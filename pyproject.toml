@@ -105,6 +105,7 @@ addopts = [
 markers = [
     "unit: Unit tests (fast, no I/O)",
     "integration: Integration tests (may use I/O)",
+    "e2e: End-to-end tests (slow, requires Docker)",
     "slow: Slow tests",
     "security: Security tests",
 ]

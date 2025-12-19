@@ -1,0 +1,32 @@
+# configs/pipelines/pubmed/publications.yaml
+pipeline_name: pubmed_publications
+provider: pubmed
+entity_type: publication
+version: "1.0.0"
+description: "Извлекает метаданные публикаций из PubMed по поисковому запросу."
+
+primary_keys: ["pmid"]
+silver_table: "pubmed_publications"
+
+# Параметры, специфичные для этого пайплайна
+source:
+  load_strategy: full # PubMed не поддерживает инкрементальную загрузку по дате
+  # Поисковый запрос для Entrez API
+  search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
+  # Email и API ключ для NCBI. Заполняются из переменных окружения.
+  email: "${BIOETL_NCBI_EMAIL:default@example.com}"
+  api_key: "${BIOETL_NCBI_API_KEY:}"
+
+# Настройки для сохранения данных
+sink:
+  bronze:
+    path: "data/output/bronze"
+    format: jsonl
+  silver:
+    path: "data/output/silver"
+    format: delta
+    mode: merge
+    primary_key: ["pmid"]
+    forensic_retention: false
+  gold:
+    enabled: false

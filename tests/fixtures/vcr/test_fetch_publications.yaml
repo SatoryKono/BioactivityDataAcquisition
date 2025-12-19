@@ -1,0 +1,1637 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=crispr&retmax=5&usehistory=y&retmode=json
+  response:
+    body:
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"62848","retmax":"5","retstart":"0","querykey":"1","webenv":"MCID_6944fd3e73064a4587036c32","idlist":["41413662","41413567","41413213","41413028","41412877"],"translationset":[{"from":"crispr","to":"\"clustered
+        regularly interspaced short palindromic repeats\"[MeSH Terms] OR (\"clustered\"[All
+        Fields] AND \"regularly\"[All Fields] AND \"interspaced\"[All Fields] AND
+        \"short\"[All Fields] AND \"palindromic\"[All Fields] AND \"repeats\"[All
+        Fields]) OR \"clustered regularly interspaced short palindromic repeats\"[All
+        Fields] OR \"crispr\"[All Fields] OR \"crisprs\"[All Fields]"}],"querytranslation":"\"clustered
+        regularly interspaced short palindromic repeats\"[MeSH Terms] OR (\"clustered\"[All
+        Fields] AND \"regularly\"[All Fields] AND \"interspaced\"[All Fields] AND
+        \"short\"[All Fields] AND \"palindromic\"[All Fields] AND \"repeats\"[All
+        Fields]) OR \"clustered regularly interspaced short palindromic repeats\"[All
+        Fields] OR \"crispr\"[All Fields] OR \"crisprs\"[All Fields]"}}
+
+        '
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 19 Dec 2025 07:22:38 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D322BC45D49D9B5000048192EF1976E.1.1.m_1
+      NCBI-SID:
+      - 2F440042625DFECE_DDB2SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '2'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '1061'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&api_key=&email=test%40example.com
+  response:
+    body:
+      string: '{"error":"API key invalid","api-key":"","type":"invalid",
+
+        "status":"unknown"}'
+    headers:
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 19 Dec 2025 07:22:38 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '3'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '77'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&api_key=&email=default%40example.com
+  response:
+    body:
+      string: '{"error":"API key invalid","api-key":"","type":"invalid",
+
+        "status":"unknown"}'
+    headers:
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 19 Dec 2025 07:23:43 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '3'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '77'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&api_key=REDACTED&email=default%40example.com
+  response:
+    body:
+      string: '{"error":"API key invalid","api-key":"your_ncbi_api_key_here","type":"invalid",
+
+        "status":"unknown"}'
+    headers:
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 19 Dec 2025 07:32:45 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '3'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '99'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&api_key=REDACTED&email=821311%40gmail.com
+  response:
+    body:
+      string: '{"error":"API key invalid","api-key":"your_ncbi_api_key_here","type":"invalid",
+
+        "status":"unknown"}'
+    headers:
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 19 Dec 2025 07:33:24 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '3'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '99'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&email=821311%40gmail.com
+  response:
+    body:
+      string: '<?xml version="1.0" ?>
+
+        <!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January
+        2025//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd">
+
+        <PubmedArticleSet>
+
+        <PubmedArticle><MedlineCitation Status="Publisher" Owner="NLM"><PMID Version="1">41413662</PMID><DateRevised><Year>2025</Year><Month>12</Month><Day>18</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">1546-1726</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2025</Year><Month>Dec</Month><Day>18</Day></PubDate></JournalIssue><Title>Nature
+        neuroscience</Title><ISOAbbreviation>Nat Neurosci</ISOAbbreviation></Journal><ArticleTitle>CRISPRi
+        screening in cultured human astrocytes uncovers distal enhancers controlling
+        genes dysregulated in Alzheimer''s disease.</ArticleTitle><ELocationID EIdType="doi"
+        ValidYN="Y">10.1038/s41593-025-02154-3</ELocationID><Abstract><AbstractText>Genetic
+        variants associated with complex traits often lie in distal enhancers. While
+        candidate enhancers have been mapped genome wide, their functional state and
+        gene targets in specific cell types remain unclear. Here we present AstroREG,
+        a resource of enhancer-gene interactions in human primary astrocytes, generated
+        by combining CRISPR inhibition (CRISPRi), single-cell RNA-seq and machine
+        learning. By functionally testing nearly 1,000 PsychENCODE enhancers, we identified
+        more than 150 regulatory interactions, revealing enhancers that control key
+        astrocyte functions and genes implicated in Alzheimer''s disease. The CRISPRi
+        screen also provided valuable ground-truth data from a primary cell type for
+        training and benchmarking prediction models of enhancer activity. We thus
+        developed EGrf, a random forest (RF) model trained on these data, and applied
+        it genome wide to predict regulatory interactions with high specificity. Together,
+        our data provide a comprehensive functional map of enhancer-mediated regulation
+        in a key glial cell type, shedding light on brain function and disease.</AbstractText><CopyrightInformation>&#xa9;
+        2025. The Author(s).</CopyrightInformation></Abstract><AuthorList CompleteYN="Y"><Author
+        ValidYN="Y" EqualContrib="Y"><LastName>Green</LastName><ForeName>Nicole F
+        O</ForeName><Initials>NFO</Initials><Identifier Source="ORCID">0000-0001-7790-9077</Identifier><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Cellular
+        Genomics Futures Institute, University of New South Wales, Sydney, New South
+        Wales, Australia.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"
+        EqualContrib="Y"><LastName>Sutton</LastName><ForeName>Gavin J</ForeName><Initials>GJ</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>P&#xe9;rez-Burillo</LastName><ForeName>Javier</ForeName><Initials>J</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>RNA
+        Institute, University of New South Wales, Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Wang</LastName><ForeName>Juli</ForeName><Initials>J</Initials><Identifier
+        Source="ORCID">0000-0002-2034-1107</Identifier><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Bagot</LastName><ForeName>Samuel</ForeName><Initials>S</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Danon</LastName><ForeName>Hannah G</ForeName><Initials>HG</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Walsh</LastName><ForeName>Kieran</ForeName><Initials>K</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Gokool</LastName><ForeName>Akira</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Miles</LastName><ForeName>Samantha A</ForeName><Initials>SA</Initials><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Yang</LastName><ForeName>Guang</ForeName><Initials>G</Initials><Identifier
+        Source="ORCID">0000-0003-4377-1836</Identifier><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Herring</LastName><ForeName>Charles A</ForeName><Initials>CA</Initials><Identifier
+        Source="ORCID">0000-0001-7620-5772</Identifier><AffiliationInfo><Affiliation>Harry
+        Perkins Institute of Medical Research, QEII Medical Centre and Centre for
+        Medical Research, The University of Western Australia, Perth, Western Australia,
+        Australia.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>ARC
+        Centre of Excellence in Plant Energy Biology, School of Molecular Sciences,
+        The University of Western Australia, Perth, Western Australia, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Liang</LastName><ForeName>Yuheng</ForeName><Initials>Y</Initials><AffiliationInfo><Affiliation>BioMedical
+        Machine Learning Lab, The Graduate School of Biomedical Engineering, University
+        of New South Wales, Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Pfundstein</LastName><ForeName>Grant</ForeName><Initials>G</Initials><Identifier
+        Source="ORCID">0009-0009-8490-1028</Identifier><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Sytnyk</LastName><ForeName>Vladimir</ForeName><Initials>V</Initials><Identifier
+        Source="ORCID">0000-0003-1927-2199</Identifier><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Alinejad-Rokny</LastName><ForeName>Hamid</ForeName><Initials>H</Initials><AffiliationInfo><Affiliation>BioMedical
+        Machine Learning Lab, The Graduate School of Biomedical Engineering, University
+        of New South Wales, Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>UNSW
+        Data Science Hub, University of New South Wales, Sydney, New South Wales,
+        Australia.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Health
+        Data Analytics Program, Centre for Applied Artificial Intelligence, Macquarie
+        University, Sydney, New South Wales, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Lister</LastName><ForeName>Ryan</ForeName><Initials>R</Initials><Identifier
+        Source="ORCID">0000-0001-6637-7239</Identifier><AffiliationInfo><Affiliation>Harry
+        Perkins Institute of Medical Research, QEII Medical Centre and Centre for
+        Medical Research, The University of Western Australia, Perth, Western Australia,
+        Australia.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>ARC
+        Centre of Excellence in Plant Energy Biology, School of Molecular Sciences,
+        The University of Western Australia, Perth, Western Australia, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Rosenbluh</LastName><ForeName>Joseph</ForeName><Initials>J</Initials><Identifier
+        Source="ORCID">0000-0001-9815-8049</Identifier><AffiliationInfo><Affiliation>Cancer
+        Program, Department of Biochemistry and Molecular Biology, Biomedicine Discovery
+        Institute, Monash University, Melbourne, Victoria, Australia.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Gagnon-Bartsch</LastName><ForeName>Johann A</ForeName><Initials>JA</Initials><AffiliationInfo><Affiliation>Department
+        of Statistics, University of Michigan, Ann Arbor, MI, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Voineagu</LastName><ForeName>Irina</ForeName><Initials>I</Initials><Identifier
+        Source="ORCID">0000-0003-4162-3872</Identifier><AffiliationInfo><Affiliation>School
+        of Biotechnology and Biomolecular Sciences, University of New South Wales,
+        Sydney, New South Wales, Australia. i.voineagu@unsw.edu.au.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Cellular
+        Genomics Futures Institute, University of New South Wales, Sydney, New South
+        Wales, Australia. i.voineagu@unsw.edu.au.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>RNA
+        Institute, University of New South Wales, Sydney, New South Wales, Australia.
+        i.voineagu@unsw.edu.au.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList
+        CompleteYN="Y"><Grant><GrantID>2020814</GrantID><Agency>Department of Health
+        | National Health and Medical Research Council (NHMRC)</Agency><Country/></Grant></GrantList><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>18</Day></ArticleDate></Article><MedlineJournalInfo><Country>United
+        States</Country><MedlineTA>Nat Neurosci</MedlineTA><NlmUniqueID>9809671</NlmUniqueID><ISSNLinking>1097-6256</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><CoiStatement>Competing
+        interests: All authors declare no competing interests.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2024</Year><Month>9</Month><Day>24</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>10</Month><Day>23</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2025</Year><Month>12</Month><Day>18</Day><Hour>23</Hour><Minute>56</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41413662</ArticleId><ArticleId IdType="doi">10.1038/s41593-025-02154-3</ArticleId><ArticleId
+        IdType="pii">10.1038/s41593-025-02154-3</ArticleId></ArticleIdList><ReferenceList><Reference><Citation>Gasperini,
+        M. et al. A genome-wide framework for mapping gene regulation via cellular
+        genetic screens. Cell 176, 377&#x2013;390 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30612741</ArticleId><ArticleId IdType="pmc">6690346</ArticleId><ArticleId
+        IdType="doi">10.1016/j.cell.2018.11.029</ArticleId></ArticleIdList></Reference><Reference><Citation>Xie,
+        S., Duan, J., Li, B., Zhou, P. &amp; Hon, G. C. Multiplexed engineering and
+        analysis of combinatorial enhancer activity in single cells. Mol. Cell 66,
+        285&#x2013;299 (2017).</Citation><ArticleIdList><ArticleId IdType="pubmed">28416141</ArticleId><ArticleId
+        IdType="doi">10.1016/j.molcel.2017.03.007</ArticleId></ArticleIdList></Reference><Reference><Citation>Xie,
+        S., Armendariz, D., Zhou, P., Duan, J. &amp; Hon, G. C. Global analysis of
+        enhancer targets reveals convergent enhancer-driven regulatory modules. Cell
+        Rep. 29, 2570&#x2013;2578 (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">31775028</ArticleId><ArticleId
+        IdType="pmc">6904118</ArticleId><ArticleId IdType="doi">10.1016/j.celrep.2019.10.073</ArticleId></ArticleIdList></Reference><Reference><Citation>Fulco,
+        C. P. et al. Activity-by-contact model of enhancer-promoter regulation from
+        thousands of CRISPR perturbations. Nat. Genet. 51, 1664&#x2013;1669 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">31784727</ArticleId><ArticleId IdType="pmc">6886585</ArticleId><ArticleId
+        IdType="doi">10.1038/s41588-019-0538-0</ArticleId></ArticleIdList></Reference><Reference><Citation>Reilly,
+        S. K. et al. Direct characterization of cis-regulatory elements and functional
+        dissection of complex genetic associations using HCR-FlowFISH. Nat. Genet.
+        53, 1166&#x2013;1176 (2021).</Citation><ArticleIdList><ArticleId IdType="pubmed">34326544</ArticleId><ArticleId
+        IdType="pmc">8925018</ArticleId><ArticleId IdType="doi">10.1038/s41588-021-00900-4</ArticleId></ArticleIdList></Reference><Reference><Citation>Morris,
+        J. A. et al. Discovery of target genes and pathways at GWAS loci by pooled
+        single-cell CRISPR screens. Science 380, eadh7699 (2023).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">37141313</ArticleId><ArticleId IdType="pmc">10518238</ArticleId><ArticleId
+        IdType="doi">10.1126/science.adh7699</ArticleId></ArticleIdList></Reference><Reference><Citation>Alda-Catalinas,
+        C. et al. Mapping the functional impact of non-coding regulatory elements
+        in primary T cells through single-cell CRISPR screens. Genome Biol. 25, 42
+        (2024).</Citation><ArticleIdList><ArticleId IdType="pubmed">38308274</ArticleId><ArticleId
+        IdType="pmc">10835965</ArticleId><ArticleId IdType="doi">10.1186/s13059-024-03176-z</ArticleId></ArticleIdList></Reference><Reference><Citation>Chardon,
+        F. M. et al. Multiplex, single-cell CRISPRa screening for cell type specific
+        regulatory elements. Nat. Commun. 15, 8209 (2024).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">39294132</ArticleId><ArticleId IdType="pmc">11411074</ArticleId><ArticleId
+        IdType="doi">10.1038/s41467-024-52490-4</ArticleId></ArticleIdList></Reference><Reference><Citation>Cooper,
+        Y. A. et al. Functional regulatory variants implicate distinct transcriptional
+        networks in dementia. Science 377, eabi8654 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">35981026</ArticleId><ArticleId IdType="doi">10.1126/science.abi8654</ArticleId></ArticleIdList></Reference><Reference><Citation>Rummel,
+        C. K. et al. Cell type and condition specific functional annotation of schizophrenia
+        associated non-coding genetic variants. Preprint at bioRxiv https://doi.org/10.1101/2023.06.27.545266
+        (2023).</Citation></Reference><Reference><Citation>Molofsky, A. V. et al.
+        Astrocytes and disease: a neurodevelopmental perspective. Genes Dev. 26, 891&#x2013;907
+        (2012).</Citation><ArticleIdList><ArticleId IdType="pubmed">22549954</ArticleId><ArticleId
+        IdType="pmc">3347787</ArticleId><ArticleId IdType="doi">10.1101/gad.188326.112</ArticleId></ArticleIdList></Reference><Reference><Citation>Chung,
+        W.-S., Allen, N. J. &amp; Eroglu, C. Astrocytes control synapse formation,
+        function, and elimination. Cold Spring Harb. Perspect. Biol. 7, a020370 (2015).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">25663667</ArticleId><ArticleId IdType="pmc">4527946</ArticleId><ArticleId
+        IdType="doi">10.1101/cshperspect.a020370</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang,
+        D. et al. Comprehensive functional genomic resource and integrative model
+        for the human brain. Science 362, eaat8464 (2018).</Citation></Reference><Reference><Citation>Gschwind,
+        A. R. et al. An encyclopedia of enhancer-gene regulatory interactions in the
+        human genome. Preprint at bioRxiv https://doi.org/10.1101/2023.11.09.563812
+        (2023).</Citation></Reference><Reference><Citation>Schraivogel, D. et al.
+        Targeted Perturb-seq enables genome-scale genetic screens in single cells.
+        Nat. Methods 17, 629&#x2013;635 (2020).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">32483332</ArticleId><ArticleId IdType="pmc">7610614</ArticleId><ArticleId
+        IdType="doi">10.1038/s41592-020-0837-5</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhang,
+        Y. et al. Purification and characterization of progenitor and mature human
+        astrocytes reveals transcriptional and functional differences with mouse.
+        Neuron 89, 37&#x2013;53 (2016).</Citation><ArticleIdList><ArticleId IdType="pubmed">26687838</ArticleId><ArticleId
+        IdType="doi">10.1016/j.neuron.2015.11.013</ArticleId></ArticleIdList></Reference><Reference><Citation>Herring,
+        C. A. et al. Human prefrontal cortex gene regulatory dynamics from gestation
+        to adulthood at single-cell resolution. Cell 185, 4428&#x2013;4447 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">36318921</ArticleId><ArticleId IdType="doi">10.1016/j.cell.2022.09.039</ArticleId></ArticleIdList></Reference><Reference><Citation>Fullard,
+        J. F. et al. An atlas of chromatin accessibility in the adult human brain.
+        Genome Res. 28, 1243&#x2013;1252 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">29945882</ArticleId><ArticleId IdType="pmc">6071637</ArticleId><ArticleId
+        IdType="doi">10.1101/gr.232488.117</ArticleId></ArticleIdList></Reference><Reference><Citation>Rizzardi,
+        L. F. et al. Neuronal brain-region-specific DNA methylation and chromatin
+        accessibility are associated with neuropsychiatric trait heritability. Nat.
+        Neurosci. 22, 307&#x2013;316 (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">30643296</ArticleId><ArticleId
+        IdType="pmc">6348048</ArticleId><ArticleId IdType="doi">10.1038/s41593-018-0297-8</ArticleId></ArticleIdList></Reference><Reference><Citation>Trevino,
+        A. E. et al. Chromatin accessibility dynamics in a model of human forebrain
+        development. Science 367, eaay1645 (2020).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">31974223</ArticleId><ArticleId IdType="pmc">7313757</ArticleId><ArticleId
+        IdType="doi">10.1126/science.aay1645</ArticleId></ArticleIdList></Reference><Reference><Citation>Song,
+        M. et al. Mapping cis-regulatory chromatin contacts in neural cells links
+        neuropsychiatric disorder risk variants to target genes. Nat. Genet. 51, 1252&#x2013;1262
+        (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">31367015</ArticleId><ArticleId
+        IdType="pmc">6677164</ArticleId><ArticleId IdType="doi">10.1038/s41588-019-0472-1</ArticleId></ArticleIdList></Reference><Reference><Citation>Rajarajan,
+        P. et al. Neuron-specific signatures in the chromosomal connectome associated
+        with schizophrenia risk. Science 362, eaat4311 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30545851</ArticleId><ArticleId IdType="pmc">6408958</ArticleId><ArticleId
+        IdType="doi">10.1126/science.aat4311</ArticleId></ArticleIdList></Reference><Reference><Citation>ENCODE
+        Project Consortium et al. Expanded encyclopaedias of DNA elements in the human
+        and mouse genomes. Nature 583, 699&#x2013;710 (2020).</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41586-020-2493-4</ArticleId></ArticleIdList></Reference><Reference><Citation>Nott,
+        A. et al. Brain cell type-specific enhancer-promoter interactome maps and
+        disease-risk association. Science 366, 1134&#x2013;1139 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">31727856</ArticleId><ArticleId IdType="pmc">7028213</ArticleId><ArticleId
+        IdType="doi">10.1126/science.aay0793</ArticleId></ArticleIdList></Reference><Reference><Citation>Barry,
+        T., Wang, X., Morris, J. A., Roeder, K. &amp; Katsevich, E. SCEPTRE improves
+        calibration and sensitivity in single-cell CRISPR screen analysis. Genome
+        Biol. 22, 344 (2021).</Citation><ArticleIdList><ArticleId IdType="pubmed">34930414</ArticleId><ArticleId
+        IdType="pmc">8686614</ArticleId><ArticleId IdType="doi">10.1186/s13059-021-02545-2</ArticleId></ArticleIdList></Reference><Reference><Citation>Hnisz,
+        D. et al. Super-enhancers in the control of cell identity and disease. Cell
+        155, 934&#x2013;947 (2013).</Citation><ArticleIdList><ArticleId IdType="pubmed">24119843</ArticleId><ArticleId
+        IdType="doi">10.1016/j.cell.2013.09.053</ArticleId></ArticleIdList></Reference><Reference><Citation>Saint-Andr&#xe9;,
+        V. et al. Models of human core transcriptional regulatory circuitries. Genome
+        Res. 26, 385&#x2013;396 (2016).</Citation><ArticleIdList><ArticleId IdType="pubmed">26843070</ArticleId><ArticleId
+        IdType="pmc">4772020</ArticleId><ArticleId IdType="doi">10.1101/gr.197590.115</ArticleId></ArticleIdList></Reference><Reference><Citation>Zuin,
+        J. et al. Nonlinear control of transcription through enhancer&#x2013;promoter
+        interactions. Nature 604, 571&#x2013;577 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">35418676</ArticleId><ArticleId IdType="pmc">9021019</ArticleId><ArticleId
+        IdType="doi">10.1038/s41586-022-04570-y</ArticleId></ArticleIdList></Reference><Reference><Citation>Schwalb,
+        B. et al. TT-seq maps the human transient transcriptome. Science 352, 1225&#x2013;1228
+        (2016).</Citation><ArticleIdList><ArticleId IdType="pubmed">27257258</ArticleId><ArticleId
+        IdType="doi">10.1126/science.aad9841</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhong,
+        S. et al. A single-cell RNA-seq survey of the developmental landscape of the
+        human prefrontal cortex. Nature 555, 524&#x2013;528 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">29539641</ArticleId><ArticleId IdType="doi">10.1038/nature25980</ArticleId></ArticleIdList></Reference><Reference><Citation>Morabito,
+        S. et al. Single-nucleus chromatin accessibility and transcriptomic characterization
+        of Alzheimer&#x2019;s disease. Nat. Genet. 53, 1143&#x2013;1155 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34239132</ArticleId><ArticleId IdType="pmc">8766217</ArticleId><ArticleId
+        IdType="doi">10.1038/s41588-021-00894-z</ArticleId></ArticleIdList></Reference><Reference><Citation>Krawczyk,
+        M. C. et al. Human astrocytes exhibit tumor microenvironment-, age-, and sex-related
+        transcriptomic signatures. J. Neurosci. 42, 1587&#x2013;1603 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34987109</ArticleId><ArticleId IdType="pmc">8883850</ArticleId><ArticleId
+        IdType="doi">10.1523/JNEUROSCI.0407-21.2021</ArticleId></ArticleIdList></Reference><Reference><Citation>Palmer,
+        C. R., Liu, C. S., Romanow, W. J., Lee, M.-H. &amp; Chun, J. Altered cell
+        and RNA isoform diversity in aging Down syndrome brains. Proc. Natl Acad.
+        Sci. USA 118, e2114326118 (2021).</Citation></Reference><Reference><Citation>Leng,
+        K. et al. CRISPRi screens in human iPSC-derived astrocytes elucidate regulators
+        of distinct inflammatory reactive states. Nat. Neurosci. 25, 1528&#x2013;1542
+        (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">36303069</ArticleId><ArticleId
+        IdType="pmc">9633461</ArticleId><ArticleId IdType="doi">10.1038/s41593-022-01180-9</ArticleId></ArticleIdList></Reference><Reference><Citation>Eisenberg,
+        E. &amp; Levanon, E. Y. Human housekeeping genes, revisited. Trends Genet.
+        29, 569&#x2013;574 (2013).</Citation><ArticleIdList><ArticleId IdType="pubmed">23810203</ArticleId><ArticleId
+        IdType="doi">10.1016/j.tig.2013.05.010</ArticleId></ArticleIdList></Reference><Reference><Citation>Lin,
+        Y. Evaluating stably expressed genes in single cells. GigaScience 8, giz106
+        (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">31531674</ArticleId><ArticleId
+        IdType="pmc">6748759</ArticleId><ArticleId IdType="doi">10.1093/gigascience/giz106</ArticleId></ArticleIdList></Reference><Reference><Citation>Bentsen,
+        M. et al. ATAC-seq footprinting unravels kinetics of transcription factor
+        binding during zygotic genome activation. Nat. Commun. 11, 4267 (2020).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">32848148</ArticleId><ArticleId IdType="pmc">7449963</ArticleId><ArticleId
+        IdType="doi">10.1038/s41467-020-18035-1</ArticleId></ArticleIdList></Reference><Reference><Citation>Tiwari,
+        N. et al. Stage-specific transcription factors drive astrogliogenesis by remodeling
+        gene regulatory landscapes. Cell Stem Cell 23, 557&#x2013;571 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30290178</ArticleId><ArticleId IdType="pmc">6179960</ArticleId><ArticleId
+        IdType="doi">10.1016/j.stem.2018.09.008</ArticleId></ArticleIdList></Reference><Reference><Citation>Castro-Mondragon,
+        J. A. et al. JASPAR 2022: the 9th release of the open-access database of transcription
+        factor binding profiles. Nucleic Acids Res. 50, D165&#x2013;D173 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34850907</ArticleId><ArticleId IdType="doi">10.1093/nar/gkab1113</ArticleId></ArticleIdList></Reference><Reference><Citation>Loupe,
+        J. M. et al. Multiomic profiling of transcription factor binding and function
+        in human brain. Nat. Neurosci. 27, 1387&#x2013;1399 (2024).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">38831039</ArticleId><ArticleId IdType="doi">10.1038/s41593-024-01658-8</ArticleId></ArticleIdList></Reference><Reference><Citation>Zou,
+        Z., Ohta, T. &amp; Oki, S. ChIP-Atlas 3.0: a data-mining suite to explore
+        chromosome architecture together with large-scale regulome data. Nucleic Acids
+        Res. 52, W45&#x2013;W53 (2024).</Citation><ArticleIdList><ArticleId IdType="pubmed">38749504</ArticleId><ArticleId
+        IdType="pmc">11223792</ArticleId><ArticleId IdType="doi">10.1093/nar/gkae358</ArticleId></ArticleIdList></Reference><Reference><Citation>Cruz-Mendoza,
+        F., Jauregui-Huerta, F., Aguilar-Delgadillo, A., Garc&#xed;a-Estrada, J. &amp;
+        Luquin, S. Immediate early gene c-fos in the brain: focus on glial cells.
+        Brain Sci. 12, 687 (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">35741573</ArticleId><ArticleId
+        IdType="pmc">9221432</ArticleId><ArticleId IdType="doi">10.3390/brainsci12060687</ArticleId></ArticleIdList></Reference><Reference><Citation>Pi&#xf1;ero,
+        J. et al. DisGeNET: a comprehensive platform integrating information on human
+        disease-associated genes and variants. Nucleic Acids Res. 45, D833&#x2013;D839
+        (2017).</Citation><ArticleIdList><ArticleId IdType="pubmed">27924018</ArticleId><ArticleId
+        IdType="doi">10.1093/nar/gkw943</ArticleId></ArticleIdList></Reference><Reference><Citation>Sadick,
+        J. S. et al. Astrocytes and oligodendrocytes undergo subtype-specific transcriptional
+        changes in Alzheimer&#x2019;s disease. Neuron 110, 1788&#x2013;1805 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">35381189</ArticleId><ArticleId IdType="pmc">9167747</ArticleId><ArticleId
+        IdType="doi">10.1016/j.neuron.2022.03.008</ArticleId></ArticleIdList></Reference><Reference><Citation>Mathys,
+        H. et al. Single-cell atlas reveals correlates of high cognitive function,
+        dementia, and resilience to Alzheimer&#x2019;s disease pathology. Cell 186,
+        4365&#x2013;4385 (2023).</Citation><ArticleIdList><ArticleId IdType="pubmed">37774677</ArticleId><ArticleId
+        IdType="pmc">10601493</ArticleId><ArticleId IdType="doi">10.1016/j.cell.2023.08.039</ArticleId></ArticleIdList></Reference><Reference><Citation>J&#xe4;kel,
+        S. et al. Altered human oligodendrocyte heterogeneity in multiple sclerosis.
+        Nature 566, 543&#x2013;547 (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">30747918</ArticleId><ArticleId
+        IdType="pmc">6544546</ArticleId><ArticleId IdType="doi">10.1038/s41586-019-0903-2</ArticleId></ArticleIdList></Reference><Reference><Citation>Gandal,
+        M. J. et al. Broad transcriptomic dysregulation occurs across the cerebral
+        cortex in ASD. Nature 611, 532&#x2013;539 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">36323788</ArticleId><ArticleId IdType="pmc">9668748</ArticleId><ArticleId
+        IdType="doi">10.1038/s41586-022-05377-7</ArticleId></ArticleIdList></Reference><Reference><Citation>Garc&#xed;a-Revilla,
+        J. et al. Galectin-3, a rising star in modulating microglia activation under
+        conditions of neurodegeneration. Cell Death Dis. 13, 628 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">35859075</ArticleId><ArticleId IdType="pmc">9300700</ArticleId><ArticleId
+        IdType="doi">10.1038/s41419-022-05058-3</ArticleId></ArticleIdList></Reference><Reference><Citation>Yin,
+        Z. et al. APOE4 impairs the microglial response in Alzheimer''s disease by
+        inducing TGF&#x3b2;-mediated checkpoints. Nat. Immunol. 24, 1839&#x2013;1853
+        (2023).</Citation><ArticleIdList><ArticleId IdType="pubmed">37749326</ArticleId><ArticleId
+        IdType="pmc">10863749</ArticleId><ArticleId IdType="doi">10.1038/s41590-023-01627-6</ArticleId></ArticleIdList></Reference><Reference><Citation>GTEx
+        Consortium. The GTEx Consortium atlas of genetic regulatory effects across
+        human tissues. Science 369, 1318&#x2013;1330 (2020).</Citation></Reference><Reference><Citation>Zeng,
+        B. et al. Multi-ancestry eQTL meta-analysis of human brain identifies candidate
+        causal variants for brain-related traits. Nat. Genet. 54, 161&#x2013;169 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">35058635</ArticleId><ArticleId IdType="pmc">8852232</ArticleId><ArticleId
+        IdType="doi">10.1038/s41588-021-00987-9</ArticleId></ArticleIdList></Reference><Reference><Citation>de
+        Klein, N. et al. Brain expression quantitative trait locus and network analyses
+        reveal downstream effects and putative drivers for brain-related diseases.
+        Nat. Genet. 55, 377&#x2013;388 (2023).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">36823318</ArticleId><ArticleId IdType="pmc">10011140</ArticleId><ArticleId
+        IdType="doi">10.1038/s41588-023-01300-6</ArticleId></ArticleIdList></Reference><Reference><Citation>Bryois,
+        J. et al. Cell-type-specific cis-eQTLs in eight human brain cell types identify
+        novel risk genes for psychiatric and neurological disorders. Nat. Neurosci.
+        25, 1104&#x2013;1112 (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">35915177</ArticleId><ArticleId
+        IdType="doi">10.1038/s41593-022-01128-z</ArticleId></ArticleIdList></Reference><Reference><Citation>Kee,
+        Y. &amp; Bronner-Fraser, M. To proliferate or to die: role of Id3 in cell
+        cycle progression and survival of neural crest progenitors. Genes Dev. 19,
+        744&#x2013;755 (2005).</Citation><ArticleIdList><ArticleId IdType="pubmed">15769946</ArticleId><ArticleId
+        IdType="pmc">1065727</ArticleId><ArticleId IdType="doi">10.1101/gad.1257405</ArticleId></ArticleIdList></Reference><Reference><Citation>Nurgazieva,
+        D. et al. TGF-&#x3b2;1, but not bone morphogenetic proteins, activates Smad1/5
+        pathway in primary human macrophages and induces expression of proatherogenic
+        genes. J. Immunol. 194, 709&#x2013;718 (2015).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">25505291</ArticleId><ArticleId IdType="doi">10.4049/jimmunol.1300272</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhou,
+        J. et al. Deep learning sequence-based ab initio prediction of variant effects
+        on expression and disease risk. Nat. Genet. 50, 1171&#x2013;1179 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30013180</ArticleId><ArticleId IdType="pmc">6094955</ArticleId><ArticleId
+        IdType="doi">10.1038/s41588-018-0160-6</ArticleId></ArticleIdList></Reference><Reference><Citation>Lee,
+        W.-P. et al. Association of common and rare variants with Alzheimer''s disease
+        in over 13,000 diverse individuals with whole-genome sequencing from the Alzheimer''s
+        disease sequencing project. Alzheimers Dement. 20, 8470&#x2013;8483 (2024).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">39428839</ArticleId><ArticleId IdType="pmc">11667527</ArticleId><ArticleId
+        IdType="doi">10.1002/alz.14283</ArticleId></ArticleIdList></Reference><Reference><Citation>Joly-Amado,
+        A. et al. CCL2 overexpression in the brain promotes glial activation and accelerates
+        tau pathology in a mouse model of tauopathy. Front. Immunol. 11, 997 (2020).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">32508844</ArticleId><ArticleId IdType="pmc">7251073</ArticleId><ArticleId
+        IdType="doi">10.3389/fimmu.2020.00997</ArticleId></ArticleIdList></Reference><Reference><Citation>Ben-Yehuda,
+        H. et al. Key role of the CCR2&#x2013;CCL2 axis in disease modification in
+        a mouse model of tauopathy. Mol. Neurodegener. 16, 39 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34172073</ArticleId><ArticleId IdType="pmc">8234631</ArticleId><ArticleId
+        IdType="doi">10.1186/s13024-021-00458-z</ArticleId></ArticleIdList></Reference><Reference><Citation>Nasser,
+        J. et al. Genome-wide enhancer maps link risk variants to disease genes. Nature
+        593, 238&#x2013;243 (2021).</Citation><ArticleIdList><ArticleId IdType="pubmed">33828297</ArticleId><ArticleId
+        IdType="pmc">9153265</ArticleId><ArticleId IdType="doi">10.1038/s41586-021-03446-x</ArticleId></ArticleIdList></Reference><Reference><Citation>Avsec,
+        &#x17d; et al. Effective gene expression prediction from sequence by integrating
+        long-range interactions. Nat. Methods 18, 1196&#x2013;1203 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34608324</ArticleId><ArticleId IdType="pmc">8490152</ArticleId><ArticleId
+        IdType="doi">10.1038/s41592-021-01252-x</ArticleId></ArticleIdList></Reference><Reference><Citation>Harold,
+        D. et al. Genome-wide association study identifies variants at CLU and PICALM
+        associated with Alzheimer&#x2019;s disease. Nat. Genet. 41, 1088&#x2013;1093
+        (2009).</Citation><ArticleIdList><ArticleId IdType="pubmed">19734902</ArticleId><ArticleId
+        IdType="pmc">2845877</ArticleId><ArticleId IdType="doi">10.1038/ng.440</ArticleId></ArticleIdList></Reference><Reference><Citation>Gri&#xf1;&#xe1;n-Ferr&#xe9;,
+        C. et al. Deletion of Gadd45a expression in mice leads to cognitive and synaptic
+        impairment associated with Alzheimer&#x2019;s disease hallmarks. Int. J. Mol.
+        Sci. 25, 2595 (2024).</Citation><ArticleIdList><ArticleId IdType="pubmed">38473843</ArticleId><ArticleId
+        IdType="pmc">10931605</ArticleId><ArticleId IdType="doi">10.3390/ijms25052595</ArticleId></ArticleIdList></Reference><Reference><Citation>Kutz,
+        S. M., Higgins, C. E. &amp; Higgins, P. J. Expression of the TGF-b1/p53 target
+        SERPINE1 gene in Alzheimer&#x2019;s dementia: molecular mechanisms and therapeutic
+        opportunities. J. Aging Gerontol. 2, 1&#x2013;4 (2014).</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.12974/2309-6128.2014.02.01.1</ArticleId></ArticleIdList></Reference><Reference><Citation>Pan,
+        Y. et al. Assessment of GGC repeat expansion in GIPC1 in patients with Parkinson&#x2019;s
+        disease. Mov. Disord. 37, 1557&#x2013;1559 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">35521937</ArticleId><ArticleId IdType="doi">10.1002/mds.29041</ArticleId></ArticleIdList></Reference><Reference><Citation>Mostafavi,
+        H., Spence, J. P., Naqvi, S. &amp; Pritchard, J. K. Systematic differences
+        in discovery of genetic effects on gene expression and complex traits. Nat.
+        Genet. 55, 1866&#x2013;1875 (2023).</Citation><ArticleIdList><ArticleId IdType="pubmed">37857933</ArticleId><ArticleId
+        IdType="pmc">12270542</ArticleId><ArticleId IdType="doi">10.1038/s41588-023-01529-1</ArticleId></ArticleIdList></Reference><Reference><Citation>Yao,
+        L. et al. A comparison of experimental assays and analytical methods for genome-wide
+        identification of active enhancers. Nat. Biotechnol. 40, 1056&#x2013;1065
+        (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">35177836</ArticleId><ArticleId
+        IdType="pmc">9288987</ArticleId><ArticleId IdType="doi">10.1038/s41587-022-01211-7</ArticleId></ArticleIdList></Reference><Reference><Citation>Kent,
+        W. J. et al. The human genome browser at UCSC. Genome Res. 12, 996&#x2013;1006
+        (2002).</Citation><ArticleIdList><ArticleId IdType="pubmed">12045153</ArticleId><ArticleId
+        IdType="pmc">186604</ArticleId><ArticleId IdType="doi">10.1101/gr.229102</ArticleId></ArticleIdList></Reference><Reference><Citation>Shannon,
+        P. et al. Cytoscape: a software environment for integrated models of biomolecular
+        interaction networks. Genome Res. 13, 2498&#x2013;2504 (2003).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">14597658</ArticleId><ArticleId IdType="pmc">403769</ArticleId><ArticleId
+        IdType="doi">10.1101/gr.1239303</ArticleId></ArticleIdList></Reference><Reference><Citation>Chujo,
+        T. et al. Unusual semi-extractability as a hallmark of nuclear body-associated
+        architectural noncoding RNAs. EMBO J. 36, 1447&#x2013;1462 (2017).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">28404604</ArticleId><ArticleId IdType="pmc">5430218</ArticleId><ArticleId
+        IdType="doi">10.15252/embj.201695848</ArticleId></ArticleIdList></Reference><Reference><Citation>Hellemans,
+        J., Mortier, G., de Paepe, A., Speleman, F. &amp; Vandesompele, J. qBase relative
+        quantification framework and software for management and automated analysis
+        of real-time quantitative PCR data. Genome Biol. 8, R19 (2007).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">17291332</ArticleId><ArticleId IdType="pmc">1852402</ArticleId><ArticleId
+        IdType="doi">10.1186/gb-2007-8-2-r19</ArticleId></ArticleIdList></Reference><Reference><Citation>Kutner,
+        R. H., Zhang, X.-Y. &amp; Reiser, J. Production, concentration and titration
+        of pseudotyped HIV-1-based lentiviral vectors. Nat. Protoc. 4, 495&#x2013;505
+        (2009).</Citation><ArticleIdList><ArticleId IdType="pubmed">19300443</ArticleId><ArticleId
+        IdType="doi">10.1038/nprot.2009.22</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhang,
+        B. et al. The significance of controlled conditions in lentiviral vector titration
+        and in the use of multiplicity of infection (MOI) for predicting gene transfer
+        events. Genet. Vaccines Ther. 2, 6 (2004).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">15291957</ArticleId><ArticleId IdType="pmc">514534</ArticleId><ArticleId
+        IdType="doi">10.1186/1479-0556-2-6</ArticleId></ArticleIdList></Reference><Reference><Citation>Tuano,
+        N. K. et al. CRISPR screens identify gene targets at breast cancer risk loci.
+        Genome Biol. 24, 59 (2023).</Citation><ArticleIdList><ArticleId IdType="pubmed">36991492</ArticleId><ArticleId
+        IdType="pmc">10053147</ArticleId><ArticleId IdType="doi">10.1186/s13059-023-02898-w</ArticleId></ArticleIdList></Reference><Reference><Citation>Sanson,
+        K. R. et al. Optimized libraries for CRISPR&#x2013;Cas9 genetic screens with
+        multiple modalities. Nat. Commun. 9, 5416 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30575746</ArticleId><ArticleId IdType="pmc">6303322</ArticleId><ArticleId
+        IdType="doi">10.1038/s41467-018-07901-8</ArticleId></ArticleIdList></Reference><Reference><Citation>Hill,
+        A. J. et al. On the design of CRISPR-based single-cell molecular screens.
+        Nat. Methods 15, 271&#x2013;274 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">29457792</ArticleId><ArticleId IdType="pmc">5882576</ArticleId><ArticleId
+        IdType="doi">10.1038/nmeth.4604</ArticleId></ArticleIdList></Reference><Reference><Citation>Quinlan,
+        A. R. &amp; Hall, I. M. BEDTools: a flexible suite of utilities for comparing
+        genomic features. Bioinformatics 26, 841&#x2013;842 (2010).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">20110278</ArticleId><ArticleId IdType="pmc">2832824</ArticleId><ArticleId
+        IdType="doi">10.1093/bioinformatics/btq033</ArticleId></ArticleIdList></Reference><Reference><Citation>Lawrence,
+        M., Gentleman, R. &amp; Carey, V. rTrackLayer: an R package for interfacing
+        with genome browsers. Bioinformatics 25, 1841&#x2013;1842 (2009).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">19468054</ArticleId><ArticleId IdType="pmc">2705236</ArticleId><ArticleId
+        IdType="doi">10.1093/bioinformatics/btp328</ArticleId></ArticleIdList></Reference><Reference><Citation>Zheng,
+        G. X. Y. et al. Massively parallel digital transcriptional profiling of single
+        cells. Nat. Commun. 8, 14049 (2017).</Citation><ArticleIdList><ArticleId IdType="pubmed">28091601</ArticleId><ArticleId
+        IdType="pmc">5241818</ArticleId><ArticleId IdType="doi">10.1038/ncomms14049</ArticleId></ArticleIdList></Reference><Reference><Citation>Lun,
+        A. T. L. et al. EmptyDrops: distinguishing cells from empty droplets in droplet-based
+        single-cell RNA sequencing data. Genome Biol. 20, 63 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30902100</ArticleId><ArticleId IdType="pmc">6431044</ArticleId><ArticleId
+        IdType="doi">10.1186/s13059-019-1662-y</ArticleId></ArticleIdList></Reference><Reference><Citation>Stuart,
+        T. et al. Comprehensive integration of single-cell data. Cell 177, 1888&#x2013;1902
+        (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">31178118</ArticleId><ArticleId
+        IdType="pmc">6687398</ArticleId><ArticleId IdType="doi">10.1016/j.cell.2019.05.031</ArticleId></ArticleIdList></Reference><Reference><Citation>Muskovic,
+        W. &amp; Powell, J. E. DropletQC: improved identification of empty droplets
+        and damaged cells in single-cell RNA-seq data. Genome Biol. 22, 329 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34857027</ArticleId><ArticleId IdType="pmc">8641258</ArticleId><ArticleId
+        IdType="doi">10.1186/s13059-021-02547-0</ArticleId></ArticleIdList></Reference><Reference><Citation>Datlinger,
+        P. et al. Pooled CRISPR screening with single-cell transcriptome readout.
+        Nat. Methods 14, 297&#x2013;301 (2017).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">28099430</ArticleId><ArticleId IdType="pmc">5334791</ArticleId><ArticleId
+        IdType="doi">10.1038/nmeth.4177</ArticleId></ArticleIdList></Reference><Reference><Citation>Aran,
+        D. et al. Reference-based analysis of lung single-cell sequencing reveals
+        a transitional profibrotic macrophage. Nat. Immunol. 20, 163&#x2013;172 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30643263</ArticleId><ArticleId IdType="pmc">6340744</ArticleId><ArticleId
+        IdType="doi">10.1038/s41590-018-0276-y</ArticleId></ArticleIdList></Reference><Reference><Citation>Dong,
+        P. et al. Population-level variation in enhancer expression identifies disease
+        mechanisms in the human brain. Nat. Genet. 54, 1493&#x2013;1503 (2022).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">36163279</ArticleId><ArticleId IdType="pmc">9547946</ArticleId><ArticleId
+        IdType="doi">10.1038/s41588-022-01170-4</ArticleId></ArticleIdList></Reference><Reference><Citation>Zheng,
+        S. C. et al. Universal prediction of cell-cycle position using transfer learning.
+        Genome Biol. 23, 41 (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">35101061</ArticleId><ArticleId
+        IdType="pmc">8802487</ArticleId><ArticleId IdType="doi">10.1186/s13059-021-02581-y</ArticleId></ArticleIdList></Reference><Reference><Citation>Benjamini,
+        Y. &amp; Hochberg, Y. Controlling the false discovery rate: a practical and
+        powerful approach to multiple testing. J. R. Stat. Soc. Series B Stat. Methodol.
+        57, 289&#x2013;300 (1995).</Citation><ArticleIdList><ArticleId IdType="doi">10.1111/j.2517-6161.1995.tb02031.x</ArticleId></ArticleIdList></Reference></ReferenceList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="Publisher" Owner="NLM"><PMID Version="1">41413567</PMID><DateRevised><Year>2025</Year><Month>12</Month><Day>18</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">1476-4598</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2025</Year><Month>Dec</Month><Day>18</Day></PubDate></JournalIssue><Title>Molecular
+        cancer</Title><ISOAbbreviation>Mol Cancer</ISOAbbreviation></Journal><ArticleTitle>Targeting
+        the tumor cell-intrinsic ITGB2 axis inhibits melanoma progression.</ArticleTitle><ELocationID
+        EIdType="doi" ValidYN="Y">10.1186/s12943-025-02527-z</ELocationID><Abstract><AbstractText
+        Label="BACKGROUND" NlmCategory="BACKGROUND">ITGB2 is a critical integrin mediator
+        of immune cell activation and trafficking. Its expression has been claimed
+        as exclusive to hematopoietic cells. Consequently, the significance of cancer
+        cell-intrinsic ITGB2 in solid tumor progression and therapy has not been rigorously
+        evaluated.</AbstractText><AbstractText Label="METHODS" NlmCategory="METHODS">We
+        leveraged single-cell and bulk RNA sequencing, real-time quantitative PCR,
+        multiplex immunofluorescence, flow cytometry, immunoblotting, and intercellular
+        adhesion molecule (ICAM)-1-dependent adhesion and proliferation assays to
+        uncover melanoma cell-intrinsic ITGB2 functional expression, association with
+        clinical tumor progression, activation, protumorigenic signaling, adhesive
+        and proliferative functions utilizing patient melanoma biospecimens, established
+        human and murine melanoma lines. In vivo tumorigenicity studies in immunocompromised
+        NOD/SCID interleukin-2 receptor &#x3b3; chain null (NSG), immunocompetent
+        wildtype, and Icam1 knockout (KO) C57BL/6 mice were performed to dissect melanoma-ITGB2
+        downstream pathway activity and functions in tumor growth and metastasis.
+        The cancer cell-intrinsic ITGB2 axis was targeted using CRISPR/Cas9-based
+        Itgb2 KO, blocking ITGB2 antibodies, ITGB2-activating CD44 crosslinking, and
+        pharmacologic inhibition of ITGB2-dependent Wnt signaling using LGK974, zamaporvint,
+        and FDA-approved pyrvinium pamoate repurposed for cancer therapy.</AbstractText><AbstractText
+        Label="RESULTS" NlmCategory="RESULTS">This work demonstrates nonhematopoietic
+        expression and protumorigenic functions of ITGB2 intrinsic to melanoma cells.
+        Tumor cell-ITGB2 mediated adhesion to ICAM-1, promoted cancer progression
+        in preclinical melanoma models, was enriched in clinical metastatic versus
+        primary melanomas or benign nevi, and predicted sentinel lymph node metastasis
+        in patients with primary disease. Consistently, inhibition of melanoma cell-intrinsic
+        ITGB2 using blocking antibodies or Itgb2 gene KO potently suppressed ICAM-1-mediated
+        melanoma cell adhesion, tumor growth, and metastatic dissemination. Melanoma
+        cell-ITGB2:ICAM-1 interaction activated downstream Wnt signaling, the pharmacologic
+        inhibition of which suppressed melanoma-ITGB2-mediated tumorigenesis.</AbstractText><AbstractText
+        Label="CONCLUSIONS" NlmCategory="CONCLUSIONS">This work overturns the longstanding
+        paradigm that ITGB2 is restricted to leukocytes by discovering a tumor cell-intrinsic
+        ITGB2:ICAM-1:Wnt protumorigenic axis as a bona fide cancer therapeutic target
+        in melanoma.</AbstractText><CopyrightInformation>&#xa9; 2025. The Author(s).</CopyrightInformation></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y" EqualContrib="Y"><LastName>Rasbach</LastName><ForeName>Erik</ForeName><Initials>E</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Department
+        of General and Visceral Surgery, Ulm University Medical Center, Ulm, 89081,
+        Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y" EqualContrib="Y"><LastName>Migayron</LastName><ForeName>Laure</ForeName><Initials>L</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y" EqualContrib="Y"><LastName>Brandenburg</LastName><ForeName>Anne</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Center
+        for Skin Diseases, Clinic for Dermatooncology and Phlebology, University Hospital
+        Bonn, Bonn, 53127, Germany.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Singh</LastName><ForeName>Praveen</ForeName><Initials>P</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Martins</LastName><ForeName>Christina</ForeName><Initials>C</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Kassem</LastName><ForeName>Ali</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>Department
+        of General and Visceral Surgery, Ulm University Medical Center, Ulm, 89081,
+        Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Karkempetzaki</LastName><ForeName>Anastasia
+        I</ForeName><Initials>AI</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Suessner</LastName><ForeName>Nadine</ForeName><Initials>N</Initials><AffiliationInfo><Affiliation>Department
+        of General and Visceral Surgery, Ulm University Medical Center, Ulm, 89081,
+        Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Kulcsar</LastName><ForeName>Zsofi</ForeName><Initials>Z</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Center
+        for Skin Diseases, Clinic for Dermatooncology and Phlebology, University Hospital
+        Bonn, Bonn, 53127, Germany.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Riopedre</LastName><ForeName>Jessica</ForeName><Initials>J</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Silva</LastName><ForeName>Mariana</ForeName><Initials>M</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Zhen</LastName><ForeName>Ethan</ForeName><Initials>E</Initials><AffiliationInfo><Affiliation>Department
+        of Pathology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Xu</LastName><ForeName>Shuyun</ForeName><Initials>S</Initials><AffiliationInfo><Affiliation>Department
+        of Pathology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Mucciarone</LastName><ForeName>Kyla</ForeName><Initials>K</Initials><AffiliationInfo><Affiliation>Department
+        of Pathology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Holzgruber</LastName><ForeName>Julia</ForeName><Initials>J</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Department
+        of Dermatology and Venerology, Johannes Kepler University, Linz, 4020, Austria.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Williams</LastName><ForeName>Jason B</ForeName><Initials>JB</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Birgin</LastName><ForeName>Emrullah</ForeName><Initials>E</Initials><AffiliationInfo><Affiliation>Department
+        of General and Visceral Surgery, Ulm University Medical Center, Ulm, 89081,
+        Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Levesque</LastName><ForeName>Mitchell
+        P</ForeName><Initials>MP</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, University of Zurich Hospital, University of Zurich, Schlieren,
+        Switzerland.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Mart&#xed;nez-G&#xf3;mez</LastName><ForeName>Julia
+        M</ForeName><Initials>JM</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, University of Zurich Hospital, University of Zurich, Schlieren,
+        Switzerland.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Dummer</LastName><ForeName>Reinhard</ForeName><Initials>R</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, University of Zurich Hospital, University of Zurich, Schlieren,
+        Switzerland.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Landsberg</LastName><ForeName>Jennifer</ForeName><Initials>J</Initials><AffiliationInfo><Affiliation>Center
+        for Skin Diseases, Clinic for Dermatooncology and Phlebology, University Hospital
+        Bonn, Bonn, 53127, Germany.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Lian</LastName><ForeName>Christine G</ForeName><Initials>CG</Initials><AffiliationInfo><Affiliation>Department
+        of Pathology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Murphy</LastName><ForeName>George
+        F</ForeName><Initials>GF</Initials><AffiliationInfo><Affiliation>Department
+        of Pathology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Berdan</LastName><ForeName>Emma
+        L</ForeName><Initials>EL</Initials><AffiliationInfo><Affiliation>Department
+        of Biostatistics, Harvard Chan Bioinformatics Core, Harvard T.H. Chan School
+        of Public Health, Harvard Medical School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Sui</LastName><ForeName>Shannan Ho</ForeName><Initials>SH</Initials><AffiliationInfo><Affiliation>Department
+        of Biostatistics, Harvard Chan Bioinformatics Core, Harvard T.H. Chan School
+        of Public Health, Harvard Medical School, Boston, MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Kupper</LastName><ForeName>Thomas S</ForeName><Initials>TS</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Rahbari</LastName><ForeName>Nuh
+        N</ForeName><Initials>NN</Initials><AffiliationInfo><Affiliation>Department
+        of General and Visceral Surgery, Ulm University Medical Center, Ulm, 89081,
+        Germany.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Lee</LastName><ForeName>Nayoung</ForeName><Initials>N</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>The
+        Ronald O. Perelman Department of Dermatology, NYU Grossman School of Medicine,
+        NY, 10016, New York, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Barthel</LastName><ForeName>Steven R</ForeName><Initials>SR</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA. sbarthel@bwh.harvard.edu.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA. sbarthel@bwh.harvard.edu.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Schatton</LastName><ForeName>Tobias</ForeName><Initials>T</Initials><AffiliationInfo><Affiliation>Department
+        of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA. tschatton@bwh.harvard.edu.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
+        School, Boston, MA, 02115, USA. tschatton@bwh.harvard.edu.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Department
+        of Medicine, Boston Children''s Hospital, Harvard Medical School, Boston,
+        MA, 02115, USA. tschatton@bwh.harvard.edu.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList
+        CompleteYN="Y"><Grant><GrantID>470684420</GrantID><Agency>Walter Benjamin
+        Scholarship from the German Research Foundation</Agency><Country/></Grant><Grant><GrantID>R01CA247957</GrantID><Agency>NIH/NCI
+        grant</Agency><Country/></Grant><Grant><GrantID>R01CA247957</GrantID><Agency>NIH/NCI
+        grant</Agency><Country/></Grant><Grant><GrantID>R01CA190838</GrantID><Agency>NIH/NCI
+        grant</Agency><Country/></Grant></GrantList><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>18</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Mol
+        Cancer</MedlineTA><NlmUniqueID>101147698</NlmUniqueID><ISSNLinking>1476-4598</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">CD18</Keyword><Keyword MajorTopicYN="N">CD44</Keyword><Keyword
+        MajorTopicYN="N">ICAM-1</Keyword><Keyword MajorTopicYN="N">ITGB2</Keyword><Keyword
+        MajorTopicYN="N">Integrin &#x3b2;2</Keyword><Keyword MajorTopicYN="N">Melanoma</Keyword><Keyword
+        MajorTopicYN="N">Metastasis</Keyword><Keyword MajorTopicYN="N">Wnt</Keyword></KeywordList><CoiStatement>Declarations.
+        Ethics approval and consent to participate: All studies involving human specimens
+        were approved by Institutional Review Boards of Mass General Brigham, the
+        University of Zurich, Switzerland, and the University of Bonn, Germany. All
+        studies involving animal experiments were approved by BWH Institutional Animal
+        Care and Use Committee (IACUC). Consent for publication: Not applicable. Competing
+        interests: R.D. is a consultant for Novartis, Merck Sharp &amp; Dohme (MSD),
+        Bristol-Myers Squibb (BMS), Roche, Amgen, Takeda, Pierre Fabre, Sun Pharma,
+        Sanofi, Catalym, Second Genome, Regeneron, Alligator, T3 Pharma, MaxiVAX SA,
+        Pfizer, Simcere, and touchIME, not related to the submitted work. All other
+        authors declare that no competing interests exist.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>6</Month><Day>3</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>11</Month><Day>9</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2025</Year><Month>12</Month><Day>18</Day><Hour>23</Hour><Minute>51</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41413567</ArticleId><ArticleId IdType="doi">10.1186/s12943-025-02527-z</ArticleId><ArticleId
+        IdType="pii">10.1186/s12943-025-02527-z</ArticleId></ArticleIdList><ReferenceList><Reference><Citation>Hogg
+        N, Patzak I, Willenbrock F. The insider&#x2019;s guide to leukocyte integrin
+        signalling and function. Nat Rev Immunol. 2011;11:416&#x2013;26.</Citation></Reference><Reference><Citation>Cox
+        D, Brennan M, Moran N. Integrins as therapeutic targets: lessons and opportunities.
+        Nat Rev Drug Discov. 2010;9:804&#x2013;20.</Citation></Reference><Reference><Citation>Cooper
+        J, Giancotti FG. Integrin signaling in cancer: mechanotransduction, stemness,
+        epithelial plasticity, and therapeutic resistance. Cancer Cell. 2019;35:347&#x2013;67.</Citation></Reference><Reference><Citation>Lee
+        SH, Prince JE, Rais M, Kheradmand F, Shardonofsky F, Lu H, Beaudet AL, Smith
+        CW, Soong L, Corry DB. Differential requirement for CD18 in T-helper effector
+        homing. Nat Med. 2003;9:1281&#x2013;6.</Citation></Reference><Reference><Citation>Ley
+        K, Rivera-Nieves J, Sandborn WJ, Shattil S. Integrin-based therapeutics: biological
+        basis, clinical use and new drugs. Nat Rev Drug Discov. 2016;15:173&#x2013;83.</Citation></Reference><Reference><Citation>Benedicto
+        A, Marquez J, Herrero A, Olaso E, Kolaczkowska E, Arteta B. Decreased expression
+        of the beta(2) integrin on tumor cells is associated with a reduction in liver
+        metastasis of colorectal cancer in mice. BMC Cancer. 2017;17:827.</Citation></Reference><Reference><Citation>Li
+        GW, Jin YP, Qiu JP, Lu XF. ITGB2 fosters the cancerous characteristics of
+        ovarian cancer cells through its role in mitochondrial glycolysis transformation.
+        Aging. 2024;16:3007&#x2013;20.</Citation></Reference><Reference><Citation>Zu
+        L, He J, Zhou N, Zeng J, Zhu Y, Tang Q, et al. The profile and clinical significance
+        of ITGB2 expression in non-small-cell lung cancer. J Clin Med. 2022;11:6421.</Citation></Reference><Reference><Citation>Koopman
+        G, van Kooyk Y, de Graaff M, Meyer CJ, Figdor CG, Pals ST. Triggering of the
+        CD44 antigen on T lymphocytes promotes T cell adhesion through the LFA-1 pathway.
+        J Immunol. 1990;145:3589&#x2013;93.</Citation></Reference><Reference><Citation>Lee
+        N, Barthel SR, Schatton T. Melanoma stem cells and metastasis: mimicking hematopoietic
+        cell trafficking? Lab Invest. 2014;94:13&#x2013;30.</Citation></Reference><Reference><Citation>Schatton
+        T, Itoh Y, Martins C, Rasbach E, Singh P, Silva M, et al. Inhibition of melanoma
+        cell-intrinsic Tim-3 stimulates MAPK-dependent tumorigenesis. Cancer Res.
+        2022;82:3774&#x2013;84.</Citation></Reference><Reference><Citation>Kleffel
+        S, Posch C, Barthel SR, Mueller H, Schlapbach C, Guenova E, et al. Melanoma
+        cell-intrinsic PD-1 receptor functions promote tumor growth. Cell. 2015;162:1242&#x2013;56.</Citation></Reference><Reference><Citation>Martins
+        C, Rasbach E, Heppt MV, Singh P, Kulcsar Z, Holzgruber J, et al. Tumor cell&#x2013;intrinsic
+        PD-1 promotes Merkel cell carcinoma growth by activating downstream mTOR-mitochondrial
+        ROS signaling. Sci Adv. 2024;10:eadi2012.</Citation></Reference><Reference><Citation>Fischer
+        GM, Fang R, Xu S, Karkempetzaki AI, Migayron L, Draper E, Wang J, Schatton
+        T, Mandinova A, Murphy GF, Lian CG. Loss of TET2 facilitates aggressive behavior
+        in cutaneous melanoma by inducing PGC1alpha/Oxidative phosphorylation (OXPHOS).
+        Br J Dermatol 2025.</Citation></Reference><Reference><Citation>Martins C,
+        Silva M, Rasbach E, Singh P, Itoh Y, Williams JB, Statham E, Meurer A, Martinez
+        DV, Brandenburg A, et al. Distinct antibody clones detect PD-1 checkpoint
+        expression and block PD-L1 interactions on live murine melanoma cells. Sci
+        Rep. 2022;12:12491.</Citation></Reference><Reference><Citation>Holzgruber
+        J, Martins C, Kulcsar Z, Duplaine A, Rasbach E, Migayron L, et al. Type I
+        interferon signaling induces melanoma cell-intrinsic PD-1 and its inhibition
+        antagonizes immune checkpoint blockade. Nat Commun. 2024;15:7165.</Citation></Reference><Reference><Citation>Barthel
+        SR, Gavino JD, Wiese GK, Jaynes JM, Siddiqui J, Dimitroff CJ. Analysis of
+        glycosyltransferase expression in metastatic prostate cancer cells capable
+        of rolling activity on microvascular endothelial (E)-selectin. Glycobiol.
+        2008;18:806&#x2013;17.</Citation></Reference><Reference><Citation>Xu H, Gonzalo
+        JA, St Pierre Y, Williams IR, Kupper TS, Cotran RS, Springer TA, Gutierrez-Ramos
+        JC. Leukocytosis and resistance to septic shock in intercellular adhesion
+        molecule 1-deficient mice. J Exp Med. 1994;180:95&#x2013;109.</Citation></Reference><Reference><Citation>Yang
+        J, Lim JT, Santiago Raj PV, Corona MG, Chen C, Khawaja H, Pan Q, Paine-Murrieta
+        GD, Schnellmann RG, Roe DJ, et al. Integrative analysis reveals therapeutic
+        potential of pyrvinium pamoate in Merkel cell carcinoma. J Clin Invest. 2025;135:e177724.</Citation></Reference><Reference><Citation>Liu
+        J, Pan S, Hsieh MH, Ng N, Sun F, Wang T, et al. Targeting Wnt-driven cancer
+        through the inhibition of Porcupine by LGK974. Proc Natl Acad Sci USA. 2013;110:20224&#x2013;9.</Citation></Reference><Reference><Citation>Phillips
+        C, Bhamra I, Eagle C, Flanagan E, Armer R, Jones CD, et al. The Wnt pathway
+        inhibitor RXC004 blocks tumor growth and reverses immune evasion in Wnt ligand-dependent
+        cancer models. Cancer Res Commun. 2022;2:914&#x2013;28.</Citation></Reference><Reference><Citation>Dobin
+        A, Davis CA, Schlesinger F, Drenkow J, Zaleski C, Jha S, Batut P, Chaisson
+        M, Gingeras TR. STAR: ultrafast universal RNA-seq aligner. Bioinformatics.
+        2013;29:15&#x2013;21.</Citation></Reference><Reference><Citation>Garcia-Alcalde
+        F, Okonechnikov K, Carbonell J, Cruz LM, Gotz S, Tarazona S, Dopazo J, Meyer
+        TF, Conesa A. Qualimap: evaluating next-generation sequencing alignment data.
+        Bioinformatics. 2012;28:2678&#x2013;9.</Citation></Reference><Reference><Citation>Love
+        MI, Huber W, Anders S. Moderated estimation of fold change and dispersion
+        for RNA-seq data with DESeq2. Genome Biol. 2014;15:550.</Citation></Reference><Reference><Citation>Zhu
+        A, Ibrahim JG, Love MI. Heavy-tailed prior distributions for sequence count
+        data: removing the noise and preserving large differences. Bioinformatics.
+        2019;35:2084&#x2013;92.</Citation></Reference><Reference><Citation>Pozniak
+        J, Pedri D, Landeloos E, Van Herck Y, Antoranz A, Vanwynsberghe L, Nowosad
+        A, Roda N, Makhzami S, Bervoets G, et al. A TCF4-dependent gene regulatory
+        network confers resistance to immunotherapy in melanoma. Cell. 2024;187:166&#x2013;e183125.</Citation></Reference><Reference><Citation>Goyal
+        Y, Busch GT, Pillai M, Li J, Boe RH, Grody EI, Chelvanambi M, Dardani IP,
+        Emert B, Bodkin N, et al. Diverse clonal fates emerge upon drug treatment
+        of homogeneous cancer cells. Nature. 2023;620:651&#x2013;9.</Citation></Reference><Reference><Citation>Tirosh
+        I, Izar B, Prakadan SM, Wadsworth MH 2nd, Treacy D, Trombetta JJ, Rotem A,
+        Rodman C, Lian C, Murphy G, et al. Dissecting the multicellular ecosystem
+        of metastatic melanoma by single-cell RNA-seq. Science. 2016;352:189&#x2013;96.</Citation></Reference><Reference><Citation>Shimaoka
+        M, Salas A, Yang W, Weitz-Schmidt G, Springer TA. Small molecule integrin
+        antagonists that bind to the beta2 subunit I-like domain and activate signals
+        in one direction and block them in the other. Immunity. 2003;19:391&#x2013;402.</Citation></Reference><Reference><Citation>Szklarczyk
+        D, Gable AL, Lyon D, Junge A, Wyder S, Huerta-Cepas J, et al. STRING v11:
+        protein-protein association networks with increased coverage, supporting functional
+        discovery in genome-wide experimental datasets. Nucleic Acids Res. 2019;47:D607-d613.</Citation></Reference><Reference><Citation>Weeraratna
+        AT, Jiang Y, Hostetter G, Rosenblatt K, Duray P, Bittner M, Trent JM. Wnt5a
+        signaling directly affects cell motility and invasion of metastatic melanoma.
+        Cancer Cell. 2002;1:279&#x2013;88.</Citation></Reference><Reference><Citation>Kakugawa
+        S, Langton PF, Zebisch M, Howell S, Chang TH, Liu Y, Feizi T, Bineva G, O&#x2019;Reilly
+        N, Snijders AP, et al. Notum deacylates Wnt proteins to suppress signalling
+        activity. Nature. 2015;519:187&#x2013;92.</Citation></Reference><Reference><Citation>Guo
+        M, Yuan Z, Jin X, Li X, Deng Y, Zhou S, et al. Inhibition of ICAM1 diminishes
+        stemness and enhances antitumor immunity in glioblastoma via beta-catenin/PD-L1
+        signaling. Nat Commun. 2025;16:8642.</Citation></Reference><Reference><Citation>Webster
+        MR, Kugel CH, Weeraratna AT. The Wnts of change: how Wnts regulate phenotype
+        switching in melanoma. Biochim Biophys Acta. 2015;1856:244&#x2013;51.</Citation></Reference><Reference><Citation>Anastas
+        JN, Kulikauskas RM, Tamir T, Rizos H, Long GV, von Euw EM, et al. WNT5A enhances
+        resistance of melanoma cells to targeted BRAF inhibitors. J Clin Invest. 2014;124:2877&#x2013;90.</Citation></Reference><Reference><Citation>Chen
+        G, Gao C, Gao X, Zhang DH, Kuan SF, Burns TF, et al. Wnt/beta-Catenin pathway
+        activation mediates adaptive resistance to BRAF inhibition in colorectal cancer.
+        Mol Cancer Ther. 2018;17:806&#x2013;13.</Citation></Reference><Reference><Citation>Schatton
+        T, Murphy GF, Frank NY, Yamaura K, Waaga-Gasser AM, Gasser M, Zhan Q, Jordan
+        S, Duncan LM, Weishaupt C, et al. Identification of cells initiating human
+        melanomas. Nature. 2008;451:345&#x2013;9.</Citation></Reference><Reference><Citation>Tufail
+        M, Jiang CH, Li N. Wnt signaling in cancer: from biomarkers to targeted therapies
+        and clinical translation. Mol Cancer. 2025;24:107.</Citation></Reference><Reference><Citation>Ponzini
+        FM, Schultz CW, Leiby BE, Cannaday S, Yeo T, Posey J, Bowne WB, Yeo C, Brody
+        JR, Lavu H, Nevler A. Repurposing the FDA-approved anthelmintic pyrvinium
+        pamoate for pancreatic cancer treatment: study protocol for a phase I clinical
+        trial in early-stage pancreatic ductal adenocarcinoma. BMJ Open. 2023;13:e073839.</Citation></Reference><Reference><Citation>Sackstein
+        R, Schatton T, Barthel SR. T-lymphocyte homing: an underappreciated yet critical
+        hurdle for successful cancer immunotherapy. Lab Invest. 2017;97:669&#x2013;97.</Citation></Reference><Reference><Citation>Barthel
+        SR, Johansson MW, McNamee DM, Mosher DF. Roles of integrin activation in eosinophil
+        function and the eosinophilic inflammation of asthma. J Leukoc Biol. 2008;83:1&#x2013;12.</Citation></Reference><Reference><Citation>Mandal
+        K, Wicaksono G, Yu C, Adams JJ, Hoopmann MR, Temple WC, Izgutdina A, Escobar
+        BP, Gorelik M, Ihling CH, et al. Structural surfaceomics reveals an AML-specific
+        conformation of integrin beta(2) as a CAR T cellular therapy target. Nat Cancer.
+        2023;4:1592&#x2013;609.</Citation></Reference><Reference><Citation>Fujisaki
+        T, Tanaka Y, Fujii K, Mine S, Saito K, Yamada S, Yamashita U, Irimura T, Eto
+        S. CD44 stimulation induces integrin-mediated adhesion of colon cancer cell
+        lines to endothelial cells by up-regulation of integrins and c-Met and activation
+        of integrins. Cancer Res. 1999;59:4427&#x2013;34.</Citation></Reference><Reference><Citation>Scharffetter-Kochanek
+        K, Lu H, Norman K, van Nood N, Munoz F, Grabbe S, et al. Spontaneous skin
+        ulceration and defective T cell function in CD18 null mice. J Exp Med. 1998;188:119&#x2013;31.</Citation></Reference><Reference><Citation>Raab-Westphal
+        S, Marshall JF, Goodman SL. Integrins as therapeutic targets: successes and
+        cancers. Cancers. 2017;9:110.&#xa0;</Citation></Reference><Reference><Citation>Weitz-Schmidt
+        G, Welzenbach K, Brinkmann V, Kamata T, Kallen J, Bruns C, Cottens S, Takada
+        Y, Hommel U. Statins selectively inhibit leukocyte function antigen-1 by binding
+        to a novel regulatory integrin site. Nat Med. 2001;7:687&#x2013;92.</Citation></Reference><Reference><Citation>Nielsen
+        SF, Nordestgaard BG, Bojesen SE. Statin use and reduced cancer-related mortality.
+        N Engl J Med. 2012;367:1792&#x2013;802.</Citation></Reference><Reference><Citation>Ghislin
+        S, Obino D, Middendorp S, Boggetto N, Alcaide-Loridan C, Deshayes F. LFA-1
+        and ICAM-1 expression induced during melanoma-endothelial cell co-culture
+        favors the transendothelial migration of melanoma cell lines in vitro. BMC
+        Cancer. 2012;12:455.</Citation></Reference><Reference><Citation>Fane ME, Chhabra
+        Y, Alicea GM, Maranto DA, Douglass SM, Webster MR, Rebecca VW, Marino GE,
+        Almeida F, Ecker BL, et al. Stromal changes in the aged lung induce an emergence
+        from melanoma dormancy. Nature. 2022;606:396&#x2013;405.</Citation></Reference><Reference><Citation>Lin
+        FY, Li J, Xie Y, Zhu J, Huong Nguyen TT, Zhang Y, Zhu J, Springer TA. A general
+        chemical principle for creating closure-stabilizing integrin inhibitors. Cell.
+        2022;185:3533&#x2013;e35503527.</Citation></Reference></ReferenceList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="MEDLINE" Owner="NLM" IndexingMethod="Automated"><PMID Version="1">41413213</PMID><DateCompleted><Year>2025</Year><Month>12</Month><Day>18</Day></DateCompleted><DateRevised><Year>2025</Year><Month>12</Month><Day>18</Day></DateRevised><Article
+        PubModel="Electronic"><Journal><ISSN IssnType="Electronic">2059-3635</ISSN><JournalIssue
+        CitedMedium="Internet"><Volume>10</Volume><Issue>1</Issue><PubDate><Year>2025</Year><Month>Dec</Month><Day>19</Day></PubDate></JournalIssue><Title>Signal
+        transduction and targeted therapy</Title><ISOAbbreviation>Signal Transduct
+        Target Ther</ISOAbbreviation></Journal><ArticleTitle>Hypoxia induced VEGF
+        secretion promotes resistance to bispecific T-cell engagers.</ArticleTitle><Pagination><StartPage>405</StartPage><MedlinePgn>405</MedlinePgn></Pagination><ELocationID
+        EIdType="doi" ValidYN="Y">10.1038/s41392-025-02505-3</ELocationID><Abstract><AbstractText>Bispecific
+        T-cell Engagers (BITEs) are a novel form of immunotherapy that overcome a
+        deficiency of immune checkpoint inhibitors (ICI) by targeting a preidentified
+        tumor associated antigen and redirecting a polyclonal population of effector
+        T-cells against the tumor. High grade serous ovarian cancer is a lethal disease
+        in the recurrent setting and has not been amenable to ICI therapy. MUC16/CA125
+        is overexpressed in high grade serous ovarian cancer. BITEs targeting the
+        tumor-retained portion of MUC16/CA125 have recently been described and are
+        in early-phase clinical trials. To identify mechanisms of resistance to BITEs,
+        we collected serum, peripheral blood mononuclear cells, and ascites samples
+        from patients with disease progression on MUC16-directed bispecific antibodies.
+        Analysis of these samples showed downregulation of MUC16/CA125, elevated secretion
+        of VEGF, and epithelial-to-mesenchymal transition in tumor cells. Interestingly,
+        hypoxia was determined to be a driver of these changes. These findings were
+        prospectively validated in ovarian cancer cell lines with CRISPR/Cas9 knockout
+        of MUC16/CA125 and VEGF. Peripheral blood mononuclear cells from patients
+        with disease progression were capable of effective cytolysis ex vivo, suggesting
+        that resistance to therapy was primarily tumor driven. Restoration of MUC16/CA125
+        expression did not restore cytotoxicity in the presence of increased VEGF
+        secretion. Combination treatment with a VEGF inhibitor rescued cytotoxicity
+        in hypoxia-conditioned ovarian cancer cell lines with preserved target antigen
+        expression. Collectively, these data outline a link between hypoxia and the
+        development of resistance to BITEs and posits inhibition of VEGF inhibition
+        as a potentially important therapeutic intervention.</AbstractText><CopyrightInformation>&#xa9;
+        2025. The Author(s).</CopyrightInformation></Abstract><AuthorList CompleteYN="Y"><Author
+        ValidYN="Y" EqualContrib="Y"><LastName>Xu</LastName><ForeName>Mengyao</ForeName><Initials>M</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y" EqualContrib="Y"><LastName>Barakzai</LastName><ForeName>Syem K</ForeName><Initials>SK</Initials><AffiliationInfo><Affiliation>Meigs
+        Division of Gynecologic Oncology, Vincent Department of Obstetrics and Gynecology,
+        Massachusetts General Hospital, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Kumar</LastName><ForeName>Raj</ForeName><Initials>R</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Veillard</LastName><ForeName>Irva</ForeName><Initials>I</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Kim</LastName><ForeName>Eugene</ForeName><Initials>E</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Bregar</LastName><ForeName>Amy</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>Meigs
+        Division of Gynecologic Oncology, Vincent Department of Obstetrics and Gynecology,
+        Massachusetts General Hospital, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Eisenhauer</LastName><ForeName>Eric</ForeName><Initials>E</Initials><AffiliationInfo><Affiliation>Meigs
+        Division of Gynecologic Oncology, Vincent Department of Obstetrics and Gynecology,
+        Massachusetts General Hospital, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Penson</LastName><ForeName>Richard</ForeName><Initials>R</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Bouberhan</LastName><ForeName>Sara</ForeName><Initials>S</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Filipi</LastName><ForeName>Jennifer</ForeName><Initials>J</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Colella</LastName><ForeName>Tina</ForeName><Initials>T</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Bond</LastName><ForeName>Tim</ForeName><Initials>T</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Clark</LastName><ForeName>Caroline</ForeName><Initials>C</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Lin</LastName><ForeName>Lawrence H</ForeName><Initials>LH</Initials><AffiliationInfo><Affiliation>Department
+        of Pathology, Massachusetts General Hospital, Harvard Medical School, Boston,
+        MA, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Ruan</LastName><ForeName>Jinpeng</ForeName><Initials>J</Initials><AffiliationInfo><Affiliation>Department
+        of Obstetrics and Gynecology, Vincent Center for Reproductive Biology, Massachusetts
+        General Hospital, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Wang</LastName><ForeName>Cheng</ForeName><Initials>C</Initials><Identifier
+        Source="ORCID">0000-0002-0911-8254</Identifier><AffiliationInfo><Affiliation>Department
+        of Obstetrics and Gynecology, Vincent Center for Reproductive Biology, Massachusetts
+        General Hospital, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Qin</LastName><ForeName>Xingping</ForeName><Initials>X</Initials><Identifier
+        Source="ORCID">0000-0003-3263-0843</Identifier><AffiliationInfo><Affiliation>John
+        B. Little Center for Radiation Sciences, Harvard T.H. Chan School of Public
+        Health, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Sarosiek</LastName><ForeName>Kristopher</ForeName><Initials>K</Initials><Identifier
+        Source="ORCID">0000-0002-4618-5085</Identifier><AffiliationInfo><Affiliation>John
+        B. Little Center for Radiation Sciences, Harvard T.H. Chan School of Public
+        Health, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Rueda</LastName><ForeName>Bo</ForeName><Initials>B</Initials><AffiliationInfo><Affiliation>Meigs
+        Division of Gynecologic Oncology, Vincent Department of Obstetrics and Gynecology,
+        Massachusetts General Hospital, Boston, MA, USA.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Castro</LastName><ForeName>Cesar</ForeName><Initials>C</Initials><Identifier
+        Source="ORCID">0000-0002-1159-5658</Identifier><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Spriggs</LastName><ForeName>David R</ForeName><Initials>DR</Initials><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Yeku</LastName><ForeName>Oladapo O</ForeName><Initials>OO</Initials><Identifier
+        Source="ORCID">0000-0002-6319-1647</Identifier><AffiliationInfo><Affiliation>Massachusetts
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA. oyeku@mgh.harvard.edu.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>19</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Signal
+        Transduct Target Ther</MedlineTA><NlmUniqueID>101676423</NlmUniqueID><ISSNLinking>2059-3635</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D018033">Antibodies, Bispecific</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D042461">Vascular Endothelial Growth Factor A</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="C467484">VEGFA protein, human</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D018394">CA-125 Antigen</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="C451759">MUC16 protein, human</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D008565">Membrane Proteins</NameOfSubstance></Chemical></ChemicalList><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D006801" MajorTopicYN="N">Humans</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D005260" MajorTopicYN="N">Female</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D018033" MajorTopicYN="Y">Antibodies, Bispecific</DescriptorName><QualifierName
+        UI="Q000494" MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D042461" MajorTopicYN="Y">Vascular Endothelial Growth Factor A</DescriptorName><QualifierName
+        UI="Q000235" MajorTopicYN="N">genetics</QualifierName><QualifierName UI="Q000276"
+        MajorTopicYN="N">immunology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D010051" MajorTopicYN="Y">Ovarian Neoplasms</DescriptorName><QualifierName
+        UI="Q000276" MajorTopicYN="N">immunology</QualifierName><QualifierName UI="Q000235"
+        MajorTopicYN="N">genetics</QualifierName><QualifierName UI="Q000473" MajorTopicYN="N">pathology</QualifierName><QualifierName
+        UI="Q000628" MajorTopicYN="N">therapy</QualifierName><QualifierName UI="Q000188"
+        MajorTopicYN="N">drug therapy</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D018394" MajorTopicYN="Y">CA-125 Antigen</DescriptorName><QualifierName
+        UI="Q000235" MajorTopicYN="N">genetics</QualifierName><QualifierName UI="Q000276"
+        MajorTopicYN="N">immunology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013601" MajorTopicYN="Y">T-Lymphocytes</DescriptorName><QualifierName
+        UI="Q000276" MajorTopicYN="N">immunology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D045744" MajorTopicYN="N">Cell Line, Tumor</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D019008" MajorTopicYN="Y">Drug Resistance, Neoplasm</DescriptorName><QualifierName
+        UI="Q000235" MajorTopicYN="N">genetics</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008565" MajorTopicYN="N">Membrane Proteins</DescriptorName><QualifierName
+        UI="Q000235" MajorTopicYN="N">genetics</QualifierName><QualifierName UI="Q000276"
+        MajorTopicYN="N">immunology</QualifierName></MeshHeading></MeshHeadingList><CoiStatement>Competing
+        interests: O.O.Y. reports grants from Ascendis Pharma A/S, Immunocore Limited,
+        Duality Biologics, Merck Sharp &amp; Dohme Corporation, ProfoundBio, and the
+        Department of Defense. Consulting fees from Aadi Bioscience. Advisory board
+        role at hC Bioscience. In addition, he has a patent pending for MUC16 Directed
+        Antibodies for therapeutic applications, and a patent pending for Human Artificial
+        Chromosomes for therapeutic applications. D.R.S. is a co-inventor of the MUC16ecto
+        antibody 4H11 and the patent is held jointly by Memorial Sloan Kettering Cancer
+        Center and Eureka Therapeutics. A patent application has been filed for the
+        modified human 4H11 antibody. The remaining authors declare no competing interests.
+        Human ethics and consent to participate: All patients were consented to the
+        Mass General Brigham Institutional Review Board approved biobanking protocol
+        07-049 and all experiments were performed under the Mass General Brigham Institutional
+        Review Board approved Excess Human Material secondary use protocol 2019P003362.
+        All experiments were performed in accordance with relevant guidelines and
+        regulations.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>46</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>3</Month><Day>16</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>11</Month><Day>11</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="revised"><Year>2025</Year><Month>10</Month><Day>21</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2025</Year><Month>12</Month><Day>18</Day><Hour>23</Hour><Minute>33</Minute></PubMedPubDate></History><PublicationStatus>epublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41413213</ArticleId><ArticleId IdType="doi">10.1038/s41392-025-02505-3</ArticleId><ArticleId
+        IdType="pii">10.1038/s41392-025-02505-3</ArticleId></ArticleIdList><ReferenceList><Reference><Citation>Mehta,
+        D. A. &amp; Hay, J. W. Cost-effectiveness of adding bevacizumab to first line
+        therapy for patients with advanced ovarian cancer. Gynecol. Oncol. 132, 677&#x2013;683
+        (2014).</Citation><ArticleIdList><ArticleId IdType="pubmed">24463160</ArticleId><ArticleId
+        IdType="doi">10.1016/j.ygyno.2014.01.021</ArticleId></ArticleIdList></Reference><Reference><Citation>Sabbatini,
+        P. J. et al. Immunization of ovarian cancer patients with a synthetic Lewis(y)-protein
+        conjugate vaccine: a phase 1 trial. Int. J. Cancer 87, 79&#x2013;85 (2000).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">10861456</ArticleId><ArticleId IdType="doi">10.1002/1097-0215(20000701)87:1&lt;79::AID-IJC12&gt;3.0.CO;2-L</ArticleId></ArticleIdList></Reference><Reference><Citation>Hamanishi,
+        J. et al. Safety and antitumor activity of anti-PD-1 antibody, nivolumab,
+        in patients with platinum-resistant ovarian cancer. J. Clin. Oncol. 33, 4015&#x2013;4022
+        (2015).</Citation><ArticleIdList><ArticleId IdType="pubmed">26351349</ArticleId><ArticleId
+        IdType="doi">10.1200/JCO.2015.62.3397</ArticleId></ArticleIdList></Reference><Reference><Citation>Koneru,
+        M., O&#x2019;Cearbhaill, R., Pendharkar, S., Spriggs, D. R. &amp; Brentjens,
+        R. J. A phase I clinical trial of adoptive T cell therapy using IL-12 secreting
+        MUC-16(ecto) directed chimeric antigen receptors for recurrent ovarian cancer.
+        J. Transl. Med. 13, 102 (2015).</Citation><ArticleIdList><ArticleId IdType="pubmed">25890361</ArticleId><ArticleId
+        IdType="pmc">4438636</ArticleId><ArticleId IdType="doi">10.1186/s12967-015-0460-x</ArticleId></ArticleIdList></Reference><Reference><Citation>Moore,
+        K. N. et al. FORWARD I: a Phase III study of mirvetuximab soravtansine versus
+        chemotherapy in platinum-resistant ovarian cancer. Future Oncol. 14, 1669&#x2013;1678
+        (2018).</Citation><ArticleIdList><ArticleId IdType="pubmed">29424243</ArticleId><ArticleId
+        IdType="doi">10.2217/fon-2017-0646</ArticleId></ArticleIdList></Reference><Reference><Citation>Disis,
+        M. L. et al. Efficacy and safety of avelumab for patients with recurrent or
+        refractory ovarian cancer: phase 1b results from the JAVELIN solid tumor trial.
+        JAMA Oncol. 5, 393&#x2013;401 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">30676622</ArticleId><ArticleId IdType="pmc">6439837</ArticleId><ArticleId
+        IdType="doi">10.1001/jamaoncol.2018.6258</ArticleId></ArticleIdList></Reference><Reference><Citation>Hamanishi,
+        J. et al. Nivolumab versus gemcitabine or pegylated liposomal doxorubicin
+        for patients with platinum-resistant ovarian cancer: open-label, randomized
+        trial in Japan (NINJA). J. Clin. Oncol. 39, 3671&#x2013;3681 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34473544</ArticleId><ArticleId IdType="pmc">8601279</ArticleId><ArticleId
+        IdType="doi">10.1200/JCO.21.00334</ArticleId></ArticleIdList></Reference><Reference><Citation>Matulonis,
+        U. A. et al. Antitumor activity and safety of pembrolizumab in patients with
+        advanced recurrent ovarian cancer: results from the phase II KEYNOTE-100 study.
+        Ann. Oncol. 30, 1080&#x2013;1087 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">31046082</ArticleId><ArticleId IdType="doi">10.1093/annonc/mdz135</ArticleId></ArticleIdList></Reference><Reference><Citation>Konstantinopoulos,
+        P. A. et al. Single-arm phases 1 and 2 trial of niraparib in combination with
+        pembrolizumab in patients with recurrent platinum-resistant ovarian carcinoma.
+        JAMA Oncol. 5, 1141&#x2013;1149 (2019).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">31194228</ArticleId><ArticleId IdType="pmc">6567832</ArticleId><ArticleId
+        IdType="doi">10.1001/jamaoncol.2019.1048</ArticleId></ArticleIdList></Reference><Reference><Citation>Liu,
+        J. F. et al. Assessment of combined nivolumab and bevacizumab in relapsed
+        ovarian cancer: a phase 2 clinical trial. JAMA Oncol. 5, 1731&#x2013;1738
+        (2019).</Citation><ArticleIdList><ArticleId IdType="pubmed">31600397</ArticleId><ArticleId
+        IdType="pmc">6802049</ArticleId><ArticleId IdType="doi">10.1001/jamaoncol.2019.3343</ArticleId></ArticleIdList></Reference><Reference><Citation>Moore,
+        K. N. et al. Atezolizumab, bevacizumab, and chemotherapy for newly diagnosed
+        stage III or IV ovarian cancer: placebo-controlled randomized phase III trial
+        (IMagyn050/GOG 3015/ENGOT-OV39). J. Clin. Oncol. 39, 1842&#x2013;1855 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">33891472</ArticleId><ArticleId IdType="pmc">8189598</ArticleId><ArticleId
+        IdType="doi">10.1200/JCO.21.00306</ArticleId></ArticleIdList></Reference><Reference><Citation>Wu,
+        Z. &amp; Cheung, N. V. T cell engaging bispecific antibody (T-BsAb): from
+        technology to therapeutics. Pharm. Ther. 182, 161&#x2013;175 (2018).</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.pharmthera.2017.08.005</ArticleId></ArticleIdList></Reference><Reference><Citation>Hoffmann,
+        P. et al. Serial killing of tumor cells by cytotoxic T cells redirected with
+        a CD19-/CD3-bispecific single-chain antibody construct. Int. J. Cancer 115,
+        98&#x2013;104 (2005).</Citation><ArticleIdList><ArticleId IdType="pubmed">15688411</ArticleId><ArticleId
+        IdType="doi">10.1002/ijc.20908</ArticleId></ArticleIdList></Reference><Reference><Citation>Middelburg,
+        J. et al. Overcoming challenges for CD3-bispecific antibody therapy in solid
+        tumors. Cancers 13, 287 (2021).</Citation></Reference><Reference><Citation>Nathan,
+        P. et al. Overall survival benefit with tebentafusp in metastatic uveal melanoma.
+        N. Engl. J. Med. 385, 1196&#x2013;1206 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34551229</ArticleId><ArticleId IdType="doi">10.1056/NEJMoa2103485</ArticleId></ArticleIdList></Reference><Reference><Citation>Mountzios,
+        G. et al. Tarlatamab in small-cell lung cancer after platinum-based chemotherapy.
+        N. Engl. J. Med. 393, 349&#x2013;361 (2025).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">40454646</ArticleId><ArticleId IdType="doi">10.1056/NEJMoa2502099</ArticleId></ArticleIdList></Reference><Reference><Citation>Bast,
+        R. C. Jr. &amp; Spriggs, D. R. More than a biomarker: CA125 may contribute
+        to ovarian cancer pathogenesis. Gynecol. Oncol. 121, 429&#x2013;430 (2011).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">21601106</ArticleId><ArticleId IdType="doi">10.1016/j.ygyno.2011.04.032</ArticleId></ArticleIdList></Reference><Reference><Citation>Zorn,
+        K. K. et al. The prognostic value of pretreatment CA 125 in patients with
+        advanced ovarian carcinoma: a Gynecologic Oncology Group study. Cancer 115,
+        1028&#x2013;1035 (2009).</Citation><ArticleIdList><ArticleId IdType="pubmed">19156927</ArticleId><ArticleId
+        IdType="doi">10.1002/cncr.24084</ArticleId></ArticleIdList></Reference><Reference><Citation>Bast,
+        R. C. Jr. et al. New tumor markers: CA125 and beyond. Int. J. Gynecol. Cancer
+        15(Suppl 3), 274&#x2013;281 (2005).</Citation><ArticleIdList><ArticleId IdType="pubmed">16343244</ArticleId><ArticleId
+        IdType="doi">10.1136/ijgc-00009577-200511001-00015</ArticleId></ArticleIdList></Reference><Reference><Citation>Dharma
+        Rao, T. et al. Novel monoclonal antibodies against the proximal (carboxy-terminal)
+        portions of MUC16. Appl. Immunohistochem. Mol. Morphol. 18, 462&#x2013;472
+        (2010).</Citation><ArticleIdList><ArticleId IdType="pubmed">20453816</ArticleId><ArticleId
+        IdType="doi">10.1097/PAI.0b013e3181dbfcd2</ArticleId></ArticleIdList></Reference><Reference><Citation>Argueso,
+        P., Tisdale, A., Spurr-Michaud, S., Sumiyoshi, M. &amp; Gipson, I. K. Mucin
+        characteristics of human corneal-limbal epithelial cells that exclude the
+        rose bengal anionic dye. Invest. Ophthalmol. Vis. Sci. 47, 113&#x2013;119
+        (2006).</Citation><ArticleIdList><ArticleId IdType="pubmed">16384952</ArticleId><ArticleId
+        IdType="doi">10.1167/iovs.05-0735</ArticleId></ArticleIdList></Reference><Reference><Citation>Yeku,
+        O. O. et al. Bispecific T-cell engaging antibodies against MUC16 demonstrate
+        efficacy against ovarian cancer in monotherapy and in combination with PD-1
+        and VEGF inhibition. Front. Immunol. 12, 663379 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">33936101</ArticleId><ArticleId IdType="pmc">8079980</ArticleId><ArticleId
+        IdType="doi">10.3389/fimmu.2021.663379</ArticleId></ArticleIdList></Reference><Reference><Citation>Crawford,
+        A. et al. A Mucin 16 bispecific T cell-engaging antibody for the treatment
+        of ovarian cancer. Sci. Transl. Med. 11, 497 (2019).</Citation></Reference><Reference><Citation>O&#x2019;Cearbhaill,
+        R. E. et al. 754P Ubamatamab (MUC16xCD3 bispecific antibody) with cemiplimab
+        (anti-PD-1 antibody) in recurrent ovarian cancer: Phase I dose-escalation
+        study. Ann. Oncol. 34, S516&#x2013;S517 (2023).</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.annonc.2023.09.1933</ArticleId></ArticleIdList></Reference><Reference><Citation>Winer,
+        I. S. et al. 127P REGN5668 (MUC16xCD28 bispecific antibody) with cemiplimab
+        (anti-PD-1 antibody) in recurrent ovarian cancer: phase I dose-escalation
+        study. Immuno-Oncol. Technol. 20 100599 (2023).</Citation></Reference><Reference><Citation>Liu,
+        J. et al. PO011LBA/#1512; Ubamatamab (MUC16XCD3 bispecific antibody) with
+        or without cemiplimab (Anti-PD-1 antibody) in recurrent ovarian cancer: phase
+        1 clinical and biomarker results. Int. J. Gynecol. Cancer 33, A9&#x2013;A10
+        (2023).</Citation></Reference><Reference><Citation>Taki, M. et al. Tumor immune
+        microenvironment during epithelial-mesenchymal transition. Clin. Cancer Res
+        27, 4669&#x2013;4679 (2021).</Citation><ArticleIdList><ArticleId IdType="pubmed">33827891</ArticleId><ArticleId
+        IdType="doi">10.1158/1078-0432.CCR-20-4459</ArticleId></ArticleIdList></Reference><Reference><Citation>Ford,
+        C. E., Werner, B., Hacker, N. F. &amp; Warton, K. The untapped potential of
+        ascites in ovarian cancer research and treatment. Br. J. Cancer 123, 9&#x2013;16
+        (2020).</Citation><ArticleIdList><ArticleId IdType="pubmed">32382112</ArticleId><ArticleId
+        IdType="pmc">7341795</ArticleId><ArticleId IdType="doi">10.1038/s41416-020-0875-x</ArticleId></ArticleIdList></Reference><Reference><Citation>Lloyd,
+        K. O., Yin, B. W. &amp; Kudryashov, V. Isolation and characterization of ovarian
+        cancer antigen CA 125 using a new monoclonal antibody (VK-8): identification
+        as a mucin-type molecule. Int. J. Cancer 71, 842&#x2013;850 (1997).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">9180155</ArticleId><ArticleId IdType="doi">10.1002/(SICI)1097-0215(19970529)71:5&lt;842::AID-IJC24&gt;3.0.CO;2-8</ArticleId></ArticleIdList></Reference><Reference><Citation>Qin,
+        X. et al. Paclitaxel-induced mitotic arrest results in a convergence of apoptotic
+        dependencies that can be safely exploited by BCL-X(L) degradation to overcome
+        cancer chemoresistance. Preprint at https://doi.org/10.1101/2025.06.24.661170
+        (2025).</Citation></Reference><Reference><Citation>Derrien, J. et al. Acquired
+        resistance to a GPRC5D-directed T-cell engager in multiple myeloma is mediated
+        by genetic or epigenetic target inactivation. Nat. Cancer 4, 1536&#x2013;1543
+        (2023).</Citation><ArticleIdList><ArticleId IdType="pubmed">37653140</ArticleId><ArticleId
+        IdType="doi">10.1038/s43018-023-00625-9</ArticleId></ArticleIdList></Reference><Reference><Citation>Mailankody,
+        S. et al. GPRC5D-targeted CAR T cells for myeloma. N. Engl. J. Med. 387, 1196&#x2013;1206
+        (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">36170501</ArticleId><ArticleId
+        IdType="pmc">10309537</ArticleId><ArticleId IdType="doi">10.1056/NEJMoa2209900</ArticleId></ArticleIdList></Reference><Reference><Citation>Munshi,
+        N. C. et al. Idecabtagene vicleucel in relapsed and refractory multiple myeloma.
+        N. Engl. J. Med. 384, 705&#x2013;716 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">33626253</ArticleId><ArticleId IdType="doi">10.1056/NEJMoa2024850</ArticleId></ArticleIdList></Reference><Reference><Citation>Rao,
+        T. D. et al. Expression of the carboxy-terminal portion of MUC16/CA125 induces
+        transformation and tumor invasion. PLoS ONE 10, e0126633 (2015).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">25965947</ArticleId><ArticleId IdType="pmc">4429113</ArticleId><ArticleId
+        IdType="doi">10.1371/journal.pone.0126633</ArticleId></ArticleIdList></Reference><Reference><Citation>Juretzka,
+        M. M. et al. CA125 level as a predictor of progression-free survival and overall
+        survival in ovarian cancer patients with surgically defined disease status
+        prior to the initiation of intraperitoneal consolidation therapy. Gynecol.
+        Oncol. 104, 176&#x2013;180 (2007).</Citation><ArticleIdList><ArticleId IdType="pubmed">16996584</ArticleId><ArticleId
+        IdType="doi">10.1016/j.ygyno.2006.07.027</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang,
+        Q., Feng, X., Liu, X. &amp; Zhu, S. Prognostic value of elevated pre-treatment
+        serum CA-125 in epithelial ovarian cancer: a meta-analysis. Front Oncol. 12,
+        868061 (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">35463345</ArticleId><ArticleId
+        IdType="pmc">9022002</ArticleId><ArticleId IdType="doi">10.3389/fonc.2022.868061</ArticleId></ArticleIdList></Reference><Reference><Citation>Haridas,
+        D. et al. MUC16: molecular analysis and its functional implications in benign
+        and malignant conditions. FASEB J. 28, 4183&#x2013;4199 (2014).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">25002120</ArticleId><ArticleId IdType="doi">10.1096/fj.14-257352</ArticleId></ArticleIdList></Reference><Reference><Citation>Cheon,
+        D. J. et al. CA125/MUC16 is dispensable for mouse development and reproduction.
+        PLoS ONE 4, e4675 (2009).</Citation><ArticleIdList><ArticleId IdType="pubmed">19262696</ArticleId><ArticleId
+        IdType="pmc">2650410</ArticleId><ArticleId IdType="doi">10.1371/journal.pone.0004675</ArticleId></ArticleIdList></Reference><Reference><Citation>Jimenez-Sanchez,
+        A. et al. Unraveling tumor-immune heterogeneity in advanced ovarian cancer
+        uncovers immunogenic effect of chemotherapy. Nat. Genet. 52, 582&#x2013;593
+        (2020).</Citation><ArticleIdList><ArticleId IdType="pubmed">32483290</ArticleId><ArticleId
+        IdType="pmc">8353209</ArticleId><ArticleId IdType="doi">10.1038/s41588-020-0630-5</ArticleId></ArticleIdList></Reference><Reference><Citation>Jimenez-Sanchez,
+        A. et al. Heterogeneous tumor-immune microenvironments among differentially
+        growing metastases in an ovarian cancer patient. Cell 170, 927&#x2013;938.e920
+        (2017).</Citation><ArticleIdList><ArticleId IdType="pubmed">28841418</ArticleId><ArticleId
+        IdType="pmc">5589211</ArticleId><ArticleId IdType="doi">10.1016/j.cell.2017.07.025</ArticleId></ArticleIdList></Reference><Reference><Citation>Vazquez-Garcia,
+        I. et al. Ovarian cancer mutational processes drive site-specific immune evasion.
+        Nature 612, 778&#x2013;786 (2022).</Citation><ArticleIdList><ArticleId IdType="pubmed">36517593</ArticleId><ArticleId
+        IdType="pmc">9771812</ArticleId><ArticleId IdType="doi">10.1038/s41586-022-05496-1</ArticleId></ArticleIdList></Reference><Reference><Citation>Neunteufel,
+        W. &amp; Breitenecker, G. Tissue expression of CA 125 in benign and malignant
+        lesions of ovary and fallopian tube: a comparison with CA 19-9 and CEA. Gynecol.
+        Oncol. 32, 297&#x2013;302 (1989).</Citation><ArticleIdList><ArticleId IdType="pubmed">2646183</ArticleId><ArticleId
+        IdType="doi">10.1016/0090-8258(89)90628-8</ArticleId></ArticleIdList></Reference><Reference><Citation>Bakrim,
+        S. et al. Targeting inflammation in cancer therapy: from mechanistic insights
+        to emerging therapeutic approaches. J. Transl. Med. 23, 588 (2025).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">40420174</ArticleId><ArticleId IdType="pmc">12107871</ArticleId><ArticleId
+        IdType="doi">10.1186/s12967-025-06583-3</ArticleId></ArticleIdList></Reference><Reference><Citation>Bickel,
+        M. The role of interleukin-8 in inflammation and mechanisms of regulation.
+        J. Periodontol. 64, 456&#x2013;460 (1993).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">8315568</ArticleId></ArticleIdList></Reference><Reference><Citation>Stromnes,
+        I. M. IL18 at the crossroads between chronic inflammation and T-cell exhaustion
+        in pancreatic cancer. Cancer Immunol. Res 11, 400 (2023).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">36897261</ArticleId><ArticleId IdType="doi">10.1158/2326-6066.CIR-23-0145</ArticleId></ArticleIdList></Reference><Reference><Citation>Ghanbari,
+        M. et al. Interleukin-1 in obesity-related low-grade inflammation: From molecular
+        mechanisms to therapeutic strategies. Int. Immunopharmacol. 96, 107765 (2021).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">34015596</ArticleId><ArticleId IdType="doi">10.1016/j.intimp.2021.107765</ArticleId></ArticleIdList></Reference><Reference><Citation>Comamala,
+        M. et al. Downregulation of cell surface CA125/MUC16 induces epithelial-to-mesenchymal
+        transition and restores EGFR signalling in NIH:OVCAR3 ovarian carcinoma cells.
+        Br. J. Cancer 104, 989&#x2013;999 (2011).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">21326240</ArticleId><ArticleId IdType="pmc">3065274</ArticleId><ArticleId
+        IdType="doi">10.1038/bjc.2011.34</ArticleId></ArticleIdList></Reference><Reference><Citation>Miar,
+        A. et al. Hypoxia induces transcriptional and translational downregulation
+        of the type I IFN pathway in multiple cancer cell types. Cancer Res. 80, 5245&#x2013;5256
+        (2020).</Citation><ArticleIdList><ArticleId IdType="pubmed">33115807</ArticleId><ArticleId
+        IdType="pmc">7611234</ArticleId><ArticleId IdType="doi">10.1158/0008-5472.CAN-19-2306</ArticleId></ArticleIdList></Reference><Reference><Citation>Sethumadhavan,
+        S. et al. Hypoxia and hypoxia-inducible factor (HIF) downregulate antigen-presenting
+        MHC class I molecules limiting tumor cell recognition by T cells. PLoS ONE
+        12, e0187314 (2017).</Citation><ArticleIdList><ArticleId IdType="pubmed">29155844</ArticleId><ArticleId
+        IdType="pmc">5695785</ArticleId><ArticleId IdType="doi">10.1371/journal.pone.0187314</ArticleId></ArticleIdList></Reference><Reference><Citation>Cheng,
+        X. et al. Targeting the hypoxia signaling pathway with nanomedicine to reverse
+        immunotherapy resistance. Cancer Drug Resist. 8, 46 (2025).</Citation><ArticleIdList><ArticleId
+        IdType="pubmed">41019982</ArticleId><ArticleId IdType="pmc">12462398</ArticleId></ArticleIdList></Reference></ReferenceList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="Publisher" Owner="NLM"><PMID Version="1">41413028</PMID><DateRevised><Year>2025</Year><Month>12</Month><Day>18</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">2041-1723</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2025</Year><Month>Dec</Month><Day>19</Day></PubDate></JournalIssue><Title>Nature
+        communications</Title><ISOAbbreviation>Nat Commun</ISOAbbreviation></Journal><ArticleTitle>Anti-CRISPR
+        protein AcrIIA5 can enhance the activity and security of prime editing.</ArticleTitle><ELocationID
+        EIdType="doi" ValidYN="Y">10.1038/s41467-025-66237-2</ELocationID><Abstract><AbstractText>Prime
+        editing (PE) enables the precise installation of intended base substitutions,
+        small deletions or small insertions into the genome of living cells. While
+        the use of Cas9 nickase can avoid DNA double-strand breaks (DSB), undesired
+        insertions and deletions (indels) often accompany the correct edits, particularly
+        when PE activity increased. Here we show that the anti-CRISPR (Acr) protein
+        AcrIIA5 can significantly enhance PE activity by up to 8.2-fold while markedly
+        reducing byproduct indels. Further investigation reveals that AcrIIA5 can
+        promote PE across various approaches (PE2, PE3, PE4, PE5, and PE6), edit types
+        (substitutions, insertions and deletions), and endogenous loci. Mechanistically,
+        AcrIIA5 appears to inhibit the re-nicking activity of PE complex rather than
+        enhancing the core editing machinery itself, suggesting a distinct mode of
+        interaction with Cas9. Overall, we demonstrate that a known "inhibitor" Acr
+        protein can unexpectedly acting as an "enhancer" of CRISPR/Cas-based genome
+        editing, providing an effective strategy to optimize PE specificity and activity.</AbstractText><CopyrightInformation>&#xa9;
+        2025. The Author(s).</CopyrightInformation></Abstract><AuthorList CompleteYN="Y"><Author
+        ValidYN="Y"><LastName>Chen</LastName><ForeName>Qi</ForeName><Initials>Q</Initials><AffiliationInfo><Affiliation>School
+        of Pharmacy, Huazhong University of Science and Technology, Wuhan, China.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>The
+        First Hospital of Jiaxing, The Affiliated Hospital of Jiaxing University,
+        Jiaxing, Zhejiang, China.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Key
+        Laboratory of Combinatorial Biosynthesis and Drug Discovery (Wuhan University),
+        Ministry of Education and Wuhan University School of Pharmaceutical Sciences,
+        Wuhan, China.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Jiang</LastName><ForeName>Xiaoman</ForeName><Initials>X</Initials><AffiliationInfo><Affiliation>School
+        of Pharmacy, Huazhong University of Science and Technology, Wuhan, China.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Yang</LastName><ForeName>Biao</ForeName><Initials>B</Initials><AffiliationInfo><Affiliation>Key
+        Laboratory of Combinatorial Biosynthesis and Drug Discovery (Wuhan University),
+        Ministry of Education and Wuhan University School of Pharmaceutical Sciences,
+        Wuhan, China.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Deng</LastName><ForeName>Zixin</ForeName><Initials>Z</Initials><AffiliationInfo><Affiliation>Key
+        Laboratory of Combinatorial Biosynthesis and Drug Discovery (Wuhan University),
+        Ministry of Education and Wuhan University School of Pharmaceutical Sciences,
+        Wuhan, China.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Sun</LastName><ForeName>Yuhui</ForeName><Initials>Y</Initials><Identifier
+        Source="ORCID">0000-0001-5720-9620</Identifier><AffiliationInfo><Affiliation>School
+        of Pharmacy, Huazhong University of Science and Technology, Wuhan, China.
+        sunyuhui@hust.edu.cn.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Key
+        Laboratory of Combinatorial Biosynthesis and Drug Discovery (Wuhan University),
+        Ministry of Education and Wuhan University School of Pharmaceutical Sciences,
+        Wuhan, China. sunyuhui@hust.edu.cn.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>19</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Nat
+        Commun</MedlineTA><NlmUniqueID>101528555</NlmUniqueID><ISSNLinking>2041-1723</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><CoiStatement>Competing
+        interests: The authors declare no competing interests.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2024</Year><Month>10</Month><Day>22</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>11</Month><Day>4</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2025</Year><Month>12</Month><Day>18</Day><Hour>23</Hour><Minute>15</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41413028</ArticleId><ArticleId IdType="doi">10.1038/s41467-025-66237-2</ArticleId><ArticleId
+        IdType="pii">10.1038/s41467-025-66237-2</ArticleId></ArticleIdList><ReferenceList><Reference><Citation>Bak,
+        R. O., Gomez-Ospina, N. &amp; Porteus, M. H. Gene editing on center stage.
+        Trends Genet. 34, 600&#x2013;611 (2018).</Citation></Reference><Reference><Citation>Bibikova,
+        M., Beumer, K., Trautman, J. K. &amp; Carroll, D. Enhancing gene targeting
+        with designed zinc finger nucleases. Science 300, 764 (2003).</Citation></Reference><Reference><Citation>Miller,
+        J. C. et al. A TALE nuclease architecture for efficient genome editing. Nat.
+        Biotechnol. 29, 143&#x2013;148 (2011).</Citation></Reference><Reference><Citation>Jinek,
+        M. et al. A programmable dual-RNA-guided DNA endonuclease in adaptive bacterial
+        immunity. Science 337, 816&#x2013;821 (2012).</Citation></Reference><Reference><Citation>Cong,
+        L. et al. Multiplex genome engineering using CRISPR/Cas systems. Science 339,
+        819&#x2013;823 (2013).</Citation></Reference><Reference><Citation>Mali, P.
+        et al. RNA-guided human genome engineering via Cas9. Science 339, 823&#x2013;826
+        (2013).</Citation></Reference><Reference><Citation>Boroviak, K., Fu, B., Yang,
+        F., Doe, B. &amp; Bradley, A. Revealing hidden complexities of genomic rearrangements
+        generated with Cas9. Sci. Rep. 7, 12867 (2017).</Citation></Reference><Reference><Citation>Kosicki,
+        M., Tomberg, K. &amp; Bradley, A. Repair of double-strand breaks induced by
+        CRISPR&#x2013;Cas9 leads to large deletions and complex rearrangements. Nat.
+        Biotechnol. 36, 765&#x2013;771 (2018).</Citation></Reference><Reference><Citation>Cullot,
+        G. et al. CRISPR&#x2013;Cas9 genome editing induces megabase-scale chromosomal
+        truncations. Nat. Commun. 10, 1136 (2019).</Citation></Reference><Reference><Citation>Yin,
+        J. et al. Cas9 exo-endonuclease eliminates chromosomal translocations during
+        genome editing. Nat. Commun. 13, 1204 (2022).</Citation></Reference><Reference><Citation>Komor,
+        A. C., Kim, Y. B., Packer, M. S., Zuris, J. A. &amp; Liu, D. R. Programmable
+        editing of a target base in genomic DNA without double-stranded DNA cleavage.
+        Nature 533, 420&#x2013;424 (2016).</Citation></Reference><Reference><Citation>Gaudelli,
+        N. M. et al. Programmable base editing of A&#xb7;T to G&#xb7;C in genomic
+        DNA without DNA cleavage. Nature 551, 464&#x2013;471 (2017).</Citation></Reference><Reference><Citation>Tong,
+        H. et al. Programmable deaminase-free base editors for G-to-Y conversion by
+        engineered glycosylase. Natl. Sci. Rev. 10, nwad143 (2023).</Citation></Reference><Reference><Citation>Ye,
+        L. et al. Glycosylase-based base editors for efficient T-to-G and C-to-G editing
+        in mammalian cells. Nat. Biotechnol. 42, 1538&#x2013;1547 (2024).</Citation></Reference><Reference><Citation>He,
+        Y. et al. Protein language models-assisted optimization of a uracil-N-glycosylase
+        variant enables programmable T-to-G and T-to-C base editing. Mol. Cell 84,
+        1257&#x2013;1270.e6 (2024).</Citation></Reference><Reference><Citation>Kim,
+        H. S., Jeong, Y. K., Hur, J. K., Kim, J. S. &amp; Bae, S. Adenine base editors
+        catalyze cytosine conversions in human cells. Nat. Biotechnol. 37, 1145&#x2013;1148
+        (2019).</Citation></Reference><Reference><Citation>Jin, S. et al. Cytosine,
+        but not adenine, base editors induce genome-wide off-target mutations in rice.
+        Science 364, 292&#x2013;295 (2019).</Citation></Reference><Reference><Citation>Gr&#xfc;newald,
+        J. et al. Transcriptome-wide off-target RNA editing induced by CRISPR-guided
+        DNA base editors. Nature 569, 433&#x2013;437 (2019).</Citation></Reference><Reference><Citation>Anzalone,
+        A. V. et al. Search-and-replace genome editing without double-strand breaks
+        or donor DNA. Nature 576, 149&#x2013;157 (2019).</Citation></Reference><Reference><Citation>Chen,
+        P. J. et al. Enhanced prime editing systems by manipulating cellular determinants
+        of editing outcomes. Cell 184, 5635&#x2013;5652.e29 (2021).</Citation></Reference><Reference><Citation>Doman,
+        J. L. et al. Phage-assisted evolution and protein engineering yield compact,
+        efficient prime editors. Cell 186, 3983&#x2013;4002.e26 (2023).</Citation></Reference><Reference><Citation>Pawluk,
+        A., Davidson, A. R. &amp; Maxwell, K. L. Anti-CRISPR: discovery, mechanism
+        and function. Nat. Rev. Microbiol. 16, 12&#x2013;17 (2018).</Citation></Reference><Reference><Citation>Hynes,
+        A. P. et al. An anti-CRISPR from a virulent streptococcal phage inhibits Streptococcus
+        pyogenes Cas9. Nat. Microbiol. 2, 1374&#x2013;1380 (2019).</Citation></Reference><Reference><Citation>Garcia,
+        B. et al. Anti-CRISPR AcrIIA5 potently inhibits all Cas9 homologs used for
+        genome editing. Cell Rep. 29, 1739&#x2013;1746.e5 (2019).</Citation></Reference><Reference><Citation>Song,
+        G. et al. AcrIIA5 inhibits a broad range of Cas9 orthologs by preventing DNA
+        target cleavage. Cell Rep. 29, 2579&#x2013;2589.e4 (2019).</Citation></Reference><Reference><Citation>An,
+        S. Y. et al. Intrinsic disorder is essential for Cas9 inhibition of anti-CRISPR
+        AcrIIA5. Nucleic Acids Res 48, 7584&#x2013;7594 (2020).</Citation></Reference><Reference><Citation>Liang,
+        M. et al. AcrIIA5 suppresses base editors and reduces their off-target effects.
+        Cells 9, 1786 (2020).</Citation></Reference><Reference><Citation>Wang, X.
+        et al. Efficient base editing in methylated regions with a human APOBEC3A-Cas9
+        fusion. Nat. Biotechnol. 36, 946&#x2013;949 (2018).</Citation></Reference><Reference><Citation>Gehrke,
+        J. M. et al. An APOBEC3A-Cas9 base editor with minimized bystander and off-target
+        activities. Nat. Biotechnol. 36, 977&#x2013;982 (2018).</Citation></Reference><Reference><Citation>Jin,
+        S. et al. Rationally designed APOBEC3B cytosine base editors with improved
+        specificity. Mol. Cell 79, 728&#x2013;740 (2020).</Citation></Reference><Reference><Citation>Lee,
+        S. et al. Single C-to-T substitution using engineered APOBEC3G-nCas9 base
+        editors with minimum genome- and transcriptome-wide off-target effects. Sci.
+        Adv. 6, eaba1773 (2020).</Citation></Reference><Reference><Citation>Kim, J.
+        H. et al. High cleavage efficiency of a 2A peptide derived from porcine teschovirus-1
+        in human cell lines, zebrafish and mice. PLoS One 6, e18556 (2011).</Citation></Reference><Reference><Citation>Yan,
+        J. et al. Improving prime editing with an endogenous small RNA-binding protein.
+        Nature 628, 639&#x2013;647 (2024).</Citation></Reference><Reference><Citation>Nelson,
+        J. W. et al. Engineered pegRNAs improve prime editing efficiency. Nat. Biotechnol.
+        40, 402&#x2013;410 (2022).</Citation></Reference><Reference><Citation>Oscorbin,
+        I. P. &amp; Filipenko, M. L. M-MuLV reverse transcriptase: selected properties
+        and improved mutants. Comput. Struct. Biotechnol. J. 19, 6315&#x2013;6327
+        (2021).</Citation></Reference><Reference><Citation>Weber, Y. et al. Enhancing
+        prime editor activity by directed protein evolution in yeast. Nat. Commun.
+        15, 2092 (2024).</Citation></Reference><Reference><Citation>Liu, P. et al.
+        Increasing intracellular dNTP levels improves prime editing efficiency. Nat.
+        Biotechnol. 43, 539&#x2013;544 (2025).</Citation></Reference><Reference><Citation>Zong,
+        Y. et al. An engineered prime editor with enhanced editing efficiency in plants.
+        Nat. Biotechnol. 40, 1394&#x2013;1402 (2022).</Citation></Reference><Reference><Citation>Park,
+        J. C. et al. AI-generated MLH1 small binder improves prime editing efficiency.
+        Cell 188, 5831&#x2013;5846.e21 (2025).</Citation></Reference><Reference><Citation>Han,
+        X. et al. Enhancing prime editing efficiency through modulation of methylation
+        on the newly synthesized DNA Strand and prolonged expression. Adv. Sci. 12,
+        e2417790 (2025).</Citation></Reference><Reference><Citation>Li, X. et al.
+        Highly efficient prime editing by introducing same-sense mutations in pegRNA
+        or stabilizing its structure. Nat. Commun. 13, 1669 (2022).</Citation></Reference><Reference><Citation>Fei,
+        J. et al. Mismatch prime editing gRNA increased efficiency and reduced indels.
+        Nat. Commun. 16, 139 (2025).</Citation></Reference><Reference><Citation>Duan,
+        D., Goemans, N., Takeda, S., Mercuri, E. &amp; Aartsma-Rus, A. Duchenne muscular
+        dystrophy. Nat. Rev. Dis. Prim. 7, 13 (2021).</Citation></Reference><Reference><Citation>Hirbe,
+        A. C. &amp; Gutmann, D. H. Neurofibromatosis type 1: a multidisciplinary approach
+        to care. Lancet Neurol. 13, 834&#x2013;843 (2014).</Citation></Reference><Reference><Citation>Mendell,
+        J. R. et al. Single-dose gene-replacement therapy for spinal muscular atrophy.
+        N. Engl. J. Med. 377, 1713&#x2013;1722 (2017).</Citation></Reference><Reference><Citation>Davis,
+        J. R. et al. Efficient prime editing in mouse brain, liver and heart with
+        dual AAVs. Nat. Biotechnol. 42, 253&#x2013;264 (2024).</Citation></Reference><Reference><Citation>Bao,
+        X. et al. Targeting proprotein convertase subtilisin/kexin type 9 (PCSK9):
+        from bench to bedside. Signal. Transduct. Target. Ther. 9, 13 (2024).</Citation></Reference><Reference><Citation>Kim,
+        H. K. et al. SpCas9 activity prediction by DeepSpCas9, a deep learning-based
+        model with high generalization performance. Sci. Adv. 5, eaax9249 (2019).</Citation></Reference><Reference><Citation>Lee,
+        J. et al. Prime editing with genuine Cas9 nickases minimizes unwanted indels.
+        Nat. Commun. 14, 1786 (2023).</Citation></Reference><Reference><Citation>Meacham,
+        Z. et al. Cas9 degradation in human cells using phage anti-CRISPR proteins.
+        PLoS Biol. 21, e3002431 (2023).</Citation></Reference><Reference><Citation>Jiang,
+        F. et al. Temperature-responsive competitive inhibition of CRISPR-Cas9. Mol.
+        Cell 73, 601&#x2013;610.e5 (2019).</Citation></Reference><Reference><Citation>Dong,
+        D. et al. Structural basis of CRISPR-SpyCas9 inhibition by an anti-CRISPR
+        protein. Nature 546, 601&#x2013;610 (2017).</Citation></Reference><Reference><Citation>Zhang,
+        S. et al. Pro-CRISPR PcrIIC1-associated Cas9 system for enhanced bacterial
+        immunity. Nature 630, 484&#x2013;492 (2024).</Citation></Reference><Reference><Citation>Walton,
+        R. T. et al. Unconstrained genome targeting with near-PAMless engineered CRISPR-Cas9
+        variants. Science 368, 290&#x2013;296 (2020).</Citation></Reference><Reference><Citation>Kim,
+        E. et al. In vivo genome editing with a small Cas9 orthologue derived from
+        Campylobacter jejuni. Nat. Commun. 8, 14500 (2017).</Citation></Reference><Reference><Citation>Clement,
+        K. et al. CRISPResso2 provides accurate and rapid genome editing sequence
+        analysis. Nat. Biotechnol. 37, 224&#x2013;226 (2019).</Citation></Reference><Reference><Citation>Bae,
+        S., Park, J. &amp; Kim, J. S. Cas-OFFinder: a fast and versatile algorithm
+        that searches for potential off-target sites of Cas9 RNA-guided endonucleases.
+        Bioinformatics 30, 1473&#x2013;1475 (2014).</Citation></Reference></ReferenceList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="Publisher" Owner="NLM"><PMID Version="1">41412877</PMID><DateRevised><Year>2025</Year><Month>12</Month><Day>18</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">1879-3096</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2025</Year><Month>Dec</Month><Day>17</Day></PubDate></JournalIssue><Title>Trends
+        in biotechnology</Title><ISOAbbreviation>Trends Biotechnol</ISOAbbreviation></Journal><ArticleTitle>Genomic
+        surveillance: protecting sport in the post-CRISPR era.</ArticleTitle><ELocationID
+        EIdType="pii" ValidYN="Y">S0167-7799(25)00495-0</ELocationID><ELocationID
+        EIdType="doi" ValidYN="Y">10.1016/j.tibtech.2025.11.021</ELocationID><Abstract><AbstractText>Personal
+        genomics and gene editing raise the prospect of undetectable gene doping.
+        Athletes'' genome sequencing should be integrated into the Athlete Biological
+        Passport to deter future abuse. This provocative vision calls for urgent debate
+        on fairness in sport and for new solutions to share genomic data while preserving
+        privacy.</AbstractText><CopyrightInformation>Copyright &#xa9; 2025 Elsevier
+        Ltd. All rights reserved.</CopyrightInformation></Abstract><AuthorList CompleteYN="Y"><Author
+        ValidYN="Y"><LastName>Mandrioli</LastName><ForeName>Mauro</ForeName><Initials>M</Initials><AffiliationInfo><Affiliation>Department
+        of Life Sciences, University of Modena and Reggio Emilia, Biology Building,
+        via Campi 213/D, Modena, Italy. Electronic address: mauro.mandrioli@unimore.it.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>17</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Trends
+        Biotechnol</MedlineTA><NlmUniqueID>8310903</NlmUniqueID><ISSNLinking>0167-7799</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">athlete biological passport</Keyword><Keyword
+        MajorTopicYN="N">blockchain</Keyword><Keyword MajorTopicYN="N">data privacy</Keyword><Keyword
+        MajorTopicYN="N">gene doping</Keyword><Keyword MajorTopicYN="N">genomics</Keyword><Keyword
+        MajorTopicYN="N">sports ethics</Keyword></KeywordList><CoiStatement>Declaration
+        of interests The authors declare no competing interests.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2025</Year><Month>12</Month><Day>19</Day><Hour>1</Hour><Minute>45</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>9</Month><Day>2</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="revised"><Year>2025</Year><Month>11</Month><Day>13</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>11</Month><Day>21</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2025</Year><Month>12</Month><Day>18</Day><Hour>22</Hour><Minute>40</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41412877</ArticleId><ArticleId IdType="doi">10.1016/j.tibtech.2025.11.021</ArticleId><ArticleId
+        IdType="pii">S0167-7799(25)00495-0</ArticleId></ArticleIdList></PubmedData></PubmedArticle></PubmedArticleSet>'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Date:
+      - Fri, 19 Dec 2025 07:35:54 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D33263126FFF4450000262F0DAD8213.1.1.m_6
+      NCBI-SID:
+      - 37FE7205BE2DCC6D_E058SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '2'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '125247'
+    status:
+      code: 200
+      message: OK
+version: 1
