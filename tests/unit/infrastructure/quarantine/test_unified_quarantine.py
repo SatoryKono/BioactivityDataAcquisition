@@ -94,7 +94,7 @@ def batch_id():
 def mock_write_deltalake():
     """Mock write_deltalake function."""
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.write_deltalake"
+        "bioetl.infrastructure.quarantine.unified.write_deltalake"
     ) as mock:
         yield mock
 
@@ -104,7 +104,7 @@ def mock_delta_table():
     """Mock DeltaTable class in all modules."""
     mock = MagicMock()
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.DeltaTable", mock
+        "bioetl.infrastructure.quarantine.unified.DeltaTable", mock
     ), patch(
         "bioetl.infrastructure.quarantine.operations.DeltaTable", mock
     ):
