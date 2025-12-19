@@ -223,7 +223,7 @@ def bootstrap_pipeline(
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         logger=logger,
+        pipeline=pipeline,  # Explicit dependency injection
     )
-    setattr(runner, "pipeline", pipeline)
 
     return runner

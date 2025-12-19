@@ -18,8 +18,7 @@ from typing import Any, Self
 import httpx
 
 from bioetl.domain.types import HealthStatus, Watermark
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 logger = logging.getLogger(__name__)
@@ -29,91 +28,45 @@ class UniProtClient(PaginatedFetcherMixin):
     """UniProt API client implementing DataSourcePort.
 
     Provides access to protein sequence and functional information from UniProt database.
-
-    Example:
-        >>> client = UniProtClient(api_key="your_api_key")
-        >>> # Search proteins by gene name
-        >>> async for protein in client.fetch("protein", query="gene:TP53", limit=10):
-        ...     print(f"Protein: {protein['primaryAccession']}")
-        >>> # Check health
-        >>> status = await client.health_check()
-        >>> print(f"UniProt is {status}")
     """
 
     provider_name: str = "uniprot"
 
     def __init__(
         self,
+        http_client: UnifiedHTTPClient,
         api_key: str | None = None,
         base_url: str = "https://rest.uniprot.org",
-        rate: float = 100.0,  # 100 req/sec with API key
-        circuit_breaker_threshold: int = 5,
-        circuit_breaker_timeout: int = 300,
         strict_error_handling: bool = False,
     ) -> None:
         """Initialize UniProt client.
 
         Args:
-            api_key: UniProt API key (optional, increases rate limit)
+            http_client: Injected UnifiedHTTPClient
+            api_key: UniProt API key (optional)
             base_url: UniProt REST API base URL
-            rate: Requests per second (default: 100.0 with API key, 10.0 without)
-            circuit_breaker_threshold: Failures before opening circuit
-            circuit_breaker_timeout: Recovery timeout in seconds
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
         """
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.provider_name = "uniprot"
         self.strict_error_handling = strict_error_handling
-
-        # Adjust rate if no API key
-        if not api_key:
-            rate = 10.0  # Lower rate limit without API key
-
-        # Rate limiter
-        self.rate_limiter = TokenBucket(rate=rate, capacity=int(rate * 2))
-
-        # Circuit breaker
-        self.circuit_breaker = CircuitBreaker(
-            provider=self.provider_name,
-            failure_threshold=circuit_breaker_threshold,
-            recovery_timeout=circuit_breaker_timeout,
-        )
-
-        # HTTP client
-        headers = {}
-        if api_key:
-            headers["Authorization"] = f"Bearer {api_key}"
-
-        self.http_client = httpx.AsyncClient(
-            base_url=self.base_url,
-            headers=headers,
-            timeout=30.0,
-        )
+        self.http_client = http_client
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.
 
-        Initializes HTTP client if not already active.
+        Delegates to injected HTTP client.
         """
-        if self.http_client.is_closed:
-             # Re-initialize if closed
-            headers = {}
-            if self.api_key:
-                headers["Authorization"] = f"Bearer {self.api_key}"
-            self.http_client = httpx.AsyncClient(
-                base_url=self.base_url,
-                headers=headers,
-                timeout=30.0,
-            )
+        await self.http_client.__aenter__()
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit async context manager.
 
-        Closes HTTP client.
+        Delegates to injected HTTP client.
         """
-        await self.http_client.aclose()
+        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
 
     async def fetch(
         self,
@@ -137,20 +90,8 @@ class UniProtClient(PaginatedFetcherMixin):
 
         Raises:
             ValueError: If entity_type is not supported
-            CircuitBreakerOpenError: If circuit breaker is open
-
-        Example:
-            >>> client = UniProtClient()
-            >>> # Search by gene name and organism
-            >>> async for protein in client.fetch(
-            ...     "protein",
-            ...     query="gene:BRCA1 AND organism_id:9606",
-            ...     limit=5
-            ... ):
-            ...     print(f"Accession: {protein['primaryAccession']}")
         """
-        # Apply rate limiting
-        await self.rate_limiter.acquire()
+        # Rate limiting and circuit breaking are handled by http_client.get/post
 
         if entity_type == "protein":
             async for record in self._fetch_proteins(query, watermark, limit):
@@ -228,13 +169,13 @@ class UniProtClient(PaginatedFetcherMixin):
             cursor: str | None, fetched: int
         ) -> tuple[list[dict[str, Any]], str | None]:
             """Callback for pagination."""
-            await self.rate_limiter.acquire()
             params = self._build_protein_fetch_params(
                 query, size, fetched, limit, cursor
             )
             try:
-                response = await self.circuit_breaker.call(
-                    self.http_client.get, "/uniprotkb/search", params=params
+                # UnifiedHTTPClient handles rate limiting and circuit breaking
+                response = await self.http_client.get(
+                    f"{self.base_url}/uniprotkb/search", params=params
                 )
                 return await self._process_protein_response(response)
             except Exception:
@@ -255,27 +196,15 @@ class UniProtClient(PaginatedFetcherMixin):
         query: str | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch protein features from UniProt.
-
-        Args:
-            query: Protein accession or search query
-            limit: Max records
-
-        Yields:
-            Feature records
-        """
+        """Fetch protein features from UniProt."""
         if not query:
             raise ValueError("Query is required for feature search")
 
         fetched = 0
 
-        # Get protein first
-        await self.rate_limiter.acquire()
-
         try:
-            response = await self.circuit_breaker.call(
-                self.http_client.get,
-                f"/uniprotkb/{query}.json",
+            response = await self.http_client.get(
+                f"{self.base_url}/uniprotkb/{query}.json",
             )
 
             if response.status_code == 200:
@@ -309,27 +238,15 @@ class UniProtClient(PaginatedFetcherMixin):
         query: str | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch protein sequences from UniProt.
-
-        Args:
-            query: Protein accession or search query
-            limit: Max records
-
-        Yields:
-            Sequence records
-        """
+        """Fetch protein sequences from UniProt."""
         if not query:
             raise ValueError("Query is required for sequence fetch")
 
         fetched = 0
 
-        # Fetch in FASTA format
-        await self.rate_limiter.acquire()
-
         try:
-            response = await self.circuit_breaker.call(
-                self.http_client.get,
-                "/uniprotkb/stream",
+            response = await self.http_client.get(
+                f"{self.base_url}/uniprotkb/stream",
                 params={
                     "query": query,
                     "format": "fasta",
@@ -359,14 +276,7 @@ class UniProtClient(PaginatedFetcherMixin):
             return
 
     def _parse_fasta(self, fasta_text: str) -> list[dict[str, Any]]:
-        """Parse FASTA format text.
-
-        Args:
-            fasta_text: FASTA formatted text
-
-        Returns:
-            List of sequence records
-        """
+        """Parse FASTA format text."""
         records = []
         current_header = None
         current_sequence = []
@@ -403,29 +313,17 @@ class UniProtClient(PaginatedFetcherMixin):
         return records
 
     async def health_check(self) -> HealthStatus:
-        """Check UniProt API health status.
-
-        Implements DataSourcePort.health_check() interface.
-
-        Uses dedicated health endpoint: GET /rest/beta/health
-
-        Returns:
-            HealthStatus enum value
-
-        Example:
-            >>> client = UniProtClient()
-            >>> status = await client.health_check()
-            >>> print(f"UniProt is {status.value}")
-        """
-        health_url = "/rest/beta/health"
+        """Check UniProt API health status."""
+        health_url = f"{self.base_url}/rest/beta/health"
 
         try:
             response = await self.http_client.get(health_url)
 
             if response.status_code == 200:
-                # Check circuit breaker state
-                cb_state = self.circuit_breaker.get_state()
-                failure_count = self.circuit_breaker.get_failure_count()
+                # Delegate to circuit breaker state from http_client
+                cb = self.http_client.circuit_breaker
+                cb_state = cb.get_state()
+                failure_count = cb.get_failure_count()
 
                 if cb_state.value == "CLOSED" and failure_count == 0:
                     return HealthStatus.HEALTHY
@@ -439,16 +337,14 @@ class UniProtClient(PaginatedFetcherMixin):
         except Exception:
             return HealthStatus.UNHEALTHY
 
-    async def close(self) -> None:
-        """Close HTTP client connections."""
-        await self.http_client.aclose()
-
     async def aclose(self) -> None:
-        """Gracefully close resources.
-
-        Implements DataSourcePort.aclose().
-        """
-        await self.close()
+        """Gracefully close resources."""
+        if self.http_client:
+             # UnifiedHTTPClient manages its own lifecycle via context manager
+             # But if needed we can access internal client,
+             # Though strictly we should rely on context manager of UniProtClient
+             # calling context manager of UnifiedHTTPClient
+             pass
 
     def __repr__(self) -> str:
         """String representation."""
