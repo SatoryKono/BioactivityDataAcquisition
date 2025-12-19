@@ -76,7 +76,11 @@ async def test_write_simple_overwrite(gold_writer, valid_records):
 
         # Convert expected data to pyarrow table for comparison
         expected_table = pa_arrow.Table.from_pylist(valid_records)
-        assert call_kwargs["data"] == expected_table
+        actual_data = call_kwargs["data"]
+        # Handle RecordBatchReader
+        if isinstance(actual_data, pa_arrow.RecordBatchReader):
+            actual_data = actual_data.read_all()
+        assert actual_data.equals(expected_table)
 
 
 async def test_write_simple_append(gold_writer, valid_records):
@@ -119,7 +123,11 @@ async def test_write_scd2_new_table(gold_writer, valid_records):
         assert call_kwargs["mode"] == "append"
 
         # Verify SCD columns added
-        written_data = call_kwargs["data"].to_pylist()
+        written_data_obj = call_kwargs["data"]
+        # Handle RecordBatchReader
+        if isinstance(written_data_obj, pa_arrow.RecordBatchReader):
+            written_data_obj = written_data_obj.read_all()
+        written_data = written_data_obj.to_pylist()
         assert "valid_from" in written_data[0]
         assert "valid_to" in written_data[0]
         assert "is_current" in written_data[0]
