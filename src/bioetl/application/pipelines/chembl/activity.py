@@ -66,14 +66,7 @@ class ChEMBLActivityPipeline(BasePipeline):
                 id_field="activity_id",
             )
 
-            # Temporary content hash for entity creation (will be recalculated or used)
-            # Actually, the entity needs a content hash in __init__.
-            # We usually calculate content hash from the normalized dictionary.
-            # But here we are creating the entity first.
-            # Strategy: Create "Business Content" dict, hash it, then create Entity.
-
             # Map raw fields to Entity fields
-            # Note: We use .get() with defaults where appropriate or explicit extraction
             business_data = {
                 "activity_id": str(activity_id),
                 "molecule_id": str(record.get("molecule_chembl_id", "")),
@@ -86,9 +79,14 @@ class ChEMBLActivityPipeline(BasePipeline):
                 "pchembl_value": pchembl,
                 "activity_comment": record.get("activity_comment"),
                 "data_validity_comment": record.get("data_validity_comment"),
+                # Extended fields (Gap Analysis Fix)
+                "assay_type": record.get("assay_type"),
+                "assay_description": record.get("assay_description"),
+                "document_chembl_id": record.get("document_chembl_id"),
+                "document_year": record.get("document_year"),
             }
 
-            # Generate content hash based on business data (ignoring system fields)
+            # Generate content hash based on business data
             content_hash = generate_content_hash(business_data, self.provider)
 
             entity = Activity(
@@ -96,21 +94,20 @@ class ChEMBLActivityPipeline(BasePipeline):
                 content_hash=content_hash,
                 run_id=context.run_id,
                 run_type=context.run_type,
-                source_batch_id="UNKNOWN", # TODO: pass batch_id from context if available
-                # Business fields
-                **business_data
+                source_batch_id="UNKNOWN",  # TODO: pass batch_id from context if available
+                **business_data,
             )
 
         except ValueError as e:
             # Validation failed (e.g. pchembl < 0)
             # Log warning and skip record (return None)
-            self.logger.warning("entity_validation_failed", error=str(e), activity_id=activity_id)
+            self.logger.warning(
+                "entity_validation_failed", error=str(e), activity_id=activity_id
+            )
             return None
 
         # 3. Convert back to SilverRecord (DTO) for storage
-        # We merge the entity fields with any extra fields allowed by config if necessary,
-        # but strictly adhering to the schema is better.
-
+        # Strictly populate from Entity attributes to ensure Domain is the source of truth
         silver_record: dict[str, Any] = {
             "entity_id": entity.entity_id,
             "content_hash": entity.content_hash,
@@ -125,28 +122,15 @@ class ChEMBLActivityPipeline(BasePipeline):
             "pchembl_value": entity.pchembl_value,
             "activity_comment": entity.activity_comment,
             "data_validity_comment": entity.data_validity_comment,
-            # Pass through extra fields if they exist in source and config asks for them?
-            # For now, we stick to the Entity definition + preserved fields if needed.
-            # The original code preserved 'fields' from config.
-            # But DDD implies the Entity IS the truth.
-
+            "assay_type": entity.assay_type,
+            "assay_description": entity.assay_description,
+            "document_chembl_id": entity.document_chembl_id,
+            "document_year": entity.document_year,
             # System fields required by Silver Schema
             "_run_id": str(entity.run_id),
             "_run_type": str(entity.run_type.value),
             "_ingestion_ts": entity.ingestion_ts.isoformat(),
-            # "_source_batch_id": ... handled by RecordProcessor usually
         }
-
-        # Backward compatibility: Add raw fields if they are not in the entity but requested?
-        # The schema in silver.py has: assay_type, assay_description, document_chembl_id, document_year
-        # These are MISSING from Activity entity!
-        # Gap analysis found: Entity definition is incomplete vs Silver Schema.
-        # We must fill them from raw record.
-
-        extra_fields = ["assay_type", "assay_description", "document_chembl_id", "document_year"]
-        for f in extra_fields:
-            if f in record:
-                silver_record[f] = record[f]
 
         return cast(SilverRecord, silver_record)
 
@@ -171,14 +155,14 @@ class ChEMBLActivityPipeline(BasePipeline):
     def extract_watermark(
         self, _context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
-        """Извлекает watermark и возвращает обёртку Watermark.
+        """Extract watermark and return Watermark wrapper.
 
-        Поведение:
-        - при наличии activity_id: Watermark.from_id(str(activity_id));
-        - иначе использовать поле из конфигурации (например, updated_on) и вернуть
-          Watermark.from_timestamp(datetime в UTC) при корректном ISO8601;
-        - если значение не похоже на дату — Watermark.from_id(str(value));
-        - если ничего нет — Watermark.from_id("").
+        Behavior:
+        - if activity_id present: Watermark.from_id(str(activity_id));
+        - else use config field (e.g. updated_on) and return
+          Watermark.from_timestamp(datetime in UTC) if valid ISO8601;
+        - if value not date-like — Watermark.from_id(str(value));
+        - if nothing — Watermark.from_id("").
         """
         activity_id = record.get("activity_id")
         if activity_id is not None:
