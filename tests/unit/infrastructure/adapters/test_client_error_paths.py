@@ -80,13 +80,11 @@ class TestUniProtClientErrorPaths:
             os.environ,
             {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
         ):
-            client = UniProtClient()
-            client.http_client = mock_http_client
-
-            # Make circuit_breaker.call raise an exception
-            client.circuit_breaker.call = AsyncMock(
+            # Make http_client.get raise an exception
+            mock_http_client.get = AsyncMock(
                 side_effect=ConnectionError("Network error")
             )
+            client = UniProtClient(http_client=mock_http_client)
 
             with caplog.at_level(logging.ERROR):
                 results = [
@@ -110,13 +108,11 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_proteins raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        client = UniProtClient(strict_error_handling=True)
-        client.http_client = mock_http_client
-
-        # Make circuit_breaker.call raise an exception
-        client.circuit_breaker.call = AsyncMock(
+        # Make http_client.get raise an exception
+        mock_http_client.get = AsyncMock(
             side_effect=ConnectionError("Network error")
         )
+        client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(ConnectionError, match="Network error"):
             _ = [
@@ -140,13 +136,11 @@ class TestUniProtClientErrorPaths:
 
             get_settings.cache_clear()
 
-            client = UniProtClient()
-            client.http_client = mock_http_client
-
-            # Make circuit_breaker.call raise an exception
-            client.circuit_breaker.call = AsyncMock(
+            # Make http_client.get raise an exception
+            mock_http_client.get = AsyncMock(
                 side_effect=TimeoutError("Request timeout")
             )
+            client = UniProtClient(http_client=mock_http_client)
 
             with caplog.at_level(logging.WARNING):
                 results = [r async for r in client._fetch_features("P12345", limit=10)]
@@ -167,13 +161,11 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_features raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        client = UniProtClient(strict_error_handling=True)
-        client.http_client = mock_http_client
-
-        # Make circuit_breaker.call raise an exception
-        client.circuit_breaker.call = AsyncMock(
+        # Make http_client.get raise an exception
+        mock_http_client.get = AsyncMock(
             side_effect=TimeoutError("Request timeout")
         )
+        client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(TimeoutError, match="Request timeout"):
             _ = [r async for r in client._fetch_features("P12345", limit=10)]
@@ -192,17 +184,15 @@ class TestUniProtClientErrorPaths:
 
             get_settings.cache_clear()
 
-            client = UniProtClient()
-            client.http_client = mock_http_client
-
-            # Make circuit_breaker.call raise an exception
-            client.circuit_breaker.call = AsyncMock(
+            # Make http_client.get raise an exception
+            mock_http_client.get = AsyncMock(
                 side_effect=httpx.HTTPStatusError(
                     "Server error",
                     request=MagicMock(),
                     response=MagicMock(status_code=500),
                 )
             )
+            client = UniProtClient(http_client=mock_http_client)
 
             with caplog.at_level(logging.WARNING):
                 results = [
@@ -219,16 +209,14 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_sequences raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        client = UniProtClient(strict_error_handling=True)
-        client.http_client = mock_http_client
-
-        # Make circuit_breaker.call raise an exception
+        # Make http_client.get raise an exception
         error = httpx.HTTPStatusError(
             "Server error",
             request=MagicMock(),
             response=MagicMock(status_code=500),
         )
-        client.circuit_breaker.call = AsyncMock(side_effect=error)
+        mock_http_client.get = AsyncMock(side_effect=error)
+        client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(httpx.HTTPStatusError):
             _ = [r async for r in client._fetch_sequences("gene:TP53", limit=10)]
