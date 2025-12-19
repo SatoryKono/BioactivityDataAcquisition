@@ -163,14 +163,12 @@ class TestRecordProcessorProcessBatch:
         ]
         batch_id = BatchID(uuid4())
 
-        bronze, silver, gold, quarantined = await record_processor.process_batch(
-            records, batch_id
-        )
+        result = await record_processor.process_batch(records, batch_id)
 
-        assert bronze == 2
-        assert silver == 2
-        assert gold == 1
-        assert quarantined == 0
+        assert result.bronze_count == 2
+        assert result.silver_count == 2
+        assert result.gold_count == 1
+        assert result.quarantined_count == 0
         mock_storage.write_bronze.assert_called_once()
         mock_storage.write_silver.assert_called_once()
         mock_storage.write_gold.assert_called_once()
@@ -207,11 +205,9 @@ class TestRecordProcessorProcessBatch:
         ]
         batch_id = BatchID(uuid4())
 
-        bronze, silver, gold, quarantined = await record_processor.process_batch(
-            records, batch_id
-        )
+        result = await record_processor.process_batch(records, batch_id)
 
-        assert gold == 0
+        assert result.gold_count == 0
         mock_storage.write_gold.assert_not_called()
 
     async def test_process_batch_handles_transform_error(
