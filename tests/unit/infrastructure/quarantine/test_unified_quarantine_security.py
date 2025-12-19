@@ -11,10 +11,13 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 @pytest.fixture
 def mock_delta_table():
     """Fixture for a mocked DeltaTable."""
+    mock = MagicMock()
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.DeltaTable"
-    ) as mock_dt:
-        yield mock_dt
+        "bioetl.infrastructure.quarantine.unified.DeltaTable", mock
+    ), patch(
+        "bioetl.infrastructure.quarantine.operations.DeltaTable", mock
+    ):
+        yield mock
 
 
 @pytest.mark.security

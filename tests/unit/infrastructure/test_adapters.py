@@ -140,6 +140,8 @@ class TestUniProtClient:
 
     def test_client_with_custom_base_url(self, http_client):
         """Test UniProt client with custom base URL."""
+        from unittest.mock import MagicMock
+        http_client = MagicMock()
         custom_url = "https://custom.uniprot.org"
         client = UniProtClient(http_client=http_client, base_url=custom_url)
 
