@@ -307,6 +307,7 @@ class TestPipelineRunnerRun:
         mock_executor.execute.assert_called_once_with(
             watermark="2025-01-15T00:00:00Z",
             limit=None,
+            query=None,
         )
 
     @pytest.mark.asyncio

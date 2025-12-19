@@ -50,6 +50,7 @@ class DataSourcePort(Protocol):
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
+        query: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         Fetch records from the data source (async generator).
@@ -59,6 +60,7 @@ class DataSourcePort(Protocol):
             watermark: The point from which to resume fetching data. If None,
                        fetches from the beginning.
             limit: The maximum number of records to fetch.
+            query: Optional search query for providers that support it (e.g., PubChem, UniProt).
 
         Yields:
             A dictionary representing a single record from the data source.
