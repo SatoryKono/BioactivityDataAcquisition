@@ -3,13 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
+from bioetl.composition.factories.http_client_factory import HttpClientFactory
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
@@ -42,10 +40,8 @@ class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline])
         Returns:
             DataSourcePort, wrapped with FilteredDataSource if filter_config is enabled
         """
-        # ChEMBL specific HTTP client setup
-        http_client = UnifiedHTTPClient(
-            TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
-        )
+        # ChEMBL specific HTTP client setup using factory
+        http_client = HttpClientFactory.create_for_provider("chembl", settings)
         base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
 
         # Wrap with FilteredDataSource if filter is enabled
