@@ -124,7 +124,7 @@ def bootstrap_pipeline(
         input_csv: Optional path to CSV file with filter IDs (overrides config)
         filter_column: Column name in CSV containing filter IDs (overrides config)
         filter_field: API field name to filter by (overrides config)
-        query: Optional query string to use for data fetching.
+        query: Optional query string for data sources that require it (e.g., PubChem)
     """
     from bioetl.domain.filter_config import InputFilterConfig
 
@@ -139,7 +139,7 @@ def bootstrap_pipeline(
         resume=resume,
         limit=limit,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
-        query=query,
+        query=query,  # Pass query to runtime config
     )
 
     # Build filter config from YAML defaults, CLI overrides
@@ -231,7 +231,7 @@ def bootstrap_pipeline(
 
     runner = PipelineRunner(
         config=pipeline.config,
-        runtime=pipeline.runtime,
+        runtime=runtime_config,
         services=pipeline.services,
         context=pipeline.context,
         executor=executor,
