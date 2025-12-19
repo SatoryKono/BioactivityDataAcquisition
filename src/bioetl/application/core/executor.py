@@ -100,13 +100,13 @@ class PipelineExecutor:
             raise
 
     async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:
-        bronze, silver, gold, quarantined = await self._record_processor.process_batch(
+        result = await self._record_processor.process_batch(
             records=batch, batch_id=BatchID(uuid4())
         )
-        self.records_bronze += bronze
-        self.records_silver += silver
-        self.records_gold += gold
-        self.records_quarantined += quarantined
+        self.records_bronze += result.bronze_count
+        self.records_silver += result.silver_count
+        self.records_gold += result.gold_count
+        self.records_quarantined += result.quarantined_count
 
     async def _extract(
         self, watermark: Watermark | None, limit: int | None
