@@ -54,9 +54,9 @@ class Activity(BaseEntity):
     activity_id: str
 
     # Core identifiers
-    molecule_chembl_id: str
-    target_chembl_id: Optional[str] = None
-    assay_chembl_id: Optional[str] = None
+    molecule_id: str
+    target_id: Optional[str] = None
+    assay_id: Optional[str] = None
     document_chembl_id: Optional[str] = None
     record_id: Optional[int] = None
     src_id: Optional[int] = None
@@ -129,8 +129,8 @@ class Activity(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.activity_id:
             raise ValueError("Activity ID is required")
-        if not self.molecule_chembl_id:
-            raise ValueError("Molecule ChEMBL ID is required")
+        if not self.molecule_id:
+            raise ValueError("Molecule ID is required")
         self._validate_pchembl_value()
 
     def _validate_pchembl_value(self) -> None:

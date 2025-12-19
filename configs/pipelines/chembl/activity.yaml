@@ -66,3 +66,12 @@ dq_rules:
 circuit_breaker:
     failure_threshold: 5
     recovery_timeout: 300
+
+# Input filter configuration (for CSV-based ID filtering)
+# CLI options --input-csv, --filter-column, --filter-field override these
+input_filter:
+    enabled: false
+    source_path: "data/input/molecules.csv"  # Default CSV path
+    column_name: "molecule_chembl_id"         # Column in CSV with IDs
+    filter_field: "molecule_chembl_id"        # API field to filter by
+    batch_size: 100                           # IDs per API request

@@ -30,12 +30,21 @@ class InputFilterConfig:
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""
-        if self.enabled:
-            if not self.source_path:
-                raise ValueError("source_path is required when filter is enabled")
-            if not self.column_name:
-                raise ValueError("column_name is required when filter is enabled")
-            if not self.filter_field:
-                raise ValueError("filter_field is required when filter is enabled")
-        if self.batch_size < 1 or self.batch_size > 1000:
+        self._validate_enabled_fields()
+        self._validate_batch_size()
+
+    def _validate_enabled_fields(self) -> None:
+        """Validate fields required when filtering is enabled."""
+        if not self.enabled:
+            return
+        if not self.source_path:
+            raise ValueError("source_path is required when filter is enabled")
+        if not self.column_name:
+            raise ValueError("column_name is required when filter is enabled")
+        if not self.filter_field:
+            raise ValueError("filter_field is required when filter is enabled")
+
+    def _validate_batch_size(self) -> None:
+        """Validate the batch_size is within a reasonable range."""
+        if not (1 <= self.batch_size <= 1000):
             raise ValueError("batch_size must be between 1 and 1000")
