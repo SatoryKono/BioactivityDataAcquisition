@@ -20,6 +20,8 @@ Architecture:
 
 import asyncio
 import json
+import os
+import tempfile
 from datetime import datetime
 from typing import Any, Literal
 from pathlib import Path
@@ -175,10 +177,45 @@ class DeltaWriter:
             # Convert list/struct columns to JSON strings for CSV compatibility
             csv_data = self._flatten_for_csv(arrow_data)
 
+            # Atomic write: write to temp file, then rename to avoid file lock issues on Windows
             await loop.run_in_executor(
                 None,
-                lambda: pv.write_csv(csv_data, csv_full_path, write_options=write_options)
+                lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options)
             )
+
+    @staticmethod
+    def _atomic_csv_write(
+        data: pa.Table,
+        target_path: Path,
+        write_options: pv.WriteOptions,
+    ) -> None:
+        """Write CSV atomically to avoid file lock issues on Windows.
+
+        Writes to a temporary file in the same directory, then renames.
+        This avoids WinError 32 when the target file is briefly locked.
+        """
+        # Create temp file in same directory for atomic rename
+        target_dir = target_path.parent
+        fd, temp_path = tempfile.mkstemp(
+            suffix=".csv.tmp",
+            prefix=target_path.stem + "_",
+            dir=target_dir,
+        )
+        try:
+            os.close(fd)  # Close fd, PyArrow will open by path
+            pv.write_csv(data, temp_path, write_options=write_options)
+
+            # On Windows, need to remove target first if exists
+            if os.name == "nt" and target_path.exists():
+                target_path.unlink()
+
+            # Atomic rename
+            os.rename(temp_path, target_path)
+        except Exception:
+            # Clean up temp file on error
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            raise
 
     async def _merge_records(
         self,
