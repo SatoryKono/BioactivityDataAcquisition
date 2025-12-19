@@ -187,6 +187,8 @@ class PubChemClient:
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds from PubChem."""
+        if not query and watermark is None:
+            raise ValueError("Either query or watermark must be provided for compound fetch")
         if query:
             await self.rate_limiter.acquire()
             compounds = await self.circuit_breaker.call(
