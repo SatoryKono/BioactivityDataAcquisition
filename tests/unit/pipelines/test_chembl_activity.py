@@ -12,7 +12,7 @@ from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.pipeline_config import PipelineConfig
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunID, RunType, Watermark
 
 
 @pytest.fixture

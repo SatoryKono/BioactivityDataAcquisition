@@ -42,6 +42,8 @@ class PubChemClient:
         >>> print(f"PubChem is {status}")
     """
 
+    provider_name: str = "pubchem"
+
     def __init__(
         self,
         rate: float = 5.0,  # 5 req/sec per RULES.md
@@ -391,6 +393,13 @@ class PubChemClient:
     async def close(self) -> None:
         """Close thread pool."""
         self.thread_pool.shutdown(wait=True)
+
+    async def aclose(self) -> None:
+        """Gracefully close resources.
+
+        Implements DataSourcePort.aclose().
+        """
+        await self.close()
 
     def __repr__(self) -> str:
         """String representation."""
