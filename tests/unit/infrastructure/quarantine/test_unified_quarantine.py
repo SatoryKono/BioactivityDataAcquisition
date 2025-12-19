@@ -148,21 +148,20 @@ class TestUnifiedQuarantineWrite:
         )
 
         mock_write_deltalake.assert_called_once()
-        # ContentHash is a NewType over str, so result is a string
-        assert isinstance(result, str)
-        assert len(result) == 64  # SHA256 hex digest
+        # write now returns None (no ContentHash)
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_write_with_error_details(
         self, quarantine, batch_id, mock_write_deltalake
     ):
-        """Test write with error details."""
+        """Test write with error details via metadata."""
         await quarantine.write(
             pipeline="test",
             error_code="SCHEMA_VIOLATION",
             payload={"id": 1},
             bronze_batch_id=batch_id,
-            error_details={"field": "value", "reason": "Invalid type"},
+            metadata={"error_details": {"field": "value", "reason": "Invalid type"}},
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
@@ -174,13 +173,13 @@ class TestUnifiedQuarantineWrite:
     async def test_write_with_bronze_file_uri(
         self, quarantine, batch_id, mock_write_deltalake
     ):
-        """Test write with bronze file URI."""
+        """Test write with bronze file URI via metadata."""
         await quarantine.write(
             pipeline="test",
             error_code="ERROR",
             payload={"id": 1},
             bronze_batch_id=batch_id,
-            bronze_file_uri="s3://bronze/v1/file.jsonl.zst",
+            metadata={"bronze_file_uri": "s3://bronze/v1/file.jsonl.zst"},
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
