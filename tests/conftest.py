@@ -239,10 +239,16 @@ def cleanup_infrastructure_state():
 def docker_ip():
     """Get Docker IP address, skip if Docker not available."""
     import shutil
+    import platform
+
     if not shutil.which("docker"):
         pytest.skip("Docker executable not found")
 
     try:
+        # For Windows, Docker Desktop typically uses localhost.
+        if platform.system() == "Windows":
+            return "localhost"
+
         from pytest_docker.plugin import get_docker_ip
         # Try to execute a docker command to verify connectivity
         import subprocess
