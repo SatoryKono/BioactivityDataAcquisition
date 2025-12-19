@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from dataclasses import dataclass
+
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -19,6 +21,16 @@ from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
     pass
+
+
+@dataclass(frozen=True)
+class BatchResult:
+    """Result of processing a single batch."""
+
+    bronze_count: int
+    silver_count: int
+    gold_count: int
+    quarantined_count: int
 
 
 class RecordProcessor:
@@ -61,7 +73,7 @@ class RecordProcessor:
         self,
         records: list[dict[str, Any]],
         batch_id: BatchID,
-    ) -> tuple[int, int, int, int]:
+    ) -> BatchResult:
         """Process a batch of records through Bronze -> Silver -> Gold."""
         # Capture consistent timestamp for this batch
         ingestion_ts = datetime.now(UTC)
@@ -130,17 +142,37 @@ class RecordProcessor:
 
         # 3. Write to Silver
         if silver_records:
-            await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
+            try:
+                await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
+            except Exception as e:
+                error_type = self._error_classifier.classify(e)
+                self._context.logger.error(
+                    "Silver write failed",
+                    error=str(e),
+                    error_type=error_type.value,
+                    batch_id=str(batch_id),
+                )
+                raise
 
         # 4. Write to Gold
         if gold_records:
-            await self._write_gold_batch(gold_records)
+            try:
+                await self._write_gold_batch(gold_records)
+            except Exception as e:
+                error_type = self._error_classifier.classify(e)
+                self._context.logger.error(
+                    "Gold write failed",
+                    error=str(e),
+                    error_type=error_type.value,
+                    batch_id=str(batch_id),
+                )
+                raise
 
-        return (
-            records_bronze,
-            len(silver_records),
-            len(gold_records),
-            records_quarantined,
+        return BatchResult(
+            bronze_count=records_bronze,
+            silver_count=len(silver_records),
+            gold_count=len(gold_records),
+            quarantined_count=records_quarantined,
         )
 
     async def _write_bronze_batch(
