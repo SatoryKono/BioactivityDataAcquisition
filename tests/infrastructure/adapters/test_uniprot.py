@@ -187,8 +187,9 @@ async def test_health_check_unhealthy_on_server_error(uniprot_client):
     respx.get("https://rest.uniprot.org/rest/beta/health").mock(
         return_value=Response(500)
     )
-    status = await uniprot_client.health_check()
-    # 500 triggers retry exhaustion → exception → UNHEALTHY
+    async with uniprot_client:
+        status = await uniprot_client.health_check()
+    # 500 triggers raise_for_status() -> exception -> UNHEALTHY
     assert status == HealthStatus.UNHEALTHY
 
 
