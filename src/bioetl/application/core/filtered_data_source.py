@@ -91,6 +91,7 @@ class FilteredDataSource:
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
+        query: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with optional filtering.
 
@@ -101,6 +102,7 @@ class FilteredDataSource:
             entity_type: Type of entity to fetch.
             watermark: Last checkpoint for incremental load.
             limit: Maximum number of records.
+            query: Optional search query for providers that support it.
 
         Yields:
             Records from the data source, filtered if configured.
@@ -111,6 +113,7 @@ class FilteredDataSource:
                 entity_type=entity_type,
                 watermark=watermark,
                 limit=limit,
+                query=query,
                 filter_ids=self._filter_ids,
                 filter_field=self._filter_config.filter_field,
             ):
@@ -121,6 +124,7 @@ class FilteredDataSource:
                 entity_type=entity_type,
                 watermark=watermark,
                 limit=limit,
+                query=query,
             ):
                 yield record
 
