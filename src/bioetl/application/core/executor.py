@@ -103,11 +103,7 @@ class PipelineExecutor:
         result = await self._record_processor.process_batch(
             records=batch, batch_id=BatchID(uuid4())
         )
-        print(f"DEBUG: result in _process_and_update_counts: {result}")
-        self.records_bronze += result.bronze_count
-        self.records_silver += result.silver_count
-        self.records_gold += result.gold_count
-        self.records_quarantined += result.quarantined_count
+        self.records_bronze, self.records_silver, self.records_gold, self.records_quarantined = result
 
     async def _extract(
         self, watermark: Watermark | None, limit: int | None
