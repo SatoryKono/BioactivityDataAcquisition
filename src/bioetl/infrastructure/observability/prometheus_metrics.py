@@ -6,6 +6,8 @@ Prometheus client library.
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
+    BATCH_SIZE_RECORDS,
+    ERRORS_TOTAL,
     PIPELINE_DURATION_SECONDS,
     RECORDS_PROCESSED_TOTAL,
 )
@@ -13,11 +15,13 @@ from bioetl.infrastructure.observability.metrics import (
 # Registry of histogram metrics
 HISTOGRAMS = {
     "pipeline_duration_seconds": PIPELINE_DURATION_SECONDS,
+    "batch_size_records": BATCH_SIZE_RECORDS,
 }
 
 # Registry of counter metrics
 COUNTERS = {
     "records_processed_total": RECORDS_PROCESSED_TOTAL,
+    "errors_total": ERRORS_TOTAL,
 }
 
 
@@ -25,14 +29,6 @@ class PrometheusMetrics(MetricsPort):
     """Prometheus implementation of MetricsPort.
 
     Maps metric names to pre-defined Prometheus metrics and records observations.
-
-    Example:
-        >>> metrics = PrometheusMetrics()
-        >>> metrics.observe_histogram(
-        ...     "pipeline_duration_seconds",
-        ...     123.45,
-        ...     {"pipeline_name": "chembl_activity", "status": "success"}
-        ... )
     """
 
     def observe_histogram(
@@ -41,16 +37,7 @@ class PrometheusMetrics(MetricsPort):
         value: float,
         labels: dict[str, str],
     ) -> None:
-        """Observe a value for a Prometheus histogram.
-
-        Args:
-            name: The name of the histogram metric (must be in HISTOGRAMS registry).
-            value: The value to observe.
-            labels: Label values for the metric.
-
-        Raises:
-            KeyError: If the metric name is not found in HISTOGRAMS.
-        """
+        """Observe a value for a Prometheus histogram."""
         if name in HISTOGRAMS:
             HISTOGRAMS[name].labels(**labels).observe(value)
 
@@ -60,15 +47,6 @@ class PrometheusMetrics(MetricsPort):
         value: int,
         labels: dict[str, str],
     ) -> None:
-        """Increment a Prometheus counter.
-
-        Args:
-            name: The name of the counter metric (must be in COUNTERS registry).
-            value: The amount to increment by.
-            labels: Label values for the metric.
-
-        Raises:
-            KeyError: If the metric name is not found in COUNTERS.
-        """
+        """Increment a Prometheus counter."""
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
