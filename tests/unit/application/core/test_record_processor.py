@@ -163,14 +163,12 @@ class TestRecordProcessorProcessBatch:
         ]
         batch_id = BatchID(uuid4())
 
-        bronze, silver, gold, quarantined = await record_processor.process_batch(
-            records, batch_id
-        )
+        result = await record_processor.process_batch(records, batch_id)
 
-        assert bronze == 2
-        assert silver == 2
-        assert gold == 1
-        assert quarantined == 0
+        assert result.bronze_count == 2
+        assert result.silver_count == 2
+        assert result.gold_count == 1
+        assert result.quarantined_count == 0
         mock_storage.write_bronze.assert_called_once()
         mock_storage.write_silver.assert_called_once()
         mock_storage.write_gold.assert_called_once()
@@ -207,11 +205,11 @@ class TestRecordProcessorProcessBatch:
         ]
         batch_id = BatchID(uuid4())
 
-        bronze, silver, gold, quarantined = await record_processor.process_batch(
+        result = await record_processor.process_batch(
             records, batch_id
         )
 
-        assert gold == 0
+        assert result.gold_count == 0
         mock_storage.write_gold.assert_not_called()
 
     async def test_process_batch_handles_transform_error(
@@ -242,13 +240,13 @@ class TestRecordProcessorProcessBatch:
         ]
         batch_id = BatchID(uuid4())
 
-        bronze, silver, gold, quarantined = await processor.process_batch(
+        result = await processor.process_batch(
             records, batch_id
         )
 
-        assert bronze == 2
-        assert silver == 1
-        assert quarantined == 1
+        assert result.bronze_count == 2
+        assert result.silver_count == 1
+        assert result.quarantined_count == 1
         # Quarantine logic is now internal to Processor via QuarantineManager -> Port
         mock_services.quarantine.write.assert_called_once()
 
@@ -284,13 +282,13 @@ class TestRecordProcessorProcessBatch:
         records = []
         batch_id = BatchID(uuid4())
 
-        bronze, silver, gold, quarantined = await record_processor.process_batch(
+        result = await record_processor.process_batch(
             records, batch_id
         )
 
-        assert bronze == 0
-        assert silver == 0
-        assert gold == 0
+        assert result.bronze_count == 0
+        assert result.silver_count == 0
+        assert result.gold_count == 0
         mock_storage.write_silver.assert_not_called()
         mock_storage.write_gold.assert_not_called()
 
@@ -379,14 +377,14 @@ class TestRecordProcessorProcessBatch:
             {"id": "bad", "value": 2},
         ]
 
-        bronze, silver, gold, quarantined = await processor.process_batch(
+        result = await processor.process_batch(
             records, BatchID(uuid4())
         )
 
-        assert bronze == 2
-        assert silver == 1
-        assert gold == 1
-        assert quarantined == 1
+        assert result.bronze_count == 2
+        assert result.silver_count == 1
+        assert result.gold_count == 1
+        assert result.quarantined_count == 1
         mock_context.logger.warning.assert_not_called()
 
         get_pipeline_config.cache_clear()

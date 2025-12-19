@@ -6,7 +6,17 @@ Handles the exposure of metrics and other observability signals to external syst
 from contextlib import suppress
 from threading import Thread
 
-from prometheus_client import start_http_server
+# We import from infrastructure to avoid direct dependency on prometheus_client here
+# if we want to be strict, but start_http_server is the standard way.
+# However, to satisfy the architecture test "Forbidden import 'prometheus_client' outside observability",
+# we should probably move this function to infrastructure/observability/server.py
+# and import it here. But since this IS the interface layer for observability,
+# maybe we can just exempt it in the test or move the implementation.
+
+# Let's move the implementation to infrastructure/observability/server.py
+# and call it from here.
+
+from bioetl.infrastructure.observability.server import start_metrics_server as _start_server
 
 
 def start_metrics_server(port: int = 8000) -> None:
@@ -15,15 +25,4 @@ def start_metrics_server(port: int = 8000) -> None:
     Args:
         port: Port to bind the HTTP server (default: 8000)
     """
-    # prometheus_client.start_http_server starts a daemon thread by default
-    # but we wrap it to ensure we handle any immediate errors if needed
-    # and to clarify intent.
-    try:
-        start_http_server(port)
-    except OSError as e:
-        # If port is in use, we might want to log it but not crash?
-        # The original code returned False.
-        # But here we are in the Interface layer, we should probably let the caller handle exceptions
-        # or log them.
-        # Re-raising for now to let CLI handle it.
-        raise e
+    _start_server(port)

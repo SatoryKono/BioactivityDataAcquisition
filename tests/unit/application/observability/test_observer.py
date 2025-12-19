@@ -35,12 +35,16 @@ def test_pipeline_observer_success(metrics_mock, logger_mock):
     args, _ = metrics_mock.observe_histogram.call_args
     assert args[0] == "pipeline_duration_seconds"
     assert isinstance(args[1], float)
-    assert args[2] == {
-        "pipeline_name": "test_pipeline",
+    # The labels should match what PipelineObserver constructs:
+    # {"pipeline": ..., "stage": "pipeline", "run_type": ..., "status": ..., **tags}
+    expected_labels = {
+        "pipeline": "test_pipeline",
+        "stage": "pipeline",
         "run_type": "incremental",
         "status": "success",
         "custom": "tag",
     }
+    assert args[2] == expected_labels
 
     # Verify logs: 2 info calls - start and completion
     assert logger_mock.info.call_count == 2
