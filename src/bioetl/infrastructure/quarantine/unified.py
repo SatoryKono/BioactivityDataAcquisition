@@ -20,7 +20,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.types import BatchID, ContentHash, DQStatus
+from bioetl.domain.types import BatchID, ContentHash, DQStatus, RunID
 from bioetl.infrastructure.quarantine.helpers import (
     MAX_PAYLOAD_SIZE,
     calculate_hash,
@@ -59,10 +59,19 @@ class UnifiedQuarantine:
         error_code: str,
         payload: dict[str, Any],
         bronze_batch_id: BatchID,
-        *args: Any,
-        **kwargs: Any,
-    ) -> ContentHash:
-        """Write record to quarantine."""
+        run_id: RunID | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        """Write record to quarantine.
+
+        Args:
+            pipeline: The name of the pipeline where the error occurred.
+            error_code: A code identifying the type of error.
+            payload: The record that failed processing.
+            bronze_batch_id: The ID of the bronze batch containing the record.
+            run_id: Optional ID of the pipeline run for traceability.
+            metadata: Optional additional metadata (e.g., error_details, bronze_file_uri).
+        """
         payload_json = json.dumps(payload, ensure_ascii=True)
 
         if len(payload_json) > MAX_PAYLOAD_SIZE:
@@ -72,6 +81,7 @@ class UnifiedQuarantine:
             truncated = False
 
         payload_hash = calculate_hash(payload_json)
+        meta = metadata or {}
 
         record = {
             "ingestion_ts": datetime.now(UTC).isoformat(),
@@ -81,13 +91,13 @@ class UnifiedQuarantine:
             "payload_hash": payload_hash,
             "payload_truncated": truncated,
             "bronze_batch_id": str(bronze_batch_id),
-            "bronze_file_uri": kwargs.get("bronze_file_uri", ""),
-            "error_details": json.dumps(kwargs.get("error_details", {})),
+            "bronze_file_uri": meta.get("bronze_file_uri", ""),
+            "error_details": json.dumps(meta.get("error_details", {})),
             "dq_status": DQStatus.NEW.value,
+            "run_id": str(run_id) if run_id else "",
         }
 
         self._write_to_delta(record)
-        return ContentHash(payload_hash)
 
     def _write_to_delta(self, record: dict[str, Any]) -> None:
         """Write record to Delta table."""

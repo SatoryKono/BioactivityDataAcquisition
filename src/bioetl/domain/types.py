@@ -7,7 +7,7 @@ No I/O operations allowed (REQ-ARCH-003).
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, NewType, Self, TypedDict
+from typing import Any, NewType, Self, TypeAlias, TypedDict
 from uuid import UUID
 
 # Type aliases for semantic clarity
@@ -22,6 +22,13 @@ ContentHash = NewType("ContentHash", str)
 
 BatchID = NewType("BatchID", UUID)
 """Unique identifier for a data batch."""
+
+ArrowSchema: TypeAlias = Any
+"""PyArrow schema type alias.
+
+Using TypeAlias to document intent while avoiding strict dependency
+on pyarrow in the domain layer. At runtime, this is a pyarrow.Schema object.
+"""
 
 
 class BronzeRecord(TypedDict):
