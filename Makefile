@@ -168,7 +168,7 @@ watch-logs: ## Watch structured logs (tail -f)
 # Architecture and Quality Checks
 arch-test: ## Run architecture tests (layer dependencies)
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/architecture/ -v
+	$(VENV_PYTHON) -m pytest tests/test_architecture.py -v
 
 arch-lint: ## Run import-linter contracts
 	@echo "$(BLUE)Checking import contracts...$(NC)"
@@ -179,8 +179,14 @@ complexity: ## Check cyclomatic complexity (max CC=10)
 	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules B --max-average A --exclude "tests/*" src/
 	@echo "$(BLUE)Checking domain layer complexity (max CC=5)...$(NC)"
 	$(VENV_PYTHON) -m xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain/
+	@echo "$(BLUE)Checking adapters complexity (max CC=5)...$(NC)"
+	$(VENV_PYTHON) -m xenon --max-absolute A --max-modules A --max-average A src/bioetl/infrastructure/adapters/
 	@echo "$(BLUE)Checking factories complexity (strict A/A/B)...$(NC)"
 	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules A --max-average A src/bioetl/interfaces/factories/
+
+check-duplication: ## Check for code duplication
+	@echo "$(BLUE)Checking code duplication...$(NC)"
+	$(VENV_PYTHON) -m pylint --disable=all --enable=duplicate-code src/bioetl/infrastructure/adapters
 
 complexity-report: ## Generate detailed complexity report
 	@echo "$(BLUE)Generating complexity report...$(NC)"

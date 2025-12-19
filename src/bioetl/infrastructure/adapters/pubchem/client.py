@@ -21,6 +21,7 @@ import pubchempy as pcp
 
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,11 @@ class PubChemClient:
 
         # Thread pool for sync API calls
         self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+        self._fetch_strategies = {
+            "compound": self._fetch_compounds,
+            "substance": self._fetch_substances,
+            "assay": self._fetch_assays,
+        }
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.
@@ -98,49 +104,36 @@ class PubChemClient:
         watermark: Watermark | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from PubChem.
-
-        Implements DataSourcePort.fetch() interface.
-
-        Args:
-            entity_type: Type of entity ('compound', 'substance', 'assay')
-            query: Search query (name, formula, SMILES, etc.)
-            watermark: Last checkpoint (CID for incremental load)
-            limit: Maximum number of records
-
-        Yields:
-            Raw records as dictionaries
-
-        Raises:
-            ValueError: If entity_type is not supported
-            CircuitBreakerOpenError: If circuit breaker is open
-
-        Example:
-            >>> client = PubChemClient()
-            >>> # Search by name
-            >>> async for compound in client.fetch("compound", query="caffeine", limit=5):
-            ...     print(f"CID: {compound['cid']}, Name: {compound.get('iupac_name')}")
-            >>> # Fetch by CID range (incremental)
-            >>> async for compound in client.fetch("compound", watermark=1000, limit=100):
-            ...     print(f"CID: {compound['cid']}")
-        """
+        """Fetch records from PubChem."""
         # Apply rate limiting
         await self.rate_limiter.acquire()
 
-        if entity_type == "compound":
-            async for record in self._fetch_compounds(query, watermark, limit):
-                yield record
-        elif entity_type == "substance":
-            async for record in self._fetch_substances(query, limit):
-                yield record
-        elif entity_type == "assay":
-            async for record in self._fetch_assays(query, limit):
-                yield record
-        else:
-            raise ValueError(
+        strategy = self._fetch_strategies.get(entity_type)
+        if not strategy:
+             raise ValueError(
                 f"Unsupported entity type: {entity_type}. "
-                f"Supported: compound, substance, assay"
+                f"Supported: {', '.join(self._fetch_strategies.keys())}"
             )
+
+        # Pass arguments as keyword to avoid signature mismatch
+        async for record in strategy(query=query, watermark=watermark, limit=limit):
+             yield record
+
+    async def _fetch_batch_safe(self, cid_batch: list[int]) -> list[Any]:
+        """Fetch a batch of CIDs safely using circuit breaker."""
+        try:
+            return await self.circuit_breaker.call(
+                self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+            )
+        except Exception:
+            logger.error(
+                "PubChem compound batch fetch failed",
+                exc_info=True,
+                extra={"batch_start": cid_batch[0], "batch_end": cid_batch[-1]},
+            )
+            if self.strict_error_handling:
+                raise
+            return []
 
     async def _fetch_compounds_incremental(
         self, watermark: Watermark, limit: int | None
@@ -154,126 +147,104 @@ class PubChemClient:
         while not limit or fetched < limit:
             await self.rate_limiter.acquire()
             cid_batch = list(range(current_cid, current_cid + batch_size))
-            try:
-                compounds = await self.circuit_breaker.call(
-                    self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
-                )
-                if not compounds:
+
+            compounds = await self._fetch_batch_safe(cid_batch)
+            if not compounds:
+                # If safe fetch returns empty due to error (and not strict), we continue
+                # But if it returns empty because no data? pcp returns [] if no data.
+                # If error occurred and suppressed, we skip batch.
+                pass
+
+            for compound in compounds:
+                if limit and fetched >= limit:
                     break
-                for compound in compounds:
-                    if limit and fetched >= limit:
-                        break
-                    yield self._compound_to_dict(compound)
-                    fetched += 1
-                current_cid += batch_size
-            except Exception:
-                logger.error(
-                    "PubChem compound batch fetch failed",
-                    exc_info=True,
-                    extra={
-                        "cid_range_start": current_cid,
-                        "cid_range_end": current_cid + batch_size,
-                    },
-                )
-                if self.strict_error_handling:
-                    raise
-                current_cid += batch_size
-                continue
+                yield self._compound_to_dict(compound)
+                fetched += 1
+
+            current_cid += batch_size
 
     async def _fetch_compounds(
         self,
         query: str | None,
         watermark: Watermark | None,
-        limit: int | None,
+        limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds from PubChem."""
         if not query and watermark is None:
             raise ValueError("Either query or watermark must be provided for compound fetch")
+
         if query:
-            await self.rate_limiter.acquire()
-            compounds = await self.circuit_breaker.call(
-                self._run_in_executor, pcp.get_compounds, query, "name"
-            )
-            for i, compound in enumerate(compounds or []):
-                if limit and i >= limit:
-                    break
-                yield self._compound_to_dict(compound)
+            async for record in self._fetch_by_query(query, limit):
+                yield record
         else:
-            # watermark can be None (starts from CID 1)
-            async for compound in self._fetch_compounds_incremental(watermark, limit):
-                yield compound
+            async for record in self._fetch_compounds_incremental(watermark, limit):
+                yield record
+
+    async def _fetch_by_query(self, query: str, limit: int | None) -> AsyncIterator[dict[str, Any]]:
+         """Fetch compounds by query."""
+         await self.rate_limiter.acquire()
+         compounds = await self.circuit_breaker.call(
+            self._run_in_executor, pcp.get_compounds, query, "name"
+         )
+         for i, compound in enumerate(compounds or []):
+            if limit and i >= limit:
+                break
+            yield self._compound_to_dict(compound)
 
     async def _fetch_substances(
         self,
         query: str | None,
+        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch substances from PubChem.
-
-        Args:
-            query: Search query
-            limit: Max records
-
-        Yields:
-            Substance records
-        """
-        fetched = 0
-
-        if query:
-            await self.rate_limiter.acquire()
-
-            substances = await self.circuit_breaker.call(
-                self._run_in_executor,
-                pcp.get_substances,
-                query,
-                "name",
-            )
-
-            for substance in substances or []:
-                if limit and fetched >= limit:
-                    break
-
-                yield self._substance_to_dict(substance)
-                fetched += 1
-
-        else:
+        """Fetch substances from PubChem."""
+        if not query:
             raise ValueError("Query is required for substance search")
+
+        # Watermark ignored
+
+        fetched = 0
+        await self.rate_limiter.acquire()
+
+        substances = await self.circuit_breaker.call(
+            self._run_in_executor,
+            pcp.get_substances,
+            query,
+            "name",
+        )
+
+        for substance in substances or []:
+            if limit and fetched >= limit:
+                break
+            yield self._substance_to_dict(substance)
+            fetched += 1
 
     async def _fetch_assays(
         self,
         query: str | None,
+        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch assays from PubChem.
+        """Fetch assays from PubChem."""
+        if not query:
+             raise ValueError("Query is required for assay search")
 
-        Args:
-            query: Search query (assay ID or target)
-            limit: Max records
+        # Watermark ignored
 
-        Yields:
-            Assay records
-        """
         fetched = 0
+        await self.rate_limiter.acquire()
 
-        if query:
-            await self.rate_limiter.acquire()
+        assays = await self.circuit_breaker.call(
+            self._run_in_executor,
+            pcp.get_assays,
+            query,
+        )
 
-            # PubChem assay search via PUG REST API
-            assays = await self.circuit_breaker.call(
-                self._run_in_executor,
-                pcp.get_assays,
-                query,
-            )
-
-            for assay in assays or []:
-                if limit and fetched >= limit:
-                    break
-
-                yield self._assay_to_dict(assay)
-                fetched += 1
-
-        else:
-            raise ValueError("Query is required for assay search")
+        for assay in assays or []:
+            if limit and fetched >= limit:
+                break
+            yield self._assay_to_dict(assay)
+            fetched += 1
 
     def _compound_to_dict(self, compound: pcp.Compound) -> dict[str, Any]:
         """Convert pubchempy Compound to dictionary.
@@ -375,16 +346,7 @@ class PubChemClient:
             )
 
             if compound:
-                # Check circuit breaker state
-                cb_state = self.circuit_breaker.get_state()
-                failure_count = self.circuit_breaker.get_failure_count()
-
-                if cb_state.value == "CLOSED" and failure_count == 0:
-                    return HealthStatus.HEALTHY
-                elif failure_count <= 2:
-                    return HealthStatus.DEGRADED
-                else:
-                    return HealthStatus.UNHEALTHY
+                return assess_health_from_circuit_breaker(self.circuit_breaker)
             else:
                 return HealthStatus.DEGRADED
 

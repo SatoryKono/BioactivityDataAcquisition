@@ -13,18 +13,20 @@ Documentation: https://www.uniprot.org/help/api
 
 import logging
 from collections.abc import AsyncIterator
-from typing import Any, Self
+from typing import Any
 
 import httpx
 
 from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 logger = logging.getLogger(__name__)
 
 
-class UniProtClient(PaginatedFetcherMixin):
+class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API client implementing DataSourcePort.
 
     Provides access to protein sequence and functional information from UniProt database.
@@ -47,26 +49,16 @@ class UniProtClient(PaginatedFetcherMixin):
             base_url: UniProt REST API base URL
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
         """
+        super().__init__(http_client)
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.provider_name = "uniprot"
         self.strict_error_handling = strict_error_handling
-        self.http_client = http_client
-
-    async def __aenter__(self) -> Self:
-        """Enter async context manager.
-
-        Delegates to injected HTTP client.
-        """
-        await self.http_client.__aenter__()
-        return self
-
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Exit async context manager.
-
-        Delegates to injected HTTP client.
-        """
-        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
+        self._fetch_strategies = {
+            "protein": self._fetch_proteins,
+            "feature": self._fetch_features,
+            "sequence": self._fetch_sequences,
+        }
 
     async def fetch(
         self,
@@ -75,63 +67,32 @@ class UniProtClient(PaginatedFetcherMixin):
         watermark: Watermark | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from UniProt.
-
-        Implements DataSourcePort.fetch() interface.
-
-        Args:
-            entity_type: Type of entity ('protein', 'feature', 'sequence')
-            query: Search query (gene name, organism, keyword, etc.)
-            watermark: Last accession for incremental load
-            limit: Maximum number of records
-
-        Yields:
-            Raw records as dictionaries
-
-        Raises:
-            ValueError: If entity_type is not supported
-        """
-        # Rate limiting and circuit breaking are handled by http_client.get/post
-
-        if entity_type == "protein":
-            async for record in self._fetch_proteins(query, watermark, limit):
-                yield record
-        elif entity_type == "feature":
-            async for record in self._fetch_features(query, limit):
-                yield record
-        elif entity_type == "sequence":
-            async for record in self._fetch_sequences(query, limit):
-                yield record
-        else:
+        """Fetch records from UniProt."""
+        strategy = self._fetch_strategies.get(entity_type)
+        if not strategy:
             raise ValueError(
                 f"Unsupported entity type: {entity_type}. "
-                f"Supported: protein, feature, sequence"
+                f"Supported: {', '.join(self._fetch_strategies.keys())}"
             )
+
+        # Ensure arguments are passed correctly to strategies
+        async for record in strategy(query=query, watermark=watermark, limit=limit):
+            yield record
 
     def _build_protein_fetch_params(
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
     ) -> dict[str, Any]:
         """Build the parameter dictionary for a protein fetch request."""
+        fields = [
+            "accession", "id", "gene_names", "organism_name", "organism_id",
+            "protein_name", "length", "sequence", "cc_function", "ft_domain",
+            "xref_pdb", "xref_chembl"
+        ]
         params = {
             "query": query,
             "size": min(size, (limit - fetched) if limit else size),
             "format": "json",
-            "fields": ",".join(
-                [
-                    "accession",
-                    "id",
-                    "gene_names",
-                    "organism_name",
-                    "organism_id",
-                    "protein_name",
-                    "length",
-                    "sequence",
-                    "cc_function",
-                    "ft_domain",
-                    "xref_pdb",
-                    "xref_chembl",
-                ]
-            ),
+            "fields": ",".join(fields),
         }
         if cursor:
             params["cursor"] = cursor
@@ -173,178 +134,146 @@ class UniProtClient(PaginatedFetcherMixin):
                 query, size, fetched, limit, cursor
             )
             try:
-                # UnifiedHTTPClient handles rate limiting and circuit breaking
                 response = await self.http_client.get(
                     f"{self.base_url}/uniprotkb/search", params=params
                 )
                 return await self._process_protein_response(response)
             except Exception:
-                logger.error(
-                    "UniProt protein fetch failed",
-                    exc_info=True,
-                    extra={"query": query, "cursor": cursor},
-                )
-                if self.strict_error_handling:
-                    raise
+                self._handle_fetch_error("protein", query, cursor)
                 return [], None
 
         async for item in self.paginated_fetch(fetch_page, limit=limit):
             yield item
 
+    def _handle_fetch_error(self, entity_type: str, query: str | None, cursor: str | None = None) -> None:
+        """Handle fetch errors centrally."""
+        logger.error(
+            f"UniProt {entity_type} fetch failed",
+            exc_info=True,
+            extra={"query": query, "cursor": cursor},
+        )
+        if self.strict_error_handling:
+            raise
+
+    async def _get_features_json(self, query: str) -> list[dict[str, Any]]:
+        """Retrieve features JSON."""
+        try:
+            response = await self.http_client.get(f"{self.base_url}/uniprotkb/{query}.json")
+            if response.status_code == 200:
+                return response.json().get("features", [])
+            return []
+        except Exception:
+            self._handle_fetch_error("feature", query)
+            return []
+
     async def _fetch_features(
         self,
         query: str | None,
+        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch protein features from UniProt."""
         if not query:
             raise ValueError("Query is required for feature search")
 
-        fetched = 0
+        # Watermark not supported for features
+        if watermark:
+             logger.warning("Watermark is not supported for feature fetch, ignoring.")
 
+        features = await self._get_features_json(query)
+        fetched = 0
+        for feature in features:
+            if limit and fetched >= limit:
+                break
+            yield self._format_feature(query, feature)
+            fetched += 1
+
+    def _format_feature(self, query: str, feature: dict[str, Any]) -> dict[str, Any]:
+        """Format a single feature."""
+        return {
+            "accession": query,
+            "type": feature.get("type"),
+            "location": feature.get("location"),
+            "description": feature.get("description"),
+        }
+
+    async def _get_sequence_fasta(self, query: str) -> str | None:
+        """Retrieve FASTA sequence."""
         try:
             response = await self.http_client.get(
-                f"{self.base_url}/uniprotkb/{query}.json",
+                f"{self.base_url}/uniprotkb/stream",
+                params={"query": query, "format": "fasta"},
             )
-
             if response.status_code == 200:
-                protein = response.json()
-                features = protein.get("features", [])
-
-                for feature in features:
-                    if limit and fetched >= limit:
-                        break
-
-                    yield {
-                        "accession": query,
-                        "type": feature.get("type"),
-                        "location": feature.get("location"),
-                        "description": feature.get("description"),
-                    }
-                    fetched += 1
-
+                return response.text
+            return None
         except Exception:
-            logger.warning(
-                "UniProt feature fetch failed",
-                exc_info=True,
-                extra={"accession": query},
-            )
-            if self.strict_error_handling:
-                raise
-            return
+            self._handle_fetch_error("sequence", query)
+            return None
+
+    async def _get_parsed_sequences(self, query: str) -> AsyncIterator[dict[str, Any]]:
+        """Yield parsed sequences."""
+        fasta_text = await self._get_sequence_fasta(query)
+        if fasta_text:
+            for seq in self._parse_fasta(fasta_text):
+                yield seq
 
     async def _fetch_sequences(
         self,
         query: str | None,
+        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch protein sequences from UniProt."""
         if not query:
             raise ValueError("Query is required for sequence fetch")
 
+        # Watermark not supported for sequences in this mode
+        if watermark:
+             logger.warning("Watermark is not supported for sequence fetch, ignoring.")
+
         fetched = 0
-
-        try:
-            response = await self.http_client.get(
-                f"{self.base_url}/uniprotkb/stream",
-                params={
-                    "query": query,
-                    "format": "fasta",
-                },
-            )
-
-            if response.status_code == 200:
-                # Parse FASTA format
-                fasta_text = response.text
-                sequences = self._parse_fasta(fasta_text)
-
-                for seq_record in sequences:
-                    if limit and fetched >= limit:
-                        break
-
-                    yield seq_record
-                    fetched += 1
-
-        except Exception:
-            logger.warning(
-                "UniProt sequence fetch failed",
-                exc_info=True,
-                extra={"query": query},
-            )
-            if self.strict_error_handling:
-                raise
-            return
+        async for seq_record in self._get_parsed_sequences(query):
+            if limit and fetched >= limit:
+                break
+            yield seq_record
+            fetched += 1
 
     def _parse_fasta(self, fasta_text: str) -> list[dict[str, Any]]:
         """Parse FASTA format text."""
         records = []
         current_header = None
-        current_sequence = []
+        current_sequence: list[str] = []
 
-        for line in fasta_text.split("\n"):
+        def add_record(header: str | None, seq: list[str]) -> None:
+            if header:
+                records.append({"header": header, "sequence": "".join(seq)})
+
+        for line in fasta_text.splitlines():
             line = line.strip()
             if not line:
                 continue
-
             if line.startswith(">"):
-                # New sequence
-                if current_header:
-                    records.append(
-                        {
-                            "header": current_header,
-                            "sequence": "".join(current_sequence),
-                        }
-                    )
-
-                current_header = line[1:]  # Remove '>'
+                add_record(current_header, current_sequence)
+                current_header = line[1:]
                 current_sequence = []
             else:
                 current_sequence.append(line)
 
-        # Add last sequence
-        if current_header:
-            records.append(
-                {
-                    "header": current_header,
-                    "sequence": "".join(current_sequence),
-                }
-            )
-
+        add_record(current_header, current_sequence)
         return records
 
     async def health_check(self) -> HealthStatus:
         """Check UniProt API health status."""
-        health_url = f"{self.base_url}/rest/beta/health"
-
         try:
-            response = await self.http_client.get(health_url)
-
-            if response.status_code == 200:
-                # Delegate to circuit breaker state from http_client
-                cb = self.http_client.circuit_breaker
-                cb_state = cb.get_state()
-                failure_count = cb.get_failure_count()
-
-                if cb_state.value == "CLOSED" and failure_count == 0:
-                    return HealthStatus.HEALTHY
-                elif failure_count <= 2:
-                    return HealthStatus.DEGRADED
-                else:
-                    return HealthStatus.UNHEALTHY
-            else:
+             # Check specific health URL first
+            resp = await self.http_client.get(f"{self.base_url}/rest/beta/health")
+            if resp.status_code != 200:
                 return HealthStatus.DEGRADED
-
         except Exception:
-            return HealthStatus.UNHEALTHY
+            pass # Fallback to CB check
 
-    async def aclose(self) -> None:
-        """Gracefully close resources."""
-        if self.http_client:
-             # UnifiedHTTPClient manages its own lifecycle via context manager
-             # But if needed we can access internal client,
-             # Though strictly we should rely on context manager of UniProtClient
-             # calling context manager of UnifiedHTTPClient
-             pass
+        return await super().health_check()
 
     def __repr__(self) -> str:
         """String representation."""

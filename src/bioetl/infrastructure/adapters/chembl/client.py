@@ -11,10 +11,11 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
@@ -54,7 +55,7 @@ ENTITY_PLURAL = {
 
 
 @dataclass
-class ChemblAdapter:
+class ChemblAdapter(BaseHttpAdapter):
     """ChEMBL data source adapter.
 
     Implements DataSourcePort for fetching data from ChEMBL database.
@@ -63,14 +64,6 @@ class ChemblAdapter:
         http_client: UnifiedHTTPClient instance
         batch_size: Number of records per API request (default: 1000)
         thread_pool: ThreadPoolExecutor for sync operations
-
-    Example:
-        >>> bucket = TokenBucket(rate=10.0, capacity=10)
-        >>> cb = CircuitBreaker(provider="chembl")
-        >>> async with UnifiedHTTPClient(bucket, cb) as http:
-        ...     adapter = ChemblAdapter(http_client=http)
-        ...     async for record in adapter.fetch("activity", limit=100):
-        ...         process(record)
     """
 
     http_client: UnifiedHTTPClient
@@ -83,15 +76,6 @@ class ChemblAdapter:
     _consecutive_errors: int = field(init=False, default=0)
     _last_health_check: datetime | None = field(init=False, default=None)
     _cached_health: HealthStatus = field(init=False, default=HealthStatus.HEALTHY)
-
-    async def __aenter__(self) -> Self:
-        """Enter async context manager."""
-        await self.http_client.__aenter__()
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Exit async context manager."""
-        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
 
     def _get_resource_url(self, entity_type: str) -> str:
         """Get ChEMBL API URL for entity type."""
@@ -130,20 +114,39 @@ class ChemblAdapter:
         return records, has_next
 
     def _batch_ids(self, ids: set[str], batch_size: int) -> Iterator[list[str]]:
-        """Split IDs into batches for API requests.
-
-        ChEMBL API has limits on the number of IDs in __in filter (~100).
-
-        Args:
-            ids: Set of IDs to batch
-            batch_size: Maximum IDs per batch
-
-        Yields:
-            Lists of IDs, each with at most batch_size elements
-        """
+        """Split IDs into batches for API requests."""
         id_list = list(ids)
         for i in range(0, len(id_list), batch_size):
             yield id_list[i : i + batch_size]
+
+    async def _fetch_page(
+        self, url: str, params: dict[str, Any], entity_type: str
+    ) -> tuple[list[dict[str, Any]], bool]:
+        """Fetch a single page and handle errors."""
+        try:
+            response = await self.http_client.get(url, params=params)
+            records, has_next = self._process_response(response, entity_type)
+            self._consecutive_errors = 0
+            return records, has_next
+        except Exception as e:
+            self._handle_error(e)
+            return [], False
+
+    async def _page_iterator(
+        self, entity_type: str, watermark: Watermark | None
+    ) -> AsyncIterator[list[dict[str, Any]]]:
+        """Yield pages of records."""
+        url = self._get_resource_url(entity_type)
+        offset = 0
+        while True:
+            params = self._build_params(entity_type, watermark, offset)
+            records, has_next = await self._fetch_page(url, params, entity_type)
+            if not records:
+                break
+            yield records
+            if not has_next:
+                break
+            offset += self.batch_size
 
     async def _fetch_with_filter(
         self,
@@ -153,47 +156,64 @@ class ChemblAdapter:
         id_batch: list[str],
         filter_field: str,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records filtered by ID batch.
-
-        Args:
-            entity_type: Type of entity
-            watermark: Last checkpoint
-            limit: Maximum records (across all batches)
-            id_batch: List of IDs to filter by
-            filter_field: API field name for filtering
-
-        Yields:
-            Records matching the filter IDs
-        """
+        """Fetch records filtered by ID batch."""
         url = self._get_resource_url(entity_type)
         offset = 0
 
         while True:
             params = self._build_params(entity_type, watermark, offset)
-            # Add __in filter for the batch
             params[f"{filter_field}__in"] = ",".join(id_batch)
 
-            try:
-                response = await self.http_client.get(url, params=params)
-                records, has_next = self._process_response(response, entity_type)
+            records, has_next = await self._fetch_page(url, params, entity_type)
+            if not records:
+                break
 
-                if not records:
-                    break
+            for record in records:
+                yield record
 
-                for record in records:
-                    yield record
+            if not has_next:
+                break
+            offset += self.batch_size
 
-                self._consecutive_errors = 0
+    def _handle_error(self, e: Exception) -> None:
+        """Handle fetch errors."""
+        self._consecutive_errors += 1
+        self._update_health()
+        raise ChemblApiError(str(e)) from e
 
-                if not has_next:
-                    break
+    async def _fetch_filtered(
+        self,
+        entity_type: str,
+        watermark: Watermark | None,
+        limit: int | None,
+        filter_ids: set[str],
+        filter_field: str,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Perform filtered fetch using ID batches."""
+        total_fetched = 0
+        for id_batch in self._batch_ids(filter_ids, batch_size=100):
+            async for record in self._fetch_with_filter(
+                entity_type, watermark, limit, id_batch, filter_field
+            ):
+                yield record
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
 
-                offset += self.batch_size
-
-            except Exception as e:
-                self._consecutive_errors += 1
-                self._update_health()
-                raise ChemblApiError(str(e)) from e
+    async def _fetch_standard(
+        self,
+        entity_type: str,
+        watermark: Watermark | None,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Perform standard paginated fetch."""
+        total_fetched = 0
+        async for records in self._page_iterator(entity_type, watermark):
+            for record in records:
+                yield record
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
 
     async def fetch(
         self,
@@ -204,99 +224,40 @@ class ChemblAdapter:
         filter_ids: set[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from ChEMBL.
-
-        Args:
-            entity_type: Type of entity (activity, compound, target, etc)
-            watermark: Last checkpoint for incremental load
-            limit: Maximum number of records
-            query: Search query (not used by ChEMBL, provided for protocol compatibility)
-            filter_ids: Optional set of IDs to filter by
-            filter_field: API field name for filtering (e.g., molecule_chembl_id)
-
-        Yields:
-            Raw records as dictionaries
-
-        Raises:
-            ChemblApiError: On API errors
-            ValueError: On unknown entity type
-        """
-        total_fetched = 0
-
-        # Filtered fetch: batch IDs and fetch each batch
+        """Fetch records from ChEMBL."""
         if filter_ids and filter_field:
-            # Batch IDs (ChEMBL __in limit is ~100 IDs)
-            for id_batch in self._batch_ids(filter_ids, batch_size=100):
-                async for record in self._fetch_with_filter(
-                    entity_type, watermark, limit, id_batch, filter_field
-                ):
-                    yield record
-                    total_fetched += 1
-                    if limit and total_fetched >= limit:
-                        return
-            return
-
-        # Standard fetch: paginate through all records
-        url = self._get_resource_url(entity_type)
-        offset = 0
-
-        while True:
-            params = self._build_params(entity_type, watermark, offset)
-
-            try:
-                response = await self.http_client.get(url, params=params)
-                records, has_next = self._process_response(response, entity_type)
-
-                if not records:
-                    break
-
-                for record in records:
-                    yield record
-                    total_fetched += 1
-                    if limit and total_fetched >= limit:
-                        return
-
-                self._consecutive_errors = 0
-
-                if not has_next:
-                    break
-
-                offset += self.batch_size
-
-            except Exception as e:
-                self._consecutive_errors += 1
-                self._update_health()
-                raise ChemblApiError(str(e)) from e
+            async for record in self._fetch_filtered(
+                entity_type, watermark, limit, filter_ids, filter_field
+            ):
+                yield record
+        else:
+            async for record in self._fetch_standard(entity_type, watermark, limit):
+                yield record
 
     async def health_check(self) -> HealthStatus:
-        """Check ChEMBL API health status.
-
-        Returns:
-            HEALTHY: API is operational
-            DEGRADED: API responding slowly or with some errors
-            UNHEALTHY: API is down
-        """
+        """Check ChEMBL API health status."""
         try:
             response = await self.http_client.get(CHEMBL_STATUS_URL)
-
-            if response.status_code == 200:
-                data = response.json()
-                # ChEMBL status endpoint returns service info
-                if data.get("status") == "UP":
-                    self._consecutive_errors = 0
-                    self._cached_health = HealthStatus.HEALTHY
-                else:
-                    self._cached_health = HealthStatus.DEGRADED
-            else:
-                self._consecutive_errors += 1
-                self._update_health()
-
+            self._handle_health_response(response)
         except Exception:
             self._consecutive_errors += 1
             self._update_health()
 
         self._last_health_check = datetime.now()
         return self._cached_health
+
+    def _handle_health_response(self, response: Response) -> None:
+        """Process health check response."""
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("status") == "UP":
+                self._consecutive_errors = 0
+                self._cached_health = HealthStatus.HEALTHY
+            else:
+                self._cached_health = HealthStatus.DEGRADED
+        else:
+            self._consecutive_errors += 1
+            self._update_health()
 
     def _update_health(self) -> None:
         """Update health status based on error count."""
@@ -308,55 +269,25 @@ class ChemblAdapter:
             self._cached_health = HealthStatus.HEALTHY
 
     async def get_entity_count(self, entity_type: str) -> int:
-        """Get total count of entities (for progress tracking).
-
-        Args:
-            entity_type: Type of entity
-
-        Returns:
-            Total count of entities
-        """
+        """Get total count of entities."""
         url = self._get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}
-
         response = await self.http_client.get(url, params=params)
         data = response.json()
-
         page_meta = data.get("page_meta", {})
         return page_meta.get("total_count", 0)
-
-    async def aclose(self) -> None:
-        """Close resources.
-
-        Implements aclose() required by DataSourcePort protocol.
-        The underlying http_client is managed by the caller.
-        """
-        pass  # HTTP client is managed externally
 
 
 def create_chembl_adapter(
     circuit_breaker: CircuitBreaker,
     run_id: Any = None,
 ) -> tuple[ChemblAdapter, UnifiedHTTPClient]:
-    """Factory function to create ChemblAdapter with dependencies.
-
-    Args:
-        circuit_breaker: CircuitBreaker instance for fault tolerance
-        run_id: Optional run ID for correlation
-
-    Returns:
-        Tuple of (ChemblAdapter, UnifiedHTTPClient)
-        Note: Caller is responsible for entering http_client context.
-    """
-    # ChEMBL has no explicit rate limit, use conservative default
+    """Factory function to create ChemblAdapter with dependencies."""
     rate_limiter = TokenBucket(rate=10.0, capacity=20)
-
     http_client = UnifiedHTTPClient(
         rate_limiter=rate_limiter,
         circuit_breaker=circuit_breaker,
         run_id=run_id,
     )
-
     adapter = ChemblAdapter(http_client=http_client)
-
     return adapter, http_client
