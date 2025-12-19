@@ -35,6 +35,11 @@ class TestBaseEntity:
                 **base_entity_kwargs,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL123",
+<<<<<<< HEAD
+=======
+                target_chembl_id="CHEMBL456",
+                assay_chembl_id="CHEMBL789",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
             )
 
     def test_base_entity_requires_content_hash(self, base_entity_kwargs):
@@ -45,6 +50,11 @@ class TestBaseEntity:
                 **base_entity_kwargs,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL123",
+<<<<<<< HEAD
+=======
+                target_chembl_id="CHEMBL456",
+                assay_chembl_id="CHEMBL789",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
             )
 
     def test_base_entity_default_ingestion_ts(self, base_entity_kwargs):
@@ -53,6 +63,11 @@ class TestBaseEntity:
             **base_entity_kwargs,
             activity_id="ACT1",
             molecule_chembl_id="CHEMBL123",
+<<<<<<< HEAD
+=======
+            target_chembl_id="CHEMBL456",
+            assay_chembl_id="CHEMBL789",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
         )
         assert activity.ingestion_ts is not None
         assert isinstance(activity.ingestion_ts, datetime)
@@ -108,6 +123,11 @@ class TestActivity:
                 **base_entity_kwargs,
                 activity_id="",
                 molecule_chembl_id="CHEMBL1",
+<<<<<<< HEAD
+=======
+                target_chembl_id="CHEMBL2",
+                assay_chembl_id="CHEMBL3",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
             )
 
     def test_activity_pchembl_must_be_nonnegative(self, base_entity_kwargs):
@@ -117,6 +137,11 @@ class TestActivity:
                 **base_entity_kwargs,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL1",
+<<<<<<< HEAD
+=======
+                target_chembl_id="CHEMBL2",
+                assay_chembl_id="CHEMBL3",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
                 pchembl_value=-1.0,
             )
 
@@ -126,6 +151,11 @@ class TestActivity:
             **base_entity_kwargs,
             activity_id="ACT1",
             molecule_chembl_id="CHEMBL1",
+<<<<<<< HEAD
+=======
+            target_chembl_id="CHEMBL2",
+            assay_chembl_id="CHEMBL3",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
             pchembl_value=0.0,
         )
         assert activity.pchembl_value == 0.0
@@ -136,6 +166,11 @@ class TestActivity:
             **base_entity_kwargs,
             activity_id="ACT1",
             molecule_chembl_id="CHEMBL1",
+<<<<<<< HEAD
+=======
+            target_chembl_id="CHEMBL2",
+            assay_chembl_id="CHEMBL3",
+>>>>>>> eed3ceddfbcbc5d32fa9cecc4a29b7b3362cad7c
         )
         with pytest.raises(AttributeError):
             activity.activity_id = "NEW_ID"
