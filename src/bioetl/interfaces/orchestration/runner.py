@@ -13,14 +13,15 @@ from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_config import (
     PipelineRuntimeConfig,
 )
-from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.pipeline_config import PipelineConfig
 
 if TYPE_CHECKING:
     import structlog
+
     from bioetl.application.core.executor import PipelineExecutor
 
 
@@ -37,10 +38,10 @@ class PipelineRunner:
         runtime: PipelineRuntimeConfig,
         services: PipelineServices,
         context: PipelineContext,
-        executor: "PipelineExecutor",
+        executor: PipelineExecutor,
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         pipeline: BasePipeline | None = None,
     ) -> None:
         self._config = config
@@ -70,7 +71,7 @@ class PipelineRunner:
         )
 
     @property
-    def logger(self) -> "structlog.BoundLogger":
+    def logger(self) -> structlog.BoundLogger:
         return self._logger
 
     async def run(self) -> None:

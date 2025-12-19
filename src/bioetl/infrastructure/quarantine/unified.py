@@ -20,7 +20,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.types import BatchID, ContentHash, DQStatus, RunID
+from bioetl.domain.types import BatchID, DQStatus, RunID
 from bioetl.infrastructure.quarantine.helpers import (
     MAX_PAYLOAD_SIZE,
     calculate_hash,

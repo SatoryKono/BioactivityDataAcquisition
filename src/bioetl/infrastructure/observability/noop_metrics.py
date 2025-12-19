@@ -8,12 +8,8 @@ it's a concrete implementation detail, even though it does nothing.
 """
 
 import warnings
-from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import MetricsPort
-
-if TYPE_CHECKING:
-    pass
 
 
 class NoOpMetrics(MetricsPort):

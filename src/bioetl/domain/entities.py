@@ -14,10 +14,9 @@ Design Principles:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-from bioetl.domain.types import EntityID, ContentHash, BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -33,7 +32,7 @@ class BaseEntity:
     run_id: RunID
     run_type: RunType
     source_batch_id: BatchID
-    ingestion_ts: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    ingestion_ts: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def __post_init__(self) -> None:
         if not self.entity_id:
@@ -55,72 +54,72 @@ class Activity(BaseEntity):
 
     # Core identifiers
     molecule_chembl_id: str
-    target_chembl_id: Optional[str] = None
-    assay_chembl_id: Optional[str] = None
-    document_chembl_id: Optional[str] = None
-    record_id: Optional[int] = None
-    src_id: Optional[int] = None
+    target_chembl_id: str | None = None
+    assay_chembl_id: str | None = None
+    document_chembl_id: str | None = None
+    record_id: int | None = None
+    src_id: int | None = None
 
     # Molecule data
-    canonical_smiles: Optional[str] = None
-    molecule_pref_name: Optional[str] = None
-    parent_molecule_chembl_id: Optional[str] = None
+    canonical_smiles: str | None = None
+    molecule_pref_name: str | None = None
+    parent_molecule_chembl_id: str | None = None
 
     # Target data
-    target_pref_name: Optional[str] = None
-    target_organism: Optional[str] = None
-    target_tax_id: Optional[str] = None
+    target_pref_name: str | None = None
+    target_organism: str | None = None
+    target_tax_id: str | None = None
 
     # Assay data
-    assay_type: Optional[str] = None
-    assay_description: Optional[str] = None
-    assay_variant_accession: Optional[str] = None
-    assay_variant_mutation: Optional[str] = None
+    assay_type: str | None = None
+    assay_description: str | None = None
+    assay_variant_accession: str | None = None
+    assay_variant_mutation: str | None = None
 
     # BAO (BioAssay Ontology) annotations
-    bao_endpoint: Optional[str] = None
-    bao_format: Optional[str] = None
-    bao_label: Optional[str] = None
+    bao_endpoint: str | None = None
+    bao_format: str | None = None
+    bao_label: str | None = None
 
     # Raw activity values
-    type: Optional[str] = None
-    value: Optional[float] = None
-    units: Optional[str] = None
-    relation: Optional[str] = None
-    upper_value: Optional[float] = None
-    text_value: Optional[str] = None
+    type: str | None = None
+    value: float | None = None
+    units: str | None = None
+    relation: str | None = None
+    upper_value: float | None = None
+    text_value: str | None = None
 
     # Standardized activity values
-    standard_type: Optional[str] = None
-    standard_value: Optional[float] = None
-    standard_units: Optional[str] = None
-    standard_relation: Optional[str] = None
-    standard_upper_value: Optional[float] = None
-    standard_text_value: Optional[str] = None
-    standard_flag: Optional[int] = None
+    standard_type: str | None = None
+    standard_value: float | None = None
+    standard_units: str | None = None
+    standard_relation: str | None = None
+    standard_upper_value: float | None = None
+    standard_text_value: str | None = None
+    standard_flag: int | None = None
 
     # Derived metrics
-    pchembl_value: Optional[float] = None
-    ligand_efficiency: Optional[str] = None  # JSON string of dict
+    pchembl_value: float | None = None
+    ligand_efficiency: str | None = None  # JSON string of dict
 
     # Units ontology
-    qudt_units: Optional[str] = None
-    uo_units: Optional[str] = None
+    qudt_units: str | None = None
+    uo_units: str | None = None
 
     # Document/Publication data
-    document_journal: Optional[str] = None
-    document_year: Optional[int] = None
+    document_journal: str | None = None
+    document_year: int | None = None
 
     # Quality annotations
-    activity_comment: Optional[str] = None
-    data_validity_comment: Optional[str] = None
-    data_validity_description: Optional[str] = None
-    potential_duplicate: Optional[int] = None
+    activity_comment: str | None = None
+    data_validity_comment: str | None = None
+    data_validity_description: str | None = None
+    potential_duplicate: int | None = None
 
     # Action and properties
-    action_type: Optional[str] = None
-    activity_properties: Optional[str] = None  # JSON string of list
-    toid: Optional[int] = None
+    action_type: str | None = None
+    activity_properties: str | None = None  # JSON string of list
+    toid: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -144,15 +143,15 @@ class Compound(BaseEntity):
     """Represents a chemical compound (PubChem Compound)."""
 
     cid: str
-    molecular_formula: Optional[str] = None
-    molecular_weight: Optional[str] = None  # Kept as string to preserve precision/format
+    molecular_formula: str | None = None
+    molecular_weight: str | None = None  # Kept as string to preserve precision/format
 
     # Structure representations
-    canonical_smiles: Optional[str] = None
-    isomeric_smiles: Optional[str] = None
-    inchi: Optional[str] = None
-    inchikey: Optional[str] = None
-    iupac_name: Optional[str] = None
+    canonical_smiles: str | None = None
+    isomeric_smiles: str | None = None
+    inchi: str | None = None
+    inchikey: str | None = None
+    iupac_name: str | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -172,8 +171,8 @@ class Protein(BaseEntity):
     entry_name: str
     protein_name: str
     gene_names: list[str] = field(default_factory=list)
-    organism_id: Optional[int] = None
-    sequence_length: Optional[int] = None
+    organism_id: int | None = None
+    sequence_length: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -190,9 +189,9 @@ class Publication(BaseEntity):
 
     pmid: str
     title: str
-    abstract: Optional[str] = None
-    journal: Optional[str] = None
-    publication_year: Optional[int] = None
+    abstract: str | None = None
+    journal: str | None = None
+    publication_year: int | None = None
     authors: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:

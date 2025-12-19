@@ -74,4 +74,4 @@ class PipelineShutdownError(Exception):
     pass
 
 
-__all__ = ["ShutdownSignal", "PipelineShutdownError"]
+__all__ = ["PipelineShutdownError", "ShutdownSignal"]

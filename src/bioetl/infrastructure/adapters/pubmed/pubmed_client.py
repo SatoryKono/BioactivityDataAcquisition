@@ -88,14 +88,14 @@ class PubMedAdapter:
             raise ValueError("PubMedAdapter only supports 'publication'")
 
         pmids = await self._get_pmids(search_term, limit or 10000)
-        
+
         if not pmids:
             return
 
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):
             id_batch = pmids[i:i + self.batch_size]
-            
+
             fetch_url = f"{ENTREZ_API_BASE}efetch.fcgi"
             params = {
                 "db": "pubmed",
@@ -119,7 +119,7 @@ class PubMedAdapter:
                 for article_node in root.findall(".//PubmedArticle"):
                     pmid_node = article_node.find(".//PMID")
                     title_node = article_node.find(".//ArticleTitle")
-                    
+
                     record = {
                         "pmid": pmid_node.text if pmid_node is not None else None,
                         "article_title": title_node.text if title_node is not None else "No title found",

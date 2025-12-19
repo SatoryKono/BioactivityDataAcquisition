@@ -119,7 +119,7 @@ class S3Checkpoint:
             full_path = Path(self.bucket) / key
             if not full_path.exists():
                 return None
-            with open(full_path, "r") as f:
+            with open(full_path) as f:
                 checkpoint_json = f.read()
         else:
             loop = asyncio.get_running_loop()

@@ -9,12 +9,12 @@ Configuration consolidation (all in bioetl.domain.config):
 - RuntimeConfig/PipelineRuntimeConfig: CLI/runtime parameters
 """
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.application.core.base import BasePipeline
 
 # Re-exports from consolidated domain location
 from bioetl.domain.config import (

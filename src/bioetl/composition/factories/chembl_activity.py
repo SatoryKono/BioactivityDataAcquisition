@@ -3,17 +3,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
-from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
+from bioetl.infrastructure.factories.data_sources import DataSourceFactory
+from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
 
 if TYPE_CHECKING:
+    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.domain.ports import DataSourcePort
-    from bioetl.domain.filter_config import InputFilterConfig
 
 
 class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline]):

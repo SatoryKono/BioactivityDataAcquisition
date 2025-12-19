@@ -13,19 +13,20 @@ import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
+from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
 if TYPE_CHECKING:
-    import structlog
     import pyarrow as pa
+    import structlog
+
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.infrastructure.config import Settings
-    from bioetl.domain.ports import DataSourcePort
     from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 

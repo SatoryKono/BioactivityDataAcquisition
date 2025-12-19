@@ -11,7 +11,6 @@ Consolidated configuration classes (post-refactoring):
 - RuntimeConfig: CLI/runtime parameters (Value Object)
 """
 from dataclasses import dataclass, field
-from typing import List
 
 from bioetl.domain.types import RunType
 
@@ -78,10 +77,10 @@ class PipelineConfig:
     gold_table: str | None = None
 
     # Processing
-    gold_filter_types: List[str] = field(default_factory=list)
+    gold_filter_types: list[str] = field(default_factory=list)
     batch_size: int = 100
     checkpoint_interval: int = 1000
-    fields: List[str] = field(default_factory=list)
+    fields: list[str] = field(default_factory=list)
     watermark_field: str | None = None
 
     # Data Quality

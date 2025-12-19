@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.factories.clients import get_aws_credentials
@@ -33,7 +33,7 @@ class StorageFactory:
     def create(
         settings: Settings,
         config: PipelineYamlConfig,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
     ) -> StorageContext:
         """Create a StorageAdapter based on environment and pipeline configuration.
 

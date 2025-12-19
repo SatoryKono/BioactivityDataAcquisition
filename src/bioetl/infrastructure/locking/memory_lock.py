@@ -3,7 +3,6 @@ A simple in-memory lock for local development and testing.
 This lock is not distributed and only works within a single process.
 """
 import asyncio
-from typing import Dict, Tuple
 
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID
@@ -13,7 +12,7 @@ class MemoryLock(LockPort):
     """A simple in-memory lock for local development and testing."""
 
     def __init__(self) -> None:
-        self._locks: Dict[str, Tuple[str, asyncio.Lock]] = {}
+        self._locks: dict[str, tuple[str, asyncio.Lock]] = {}
         self._global_lock = asyncio.Lock()
 
     async def acquire(

@@ -3,15 +3,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
-from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
-from bioetl.infrastructure.schemas.silver import PUBCHEM_COMPOUND_SCHEMA
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
+from bioetl.infrastructure.factories.data_sources import DataSourceFactory
+from bioetl.infrastructure.schemas.silver import PUBCHEM_COMPOUND_SCHEMA
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.domain.ports import DataSourcePort
 
 
 class PubChemCompoundPipelineFactory(BasePipelineFactory[PubChemCompoundPipeline]):
@@ -26,7 +26,7 @@ class PubChemCompoundPipelineFactory(BasePipelineFactory[PubChemCompoundPipeline
         cls,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
-        filter_config: "InputFilterConfig | None" = None,
+        filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create PubChem data source."""
         # PubChem rate limit: 5 requests/second without API key

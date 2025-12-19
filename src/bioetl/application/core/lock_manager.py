@@ -11,6 +11,7 @@ from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     import structlog
+
     from bioetl.application.core.checkpoint_manager import CheckpointManager
 
 
@@ -30,7 +31,7 @@ class LockManager:
         wait_for_lock: bool,
         wait_timeout: int,
         heartbeat_interval: int,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
     ) -> None:
@@ -63,10 +64,10 @@ class LockManager:
         wait_for_lock: bool,
         wait_timeout: int,
         heartbeat_interval: int,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
-    ) -> "LockManager":
+    ) -> LockManager:
         """Factory method for creating LockManager."""
         exclusive = run_type in (RunType.BACKFILL, RunType.REBUILD)
         lock_key = f"lock:{provider}_{entity_type}"
@@ -161,7 +162,7 @@ class LockManager:
 
                 raise PipelineShutdownError("Lock lost")
 
-    async def __aenter__(self) -> "LockManager":
+    async def __aenter__(self) -> LockManager:
         acquired = await self.acquire()
         if not acquired:
             raise PipelineShutdownError(f"Failed to acquire lock for {self._lock_key}")

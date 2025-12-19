@@ -1,5 +1,6 @@
-from bioetl.domain.types import Watermark
 from datetime import datetime
+
+from bioetl.domain.types import Watermark
 
 try:
     print("Attempting Watermark(datetime)...")

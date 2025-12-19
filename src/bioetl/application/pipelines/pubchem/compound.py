@@ -4,12 +4,9 @@ from __future__ import annotations
 from typing import Any, cast
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-from bioetl.domain.pipeline_config import PipelineConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
-from bioetl.domain.transformations import generate_entity_id, generate_content_hash
 
 
 class PubChemCompoundPipeline(BasePipeline):
@@ -48,7 +45,7 @@ class PubChemCompoundPipeline(BasePipeline):
         content_hash = generate_content_hash(normalized, self.provider)
         normalized["content_hash"] = content_hash
 
-        return cast(SilverRecord, normalized)
+        return cast("SilverRecord", normalized)
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]
