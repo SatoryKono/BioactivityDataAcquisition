@@ -19,6 +19,7 @@ Architecture:
 """
 
 import asyncio
+import json
 from datetime import datetime
 from typing import Any, Literal
 from pathlib import Path
@@ -108,9 +109,23 @@ class DeltaWriter:
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
         # Filter records to only include fields in schema to avoid null type columns
+        # Also serialize dict/list values to JSON strings for string-typed columns
         schema_fields = set(schema.names)
+        string_fields = {
+            field.name for field in schema
+            if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
+        }
+
+        def serialize_value(key: str, value):
+            """Serialize dict/list values to JSON strings for string columns."""
+            if value is None:
+                return None
+            if key in string_fields and isinstance(value, (dict, list)):
+                return json.dumps(value)
+            return value
+
         filtered_records = [
-            {k: v for k, v in rec.items() if k in schema_fields}
+            {k: serialize_value(k, v) for k, v in rec.items() if k in schema_fields}
             for rec in records
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
