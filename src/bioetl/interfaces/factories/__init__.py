@@ -4,12 +4,16 @@ Note: Factories have been moved to bioetl.composition.factories.
 This module re-exports them for backward compatibility.
 """
 
-from bioetl.composition.factories.chembl_activity import ChEMBLActivityPipelineFactory
-from bioetl.composition.factories.pubchem_compound import PubChemCompoundPipelineFactory
-from bioetl.composition.factories.uniprot_protein import UniProtProteinPipelineFactory
+from bioetl.composition.factories.pipeline_factories import (
+    chembl_activity_factory,
+    pubchem_compound_factory,
+    pubmed_publications_factory,
+    uniprot_protein_factory,
+)
 
 __all__ = [
-    "ChEMBLActivityPipelineFactory",
-    "PubChemCompoundPipelineFactory",
-    "UniProtProteinPipelineFactory",
+    "chembl_activity_factory",
+    "pubchem_compound_factory",
+    "pubmed_publications_factory",
+    "uniprot_protein_factory",
 ]
