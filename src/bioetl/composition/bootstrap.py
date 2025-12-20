@@ -177,6 +177,7 @@ def bootstrap_pipeline(
     pipeline_def = PipelineRegistry.get(pipeline_name)
     factory = pipeline_def.factory
     silver_schema = pipeline_def.silver_schema
+    gold_schema = pipeline_def.gold_schema
 
     pipeline = factory.create_with_services(
         runtime=runtime_config,
@@ -218,6 +219,7 @@ def bootstrap_pipeline(
         transform_callback=pipeline.transform_bronze_to_silver,
         gold_filter_callback=pipeline.should_write_gold,
         silver_schema=silver_schema,
+        gold_schema=gold_schema,
         dq_config=dq_config,
         table_config=table_config,
     )

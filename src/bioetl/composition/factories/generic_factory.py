@@ -63,6 +63,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
+        gold_schema: Any | None = None,
         data_source_creator: DataSourceCreator | None = None,
     ) -> None:
         """Initialize the factory.
@@ -72,6 +73,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pipeline_class: The pipeline class to instantiate
             provider: Provider name for data source creation
             silver_schema: Optional PyArrow schema for Silver layer
+            gold_schema: Optional Pandera schema for Gold layer
             data_source_creator: Optional custom creator function. If not provided,
                 uses DataSourceRegistry.get(provider)
         """
@@ -79,6 +81,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.pipeline_class = pipeline_class
         self.provider = provider
         self.silver_schema = silver_schema
+        self.gold_schema = gold_schema
 
         # Use custom creator or look up from registry
         self._create_data_source = (
@@ -176,6 +179,7 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
+    gold_schema: Any | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories.
 
@@ -184,6 +188,7 @@ def create_pipeline_factory(
         pipeline_class: Pipeline class to instantiate
         provider: Data source provider name
         silver_schema: Optional Silver layer schema
+        gold_schema: Optional Gold layer schema
 
     Returns:
         Configured GenericPipelineFactory
@@ -201,4 +206,5 @@ def create_pipeline_factory(
         pipeline_class=pipeline_class,
         provider=provider,
         silver_schema=silver_schema,
+        gold_schema=gold_schema,
     )

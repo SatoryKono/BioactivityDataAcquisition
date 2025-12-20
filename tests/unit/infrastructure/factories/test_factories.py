@@ -16,7 +16,7 @@ class TestCreateRedisClient:
 
     def test_create_redis_client_with_password(self):
         """Test creating Redis client with password."""
-        from bioetl.infrastructure.factories.clients import create_redis_client
+        from bioetl.composition.factories.clients import create_redis_client
 
         settings = MagicMock()
         settings.redis.host = "localhost"
@@ -38,7 +38,7 @@ class TestCreateRedisClient:
 
     def test_create_redis_client_without_password(self):
         """Test creating Redis client without password."""
-        from bioetl.infrastructure.factories.clients import create_redis_client
+        from bioetl.composition.factories.clients import create_redis_client
 
         settings = MagicMock()
         settings.redis.host = "redis.example.com"
@@ -64,7 +64,7 @@ class TestGetAwsCredentials:
 
     def test_get_aws_credentials_with_secret(self):
         """Test extracting AWS credentials with secret key."""
-        from bioetl.infrastructure.factories.clients import get_aws_credentials
+        from bioetl.composition.factories.clients import get_aws_credentials
 
         settings = MagicMock()
         settings.aws.access_key_id = "AKIAIOSFODNN7EXAMPLE"
@@ -80,7 +80,7 @@ class TestGetAwsCredentials:
 
     def test_get_aws_credentials_without_secret(self):
         """Test extracting AWS credentials without secret key."""
-        from bioetl.infrastructure.factories.clients import get_aws_credentials
+        from bioetl.composition.factories.clients import get_aws_credentials
 
         settings = MagicMock()
         settings.aws.access_key_id = "AKIAIOSFODNN7EXAMPLE"
@@ -93,7 +93,7 @@ class TestGetAwsCredentials:
 
     def test_get_aws_credentials_all_none(self):
         """Test extracting AWS credentials when all None."""
-        from bioetl.infrastructure.factories.clients import get_aws_credentials
+        from bioetl.composition.factories.clients import get_aws_credentials
 
         settings = MagicMock()
         settings.aws.access_key_id = None
@@ -135,7 +135,7 @@ class TestStorageAdapter:
         self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
     ):
         """Create StorageAdapter instance."""
-        from bioetl.infrastructure.factories.storage import StorageAdapter
+        from bioetl.composition.factories.storage_factory import StorageAdapter
 
         return StorageAdapter(
             bronze_writer=mock_bronze_writer,

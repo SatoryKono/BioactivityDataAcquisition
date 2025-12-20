@@ -8,8 +8,7 @@ import pytest
 from uuid import uuid4
 from bioetl.domain.types import RunType
 from bioetl.composition.bootstrap import bootstrap_pipeline
-from bioetl.infrastructure.factories.storage_factory import StorageContext
-from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage_factory import StorageContext, StorageAdapter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter

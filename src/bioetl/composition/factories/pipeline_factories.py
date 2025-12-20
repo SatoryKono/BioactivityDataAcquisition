@@ -22,6 +22,12 @@ from bioetl.infrastructure.schemas.silver import (
     PUBMED_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
+from bioetl.infrastructure.schemas.gold import (
+    ChEMBLActivityGoldSchema,
+    PubChemCompoundGoldSchema,
+    UniProtProteinGoldSchema,
+    PubMedPublicationGoldSchema,
+)
 
 # ChEMBL Activity Pipeline
 chembl_activity_factory = GenericPipelineFactory(
@@ -29,6 +35,7 @@ chembl_activity_factory = GenericPipelineFactory(
     pipeline_class=ChEMBLActivityPipeline,
     provider="chembl",
     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+    gold_schema=ChEMBLActivityGoldSchema,
 )
 
 # PubChem Compound Pipeline
@@ -37,6 +44,7 @@ pubchem_compound_factory = GenericPipelineFactory(
     pipeline_class=PubChemCompoundPipeline,
     provider="pubchem",
     silver_schema=PUBCHEM_COMPOUND_SCHEMA,
+    gold_schema=PubChemCompoundGoldSchema,
 )
 
 # UniProt Protein Pipeline
@@ -45,6 +53,7 @@ uniprot_protein_factory = GenericPipelineFactory(
     pipeline_class=UniProtProteinPipeline,
     provider="uniprot",
     silver_schema=UNIPROT_PROTEIN_SCHEMA,
+    gold_schema=UniProtProteinGoldSchema,
 )
 
 # PubMed Publications Pipeline
@@ -53,6 +62,7 @@ pubmed_publications_factory = GenericPipelineFactory(
     pipeline_class=PubMedPublicationsPipeline,
     provider="pubmed",
     silver_schema=PUBMED_PUBLICATION_SCHEMA,
+    gold_schema=PubMedPublicationGoldSchema,
 )
 
 # Register all factories with the PipelineRegistry

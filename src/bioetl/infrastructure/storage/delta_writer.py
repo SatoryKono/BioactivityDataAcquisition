@@ -20,14 +20,10 @@ Architecture:
 
 import asyncio
 import json
-import os
-import tempfile
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Literal
 
 import pyarrow as pa
-import pyarrow.csv as pv
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import DeltaError, SchemaMismatchError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -38,6 +34,7 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
     TableNotFoundError,
 )
+from bioetl.infrastructure.storage.csv_exporter import CsvExporter
 
 
 class DeltaWriter:
@@ -45,29 +42,6 @@ class DeltaWriter:
 
     Implements merge/upsert strategy to handle updates and deduplication.
     """
-
-    @staticmethod
-    def _flatten_for_csv(table: pa.Table) -> pa.Table:
-        """Convert complex types (list, struct) to JSON strings for CSV export."""
-        import json as json_module
-
-        new_columns = []
-        for i, field in enumerate(table.schema):
-            col = table.column(i)
-            if pa.types.is_list(field.type) or pa.types.is_large_list(field.type) or pa.types.is_struct(field.type):
-                json_strings = [
-                    json_module.dumps(val.as_py()) if val.as_py() is not None else None
-                    for val in col
-                ]
-                new_columns.append(pa.array(json_strings, type=pa.string()))
-            else:
-                new_columns.append(col)
-
-        new_schema = pa.schema([
-            pa.field(f.name, pa.string() if pa.types.is_list(f.type) or pa.types.is_large_list(f.type) or pa.types.is_struct(f.type) else f.type, f.nullable)
-            for f in table.schema
-        ])
-        return pa.Table.from_arrays(new_columns, schema=new_schema)
 
     def __init__(
         self,
@@ -82,15 +56,11 @@ class DeltaWriter:
             base_path: Base path for Delta tables
             storage_options: Storage options for S3/MinIO
             csv_path: Path for CSV export (None to disable)
-            csv_options: CSV export options:
-                - delimiter: Field delimiter (default: ",")
-                - header: Include header row (default: True)
-                - encoding: File encoding (default: "utf-8")
+            csv_options: CSV export options
         """
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
-        self.csv_path = csv_path
-        self.csv_options = csv_options or {}
+        self.csv_exporter = CsvExporter(csv_path, csv_options)
 
     async def write_silver(
         self,
@@ -166,61 +136,8 @@ class DeltaWriter:
                 raise MergeConflictError(table_name, conflicts=1) from e
             raise
 
-        if self.csv_path:
-            csv_full_path = Path(self.csv_path) / f"{table_name}.csv"
-            csv_full_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Build CSV write options from config
-            delimiter = self.csv_options.get("delimiter", ",")
-            include_header = self.csv_options.get("header", True)
-
-            write_options = pv.WriteOptions(
-                include_header=include_header,
-                delimiter=delimiter,
-            )
-
-            # Convert list/struct columns to JSON strings for CSV compatibility
-            csv_data = self._flatten_for_csv(arrow_data)
-
-            # Atomic write: write to temp file, then rename to avoid file lock issues on Windows
-            await loop.run_in_executor(
-                None,
-                lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options)
-            )
-
-    @staticmethod
-    def _atomic_csv_write(
-        data: pa.Table,
-        target_path: Path,
-        write_options: pv.WriteOptions,
-    ) -> None:
-        """Write CSV atomically to avoid file lock issues on Windows.
-
-        Writes to a temporary file in the same directory, then renames.
-        This avoids WinError 32 when the target file is briefly locked.
-        """
-        # Create temp file in same directory for atomic rename
-        target_dir = target_path.parent
-        fd, temp_path = tempfile.mkstemp(
-            suffix=".csv.tmp",
-            prefix=target_path.stem + "_",
-            dir=target_dir,
-        )
-        try:
-            os.close(fd)  # Close fd, PyArrow will open by path
-            pv.write_csv(data, temp_path, write_options=write_options)
-
-            # On Windows, need to remove target first if exists
-            if os.name == "nt" and target_path.exists():
-                target_path.unlink()
-
-            # Atomic rename
-            os.rename(temp_path, target_path)
-        except Exception:
-            # Clean up temp file on error
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
-            raise
+        # Export to CSV if enabled
+        await self.csv_exporter.export(table_name, arrow_data)
 
     async def _merge_records(
         self,

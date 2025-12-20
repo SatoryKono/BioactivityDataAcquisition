@@ -604,7 +604,7 @@ def test_adapters_implement_protocols(src_dir: Path):
         from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
         from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
-        from bioetl.infrastructure.factories.storage import StorageAdapter
+        from bioetl.composition.factories.storage_factory import StorageAdapter
         from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
         from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
     except ImportError as e:
