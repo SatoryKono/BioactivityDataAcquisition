@@ -134,9 +134,9 @@ class PipelineYamlConfig(BaseModel):
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
 
     # Storage
-    primary_keys: list[str]
-    silver_table: str
-    gold_table: str | None = None
+    primary_keys: list[str] = Field(min_length=1)
+    silver_table: str = Field(min_length=1)
+    gold_table: str | None = Field(default=None, min_length=1)
     gold_filter_types: list[str] = Field(default_factory=list)
 
     # Medallion Layers
