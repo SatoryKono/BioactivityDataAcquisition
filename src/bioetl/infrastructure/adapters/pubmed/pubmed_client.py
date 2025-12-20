@@ -165,10 +165,15 @@ class PubMedAdapter:
             return HealthStatus.UNHEALTHY
 
     async def aclose(self) -> None:
-        """Close the HTTP client."""
-        # Delegated to __aexit__, but kept for protocol completeness if used manually
-        if self.http_client:
-            # Note: UnifiedHTTPClient doesn't have a public aclose method other than via context manager
-            # But the underlying client does.
-            # Ideally usage is via context manager.
-            pass
+        """Close adapter resources.
+
+        Safely closes the HTTP client if it's open. Idempotent - safe to call
+        multiple times. Handles cases where client may already be closed.
+        """
+        if (
+            self.http_client
+            and hasattr(self.http_client, "_client")
+            and self.http_client._client is not None
+        ):
+            await self.http_client._client.aclose()
+            self.http_client._client = None
