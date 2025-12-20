@@ -79,7 +79,7 @@ class PubMedAdapter:
             entity_type: Must be 'publication'
             watermark: Unused for now (required by protocol)
             limit: Max records to fetch
-            query: PubMed search query (default: "pharmacogenomics[Title/Abstract]")
+            query: PubMed search query (defaults to pharmacogenomics search)
 
         Yields:
             Dict containing pmid, article_title, and raw_xml
