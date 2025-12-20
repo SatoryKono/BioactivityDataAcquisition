@@ -18,11 +18,18 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
+
+@pytest.fixture(autouse=True)
+def ensure_registration():
+    """Ensure pipeline factories are registered before E2E tests."""
+    register_all_pipelines()
 
 
 @pytest.mark.e2e

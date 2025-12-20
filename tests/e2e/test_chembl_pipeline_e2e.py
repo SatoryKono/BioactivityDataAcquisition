@@ -11,11 +11,18 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.executor import PipelineExecutor
-from bioetl.domain.config import RuntimeConfig
-from bioetl.application.core.record_processor import RecordProcessor, BatchResult
+from bioetl.application.core.record_processor import BatchResult, RecordProcessor
 from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_settings
+
+
+@pytest.fixture(autouse=True)
+def ensure_registration():
+    """Ensure pipeline factories are registered before E2E tests."""
+    register_all_pipelines()
 
 
 @pytest.mark.e2e
