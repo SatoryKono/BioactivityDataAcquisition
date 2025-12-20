@@ -552,3 +552,4 @@ fields:
 - **3.0** (2025-05-20): Lineage, Backfill, Concurrency, Graceful Shutdown, Dev Experience. 
 - **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский. 
 - **1.0** (2025-04-01): Черновик. 
+2
