@@ -103,7 +103,7 @@ def shutdown_signal():
 @pytest.fixture
 def mock_lock_manager():
     """Mock LockManager class."""
-    with patch("bioetl.interfaces.orchestration.runner.LockManager") as mock:
+    with patch("bioetl.application.orchestration.runner.LockManager") as mock:
         lock_manager = MagicMock()
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock(return_value=None)
