@@ -133,10 +133,10 @@ async def test_chembl_pipeline_e2e(
 
     # 5. Verify Results
 
-    # Verify Checkpoint
+    # Verify Checkpoint is deleted after successful run
+    # (Checkpoints are only kept for resume, deleted on success)
     objs = s3.list_objects_v2(Bucket="test-checkpoints", Prefix=f"checkpoints/{pipeline_name}/")
-    assert "Contents" in objs
-    assert len(objs["Contents"]) == 1
+    assert "Contents" not in objs or len(objs.get("Contents", [])) == 0
 
     # Verify Bronze
     objs = s3.list_objects_v2(Bucket="test-bronze", Prefix=f"bronze/v1/chembl/activity/")
