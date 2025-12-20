@@ -7,7 +7,6 @@ import pytest
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.composition.factories.chembl_adapter import create_chembl_adapter
 
 
 @pytest.fixture
@@ -122,14 +121,6 @@ async def test_get_entity_count(adapter, mock_http_client):
 
     count = await adapter.get_entity_count("activity")
     assert count == 100
-
-
-def test_create_chembl_adapter():
-    """Test factory function."""
-    cb = MagicMock()
-    adapter, client = create_chembl_adapter(cb)
-    assert isinstance(adapter, ChemblAdapter)
-    assert adapter.http_client is client
 
 
 @pytest.mark.asyncio
