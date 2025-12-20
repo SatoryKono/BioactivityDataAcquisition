@@ -133,6 +133,7 @@ class RuntimeConfig:
     run_type: RunType
     resume: bool = False
     limit: int | None = None
+    query: str | None = None
     heartbeat_interval: int = 30
     wait_for_lock: bool = False
     lock_wait_timeout: int = 300
