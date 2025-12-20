@@ -25,8 +25,12 @@ class FilteredDataSource:
 
     The wrapper:
     1. Loads filter IDs from CSV on context entry
-    2. Passes filter_ids and filter_field to the underlying adapter's fetch()
+    2. Calls fetch_filtered() on adapters that support it (e.g., ChemblAdapter)
     3. Delegates all other operations to the wrapped adapter
+
+    Note:
+        Filtering requires the underlying adapter to implement a fetch_filtered()
+        method. This is a provider-specific extension not part of DataSourcePort.
 
     Example:
         >>> config = InputFilterConfig(
@@ -95,8 +99,8 @@ class FilteredDataSource:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with optional filtering.
 
-        If filtering is enabled and filter IDs are loaded, passes them
-        to the underlying adapter. Otherwise, delegates directly.
+        If filtering is enabled and filter IDs are loaded, uses the adapter's
+        fetch_filtered() method if available. Otherwise, delegates to standard fetch().
 
         Args:
             entity_type: Type of entity to fetch.
@@ -106,16 +110,25 @@ class FilteredDataSource:
 
         Yields:
             Records from the data source, filtered if configured.
+
+        Raises:
+            TypeError: If filtering is enabled but the adapter doesn't support
+                fetch_filtered() method.
         """
         if self._filter_config.enabled and self._filter_ids:
-            # Filtered fetch: pass IDs to adapter
-            async for record in self._data_source.fetch(
+            # Check if adapter supports filtering (ChEMBL-specific extension)
+            if not hasattr(self._data_source, "fetch_filtered"):
+                raise TypeError(
+                    f"Adapter {self._data_source.provider_name} does not support "
+                    "fetch_filtered(). Filtering requires an adapter with this method."
+                )
+            # Filtered fetch using adapter-specific method
+            async for record in self._data_source.fetch_filtered(
                 entity_type=entity_type,
-                watermark=watermark,
-                limit=limit,
-                query=query,
                 filter_ids=self._filter_ids,
                 filter_field=self._filter_config.filter_field,
+                watermark=watermark,
+                limit=limit,
             ):
                 yield record
         else:
