@@ -102,9 +102,9 @@ class PubChemClient:
     async def fetch(
         self,
         entity_type: str,
-        query: str | None = None,
         watermark: Watermark | None = None,
         limit: int | None = None,
+        query: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from PubChem."""
         # Apply rate limiting
