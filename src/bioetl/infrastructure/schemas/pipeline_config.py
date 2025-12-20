@@ -78,6 +78,13 @@ class InputFilterConfig(BaseModel):
     )
 
 
+class ApiConfig(BaseModel):
+    """Configuration for API connection details."""
+    base_url: str | None = None
+    rate_limit: float | None = None
+    timeout: int | None = None
+
+
 class SourceConfig(BaseModel):
     """Configuration for the data source."""
     load_strategy: Literal["full", "incremental"] = "full"
@@ -86,6 +93,7 @@ class SourceConfig(BaseModel):
     api_key: str | None = None
     watermark_field: str | None = None
     fields: list[dict[str, str]] = Field(default_factory=list)
+    api: ApiConfig = Field(default_factory=ApiConfig)
 
 
 class SinkLayerConfig(BaseModel):
