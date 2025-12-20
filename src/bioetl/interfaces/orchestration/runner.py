@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.core.executor import PipelineExecutor
+    from bioetl.domain.ports import TracingPort
 
 
 class PipelineRunner:
