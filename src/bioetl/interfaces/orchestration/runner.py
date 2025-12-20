@@ -43,6 +43,7 @@ class PipelineRunner:
         shutdown_signal: ShutdownSignal,
         logger: structlog.BoundLogger,
         pipeline: BasePipeline | None = None,
+        tracer: TracingPort | None = None,
     ) -> None:
         self._config = config
         self._runtime = runtime
@@ -53,6 +54,7 @@ class PipelineRunner:
         self.shutdown_signal = shutdown_signal
         self._logger = logger
         self.pipeline = pipeline
+        self._tracer = tracer
 
         # The runner is responsible for creating application services
         self._lock_manager = LockManager.create(
@@ -74,6 +76,11 @@ class PipelineRunner:
     def logger(self) -> structlog.BoundLogger:
         return self._logger
 
+    @property
+    def services(self) -> PipelineServices:
+        """Access injected services."""
+        return self._services
+
     async def run(self) -> None:
         """Execute pipeline. Main entry point."""
         self._logger.info(
@@ -83,33 +90,27 @@ class PipelineRunner:
 
         # Initialize observer for automated metrics collection
         observer = PipelineObserver(
+            pipeline_name=self._config.pipeline_name,
+            run_id=self._context.run_id,
+            run_type=self._runtime.run_type,
             metrics=self._services.metrics,
             logger=self._logger,
-            pipeline_name=self._config.pipeline_name,
-            run_type=self._runtime.run_type.value,
+            tracer=self._tracer,
         )
 
         with observer:
-            try:
-                async with self._services, self._lock_manager:
-                    watermark = await self._checkpoint_manager.load_checkpoint()
-                    await self._executor.execute(
-                        watermark=watermark, limit=self._runtime.limit, query=self._runtime.query
-                    )
-                    await self._checkpoint_manager.delete_checkpoint()
-
-                # Add extra info to logs if needed, though observer handles success/failure logging
-                self._logger.debug(
-                    "Pipeline execution finished",
-                    extra={"records_fetched": self._executor.records_fetched},
+            # Observer handles ShutdownSignal suppression and status recording
+            async with self._services, self._lock_manager:
+                watermark = await self._checkpoint_manager.load_checkpoint()
+                await self._executor.execute(
+                    watermark=watermark,
+                    limit=self._runtime.limit,
+                    query=self._runtime.query,
                 )
+                await self._checkpoint_manager.delete_checkpoint()
 
-            except PipelineShutdownError:
-                observer.set_status("shutdown")
-                self._logger.warning(
-                    "Pipeline shutdown requested", extra={"stage": "shutdown"}
-                )
-                # Do not re-raise, allow observer to record shutdown status
-            except Exception as e:
-                self._logger.error(f"Pipeline failed: {e}", exc_info=True)
-                raise  # Re-raise, observer will record 'failure' status automatically
+            # Add extra info to logs if needed, though observer handles success/failure logging
+            self._logger.debug(
+                "Pipeline execution finished",
+                extra={"records_fetched": self._executor.records_fetched},
+            )

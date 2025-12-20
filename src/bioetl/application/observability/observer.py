@@ -1,116 +1,135 @@
 """Pipeline Observer Context Manager.
 
-Handles automated metrics collection for pipeline execution.
+Implements R12/R13: Observability wrapper for pipeline execution.
+Handles:
+- Distributed Tracing (Span creation)
+- Metrics (Counter/Histogram)
+- Logging (Structured logs with lifecycle context)
 """
+
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from contextlib import AbstractContextManager
+from types import TracebackType
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.domain.ports import MetricsPort, TracingPort
 
 if TYPE_CHECKING:
-    from types import TracebackType
-
     import structlog
 
-    from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.types import RunID, RunType
 
 
-class PipelineObserver:
-    """
-    Context manager for observing pipeline execution.
-    Automatically handles timing and metrics submission.
-
-    Usage:
-        with PipelineObserver(metrics, logger, "my_pipeline", "incremental") as obs:
-            ...
-            if shutdown:
-                obs.set_status("shutdown")
-    """
+class PipelineObserver(AbstractContextManager["PipelineObserver"]):
+    """Observability wrapper for pipeline execution."""
 
     def __init__(
         self,
+        pipeline_name: str,
+        run_id: RunID,
+        run_type: RunType,
         metrics: MetricsPort,
         logger: structlog.BoundLogger,
-        pipeline_name: str,
-        run_type: str,
-        tags: dict[str, str] | None = None,
+        tracer: TracingPort | None = None,
     ) -> None:
-        self._metrics = metrics
-        self._logger = logger
-        self._pipeline_name = pipeline_name
-        self._run_type = run_type
-        self._tags = tags or {}
-        self._start_time: float | None = None
-        self._status: str | None = None
+        """Initialize observer."""
+        self.pipeline_name = pipeline_name
+        self.run_id = str(run_id)
+        self.run_type = run_type.value
+        self.metrics = metrics
+        self.logger = logger
+        self.tracer = tracer
+
+        self.start_time: float | None = None
+        self.span: Any = None
 
     def __enter__(self) -> PipelineObserver:
-        self._start_time = time.monotonic()
-        self._logger.info(
-            f"Starting pipeline: {self._pipeline_name}",
-            extra={"stage": "startup", "run_type": self._run_type},
-        )
-        return self
+        """Start observation (Span + Log + Metric)."""
+        self.start_time = time.monotonic()
 
-    def set_status(self, status: str) -> None:
-        """Manually set the execution status (e.g., 'shutdown')."""
-        self._status = status
+        # 1. Start Trace Span
+        if self.tracer:
+            otel_tracer = self.tracer.get_tracer("bioetl.pipeline")
+            self.span = otel_tracer.start_as_current_span(
+                f"pipeline.{self.pipeline_name}",
+                attributes={
+                    "bioetl.pipeline": self.pipeline_name,
+                    "bioetl.run_id": self.run_id,
+                    "bioetl.run_type": self.run_type,
+                }
+            )
+            self.span.__enter__()
+
+        # 2. Log Start
+        self.logger.info("pipeline_started", run_type=self.run_type)
+
+        return self
 
     def __exit__(
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
-    ) -> None:
-        if self._start_time is None:
-            return
+    ) -> bool | None:
+        """End observation (Span + Log + Metric)."""
+        duration = time.monotonic() - (self.start_time or 0)
+        status = "success"
+        suppress_exception = False
 
-        duration = time.monotonic() - self._start_time
-
-        # Determine status
-        if self._status:
-            status = self._status
-        elif exc_val:
-            status = "failure"
+        if exc_val:
             if isinstance(exc_val, PipelineShutdownError):
                 status = "shutdown"
-        else:
-            status = "success"
+                suppress_exception = True  # We suppress the shutdown signal to allow clean exit
+            else:
+                status = "failed"
 
-        # Prepare labels
-        labels = {
-            "pipeline": self._pipeline_name,
-            "stage": "pipeline",  # Overall pipeline duration
-            "run_type": self._run_type,
+        # 1. Metrics (Histogram)
+        self.metrics.observe_histogram(
+            "bioetl_pipeline_duration_seconds",
+            duration,
+            labels={
+                "pipeline": self.pipeline_name,
+                "run_type": self.run_type,
+                "status": status,
+            },
+        )
+        self.metrics.increment_counter(
+            "bioetl_pipeline_runs_total",
+            1,
+            labels={
+                "pipeline": self.pipeline_name,
+                "run_type": self.run_type,
+                "status": status,
+            },
+        )
+
+        # 2. Log Result
+        log_ctx = {
+            "duration_seconds": duration,
             "status": status,
         }
-        labels.update(self._tags)
-
-        # Record metrics
-        try:
-            self._metrics.observe_histogram(
-                "pipeline_duration_seconds",
-                duration,
-                labels,
+        if status == "failed":
+            self.logger.error(
+                "pipeline_failed",
+                **log_ctx,
+                error=str(exc_val),
+                error_type=type(exc_val).__name__,
             )
-        except Exception as e:
-            self._logger.error(f"Failed to record metrics: {e}", exc_info=True)
-
-        # Log completion summary
-        extra = {
-            "stage": "complete" if status == "success" else status,
-            "duration_seconds": duration,
-        }
-
-        if status == "success":
-            self._logger.info("Pipeline completed successfully", extra=extra)
         elif status == "shutdown":
-            self._logger.warning("Pipeline shutdown", extra=extra)
-        elif status == "failure":
-             # We log failure here to ensure visibility even if exception handling in caller is silent
-             self._logger.error(
-                 "Pipeline failed",
-                 extra={**extra, "error": str(exc_val)},
-                 exc_info=(exc_type, exc_val, exc_tb)
-             )
+            self.logger.warning("pipeline_shutdown", **log_ctx)
+        else:
+            self.logger.info("pipeline_finished", **log_ctx)
+
+        # 3. End Trace Span
+        if self.span:
+            self.span.set_attribute("bioetl.status", status)
+            self.span.set_attribute("bioetl.duration_ms", duration * 1000)
+            if status == "failed":
+                self.span.record_exception(exc_val)
+                self.span.set_attribute("error", True)
+            self.span.__exit__(exc_type, exc_val, exc_tb)
+
+        return suppress_exception

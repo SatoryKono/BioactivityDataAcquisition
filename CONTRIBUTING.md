@@ -96,3 +96,25 @@ Before contributing, read these documents:
 - **MUST**: Absolute requirement, violation is a release blocker
 - **SHOULD**: Strong recommendation, deviation requires justification in PR
 - **MAY**: Optional, developer discretion
+
+## Troubleshooting
+
+### Common Issues
+
+**1. "Watermark not found" errors**
+- Check S3/MinIO connectivity (`make test-integration` usually catches this).
+- Ensure `Watermark` class usage is consistent (use `Watermark.from_*` factory methods).
+
+**2. "Lock acquisition failed"**
+- Check Redis is running: `docker ps`.
+- Check logs for "Lock lost" messages.
+
+**3. "Missing dependencies"**
+- Run `uv sync --extra dev --extra tracing`.
+- Check `pyproject.toml` for new groups.
+
+### Observability & Metrics
+
+- Metrics are available at `http://localhost:8000/metrics`.
+- Dashboards are in `grafana/dashboards/`.
+- Tracing is disabled by default. To enable: `export BIOETL_OBSERVABILITY__TRACING_ENABLED=true`.

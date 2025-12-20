@@ -264,6 +264,15 @@ class RedisSettings(BaseSettings):
     db: int = Field(default=0, ge=0)
 
 
+class ObservabilitySettings(BaseSettings):
+    """Observability configuration."""
+
+    model_config = SettingsConfigDict(frozen=True)
+
+    tracing_enabled: bool = Field(default=False)
+    """Enable OpenTelemetry tracing."""
+
+
 class PipelineSettings(BaseSettings):
     """Pipeline execution configuration."""
 
@@ -308,6 +317,7 @@ class Settings(BaseSettings):
     s3: S3Settings = Field(default_factory=S3Settings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
+    observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
 
     # Provider-specific settings
     default_email: str = Field(
