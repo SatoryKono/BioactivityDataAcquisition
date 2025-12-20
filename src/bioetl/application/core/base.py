@@ -13,11 +13,10 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Self
 from uuid import uuid4
 
-from bioetl.domain.config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig
 from bioetl.domain.types import (
     BronzeRecord,
     RunID,

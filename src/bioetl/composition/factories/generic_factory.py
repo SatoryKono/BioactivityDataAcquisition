@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.domain.config import PipelineRuntimeConfig
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort
