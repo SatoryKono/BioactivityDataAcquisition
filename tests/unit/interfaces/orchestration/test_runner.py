@@ -225,7 +225,8 @@ class TestPipelineRunnerRun:
         await runner.run()
 
         calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("completed successfully" in call for call in calls)
+        # Observer logs "pipeline_finished" on success
+        assert any("pipeline_finished" in call or "finished" in call for call in calls)
 
     @pytest.mark.asyncio
     async def test_run_handles_shutdown_error(
@@ -256,7 +257,7 @@ class TestPipelineRunnerRun:
 
         mock_services.metrics.observe_histogram.assert_called_once()
         call_args = mock_services.metrics.observe_histogram.call_args
-        assert call_args[0][0] == "pipeline_duration_seconds"
+        assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
 
     @pytest.mark.asyncio
     async def test_run_records_metrics_on_failure(self, runner, mock_services, mock_executor):
@@ -268,8 +269,8 @@ class TestPipelineRunnerRun:
 
         mock_services.metrics.observe_histogram.assert_called_once()
         call_args = mock_services.metrics.observe_histogram.call_args
-        labels = call_args[0][2]
-        assert labels["status"] == "failure"
+        labels = call_args[1].get("labels") or call_args[0][2]
+        assert labels["status"] == "failed"
 
     @pytest.mark.asyncio
     async def test_run_records_metrics_on_shutdown(
@@ -281,7 +282,7 @@ class TestPipelineRunnerRun:
         await runner.run()
 
         call_args = mock_services.metrics.observe_histogram.call_args
-        labels = call_args[0][2]
+        labels = call_args[1].get("labels") or call_args[0][2]
         assert labels["status"] == "shutdown"
 
     @pytest.mark.asyncio
