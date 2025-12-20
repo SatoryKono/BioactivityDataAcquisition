@@ -197,6 +197,10 @@ class TestStorageFactoryLocal:
         mock_logger,
     ):
         """Test local run with CSV export enabled for Silver and Gold."""
+        from pathlib import Path
+
+        from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
         with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
              patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta, \
              patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold:
@@ -207,17 +211,23 @@ class TestStorageFactoryLocal:
                 logger=mock_logger,
             )
 
-            # Verify DeltaWriter (Silver) was called with csv options
+            # Verify DeltaWriter (Silver) was called with csv_exporter
             mock_delta.assert_called_once()
             silver_call_kwargs = mock_delta.call_args[1]
-            assert silver_call_kwargs["csv_path"] == "data/export/silver.csv"
-            assert silver_call_kwargs["csv_options"]["delimiter"] == ","
+            assert "csv_exporter" in silver_call_kwargs
+            silver_exporter = silver_call_kwargs["csv_exporter"]
+            assert isinstance(silver_exporter, CsvExporter)
+            assert silver_exporter.base_path == Path("data/export/silver.csv")
+            assert silver_exporter.delimiter == ","
 
-            # Verify GoldWriter was called with csv options
+            # Verify GoldWriter was called with csv_exporter
             mock_gold.assert_called_once()
             gold_call_kwargs = mock_gold.call_args[1]
-            assert gold_call_kwargs["csv_path"] == "data/export/gold.csv"
-            assert gold_call_kwargs["csv_options"]["delimiter"] == ";"
+            assert "csv_exporter" in gold_call_kwargs
+            gold_exporter = gold_call_kwargs["csv_exporter"]
+            assert isinstance(gold_exporter, CsvExporter)
+            assert gold_exporter.base_path == Path("data/export/gold.csv")
+            assert gold_exporter.delimiter == ";"
 
     def test_local_run_logs_info(
         self,
