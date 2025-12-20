@@ -43,7 +43,7 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.interfaces.orchestration.runner import PipelineRunner
+from bioetl.application.orchestration.runner import PipelineRunner
 
 __all__ = [
     "BronzeWriter",
