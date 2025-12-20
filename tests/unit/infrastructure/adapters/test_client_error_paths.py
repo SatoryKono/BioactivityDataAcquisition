@@ -122,10 +122,10 @@ class TestUniProtClientErrorPaths:
                 )
             ]
 
-    async def test_fetch_features_logs_warning_on_failure(
+    async def test_fetch_features_logs_error_on_failure(
         self, mock_http_client, caplog
     ):
-        """Test that _fetch_features logs warning when fetch fails."""
+        """Test that _fetch_features logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         with patch.dict(
@@ -142,20 +142,20 @@ class TestUniProtClientErrorPaths:
             )
             client = UniProtClient(http_client=mock_http_client)
 
-            with caplog.at_level(logging.WARNING):
-                results = [r async for r in client._fetch_features("P12345", limit=10)]
+            with caplog.at_level(logging.ERROR):
+                results = [r async for r in client._fetch_features("P12345", watermark=None, limit=10)]
 
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the warning
+            # Should have logged the error
             assert "UniProt feature fetch failed" in caplog.text
             # Check that the exception info is in the log
-            warning_records = [
-                r for r in caplog.records if r.levelno == logging.WARNING
+            error_records = [
+                r for r in caplog.records if r.levelno == logging.ERROR
             ]
-            assert len(warning_records) >= 1
-            assert "Request timeout" in warning_records[0].exc_text
+            assert len(error_records) >= 1
+            assert "Request timeout" in error_records[0].exc_text
 
     async def test_fetch_features_raises_in_strict_mode(self, mock_http_client):
         """Test that _fetch_features raises exception in strict mode."""
@@ -168,12 +168,12 @@ class TestUniProtClientErrorPaths:
         client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(TimeoutError, match="Request timeout"):
-            _ = [r async for r in client._fetch_features("P12345", limit=10)]
+            _ = [r async for r in client._fetch_features("P12345", watermark=None, limit=10)]
 
-    async def test_fetch_sequences_logs_warning_on_failure(
+    async def test_fetch_sequences_logs_error_on_failure(
         self, mock_http_client, caplog
     ):
-        """Test that _fetch_sequences logs warning when fetch fails."""
+        """Test that _fetch_sequences logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         with patch.dict(
@@ -194,15 +194,15 @@ class TestUniProtClientErrorPaths:
             )
             client = UniProtClient(http_client=mock_http_client)
 
-            with caplog.at_level(logging.WARNING):
+            with caplog.at_level(logging.ERROR):
                 results = [
-                    r async for r in client._fetch_sequences("gene:TP53", limit=10)
+                    r async for r in client._fetch_sequences("gene:TP53", watermark=None, limit=10)
                 ]
 
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the warning
+            # Should have logged the error
             assert "UniProt sequence fetch failed" in caplog.text
 
     async def test_fetch_sequences_raises_in_strict_mode(self, mock_http_client):
@@ -219,7 +219,7 @@ class TestUniProtClientErrorPaths:
         client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(httpx.HTTPStatusError):
-            _ = [r async for r in client._fetch_sequences("gene:TP53", limit=10)]
+            _ = [r async for r in client._fetch_sequences("gene:TP53", watermark=None, limit=10)]
 
 
 class TestPubChemClientErrorPaths:
