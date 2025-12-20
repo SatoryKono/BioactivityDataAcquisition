@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.registry import PipelineRegistry
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
+from bioetl.composition.factories.data_source_registry import _wrap_with_filter
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
@@ -44,20 +45,7 @@ class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline])
         http_client = HttpClientFactory.create_for_provider("chembl", settings)
         base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
 
-        # Wrap with FilteredDataSource if filter is enabled
-        if filter_config and filter_config.enabled:
-            from bioetl.application.core.filtered_data_source import FilteredDataSource
-            from bioetl.infrastructure.adapters.input.csv_filter_reader import (
-                CsvFilterReader,
-            )
-
-            return FilteredDataSource(
-                data_source=base_adapter,
-                filter_reader=CsvFilterReader(),
-                filter_config=filter_config,
-            )
-
-        return base_adapter
+        return _wrap_with_filter(base_adapter, filter_config)
 
 
 PipelineRegistry.register(
