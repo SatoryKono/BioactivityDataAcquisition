@@ -1,17 +1,16 @@
 # src/bioetl/composition/factories/__init__.py
 """Pipeline factories module.
 
-Provides both legacy class-based factories and new generic factory pattern.
+Provides the GenericPipelineFactory for creating pipeline instances declaratively.
 
-Usage (new pattern):
+Usage:
     >>> from bioetl.composition.factories import GenericPipelineFactory
     >>> factory = GenericPipelineFactory(...)
 
-Usage (legacy pattern):
-    >>> from bioetl.composition.factories import chembl_activity
+All pipeline factories are auto-registered when this module is imported.
 """
 
-# New unified factory system
+# Core factory infrastructure
 from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
     DataSourceRegistry,
@@ -21,19 +20,21 @@ from bioetl.composition.factories.generic_factory import (
     create_pipeline_factory,
 )
 
-# Import all pipeline factories to ensure they are registered in the PipelineRegistry.
-# The registration happens at import time when the module is loaded.
-from . import chembl_activity, pubchem_compound, pubmed_publications, uniprot_protein
+# Import to trigger pipeline registration
+from bioetl.composition.factories.pipeline_factories import (
+    chembl_activity_factory,
+    pubchem_compound_factory,
+    pubmed_publications_factory,
+    uniprot_protein_factory,
+)
 
 __all__ = [
-    # New generic factory
-    "GenericPipelineFactory",
-    "create_pipeline_factory",
-    "DataSourceRegistry",
     "DataSourceCreator",
-    # Legacy factories (still functional)
-    "chembl_activity",
-    "pubchem_compound",
-    "uniprot_protein",
-    "pubmed_publications",
+    "DataSourceRegistry",
+    "GenericPipelineFactory",
+    "chembl_activity_factory",
+    "create_pipeline_factory",
+    "pubchem_compound_factory",
+    "pubmed_publications_factory",
+    "uniprot_protein_factory",
 ]

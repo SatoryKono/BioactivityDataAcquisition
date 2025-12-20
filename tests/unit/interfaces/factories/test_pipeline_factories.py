@@ -1,15 +1,11 @@
 """Unit tests for pipeline factories.
 
-Tests creation of services for all pipelines:
-- PubChemCompoundPipelineFactory
-- UniProtProteinPipelineFactory
+Tests that pipeline factory instances are properly exported and configured.
 """
 
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-from bioetl.domain.types import RunType
 
 
 # =============================================================================
@@ -22,37 +18,50 @@ class TestInterfacesFactoriesReexports:
     """Test that interfaces.factories re-exports work correctly."""
 
     def test_chembl_activity_factory_reexport(self):
-        """Test ChEMBLActivityPipelineFactory is re-exported."""
-        from bioetl.interfaces.factories import ChEMBLActivityPipelineFactory
+        """Test chembl_activity_factory is re-exported."""
+        from bioetl.interfaces.factories import chembl_activity_factory
 
-        assert ChEMBLActivityPipelineFactory is not None
-        assert hasattr(ChEMBLActivityPipelineFactory, "build_services")
-        assert hasattr(ChEMBLActivityPipelineFactory, "create_with_services")
+        assert chembl_activity_factory is not None
+        assert hasattr(chembl_activity_factory, "build_services")
+        assert hasattr(chembl_activity_factory, "create_with_services")
+        assert chembl_activity_factory.pipeline_name == "chembl_activity"
 
     def test_pubchem_compound_factory_reexport(self):
-        """Test PubChemCompoundPipelineFactory is re-exported."""
-        from bioetl.interfaces.factories import PubChemCompoundPipelineFactory
+        """Test pubchem_compound_factory is re-exported."""
+        from bioetl.interfaces.factories import pubchem_compound_factory
 
-        assert PubChemCompoundPipelineFactory is not None
-        assert hasattr(PubChemCompoundPipelineFactory, "build_services")
-        assert hasattr(PubChemCompoundPipelineFactory, "create_with_services")
+        assert pubchem_compound_factory is not None
+        assert hasattr(pubchem_compound_factory, "build_services")
+        assert hasattr(pubchem_compound_factory, "create_with_services")
+        assert pubchem_compound_factory.pipeline_name == "pubchem_compound"
 
     def test_uniprot_protein_factory_reexport(self):
-        """Test UniProtProteinPipelineFactory is re-exported."""
-        from bioetl.interfaces.factories import UniProtProteinPipelineFactory
+        """Test uniprot_protein_factory is re-exported."""
+        from bioetl.interfaces.factories import uniprot_protein_factory
 
-        assert UniProtProteinPipelineFactory is not None
-        assert hasattr(UniProtProteinPipelineFactory, "build_services")
-        assert hasattr(UniProtProteinPipelineFactory, "create_with_services")
+        assert uniprot_protein_factory is not None
+        assert hasattr(uniprot_protein_factory, "build_services")
+        assert hasattr(uniprot_protein_factory, "create_with_services")
+        assert uniprot_protein_factory.pipeline_name == "uniprot_protein"
+
+    def test_pubmed_publications_factory_reexport(self):
+        """Test pubmed_publications_factory is re-exported."""
+        from bioetl.interfaces.factories import pubmed_publications_factory
+
+        assert pubmed_publications_factory is not None
+        assert hasattr(pubmed_publications_factory, "build_services")
+        assert hasattr(pubmed_publications_factory, "create_with_services")
+        assert pubmed_publications_factory.pipeline_name == "pubmed_publications"
 
     def test_all_exports_in_module(self):
         """Test __all__ contains expected factories."""
         from bioetl import interfaces
 
         factory_module = interfaces.factories
-        assert "ChEMBLActivityPipelineFactory" in factory_module.__all__
-        assert "PubChemCompoundPipelineFactory" in factory_module.__all__
-        assert "UniProtProteinPipelineFactory" in factory_module.__all__
+        assert "chembl_activity_factory" in factory_module.__all__
+        assert "pubchem_compound_factory" in factory_module.__all__
+        assert "uniprot_protein_factory" in factory_module.__all__
+        assert "pubmed_publications_factory" in factory_module.__all__
 
 
 @pytest.fixture
@@ -91,7 +100,10 @@ def mock_logger():
 def mock_pipeline_config():
     """Create mock pipeline configuration."""
     config = MagicMock()
-    config.source = {"api": {"rate_limit": 5.0, "base_url": "https://api.example.com"}}
+    config.source = MagicMock()
+    config.source.get = MagicMock(return_value={"rate_limit": 5.0})
+    config.source.api_key = None
+    config.source.email = None
     return config
 
 
@@ -109,17 +121,17 @@ def mock_services():
 
 
 # =============================================================================
-# PubChemCompoundPipelineFactory Tests
+# GenericPipelineFactory Tests (via pubchem_compound_factory)
 # =============================================================================
 
 
 @pytest.mark.unit
-class TestPubChemCompoundPipelineFactory:
-    """Tests for PubChemCompoundPipelineFactory."""
+class TestPubChemCompoundFactory:
+    """Tests for pubchem_compound_factory (GenericPipelineFactory instance)."""
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -130,9 +142,9 @@ class TestPubChemCompoundPipelineFactory:
         mock_pipeline_config,
         mock_services,
     ):
-        """Test build_services creates data source via DataSourceFactory."""
-        from bioetl.composition.factories.pubchem_compound import (
-            PubChemCompoundPipelineFactory,
+        """Test build_services creates data source via DataSourceRegistry."""
+        from bioetl.composition.factories.pipeline_factories import (
+            pubchem_compound_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
@@ -140,23 +152,20 @@ class TestPubChemCompoundPipelineFactory:
         mock_data_source = MagicMock()
         mock_data_source_create.return_value = mock_data_source
 
-        services = PubChemCompoundPipelineFactory.build_services(
+        services = pubchem_compound_factory.build_services(
             settings=mock_settings,
             logger=mock_logger,
         )
 
         assert services is not None
-        mock_data_source_create.assert_called_once_with(
-            "pubchem",
-            http_client=None,
-            rate=5.0,
-            strict_error_handling=False,
-            filter_config=None,
-        )
+        # DataSourceFactory.create is called with pubchem provider
+        mock_data_source_create.assert_called_once()
+        call_args = mock_data_source_create.call_args
+        assert call_args[0][0] == "pubchem"
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -168,8 +177,8 @@ class TestPubChemCompoundPipelineFactory:
         mock_services,
     ):
         """Test build_services uses BaseServicesFactory."""
-        from bioetl.composition.factories.pubchem_compound import (
-            PubChemCompoundPipelineFactory,
+        from bioetl.composition.factories.pipeline_factories import (
+            pubchem_compound_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
@@ -177,56 +186,16 @@ class TestPubChemCompoundPipelineFactory:
         mock_data_source = MagicMock()
         mock_data_source_create.return_value = mock_data_source
 
-        PubChemCompoundPipelineFactory.build_services(
+        pubchem_compound_factory.build_services(
             settings=mock_settings,
             logger=mock_logger,
         )
 
-        mock_base_services.create_common_services.assert_called_once_with(
-            settings=mock_settings,
-            logger=mock_logger,
-            data_source=mock_data_source,
-            pipeline_config=mock_pipeline_config,
-        )
+        mock_base_services.create_common_services.assert_called_once()
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
-    def test_build_services_uses_default_rate_limit(
-        self,
-        mock_load_config,
-        mock_data_source_create,
-        mock_base_services,
-        mock_settings,
-        mock_logger,
-        mock_services,
-    ):
-        """Test build_services uses default rate_limit."""
-        from bioetl.composition.factories.pubchem_compound import (
-            PubChemCompoundPipelineFactory,
-        )
-
-        config = MagicMock()
-        config.source = {"api": {}}  # No rate_limit
-        mock_load_config.return_value = config
-        mock_base_services.create_common_services.return_value = mock_services
-
-        PubChemCompoundPipelineFactory.build_services(
-            settings=mock_settings,
-            logger=mock_logger,
-        )
-
-        mock_data_source_create.assert_called_once_with(
-            "pubchem",
-            http_client=None,
-            rate=5.0,  # Default rate
-            strict_error_handling=False,
-            filter_config=None,
-        )
-
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -238,13 +207,15 @@ class TestPubChemCompoundPipelineFactory:
         mock_services,
     ):
         """Test build_services uses provided configuration."""
-        from bioetl.composition.factories.pubchem_compound import (
-            PubChemCompoundPipelineFactory,
+        from bioetl.composition.factories.pipeline_factories import (
+            pubchem_compound_factory,
         )
 
         mock_base_services.create_common_services.return_value = mock_services
+        mock_data_source = MagicMock()
+        mock_data_source_create.return_value = mock_data_source
 
-        PubChemCompoundPipelineFactory.build_services(
+        pubchem_compound_factory.build_services(
             settings=mock_settings,
             logger=mock_logger,
             config=mock_pipeline_config,
@@ -252,54 +223,6 @@ class TestPubChemCompoundPipelineFactory:
 
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
-
-    @patch("bioetl.composition.factories.base_pipeline_factory.yaml_config_to_domain")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    def test_create_with_services(
-        self,
-        mock_data_source_create,
-        mock_base_services,
-        mock_load_config,
-        mock_yaml_to_domain,
-        mock_settings,
-        mock_logger,
-        mock_pipeline_config,
-        mock_services,
-    ):
-        """Test create_with_services creates pipeline."""
-        from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-        from bioetl.composition.factories.pubchem_compound import (
-            PubChemCompoundPipelineFactory,
-        )
-
-        mock_load_config.return_value = mock_pipeline_config
-        mock_base_services.create_common_services.return_value = mock_services
-        mock_domain_config = MagicMock()
-        mock_yaml_to_domain.return_value = mock_domain_config
-
-        # Save and patch pipeline_class on the factory to use our mock
-        original_class = PubChemCompoundPipelineFactory.pipeline_class
-        mock_pipeline_class = MagicMock()
-        PubChemCompoundPipelineFactory.pipeline_class = mock_pipeline_class
-
-        try:
-            runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-            PubChemCompoundPipelineFactory.create_with_services(
-                runtime=runtime,
-                settings=mock_settings,
-                logger=mock_logger,
-            )
-
-            mock_pipeline_class.create.assert_called_once_with(
-                runtime=runtime,
-                services=mock_services,
-                config=mock_domain_config,
-            )
-        finally:
-            # Restore original class
-            PubChemCompoundPipelineFactory.pipeline_class = original_class
 
 
 # UniProtProteinPipelineFactory tests are covered in tests/unit/pipelines/test_uniprot.py

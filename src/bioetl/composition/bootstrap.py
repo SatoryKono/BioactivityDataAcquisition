@@ -9,16 +9,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+# Factories are imported to ensure registration happens
+import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.application.orchestration.runner import PipelineRunner
 from bioetl.application.registry import PipelineRegistry
-
-# Factories are imported to ensure registration happens
-from bioetl.composition.factories.chembl_activity import (
-    ChEMBLActivityPipelineFactory,
-)
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -43,11 +41,9 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.application.orchestration.runner import PipelineRunner
 
 __all__ = [
     "BronzeWriter",
-    "ChEMBLActivityPipelineFactory",
     "ChemblAdapter",
     "DeltaWriter",
     "GoldWriter",
