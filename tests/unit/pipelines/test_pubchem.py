@@ -2,8 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineRuntimeConfig
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 
 

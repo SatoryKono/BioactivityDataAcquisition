@@ -5,8 +5,7 @@ from unittest.mock import MagicMock, AsyncMock
 from uuid import uuid4
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig
-from bioetl.domain.config import PipelineRuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.types import RunID, RunType
 
