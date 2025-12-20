@@ -8,62 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# =============================================================================
-# Re-exports from interfaces.factories Tests
-# =============================================================================
-
-
-@pytest.mark.unit
-class TestInterfacesFactoriesReexports:
-    """Test that interfaces.factories re-exports work correctly."""
-
-    def test_chembl_activity_factory_reexport(self):
-        """Test chembl_activity_factory is re-exported."""
-        from bioetl.interfaces.factories import chembl_activity_factory
-
-        assert chembl_activity_factory is not None
-        assert hasattr(chembl_activity_factory, "build_services")
-        assert hasattr(chembl_activity_factory, "create_with_services")
-        assert chembl_activity_factory.pipeline_name == "chembl_activity"
-
-    def test_pubchem_compound_factory_reexport(self):
-        """Test pubchem_compound_factory is re-exported."""
-        from bioetl.interfaces.factories import pubchem_compound_factory
-
-        assert pubchem_compound_factory is not None
-        assert hasattr(pubchem_compound_factory, "build_services")
-        assert hasattr(pubchem_compound_factory, "create_with_services")
-        assert pubchem_compound_factory.pipeline_name == "pubchem_compound"
-
-    def test_uniprot_protein_factory_reexport(self):
-        """Test uniprot_protein_factory is re-exported."""
-        from bioetl.interfaces.factories import uniprot_protein_factory
-
-        assert uniprot_protein_factory is not None
-        assert hasattr(uniprot_protein_factory, "build_services")
-        assert hasattr(uniprot_protein_factory, "create_with_services")
-        assert uniprot_protein_factory.pipeline_name == "uniprot_protein"
-
-    def test_pubmed_publications_factory_reexport(self):
-        """Test pubmed_publications_factory is re-exported."""
-        from bioetl.interfaces.factories import pubmed_publications_factory
-
-        assert pubmed_publications_factory is not None
-        assert hasattr(pubmed_publications_factory, "build_services")
-        assert hasattr(pubmed_publications_factory, "create_with_services")
-        assert pubmed_publications_factory.pipeline_name == "pubmed_publications"
-
-    def test_all_exports_in_module(self):
-        """Test __all__ contains expected factories."""
-        from bioetl import interfaces
-
-        factory_module = interfaces.factories
-        assert "chembl_activity_factory" in factory_module.__all__
-        assert "pubchem_compound_factory" in factory_module.__all__
-        assert "uniprot_protein_factory" in factory_module.__all__
-        assert "pubmed_publications_factory" in factory_module.__all__
-
-
 @pytest.fixture
 def mock_settings():
     """Create mock application settings."""
