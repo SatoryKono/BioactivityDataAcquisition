@@ -654,6 +654,34 @@ def test_adapters_implement_protocols(src_dir: Path):
     assert not violations, "\n".join(violations)
 
 
+def test_http_adapters_inherit_base(src_dir: Path):
+    """All HTTP adapters in infrastructure must inherit from BaseHttpAdapter.
+
+    This ensures consistent lifecycle management and HTTP client usage.
+    """
+    from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+    try:
+        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+    except ImportError as e:
+        pytest.fail(f"Could not import adapters: {e}")
+
+    # List of adapters that are considered "HTTP Adapters"
+    # PubChemClient is excluded as it uses a sync library (pubchempy)
+    # and manages its own thread pool / connection logic.
+    http_adapters = [
+        ChemblAdapter,
+        UniProtClient,
+    ]
+
+    violations = []
+    for adapter in http_adapters:
+        if not issubclass(adapter, BaseHttpAdapter):
+            violations.append(f"{adapter.__name__} must inherit from BaseHttpAdapter")
+
+    assert not violations, "\n".join(violations)
+
+
 def test_public_methods_have_docstrings(src_dir: Path):
     """All public methods in Application/Infrastructure must have docstrings."""
     violations = []
