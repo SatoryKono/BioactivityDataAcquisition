@@ -74,7 +74,7 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
 
         async with pubmed_adapter.http_client:
             records = []
-            async for record in pubmed_adapter.fetch("publication", search_term="crispr", limit=2):
+            async for record in pubmed_adapter.fetch("publication", query="crispr", limit=2):
                 records.append(record)
 
             assert len(records) == 2

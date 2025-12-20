@@ -69,17 +69,17 @@ class PubMedAdapter:
     async def fetch(
         self,
         entity_type: str,
-        search_term: str = "pharmacogenomics[Title/Abstract]",
-        limit: int | None = None,
         watermark: Watermark | None = None,
+        limit: int | None = None,
+        query: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records.
 
         Args:
             entity_type: Must be 'publication'
-            search_term: PubMed search query
-            limit: Max records to fetch
             watermark: Unused for now (required by protocol)
+            limit: Max records to fetch
+            query: PubMed search query (default: "pharmacogenomics[Title/Abstract]")
 
         Yields:
             Dict containing pmid, article_title, and raw_xml
@@ -87,6 +87,7 @@ class PubMedAdapter:
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
+        search_term = query or "pharmacogenomics[Title/Abstract]"
         pmids = await self._get_pmids(search_term, limit or 10000)
 
         if not pmids:
