@@ -98,13 +98,12 @@ def create_uniprot_data_source(
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
     """Create UniProt data source."""
-    source_config = pipeline_config.source.get("api", {})
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)
 
     data_source = DataSourceFactory.create(
         "uniprot",
         http_client=http_client,
-        base_url=source_config.get("base_url", "https://rest.uniprot.org"),
+        base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
         strict_error_handling=settings.strict_error_handling,
     )
     return _wrap_with_filter(data_source, filter_config)
