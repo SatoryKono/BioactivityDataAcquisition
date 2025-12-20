@@ -13,6 +13,7 @@ Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 
 import asyncio
 import logging
+import weakref
 from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Self
@@ -79,6 +80,10 @@ class PubChemClient:
 
         # Thread pool for sync API calls
         self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+
+        # Ensure cleanup if aclose() is forgotten
+        self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
+
         self._fetch_strategies = {
             "compound": self._fetch_compounds,
             "substance": self._fetch_substances,
