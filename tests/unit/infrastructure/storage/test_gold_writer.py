@@ -397,3 +397,170 @@ class TestGoldWriterHistory:
         # Should return only chembl records
         assert len(result) == 2
         assert all(r["provider"] == "chembl" for r in result)
+
+
+@pytest.mark.unit
+class TestGoldWriterTypeSanitization:
+    """Tests for type sanitization methods."""
+
+    def test_sanitize_null_type(self, gold_writer):
+        """Test sanitization of null type to string."""
+        import pyarrow as pa
+
+        result = gold_writer._sanitize_type_for_delta(pa.null())
+        assert result == pa.string()
+
+    def test_sanitize_list_with_null_inner(self, gold_writer):
+        """Test sanitization of list<null> to list<string>."""
+        import pyarrow as pa
+
+        null_list_type = pa.list_(pa.null())
+        result = gold_writer._sanitize_type_for_delta(null_list_type)
+        assert result == pa.list_(pa.string())
+
+    def test_sanitize_large_list_type(self, gold_writer):
+        """Test sanitization of large_list type."""
+        import pyarrow as pa
+
+        large_list_type = pa.large_list(pa.null())
+        result = gold_writer._sanitize_type_for_delta(large_list_type)
+        assert result == pa.large_list(pa.string())
+
+    def test_sanitize_struct_with_null_field(self, gold_writer):
+        """Test sanitization of struct with null field."""
+        import pyarrow as pa
+
+        struct_type = pa.struct([pa.field("name", pa.string()), pa.field("value", pa.null())])
+        result = gold_writer._sanitize_type_for_delta(struct_type)
+
+        # Check the value field is now string
+        assert result[1].type == pa.string()
+
+    def test_sanitize_map_type(self, gold_writer):
+        """Test sanitization of map type."""
+        import pyarrow as pa
+
+        map_type = pa.map_(pa.string(), pa.null())
+        result = gold_writer._sanitize_type_for_delta(map_type)
+        assert result.item_type == pa.string()
+
+    def test_sanitize_non_null_type_unchanged(self, gold_writer):
+        """Test that non-null types are unchanged."""
+        import pyarrow as pa
+
+        int_type = pa.int64()
+        result = gold_writer._sanitize_type_for_delta(int_type)
+        assert result == pa.int64()
+
+
+@pytest.mark.unit
+class TestGoldWriterFlattenForCSV:
+    """Tests for CSV flattening method."""
+
+    def test_flatten_list_column(self, gold_writer):
+        """Test flattening of list column to JSON string."""
+        import pyarrow as pa
+
+        table = pa.table({
+            "id": ["a", "b"],
+            "tags": [["tag1", "tag2"], ["tag3"]],
+        })
+
+        result = gold_writer._flatten_for_csv(table)
+
+        # Tags column should now be string type
+        assert result.schema.field("tags").type == pa.string()
+        # Values should be JSON strings
+        assert result.column("tags")[0].as_py() == '["tag1", "tag2"]'
+
+    def test_flatten_struct_column(self, gold_writer):
+        """Test flattening of struct column to JSON string."""
+        import pyarrow as pa
+
+        table = pa.table({
+            "id": ["a"],
+            "metadata": [{"key": "value"}],
+        })
+
+        result = gold_writer._flatten_for_csv(table)
+
+        assert result.schema.field("metadata").type == pa.string()
+        assert result.column("metadata")[0].as_py() == '{"key": "value"}'
+
+    def test_flatten_preserves_simple_columns(self, gold_writer):
+        """Test that simple columns are preserved."""
+        import pyarrow as pa
+
+        table = pa.table({
+            "id": ["a", "b"],
+            "value": [1.0, 2.0],
+        })
+
+        result = gold_writer._flatten_for_csv(table)
+
+        assert result.schema.field("id").type == pa.string()
+        assert result.schema.field("value").type == pa.float64()
+
+    def test_flatten_handles_null_values(self, gold_writer):
+        """Test flattening handles null values in list columns."""
+        import pyarrow as pa
+
+        table = pa.table({
+            "id": ["a", "b"],
+            "tags": [["tag1"], None],
+        })
+
+        result = gold_writer._flatten_for_csv(table)
+
+        assert result.column("tags")[0].as_py() == '["tag1"]'
+        assert result.column("tags")[1].as_py() is None
+
+
+@pytest.mark.unit
+class TestGoldWriterToArrowTable:
+    """Tests for _to_arrow_table method."""
+
+    def test_to_arrow_table_with_null_columns(self, gold_writer):
+        """Test conversion when records have all-null columns."""
+        records = [
+            {"id": "a", "value": None},
+            {"id": "b", "value": None},
+        ]
+
+        result = gold_writer._to_arrow_table(records)
+
+        # Value column should be converted to string (or valid type)
+        assert result.num_rows == 2
+
+    def test_to_arrow_table_with_mixed_types(self, gold_writer):
+        """Test conversion with various data types."""
+        records = [
+            {"id": "a", "count": 1, "score": 1.5, "active": True},
+        ]
+
+        result = gold_writer._to_arrow_table(records)
+
+        assert result.num_rows == 1
+
+
+@pytest.mark.unit
+class TestGoldWriterCSVExport:
+    """Tests for CSV export functionality."""
+
+    def test_init_with_csv_path(self):
+        """Test initialization with CSV path."""
+        writer = GoldWriter(
+            base_path="s3://bucket/gold",
+            csv_path="/tmp/exports",
+        )
+        assert writer.csv_path == "/tmp/exports"
+
+    def test_init_with_csv_options(self):
+        """Test initialization with CSV options."""
+        writer = GoldWriter(
+            base_path="s3://bucket/gold",
+            csv_path="/tmp/exports",
+            csv_options={"delimiter": ";", "header": False},
+        )
+        assert writer.csv_options["delimiter"] == ";"
+        assert writer.csv_options["header"] is False
