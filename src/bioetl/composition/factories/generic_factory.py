@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -89,7 +90,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
         filter_config: InputFilterConfig | None = None,
-    ):
+    ) -> DataSourcePort:
         """Create data source using the configured creator.
 
         Args:

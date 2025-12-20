@@ -23,7 +23,7 @@ class DataSourceFactory:
 
     @classmethod
     def create(
-        cls, provider: str, http_client: "UnifiedHTTPClient", **kwargs: Any
+        cls, provider: str, http_client: "UnifiedHTTPClient | None" = None, **kwargs: Any
     ) -> DataSourcePort:
         """Create a data source adapter.
 
