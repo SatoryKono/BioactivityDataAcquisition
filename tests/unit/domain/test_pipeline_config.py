@@ -3,7 +3,7 @@
 import pytest
 
 from bioetl.domain.config import DQConfig
-from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.domain.config import PipelineConfig
 
 
 @pytest.mark.unit

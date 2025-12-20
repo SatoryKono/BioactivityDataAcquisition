@@ -1,0 +1,31 @@
+name: Architecture Metrics
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  architecture-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Architecture Metrics
+        run: |
+          # Layer violations (conceptual - using import-linter for now)
+          # python -c "import tests.test_architecture; ..."
+
+          # Cyclomatic complexity
+          radon cc src/bioetl --min C --show-closures
+
+          # Test coverage
+          pytest --cov=src/bioetl --cov-fail-under=80

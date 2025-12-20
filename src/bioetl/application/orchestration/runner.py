@@ -10,14 +10,12 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.pipeline_config import (
-    PipelineRuntimeConfig,
-)
+from bioetl.domain.config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.domain.config import PipelineConfig
 
 if TYPE_CHECKING:
     import structlog

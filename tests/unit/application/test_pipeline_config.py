@@ -2,8 +2,8 @@
 
 import pytest
 
-from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.domain.config import PipelineRuntimeConfig
+from bioetl.domain.config import PipelineConfig
 from bioetl.domain.types import RunType
 
 

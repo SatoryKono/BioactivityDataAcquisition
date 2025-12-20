@@ -11,7 +11,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.domain.config import PipelineRuntimeConfig
 from bioetl.application.core.record_processor import RecordProcessor, BatchResult
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.domain.types import RunType
