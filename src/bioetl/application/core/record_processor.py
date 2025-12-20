@@ -213,11 +213,12 @@ class RecordProcessor:
         self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
     ) -> None:
         # Sort keys for deterministic output
-        record_bytes = [
+        # Use generator expression to offload JSON serialization to the executor
+        record_bytes = (
             (json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in records
-        ]
+        )
         await self._storage.write_bronze(
-            records=iter(record_bytes),
+            records=record_bytes,
             provider=self._provider,
             entity=self._entity_type,
             date=ingestion_ts,
