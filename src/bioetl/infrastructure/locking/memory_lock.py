@@ -36,8 +36,8 @@ class MemoryLock(LockPort):
             if key in self._locks:
                 existing_owner, lock = self._locks[key]
                 if lock.locked():
-                    # Return True if already owned (reentrant), False otherwise
-                    return existing_owner == str(owner_id)
+                    # Strictly non-reentrant: cannot acquire if already locked
+                    return False
 
             # Create new lock or reuse existing unlocked one
             if key not in self._locks:
