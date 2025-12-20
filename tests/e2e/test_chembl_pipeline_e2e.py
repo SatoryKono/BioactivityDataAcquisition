@@ -58,6 +58,11 @@ async def test_chembl_pipeline_e2e(
     monkeypatch.setenv("BIOETL_S3__BUCKET_GOLD", "test-gold")
     monkeypatch.setenv("BIOETL_S3__BUCKET_CHECKPOINTS", "test-checkpoints")
     monkeypatch.setenv("BIOETL_REDIS__HOST", "localhost")
+
+    # Allow HTTP for Delta Lake (required for MinIO without SSL)
+    monkeypatch.setenv("AWS_STORAGE_ALLOW_HTTP", "true")
+    monkeypatch.setenv("AWS_S3_ALLOW_UNSAFE_RENAME", "true")
+
     # Parse port from redis_service (redis://localhost:<port>)
     redis_port = redis_service.split(":")[-1]
     monkeypatch.setenv("BIOETL_REDIS__PORT", redis_port)
