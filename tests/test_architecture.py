@@ -13,7 +13,8 @@ import inspect
 import re
 import tomllib
 from pathlib import Path
-from typing import Any, get_type_hints
+from collections.abc import AsyncGenerator, AsyncIterator
+from typing import Any, get_origin, get_type_hints
 from unittest.mock import patch
 
 import pytest
@@ -347,6 +348,19 @@ def test_io_ports_are_async():
             is_async = inspect.iscoroutinefunction(method) or inspect.isasyncgenfunction(
                 method
             )
+
+            # Also check if return type is AsyncIterator/AsyncGenerator (for Protocol definitions)
+            if not is_async:
+                try:
+                    hints = get_type_hints(method)
+                    return_type = hints.get("return")
+                    if return_type is not None:
+                        origin = get_origin(return_type)
+                        if origin in (AsyncIterator, AsyncGenerator):
+                            is_async = True
+                except Exception:
+                    pass  # Type hints may not be resolvable in all cases
+
             if not is_async:
                 violations.append(f"{port.__name__}.{method_name} should be async")
     assert not violations, "\n".join(violations)
