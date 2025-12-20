@@ -278,16 +278,3 @@ class ChemblAdapter(BaseHttpAdapter):
         return page_meta.get("total_count", 0)
 
 
-def create_chembl_adapter(
-    circuit_breaker: CircuitBreaker,
-    run_id: Any = None,
-) -> tuple[ChemblAdapter, UnifiedHTTPClient]:
-    """Factory function to create ChemblAdapter with dependencies."""
-    rate_limiter = TokenBucket(rate=10.0, capacity=20)
-    http_client = UnifiedHTTPClient(
-        rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
-        run_id=run_id,
-    )
-    adapter = ChemblAdapter(http_client=http_client)
-    return adapter, http_client
