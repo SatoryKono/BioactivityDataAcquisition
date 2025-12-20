@@ -12,22 +12,24 @@ Architecture:
 - Supports both Delta Lake and Parquet formats
 - Implements SCD Type 2 (Slowly Changing Dimensions) for history tracking
 - Enforces data contracts
+- CSV export delegated to CsvExporter (composition)
 """
 
+from __future__ import annotations
+
 import asyncio
-import os
 import random
-import tempfile
 from datetime import UTC, datetime
-from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import pandera as pandera_pa
 import pyarrow as pa
-import pyarrow.csv as pv
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import DataFrameSchema
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
 class GoldWriter:
@@ -35,30 +37,25 @@ class GoldWriter:
 
     Enforces strict validation before writing. All records must pass
     schema validation or the entire batch fails.
+    CSV export is delegated to an optional CsvExporter (composition pattern).
     """
 
     def __init__(
         self,
         base_path: str,
         storage_options: dict[str, str] | None = None,
-        csv_path: str | None = None,
-        csv_options: dict[str, Any] | None = None,
+        csv_exporter: CsvExporter | None = None,
     ) -> None:
         """Initialize Gold writer.
 
         Args:
             base_path: Base path for Gold tables
             storage_options: Storage options for S3/MinIO
-            csv_path: Path for CSV export (None to disable)
-            csv_options: CSV export options:
-                - delimiter: Field delimiter (default: ",")
-                - header: Include header row (default: True)
-                - encoding: File encoding (default: "utf-8")
+            csv_exporter: Optional CsvExporter for CSV output (None to disable)
         """
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
-        self.csv_path = csv_path
-        self.csv_options = csv_options or {}
+        self.csv_exporter = csv_exporter
 
     async def write_gold(
         self,
@@ -90,7 +87,7 @@ class GoldWriter:
                 raise ValueError("scd_config required for SCD Type 2 mode")
             await self._write_scd2(table_path, records, scd_config, partition_cols)
         elif mode in ("overwrite", "append"):
-            await self._write_simple(table_path, records, mode, partition_cols, schema)
+            await self._write_simple(table_path, table_name, records, mode, partition_cols, schema)
         else:
             raise ValueError(f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'")
 
@@ -120,59 +117,6 @@ class GoldWriter:
             item_type = self._sanitize_type_for_delta(dtype.item_type)
             return pa.map_(key_type, item_type)
         return dtype
-
-    def _flatten_for_csv(self, table: pa.Table) -> pa.Table:
-        """Convert complex types (list, struct) to JSON strings for CSV export."""
-        import json as json_module
-
-        new_columns = []
-        for i, field in enumerate(table.schema):
-            col = table.column(i)
-            if pa.types.is_list(field.type) or pa.types.is_large_list(field.type) or pa.types.is_struct(field.type):
-                # Convert to JSON strings
-                json_strings = [
-                    json_module.dumps(val.as_py()) if val.as_py() is not None else None
-                    for val in col
-                ]
-                new_columns.append(pa.array(json_strings, type=pa.string()))
-            else:
-                new_columns.append(col)
-
-        new_schema = pa.schema([
-            pa.field(f.name, pa.string() if pa.types.is_list(f.type) or pa.types.is_large_list(f.type) or pa.types.is_struct(f.type) else f.type, f.nullable)
-            for f in table.schema
-        ])
-        return pa.Table.from_arrays(new_columns, schema=new_schema)
-
-    @staticmethod
-    def _atomic_csv_write(
-        data: pa.Table,
-        target_path: Path,
-        write_options: pv.WriteOptions,
-    ) -> None:
-        """Write CSV atomically to avoid file lock issues on Windows.
-
-        Writes to a temporary file in the same directory, then renames.
-        This avoids WinError 32 when the target file is briefly locked.
-        """
-        target_dir = target_path.parent
-        fd, temp_path = tempfile.mkstemp(
-            suffix=".csv.tmp",
-            prefix=target_path.stem + "_",
-            dir=target_dir,
-        )
-        try:
-            os.close(fd)
-            pv.write_csv(data, temp_path, write_options=write_options)
-
-            if os.name == "nt" and target_path.exists():
-                target_path.unlink()
-
-            os.rename(temp_path, target_path)
-        except Exception:
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
-            raise
 
     def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
@@ -215,6 +159,7 @@ class GoldWriter:
     async def _write_simple(
         self,
         table_path: str,
+        table_name: str,
         records: list[dict[str, Any]],
         mode: str,
         partition_cols: list[str] | None,
@@ -243,26 +188,9 @@ class GoldWriter:
                 delay = 0.5 * (2 ** attempt) + random.uniform(0, 0.1)
                 await asyncio.sleep(delay)
 
-        if self.csv_path:
-            csv_full_path = Path(self.csv_path) / f"{table_path.replace(self.base_path, '')}.csv"
-            csv_full_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Build CSV write options from config
-            delimiter = self.csv_options.get("delimiter", ",")
-            include_header = self.csv_options.get("header", True)
-
-            write_options = pv.WriteOptions(
-                include_header=include_header,
-                delimiter=delimiter,
-            )
-
-            # Convert list/struct columns to JSON strings for CSV compatibility
-            csv_data = self._flatten_for_csv(arrow_data)
-
-            # Atomic write to avoid file lock issues on Windows
-            await self._run_in_executor(
-                lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options)
-            )
+        # Delegate CSV export to CsvExporter if configured
+        if self.csv_exporter:
+            await self.csv_exporter.export(table_name, arrow_data)
 
     async def _write_scd2(
         self,
