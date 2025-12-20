@@ -221,18 +221,49 @@ class ChemblAdapter(BaseHttpAdapter):
         watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
-        filter_ids: set[str] | None = None,
-        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from ChEMBL."""
-        if filter_ids and filter_field:
-            async for record in self._fetch_filtered(
-                entity_type, watermark, limit, filter_ids, filter_field
-            ):
-                yield record
-        else:
-            async for record in self._fetch_standard(entity_type, watermark, limit):
-                yield record
+        """Fetch records from ChEMBL.
+
+        Implements DataSourcePort.fetch() interface.
+
+        Args:
+            entity_type: Type of entity to fetch (activity, assay, compound, etc.)
+            watermark: Resume point for incremental fetching
+            limit: Maximum number of records to fetch
+            query: Unused for ChEMBL (filtering done via fetch_filtered method)
+
+        Yields:
+            Dictionary records from ChEMBL API
+        """
+        async for record in self._fetch_standard(entity_type, watermark, limit):
+            yield record
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: set[str],
+        filter_field: str,
+        watermark: Watermark | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from ChEMBL with ID filtering.
+
+        This is a ChEMBL-specific extension not part of DataSourcePort.
+
+        Args:
+            entity_type: Type of entity to fetch
+            filter_ids: Set of IDs to filter by
+            filter_field: Field name to filter on
+            watermark: Resume point for incremental fetching
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records matching the filter criteria
+        """
+        async for record in self._fetch_filtered(
+            entity_type, watermark, limit, filter_ids, filter_field
+        ):
+            yield record
 
     async def health_check(self) -> HealthStatus:
         """Check ChEMBL API health status."""
