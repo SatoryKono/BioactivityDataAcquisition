@@ -1,7 +1,7 @@
 # src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
 from __future__ import annotations
 
-import logging
+import structlog
 import xml.etree.ElementTree as ET
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 
 @dataclass
