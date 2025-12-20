@@ -256,10 +256,10 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test create_with_services creates pipeline."""
-        from bioetl.domain.config import RuntimeConfig
         from bioetl.composition.factories.pipeline_factories import (
             chembl_activity_factory,
         )
+        from bioetl.domain.config import RuntimeConfig
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services

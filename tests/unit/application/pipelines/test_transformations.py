@@ -1,7 +1,8 @@
 """Unit tests for the transformation logic in pipelines."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline

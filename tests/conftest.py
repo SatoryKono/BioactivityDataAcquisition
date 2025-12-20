@@ -205,7 +205,7 @@ def run_id() -> "RunID":
 def clear_settings_cache():
     """Clear the settings cache before and after each test."""
     try:
-        from bioetl.infrastructure.config import get_settings, get_pipeline_config
+        from bioetl.infrastructure.config import get_pipeline_config, get_settings
 
         get_settings.cache_clear()
         get_pipeline_config.cache_clear()
@@ -238,8 +238,8 @@ def cleanup_infrastructure_state():
 @pytest.fixture(scope="session")
 def docker_ip():
     """Get Docker IP address, skip if Docker not available."""
-    import shutil
     import platform
+    import shutil
 
     if not shutil.which("docker"):
         pytest.skip("Docker executable not found")
@@ -249,9 +249,10 @@ def docker_ip():
         if platform.system() == "Windows":
             return "localhost"
 
-        from pytest_docker.plugin import get_docker_ip
         # Try to execute a docker command to verify connectivity
         import subprocess
+
+        from pytest_docker.plugin import get_docker_ip
         subprocess.check_call(["docker", "ps"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return get_docker_ip()
     except ImportError:
@@ -274,8 +275,8 @@ def docker_compose_file(project_root: Path) -> str:
 @pytest.fixture(scope="session")
 def minio_service(docker_ip, docker_services):
     """Ensure that MinIO service is up and responsive."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     port = docker_services.port_for("minio", 9000)
     url = f"http://{docker_ip}:{port}"
@@ -305,7 +306,7 @@ def redis_service(docker_ip, docker_services):
             sock.connect((docker_ip, port))
             sock.close()
             return True
-        except (socket.error, ConnectionError):
+        except (OSError, ConnectionError):
             return False
 
     docker_services.wait_until_responsive(timeout=30.0, pause=0.5, check=is_responsive)
@@ -372,8 +373,8 @@ def circuit_breaker():
 @pytest.fixture(scope="session")
 def docker_ip():
     """Get Docker IP address, skip if Docker not available."""
-    import shutil
     import platform
+    import shutil
 
     if not shutil.which("docker"):
         pytest.skip("Docker executable not found")
@@ -383,9 +384,10 @@ def docker_ip():
         if platform.system() == "Windows":
             return "localhost"
 
-        from pytest_docker.plugin import get_docker_ip
         # Try to execute a docker command to verify connectivity
         import subprocess
+
+        from pytest_docker.plugin import get_docker_ip
         subprocess.check_call(["docker", "ps"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return get_docker_ip()
     except ImportError:
@@ -409,9 +411,8 @@ def docker_compose_file(project_root: Path) -> str:
 @pytest.fixture(scope="session")
 def minio_service(docker_ip, docker_services):
     """Ensure that MinIO service is up and responsive."""
-    import urllib.request
     import urllib.error
-    import time
+    import urllib.request
 
     # Assuming port 9000 is mapped
     port = docker_services.port_for("minio", 9000)
@@ -444,7 +445,7 @@ def redis_service(docker_ip, docker_services):
             sock.connect((docker_ip, port))
             sock.close()
             return True
-        except (socket.error, ConnectionError):
+        except (OSError, ConnectionError):
             return False
 
     docker_services.wait_until_responsive(timeout=30.0, pause=0.5, check=is_responsive)

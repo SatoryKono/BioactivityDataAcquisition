@@ -1,7 +1,7 @@
 """Tests for PaginatedFetcherMixin."""
 
+
 import pytest
-from unittest.mock import Mock
 
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 

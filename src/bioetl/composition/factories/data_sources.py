@@ -12,10 +12,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
+from typing import ClassVar
+
+
 class DataSourceFactory:
     """Factory for creating data source adapters."""
 
-    _adapters = {
+    _adapters: ClassVar[dict[str, tuple[str, str]]] = {
         "chembl": ("bioetl.infrastructure.adapters.chembl.client", "ChemblAdapter"),
         "pubchem": ("bioetl.infrastructure.adapters.pubchem.client", "PubChemClient"),
         "uniprot": ("bioetl.infrastructure.adapters.uniprot.client", "UniProtClient"),

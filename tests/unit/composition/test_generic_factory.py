@@ -1,6 +1,6 @@
 """Tests for GenericPipelineFactory and DataSourceRegistry."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 

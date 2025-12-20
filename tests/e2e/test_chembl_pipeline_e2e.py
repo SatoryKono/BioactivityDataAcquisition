@@ -4,18 +4,12 @@ Implements R16 - E2E tests with Docker.
 Verifies the full pipeline flow using real Redis and MinIO instances.
 """
 
-import asyncio
-import json
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.executor import PipelineExecutor
-from bioetl.domain.config import RuntimeConfig
-from bioetl.application.core.record_processor import RecordProcessor, BatchResult
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import get_settings
 
 
 @pytest.mark.e2e
@@ -142,7 +136,7 @@ async def test_chembl_pipeline_e2e(
         "Checkpoint should be deleted after successful pipeline completion"
 
     # Verify Bronze
-    objs = s3.list_objects_v2(Bucket="test-bronze", Prefix=f"bronze/v1/chembl/activity/")
+    objs = s3.list_objects_v2(Bucket="test-bronze", Prefix="bronze/v1/chembl/activity/")
     assert "Contents" in objs
     assert len(objs["Contents"]) > 0
 

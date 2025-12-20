@@ -16,17 +16,17 @@ from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.orchestration.runner import PipelineRunner
 from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.factories.clients import (
+    create_redis_client,
+    get_aws_credentials,
+)
+from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.domain.config import RuntimeConfig, TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
-from bioetl.composition.factories.clients import (
-    create_redis_client,
-    get_aws_credentials,
-)
-from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,

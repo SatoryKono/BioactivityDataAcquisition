@@ -1,7 +1,6 @@
 """Unit tests for PipelineExecutor."""
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 

@@ -12,7 +12,6 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-
 # Default test run metadata
 TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
 TEST_RUN_TYPE = RunType.INCREMENTAL

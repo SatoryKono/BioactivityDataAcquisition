@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -134,7 +134,7 @@ async def e2e_cleanup_infrastructure(e2e_redis_client):
 
     # Clear settings cache
     try:
-        from bioetl.infrastructure.config import get_settings, get_pipeline_config
+        from bioetl.infrastructure.config import get_pipeline_config, get_settings
         get_settings.cache_clear()
         get_pipeline_config.cache_clear()
     except ImportError:

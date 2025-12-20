@@ -1,9 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 
 
 @pytest.fixture

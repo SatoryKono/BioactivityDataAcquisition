@@ -10,12 +10,10 @@ Combines standard pytest checks and AST-based enforcement to ensure:
 
 import ast
 import inspect
-import re
 import tomllib
-from pathlib import Path
 from collections.abc import AsyncGenerator, AsyncIterator
+from pathlib import Path
 from typing import Any, get_origin, get_type_hints
-from unittest.mock import patch
 
 import pytest
 
@@ -263,12 +261,12 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
 
     # Import schemas and entities
     try:
+        from bioetl.domain.entities import Activity, BaseEntity, Compound, Protein
         from bioetl.infrastructure.schemas.silver import (
             CHEMBL_ACTIVITY_SCHEMA,
             PUBCHEM_COMPOUND_SCHEMA,
             UNIPROT_PROTEIN_SCHEMA,
         )
-        from bioetl.domain.entities import Activity, Compound, Protein, BaseEntity
     except ImportError as e:
         pytest.fail(f"Could not import schemas or entities: {e}")
 
@@ -588,25 +586,27 @@ def test_adapters_implement_protocols(src_dir: Path):
 
     # Import Protocols
     from bioetl.domain.ports import (
-        DataSourcePort,
         CheckpointPort,
+        DataSourcePort,
         LockPort,
-        QuarantinePort,
         StoragePort,
-        MetricsPort,
     )
 
     # Import Adapters (Lazy import to avoid import errors if deps are missing)
     try:
+        from bioetl.composition.factories.storage_factory import StorageAdapter
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
         from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
-        from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
-        from bioetl.composition.factories.storage_factory import StorageAdapter
-        from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
         from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+        from bioetl.infrastructure.observability.prometheus_metrics import (
+            PrometheusMetrics,
+        )
+        from bioetl.infrastructure.quarantine.unified_quarantine import (
+            UnifiedQuarantine,
+        )
     except ImportError as e:
         pytest.fail(f"Could not import adapters for protocol check: {e}")
 

@@ -4,7 +4,6 @@ import json
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
-import pyarrow as pa
 import pytest
 
 from bioetl.domain.types import BatchID, DQStatus

@@ -4,8 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext, StorageFactory
-from bioetl.infrastructure.config import Settings
+from bioetl.composition.factories.storage_factory import (
+    StorageAdapter,
+    StorageContext,
+    StorageFactory,
+)
 
 
 @pytest.fixture

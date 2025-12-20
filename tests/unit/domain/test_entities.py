@@ -1,11 +1,11 @@
 """Unit tests for domain entities."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.entities import Activity, BaseEntity, Compound, Protein
+from bioetl.domain.entities import Activity, Compound, Protein
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
 
@@ -60,7 +60,7 @@ class TestBaseEntity:
         )
         assert activity.ingestion_ts is not None
         assert isinstance(activity.ingestion_ts, datetime)
-        assert activity.ingestion_ts.tzinfo == timezone.utc
+        assert activity.ingestion_ts.tzinfo == UTC
 
 
 @pytest.mark.unit

@@ -2,13 +2,13 @@
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
 
-from uuid import uuid4
-from bioetl.domain.types import RunType
 from bioetl.composition.bootstrap import bootstrap_pipeline
-from bioetl.composition.factories.storage_factory import StorageContext, StorageAdapter
+from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter

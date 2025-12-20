@@ -9,11 +9,12 @@ This ensures proper behavior of:
 """
 
 import asyncio
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
-from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
 
 # Use fakeredis for integration tests as per plan
 # This works without a real Redis instance but validates logic fully.

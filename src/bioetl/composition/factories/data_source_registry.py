@@ -7,7 +7,7 @@ DataSourcePort implementation.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, ClassVar, Protocol
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.factories.data_sources import DataSourceFactory
@@ -71,6 +71,7 @@ def create_chembl_data_source(
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering."""
+    _ = pipeline_config  # Unused
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
     base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
     return _wrap_with_filter(base_adapter, filter_config)
@@ -82,6 +83,7 @@ def create_pubchem_data_source(
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
     """Create PubChem data source."""
+    _ = pipeline_config  # Unused
     # PubChem rate limit: 5 requests/second without API key
     data_source = DataSourceFactory.create(
         "pubchem",
@@ -150,7 +152,7 @@ class DataSourceRegistry:
         >>> data_source = creator(settings, pipeline_config)
     """
 
-    _creators: dict[str, DataSourceCreator] = {
+    _creators: ClassVar[dict[str, DataSourceCreator]] = {
         "chembl": create_chembl_data_source,
         "pubchem": create_pubchem_data_source,
         "uniprot": create_uniprot_data_source,

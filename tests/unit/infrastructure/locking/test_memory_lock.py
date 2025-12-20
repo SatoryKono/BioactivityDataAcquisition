@@ -1,6 +1,5 @@
 """Unit tests for MemoryLock."""
 
-import asyncio
 
 import pytest
 

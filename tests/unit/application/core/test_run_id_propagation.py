@@ -6,7 +6,6 @@ Verifies that run_id is consistently propagated:
 - Through logs
 """
 
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 

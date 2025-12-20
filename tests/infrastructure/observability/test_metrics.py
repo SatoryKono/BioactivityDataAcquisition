@@ -1,7 +1,6 @@
 """Unit tests for Metrics adapters."""
 
 import warnings
-from unittest.mock import MagicMock, patch
 
 import pytest
 
