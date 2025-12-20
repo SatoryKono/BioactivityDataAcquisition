@@ -1,9 +1,9 @@
 """Unit tests for S3Checkpoint."""
 
 import asyncio
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import UUID
-from datetime import datetime
 
 import pytest
 from botocore.exceptions import ClientError
@@ -199,7 +199,6 @@ class TestS3CheckpointLocal:
 
         # Load
         watermark, loaded_run_id, _ = await store.load("p1")
-        from datetime import datetime
         # 2024-01-01 could be parsed as date if ISO format
         # But here we saved "2024-01-01" as string/ID if passed as ID.
         # Wait, from_id("2024-01-01") -> value="2024-01-01".

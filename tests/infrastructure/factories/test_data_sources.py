@@ -1,13 +1,14 @@
 """Tests for DataSourceFactory."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 @pytest.fixture

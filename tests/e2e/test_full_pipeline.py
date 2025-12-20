@@ -11,8 +11,7 @@ NOTE: These tests are currently SKIPPED due to existing issues with:
 Focus on test_infrastructure.py for E2E infrastructure testing.
 """
 
-from pathlib import Path
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -144,8 +143,9 @@ async def test_pubchem_compound_pipeline(
     - Write to Bronze layer
     - Transform to Silver layer
     """
-    from bioetl.composition.factories.storage_factory import StorageContext
     import structlog
+
+    from bioetl.composition.factories.storage_factory import StorageContext
 
     logger = structlog.get_logger()
 
@@ -228,8 +228,9 @@ async def test_pipeline_resume_after_failure(
     - Pipeline can resume from checkpoint
     - No duplicate records in Silver layer
     """
-    from bioetl.composition.factories.storage_factory import StorageContext
     import structlog
+
+    from bioetl.composition.factories.storage_factory import StorageContext
 
     logger = structlog.get_logger()
 
@@ -334,8 +335,9 @@ async def test_pipeline_idempotency(
     - No duplicate records in Silver
     - Delta Lake merge/upsert working correctly
     """
-    from bioetl.composition.factories.storage_factory import StorageContext
     import structlog
+
+    from bioetl.composition.factories.storage_factory import StorageContext
 
     logger = structlog.get_logger()
 

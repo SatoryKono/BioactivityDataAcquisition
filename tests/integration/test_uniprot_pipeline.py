@@ -8,11 +8,11 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.domain.types import RunType
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture

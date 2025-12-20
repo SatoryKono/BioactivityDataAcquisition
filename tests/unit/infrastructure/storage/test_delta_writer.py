@@ -4,8 +4,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.domain.exceptions import SchemaViolationError
-
 
 @pytest.fixture
 def valid_records():

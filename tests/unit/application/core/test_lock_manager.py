@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.shutdown import ShutdownSignal, PipelineShutdownError
+from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 

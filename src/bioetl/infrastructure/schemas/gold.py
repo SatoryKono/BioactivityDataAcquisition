@@ -4,7 +4,6 @@ Defines the Pandera DataFrameModels for various entities in the Gold layer.
 Used for validating data quality before writing to the Gold layer.
 """
 
-from typing import Optional
 import pandera.pandas as pa
 from pandera.typing import Series
 

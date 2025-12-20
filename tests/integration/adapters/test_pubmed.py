@@ -1,13 +1,18 @@
 # tests/integration/adapters/test_pubmed.py
 import pytest
+import respx
+from httpx import Response
+
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter, ENTREZ_API_BASE
-from bioetl.infrastructure.config import get_settings # Import get_settings
-import respx
-from httpx import Response
+from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+    ENTREZ_API_BASE,
+    PubMedAdapter,
+)
+from bioetl.infrastructure.config import get_settings  # Import get_settings
+
 
 @pytest.fixture
 def pubmed_adapter(monkeypatch) -> PubMedAdapter:
@@ -15,7 +20,7 @@ def pubmed_adapter(monkeypatch) -> PubMedAdapter:
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     get_settings.cache_clear()
     settings = get_settings() # Load settings
-    
+
     # Use actual rate from settings if API key is present
     rate = 10.0 if settings.pubmed_api_key and settings.pubmed_api_key.get_secret_value() else 3.0
 
@@ -68,7 +73,7 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
         # Mock search
         respx_mock.get("esearch.fcgi").mock(return_value=Response(200, json=mock_search_json))
-        
+
         # Mock fetch
         respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
 

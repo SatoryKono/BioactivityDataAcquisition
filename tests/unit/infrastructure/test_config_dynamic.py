@@ -1,9 +1,10 @@
+
 import pytest
-from pathlib import Path
 import yaml
-import os
+
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
 
 @pytest.fixture
 def setup_configs(tmp_path, monkeypatch):

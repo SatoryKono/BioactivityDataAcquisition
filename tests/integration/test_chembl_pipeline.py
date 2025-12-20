@@ -1,12 +1,12 @@
 """Integration tests for the ChEMBL Activity pipeline."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint

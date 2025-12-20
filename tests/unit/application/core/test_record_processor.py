@@ -7,7 +7,6 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier

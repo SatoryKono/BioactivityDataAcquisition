@@ -11,7 +11,7 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext

@@ -16,12 +16,14 @@ from bioetl.composition.factories.data_source_registry import (
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
 if TYPE_CHECKING:
+    from typing import Any
+
     import pyarrow as pa
     import structlog
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.domain.config import RuntimeConfig
     from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings

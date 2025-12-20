@@ -17,7 +17,6 @@ from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 # ChEMBL API base URL
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"

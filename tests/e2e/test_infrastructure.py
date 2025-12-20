@@ -129,9 +129,10 @@ async def test_redis_lock_integration_with_bioetl(e2e_redis_client):
 @pytest.mark.slow
 async def test_checkpoint_with_minio(e2e_minio_client):
     """Test S3Checkpoint with real MinIO."""
-    from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-    from bioetl.domain.types import Watermark
     from uuid import uuid4
+
+    from bioetl.domain.types import Watermark
+    from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
     checkpoint = S3Checkpoint(
         bucket="checkpoints",
@@ -147,9 +148,9 @@ async def test_checkpoint_with_minio(e2e_minio_client):
 
     # Save checkpoint
     await checkpoint.save(
-        pipeline=pipeline_name, 
-        run_id=run_id, 
-        watermark=watermark, 
+        pipeline=pipeline_name,
+        run_id=run_id,
+        watermark=watermark,
         metadata=checkpoint_data
     )
 

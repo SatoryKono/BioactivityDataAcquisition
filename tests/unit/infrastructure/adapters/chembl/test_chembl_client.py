@@ -1,13 +1,13 @@
 """Unit tests for ChemblAdapter."""
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
+from bioetl.composition.factories.chembl_adapter import create_chembl_adapter
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.composition.factories.chembl_adapter import create_chembl_adapter
 
 
 @pytest.fixture

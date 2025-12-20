@@ -1,11 +1,12 @@
 # src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
 from __future__ import annotations
 
-import structlog
 import xml.etree.ElementTree as ET
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
+
+import structlog
 
 from bioetl.domain.exceptions import ApiError
 from bioetl.domain.types import HealthStatus, Watermark

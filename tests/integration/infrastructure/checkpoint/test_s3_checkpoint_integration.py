@@ -3,15 +3,12 @@
 Verifies that the S3Checkpoint class correctly interacts with an S3-compatible
 storage system for saving, loading, deleting, and listing checkpoints.
 """
-import asyncio
-import pytest
-import boto3
+from datetime import UTC, datetime
 from uuid import uuid4
-from datetime import datetime, timezone
 
+import pytest
 from moto import mock_aws
 
-from bioetl.domain.exceptions import CheckpointConflictError
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.storage.s3_pool import S3ClientPool
@@ -28,9 +25,9 @@ def s3_client(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", TEST_REGION)
-    
+
     S3ClientPool.clear_pool()
-    
+
     with mock_aws():
         import boto3
         client = boto3.client("s3", region_name=TEST_REGION)
@@ -64,7 +61,7 @@ class TestS3Checkpoint:
         # Arrange
         pipeline_name = "test_pipeline_1"
         run_id = RunID(uuid4())
-        watermark_ts = datetime.now(timezone.utc)
+        watermark_ts = datetime.now(UTC)
         watermark = Watermark.from_timestamp(watermark_ts)
         metadata = {"key": "value", "run_type": "incremental"}
 
