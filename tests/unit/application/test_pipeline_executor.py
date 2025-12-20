@@ -41,12 +41,7 @@ def mock_record_processor():
     """Create mock RecordProcessor."""
     processor = AsyncMock()
     processor.process_batch = AsyncMock(
-        return_value=BatchResult(
-            bronze_count=1,
-            silver_count=1,
-            gold_count=1,
-            quarantined_count=0,
-        )
+        return_value=BatchResult(bronze_count=1, silver_count=1, gold_count=1, quarantined_count=0)
     )
     return processor
 

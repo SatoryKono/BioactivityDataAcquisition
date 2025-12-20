@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.0 | Last updated: 2025-12-18*
+*Synced with RULES.md v5.0 | Last updated: 2025-12-20*
 
 ## Quick Links
 
@@ -45,18 +45,31 @@ docs/
 │   ├── system-context.md        # C4 System Context Diagram
 │   ├── container-diagram.md     # C4 Container Diagram
 │   ├── data-flow.md             # High-level Medallion data flow
-│   ├── decisions/               # Architecture Decision Records
+│   ├── 04-interfaces-layer.md   # Interfaces layer docs
+│   ├── decisions/               # Architecture Decision Records (ADR-001..006)
 │   └── diagrams/                # Diagram source files
-│       └── 00-diagramming-policy.md
 │
-├── 03-guides/                      # How-to guides
+├── 03-guides/                   # How-to guides
+│   ├── quick-start.md           # Quick start guide
+│   ├── getting-started.md       # Getting started
+│   ├── running-pipelines.md     # Running pipelines
+│   ├── troubleshooting.md       # Troubleshooting
+│   ├── add-new-source.md        # Adding new data source
+│   └── add-pipeline-existing-source.md  # Adding pipeline to existing source
 │
-├── 04-reference/                  # Reference documentation
+├── 04-reference/                # Reference documentation
 │
-├── 05-operations/                 # Operational runbooks
+├── 05-operations/               # Operational runbooks
 │
-└── templates/                   # Document templates
-    └── pipeline-review-checklist.md
+├── contracts/                   # Data contracts
+│   └── gold/                    # Gold layer contracts
+│
+└── templates/                   # Document & code templates
+    ├── pipeline-review-checklist.md
+    ├── config.yaml.tpl
+    ├── factory.py.tpl
+    ├── pipeline.py.tpl
+    └── source_adapter.py.tpl
 ```
 
 ---
@@ -76,10 +89,12 @@ docs/
 | [system-context.md](02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
 | [container-diagram.md](02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
 | [data-flow.md](02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
-| [ADR-001: Delta Lake](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Pipeline stages, Medallion flow          | §2.1, §3 |
-| [ADR-002: Medallion](02-architecture/decisions/ADR-002-medallion-architecture.md)            | Code reuse, patterns                     | §1       |
-| [ADR-003: Redis Locking](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Directory structure, imports             | §6       |
-| [ADR-004: Pydantic](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Visual diagrams                          | -        |
+| [ADR-001: Delta Lake](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
+| [ADR-002: Medallion](02-architecture/decisions/ADR-002-medallion-architecture.md)            | Data layering pattern                    | §1       |
+| [ADR-003: Redis Locking](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Distributed locking                      | §6       |
+| [ADR-004: Pydantic](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Validation approach                      | -        |
+| [ADR-005: Composition Layer](02-architecture/decisions/ADR-005-composition-layer-separation.md) | DI and layer separation               | §1.1     |
+| [ADR-006: Logger/Metrics Ports](02-architecture/decisions/ADR-006-logger-metrics-ports.md)   | Port abstractions                        | §1.1     |
 
 ### Data Management
 
@@ -108,11 +123,11 @@ docs/
 
 | Topic            | Document                                                                                        | RULES.md |
 |------------------|-------------------------------------------------------------------------------------------------|----------|
-| Adding Providers | [04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)                               | App D    |
-| Pipeline Review  | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                          | §4.2     |
-| Testing          | [01-project-rules.md](00-project_rules/01-project-rules.md) | §4.2     |
-| Code Style       | [01-project-rules.md](00-project_rules/01-project-rules.md)            | §4       |
-| Refactoring      | [01-project-rules.md](00-project_rules/01-project-rules.md)              | -        |
+| Adding Providers | [add-new-source.md](03-guides/add-new-source.md)                                                | App D    |
+| Adding Pipelines | [add-pipeline-existing-source.md](03-guides/add-pipeline-existing-source.md)                    | App D    |
+| Pipeline Review  | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                | §4.2     |
+| Testing          | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4.2     |
+| Code Style       | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4       |
 
 ---
 
@@ -220,12 +235,12 @@ graph TD
 | RULES.md (docs/)         | 2025-12-15   | v5.0 (Production Ready)     |
 | 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md        |
 | 00-rules-summary.md      | 2025-12-15   | v5.0 Synced                 |
-| 00-map.md                | 2025-12-18   | Updated (code map fixed)    |
+| 00-map.md                | 2025-12-20   | Updated (cleanup, new ADRs) |
 | CHANGELOG.md             | 2025-12-16   | Updated (v5.0.0)            |
-| 02-architecture/AUDIT_REPORT.md | 2025-05-20 | Architecture Audit (9.25/10)|
-| All architecture docs    | 2025-12-15   | Synced with v5.0            |
+| 03-guides/               | 2025-12-20   | Consolidated (6 guides)     |
+| ADR-001..006             | 2025-12-20   | All 6 ADRs documented       |
 | pyproject.toml           | 2025-12-16   | Version 5.0.0               |
 
 ---
 
-*Last updated: 2025-12-18. Update when adding new documentation.*
+*Last updated: 2025-12-20. Update when adding new documentation.*
