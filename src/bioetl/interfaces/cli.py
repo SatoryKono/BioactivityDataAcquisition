@@ -15,6 +15,7 @@ import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
     bootstrap_pipeline,
@@ -188,6 +189,8 @@ def checkpoint_list(pipeline: str) -> None:
 
 def main() -> None:
     """Main entry point."""
+    # Explicit registration of all pipeline factories
+    register_all_pipelines()
     cli()
 
 

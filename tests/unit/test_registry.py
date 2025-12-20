@@ -5,9 +5,14 @@ from pathlib import Path
 
 import pytest
 
-# Import pipeline_factories module to trigger registration
-import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+
+
+@pytest.fixture(autouse=True)
+def ensure_registration():
+    """Ensure pipeline factories are registered before tests."""
+    register_all_pipelines()
 
 
 def test_registry_completeness():
@@ -61,3 +66,34 @@ def test_registry_contains_expected_pipelines():
 
     for pipe in expected:
         assert pipe in registered, f"Expected pipeline {pipe} not found in registry"
+
+
+def test_register_all_pipelines_is_idempotent():
+    """Test that calling register_all_pipelines multiple times is safe."""
+    from bioetl.composition.factories.pipeline_factories import is_registered
+
+    # First call already made in fixture
+    assert is_registered()
+
+    # Get current count
+    initial_count = len(PipelineRegistry.list_pipelines())
+
+    # Call again - should be no-op
+    register_all_pipelines()
+
+    # Count should remain the same
+    assert len(PipelineRegistry.list_pipelines()) == initial_count
+
+
+def test_registry_empty_raises_runtime_error():
+    """Test that accessing empty registry raises RuntimeError."""
+    # Save current registry and clear it
+    saved_registry = PipelineRegistry._registry.copy()
+    PipelineRegistry._registry.clear()
+
+    try:
+        with pytest.raises(RuntimeError, match="PipelineRegistry is empty"):
+            PipelineRegistry.get("any_pipeline")
+    finally:
+        # Restore registry
+        PipelineRegistry._registry = saved_registry

@@ -9,8 +9,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-# Factories are imported to ensure registration happens
-import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor

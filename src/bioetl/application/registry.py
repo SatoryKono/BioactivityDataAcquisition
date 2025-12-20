@@ -110,8 +110,14 @@ class PipelineRegistry:
             PipelineDefinition with factory and schema
 
         Raises:
+            RuntimeError: If registry is empty (registration not called)
             ValueError: If pipeline is not registered
         """
+        if not cls._registry:
+            raise RuntimeError(
+                "PipelineRegistry is empty. "
+                "Did you forget to call register_all_pipelines()?"
+            )
         if pipeline_name not in cls._registry:
             raise ValueError(
                 f"Unknown pipeline name: {pipeline_name}. "
