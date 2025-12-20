@@ -7,7 +7,7 @@ import pytest
 from pydantic import SecretStr
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config import (
     AWSSettings,
     PipelineSettings,

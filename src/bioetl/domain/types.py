@@ -7,8 +7,11 @@ No I/O operations allowed (REQ-ARCH-003).
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, NewType, Self, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, NewType, Self, TypeAlias, TypedDict
 from uuid import UUID
+
+if TYPE_CHECKING:
+    import pyarrow
 
 # Type aliases for semantic clarity
 RunID = NewType("RunID", UUID)
@@ -23,11 +26,11 @@ ContentHash = NewType("ContentHash", str)
 BatchID = NewType("BatchID", UUID)
 """Unique identifier for a data batch."""
 
-ArrowSchema: TypeAlias = Any
+ArrowSchema: TypeAlias = "pyarrow.Schema"
 """PyArrow schema type alias.
 
-Using TypeAlias to document intent while avoiding strict dependency
-on pyarrow in the domain layer. At runtime, this is a pyarrow.Schema object.
+Uses TYPE_CHECKING for type hints without runtime dependency on pyarrow
+in the domain layer. At runtime, this is a pyarrow.Schema object.
 """
 
 
