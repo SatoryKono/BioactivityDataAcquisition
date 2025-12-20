@@ -337,6 +337,7 @@ class TestPipelineRunnerRun:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            pipeline=None,
         )
 
         await runner.run()
