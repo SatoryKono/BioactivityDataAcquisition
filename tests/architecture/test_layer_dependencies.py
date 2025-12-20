@@ -555,3 +555,135 @@ def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
         + "\n".join(f"  - {v}" for v in violations)
         + "\n\nUse dependency injection via domain ports instead."
     )
+
+
+def test_domain_value_objects_are_frozen(src_dir: Path) -> None:
+    """Domain Value Objects (dataclasses) must be frozen.
+
+    REQ-ARCH-014: Domain entities and value objects must be immutable
+    to ensure side-effect-free behavior and thread safety.
+    """
+    import ast
+
+    domain_path = src_dir / "bioetl" / "domain"
+    if not domain_path.exists():
+        pytest.skip("Domain layer not found")
+
+    violations = []
+
+    for py_file in domain_path.rglob("*.py"):
+        with py_file.open(encoding="utf-8") as f:
+            try:
+                tree = ast.parse(f.read(), filename=str(py_file))
+            except SyntaxError:
+                continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                # Check for @dataclass decorator
+                is_dataclass = False
+                is_frozen = False
+
+                for decorator in node.decorator_list:
+                    # Case 1: @dataclass
+                    if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
+                        is_dataclass = True
+                        # Default is frozen=False
+
+                    # Case 2: @dataclass(...)
+                    elif isinstance(decorator, ast.Call):
+                        func = decorator.func
+                        if isinstance(func, ast.Name) and func.id == "dataclass":
+                            is_dataclass = True
+                            # Check keywords for frozen=True
+                            for keyword in decorator.keywords:
+                                if keyword.arg == "frozen" and isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
+                                    is_frozen = True
+
+                if is_dataclass and not is_frozen:
+                    # Exemptions can be added here if strictly necessary, but default rule is strict
+                    violations.append(f"{py_file.name}:{node.lineno} - {node.name} is not frozen")
+
+    assert not violations, (
+        "Found mutable domain dataclasses (must be frozen=True):\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )
+
+
+def test_infrastructure_does_not_import_interfaces(src_dir: Path) -> None:
+    """Infrastructure layer must not import from interfaces layer.
+
+    REQ-ARCH-015: Interfaces (Driving Adapters) depend on Infrastructure,
+    not the other way around. Prevents circular dependencies.
+    """
+    infra_path = src_dir / "bioetl" / "infrastructure"
+    if not infra_path.exists():
+        pytest.skip("Infrastructure layer not found")
+
+    all_errors = []
+    forbidden = {"bioetl.interfaces"}
+
+    for py_file in infra_path.rglob("*.py"):
+        errors = _check_imports_in_file(py_file, forbidden)
+        all_errors.extend(errors)
+
+    assert not all_errors, "\n".join(all_errors)
+
+
+def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
+    """Frozen dataclasses should not have mutable default arguments.
+
+    REQ-ARCH-016: Mutable defaults (list, dict, set) in dataclasses
+    cause shared state issues even if the class is frozen.
+    """
+    import ast
+
+    bioetl_path = src_dir / "bioetl"
+    if not bioetl_path.exists():
+        pytest.skip("bioetl source not found")
+
+    violations = []
+
+    for py_file in bioetl_path.rglob("*.py"):
+        with py_file.open(encoding="utf-8") as f:
+            try:
+                tree = ast.parse(f.read(), filename=str(py_file))
+            except SyntaxError:
+                continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                # Check if it's a dataclass
+                is_dataclass = False
+                for decorator in node.decorator_list:
+                    if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
+                        is_dataclass = True
+                    elif isinstance(decorator, ast.Call):
+                        if isinstance(decorator.func, ast.Name) and decorator.func.id == "dataclass":
+                            is_dataclass = True
+
+                if not is_dataclass:
+                    continue
+
+                # Check fields for mutable defaults
+                for item in node.body:
+                    if isinstance(item, ast.AnnAssign):
+                        if item.value: # Has a default value
+                            is_mutable = False
+                            if isinstance(item.value, (ast.List, ast.Dict, ast.Set)):
+                                is_mutable = True
+                            elif isinstance(item.value, ast.Call):
+                                # Check for simple calls like list(), dict(), set()
+                                if isinstance(item.value.func, ast.Name) and item.value.func.id in ("list", "dict", "set"):
+                                    is_mutable = True
+
+                            if is_mutable:
+                                violations.append(
+                                    f"{py_file.name}:{item.lineno} - Field '{getattr(item.target, 'id', 'unknown')}' "
+                                    f"in class '{node.name}' has a mutable default value."
+                                )
+
+    assert not violations, (
+        "Found mutable defaults in dataclasses (use field(default_factory=...) instead):\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )

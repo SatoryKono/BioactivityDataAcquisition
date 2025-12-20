@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -51,7 +52,6 @@ class RecordProcessor:
         table_config: TableConfig | None = None,
     ):
         self._storage = services.storage
-        self._metrics = services.metrics
         self._quarantine_manager = QuarantineManager(
             quarantine_port=services.quarantine,
             pipeline_name=pipeline_name,
@@ -66,6 +66,13 @@ class RecordProcessor:
         self._gold_schema = gold_schema
         self._dq_config = dq_config
         self._table_config = table_config or TableConfig()
+
+        # Instantiate Metrics Recorder
+        pipeline_label = f"{self._provider}_{self._entity_type}"
+        run_type_label = self._context.run_type.value
+        self._batch_metrics = BatchMetricsRecorder(
+            services.metrics, pipeline_label, run_type_label
+        )
 
     async def process_batch(
         self,
@@ -86,34 +93,16 @@ class RecordProcessor:
                 "Bronze write failed",
                 error=str(e),
                 error_type=error_type.value,
-                batch_id=str(batch_id)
+                batch_id=str(batch_id),
             )
-            if self._metrics:
-                pipeline_label = f"{self._provider}_{self._entity_type}"
-                self._metrics.increment_counter(
-                    "errors_total",
-                    1,
-                    {"pipeline": pipeline_label, "stage": "bronze_write", "error_code": error_type.value},
-                )
+            self._batch_metrics.track_error("bronze_write", error_type)
             # Re-raise to trigger checkpointing logic in Executor or termination
             # Critical persistence failure means we cannot proceed with this batch
             raise
 
         records_bronze = len(records)
-        if self._metrics:
-            pipeline_label = f"{self._provider}_{self._entity_type}"
-            run_type_label = self._context.run_type.value
-
-            self._metrics.observe_histogram(
-                "batch_size_records",
-                records_bronze,
-                {"pipeline": pipeline_label, "stage": "bronze"},
-            )
-            self._metrics.increment_counter(
-                "records_processed_total",
-                records_bronze,
-                {"pipeline": pipeline_label, "stage": "bronze", "run_type": run_type_label},
-            )
+        self._batch_metrics.track_batch_size("bronze", records_bronze)
+        self._batch_metrics.track_processed_records("bronze", records_bronze)
 
         # 2. Transform and collect Silver/Gold
         silver_records: list[dict[str, Any]] = []
@@ -121,61 +110,40 @@ class RecordProcessor:
         records_quarantined = 0
 
         for raw_record in records:
+            # Bind logger with record context
             record_context = self._context.bind_logger(
                 batch_id=str(batch_id),
                 entity_id=raw_record.get("activity_id"),
             )
+
+            # Use helper method for single record transformation
             try:
-                transformed = await self._transform(record_context, raw_record)
+                transformed = await self._transform_record(record_context, raw_record)
                 if transformed:
                     silver_records.append(transformed)
+                    # Use helper method for gold filtering
                     if self._gold_filter(record_context, transformed):
                         gold_records.append(transformed)
             except Exception as e:
+                # Error handling encapsulated here or in helper?
+                # Keeping it here for now to access quarantine manager which uses raw_record
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():
                     await self._quarantine_manager.quarantine_record(
                         raw_record, error_type, batch_id, str(e)
                     )
                     records_quarantined += 1
-                    if self._metrics:
-                        # Need to re-compute pipeline label here as it is computed later in original code
-                        pipeline_label = f"{self._provider}_{self._entity_type}"
-                        self._metrics.increment_counter(
-                            "errors_total",
-                            1,
-                            {"pipeline": pipeline_label, "stage": "transform", "error_code": error_type.value},
-                        )
+                    self._batch_metrics.track_error("transform", error_type)
                 else:
                     raise
 
         # Check DQ thresholds
-        if self._dq_config and records:
-            error_rate = records_quarantined / len(records)
-            if self._dq_config.hard_fail_threshold and error_rate >= self._dq_config.hard_fail_threshold:
-                raise DataQualityThresholdError(error_rate, self._dq_config.hard_fail_threshold)
-            if self._dq_config.soft_fail_threshold and error_rate >= self._dq_config.soft_fail_threshold:
-                self._context.logger.warning("DQ Soft Threshold exceeded", error_rate=error_rate)
+        self._collect_dq_stats(records, records_quarantined)
 
-        if self._metrics:
-            pipeline_label = f"{self._provider}_{self._entity_type}"
-            run_type_label = self._context.run_type.value
-
-            self._metrics.increment_counter(
-                "records_processed_total",
-                records_quarantined,
-                {"pipeline": pipeline_label, "stage": "quarantined", "run_type": run_type_label},
-            )
-            self._metrics.increment_counter(
-                "records_processed_total",
-                len(silver_records),
-                {"pipeline": pipeline_label, "stage": "silver", "run_type": run_type_label},
-            )
-            self._metrics.increment_counter(
-                "records_processed_total",
-                len(gold_records),
-                {"pipeline": pipeline_label, "stage": "gold", "run_type": run_type_label},
-            )
+        # Update metrics
+        self._batch_metrics.track_processed_records("quarantined", records_quarantined)
+        self._batch_metrics.track_processed_records("silver", len(silver_records))
+        self._batch_metrics.track_processed_records("gold", len(gold_records))
 
         # 3. Write to Silver
         if silver_records:
@@ -189,13 +157,7 @@ class RecordProcessor:
                     error_type=error_type.value,
                     batch_id=str(batch_id),
                 )
-                if self._metrics:
-                    pipeline_label = f"{self._provider}_{self._entity_type}"
-                    self._metrics.increment_counter(
-                        "errors_total",
-                        1,
-                        {"pipeline": pipeline_label, "stage": "silver_write", "error_code": error_type.value},
-                    )
+                self._batch_metrics.track_error("silver_write", error_type)
                 raise
 
         # 4. Write to Gold
@@ -210,13 +172,7 @@ class RecordProcessor:
                     error_type=error_type.value,
                     batch_id=str(batch_id),
                 )
-                if self._metrics:
-                    pipeline_label = f"{self._provider}_{self._entity_type}"
-                    self._metrics.increment_counter(
-                        "errors_total",
-                        1,
-                        {"pipeline": pipeline_label, "stage": "gold_write", "error_code": error_type.value},
-                    )
+                self._batch_metrics.track_error("gold_write", error_type)
                 raise
 
         return BatchResult(
@@ -226,11 +182,40 @@ class RecordProcessor:
             quarantined_count=records_quarantined,
         )
 
+    async def _transform_record(
+        self, record_context: PipelineContext, raw_record: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """Transform a single record using the callback."""
+        return await self._transform(record_context, raw_record)
+
+    def _collect_dq_stats(self, records: list[dict[str, Any]], quarantined_count: int) -> None:
+        """Collect DQ stats and check thresholds."""
+        if not self._dq_config or not records:
+            return
+
+        error_rate = quarantined_count / len(records)
+        if (
+            self._dq_config.hard_fail_threshold
+            and error_rate >= self._dq_config.hard_fail_threshold
+        ):
+            raise DataQualityThresholdError(
+                error_rate, self._dq_config.hard_fail_threshold
+            )
+        if (
+            self._dq_config.soft_fail_threshold
+            and error_rate >= self._dq_config.soft_fail_threshold
+        ):
+            self._context.logger.warning(
+                "DQ Soft Threshold exceeded", error_rate=error_rate
+            )
+
     async def _write_bronze_batch(
         self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
     ) -> None:
         # Sort keys for deterministic output
-        record_bytes = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in records]
+        record_bytes = [
+            (json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in records
+        ]
         await self._storage.write_bronze(
             records=iter(record_bytes),
             provider=self._provider,
@@ -255,7 +240,9 @@ class RecordProcessor:
             for r in records
         ]
         # Use configured table name or default
-        table_name = self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
+        table_name = (
+            self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
+        )
         await self._storage.write_silver(
             table_name=table_name,
             records=records_with_meta,
@@ -267,17 +254,20 @@ class RecordProcessor:
         # Validate Gold records if schema is present
         if self._gold_schema:
             import pandas as pd
+
             df = pd.DataFrame(records)
             try:
                 # Pandera validation
                 self._gold_schema.validate(df, lazy=True)
             except Exception as e:
-                 # Re-wrap in DQ error or let bubble up depending on strategy
-                 # For now, we let it bubble up to be caught by the outer loop
-                 raise e
+                # Re-wrap in DQ error or let bubble up depending on strategy
+                # For now, we let it bubble up to be caught by the outer loop
+                raise e
 
         # Use configured table name or default
-        table_name = self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
+        table_name = (
+            self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
+        )
         await self._storage.write_gold(
             table_name=table_name, records=records, mode="append"
         )

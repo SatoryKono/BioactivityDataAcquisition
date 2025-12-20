@@ -1,0 +1,36 @@
+{
+  "title": "PubChemCompoundGoldSchema",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "cid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "molecular_formula": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "molecular_weight": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "canonical_smiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

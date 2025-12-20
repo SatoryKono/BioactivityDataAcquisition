@@ -162,6 +162,10 @@ rollback: ## Rollback to version (VERSION=...)
 dev-shell: ## Open Python shell with project context
 	$(VENV_PYTHON) -i -c "from bioetl import *; print('BioETL dev shell ready!')"
 
+profile: ## Run pipeline with py-spy (PIPELINE=...)
+	@echo "$(BLUE)Profiling pipeline $(PIPELINE)...$(NC)"
+	$(VENV_BIN)/py-spy record -o profile.svg -- $(VENV_PYTHON) -m bioetl.interfaces.cli run --pipeline $(PIPELINE)
+
 watch-logs: ## Watch structured logs (tail -f)
 	tail -f logs/bioetl.log | jq '.'
 
@@ -225,6 +229,11 @@ docs-serve: ## Serve documentation locally
 
 docs-build: ## Build documentation
 	$(VENV_PYTHON) -m mkdocs build
+
+contracts-check: ## Generate and check data contracts
+	@echo "$(BLUE)Generating data contracts...$(NC)"
+	$(VENV_PYTHON) scripts/generate_contracts.py
+	@echo "$(GREEN)Contracts generated!$(NC)"
 
 # Version management
 version: ## Show current version
