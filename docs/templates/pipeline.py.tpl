@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.domain.config import PipelineConfig, PipelineRuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
@@ -30,7 +30,7 @@ class {{Provider}}{{Entity}}Pipeline(BasePipeline):
     @classmethod
     def create(
         cls,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
         config: PipelineConfig | None = None,
     ) -> "{{Provider}}{{Entity}}Pipeline":

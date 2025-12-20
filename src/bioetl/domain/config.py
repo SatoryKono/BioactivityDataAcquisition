@@ -156,7 +156,3 @@ class RuntimeConfig:
     def effective_lock_ttl(self) -> int:
         """Derived TTL for lock renewal based on runtime config."""
         return self.lock_ttl or self.heartbeat_interval * 3
-
-
-# Backward compatibility alias
-PipelineRuntimeConfig = RuntimeConfig
