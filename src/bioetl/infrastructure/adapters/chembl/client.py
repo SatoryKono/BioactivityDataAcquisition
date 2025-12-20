@@ -280,9 +280,10 @@ class ChemblAdapter(BaseHttpAdapter):
     def _handle_health_response(self, response: Response) -> None:
         """Process health check response."""
         if response.status_code == 200:
+            # Reset error counter on any successful HTTP response
+            self._consecutive_errors = 0
             data = response.json()
             if data.get("status") == "UP":
-                self._consecutive_errors = 0
                 self._cached_health = HealthStatus.HEALTHY
             else:
                 self._cached_health = HealthStatus.DEGRADED
