@@ -6,8 +6,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.domain.config import PipelineRuntimeConfig
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.context import PipelineContext
@@ -41,7 +40,7 @@ def pipeline_config():
 @pytest.fixture
 def runtime_config():
     """Create a runtime config."""
-    return PipelineRuntimeConfig(
+    return RuntimeConfig(
         run_type=RunType.INCREMENTAL,
         limit=None,
     )
@@ -322,7 +321,7 @@ class TestPipelineRunnerRun:
         mock_lock_manager,
     ):
         """Test run passes limit to executor."""
-        runtime_with_limit = PipelineRuntimeConfig(
+        runtime_with_limit = RuntimeConfig(
             run_type=RunType.INCREMENTAL,
             limit=500,
         )

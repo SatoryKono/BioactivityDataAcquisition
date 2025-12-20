@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.config import PipelineRuntimeConfig
+from bioetl.domain.config import RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.domain.context import PipelineContext
@@ -16,7 +16,7 @@ from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 @pytest.fixture
 def chembl_pipeline():
     """Fixture for a ChEMBLActivityPipeline."""
-    runtime = PipelineRuntimeConfig(
+    runtime = RuntimeConfig(
         run_type=RunType.INCREMENTAL,
         resume=False,
     )

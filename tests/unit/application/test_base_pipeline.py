@@ -28,7 +28,7 @@ def mock_pipeline():
         primary_keys=["test_entity_id"],
         silver_table="test_provider.test_entity",
     )
-    runtime = PipelineRuntimeConfig(
+    runtime = RuntimeConfig(
         run_type=RunType.INCREMENTAL,
         resume=False,
     )
@@ -69,7 +69,7 @@ async def test_base_pipeline_accepts_three_params():
         primary_keys=["id"],
         silver_table="test.entity",
     )
-    runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     services = PipelineServices(

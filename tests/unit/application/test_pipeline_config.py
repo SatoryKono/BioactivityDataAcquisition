@@ -1,4 +1,4 @@
-"""Unit tests for PipelineConfig and PipelineRuntimeConfig."""
+"""Unit tests for PipelineConfig and RuntimeConfig."""
 
 import pytest
 
@@ -149,12 +149,12 @@ class TestPipelineConfig:
             )
 
 
-class TestPipelineRuntimeConfig:
-    """Tests for PipelineRuntimeConfig dataclass."""
+class TestRuntimeConfig:
+    """Tests for RuntimeConfig dataclass."""
 
     def test_valid_runtime_config(self):
         """Test creating a valid runtime config."""
-        runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
         assert runtime.run_type == RunType.INCREMENTAL
         assert runtime.resume is False  # default
@@ -162,7 +162,7 @@ class TestPipelineRuntimeConfig:
 
     def test_runtime_config_with_all_fields(self):
         """Test creating runtime config with all fields."""
-        runtime = PipelineRuntimeConfig(
+        runtime = RuntimeConfig(
             run_type=RunType.BACKFILL,
             resume=True,
             limit=1000,
@@ -174,7 +174,7 @@ class TestPipelineRuntimeConfig:
 
     def test_runtime_config_is_frozen(self):
         """Test that runtime config is immutable."""
-        runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
         with pytest.raises(AttributeError):
             runtime.resume = True  # type: ignore[misc]
@@ -182,13 +182,13 @@ class TestPipelineRuntimeConfig:
     def test_invalid_limit_raises(self):
         """Test that non-positive limit raises ValueError."""
         with pytest.raises(ValueError, match="limit must be positive or None"):
-            PipelineRuntimeConfig(
+            RuntimeConfig(
                 run_type=RunType.INCREMENTAL,
                 limit=0,
             )
 
         with pytest.raises(ValueError, match="limit must be positive or None"):
-            PipelineRuntimeConfig(
+            RuntimeConfig(
                 run_type=RunType.INCREMENTAL,
                 limit=-1,
             )
@@ -196,5 +196,5 @@ class TestPipelineRuntimeConfig:
     def test_all_run_types(self):
         """Test that all RunType values work."""
         for run_type in RunType:
-            runtime = PipelineRuntimeConfig(run_type=run_type)
+            runtime = RuntimeConfig(run_type=run_type)
             assert runtime.run_type == run_type

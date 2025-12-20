@@ -256,7 +256,7 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test create_with_services creates pipeline."""
-        from bioetl.domain.config import PipelineRuntimeConfig
+        from bioetl.domain.config import RuntimeConfig
         from bioetl.composition.factories.pipeline_factories import (
             chembl_activity_factory,
         )
@@ -278,7 +278,7 @@ class TestChemblActivityFactory:
         chembl_activity_factory.pipeline_class = mock_pipeline_class
 
         try:
-            runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+            runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
             result = chembl_activity_factory.create_with_services(
                 runtime=runtime,
                 settings=mock_settings,

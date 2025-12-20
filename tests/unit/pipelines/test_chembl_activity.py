@@ -29,7 +29,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         watermark_field="updated_on",
     )
 
-    runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
     logger = MagicMock()
     logger.bind.return_value = MagicMock()

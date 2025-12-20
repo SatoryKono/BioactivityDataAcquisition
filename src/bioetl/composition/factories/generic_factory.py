@@ -133,7 +133,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
     def create_with_services(
         self,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,

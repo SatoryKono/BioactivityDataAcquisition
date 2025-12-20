@@ -18,7 +18,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         primary_keys=["activity_id"],
         silver_table="chembl_activity",
     )
-    runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     logger = MagicMock()
     logger.bind.return_value = MagicMock()
 
