@@ -246,11 +246,13 @@ class TestPubChemClientErrorPaths:
 
             client = PubChemClient()
 
-            # Make circuit_breaker.call raise an exception
+            # Make circuit_breaker.call raise an exception then return empty
+            # Need 3 consecutive empty batches to break the loop (max_consecutive_empty=3)
             client.circuit_breaker.call = AsyncMock(
                 side_effect=[
-                    ConnectionError("PubChem API error"),
-                    [],  # Second call returns empty to break loop
+                    ConnectionError("PubChem API error"),  # First: error → empty
+                    [],  # Second: empty
+                    [],  # Third: empty → breaks loop
                 ]
             )
 
