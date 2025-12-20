@@ -8,13 +8,25 @@ Usage:
     >>> factory = GenericPipelineFactory(...)
 
 All pipeline factories are auto-registered when this module is imported.
+
+New in v5.1: Client, Storage, and DataSource factories consolidated here from
+infrastructure/factories/ following architectural requirements.
 """
+
+# Client factories
+from bioetl.composition.factories.clients import (
+    create_redis_client,
+    get_aws_credentials,
+)
 
 # Core factory infrastructure
 from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
     DataSourceRegistry,
 )
+
+# Data source factory
+from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.composition.factories.generic_factory import (
     GenericPipelineFactory,
     create_pipeline_factory,
@@ -28,12 +40,25 @@ from bioetl.composition.factories.pipeline_factories import (
     uniprot_protein_factory,
 )
 
+# Storage factory
+from bioetl.composition.factories.storage_factory import (
+    StorageAdapter,
+    StorageContext,
+    StorageFactory,
+)
+
 __all__ = [
     "DataSourceCreator",
+    "DataSourceFactory",
     "DataSourceRegistry",
     "GenericPipelineFactory",
+    "StorageAdapter",
+    "StorageContext",
+    "StorageFactory",
     "chembl_activity_factory",
     "create_pipeline_factory",
+    "create_redis_client",
+    "get_aws_credentials",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
     "uniprot_protein_factory",
