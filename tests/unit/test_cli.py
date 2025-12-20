@@ -5,7 +5,14 @@ from unittest.mock import MagicMock, patch, AsyncMock
 import pytest
 from click.testing import CliRunner
 
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
+
+
+@pytest.fixture(autouse=True)
+def ensure_registration():
+    """Ensure pipeline factories are registered before CLI tests."""
+    register_all_pipelines()
 
 
 @pytest.fixture
