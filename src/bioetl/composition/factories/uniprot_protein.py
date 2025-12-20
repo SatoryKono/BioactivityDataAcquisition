@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.registry import PipelineRegistry
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
+from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.schemas.silver import UNIPROT_PROTEIN_SCHEMA
 
@@ -31,17 +33,24 @@ class UniProtProteinPipelineFactory(BasePipelineFactory[UniProtProteinPipeline])
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create UniProt data source."""
-        source_config = pipeline_config.source.get("api", {})
-
         # Use HttpClientFactory to create unified client
         http_client = HttpClientFactory.create_for_provider("uniprot", settings)
 
-        return DataSourceFactory.create(
+        data_source = DataSourceFactory.create(
             "uniprot",
             http_client=http_client,
-            base_url=source_config.get("base_url", "https://rest.uniprot.org"),
+            base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
             strict_error_handling=settings.strict_error_handling,
         )
+
+        if filter_config and filter_config.enabled:
+            return FilteredDataSource(
+                data_source=data_source,
+                filter_reader=CsvFilterReader(),
+                filter_config=filter_config,
+            )
+
+        return data_source
 
 
 PipelineRegistry.register(
