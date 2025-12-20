@@ -363,6 +363,8 @@ class Settings(BaseSettings):
         # delta-rs requires allow_http for HTTP endpoints (e.g., local MinIO)
         if self.aws.endpoint_url.startswith("http://"):
             options["allow_http"] = "true"
+            # Disable DynamoDB locking for local S3-compatible storage (e.g., MinIO)
+            options["AWS_S3_LOCKING_PROVIDER"] = "none"
 
         return options
 
