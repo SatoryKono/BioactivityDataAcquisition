@@ -43,8 +43,10 @@ class DataSourcePort(Protocol):
     implementation of the data source client.
     """
 
-    provider_name: str
-    """The unique name of the data provider (e.g., 'chembl')."""
+    @property
+    def provider_name(self) -> str:
+        """The unique name of the data provider (e.g., 'chembl')."""
+        ...
 
     async def __aenter__(self) -> Self:
         """Enter the async context manager."""
@@ -59,15 +61,21 @@ class DataSourcePort(Protocol):
         """Exit the async context manager."""
         ...
 
-    async def fetch(
+    def fetch(
         self,
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
+        filter_ids: set[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         Fetch records from the data source (async generator).
+
+        Note: This is NOT an async def because async generator functions
+        return AsyncIterator directly without needing to be awaited.
+        Implementations should be async generators (async def with yield).
 
         Args:
             entity_type: The type of entity to fetch (e.g., 'activity', 'molecule').
@@ -75,6 +83,8 @@ class DataSourcePort(Protocol):
                        fetches from the beginning.
             limit: The maximum number of records to fetch.
             query: Optional search query for providers that support it (e.g., PubChem, UniProt).
+            filter_ids: Optional set of IDs to filter by (for adapters that support filtering).
+            filter_field: Optional field name to filter on (for adapters that support filtering).
 
         Yields:
             A dictionary representing a single record from the data source.

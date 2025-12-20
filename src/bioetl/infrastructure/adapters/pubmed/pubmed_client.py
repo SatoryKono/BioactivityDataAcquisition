@@ -72,6 +72,8 @@ class PubMedAdapter:
         watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
+        filter_ids: set[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records.
 
@@ -80,10 +82,15 @@ class PubMedAdapter:
             watermark: Unused for now (required by protocol)
             limit: Max records to fetch
             query: PubMed search query (defaults to pharmacogenomics search)
+            filter_ids: Optional set of IDs to filter by (unused in PubMed)
+            filter_field: Optional field name to filter on (unused in PubMed)
 
         Yields:
             Dict containing pmid, article_title, and raw_xml
         """
+        # Note: filter_ids and filter_field are ignored for PubMed -
+        # filtering should be done via query parameter
+        _ = filter_ids, filter_field  # Mark as intentionally unused
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 

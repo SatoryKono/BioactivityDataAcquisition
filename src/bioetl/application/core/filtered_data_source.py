@@ -96,6 +96,8 @@ class FilteredDataSource:
         watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
+        filter_ids: set[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with optional filtering.
 
@@ -107,6 +109,8 @@ class FilteredDataSource:
             watermark: Last checkpoint for incremental load.
             limit: Maximum number of records.
             query: Optional search query for providers that support it.
+            filter_ids: External filter IDs (ignored - uses internal filter from CSV).
+            filter_field: External filter field (ignored - uses internal config).
 
         Yields:
             Records from the data source, filtered if configured.
@@ -115,6 +119,9 @@ class FilteredDataSource:
             TypeError: If filtering is enabled but the adapter doesn't support
                 fetch_filtered() method.
         """
+        # Note: External filter_ids/filter_field are ignored -
+        # this class manages its own filter state from InputFilterConfig
+        _ = filter_ids, filter_field  # Mark as intentionally unused
         if self._filter_config.enabled and self._filter_ids:
             # Check if adapter supports filtering (ChEMBL-specific extension)
             if not hasattr(self._data_source, "fetch_filtered"):

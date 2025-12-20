@@ -10,6 +10,7 @@ from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.schemas.silver import UNIPROT_PROTEIN_SCHEMA
 
 if TYPE_CHECKING:
+    from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -27,6 +28,7 @@ class UniProtProteinPipelineFactory(BasePipelineFactory[UniProtProteinPipeline])
         cls,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create UniProt data source."""
         source_config = pipeline_config.source.get("api", {})

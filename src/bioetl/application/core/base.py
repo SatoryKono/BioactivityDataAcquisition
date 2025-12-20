@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 from uuid import uuid4
 
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
@@ -47,7 +47,7 @@ class BasePipeline(ABC):
         runtime: PipelineRuntimeConfig,
         services: PipelineServices,
         config: PipelineConfig,
-    ) -> BasePipeline:
+    ) -> Self:
         """Create pipeline instance.
 
         Default factory method. Subclasses can override if custom initialization is needed.
