@@ -1,13 +1,12 @@
 # src/bioetl/composition/factories/pipeline_factories.py
-"""Consolidated pipeline factory registration.
+"""Consolidated pipeline factory definitions.
 
-This module creates and registers all pipeline factories using the
-GenericPipelineFactory pattern. This replaces the legacy class-based
-factories (chembl_activity.py, pubchem_compound.py, etc.).
+This module creates all pipeline factories using the GenericPipelineFactory
+pattern. Registration is explicit via register_all_pipelines().
 
 Usage:
-    Import this module to ensure all pipelines are registered:
-    >>> import bioetl.composition.factories.pipeline_factories
+    >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+    >>> register_all_pipelines()  # Call once at application startup
 """
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
@@ -28,6 +27,9 @@ from bioetl.infrastructure.schemas.gold import (
     UniProtProteinGoldSchema,
     PubMedPublicationGoldSchema,
 )
+
+# Flag to track if registration has been performed
+_factories_registered = False
 
 # ChEMBL Activity Pipeline
 chembl_activity_factory = GenericPipelineFactory(
@@ -65,15 +67,42 @@ pubmed_publications_factory = GenericPipelineFactory(
     gold_schema=PubMedPublicationGoldSchema,
 )
 
-# Register all factories with the PipelineRegistry
-PipelineRegistry.register_factory(chembl_activity_factory)
-PipelineRegistry.register_factory(pubchem_compound_factory)
-PipelineRegistry.register_factory(uniprot_protein_factory)
-PipelineRegistry.register_factory(pubmed_publications_factory)
+
+def register_all_pipelines() -> None:
+    """Explicitly register all pipeline factories with PipelineRegistry.
+
+    This function is idempotent - calling it multiple times has no effect
+    after the first call.
+
+    Should be called once at application startup (e.g., in cli.py or bootstrap.py).
+    """
+    global _factories_registered
+
+    if _factories_registered:
+        return
+
+    PipelineRegistry.register_factory(chembl_activity_factory)
+    PipelineRegistry.register_factory(pubchem_compound_factory)
+    PipelineRegistry.register_factory(uniprot_protein_factory)
+    PipelineRegistry.register_factory(pubmed_publications_factory)
+
+    _factories_registered = True
+
+
+def is_registered() -> bool:
+    """Check if factories have been registered.
+
+    Returns:
+        True if register_all_pipelines() has been called.
+    """
+    return _factories_registered
+
 
 __all__ = [
     "chembl_activity_factory",
+    "is_registered",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
+    "register_all_pipelines",
     "uniprot_protein_factory",
 ]
