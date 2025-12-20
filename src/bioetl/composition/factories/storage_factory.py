@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -149,10 +150,8 @@ class StorageFactory:
 
         # Initialize export variables
         json_path = None
-        silver_csv_path = None
-        silver_csv_options = None
-        gold_csv_path = None
-        gold_csv_options = None
+        silver_csv_exporter: CsvExporter | None = None
+        gold_csv_exporter: CsvExporter | None = None
 
         if is_local_run:
             logger.info(
@@ -171,22 +170,22 @@ class StorageFactory:
             # Handle CSV export (Silver)
             if silver_config and silver_config.csv_export.enabled:
                 csv_cfg = silver_config.csv_export
-                silver_csv_path = csv_cfg.path
-                silver_csv_options = {
-                    "delimiter": csv_cfg.delimiter,
-                    "header": csv_cfg.header,
-                    "encoding": csv_cfg.encoding,
-                }
+                silver_csv_exporter = CsvExporter(
+                    base_path=csv_cfg.path,
+                    delimiter=csv_cfg.delimiter,
+                    header=csv_cfg.header,
+                    encoding=csv_cfg.encoding,
+                )
 
             # Handle CSV export (Gold)
             if gold_config and gold_config.csv_export.enabled:
                 csv_cfg = gold_config.csv_export
-                gold_csv_path = csv_cfg.path
-                gold_csv_options = {
-                    "delimiter": csv_cfg.delimiter,
-                    "header": csv_cfg.header,
-                    "encoding": csv_cfg.encoding,
-                }
+                gold_csv_exporter = CsvExporter(
+                    base_path=csv_cfg.path,
+                    delimiter=csv_cfg.delimiter,
+                    header=csv_cfg.header,
+                    encoding=csv_cfg.encoding,
+                )
         else:
             # Cloud paths
             bronze_path = s3_config.bucket_bronze
@@ -197,10 +196,14 @@ class StorageFactory:
         # Logging
         if json_path:
             logger.info("JSON export enabled for Bronze layer")
-        if silver_csv_path:
-            logger.info(f"CSV export enabled for Silver layer: {silver_csv_path}")
-        if gold_csv_path:
-            logger.info(f"CSV export enabled for Gold layer: {gold_csv_path}")
+        if silver_csv_exporter:
+            logger.info(
+                f"CSV export enabled for Silver layer: {silver_csv_exporter.base_path}"
+            )
+        if gold_csv_exporter:
+            logger.info(
+                f"CSV export enabled for Gold layer: {gold_csv_exporter.base_path}"
+            )
 
         # Determine save_json flag
         save_json = bronze_config.save_json if bronze_config else False
@@ -218,14 +221,12 @@ class StorageFactory:
             silver_writer=DeltaWriter(
                 base_path=silver_base_path,
                 storage_options=storage_options,
-                csv_path=silver_csv_path,
-                csv_options=silver_csv_options,
+                csv_exporter=silver_csv_exporter,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_base_path,
                 storage_options=storage_options,
-                csv_path=gold_csv_path,
-                csv_options=gold_csv_options,
+                csv_exporter=gold_csv_exporter,
             ),
         )
 
