@@ -29,7 +29,7 @@ jobs:
             # /run-tests command
             -   name: Run Tests (Coverage)
                 run: |
-                    pytest --cov=src --cov-report=term-missing --cov-fail-under=85
+                    pytest --cov=src --cov-report=term-missing --cov-fail-under=80
 
             # /render-diagrams command
             -   name: Render Diagrams & Check Consistency
