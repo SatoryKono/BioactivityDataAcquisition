@@ -6,9 +6,9 @@ from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.registry import PipelineRegistry
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
+from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
-from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.schemas.silver import UNIPROT_PROTEIN_SCHEMA
 
 if TYPE_CHECKING:
