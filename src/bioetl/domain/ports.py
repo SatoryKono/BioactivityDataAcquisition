@@ -59,7 +59,7 @@ class DataSourcePort(Protocol):
         """Exit the async context manager."""
         ...
 
-    def fetch(
+    async def fetch(
         self,
         entity_type: str,
         watermark: Watermark | None = None,
