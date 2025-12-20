@@ -22,6 +22,18 @@ from bioetl.domain.types import (
 
 
 @runtime_checkable
+class TracingPort(Protocol):
+    """Port for distributed tracing (OpenTelemetry).
+
+    Abstracts the tracer implementation to allow no-op or specific backends.
+    """
+
+    def get_tracer(self, name: str) -> Any:
+        """Get a tracer instance for instrumentation."""
+        ...
+
+
+@runtime_checkable
 class DataSourcePort(Protocol):
     """
     Port for data sources (e.g., ChEMBL, PubChem).
