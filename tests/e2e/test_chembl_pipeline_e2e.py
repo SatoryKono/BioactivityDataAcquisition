@@ -52,6 +52,15 @@ async def test_chembl_pipeline_e2e(
     monkeypatch.setenv("BIOETL_AWS_ENDPOINT_URL", minio_service)
     monkeypatch.setenv("BIOETL_AWS_ACCESS_KEY_ID", "minioadmin")
     monkeypatch.setenv("BIOETL_AWS_SECRET_ACCESS_KEY", "minioadmin")
+    monkeypatch.setenv("BIOETL_AWS_REGION", "us-east-1")
+
+    # Also set standard AWS env vars for libraries that might read them directly
+    monkeypatch.setenv("AWS_ENDPOINT_URL", minio_service)
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "minioadmin")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "minioadmin")
+    monkeypatch.setenv("AWS_REGION", "us-east-1")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
     # S3Settings uses BIOETL_S3__BUCKET_BRONZE (nested delimiter)
     monkeypatch.setenv("BIOETL_S3__BUCKET_BRONZE", "test-bronze")
     monkeypatch.setenv("BIOETL_S3__BUCKET_SILVER", "test-silver")
@@ -62,6 +71,8 @@ async def test_chembl_pipeline_e2e(
     # Allow HTTP for Delta Lake (required for MinIO without SSL)
     monkeypatch.setenv("AWS_STORAGE_ALLOW_HTTP", "true")
     monkeypatch.setenv("AWS_S3_ALLOW_UNSAFE_RENAME", "true")
+    # Force path-style addressing for MinIO
+    monkeypatch.setenv("AWS_S3_ADDRESSING_STYLE", "path")
 
     # Parse port from redis_service (redis://localhost:<port>)
     redis_port = redis_service.split(":")[-1]
@@ -74,6 +85,7 @@ async def test_chembl_pipeline_e2e(
         endpoint_url=minio_service,
         aws_access_key_id="minioadmin",
         aws_secret_access_key="minioadmin",
+        region_name="us-east-1",
     )
     for bucket in ["test-bronze", "test-silver", "test-gold", "test-checkpoints"]:
         try:

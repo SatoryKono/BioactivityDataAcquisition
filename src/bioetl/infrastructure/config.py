@@ -354,11 +354,17 @@ class Settings(BaseSettings):
             return None
 
         secret = self.aws.secret_access_key
-        return {
+        options = {
             "AWS_ENDPOINT_URL": self.aws.endpoint_url,
             "AWS_ACCESS_KEY_ID": self.aws.access_key_id or "",
             "AWS_SECRET_ACCESS_KEY": secret.get_secret_value() if secret else "",
         }
+
+        # delta-rs requires allow_http for HTTP endpoints (e.g., local MinIO)
+        if self.aws.endpoint_url.startswith("http://"):
+            options["allow_http"] = "true"
+
+        return options
 
     @classmethod
     def settings_customise_sources(
