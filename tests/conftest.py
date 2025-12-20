@@ -331,11 +331,13 @@ def minio_client(minio_service):
 
 
 @pytest.fixture
-def redis_client(redis_service):
+async def redis_client(redis_service):
     """Redis client."""
     import redis.asyncio as aioredis
 
-    return aioredis.from_url(redis_service)
+    client = aioredis.from_url(redis_service)
+    yield client
+    await client.aclose()
 
 
 @pytest.fixture
