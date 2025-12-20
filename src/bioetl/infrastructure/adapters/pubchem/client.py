@@ -21,7 +21,9 @@ import pubchempy as pcp
 
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
+from bioetl.infrastructure.adapters.http.health import (
+    assess_health_from_circuit_breaker,
+)
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 logger = logging.getLogger(__name__)

@@ -20,7 +20,6 @@ import httpx
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 logger = logging.getLogger(__name__)
