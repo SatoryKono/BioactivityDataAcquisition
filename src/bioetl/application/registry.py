@@ -32,6 +32,9 @@ class PipelineDefinition(NamedTuple):
     silver_schema: pa.Schema | None
     """PyArrow schema for Silver layer validation."""
 
+    gold_schema: Any | None = None
+    """Pandera schema for Gold layer validation."""
+
     is_instance: bool = False
     """True if factory is an instance, False if it's a class."""
 
@@ -59,6 +62,7 @@ class PipelineRegistry:
         pipeline_name: str,
         factory: type[Any],
         silver_schema: pa.Schema | None = None,
+        gold_schema: Any | None = None,
     ) -> None:
         """Register a class-based pipeline factory (legacy pattern).
 
@@ -66,10 +70,12 @@ class PipelineRegistry:
             pipeline_name: Unique pipeline identifier
             factory: Factory class (must have create_with_services classmethod)
             silver_schema: Optional PyArrow schema for Silver layer
+            gold_schema: Optional Pandera schema for Gold layer
         """
         cls._registry[pipeline_name] = PipelineDefinition(
             factory=factory,
             silver_schema=silver_schema,
+            gold_schema=gold_schema,
             is_instance=False,
         )
 
@@ -83,9 +89,13 @@ class PipelineRegistry:
         Args:
             factory: Factory instance with pipeline_name and silver_schema attributes
         """
+        # Try to get gold_schema from factory if available, else None
+        gold_schema = getattr(factory, "gold_schema", None)
+
         cls._registry[factory.pipeline_name] = PipelineDefinition(
             factory=factory,
             silver_schema=factory.silver_schema,
+            gold_schema=gold_schema,
             is_instance=True,
         )
 

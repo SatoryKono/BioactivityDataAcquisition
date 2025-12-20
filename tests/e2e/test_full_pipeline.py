@@ -18,8 +18,8 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.factories.storage import StorageAdapter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -85,7 +85,7 @@ class TestChEMBLPipelineE2E:
         - Checkpoint saved
         - Redis locks released
         """
-        from bioetl.infrastructure.factories.storage_factory import StorageContext
+        from bioetl.composition.factories.storage_factory import StorageContext
 
         storage_context = StorageContext(
             adapter=storage_adapter,
@@ -144,7 +144,7 @@ async def test_pubchem_compound_pipeline(
     - Write to Bronze layer
     - Transform to Silver layer
     """
-    from bioetl.infrastructure.factories.storage_factory import StorageContext
+    from bioetl.composition.factories.storage_factory import StorageContext
     import structlog
 
     logger = structlog.get_logger()
@@ -228,7 +228,7 @@ async def test_pipeline_resume_after_failure(
     - Pipeline can resume from checkpoint
     - No duplicate records in Silver layer
     """
-    from bioetl.infrastructure.factories.storage_factory import StorageContext
+    from bioetl.composition.factories.storage_factory import StorageContext
     import structlog
 
     logger = structlog.get_logger()
@@ -334,7 +334,7 @@ async def test_pipeline_idempotency(
     - No duplicate records in Silver
     - Delta Lake merge/upsert working correctly
     """
-    from bioetl.infrastructure.factories.storage_factory import StorageContext
+    from bioetl.composition.factories.storage_factory import StorageContext
     import structlog
 
     logger = structlog.get_logger()
