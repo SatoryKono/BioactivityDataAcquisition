@@ -43,3 +43,9 @@
 ## 4. Качество Данных (DQ)
 
 - **Strict Mode:** `false` — ошибки валидации не приведут к падению пайплайна, а будут отправлены в карантин.
+
+## 5. См. также
+
+- [Running Pipelines](../../03-guides/running-pipelines.md) - Запуск пайплайнов
+- [ChEMBL Activity](../chembl/activity.md) - Детальная документация (пример)
+- [Project Rules](../../RULES.md) - Правила обработки данных

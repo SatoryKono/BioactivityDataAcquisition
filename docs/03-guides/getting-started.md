@@ -108,3 +108,9 @@ Ensure Docker Desktop is running. If `docker-up` fails, try restarting Docker De
 
 ### Permission Denied
 If you encounter permission errors with `./docker-data/`, run `make docker-reset` to clear old volumes and start fresh.
+
+## Next Steps
+
+- [Running Pipelines](running-pipelines.md) - Comprehensive guide to pipeline execution
+- [Add New Source](add-new-source.md) - Integrate a new data provider
+- [Project Navigator](../00-map.md) - Full documentation index
