@@ -687,3 +687,48 @@ def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
         "Found mutable defaults in dataclasses (use field(default_factory=...) instead):\n"
         + "\n".join(f"  - {v}" for v in violations)
     )
+
+
+def test_pipeline_factories_no_side_effects_on_import() -> None:
+    """Importing pipeline_factories should not modify global state.
+
+    REQ-ARCH-017: Factory registration must be explicit via register_all_pipelines(),
+    not triggered automatically by importing the module. This ensures:
+    - Test isolation (registry can be reset between tests)
+    - Predictable initialization order
+    - No hidden dependencies on import order
+    """
+    import importlib
+    import sys
+
+    from bioetl.application.registry import PipelineRegistry
+
+    # Clear registry to start fresh
+    PipelineRegistry.reset()
+
+    # Remove module from cache to force reimport
+    module_name = "bioetl.composition.factories.pipeline_factories"
+    if module_name in sys.modules:
+        del sys.modules[module_name]
+
+    # Import the module - should NOT register anything
+    import bioetl.composition.factories.pipeline_factories as pf
+
+    importlib.reload(pf)
+
+    # Registry should still be empty after import
+    registered = PipelineRegistry.list_pipelines()
+    assert registered == [], (
+        f"Importing pipeline_factories should not register pipelines automatically. "
+        f"Found registered: {registered}. "
+        f"Use register_all_pipelines() explicitly instead."
+    )
+
+    # Verify explicit registration works
+    pf.register_all_pipelines()
+    assert PipelineRegistry.is_initialized(), (
+        "register_all_pipelines() should register factories"
+    )
+
+    # Cleanup: ensure registry is populated for other tests
+    # (already done by register_all_pipelines above)

@@ -65,15 +65,38 @@ pubmed_publications_factory = GenericPipelineFactory(
     gold_schema=PubMedPublicationGoldSchema,
 )
 
-# Register all factories with the PipelineRegistry
-PipelineRegistry.register_factory(chembl_activity_factory)
-PipelineRegistry.register_factory(pubchem_compound_factory)
-PipelineRegistry.register_factory(uniprot_protein_factory)
-PipelineRegistry.register_factory(pubmed_publications_factory)
+# All factories for explicit registration
+_ALL_FACTORIES = [
+    chembl_activity_factory,
+    pubchem_compound_factory,
+    uniprot_protein_factory,
+    pubmed_publications_factory,
+]
+
+
+def register_all_pipelines() -> None:
+    """Explicitly register all pipeline factories.
+
+    Call this function once at application startup (e.g., in bootstrap).
+    Idempotent: safe to call multiple times.
+
+    Example:
+        >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+        >>> register_all_pipelines()
+        >>> PipelineRegistry.list_pipelines()
+        ['chembl_activity', 'pubchem_compound', 'uniprot_protein', 'pubmed_publications']
+    """
+    if PipelineRegistry.is_initialized():
+        return  # Already registered
+
+    for factory in _ALL_FACTORIES:
+        PipelineRegistry.register_factory(factory)
+
 
 __all__ = [
     "chembl_activity_factory",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
+    "register_all_pipelines",
     "uniprot_protein_factory",
 ]

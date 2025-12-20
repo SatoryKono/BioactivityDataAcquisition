@@ -9,8 +9,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-# Factories are imported to ensure registration happens
-import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor
@@ -128,7 +126,11 @@ def bootstrap_pipeline(
         filter_field: API field name to filter by (overrides config)
         query: Optional query string for data sources that support it
     """
-    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.composition.builders import FilterConfigBuilder
+    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+
+    # Ensure factories are registered (idempotent)
+    register_all_pipelines()
 
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
@@ -145,33 +147,14 @@ def bootstrap_pipeline(
         query=query,
     )
 
-    # Build filter config from YAML defaults, CLI overrides
-    filter_config = None
-    yaml_filter = yaml_config.input_filter
-
-    # Determine effective values: CLI > YAML config
-    effective_csv = input_csv or yaml_filter.source_path
-    effective_column = filter_column or yaml_filter.column_name
-    effective_field = filter_field or yaml_filter.filter_field
-
-    # Enable filter if: CLI provides --input-csv OR config has enabled=true
-    filter_enabled = bool(input_csv) or yaml_filter.enabled
-
-    if filter_enabled and effective_csv:
-        filter_config = InputFilterConfig(
-            enabled=True,
-            source_path=effective_csv,
-            column_name=effective_column,
-            filter_field=effective_field,
-            batch_size=yaml_filter.batch_size,
-        )
-        logger.info(
-            "input_filter_enabled",
-            csv_path=effective_csv,
-            column=effective_column,
-            filter_field=effective_field,
-            source="cli" if input_csv else "config",
-        )
+    # Build filter config (CLI overrides YAML)
+    filter_config = FilterConfigBuilder.build(
+        yaml_filter=yaml_config.input_filter,
+        cli_csv=input_csv,
+        cli_column=filter_column,
+        cli_field=filter_field,
+        logger=logger,
+    )
 
     # Resolve pipeline factory from registry
     pipeline_def = PipelineRegistry.get(pipeline_name)

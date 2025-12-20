@@ -123,3 +123,22 @@ class PipelineRegistry:
     def list_pipelines(cls) -> list[str]:
         """List all registered pipeline names."""
         return list(cls._registry.keys())
+
+    @classmethod
+    def is_initialized(cls) -> bool:
+        """Check if any pipelines are registered.
+
+        Returns:
+            True if registry contains at least one pipeline.
+        """
+        return bool(cls._registry)
+
+    @classmethod
+    def reset(cls) -> None:
+        """Clear all registered pipelines.
+
+        WARNING: For testing purposes only. Do not use in production code.
+        This method is intended for test isolation to ensure a clean registry
+        state between tests.
+        """
+        cls._registry.clear()
