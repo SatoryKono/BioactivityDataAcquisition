@@ -284,8 +284,10 @@ Lock key включает тип запуска:
 | **HTTP Клиент** | **httpx** | requests | Поддержка `async`. **Legacy Wrappers**: Для библиотек без async поддержки (pubchempy, biopython) обязателен запуск в отдельном пуле потоков: `await loop.run_in_executor(thread_pool, fetch_func)`. | 
 | **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". | 
  
-### 4.2. Политика Тестирования 
-- **Unit**: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек. 
+### 4.2. Политика Тестирования
+**Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`).
+
+- **Unit**: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек.
 - **Integration**: 
     - **VCR.py**: Запись ответов API в кассеты (`tests/fixtures/vcr/`). 
     - **Санитизация**: Обязательная очистка секретов (`Authorization`, `X-API-Key`) и PII в хуке `before_record`. 
