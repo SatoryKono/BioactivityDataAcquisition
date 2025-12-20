@@ -35,6 +35,10 @@ from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.observability.tracing import (
+    NoOpTracer,
+    OpenTelemetryTracer,
+)
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -97,6 +101,14 @@ def bootstrap_logger(
     )
 
 
+def bootstrap_tracer(service_name: str = "bioetl"):
+    """Bootstrap distributed tracing."""
+    settings = get_settings()
+    if settings.observability.tracing_enabled:
+        return OpenTelemetryTracer(service_name=service_name)
+    return NoOpTracer()
+
+
 def bootstrap_pipeline(
     pipeline_name: str,
     run_id: UUID,
@@ -123,6 +135,7 @@ def bootstrap_pipeline(
 
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
+    tracer = bootstrap_tracer()
 
     # Load validated YAML config
     yaml_config = load_pipeline_config(pipeline_name)
@@ -231,6 +244,7 @@ def bootstrap_pipeline(
         shutdown_signal=pipeline.shutdown_signal,
         logger=logger,
         pipeline=pipeline,  # Explicit dependency injection
+        tracer=tracer,
     )
 
     return runner

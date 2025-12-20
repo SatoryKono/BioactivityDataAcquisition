@@ -46,6 +46,11 @@ dependencies = [
 bioetl = "bioetl.interfaces.cli:main"
 
 [project.optional-dependencies]
+tracing = [
+    "opentelemetry-api>=1.20",
+    "opentelemetry-sdk>=1.20",
+    "opentelemetry-exporter-otlp>=1.20",
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",

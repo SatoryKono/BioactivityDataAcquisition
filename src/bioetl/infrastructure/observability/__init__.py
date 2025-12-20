@@ -1,25 +1,10 @@
-"""Observability infrastructure: logging, metrics, anomaly detection, lineage.
+"""Infrastructure layer observability components.
 
-This is the single source of truth for all observability components.
-Import individual modules directly to avoid loading unnecessary dependencies:
+This package contains implementations of observability ports:
+- Metrics (Prometheus)
+- Tracing (OpenTelemetry - optional)
+- Logging (Structlog integration)
+- Health Checks
 
-    # Structured logging
-    from bioetl.infrastructure.observability.logging import create_logger
-
-    # Prometheus metrics
-    from bioetl.infrastructure.observability.metrics import MetricsCollector
-
-    # Anomaly detection
-    from bioetl.infrastructure.observability.anomaly import AnomalyDetector
-
-    # Data lineage tracking
-    from bioetl.infrastructure.observability.lineage import LineageTracker
+Implements RULES.md §3 (Observability).
 """
-
-# Lazy imports - individual modules should be imported directly
-__all__ = [
-    "anomaly",
-    "lineage",
-    "logging",
-    "metrics",
-]
