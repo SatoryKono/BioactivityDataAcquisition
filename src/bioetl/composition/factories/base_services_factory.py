@@ -4,15 +4,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.factories.clients import (
+from bioetl.composition.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
-from bioetl.infrastructure.factories.storage_factory import (
+from bioetl.composition.factories.storage_factory import (
     StorageContext,
     StorageFactory,
 )
+from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics

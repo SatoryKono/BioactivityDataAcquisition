@@ -25,7 +25,7 @@ class TestCreateRedisClient:
         settings.redis.password = MagicMock()
         settings.redis.password.get_secret_value.return_value = "secret"
 
-        with patch("bioetl.infrastructure.factories.clients.aioredis.Redis") as mock_redis:
+        with patch("bioetl.composition.factories.clients.aioredis.Redis") as mock_redis:
             create_redis_client(settings)
 
             mock_redis.assert_called_once_with(
@@ -46,7 +46,7 @@ class TestCreateRedisClient:
         settings.redis.db = 1
         settings.redis.password = None
 
-        with patch("bioetl.infrastructure.factories.clients.aioredis.Redis") as mock_redis:
+        with patch("bioetl.composition.factories.clients.aioredis.Redis") as mock_redis:
             create_redis_client(settings)
 
             mock_redis.assert_called_once_with(
