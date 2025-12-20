@@ -193,8 +193,10 @@ make arch-lint            # import-linter contracts
 
 Библиотеки без async (pubchempy, biopython):
 ```python
-await loop.run_in_executor(thread_pool, fetch_func)
+await loop.run_in_executor(None, func, *args)
 ```
+
+**Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
 
 ---
 
