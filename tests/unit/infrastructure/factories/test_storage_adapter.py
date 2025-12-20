@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.domain.ports import StoragePort
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage_factory import StorageAdapter
 
 
 @pytest.fixture
