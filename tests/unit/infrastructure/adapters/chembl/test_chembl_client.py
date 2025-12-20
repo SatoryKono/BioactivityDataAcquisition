@@ -139,3 +139,27 @@ async def test_context_manager(adapter, mock_http_client):
         assert a is adapter
         mock_http_client.__aenter__.assert_called_once()
     mock_http_client.__aexit__.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_health_check_resets_errors_on_degraded_response(adapter, mock_http_client):
+    """Test that error counter resets on successful HTTP response even if status is DEGRADED.
+
+    Regression test: Previously _consecutive_errors was only reset when status="UP",
+    leaving stale error counts after a successful HTTP 200 response with non-UP status.
+    """
+    # First: simulate a failed health check to increment error counter
+    mock_http_client.get.side_effect = Exception("Network error")
+    await adapter.health_check()
+    assert adapter._consecutive_errors == 1
+
+    # Second: successful HTTP response with DEGRADED status should reset counter
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"status": "DEGRADED"}
+    mock_http_client.get.side_effect = None
+    mock_http_client.get.return_value = mock_response
+
+    status = await adapter.health_check()
+    assert status == HealthStatus.DEGRADED
+    assert adapter._consecutive_errors == 0  # Counter should be reset
