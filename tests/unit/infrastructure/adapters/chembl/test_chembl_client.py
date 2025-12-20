@@ -6,7 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter, create_chembl_adapter
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.composition.factories.chembl_adapter import create_chembl_adapter
 
 
 @pytest.fixture
