@@ -6,9 +6,9 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.domain.ports import StoragePort
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.composition.factories.storage_factory import StorageAdapter
 
 
 @pytest.fixture

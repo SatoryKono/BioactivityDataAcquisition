@@ -46,6 +46,7 @@ class RecordProcessor:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         silver_schema: Any,
+        gold_schema: Any | None = None,
         dq_config: DQConfig | None = None,
         table_config: TableConfig | None = None,
     ):
@@ -62,6 +63,7 @@ class RecordProcessor:
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
         self._silver_schema = silver_schema
+        self._gold_schema = gold_schema
         self._dq_config = dq_config
         self._table_config = table_config or TableConfig()
 
@@ -262,6 +264,18 @@ class RecordProcessor:
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
+        # Validate Gold records if schema is present
+        if self._gold_schema:
+            import pandas as pd
+            df = pd.DataFrame(records)
+            try:
+                # Pandera validation
+                self._gold_schema.validate(df, lazy=True)
+            except Exception as e:
+                 # Re-wrap in DQ error or let bubble up depending on strategy
+                 # For now, we let it bubble up to be caught by the outer loop
+                 raise e
+
         # Use configured table name or default
         table_name = self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
         await self._storage.write_gold(
