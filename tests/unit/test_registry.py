@@ -2,17 +2,13 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+
 import pytest
+
+# Import pipeline_factories module to trigger registration
+import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.application.registry import PipelineRegistry
-# Import factories to ensure registration (via side effects of imports)
-# In a real app, bootstrap/composition would do this.
-# For this test, we might need to manually trigger the imports or import the module that imports them.
-# `bioetl.composition.bootstrap` imports the factories, so importing it should suffice.
-# However, bootstrap imports depend on global config sometimes.
-# Let's import the factory modules directly to be safe and robust.
-import bioetl.composition.factories.chembl_activity
-import bioetl.composition.factories.pubchem_compound
-import bioetl.composition.factories.uniprot_protein
+
 
 def test_registry_completeness():
     """
@@ -59,6 +55,7 @@ def test_registry_contains_expected_pipelines():
         "chembl_activity",
         "pubchem_compound",
         "uniprot_protein",
+        "pubmed_publications",
     ]
     registered = PipelineRegistry.list_pipelines()
 

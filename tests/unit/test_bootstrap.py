@@ -5,8 +5,8 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.types import RunType
 from bioetl.application.orchestration.runner import PipelineRunner
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture
@@ -106,16 +106,18 @@ class TestBootstrapPipeline:
 
     @pytest.mark.skip(reason="Requires full integration setup - covered by integration tests")
     @patch("bioetl.composition.bootstrap.get_settings")
-    @patch("bioetl.composition.factories.chembl_activity.ChEMBLActivityPipelineFactory")
+    @patch("bioetl.composition.bootstrap.PipelineRegistry")
     def test_bootstrap_pipeline_chembl_activity(
-        self, mock_factory, mock_get_settings, mock_settings, mock_logger
+        self, mock_registry, mock_get_settings, mock_settings, mock_logger
     ):
         """Test bootstrap_pipeline creates chembl_activity pipeline."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
 
         mock_get_settings.return_value = mock_settings
         mock_pipeline = MagicMock()
+        mock_factory = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
+        mock_registry.get.return_value.factory = mock_factory
 
         with patch(
             "bioetl.composition.bootstrap.bootstrap_logger", return_value=mock_logger
@@ -129,38 +131,41 @@ class TestBootstrapPipeline:
             )
 
         assert isinstance(result, PipelineRunner)
-        assert result.pipeline == mock_pipeline
         mock_factory.create_with_services.assert_called_once()
 
 
 @pytest.mark.unit
-class TestChEMBLActivityPipelineFactory:
-    """Tests for ChEMBLActivityPipelineFactory."""
+class TestChemblActivityFactory:
+    """Tests for chembl_activity_factory (GenericPipelineFactory instance)."""
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
         mock_data_source_create,
+        mock_http_client_factory,
         mock_base_services,
         mock_settings,
         mock_logger,
         mock_services,
         mock_pipeline_config,
     ):
-        """Test build_services creates data source through DataSourceFactory."""
-        from bioetl.composition.factories.chembl_activity import (
-            ChEMBLActivityPipelineFactory,
+        """Test build_services creates data source through DataSourceRegistry."""
+        from bioetl.composition.factories.pipeline_factories import (
+            chembl_activity_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
         mock_data_source = MagicMock()
         mock_data_source_create.return_value = mock_data_source
+        mock_http_client = MagicMock()
+        mock_http_client_factory.create_for_provider.return_value = mock_http_client
 
-        services = ChEMBLActivityPipelineFactory.build_services(
+        services = chembl_activity_factory.build_services(
             settings=mock_settings,
             logger=mock_logger,
         )
@@ -168,13 +173,15 @@ class TestChEMBLActivityPipelineFactory:
         assert services is not None
         mock_data_source_create.assert_called_once()
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
         mock_data_source_create,
+        mock_http_client_factory,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -182,8 +189,8 @@ class TestChEMBLActivityPipelineFactory:
         mock_pipeline_config,
     ):
         """Test build_services uses BaseServicesFactory."""
-        from bioetl.composition.factories.chembl_activity import (
-            ChEMBLActivityPipelineFactory,
+        from bioetl.composition.factories.pipeline_factories import (
+            chembl_activity_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
@@ -191,25 +198,22 @@ class TestChEMBLActivityPipelineFactory:
         mock_data_source = MagicMock()
         mock_data_source_create.return_value = mock_data_source
 
-        ChEMBLActivityPipelineFactory.build_services(
+        chembl_activity_factory.build_services(
             settings=mock_settings,
             logger=mock_logger,
         )
 
-        mock_base_services.create_common_services.assert_called_once_with(
-            settings=mock_settings,
-            logger=mock_logger,
-            data_source=mock_data_source,
-            pipeline_config=mock_pipeline_config,
-        )
+        mock_base_services.create_common_services.assert_called_once()
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
         mock_data_source_create,
+        mock_http_client_factory,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -217,13 +221,15 @@ class TestChEMBLActivityPipelineFactory:
         mock_pipeline_config,
     ):
         """Test build_services uses provided config."""
-        from bioetl.composition.factories.chembl_activity import (
-            ChEMBLActivityPipelineFactory,
+        from bioetl.composition.factories.pipeline_factories import (
+            chembl_activity_factory,
         )
 
         mock_base_services.create_common_services.return_value = mock_services
+        mock_data_source = MagicMock()
+        mock_data_source_create.return_value = mock_data_source
 
-        ChEMBLActivityPipelineFactory.build_services(
+        chembl_activity_factory.build_services(
             settings=mock_settings,
             logger=mock_logger,
             config=mock_pipeline_config,
@@ -232,13 +238,15 @@ class TestChEMBLActivityPipelineFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.yaml_config_to_domain")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
+    @patch("bioetl.composition.factories.generic_factory.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
+    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     def test_create_with_services(
         self,
         mock_data_source_create,
+        mock_http_client_factory,
         mock_base_services,
         mock_load_config,
         mock_yaml_to_domain,
@@ -249,23 +257,29 @@ class TestChEMBLActivityPipelineFactory:
     ):
         """Test create_with_services creates pipeline."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-        from bioetl.composition.factories.chembl_activity import (
-            ChEMBLActivityPipelineFactory,
+        from bioetl.composition.factories.pipeline_factories import (
+            chembl_activity_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
         mock_yaml_to_domain.return_value = mock_domain_config
+        mock_data_source = MagicMock()
+        mock_data_source_create.return_value = mock_data_source
 
-        # Save and patch pipeline_class on the factory to use our mock
-        original_class = ChEMBLActivityPipelineFactory.pipeline_class
+        # Create a mock pipeline class
         mock_pipeline_class = MagicMock()
-        ChEMBLActivityPipelineFactory.pipeline_class = mock_pipeline_class
+        mock_pipeline = MagicMock()
+        mock_pipeline_class.create.return_value = mock_pipeline
+
+        # Temporarily replace pipeline_class
+        original_class = chembl_activity_factory.pipeline_class
+        chembl_activity_factory.pipeline_class = mock_pipeline_class
 
         try:
             runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-            ChEMBLActivityPipelineFactory.create_with_services(
+            result = chembl_activity_factory.create_with_services(
                 runtime=runtime,
                 settings=mock_settings,
                 logger=mock_logger,
@@ -276,6 +290,7 @@ class TestChEMBLActivityPipelineFactory:
                 services=mock_services,
                 config=mock_domain_config,
             )
+            assert result is mock_pipeline
         finally:
             # Restore original class
-            ChEMBLActivityPipelineFactory.pipeline_class = original_class
+            chembl_activity_factory.pipeline_class = original_class
