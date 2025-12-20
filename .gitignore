@@ -105,3 +105,4 @@ node_modules/
 puppeteer-config.json
 *.png
 nul
+profile.svg
