@@ -59,7 +59,7 @@ class PubMedPublicationsPipeline(BasePipeline):
 
             business_data = {
                 "pmid": pmid,
-                "title": title_node.text if title_node is not None else "N/A",
+                "title": title_node.text if title_node is not None else None,
                 "abstract": abstract_node.text if abstract_node is not None else None,
                 "journal": journal_node.text if journal_node is not None else None,
                 "publication_year": int(pub_year_node.text) if pub_year_node is not None and pub_year_node.text else None,
@@ -78,7 +78,7 @@ class PubMedPublicationsPipeline(BasePipeline):
                 content_hash=content_hash,
                 run_id=context.run_id,
                 run_type=context.run_type,
-                source_batch_id="UNKNOWN",
+                source_batch_id=None,
                 **business_data,
             )
 

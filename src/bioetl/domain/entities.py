@@ -31,7 +31,7 @@ class BaseEntity:
     # Lineage Metadata
     run_id: RunID
     run_type: RunType
-    source_batch_id: BatchID
+    source_batch_id: BatchID | None = None  # None when batch context unavailable
     ingestion_ts: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def __post_init__(self) -> None:
@@ -188,7 +188,7 @@ class Publication(BaseEntity):
     """Represents a scientific publication (e.g., from PubMed)."""
 
     pmid: str
-    title: str
+    title: str | None = None  # None when title unavailable from source
     abstract: str | None = None
     journal: str | None = None
     publication_year: int | None = None
@@ -199,5 +199,3 @@ class Publication(BaseEntity):
         super().__post_init__()
         if not self.pmid:
             raise ValueError("Publication PMID is required")
-        if not self.title:
-            raise ValueError("Publication title is required")

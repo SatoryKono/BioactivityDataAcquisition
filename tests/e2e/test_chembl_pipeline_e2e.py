@@ -74,7 +74,7 @@ async def test_chembl_pipeline_e2e(
     # Force path-style addressing for MinIO
     monkeypatch.setenv("AWS_S3_ADDRESSING_STYLE", "path")
     # Disable S3 locking (not supported by MinIO out of the box)
-    monkeypatch.setenv("AWS_S3_LOCKING_PROVIDER", "dynamodb")
+    monkeypatch.setenv("AWS_S3_LOCKING_PROVIDER", "none")
 
     # Parse port from redis_service (redis://localhost:<port>)
     redis_port = redis_service.split(":")[-1]
