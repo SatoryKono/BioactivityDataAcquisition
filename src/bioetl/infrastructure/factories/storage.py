@@ -1,87 +1,34 @@
-"""Unified storage adapter for Bronze/Silver/Gold."""
+"""DEPRECATED: This module has been moved to bioetl.composition.factories.storage_factory.
 
-from collections.abc import Iterator
-from datetime import datetime
-from typing import Any, Literal
+This module provides backwards-compatible re-exports with deprecation warnings.
+Update your imports to use bioetl.composition.factories.storage_factory instead.
+"""
 
-from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
+import warnings
+
+from bioetl.composition.factories.storage_factory import (
+    StorageAdapter as _StorageAdapter,
+)
+
+warnings.warn(
+    "bioetl.infrastructure.factories.storage is deprecated. "
+    "Import from bioetl.composition.factories.storage_factory instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
-class StorageAdapter:
-    """Unified storage adapter for Bronze/Silver/Gold.
+class StorageAdapter(_StorageAdapter):
+    """DEPRECATED: Use bioetl.composition.factories.storage_factory.StorageAdapter."""
 
-    Implements StoragePort protocol from domain/ports.py.
-    """
-
-    # Protocol compliance marker
-    REQUIRES_SILVER_SCHEMA: bool = True
-
-    def __init__(
-        self,
-        bronze_writer: BronzeWriter,
-        silver_writer: DeltaWriter,
-        gold_writer: GoldWriter,
-    ):
-        self.bronze = bronze_writer
-        self.silver = silver_writer
-        self.gold = gold_writer
-
-    async def write_bronze(
-        self,
-        records: Iterator[bytes],
-        provider: str,
-        entity: str,
-        date: datetime,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-    ) -> None:
-        """Write raw records to Bronze layer."""
-        await self.bronze.write_bronze(
-            records=records,
-            provider=provider,
-            entity=entity,
-            date=date,
-            batch_id=batch_id,
-            run_id=run_id,
-            run_type=run_type,
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "StorageAdapter from bioetl.infrastructure.factories.storage is deprecated. "
+            "Import from bioetl.composition.factories.storage_factory instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
+        super().__init__(*args, **kwargs)
 
-    async def write_silver(
-        self,
-        table_name: str,
-        records: list[dict[str, Any]],
-        primary_keys: list[str],
-        schema: ArrowSchema,
-        mode: Literal["merge", "append", "delete"] = "merge",
-    ) -> None:
-        """Write transformed records to Silver layer."""
-        await self.silver.write_silver(
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            schema=schema,
-        )
 
-    async def write_gold(
-        self,
-        table_name: str,
-        records: list[dict[str, Any]],
-        mode: Literal["overwrite", "append", "scd2"] = "overwrite",
-    ) -> None:
-        """Write aggregated records to Gold layer."""
-        await self.gold.write_gold(
-            table_name=table_name,
-            records=records,
-            mode=mode,
-        )
-
-    async def aclose(self) -> None:
-        """Close resources.
-
-        Implements aclose() required by StoragePort protocol.
-        """
-        pass  # Writers don't need explicit cleanup
+__all__ = ["StorageAdapter"]
