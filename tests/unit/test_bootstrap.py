@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.orchestration.runner import PipelineRunner
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.domain.types import RunType
 
 
