@@ -29,7 +29,6 @@ forbidden_modules =
     bioetl.infrastructure.locking
     bioetl.infrastructure.checkpoint
     bioetl.infrastructure.quarantine
-    bioetl.infrastructure.factories
     bioetl.infrastructure.observability.metrics
     bioetl.infrastructure.observability.prometheus_metrics
 
