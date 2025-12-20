@@ -11,7 +11,9 @@ from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.health import assess_health_from_circuit_breaker
+from bioetl.infrastructure.adapters.http.health import (
+    assess_health_from_circuit_breaker,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient

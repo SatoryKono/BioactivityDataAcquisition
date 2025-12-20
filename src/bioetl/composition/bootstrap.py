@@ -12,22 +12,15 @@ from uuid import UUID
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.registry import PipelineRegistry
-from bioetl.domain.config import TableConfig
-from bioetl.domain.error_classifier import ErrorClassifier
+
 # Factories are imported to ensure registration happens
 from bioetl.composition.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
 )
-from bioetl.composition.factories.pubchem_compound import (
-    PubChemCompoundPipelineFactory,
-)
-from bioetl.composition.factories.uniprot_protein import (
-    UniProtProteinPipelineFactory,
-)
-from bioetl.interfaces.orchestration.runner import PipelineRunner
+from bioetl.domain.config import TableConfig
+from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
@@ -46,31 +39,33 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 
 __all__ = [
-    "bootstrap_logger",
-    "bootstrap_pipeline",
-    "ChemblAdapter",
-    "UnifiedHTTPClient",
-    "S3Checkpoint",
-    "ChEMBLActivityPipelineFactory",
-    "create_redis_client",
-    "get_aws_credentials",
-    "StorageAdapter",
-    "RedisDistributedLock",
-    "PrometheusMetrics",
-    "UnifiedQuarantine",
     "BronzeWriter",
+    "ChEMBLActivityPipelineFactory",
+    "ChemblAdapter",
     "DeltaWriter",
     "GoldWriter",
-    "bootstrap_quarantine",
+    "PrometheusMetrics",
+    "RedisDistributedLock",
+    "S3Checkpoint",
+    "StorageAdapter",
+    "UnifiedHTTPClient",
+    "UnifiedQuarantine",
     "bootstrap_checkpoint",
+    "bootstrap_logger",
+    "bootstrap_pipeline",
+    "bootstrap_quarantine",
+    "create_redis_client",
+    "get_aws_credentials",
 ]
 
 if TYPE_CHECKING:
     import structlog
+
+    from bioetl.domain.ports import CheckpointPort, QuarantinePort
     from bioetl.domain.types import RunType
-    from bioetl.domain.ports import QuarantinePort, CheckpointPort
 
 
 def bootstrap_quarantine() -> QuarantinePort:

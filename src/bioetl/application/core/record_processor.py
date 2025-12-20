@@ -10,8 +10,6 @@ from datetime import UTC, datetime
 from typing import Any
 
 from bioetl.application.core.pipeline_services import PipelineServices
-
-
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.config import DQConfig, TableConfig
