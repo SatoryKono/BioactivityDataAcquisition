@@ -1,12 +1,12 @@
 """Pipeline components and base classes.
 
-NOTE: ADR-0005 introduces PipelineConfig, PipelineRuntimeConfig, PipelineServices
+NOTE: ADR-0005 introduces PipelineConfig, RuntimeConfig, PipelineServices
 for decomposed pipeline configuration. Use BasePipeline.from_config() instead of
 direct constructor.
 
 Configuration consolidation (all in bioetl.domain.config):
 - PipelineConfig: Static pipeline configuration
-- RuntimeConfig/PipelineRuntimeConfig: CLI/runtime parameters
+- RuntimeConfig: CLI/runtime parameters
 """
 
 from bioetl.application.core.base import BasePipeline
@@ -19,7 +19,6 @@ from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSign
 # Re-exports from consolidated domain location
 from bioetl.domain.config import (
     PipelineConfig,
-    PipelineRuntimeConfig,
     RuntimeConfig,
 )
 
@@ -28,7 +27,6 @@ __all__ = [
     "BasePipeline",
     # Decomposed config (ADR-0005) - consolidated in domain.config
     "PipelineConfig",
-    "PipelineRuntimeConfig",
     "RuntimeConfig",
     "PipelineServices",
     # Shutdown coordination (ADR-0005)

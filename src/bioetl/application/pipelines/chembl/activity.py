@@ -31,7 +31,7 @@ class ChEMBLActivityPipeline(BasePipeline):
     def __init__(
         self,
         config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
     ) -> None:
         """Initialize pipeline and pre-compute filter sets."""

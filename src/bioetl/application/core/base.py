@@ -43,7 +43,7 @@ class BasePipeline(ABC):
     @classmethod
     def create(
         cls,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
         config: PipelineConfig,
     ) -> Self:
@@ -56,7 +56,7 @@ class BasePipeline(ABC):
     def __init__(
         self,
         config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
     ) -> None:
         """Initialize pipeline definition."""
@@ -83,7 +83,7 @@ class BasePipeline(ABC):
         return self._config
 
     @property
-    def runtime(self) -> PipelineRuntimeConfig:
+    def runtime(self) -> RuntimeConfig:
         """Access runtime configuration."""
         return self._runtime
 
