@@ -10,7 +10,6 @@ They do NOT test full pipeline execution, focusing instead on:
 import pytest
 
 
-@pytest.mark.skip(reason="Disabling E2E tests due to persistent pytest-docker port conflicts.")
 @pytest.mark.e2e
 @pytest.mark.slow
 async def test_redis_connection(e2e_redis_client):
@@ -26,7 +25,6 @@ async def test_redis_connection(e2e_redis_client):
     assert value is None
 
 
-@pytest.mark.skip(reason="Disabling E2E tests due to persistent pytest-docker port conflicts.")
 @pytest.mark.e2e
 @pytest.mark.slow
 async def test_redis_locks(e2e_redis_client):
@@ -59,7 +57,6 @@ async def test_redis_locks(e2e_redis_client):
     await e2e_redis_client.delete(lock_key)
 
 
-@pytest.mark.skip(reason="Disabling E2E tests due to persistent pytest-docker port conflicts.")
 @pytest.mark.e2e
 @pytest.mark.slow
 def test_minio_bucket_operations(e2e_minio_client):
@@ -74,7 +71,6 @@ def test_minio_bucket_operations(e2e_minio_client):
         assert bucket in bucket_names, f"Bucket {bucket} should exist"
 
 
-@pytest.mark.skip(reason="Disabling E2E tests due to persistent pytest-docker port conflicts.")
 @pytest.mark.e2e
 @pytest.mark.slow
 def test_minio_object_operations(e2e_minio_client):
@@ -99,7 +95,6 @@ def test_minio_object_operations(e2e_minio_client):
     e2e_minio_client.delete_object(Bucket=bucket, Key=key)
 
 
-@pytest.mark.skip(reason="Disabling E2E tests due to persistent pytest-docker port conflicts.")
 @pytest.mark.e2e
 @pytest.mark.slow
 async def test_redis_lock_integration_with_bioetl(e2e_redis_client):
@@ -130,7 +125,6 @@ async def test_redis_lock_integration_with_bioetl(e2e_redis_client):
     await lock.release(lock_key, owner_id)
 
 
-@pytest.mark.skip(reason="Disabling E2E tests due to persistent pytest-docker port conflicts.")
 @pytest.mark.e2e
 @pytest.mark.slow
 async def test_checkpoint_with_minio(e2e_minio_client):

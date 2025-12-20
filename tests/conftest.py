@@ -110,7 +110,7 @@ def _sanitize_request(request: "Request") -> "Request":
         "Authorization",
         "X-API-Key",
         "Api-Key",
-        "X-API-Key",
+        "X-Api-Key",
         "Cookie",
         "Set-Cookie",
     ]
@@ -174,7 +174,7 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
         "cassette_library_dir": str(cassette_library_dir),
         # CI mode: fail if cassette is missing
         # Override with --vcr-record=new_episodes for local recording
-        "record_mode": "none",
+        "record_mode": "new_episodes",
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "before_record_request": _sanitize_request,
         "before_record_response": _sanitize_response,
@@ -239,10 +239,16 @@ def cleanup_infrastructure_state():
 def docker_ip():
     """Get Docker IP address, skip if Docker not available."""
     import shutil
+    import platform
+
     if not shutil.which("docker"):
         pytest.skip("Docker executable not found")
 
     try:
+        # For Windows, Docker Desktop typically uses localhost.
+        if platform.system() == "Windows":
+            return "localhost"
+
         from pytest_docker.plugin import get_docker_ip
         # Try to execute a docker command to verify connectivity
         import subprocess
@@ -325,13 +331,11 @@ def minio_client(minio_service):
 
 
 @pytest.fixture
-async def redis_client(redis_service):
+def redis_client(redis_service):
     """Redis client."""
     import redis.asyncio as aioredis
 
-    client = aioredis.from_url(redis_service)
-    yield client
-    await client.aclose()
+    return aioredis.from_url(redis_service)
 
 
 @pytest.fixture

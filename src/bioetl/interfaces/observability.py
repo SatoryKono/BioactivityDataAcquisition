@@ -3,6 +3,8 @@
 Handles the exposure of metrics and other observability signals to external systems.
 """
 
+from contextlib import suppress
+from threading import Thread
 
 # We import from infrastructure to avoid direct dependency on prometheus_client here
 # if we want to be strict, but start_http_server is the standard way.
@@ -14,9 +16,7 @@ Handles the exposure of metrics and other observability signals to external syst
 # Let's move the implementation to infrastructure/observability/server.py
 # and call it from here.
 
-from bioetl.infrastructure.observability.server import (
-    start_metrics_server as _start_server,
-)
+from bioetl.infrastructure.observability.server import start_metrics_server as _start_server
 
 
 def start_metrics_server(port: int = 8000) -> None:

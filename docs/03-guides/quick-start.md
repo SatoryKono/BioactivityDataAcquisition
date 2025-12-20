@@ -1,66 +1,58 @@
-# How to Run Pipelines
+# Quick Start
 
-This guide covers the common ways to execute data pipelines using the BioETL CLI.
+TL;DR for setting up and running BioETL locally.
 
-## Basic Execution
+## Setup (5 minutes)
 
-The primary command for running a pipeline is `bioetl.main run`. You must specify which pipeline to run using the `--pipeline` flag.
+```bash
+# Clone and enter directory
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
+
+# Install dependencies
+make install
+
+# Configure environment
+cp .env.example .env
+
+# Start infrastructure (Redis, MinIO)
+make docker-up
+```
+
+## Run Your First Pipeline
 
 ```bash
 # Activate virtual environment
-source .venv/bin/activate
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
 
-# Run the ChEMBL activity pipeline
-python -m bioetl.main run --pipeline chembl_activity
+# Run ChEMBL activity pipeline (limited to 100 records)
+python -m bioetl.main run --pipeline chembl_activity --limit 100
 ```
 
-This will run the pipeline defined in `configs/pipelines/chembl_activity.yaml`.
-
-## Common Flags
-
-*   `--limit <N>`: Process only the first `N` records. Ideal for testing.
-    ```bash
-    python -m bioetl.main run --pipeline chembl_activity --limit 500
-    ```
-
-*   `--full-rebuild`: Force a full load, ignoring any saved watermarks or checkpoints.
-    ```bash
-    python -m bioetl.main run --pipeline chembl_activity --full-rebuild
-    ```
-
-*   `--resume`: Resume from a previously saved checkpoint (see Graceful Shutdown in `RULES.md`).
-    ```bash
-    python -m bioetl.main run --pipeline chembl_activity --resume
-    ```
-
-## Load Strategies
-
-The pipeline's behavior depends on the `load_strategy` defined in its YAML configuration.
-
-### Incremental Load
-This is the default for most pipelines. The pipeline fetches only new or updated records since the last successful run. The `watermark_field` (e.g., `updated_at`) is used to track progress.
-
-### Full Load
-The pipeline fetches all available data from the source. This is useful for initial data loading or periodic consistency checks. You can force a full load with `--full-rebuild`.
-
-## Backfill and Replay
-
-To process data for a specific historical period, you can use flags to override the default behavior.
+## Verify
 
 ```bash
-# Example: Backfill ChEMBL data for a specific date range
-python -m bioetl.main run --pipeline chembl_activity \
-    --start-date 2023-01-01 \
-    --end-date 2023-01-31
+# Run tests
+make test
+
+# Check linting
+make lint
 ```
 
-**Note**: Backfill operations use an exclusive lock to prevent conflicts with regular incremental runs.
+## Common Commands
 
-## Viewing Available Pipelines
+| Task | Command |
+|------|---------|
+| Run all tests | `make test` |
+| Run linting | `make lint` |
+| Start infrastructure | `make docker-up` |
+| Stop infrastructure | `make docker-down` |
+| List pipelines | `python -m bioetl.main list` |
+| Full rebuild | `python -m bioetl.main run --pipeline <name> --full-rebuild` |
 
-To see a list of all configured pipelines, you can use the `list` command:
+## Next Steps
 
-```bash
-python -m bioetl.main list
-```
-This will output a list of pipeline names found in the `configs/pipelines/` directory.
+- [Getting Started](getting-started.md) - Full setup guide with troubleshooting
+- [Running Pipelines](running-pipelines.md) - Comprehensive CLI reference
+- [Add New Source](add-new-source.md) - Integrate a new data provider
