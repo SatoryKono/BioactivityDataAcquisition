@@ -171,7 +171,7 @@ class TestCsvFilterReaderEdgeCases:
             path = f.name
 
         try:
-            with pytest.raises(ValueError, match="Failed to read CSV"):
+            with pytest.raises(ValueError, match="Failed to read CSV file"):
                 await csv_reader.load_filter_ids(path, "id")
         finally:
             Path(path).unlink(missing_ok=True)
