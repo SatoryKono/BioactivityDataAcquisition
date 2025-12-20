@@ -13,11 +13,10 @@ from uuid import UUID
 import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
-from bioetl.domain.config import PipelineRuntimeConfig
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.orchestration.runner import PipelineRunner
 from bioetl.application.registry import PipelineRegistry
-from bioetl.domain.config import TableConfig
+from bioetl.domain.config import RuntimeConfig, TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
