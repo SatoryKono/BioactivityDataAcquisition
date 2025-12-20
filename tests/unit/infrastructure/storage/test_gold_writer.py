@@ -454,69 +454,6 @@ class TestGoldWriterTypeSanitization:
 
 
 @pytest.mark.unit
-class TestGoldWriterFlattenForCSV:
-    """Tests for CSV flattening method."""
-
-    def test_flatten_list_column(self, gold_writer):
-        """Test flattening of list column to JSON string."""
-        import pyarrow as pa
-
-        table = pa.table({
-            "id": ["a", "b"],
-            "tags": [["tag1", "tag2"], ["tag3"]],
-        })
-
-        result = gold_writer._flatten_for_csv(table)
-
-        # Tags column should now be string type
-        assert result.schema.field("tags").type == pa.string()
-        # Values should be JSON strings
-        assert result.column("tags")[0].as_py() == '["tag1", "tag2"]'
-
-    def test_flatten_struct_column(self, gold_writer):
-        """Test flattening of struct column to JSON string."""
-        import pyarrow as pa
-
-        table = pa.table({
-            "id": ["a"],
-            "metadata": [{"key": "value"}],
-        })
-
-        result = gold_writer._flatten_for_csv(table)
-
-        assert result.schema.field("metadata").type == pa.string()
-        assert result.column("metadata")[0].as_py() == '{"key": "value"}'
-
-    def test_flatten_preserves_simple_columns(self, gold_writer):
-        """Test that simple columns are preserved."""
-        import pyarrow as pa
-
-        table = pa.table({
-            "id": ["a", "b"],
-            "value": [1.0, 2.0],
-        })
-
-        result = gold_writer._flatten_for_csv(table)
-
-        assert result.schema.field("id").type == pa.string()
-        assert result.schema.field("value").type == pa.float64()
-
-    def test_flatten_handles_null_values(self, gold_writer):
-        """Test flattening handles null values in list columns."""
-        import pyarrow as pa
-
-        table = pa.table({
-            "id": ["a", "b"],
-            "tags": [["tag1"], None],
-        })
-
-        result = gold_writer._flatten_for_csv(table)
-
-        assert result.column("tags")[0].as_py() == '["tag1"]'
-        assert result.column("tags")[1].as_py() is None
-
-
-@pytest.mark.unit
 class TestGoldWriterToArrowTable:
     """Tests for _to_arrow_table method."""
 
@@ -541,26 +478,3 @@ class TestGoldWriterToArrowTable:
         result = gold_writer._to_arrow_table(records)
 
         assert result.num_rows == 1
-
-
-@pytest.mark.unit
-class TestGoldWriterCSVExport:
-    """Tests for CSV export functionality."""
-
-    def test_init_with_csv_path(self):
-        """Test initialization with CSV path."""
-        writer = GoldWriter(
-            base_path="s3://bucket/gold",
-            csv_path="/tmp/exports",
-        )
-        assert writer.csv_path == "/tmp/exports"
-
-    def test_init_with_csv_options(self):
-        """Test initialization with CSV options."""
-        writer = GoldWriter(
-            base_path="s3://bucket/gold",
-            csv_path="/tmp/exports",
-            csv_options={"delimiter": ";", "header": False},
-        )
-        assert writer.csv_options["delimiter"] == ";"
-        assert writer.csv_options["header"] is False

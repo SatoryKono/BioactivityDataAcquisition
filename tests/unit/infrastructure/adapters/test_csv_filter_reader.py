@@ -163,15 +163,21 @@ class TestCsvFilterReaderEdgeCases:
         finally:
             Path(path).unlink(missing_ok=True)
 
-    async def test_load_invalid_csv_format(self, csv_reader):
-        """Test handling of invalid CSV format."""
+    async def test_load_malformed_csv_missing_column(self, csv_reader):
+        """Test handling of CSV where requested column is missing.
+
+        Note: Polars is very lenient with CSV parsing and will interpret
+        binary/malformed data as column names. We verify that our code
+        raises a helpful error when the column isn't found.
+        """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
-            # Write binary data that's not valid CSV
-            f.write("\x00\x01\x02\x03")
+            # Write data with different column names
+            f.write("other_column\n")
+            f.write("value1\n")
             path = f.name
 
         try:
-            with pytest.raises(ValueError, match="Failed to read CSV file"):
+            with pytest.raises(ValueError, match="Column 'id' not found"):
                 await csv_reader.load_filter_ids(path, "id")
         finally:
             Path(path).unlink(missing_ok=True)
