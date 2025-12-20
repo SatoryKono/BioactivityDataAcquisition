@@ -3,6 +3,7 @@ A simple in-memory lock for local development and testing.
 This lock is not distributed and only works within a single process.
 """
 import asyncio
+import time
 
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID
@@ -15,6 +16,45 @@ class MemoryLock(LockPort):
         self._locks: dict[str, tuple[str, asyncio.Lock]] = {}
         self._global_lock = asyncio.Lock()
 
+    async def _try_acquire(
+        self,
+        key: str,
+        owner_id: RunID,
+        ttl: int | None = None,
+    ) -> bool:
+        """Attempt to acquire the lock once without waiting.
+
+        Args:
+            key: Lock key.
+            owner_id: Owner identifier.
+            ttl: Time-to-live (unused in memory lock).
+
+        Returns:
+            True if lock was acquired, False otherwise.
+        """
+        async with self._global_lock:
+            if key in self._locks:
+                existing_owner, lock = self._locks[key]
+                if lock.locked():
+                    # Return True if already owned (reentrant), False otherwise
+                    return existing_owner == str(owner_id)
+
+            # Create new lock or reuse existing unlocked one
+            if key not in self._locks:
+                lock = asyncio.Lock()
+                self._locks[key] = (str(owner_id), lock)
+            else:
+                # Lock exists but is not locked - update owner and reuse
+                _, lock = self._locks[key]
+                self._locks[key] = (str(owner_id), lock)
+
+            # Acquire the asyncio.Lock
+            if not lock.locked():
+                await lock.acquire()
+                return True
+
+            return str(owner_id) == self._locks[key][0]
+
     async def acquire(
         self,
         key: str,
@@ -24,46 +64,35 @@ class MemoryLock(LockPort):
         wait_timeout: int = 300,
         exclusive: bool = False,
     ) -> bool:
-        """Acquire a lock."""
-        async with self._global_lock:
-            # Check if key exists
-            if key in self._locks:
-                existing_owner, lock = self._locks[key]
-                if lock.locked():
-                    if existing_owner == str(owner_id):
-                        return True  # Already owned
+        """Acquire a lock.
 
-                    # If not waiting, fail immediately
-                    if not wait:
-                        return False
+        Args:
+            key: Lock key.
+            owner_id: Owner identifier.
+            ttl: Time-to-live (unused in memory lock).
+            wait: If True, wait for lock to become available.
+            wait_timeout: Maximum time to wait in seconds.
+            exclusive: Exclusive lock flag (unused in memory lock).
 
-                    # If waiting, we need to release global lock to allow others to release
-                    # But implementing per-key wait with global lock release is complex.
-                    # For simple in-memory testing, we can just fail or sleep loop.
-                    # Simplified: only support wait=False for now or assume test won't block.
-                    # Real implementation of wait in memory lock requires Condition or similar.
-                    # Given constraints, we will just fail if locked by other.
-                    # TODO: Implement proper wait mechanism if needed for tests.
-                    return False
-            else:
-                # Create new lock
-                lock = asyncio.Lock()
-                self._locks[key] = (str(owner_id), lock)
-
-        # Acquire the specific lock
-        # Note: We are already holding it logically by putting it in _locks map above
-        # But to use asyncio.Lock semantics we acquire it.
-        # However, since we are single process, the _locks map entry acts as the "held" state.
-        # We simplify by just using the map presence as locked state.
-        # But to support `lock.locked()`, we should actually acquire it.
-
-        # Re-fetch lock to be sure
-        _, lock = self._locks[key]
-        if not lock.locked():
-            await lock.acquire()
+        Returns:
+            True if lock was acquired, False otherwise.
+        """
+        # Try to acquire immediately
+        if await self._try_acquire(key, owner_id, ttl):
             return True
 
-        return str(owner_id) == self._locks[key][0]
+        # If not waiting, return immediately
+        if not wait:
+            return False
+
+        # Wait for lock with timeout
+        start = time.monotonic()
+        while time.monotonic() - start < wait_timeout:
+            if await self._try_acquire(key, owner_id, ttl):
+                return True
+            await asyncio.sleep(0.1)
+
+        return False
 
     async def release(
         self,
