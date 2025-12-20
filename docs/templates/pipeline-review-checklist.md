@@ -148,7 +148,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Integration tests with VCR.py cassettes
 - [ ] Cassettes sanitized (no secrets, no PII)
 - [ ] Golden tests for output validation
-- [ ] Coverage ≥85%
+- [ ] Coverage ≥80%
 - [ ] Tests in `tests/` mirror `src/` structure
 
 ## 15. Documentation

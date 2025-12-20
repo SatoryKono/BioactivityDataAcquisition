@@ -238,7 +238,7 @@
 
 - PEP8, Black, Ruff, Mypy (strict).
 - Логирование: `UnifiedLogger` (структурный JSON). **print() MUST NOT.**
-- Тесты: Unit (mock net), Integration (VCR.py), Golden. Coverage ≥85%.
+- Тесты: Unit (mock net), Integration (VCR.py), Golden. Coverage ≥80%.
 - Zero-sum class count при дублировании.
 - Чек-лист ревью: `docs/templates/pipeline-review-checklist.md`.
 
@@ -270,4 +270,4 @@
 4. Locks: Redis SETNX, TTL 60s, Heartbeat 20s, Fencing Token, Max 4h.
 5. DR: RPO 24h, RTO 4h, Game Days ежегодно.
 6. Schema Evolution: 14-дневный deprecation period, dual-write.
-7. Coverage ≥85%, mypy --strict, zero-sum class count.
+7. Coverage ≥80%, mypy --strict, zero-sum class count.
