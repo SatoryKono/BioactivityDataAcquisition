@@ -22,11 +22,11 @@ from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
-from bioetl.infrastructure.factories.clients import (
+from bioetl.composition.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
-from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,

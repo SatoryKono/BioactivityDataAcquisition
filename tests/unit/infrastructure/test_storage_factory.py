@@ -4,8 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.infrastructure.factories.storage_factory import StorageContext, StorageFactory
-from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext, StorageFactory
 from bioetl.infrastructure.config import Settings
 
 
@@ -152,9 +151,9 @@ class TestStorageFactoryLocal:
         mock_logger,
     ):
         """Test that local runs use data/output paths."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold:
 
             result = StorageFactory.create(
                 settings=mock_settings_local,
@@ -175,9 +174,9 @@ class TestStorageFactoryLocal:
         mock_logger,
     ):
         """Test local run with JSON export enabled."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold:
 
             StorageFactory.create(
                 settings=mock_settings_local,
@@ -198,9 +197,9 @@ class TestStorageFactoryLocal:
         mock_logger,
     ):
         """Test local run with CSV export enabled for Silver and Gold."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold:
 
             StorageFactory.create(
                 settings=mock_settings_local,
@@ -227,9 +226,9 @@ class TestStorageFactoryLocal:
         mock_logger,
     ):
         """Test that local run logs appropriate info message."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter"):
 
             StorageFactory.create(
                 settings=mock_settings_local,
@@ -257,9 +256,9 @@ class TestStorageFactoryCloud:
         mock_logger,
     ):
         """Test that cloud runs use S3 bucket paths."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter"):
 
             result = StorageFactory.create(
                 settings=mock_settings_cloud,
@@ -280,9 +279,9 @@ class TestStorageFactoryCloud:
         mock_logger,
     ):
         """Test that cloud runs pass endpoint_url to BronzeWriter."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter"):
 
             StorageFactory.create(
                 settings=mock_settings_cloud,
@@ -301,9 +300,9 @@ class TestStorageFactoryCloud:
         mock_logger,
     ):
         """Test that cloud runs pass storage_options to writers."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold:
 
             StorageFactory.create(
                 settings=mock_settings_cloud,
@@ -333,9 +332,9 @@ class TestStorageFactoryEdgeCases:
         mock_logger,
     ):
         """Test handling of empty sink configuration."""
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter"):
 
             result = StorageFactory.create(
                 settings=mock_settings_local,
@@ -367,9 +366,9 @@ class TestStorageFactoryEdgeCases:
         settings.s3.bucket_checkpoints = "dev-checkpoints"
         settings.storage_options = {}
 
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter"):
 
             result = StorageFactory.create(
                 settings=settings,
@@ -393,9 +392,9 @@ class TestStorageFactoryEdgeCases:
         silver_instance = MagicMock()
         gold_instance = MagicMock()
 
-        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
-             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
-             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
+        with patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold:
 
             mock_bronze.return_value = bronze_instance
             mock_delta.return_value = silver_instance
