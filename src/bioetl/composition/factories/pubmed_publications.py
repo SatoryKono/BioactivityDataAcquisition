@@ -3,10 +3,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.registry import PipelineRegistry
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
+from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
 from bioetl.infrastructure.schemas.silver import PUBMED_PUBLICATION_SCHEMA
 
@@ -47,11 +49,20 @@ class PubMedPublicationsPipelineFactory(BasePipelineFactory[PubMedPublicationsPi
 
         email_to_use = pipeline_config.source.email or settings.default_email
 
-        return PubMedAdapter(
+        data_source = PubMedAdapter(
             http_client=http_client,
             email=email_to_use,
             api_key=api_key_to_use
         )
+
+        if filter_config and filter_config.enabled:
+            return FilteredDataSource(
+                data_source=data_source,
+                filter_reader=CsvFilterReader(),
+                filter_config=filter_config,
+            )
+
+        return data_source
 
 # Регистрация делает пайплайн доступным для запуска через CLI
 PipelineRegistry.register(
