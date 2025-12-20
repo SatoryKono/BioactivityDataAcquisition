@@ -145,6 +145,8 @@ class PubChemClient:
         start_cid = int(watermark) if watermark else 1
         batch_size = 100
         current_cid = start_cid
+        consecutive_empty = 0
+        max_consecutive_empty = 3  # Stop after 3 consecutive empty batches
 
         while not limit or fetched < limit:
             await self.rate_limiter.acquire()
@@ -152,10 +154,16 @@ class PubChemClient:
 
             compounds = await self._fetch_batch_safe(cid_batch)
             if not compounds:
-                # If safe fetch returns empty due to error (and not strict), we continue
-                # But if it returns empty because no data? pcp returns [] if no data.
-                # If error occurred and suppressed, we skip batch.
-                pass
+                # Track consecutive empty results (from errors or no data)
+                consecutive_empty += 1
+                if consecutive_empty >= max_consecutive_empty:
+                    logger.warning(
+                        "Stopping incremental fetch after consecutive empty batches",
+                        extra={"consecutive_empty": consecutive_empty, "current_cid": current_cid},
+                    )
+                    break
+            else:
+                consecutive_empty = 0  # Reset counter on successful fetch
 
             for compound in compounds:
                 if limit and fetched >= limit:
