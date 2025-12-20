@@ -58,8 +58,9 @@ class TestIQRDetector:
         data = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0]
         q1, q3 = detector._calculate_quartiles(data)
 
-        assert q1 == 20.0  # 8 // 4 = 2 -> data[2] = 30? No, sorted[2] = 30
-        assert q3 == 60.0  # (3 * 8) // 4 = 6 -> data[6] = 70
+        # n=8, q1_idx = 8 // 4 = 2, q3_idx = (3 * 8) // 4 = 6
+        assert q1 == 30.0  # sorted_data[2] = 30.0
+        assert q3 == 70.0  # sorted_data[6] = 70.0
 
     def test_calculate_iqr_score_below_q1(self, detector):
         """Test IQR score for value below Q1."""
