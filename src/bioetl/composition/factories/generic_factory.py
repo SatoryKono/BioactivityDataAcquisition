@@ -6,14 +6,22 @@ Pipelines can be registered declaratively using configuration rather than class 
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, Any
+from uuid import UUID
 
+from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.executor import PipelineExecutor
+from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.domain.config import TableConfig
+from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
     DataSourceRegistry,
 )
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.domain.filter_config import InputFilterConfig
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -22,7 +30,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.domain.config import RuntimeConfig
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -171,6 +178,105 @@ class GenericPipelineFactory(Generic[TPipeline]):
             runtime=runtime,
             services=services,
             config=domain_config,
+        )
+
+    def create_runner(
+        self,
+        run_id: UUID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        logger: structlog.BoundLogger,
+        tracer: Any,
+        filter_config: InputFilterConfig | None = None,
+        config: PipelineYamlConfig | None = None,
+    ) -> PipelineRunner:
+        """Create a fully configured PipelineRunner.
+
+        Encapsulates the construction of the entire pipeline execution graph,
+        including services, pipeline instance, record processor, and executor.
+
+        Args:
+            run_id: Unique identifier for this run
+            runtime: Runtime configuration
+            settings: Application settings
+            logger: Logger instance
+            tracer: Tracer instance
+            filter_config: Optional filter configuration
+            config: Pre-loaded pipeline config (optional)
+
+        Returns:
+            Fully initialized PipelineRunner
+        """
+        # Load config once if not provided
+        yaml_config = config or load_pipeline_config(self.pipeline_name)
+
+        # Create pipeline instance with services
+        pipeline = self.create_with_services(
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=yaml_config,
+            filter_config=filter_config,
+        )
+
+        # Create Checkpoint Manager
+        checkpoint_manager = CheckpointManager(
+            checkpoint_port=pipeline.services.checkpoint,
+            logger=logger,
+            pipeline_name=pipeline.config.pipeline_name,
+            run_id=run_id,
+            resume=runtime.resume,
+            watermark_extractor=lambda record: pipeline.extract_watermark(
+                pipeline.context, record
+            ),
+        )
+
+        # Create Record Processor
+        error_classifier = ErrorClassifier()
+        table_config = TableConfig(
+            primary_keys=pipeline.config.primary_keys,
+            silver_table=pipeline.config.silver_table,
+            gold_table=pipeline.config.gold_table,
+        )
+
+        record_processor = RecordProcessor(
+            services=pipeline.services,
+            error_classifier=error_classifier,
+            context=pipeline.context,
+            pipeline_name=pipeline.config.pipeline_name,
+            provider=pipeline.config.provider,
+            entity_type=pipeline.config.entity_type,
+            transform_callback=pipeline.transform_bronze_to_silver,
+            gold_filter_callback=pipeline.should_write_gold,
+            silver_schema=self.silver_schema,
+            gold_schema=self.gold_schema,
+            dq_config=pipeline.config.dq,
+            table_config=table_config,
+        )
+
+        # Create Executor
+        executor = PipelineExecutor(
+            services=pipeline.services,
+            record_processor=record_processor,
+            checkpoint_manager=checkpoint_manager,
+            shutdown_signal=pipeline.shutdown_signal,
+            entity_type=pipeline.config.entity_type,
+            batch_size=pipeline.config.batch_size,
+            checkpoint_interval=pipeline.config.checkpoint_interval,
+        )
+
+        # Assemble Runner
+        return PipelineRunner(
+            config=pipeline.config,
+            runtime=pipeline.runtime,
+            services=pipeline.services,
+            context=pipeline.context,
+            executor=executor,
+            checkpoint_manager=checkpoint_manager,
+            shutdown_signal=pipeline.shutdown_signal,
+            logger=logger,
+            pipeline=pipeline,
+            tracer=tracer,
         )
 
 

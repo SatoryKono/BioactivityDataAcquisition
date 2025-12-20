@@ -9,13 +9,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.interfaces.orchestration.runner import PipelineRunner
+# Factories are imported to ensure registration happens
+import bioetl.composition.factories.pipeline_factories  # noqa: F401
+from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.application.registry import PipelineRegistry
-from bioetl.domain.config import RuntimeConfig, TableConfig
-from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
@@ -63,6 +61,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, QuarantinePort
     from bioetl.domain.types import RunType
+    from bioetl.interfaces.orchestration.runner import PipelineRunner
 
 
 def bootstrap_quarantine() -> QuarantinePort:
@@ -126,8 +125,6 @@ def bootstrap_pipeline(
         filter_field: API field name to filter by (overrides config)
         query: Optional query string for data sources that support it
     """
-    from bioetl.domain.filter_config import InputFilterConfig
-
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
     tracer = bootstrap_tracer()
@@ -143,106 +140,33 @@ def bootstrap_pipeline(
         query=query,
     )
 
-    # Build filter config from YAML defaults, CLI overrides
-    filter_config = None
-    yaml_filter = yaml_config.input_filter
+    # Build filter config using the dedicated builder
+    filter_config = FilterConfigBuilder.build(
+        yaml_filter=yaml_config.input_filter,
+        cli_csv=input_csv,
+        cli_column=filter_column,
+        cli_field=filter_field,
+    )
 
-    # Determine effective values: CLI > YAML config
-    effective_csv = input_csv or yaml_filter.source_path
-    effective_column = filter_column or yaml_filter.column_name
-    effective_field = filter_field or yaml_filter.filter_field
-
-    # Enable filter if: CLI provides --input-csv OR config has enabled=true
-    filter_enabled = bool(input_csv) or yaml_filter.enabled
-
-    if filter_enabled and effective_csv:
-        filter_config = InputFilterConfig(
-            enabled=True,
-            source_path=effective_csv,
-            column_name=effective_column,
-            filter_field=effective_field,
-            batch_size=yaml_filter.batch_size,
-        )
+    if filter_config:
         logger.info(
             "input_filter_enabled",
-            csv_path=effective_csv,
-            column=effective_column,
-            filter_field=effective_field,
+            csv_path=filter_config.source_path,
+            column=filter_config.column_name,
+            filter_field=filter_config.filter_field,
             source="cli" if input_csv else "config",
         )
 
-    # Resolve pipeline factory from registry
+    # Resolve pipeline factory and delegate runner creation
     pipeline_def = PipelineRegistry.get(pipeline_name)
     factory = pipeline_def.factory
-    silver_schema = pipeline_def.silver_schema
-    gold_schema = pipeline_def.gold_schema
 
-    pipeline = factory.create_with_services(
+    return factory.create_runner(
+        run_id=run_id,
         runtime=runtime_config,
         settings=settings,
         logger=logger,
-        config=yaml_config,
-        filter_config=filter_config,
-    )
-
-    checkpoint_manager = CheckpointManager(
-        checkpoint_port=pipeline.services.checkpoint,
-        logger=logger,
-        pipeline_name=pipeline.config.pipeline_name,
-        run_id=run_id,
-        resume=resume,
-        watermark_extractor=lambda record: pipeline.extract_watermark(
-            pipeline.context, record
-        ),
-    )
-
-    error_classifier = ErrorClassifier()
-
-    # 3. Instantiate Executor with typed configs
-    dq_config = pipeline.config.dq
-
-    table_config = TableConfig(
-        primary_keys=pipeline.config.primary_keys,
-        silver_table=pipeline.config.silver_table,
-        gold_table=pipeline.config.gold_table,
-    )
-
-    record_processor = RecordProcessor(
-        services=pipeline.services,
-        error_classifier=error_classifier,
-        context=pipeline.context,
-        pipeline_name=pipeline.config.pipeline_name,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
-        transform_callback=pipeline.transform_bronze_to_silver,
-        gold_filter_callback=pipeline.should_write_gold,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        dq_config=dq_config,
-        table_config=table_config,
-    )
-
-    executor = PipelineExecutor(
-        services=pipeline.services,
-        record_processor=record_processor,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        entity_type=pipeline.config.entity_type,
-        batch_size=pipeline.config.batch_size,
-        checkpoint_interval=pipeline.config.checkpoint_interval,
-    )
-
-    runner = PipelineRunner(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        services=pipeline.services,
-        context=pipeline.context,
-        executor=executor,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        logger=logger,
-        pipeline=pipeline,  # Explicit dependency injection
         tracer=tracer,
+        filter_config=filter_config,
+        config=yaml_config,
     )
-
-    return runner
