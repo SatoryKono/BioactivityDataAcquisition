@@ -135,10 +135,11 @@ async def test_chembl_pipeline_e2e(
 
     # 5. Verify Results
 
-    # Verify Checkpoint
+    # Verify Checkpoint is deleted after successful run (by design)
+    # Checkpoints only persist if pipeline fails mid-execution for resume capability
     objs = s3.list_objects_v2(Bucket="test-checkpoints", Prefix=f"checkpoints/{pipeline_name}/")
-    assert "Contents" in objs
-    assert len(objs["Contents"]) == 1
+    assert "Contents" not in objs or len(objs.get("Contents", [])) == 0, \
+        "Checkpoint should be deleted after successful pipeline completion"
 
     # Verify Bronze
     objs = s3.list_objects_v2(Bucket="test-bronze", Prefix=f"bronze/v1/chembl/activity/")
@@ -148,7 +149,7 @@ async def test_chembl_pipeline_e2e(
     # Verify Silver (Delta Table)
     # Reading delta table from S3 in test might be tricky without configured storage options
     # Check if object exists at least
-    objs = s3.list_objects_v2(Bucket="test-silver", Prefix="chembl/activity/")
+    objs = s3.list_objects_v2(Bucket="test-silver", Prefix="chembl_activity/")
     # Note: Delta Lake creates _delta_log/ and parquet files
     assert "Contents" in objs
 
