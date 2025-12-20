@@ -185,6 +185,18 @@ module = [
     "vcr.*",
     "fakeredis.*",
     "structlog.*",
+    "pyarrow",
+    "pyarrow.*",
+    "httpx",
+    "httpx.*",
+    "pydantic",
+    "pydantic.*",
+    "pydantic_settings",
+    "pydantic_settings.*",
+    "zstandard",
+    "zstandard.*",
+    "yaml",
+    "yaml.*",
 ]
 ignore_missing_imports = true
 

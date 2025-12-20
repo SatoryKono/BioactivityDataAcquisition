@@ -11,6 +11,7 @@ from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
 from bioetl.infrastructure.schemas.silver import PUBMED_PUBLICATION_SCHEMA
 
 if TYPE_CHECKING:
+    from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -27,6 +28,7 @@ class PubMedPublicationsPipelineFactory(BasePipelineFactory[PubMedPublicationsPi
         cls,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Создает источник данных PubMed."""
         # Use HttpClientFactory for centralized config

@@ -104,7 +104,7 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
-        **_kwargs,
+        **_kwargs: object,
     ) -> PipelineServices:
         """Builds PipelineServices from settings.
 
@@ -140,7 +140,7 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
-        **kwargs,
+        **kwargs: object,
     ) -> TPipeline:
         """Creates pipeline instance.
 
