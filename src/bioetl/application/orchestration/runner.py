@@ -33,7 +33,7 @@ class PipelineRunner:
     def __init__(
         self,
         config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
         context: PipelineContext,
         executor: PipelineExecutor,

@@ -9,8 +9,9 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.core.pipeline_config import PipelineRuntimeConfig # Corrected import
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.domain.types import RunType
 from bioetl.domain.context import PipelineContext
 
@@ -41,9 +42,9 @@ def pubchem_config() -> PipelineConfig:
 
 
 @pytest.fixture
-def pubchem_runtime() -> RuntimeConfig:
+def pubchem_runtime() -> PipelineRuntimeConfig: # Corrected type hint
     """Создаёт runtime конфигурацию."""
-    return RuntimeConfig(
+    return PipelineRuntimeConfig(
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=None,
