@@ -60,7 +60,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         ],
     )
 
-    runtime = PipelineRuntimeConfig(
+    runtime = RuntimeConfig(
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=None,
