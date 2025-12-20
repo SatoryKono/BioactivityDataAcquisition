@@ -2,8 +2,7 @@
 
 import pytest
 
-from bioetl.domain.config import PipelineRuntimeConfig
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 
 

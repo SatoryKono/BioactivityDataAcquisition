@@ -6,9 +6,8 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.domain.config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock

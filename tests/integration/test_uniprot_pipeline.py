@@ -9,9 +9,8 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
-from bioetl.domain.config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.domain.context import PipelineContext
 
@@ -40,9 +39,9 @@ def uniprot_config() -> PipelineConfig:
 
 
 @pytest.fixture
-def uniprot_runtime() -> PipelineRuntimeConfig:
+def uniprot_runtime() -> RuntimeConfig:
     """Создаёт runtime конфигурацию."""
-    return PipelineRuntimeConfig(
+    return RuntimeConfig(
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=None,
