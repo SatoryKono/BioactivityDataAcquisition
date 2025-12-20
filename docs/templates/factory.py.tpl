@@ -1,16 +1,16 @@
 """
 Template for a Factory.
-Location: src/bioetl/infrastructure/factories/<provider>.py
+Location: src/bioetl/composition/factories/<provider>.py
 """
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.infrastructure.config import Settings
+from bioetl.composition.factories.clients import create_redis_client, get_aws_credentials
+from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.factories.clients import create_redis_client, get_aws_credentials
-from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.infrastructure.config import Settings
 # Import specific adapter
 # from bioetl.infrastructure.adapters.{{provider}}.client import {{Provider}}Adapter
 
