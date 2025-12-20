@@ -148,6 +148,8 @@ src/bioetl/
 │   │   ├── pipeline_services.py # Service container
 │   │   ├── shutdown.py          # Graceful shutdown handling
 │   │   └── base_pipeline.py     # Abstract base pipeline
+│   ├── orchestration/           # Execution coordination
+│   │   └── runner.py            # PipelineRunner (Driving Adapter logic)
 │   ├── pipelines/               # Concrete pipeline implementations
 │   │   └── chembl_activity.py   # ChEMBL Activity pipeline
 │   └── observability/           # Application-level observability
@@ -181,8 +183,7 @@ src/bioetl/
 │
 └── interfaces/                  # External interfaces
     ├── cli.py                   # Click CLI (bioetl run/quarantine/checkpoint)
-    └── orchestration/           # Pipeline orchestration
-        ├── runner.py            # PipelineRunner
+    └── orchestration/           # Pipeline orchestration adapters
         ├── signals.py           # OS signal handlers
         └── prefect/             # Prefect integration
 ```

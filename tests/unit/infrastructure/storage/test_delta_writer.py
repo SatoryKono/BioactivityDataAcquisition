@@ -433,3 +433,180 @@ class TestDeltaWriterTimeTravel:
 
             with pytest.raises(TableNotFoundError):
                 await writer.time_travel("nonexistent.table", version=1)
+
+
+@pytest.mark.unit
+class TestDeltaWriterFlattenForCSV:
+    """Tests for _flatten_for_csv static method."""
+
+    def test_flatten_list_column(self):
+        """Test flattening of list column to JSON string."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        table = pa.table({
+            "id": ["a", "b"],
+            "tags": [["tag1", "tag2"], ["tag3"]],
+        })
+
+        result = DeltaWriter._flatten_for_csv(table)
+
+        assert result.schema.field("tags").type == pa.string()
+        assert result.column("tags")[0].as_py() == '["tag1", "tag2"]'
+
+    def test_flatten_struct_column(self):
+        """Test flattening of struct column to JSON string."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        table = pa.table({
+            "id": ["a"],
+            "metadata": [{"key": "value"}],
+        })
+
+        result = DeltaWriter._flatten_for_csv(table)
+
+        assert result.schema.field("metadata").type == pa.string()
+        assert result.column("metadata")[0].as_py() == '{"key": "value"}'
+
+    def test_flatten_preserves_simple_columns(self):
+        """Test that simple columns are preserved."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        table = pa.table({
+            "id": ["a", "b"],
+            "value": [1.0, 2.0],
+        })
+
+        result = DeltaWriter._flatten_for_csv(table)
+
+        assert result.schema.field("id").type == pa.string()
+        assert result.schema.field("value").type == pa.float64()
+
+    def test_flatten_handles_null_values(self):
+        """Test flattening handles null values in list columns."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        table = pa.table({
+            "id": ["a", "b"],
+            "tags": [["tag1"], None],
+        })
+
+        result = DeltaWriter._flatten_for_csv(table)
+
+        assert result.column("tags")[0].as_py() == '["tag1"]'
+        assert result.column("tags")[1].as_py() is None
+
+
+@pytest.mark.unit
+class TestDeltaWriterCSVExport:
+    """Tests for CSV export functionality."""
+
+    def test_init_with_csv_path(self):
+        """Test initialization with CSV path."""
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        writer = DeltaWriter(
+            base_path="s3://bucket/silver",
+            csv_path="/tmp/exports",
+        )
+        assert writer.csv_path == "/tmp/exports"
+
+    def test_init_with_csv_options(self):
+        """Test initialization with CSV options."""
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        writer = DeltaWriter(
+            base_path="s3://bucket/silver",
+            csv_path="/tmp/exports",
+            csv_options={"delimiter": ";", "header": False},
+        )
+        assert writer.csv_options["delimiter"] == ";"
+        assert writer.csv_options["header"] is False
+
+
+@pytest.mark.unit
+class TestDeltaWriterErrorHandling:
+    """Tests for error handling in DeltaWriter."""
+
+    @pytest.mark.asyncio
+    async def test_write_silver_schema_mismatch_error(self, valid_records):
+        """Test write_silver raises SchemaViolationError for schema mismatch."""
+        from unittest.mock import patch
+
+        from deltalake.exceptions import SchemaMismatchError
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        import pyarrow as pa
+
+        schema = pa.schema([
+            pa.field("entity_id", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
+
+        with patch(
+            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            side_effect=SchemaMismatchError("Schema mismatch"),
+        ):
+            writer = DeltaWriter(base_path="s3://bucket/silver")
+
+            with pytest.raises(SchemaViolationError):
+                await writer.write_silver(
+                    table_name="test.table",
+                    records=valid_records,
+                    primary_keys=["entity_id"],
+                    schema=schema,
+                )
+
+    @pytest.mark.asyncio
+    async def test_write_silver_merge_conflict_error(self, valid_records):
+        """Test write_silver raises MergeConflictError for merge conflicts."""
+        from unittest.mock import MagicMock, patch
+
+        from deltalake.exceptions import DeltaError
+
+        from bioetl.domain.exceptions import MergeConflictError
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        import pyarrow as pa
+
+        schema = pa.schema([
+            pa.field("entity_id", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
+
+        mock_table = MagicMock()
+        mock_merge = MagicMock()
+        mock_table.merge.return_value = mock_merge
+        mock_merge.when_matched_update_all.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
+        mock_merge.execute.side_effect = DeltaError("Merge-conflict detected")
+
+        with patch(
+            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            return_value=mock_table,
+        ):
+            writer = DeltaWriter(base_path="s3://bucket/silver")
+
+            with pytest.raises(MergeConflictError):
+                await writer.write_silver(
+                    table_name="test.table",
+                    records=valid_records,
+                    primary_keys=["entity_id"],
+                    schema=schema,
+                )
