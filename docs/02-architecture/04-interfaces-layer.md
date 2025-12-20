@@ -17,7 +17,9 @@
 
 ### 2.1. `bootstrap.py` — Composition Root
 
-**Источник:** `src/bioetl/interfaces/bootstrap.py`
+**Источник:** `src/bioetl/composition/bootstrap.py`
+
+> **Примечание:** Composition Root перенесён в отдельный слой `composition/` согласно ADR-005.
 
 Это самый важный файл в слое. Он выполняет следующие задачи:
 1.  **Загрузка конфигурации:** Читает переменные окружения и конфигурационные файлы.
