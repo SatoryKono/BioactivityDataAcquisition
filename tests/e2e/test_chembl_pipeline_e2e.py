@@ -116,8 +116,9 @@ async def test_chembl_pipeline_e2e(
                 "molecule_chembl_id": f"CHEMBL{i}",
                 "target_chembl_id": "CHEMBL25",
                 "standard_type": "IC50",
-                "standard_value": float(i),
+                "standard_value": float(i + 1),
                 "standard_units": "nM",
+                "pchembl_value": 5.0 + i * 0.5,  # Required by Gold schema
                 "assay_chembl_id": "CHEMBL123",
                 "document_chembl_id": "CHEMBL1",
             }
