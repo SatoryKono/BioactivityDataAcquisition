@@ -73,6 +73,8 @@ async def test_chembl_pipeline_e2e(
     monkeypatch.setenv("AWS_S3_ALLOW_UNSAFE_RENAME", "true")
     # Force path-style addressing for MinIO
     monkeypatch.setenv("AWS_S3_ADDRESSING_STYLE", "path")
+    # Disable S3 locking (not supported by MinIO out of the box)
+    monkeypatch.setenv("AWS_S3_LOCKING_PROVIDER", "dynamodb")
 
     # Parse port from redis_service (redis://localhost:<port>)
     redis_port = redis_service.split(":")[-1]
@@ -133,10 +135,10 @@ async def test_chembl_pipeline_e2e(
 
     # 5. Verify Results
 
-    # Verify Checkpoint is deleted after successful run
-    # (Checkpoints are only kept for resume, deleted on success)
+    # Verify Checkpoint
     objs = s3.list_objects_v2(Bucket="test-checkpoints", Prefix=f"checkpoints/{pipeline_name}/")
-    assert "Contents" not in objs or len(objs.get("Contents", [])) == 0
+    assert "Contents" in objs
+    assert len(objs["Contents"]) == 1
 
     # Verify Bronze
     objs = s3.list_objects_v2(Bucket="test-bronze", Prefix=f"bronze/v1/chembl/activity/")
