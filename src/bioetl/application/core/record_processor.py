@@ -10,6 +10,8 @@ from datetime import UTC, datetime
 from typing import Any
 
 from bioetl.application.core.pipeline_services import PipelineServices
+
+
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.config import DQConfig, TableConfig
@@ -19,9 +21,9 @@ from bioetl.domain.exceptions import DataQualityThresholdError
 from bioetl.domain.types import BatchID
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class BatchResult:
-    """Result of processing a single batch."""
+    """Result of processing a batch of records."""
 
     bronze_count: int
     silver_count: int

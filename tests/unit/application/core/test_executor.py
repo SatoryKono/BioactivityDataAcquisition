@@ -8,7 +8,7 @@ import pytest
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.application.core.record_processor import BatchResult, RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 
 
@@ -23,12 +23,9 @@ def mock_services():
 @pytest.fixture
 def mock_record_processor():
     """Create mock record processor."""
-    from bioetl.application.core.record_processor import BatchResult
     processor = MagicMock(spec=RecordProcessor)
     processor.process_batch = AsyncMock(
-        return_value=BatchResult(
-            bronze_count=0, silver_count=0, gold_count=0, quarantined_count=0
-        )
+        return_value=BatchResult(bronze_count=0, silver_count=0, gold_count=0, quarantined_count=0)
     )
     return processor
 
@@ -110,7 +107,6 @@ class TestPipelineExecutorExecute:
 
     async def test_execute_processes_records(self, executor, mock_services, mock_record_processor):
         """Test that execute processes records correctly."""
-        from bioetl.application.core.record_processor import BatchResult
 
         async def mock_fetch(**kwargs):
             for i in range(3):

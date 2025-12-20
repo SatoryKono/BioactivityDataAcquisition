@@ -58,8 +58,8 @@ sink:
 ```python
 from typing import Any
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.domain.config import PipelineConfig, RuntimeConfig  # Consolidated in domain
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 
@@ -75,7 +75,7 @@ CHEMBL_TARGET_CONFIG = PipelineConfig(
 
 class ChEMBLTargetPipeline(BasePipeline):
     @classmethod
-    def create(cls, runtime: PipelineRuntimeConfig, services: PipelineServices, config: PipelineConfig | None = None):
+    def create(cls, runtime: RuntimeConfig, services: PipelineServices, config: PipelineConfig | None = None):
         return cls(config or CHEMBL_TARGET_CONFIG, runtime, services)
 
     async def transform_bronze_to_silver(self, context: PipelineContext, record: dict[str, Any]) -> dict[str, Any] | None:
@@ -110,26 +110,23 @@ class ChEMBLTargetPipeline(BasePipeline):
 
 ## Шаг 3: Регистрация в Bootstrap (Composition Root)
 
-Откройте `src/bioetl/bootstrap.py` и зарегистрируйте новый пайплайн.
+Откройте `src/bioetl/composition/bootstrap.py` и зарегистрируйте новый пайплайн.
 
 1.  **Импортируйте** новый класс пайплайна и его конфиг.
-2.  **Создайте фабрику** (или обновите существующую), чтобы она умела создавать новый пайплайн.
+2.  **Создайте фабрику** в `src/bioetl/composition/factories/` (или обновите существующую).
 3.  **Добавьте условие** в функцию `bootstrap_pipeline`.
 
-**Пример изменений в `src/bioetl/bootstrap.py`:**
+**Пример фабрики в `src/bioetl/composition/factories/chembl_target.py`:**
 
 ```python
-# ... импорты
 from bioetl.application.pipelines.chembl_target import ChEMBLTargetPipeline, CHEMBL_TARGET_CONFIG
-
-# ...
+from bioetl.composition.factories.chembl_activity import ChEMBLActivityPipelineFactory
 
 class ChEMBLTargetPipelineFactory:
-    """Фабрика для Target пайплайна (можно объединить с Activity, если зависимости одинаковые)"""
+    """Фабрика для Target пайплайна (переиспользует сервисы ChEMBL)."""
     @staticmethod
     def create_with_services(runtime, settings, logger):
         # Переиспользование логики создания сервисов (http client, storage и т.д.)
-        # Можно вынести build_services в общий метод для ChEMBL
         services = ChEMBLActivityPipelineFactory.build_services(settings, logger)
 
         return ChEMBLTargetPipeline.create(
@@ -137,6 +134,12 @@ class ChEMBLTargetPipelineFactory:
             services=services,
             config=CHEMBL_TARGET_CONFIG
         )
+```
+
+**Пример изменений в `src/bioetl/composition/bootstrap.py`:**
+
+```python
+from bioetl.composition.factories.chembl_target import ChEMBLTargetPipelineFactory
 
 def bootstrap_pipeline(pipeline_name: str, ...):
     # ...

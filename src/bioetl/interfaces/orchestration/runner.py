@@ -94,7 +94,7 @@ class PipelineRunner:
                 async with self._services, self._lock_manager:
                     watermark = await self._checkpoint_manager.load_checkpoint()
                     await self._executor.execute(
-                        watermark=watermark, limit=self._runtime.limit, query=self._runtime.query
+                        watermark=watermark, limit=self._runtime.limit
                     )
                     await self._checkpoint_manager.delete_checkpoint()
 

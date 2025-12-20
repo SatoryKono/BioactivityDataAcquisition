@@ -85,9 +85,9 @@ class PubMedPublicationPipeline(BasePipeline):
 
 ## Шаг 4: Фабрика и Bootstrap (Composition Root)
 
-Создайте фабрику, которая соберет все зависимости для нового источника. Рекомендуется создавать отдельный файл в `src/bioetl/infrastructure/factories/`.
+Создайте фабрику, которая соберет все зависимости для нового источника. Фабрики располагаются в `src/bioetl/composition/factories/`.
 
-**Пример:** `src/bioetl/infrastructure/factories/pubmed.py`
+**Пример:** `src/bioetl/composition/factories/pubmed.py`
 
 ```python
 from bioetl.infrastructure.config import Settings
@@ -115,8 +115,10 @@ class PubMedPipelineFactory:
 
 ### Регистрация в `bootstrap.py`
 
+Файл: `src/bioetl/composition/bootstrap.py`
+
 ```python
-from bioetl.infrastructure.factories.pubmed import PubMedPipelineFactory
+from bioetl.composition.factories.pubmed import PubMedPipelineFactory
 from bioetl.application.pipelines.pubmed_publication import PubMedPublicationPipeline
 
 # ...
