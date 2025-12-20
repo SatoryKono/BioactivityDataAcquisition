@@ -62,9 +62,9 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     async def fetch(
         self,
         entity_type: str,
-        query: str | None = None,
         watermark: Watermark | None = None,
         limit: int | None = None,
+        query: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from UniProt."""
         strategy = self._fetch_strategies.get(entity_type)
