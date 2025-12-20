@@ -118,6 +118,7 @@ def bootstrap_pipeline(
     input_csv: str | None = None,
     filter_column: str | None = None,
     filter_field: str | None = None,
+    query: str | None = None,
 ) -> PipelineRunner:
     """Composition Root: Assembles and returns a fully configured PipelineRunner.
 
@@ -130,6 +131,7 @@ def bootstrap_pipeline(
         input_csv: Optional path to CSV file with filter IDs (overrides config)
         filter_column: Column name in CSV containing filter IDs (overrides config)
         filter_field: API field name to filter by (overrides config)
+        query: Optional query string for data sources that support it
     """
     from bioetl.domain.filter_config import InputFilterConfig
 
@@ -145,6 +147,7 @@ def bootstrap_pipeline(
         resume=resume,
         limit=limit,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
+        query=query,
     )
 
     # Build filter config from YAML defaults, CLI overrides

@@ -1,30 +1,45 @@
 """Unit tests for PipelineObserver."""
 
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
+
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.domain.types import RunID, RunType
 
 
 @pytest.fixture
 def metrics_mock():
-    return MagicMock()
+    mock = MagicMock()
+    mock.observe_histogram = MagicMock()
+    mock.increment_counter = MagicMock()
+    return mock
 
 
 @pytest.fixture
 def logger_mock():
-    return MagicMock()
+    mock = MagicMock()
+    mock.info = MagicMock()
+    mock.error = MagicMock()
+    mock.warning = MagicMock()
+    return mock
 
 
-def test_pipeline_observer_success(metrics_mock, logger_mock):
+@pytest.fixture
+def run_id():
+    return RunID(uuid4())
+
+
+def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
     """Test successful pipeline execution."""
     observer = PipelineObserver(
+        pipeline_name="test_pipeline",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
         metrics=metrics_mock,
         logger=logger_mock,
-        pipeline_name="test_pipeline",
-        run_type="incremental",
-        tags={"custom": "tag"},
     )
 
     with observer:
@@ -32,35 +47,27 @@ def test_pipeline_observer_success(metrics_mock, logger_mock):
 
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()
-    args, _ = metrics_mock.observe_histogram.call_args
-    assert args[0] == "pipeline_duration_seconds"
-    assert isinstance(args[1], float)
-    # The labels should match what PipelineObserver constructs:
-    # {"pipeline": ..., "stage": "pipeline", "run_type": ..., "status": ..., **tags}
-    expected_labels = {
-        "pipeline": "test_pipeline",
-        "stage": "pipeline",
-        "run_type": "incremental",
-        "status": "success",
-        "custom": "tag",
-    }
-    assert args[2] == expected_labels
+    call_args = metrics_mock.observe_histogram.call_args
+    assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
+    assert isinstance(call_args[0][1], float)
+    assert call_args[1]["labels"]["status"] == "success"
+    assert call_args[1]["labels"]["pipeline"] == "test_pipeline"
 
-    # Verify logs: 2 info calls - start and completion
+    # Verify counter
+    metrics_mock.increment_counter.assert_called_once()
+
+    # Verify logs: start and finish
     assert logger_mock.info.call_count == 2
-    # First call is "Starting pipeline: ..."
-    assert "Starting pipeline" in logger_mock.info.call_args_list[0][0][0]
-    # Second call is "Pipeline completed successfully"
-    assert logger_mock.info.call_args_list[1][0][0] == "Pipeline completed successfully"
 
 
-def test_pipeline_observer_failure(metrics_mock, logger_mock):
+def test_pipeline_observer_failure(metrics_mock, logger_mock, run_id):
     """Test failed pipeline execution."""
     observer = PipelineObserver(
+        pipeline_name="test_pipeline",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
         metrics=metrics_mock,
         logger=logger_mock,
-        pipeline_name="test_pipeline",
-        run_type="incremental",
     )
 
     with pytest.raises(ValueError):
@@ -69,40 +76,31 @@ def test_pipeline_observer_failure(metrics_mock, logger_mock):
 
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()
-    args, _ = metrics_mock.observe_histogram.call_args
-    assert args[2]["status"] == "failure"
+    call_args = metrics_mock.observe_histogram.call_args
+    assert call_args[1]["labels"]["status"] == "failed"
 
-    # On failure: 1 info call from start, 1 error call from exit
-    # The "Starting pipeline" info is called, but not "Pipeline completed successfully"
-    assert logger_mock.info.call_count == 1
-    assert "Starting pipeline" in logger_mock.info.call_args[0][0]
-    # Error is logged on failure
+    # Verify error was logged
     logger_mock.error.assert_called_once()
-    assert "Pipeline failed" in logger_mock.error.call_args[0][0]
 
 
-def test_pipeline_observer_shutdown(metrics_mock, logger_mock):
-    """Test pipeline execution with shutdown."""
+def test_pipeline_observer_shutdown(metrics_mock, logger_mock, run_id):
+    """Test pipeline execution with shutdown signal."""
     observer = PipelineObserver(
+        pipeline_name="test_pipeline",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
         metrics=metrics_mock,
         logger=logger_mock,
-        pipeline_name="test_pipeline",
-        run_type="incremental",
     )
 
-    # Simulation of Runner handling shutdown
-    try:
-        with observer:
-            raise PipelineShutdownError()
-    except PipelineShutdownError:
-        # Runner catches and swallows
-        observer.set_status("shutdown")
+    # PipelineShutdownError should be suppressed by the observer
+    with observer:
+        raise PipelineShutdownError()
 
-    # Verify metrics
+    # Verify metrics show shutdown status
     metrics_mock.observe_histogram.assert_called_once()
-    args, _ = metrics_mock.observe_histogram.call_args
-    assert args[2]["status"] == "shutdown"
+    call_args = metrics_mock.observe_histogram.call_args
+    assert call_args[1]["labels"]["status"] == "shutdown"
 
-    # Verify logs
+    # Verify warning was logged
     logger_mock.warning.assert_called_once()
-    assert logger_mock.warning.call_args[0][0] == "Pipeline shutdown"

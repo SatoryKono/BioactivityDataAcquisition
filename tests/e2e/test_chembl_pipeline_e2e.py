@@ -111,11 +111,8 @@ async def test_chembl_pipeline_e2e(
     runner.services.data_source.fetch = mock_fetch
 
     # 4. Run Pipeline
-    # Using run_safe() or directly running executor logic if needed
-    # runner.run() handles loop, but here we are in an async test
-
-    # We execute what runner.run() would do inside the loop
-    await runner._execute_pipeline()
+    # runner.run() is the public entry point
+    await runner.run()
 
     # 5. Verify Results
 
