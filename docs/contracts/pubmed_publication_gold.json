@@ -1,0 +1,24 @@
+{
+  "title": "PubMedPublicationGoldSchema",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "pmid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "article_title": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
