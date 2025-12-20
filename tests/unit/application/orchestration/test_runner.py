@@ -14,7 +14,7 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
-from bioetl.interfaces.orchestration.runner import PipelineRunner
+from bioetl.application.orchestration.runner import PipelineRunner
 
 
 @pytest.fixture
