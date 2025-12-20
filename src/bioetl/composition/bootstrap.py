@@ -137,7 +137,7 @@ def bootstrap_pipeline(
     # Load validated YAML config
     yaml_config = load_pipeline_config(pipeline_name)
 
-    runtime_config = PipelineRuntimeConfig(
+    runtime_config = RuntimeConfig(
         run_type=run_type,
         resume=resume,
         limit=limit,

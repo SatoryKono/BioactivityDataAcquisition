@@ -135,7 +135,7 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
     @classmethod
     def create_with_services(
         cls,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
