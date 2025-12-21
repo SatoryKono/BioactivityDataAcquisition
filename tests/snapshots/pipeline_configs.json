@@ -1,0 +1,81 @@
+{
+  "chembl_activity": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "activity",
+    "fields": [],
+    "gold_filter_types": [
+      "IC50",
+      "Ki"
+    ],
+    "gold_table": null,
+    "pipeline_name": "chembl_activity",
+    "primary_keys": [
+      "activity_id"
+    ],
+    "provider": "chembl",
+    "silver_table": "chembl_activity",
+    "watermark_field": "updated_on"
+  },
+  "pubchem_compound": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "compound",
+    "fields": [],
+    "gold_filter_types": [],
+    "gold_table": null,
+    "pipeline_name": "pubchem_compound",
+    "primary_keys": [
+      "cid"
+    ],
+    "provider": "pubchem",
+    "silver_table": "pubchem_compound",
+    "watermark_field": "cid"
+  },
+  "pubmed_publications": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "publication",
+    "fields": [],
+    "gold_filter_types": [],
+    "gold_table": null,
+    "pipeline_name": "pubmed_publications",
+    "primary_keys": [
+      "pmid"
+    ],
+    "provider": "pubmed",
+    "silver_table": "pubmed_publications",
+    "watermark_field": null
+  },
+  "uniprot_protein": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "protein",
+    "fields": [],
+    "gold_filter_types": [],
+    "gold_table": null,
+    "pipeline_name": "uniprot_protein",
+    "primary_keys": [
+      "accession"
+    ],
+    "provider": "uniprot",
+    "silver_table": "uniprot_protein",
+    "watermark_field": "accession"
+  }
+}
