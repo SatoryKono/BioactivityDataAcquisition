@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 
 

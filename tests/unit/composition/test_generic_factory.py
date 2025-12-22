@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.factories.data_source_registry import (
     DataSourceRegistry,
     create_chembl_data_source,
