@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+import orjson
+
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
@@ -214,15 +216,16 @@ class RecordProcessor:
     async def _write_bronze_batch(
         self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
     ) -> None:
-        # 1. Serialize all records to JSON strings with deterministic key ordering
+        # 1. Serialize all records to JSON bytes with deterministic key ordering
         # This avoids serializing twice (once for sort, once for write)
-        json_strings = [json.dumps(r, sort_keys=True) for r in records]
+        # Using orjson is ~6x faster than standard json
+        json_bytes = [orjson.dumps(r, option=orjson.OPT_SORT_KEYS) for r in records]
 
-        # 2. Sort the JSON strings to ensure deterministic file content
-        json_strings.sort()
+        # 2. Sort the bytes to ensure deterministic file content
+        json_bytes.sort()
 
         # 3. Create generator for bytes
-        record_bytes = ((s + "\n").encode("utf-8") for s in json_strings)
+        record_bytes = (b + b"\n" for b in json_bytes)
 
         await self._storage.write_bronze(
             records=record_bytes,

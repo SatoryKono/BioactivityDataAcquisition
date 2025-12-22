@@ -23,6 +23,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import orjson
 import structlog
 import zstandard as zstd
 from botocore.exceptions import ClientError
@@ -159,8 +160,8 @@ class BronzeWriter:
             def _write_local(data: bytes, path: Path, meta: dict, meta_path: Path):
                 with open(path, "wb") as f:
                     f.write(data)
-                with open(meta_path, "w") as f:
-                    json.dump(meta, f)
+                with open(meta_path, "wb") as f:
+                    f.write(orjson.dumps(meta))
 
             meta_path = full_path.with_suffix(".zst.meta.json")
             await loop.run_in_executor(
@@ -304,9 +305,9 @@ class BronzeWriter:
         with decompressor.stream_reader(compressed_data) as reader:
             decompressed_data = reader.read()
 
-        for line in decompressed_data.decode("utf-8").splitlines():
+        for line in decompressed_data.splitlines():
             if line.strip():
-                yield json.loads(line)
+                yield orjson.loads(line)
 
     async def list_batches(
         self,
