@@ -211,16 +211,20 @@ class CsvExporter:
             new_data: New data to append
 
         Returns:
-            Concatenated PyArrow table
+            Concatenated PyArrow table, or just new_data if schemas are incompatible
         """
         read_options = pv.ReadOptions()
         parse_options = pv.ParseOptions(delimiter=self.delimiter)
 
-        existing_table = pv.read_csv(
-            existing_path,
-            read_options=read_options,
-            parse_options=parse_options,
-        )
+        try:
+            existing_table = pv.read_csv(
+                existing_path,
+                read_options=read_options,
+                parse_options=parse_options,
+            )
 
-        # Concatenate tables
-        return pa.concat_tables([existing_table, new_data])
+            # Try to concatenate with schema promotion to handle type differences
+            return pa.concat_tables([existing_table, new_data], promote_options="default")
+        except (pa.ArrowInvalid, pa.ArrowTypeError):
+            # Schema incompatible - return only new data (effectively overwrite)
+            return new_data

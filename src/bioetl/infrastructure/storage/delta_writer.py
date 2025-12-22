@@ -212,6 +212,39 @@ class DeltaWriter:
             ),
         )
 
+    def clear(self, table_name: str | None = None) -> int:
+        """Clear Delta table(s) at the start of a pipeline run.
+
+        Args:
+            table_name: If provided, only clear this table.
+                       If None, clear all tables in base_path.
+
+        Returns:
+            Number of tables cleared.
+        """
+        import shutil
+        from pathlib import Path
+
+        base = Path(self.base_path)
+        if not base.exists():
+            return 0
+
+        cleared = 0
+        if table_name:
+            # Clear specific table
+            table_path = base / table_name.replace(".", "/")
+            if table_path.exists():
+                shutil.rmtree(table_path)
+                cleared = 1
+        else:
+            # Clear all Delta tables (directories with _delta_log)
+            for item in base.iterdir():
+                if item.is_dir() and (item / "_delta_log").exists():
+                    shutil.rmtree(item)
+                    cleared += 1
+
+        return cleared
+
     async def vacuum(
         self,
         table_name: str,

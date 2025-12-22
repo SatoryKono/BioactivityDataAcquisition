@@ -123,6 +123,29 @@ class StorageAdapter:
 
         return deleted_count
 
+    def clear_delta(self, table_name: str | None = None) -> int:
+        """Clear Delta tables for Silver and Gold layers.
+
+        Should be called at the start of a pipeline run to ensure
+        fresh data without duplicates from previous runs.
+
+        Args:
+            table_name: If provided, only clear Delta table for this table.
+                       If None, clear all Delta tables.
+
+        Returns:
+            Total number of tables cleared.
+        """
+        cleared_count = 0
+
+        # Clear Silver Delta table
+        cleared_count += self.silver.clear(table_name)
+
+        # Clear Gold Delta table
+        cleared_count += self.gold.clear(table_name)
+
+        return cleared_count
+
     async def aclose(self) -> None:
         """Close resources.
 
