@@ -31,6 +31,7 @@ from pydantic_settings import (
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
+from bioetl.domain.filter_config import GoldColumnFilter, GoldFilterConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -148,13 +149,29 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
 
     # Extract storage config
     silver_config = yaml_config.sink.get("silver")
-    write_mode = "merge" # Default
-    # Note: partition_cols are not explicitly in YAML schema yet, would need to be added to Schema first if needed dynamically.
-    # For now, we assume empty or derived.
-    # But wait, SinkLayerConfig in schema has 'mode' (str | None).
+    gold_config = yaml_config.sink.get("gold")
 
+    # Silver write mode (default: merge)
+    write_mode = "merge"
     if silver_config and silver_config.mode:
         write_mode = silver_config.mode
+
+    # Gold write mode (default: append)
+    gold_write_mode = "append"
+    if gold_config and gold_config.mode:
+        gold_write_mode = gold_config.mode
+
+    # Parse gold_filters from YAML
+    gf = yaml_config.gold_filters
+    column_filters = tuple(
+        GoldColumnFilter(column=col, values=frozenset(vals))
+        for col, vals in gf.columns.items()
+    )
+    gold_filters = GoldFilterConfig(
+        column_filters=column_filters,
+        required_fields=tuple(gf.required_fields),
+        exclude_if_present=tuple(gf.exclude_if_present),
+    )
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
@@ -163,8 +180,10 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         primary_keys=yaml_config.primary_keys,
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
-        write_mode=write_mode, # Mapped from YAML
+        write_mode=write_mode,
+        gold_write_mode=gold_write_mode,
         gold_filter_types=yaml_config.gold_filter_types,
+        gold_filters=gold_filters,
         gold_min_confidence=yaml_config.gold_min_confidence,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,

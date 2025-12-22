@@ -126,25 +126,36 @@ class PipelineRunner:
         """
         try:
             storage = self._services.storage
-            table_name = self._config.silver_table
+            silver_table = self._config.silver_table
+            # Gold table defaults to {provider}.{entity_type} if not specified
+            gold_table = (
+                self._config.gold_table
+                or f"{self._config.provider}.{self._config.entity_type}"
+            )
 
-            # Clear CSV exports
-            if hasattr(storage, "clear_csv"):
-                csv_count = storage.clear_csv(table_name)
-                if csv_count > 0:
-                    self._logger.info(
-                        "Cleared CSV export files",
-                        extra={"deleted_count": csv_count, "table_name": table_name},
-                    )
+            # Collect unique table names to clear
+            tables_to_clear = {silver_table, gold_table}
 
-            # Clear Delta tables
-            if hasattr(storage, "clear_delta"):
-                delta_count = storage.clear_delta(table_name)
-                if delta_count > 0:
-                    self._logger.info(
-                        "Cleared Delta tables",
-                        extra={"cleared_count": delta_count, "table_name": table_name},
-                    )
+            # Clear CSV exports and Delta tables for each table
+            total_csv_cleared = 0
+            total_delta_cleared = 0
+
+            for table_name in tables_to_clear:
+                if hasattr(storage, "clear_csv"):
+                    total_csv_cleared += storage.clear_csv(table_name)
+                if hasattr(storage, "clear_delta"):
+                    total_delta_cleared += storage.clear_delta(table_name)
+
+            if total_csv_cleared > 0:
+                self._logger.info(
+                    "Cleared CSV export files",
+                    extra={"deleted_count": total_csv_cleared},
+                )
+            if total_delta_cleared > 0:
+                self._logger.info(
+                    "Cleared Delta tables",
+                    extra={"cleared_count": total_delta_cleared},
+                )
         except AttributeError:
             # Storage not available (e.g., in tests with mocks)
             pass
