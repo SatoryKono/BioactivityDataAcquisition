@@ -24,11 +24,6 @@ gold_filters:
     exclude_if_present:
         - data_validity_comment
 
-# deprecated, kept for backward compatibility
-gold_filter_types:
-    - IC50
-    - Ki
-
 transform:
     version: "1.0.0"
     steps:
