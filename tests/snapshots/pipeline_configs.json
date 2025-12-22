@@ -14,7 +14,7 @@
     ],
     "gold_min_confidence": null,
     "gold_table": null,
-    "gold_write_mode": "append",
+    "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "chembl_activity",
     "primary_keys": [
