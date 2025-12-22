@@ -7,13 +7,12 @@ version: "1.0.0"
 primary_keys: ["cid"]
 silver_table: "pubchem_compound"
 
+# Ссылка на общий конфиг источника
+source_file: ../../sources/pubchem.yaml
+
 source:
-  load_strategy: "incremental"
+  # Переопределяем или дополняем параметры из source_file
   watermark_field: "cid"
-  api:
-    base_url: "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
-    rate_limit: 5.0
-    timeout: 30
 
 sink:
   bronze:
