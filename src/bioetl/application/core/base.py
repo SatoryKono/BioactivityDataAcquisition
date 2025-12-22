@@ -177,7 +177,7 @@ class BasePipeline(ABC):
         self, context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
         """Extract watermark value from a record.
-        
+
         Each pipeline MUST implement its own watermark extraction strategy.
         """
         ...

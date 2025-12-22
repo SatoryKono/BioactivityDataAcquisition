@@ -18,11 +18,10 @@ gold_filters:
     columns:
         standard_type: [IC50, Ki]
     required_fields:
+        - standard_type
         - standard_value
         - standard_units
         - target_chembl_id
-    exclude_if_present:
-        - data_validity_comment
 
 transform:
     version: "1.0.0"
