@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
 from bioetl.application.core.runner import PipelineRunner
 
@@ -95,14 +96,15 @@ class TestBootstrapPipeline:
         mock_bootstrap_logger.return_value = mock_logger
 
         # Now raises "Configuration file not found" because load_pipeline_config is called first
+        ctx = PipelineRunContext(
+            pipeline_name="unknown_pipeline",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            resume=False,
+            limit=None,
+        )
         with pytest.raises(ValueError, match="Configuration file not found"):
-            bootstrap_pipeline(
-                pipeline_name="unknown_pipeline",
-                run_id=uuid4(),
-                run_type=RunType.INCREMENTAL,
-                resume=False,
-                limit=None,
-            )
+            bootstrap_pipeline(ctx)
 
     @pytest.mark.skip(
         reason="Requires full integration setup - covered by integration tests"
@@ -124,13 +126,14 @@ class TestBootstrapPipeline:
         with patch(
             "bioetl.composition.bootstrap.bootstrap_logger", return_value=mock_logger
         ):
-            result = bootstrap_pipeline(
+            ctx = PipelineRunContext(
                 pipeline_name="chembl_activity",
                 run_id=uuid4(),
                 run_type=RunType.INCREMENTAL,
                 resume=False,
                 limit=100,
             )
+            result = bootstrap_pipeline(ctx)
 
         assert isinstance(result, PipelineRunner)
         mock_factory.create_with_services.assert_called_once()
