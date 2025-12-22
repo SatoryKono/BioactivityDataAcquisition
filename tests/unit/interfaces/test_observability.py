@@ -20,7 +20,7 @@ def reset_server_state():
 
 @pytest.mark.unit
 def test_start_metrics_server_success():
-    """Test start_metrics_server calls the underlying server starter."""
+    """Test start_metrics_server successfully starts the server on specified port."""
     with patch(
         "bioetl.infrastructure.observability.server.start_http_server"
     ) as mock_start:
