@@ -68,7 +68,7 @@ def start_metrics_server(port: int = 8000) -> None:
                     f"instance is running or choose a different port."
                 )
                 logger.error(error_msg, exc_info=True)
-                raise OSError(error_msg) from e
+                raise OSError(e.errno, error_msg) from e
             else:
                 logger.error(f"Failed to start metrics server on port {port}: {e}")
                 raise
