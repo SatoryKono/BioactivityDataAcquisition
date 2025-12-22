@@ -27,15 +27,15 @@ __all__ = [
     # Base classes
     "BasePipeline",
     "BaseTransformer",
-    # Decomposed config (ADR-0005) - consolidated in domain.config
-    "PipelineConfig",
-    "RuntimeConfig",
-    "PipelineServices",
-    # Shutdown coordination (ADR-0005)
-    "ShutdownSignal",
-    "PipelineShutdownError",
     # Components
     "CheckpointManager",
     "LockManager",
+    # Decomposed config (ADR-0005) - consolidated in domain.config
+    "PipelineConfig",
+    "PipelineServices",
+    "PipelineShutdownError",
     "QuarantineManager",
+    "RuntimeConfig",
+    # Shutdown coordination (ADR-0005)
+    "ShutdownSignal",
 ]

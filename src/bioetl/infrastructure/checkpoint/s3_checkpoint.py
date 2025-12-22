@@ -201,7 +201,7 @@ class S3Checkpoint:
                     )
                     if pipeline_name:
                         pipelines.add(pipeline_name)
-        return sorted(list(pipelines))
+        return sorted(pipelines)
 
     async def exists(self, pipeline: str) -> bool:
         """Check if checkpoint exists."""

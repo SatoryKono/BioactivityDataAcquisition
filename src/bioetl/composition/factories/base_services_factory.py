@@ -112,6 +112,6 @@ class BaseServicesFactory:
         return NoOpMetrics()
 
     @staticmethod
-    def _create_tracing(settings: Settings) -> TracingPort:
+    def _create_tracing(_settings: Settings) -> TracingPort:
         # Placeholder for real OTel implementation
         return NoOpTracing()

@@ -41,41 +41,41 @@ from bioetl.domain.types import (
 )
 
 __all__ = [
-    # Exceptions - Base
-    "BioETLError",
-    "CriticalError",
-    "RecoverableError",
-    "DataQualityError",
-    # Exceptions - Critical
-    "LockLostError",
-    "LockAcquisitionError",
-    "CheckpointConflictError",
-    "MergeConflictError",
-    # Exceptions - Recoverable
-    "RateLimitError",
-    "RetryExhaustedError",
-    "CircuitBreakerOpenError",
     "ApiError",
-    "ChemblApiError",
-    "StorageError",
-    "BucketNotFoundError",
-    "UploadError",
-    "TableNotFoundError",
-    # Exceptions - Data Quality
-    "SchemaViolationError",
-    "MissingRequiredFieldError",
-    "InvalidDataFormatError",
     # Types
     "BatchID",
+    # Exceptions - Base
+    "BioETLError",
+    "BucketNotFoundError",
+    "CheckpointConflictError",
+    "ChemblApiError",
+    "CircuitBreakerOpenError",
     "CircuitBreakerState",
     "ContentHash",
+    "CriticalError",
     "DQStatus",
     "DataClassification",
+    "DataQualityError",
     "DriftLevel",
     "EntityID",
     "ErrorType",
     "HealthStatus",
+    "InvalidDataFormatError",
+    "LockAcquisitionError",
+    # Exceptions - Critical
+    "LockLostError",
+    "MergeConflictError",
+    "MissingRequiredFieldError",
+    # Exceptions - Recoverable
+    "RateLimitError",
+    "RecoverableError",
+    "RetryExhaustedError",
     "RunID",
     "RunType",
+    # Exceptions - Data Quality
+    "SchemaViolationError",
+    "StorageError",
+    "TableNotFoundError",
+    "UploadError",
     "Watermark",
 ]

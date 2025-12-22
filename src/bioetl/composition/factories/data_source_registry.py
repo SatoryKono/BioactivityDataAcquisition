@@ -7,7 +7,7 @@ DataSourcePort implementation.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, ClassVar, Protocol
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.factories.data_sources import DataSourceFactory
@@ -67,7 +67,7 @@ def _wrap_with_filter(
 
 def create_chembl_data_source(
     settings: Settings,
-    pipeline_config: PipelineYamlConfig,
+    _pipeline_config: PipelineYamlConfig,
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering."""
@@ -78,7 +78,7 @@ def create_chembl_data_source(
 
 def create_pubchem_data_source(
     settings: Settings,
-    pipeline_config: PipelineYamlConfig,
+    _pipeline_config: PipelineYamlConfig,
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
     """Create PubChem data source."""
@@ -148,7 +148,7 @@ class DataSourceRegistry:
         >>> data_source = creator(settings, pipeline_config)
     """
 
-    _creators: dict[str, DataSourceCreator] = {
+    _creators: ClassVar[dict[str, DataSourceCreator]] = {
         "chembl": create_chembl_data_source,
         "pubchem": create_pubchem_data_source,
         "uniprot": create_uniprot_data_source,

@@ -280,7 +280,7 @@ class TestS3CheckpointLocal:
         result = await cp.load("test_pipeline")
 
         assert result is not None
-        watermark, run_id, _ = result
+        watermark, _run_id, _ = result
         assert isinstance(watermark, Watermark)
         assert isinstance(watermark.value, datetime)
 

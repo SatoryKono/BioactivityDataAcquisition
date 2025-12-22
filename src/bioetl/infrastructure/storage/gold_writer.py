@@ -26,9 +26,10 @@ import pandera as pandera_pa
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
-from pandera.polars import DataFrameSchema
 
 if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
+
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -236,10 +237,7 @@ class GoldWriter:
         business_key = scd_config["business_key"]
 
         # Sort records by business key for deterministic processing
-        if isinstance(business_key, str):
-            sort_keys = [business_key]
-        else:
-            sort_keys = business_key
+        sort_keys = [business_key] if isinstance(business_key, str) else business_key
 
         # Sort the input records list since we modify it in place
         records.sort(key=lambda r: tuple(r.get(k) for k in sort_keys))

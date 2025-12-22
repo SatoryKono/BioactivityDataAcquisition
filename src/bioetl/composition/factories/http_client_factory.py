@@ -5,7 +5,7 @@ Ensures consistent rate limiting and circuit breaker settings across providers.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -19,7 +19,7 @@ class HttpClientFactory:
     """Factory for creating HTTP clients."""
 
     # Default configurations per provider
-    PROVIDER_CONFIGS: dict[str, dict[str, Any]] = {
+    PROVIDER_CONFIGS: ClassVar[dict[str, dict[str, Any]]] = {
         "chembl": {"rate": 10.0, "capacity": 20},
         "pubchem": {"rate": 5.0, "capacity": 10},
         "uniprot": {"rate": 10.0, "capacity": 20},

@@ -1,6 +1,5 @@
 """Integration tests for DeltaWriter."""
 
-import shutil
 from pathlib import Path
 
 import pyarrow as pa
@@ -8,6 +7,7 @@ import pytest
 from deltalake import DeltaTable
 
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
 
 @pytest.fixture
 def temp_delta_path(tmp_path):

@@ -3,7 +3,7 @@
 MOVED to composition layer to fix dependency direction.
 """
 
-from typing import Any, NamedTuple, Protocol, runtime_checkable
+from typing import Any, ClassVar, NamedTuple, Protocol, runtime_checkable
 
 import pyarrow as pa
 
@@ -43,7 +43,7 @@ class PipelineRegistry:
         >>> PipelineRegistry.register_factory(factory)
     """
 
-    _registry: dict[str, PipelineDefinition] = {}
+    _registry: ClassVar[dict[str, PipelineDefinition]] = {}
 
     @classmethod
     def register_factory(

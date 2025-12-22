@@ -1,13 +1,11 @@
 """Integration tests for ChEMBL Activity Pipeline."""
 
+
 import pytest
 import structlog
-from datetime import datetime
-from unittest.mock import MagicMock
+from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 from bioetl.composition.factories.pipeline_factories import chembl_activity_factory
-from bioetl.domain.types import RunType
-from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 logger = structlog.get_logger()
 
@@ -18,7 +16,6 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         """Test happy path: Bronze -> Silver -> Gold."""
 
         # Override limit via config override since RuntimeConfig is frozen
-        config_overrides = {"limit": 10} # Actually limit is in RuntimeConfig
 
         # We need to create a new RuntimeConfig with limit=10
         from dataclasses import replace
@@ -39,13 +36,13 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         # Verify Bronze files exist
         import glob
+
         # Look for both compressed and uncompressed just in case, though BronzeWriter uses zstd
         # Also check the path structure
         # BronzeWriter writes to: {base_path}/v1/{provider}/{entity}/{date}/...
-
         # Debug: list all files in storage root
         import os
-        for root, dirs, files in os.walk(self.storage_root):
+        for root, _dirs, files in os.walk(self.storage_root):
              for file in files:
                  print(f"File found: {os.path.join(root, file)}")
 
@@ -128,7 +125,8 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         from bioetl.domain.exceptions import ApiError
 
         async def mock_async_gen(*args, **kwargs):
-            if False: yield # make it a generator
+            if False:
+                yield  # make it a generator
             raise ApiError("Simulated API Failure")
 
         # Patch the instance method on the adapter object

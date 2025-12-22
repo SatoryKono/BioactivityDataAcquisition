@@ -1,5 +1,7 @@
 """Unit tests for anomaly detection module."""
 
+import statistics
+
 import pytest
 
 from bioetl.infrastructure.observability.anomaly import (
@@ -254,7 +256,7 @@ class TestAnomalyDetectorEdgeCases:
         try:
             detector.update_baseline("metric", [100])
             # Stddev of single value is 0
-            result = detector.detect("metric", 110)
+            detector.detect("metric", 110)
         except (ValueError, statistics.StatisticsError):
             pass  # Expected behavior
 
@@ -355,7 +357,7 @@ class TestAnomalyDetectorBaselineManagement:
         stats = detector.get_baseline_stats("metric")
 
         assert stats is not None
-        mean, stddev, count = stats
+        mean, _stddev, count = stats
         assert count == 3
         assert mean == 110.0  # Mean of [100, 110, 120]
 

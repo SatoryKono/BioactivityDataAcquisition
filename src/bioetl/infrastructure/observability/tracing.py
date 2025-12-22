@@ -37,10 +37,7 @@ class OpenTelemetryTracer:
         provider = TracerProvider()
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
-        if OTLPSpanExporter:
-            exporter = OTLPSpanExporter()
-        else:
-            exporter = ConsoleSpanExporter()
+        exporter = OTLPSpanExporter() if OTLPSpanExporter else ConsoleSpanExporter()
 
         processor = BatchSpanProcessor(exporter)
         provider.add_span_processor(processor)

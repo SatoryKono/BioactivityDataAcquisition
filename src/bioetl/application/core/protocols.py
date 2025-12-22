@@ -4,10 +4,12 @@ Callback protocols for the pipeline.
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
-from bioetl.domain.context import PipelineContext
+if TYPE_CHECKING:
+    from collections.abc import Awaitable
+
+    from bioetl.domain.context import PipelineContext
 
 
 class TransformCallback(Protocol):

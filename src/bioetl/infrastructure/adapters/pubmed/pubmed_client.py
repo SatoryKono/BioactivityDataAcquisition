@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
-from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
 
@@ -12,6 +11,8 @@ from bioetl.domain.exceptions import ApiError
 from bioetl.domain.types import HealthStatus, Watermark
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
