@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.chembl.activity_filter import ActivityGoldFilter
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.activity_watermark import (
     ActivityWatermarkExtractor,
@@ -34,15 +33,13 @@ class ChEMBLActivityPipeline(BasePipeline):
         runtime: RuntimeConfig,
         services: PipelineServices,
     ) -> None:
-        """Initialize pipeline and pre-compute filter sets."""
+        """Initialize pipeline with transformer and watermark extractor."""
         super().__init__(config, runtime, services)
         self._transformer = ActivityTransformer(provider=self.provider)
-        self._gold_filter = ActivityGoldFilter(
-            preferred_types=self.config.gold_filter_types
-        )
         self._watermark_extractor = ActivityWatermarkExtractor(
             watermark_field=self.config.watermark_field
         )
+        # Note: Gold filtering now uses config.gold_filters via BasePipeline.should_write_gold()
 
     async def transform_bronze_to_silver(
         self,
