@@ -194,6 +194,7 @@ class StoragePort(Protocol):
         self,
         table_name: str,
         records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
     ) -> None:
         """
@@ -202,6 +203,7 @@ class StoragePort(Protocol):
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries, where each dictionary is a gold record.
+            primary_keys: Optional list of column names for sorting/deduplication.
             mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
         """
         ...
