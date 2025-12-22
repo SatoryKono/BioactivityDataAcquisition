@@ -11,12 +11,15 @@ Architecture:
 
 import asyncio
 import json
+import logging
 import os
 import tempfile
 from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.csv as pv
+
+logger = logging.getLogger(__name__)
 
 
 class CsvExporter:
@@ -233,5 +236,5 @@ class CsvExporter:
             return pa.concat_tables([existing_table, new_data])
         except (pa.ArrowInvalid, pa.ArrowTypeError) as e:
             # Schema incompatible - return only new data (effectively overwrite)
-            print(f"[DEBUG] CSV schema mismatch, overwriting: {e}")
+            logger.warning("csv_schema_mismatch_overwriting: %s", str(e))
             return new_data
