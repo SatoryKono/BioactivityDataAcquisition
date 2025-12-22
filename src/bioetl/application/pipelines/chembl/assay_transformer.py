@@ -5,12 +5,11 @@ Transforms Bronze records to Silver format (Assay entity inflation).
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Assay
 from bioetl.domain.transformations import (
-    generate_content_hash,
     generate_entity_id,
     safe_int,
 )
@@ -20,20 +19,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-def _serialize_json(value: Any) -> str | None:
-    """Serialize complex values (dict/list) to JSON string."""
-    if value is None:
-        return None
-    if isinstance(value, (dict, list)):
-        return json.dumps(value, ensure_ascii=False)
-    return str(value)
-
-
-class AssayTransformer:
+class AssayTransformer(BaseTransformer):
     """Transforms ChEMBL assay bronze records to silver."""
 
     def __init__(self, provider: str = "chembl"):
-        self.provider = provider
+        super().__init__(provider)
 
     async def transform(
         self,
@@ -88,19 +78,18 @@ class AssayTransformer:
                 "relationship_type": record.get("relationship_type"),
                 "relationship_description": record.get("relationship_description"),
                 # Variant information
-                "variant_sequence": _serialize_json(record.get("variant_sequence")),
+                "variant_sequence": self.serialize_json(record.get("variant_sequence")),
                 # Complex fields (stored as JSON strings)
-                "assay_classifications": _serialize_json(
+                "assay_classifications": self.serialize_json(
                     record.get("assay_classifications")
                 ),
-                "assay_parameters": _serialize_json(record.get("assay_parameters")),
+                "assay_parameters": self.serialize_json(record.get("assay_parameters")),
             }
 
             # Generate content hash based on business data (exclude None values)
-            content_hash = generate_content_hash(
-                {k: v for k, v in business_data.items() if v is not None},
-                self.provider,
-            )
+            # Note: Original used explicit dict comprehension, but compute_content_hash
+            # with exclude_none=True is equivalent
+            content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
             entity = Assay(
                 entity_id=entity_id,
@@ -120,12 +109,6 @@ class AssayTransformer:
             return None
 
         # Convert Entity to SilverRecord for storage
-        silver_record = entity.__dict__.copy()
-
-        # Handle lineage fields renaming and formatting
-        silver_record["_run_id"] = str(silver_record.pop("run_id"))
-        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-        silver_record["_source_batch_id"] = str(silver_record.pop("source_batch_id"))
-        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
+        silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)

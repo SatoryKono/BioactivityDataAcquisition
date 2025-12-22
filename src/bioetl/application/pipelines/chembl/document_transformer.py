@@ -7,9 +7,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Document
 from bioetl.domain.transformations import (
-    generate_content_hash,
     generate_entity_id,
     safe_int,
 )
@@ -19,11 +19,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class DocumentTransformer:
+class DocumentTransformer(BaseTransformer):
     """Transforms ChEMBL bronze document records to silver."""
 
     def __init__(self, provider: str = "chembl"):
-        self.provider = provider
+        super().__init__(provider)
 
     async def transform(
         self,
@@ -67,11 +67,7 @@ class DocumentTransformer:
                 "src_id": safe_int(record.get("src_id")),
             }
 
-            content_hash = generate_content_hash(
-                business_data,
-                self.provider,
-                exclude_none=True,
-            )
+            content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
             entity = Document(
                 entity_id=entity_id,
@@ -91,12 +87,6 @@ class DocumentTransformer:
             return None
 
         # Convert Entity to SilverRecord for storage
-        silver_record = entity.__dict__.copy()
-
-        # Handle lineage fields renaming and formatting
-        silver_record["_run_id"] = str(silver_record.pop("run_id"))
-        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-        silver_record["_source_batch_id"] = str(silver_record.pop("source_batch_id"))
-        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
+        silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)
