@@ -30,6 +30,9 @@ def mock_services():
 
     mock_metrics = MagicMock()
 
+    mock_tracing = MagicMock()
+    mock_tracing.get_tracer = MagicMock()
+
     return PipelineServices(
         data_source=mock_data_source,
         storage=mock_storage,
@@ -37,6 +40,7 @@ def mock_services():
         checkpoint=mock_checkpoint,
         quarantine=mock_quarantine,
         metrics=mock_metrics,
+        tracing=mock_tracing,
         logger=mock_logger,
     )
 

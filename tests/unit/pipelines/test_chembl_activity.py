@@ -41,6 +41,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         checkpoint=AsyncMock(),
         quarantine=AsyncMock(),
         metrics=MagicMock(),
+        tracing=MagicMock(),
         logger=logger,
     )
 

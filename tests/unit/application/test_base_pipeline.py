@@ -49,6 +49,7 @@ def mock_pipeline():
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
         metrics=MagicMock(),
+        tracing=MagicMock(),
         logger=mock_logger,
     )
     pipeline = ConcretePipeline(config, runtime, services)
@@ -85,6 +86,7 @@ async def test_base_pipeline_accepts_three_params():
         checkpoint=AsyncMock(),
         quarantine=AsyncMock(),
         metrics=MagicMock(),
+        tracing=MagicMock(),
         logger=mock_logger,
     )
 
