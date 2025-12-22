@@ -31,6 +31,7 @@ def chembl_pipeline():
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
         metrics=NoOpMetrics(warn_on_use=False),
+        tracing=MagicMock(),
         logger=mock_logger,
     )
     config = get_pipeline_config("chembl_activity")

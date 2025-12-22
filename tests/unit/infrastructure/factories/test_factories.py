@@ -212,6 +212,8 @@ class TestStorageAdapter:
             records=records,
             primary_keys=["id"],
             schema=schema,
+            mode="merge",
+            partition_cols=None,
         )
 
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):

@@ -78,6 +78,8 @@ def mock_pubchem_services(mock_logger) -> PipelineServices:
 
     logger = structlog.get_logger()
 
+    mock_tracing = MagicMock()
+
     return PipelineServices(
         data_source=mock_data_source,
         storage=mock_storage,
@@ -85,6 +87,7 @@ def mock_pubchem_services(mock_logger) -> PipelineServices:
         checkpoint=mock_checkpoint,
         quarantine=mock_quarantine,
         metrics=mock_metrics,
+        tracing=mock_tracing,
         logger=logger,
     )
 

@@ -11,6 +11,7 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 
@@ -94,6 +95,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         checkpoint=checkpoint,
         quarantine=AsyncMock(),
         metrics=PrometheusMetrics(),
+        tracing=NoOpTracing(),
         logger=logger,
     )
 
