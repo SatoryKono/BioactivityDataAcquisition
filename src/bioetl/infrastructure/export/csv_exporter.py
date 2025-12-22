@@ -133,12 +133,14 @@ class CsvExporter:
         self,
         table_name: str,
         data: pa.Table,
+        append: bool = True,
     ) -> Path:
         """Export PyArrow table to CSV file.
 
         Args:
             table_name: Name of the table (used for file naming)
             data: PyArrow table to export
+            append: If True, append to existing file; if False, overwrite
 
         Returns:
             Path to the written CSV file
@@ -147,14 +149,22 @@ class CsvExporter:
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
 
+        # Convert list/struct columns to JSON strings for CSV compatibility
+        csv_data = self._flatten_for_csv(data)
+
+        # If append mode and file exists, read and concatenate
+        if append and csv_full_path.exists():
+            loop = asyncio.get_running_loop()
+            csv_data = await loop.run_in_executor(
+                None,
+                lambda: self._read_and_concat(csv_full_path, csv_data),
+            )
+
         # Build CSV write options
         write_options = pv.WriteOptions(
             include_header=self.header,
             delimiter=self.delimiter,
         )
-
-        # Convert list/struct columns to JSON strings for CSV compatibility
-        csv_data = self._flatten_for_csv(data)
 
         # Atomic write in executor to avoid blocking
         loop = asyncio.get_running_loop()
@@ -164,3 +174,25 @@ class CsvExporter:
         )
 
         return csv_full_path
+
+    def _read_and_concat(self, existing_path: Path, new_data: pa.Table) -> pa.Table:
+        """Read existing CSV and concatenate with new data.
+
+        Args:
+            existing_path: Path to existing CSV file
+            new_data: New data to append
+
+        Returns:
+            Concatenated PyArrow table
+        """
+        read_options = pv.ReadOptions()
+        parse_options = pv.ParseOptions(delimiter=self.delimiter)
+
+        existing_table = pv.read_csv(
+            existing_path,
+            read_options=read_options,
+            parse_options=parse_options,
+        )
+
+        # Concatenate tables
+        return pa.concat_tables([existing_table, new_data])
