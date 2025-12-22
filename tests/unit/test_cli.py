@@ -98,6 +98,9 @@ class TestRunCommand:
         runner,
     ):
         """Test run command with all options."""
+        from bioetl.domain.context import PipelineRunContext
+        from bioetl.domain.types import RunType
+
         mock_runner_instance = MagicMock()
         mock_runner_instance.run = AsyncMock()
         mock_bootstrap.return_value = mock_runner_instance
@@ -117,9 +120,14 @@ class TestRunCommand:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        call_kwargs = mock_bootstrap.call_args[1]
-        assert call_kwargs["resume"] is True
-        assert call_kwargs["limit"] == 1000
+        # bootstrap_pipeline is now called with PipelineRunContext as positional arg
+        call_args = mock_bootstrap.call_args[0]
+        ctx = call_args[0]
+        assert isinstance(ctx, PipelineRunContext)
+        assert ctx.pipeline_name == "chembl_activity"
+        assert ctx.run_type == RunType.BACKFILL
+        assert ctx.resume is True
+        assert ctx.limit == 1000
 
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
