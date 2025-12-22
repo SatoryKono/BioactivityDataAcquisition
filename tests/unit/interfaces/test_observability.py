@@ -24,7 +24,7 @@ def test_start_metrics_server_success():
         mock_start.assert_called_once()
 
 def test_start_metrics_server_failure():
-    """Simulate server failure and verify that an exception is raised."""
+    """Simulate server failure and verify """
     with mock.patch("bioetl.interfaces.observability._start_server", side_effect=Exception("Failed")):
         with pytest.raises(Exception, match="Failed"):
             observability.start_metrics_server()
