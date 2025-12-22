@@ -26,6 +26,7 @@ from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
 
 logger = logging.getLogger(__name__)
 
@@ -138,10 +139,12 @@ class PubChemClient:
                 self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
             )
         except Exception:
-            logger.error(
-                "PubChem compound batch fetch failed",
-                exc_info=True,
-                extra={"batch_start": cid_batch[0], "batch_end": cid_batch[-1]},
+            log_adapter_error(
+                logger,
+                provider="pubchem",
+                operation="compound batch fetch",
+                batch_start=cid_batch[0],
+                batch_end=cid_batch[-1],
             )
             if self.strict_error_handling:
                 raise
