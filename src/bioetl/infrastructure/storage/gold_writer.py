@@ -61,6 +61,7 @@ class GoldWriter:
         self,
         table_name: str,
         records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
         schema: DataFrameSchema | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         partition_cols: list[str] | None = None,
@@ -89,7 +90,13 @@ class GoldWriter:
             await self._write_scd2(table_path, records, scd_config, partition_cols)
         elif mode in ("overwrite", "append"):
             await self._write_simple(
-                table_path, table_name, records, mode, partition_cols, schema
+                table_path,
+                table_name,
+                records,
+                mode,
+                partition_cols,
+                primary_keys,
+                schema,
             )
         else:
             raise ValueError(
@@ -176,10 +183,15 @@ class GoldWriter:
         records: list[dict[str, Any]],
         mode: str,
         partition_cols: list[str] | None,
+        primary_keys: list[str] | None = None,
         _schema: DataFrameSchema | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
         arrow_data = self._to_arrow_table(records)
+
+        # Sort by primary keys for deterministic writing
+        if primary_keys:
+            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
 
         for attempt in range(3):
             try:
@@ -222,6 +234,15 @@ class GoldWriter:
     ) -> None:
         """Write records using SCD Type 2 (history tracking)."""
         business_key = scd_config["business_key"]
+
+        # Sort records by business key for deterministic processing
+        if isinstance(business_key, str):
+            sort_keys = [business_key]
+        else:
+            sort_keys = business_key
+
+        # Sort the input records list since we modify it in place
+        records.sort(key=lambda r: tuple(r.get(k) for k in sort_keys))
         version_col = scd_config.get("version_col", "version")
         valid_from_col = scd_config.get("valid_from_col", "valid_from")
         valid_to_col = scd_config.get("valid_to_col", "valid_to")

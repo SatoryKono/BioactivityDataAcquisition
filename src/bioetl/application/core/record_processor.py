@@ -214,11 +214,16 @@ class RecordProcessor:
     async def _write_bronze_batch(
         self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
     ) -> None:
-        # Sort keys for deterministic output
-        # Use generator expression to offload JSON serialization to the executor
-        record_bytes = (
-            (json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in records
-        )
+        # 1. Serialize all records to JSON strings with deterministic key ordering
+        # This avoids serializing twice (once for sort, once for write)
+        json_strings = [json.dumps(r, sort_keys=True) for r in records]
+
+        # 2. Sort the JSON strings to ensure deterministic file content
+        json_strings.sort()
+
+        # 3. Create generator for bytes
+        record_bytes = ((s + "\n").encode("utf-8") for s in json_strings)
+
         await self._storage.write_bronze(
             records=record_bytes,
             provider=self._provider,
@@ -285,5 +290,6 @@ class RecordProcessor:
         await self._storage.write_gold(
             table_name=table_name,
             records=records,
+            primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )
