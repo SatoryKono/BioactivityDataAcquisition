@@ -5,8 +5,6 @@ Please update imports to: from bioetl.composition.registry import PipelineRegist
 """
 
 import warnings
-import pyarrow as pa
-from typing import Any
 
 from bioetl.composition.registry import (
     PipelineDefinition,
@@ -27,28 +25,6 @@ class PipelineRegistry:
 
     Delegates to bioetl.composition.registry.PipelineRegistry.
     """
-
-    @classmethod
-    def register(
-        cls,
-        pipeline_name: str,
-        factory: type[Any],
-        silver_schema: pa.Schema | None = None,
-        gold_schema: Any | None = None,
-    ) -> None:
-        """Register a pipeline factory (deprecated)."""
-        warnings.warn(
-            "bioetl.application.registry.PipelineRegistry is deprecated. "
-            "Use bioetl.composition.registry.PipelineRegistry instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        NewPipelineRegistry.register(
-            pipeline_name,
-            factory,
-            silver_schema,
-            gold_schema
-        )
 
     @classmethod
     def register_factory(
