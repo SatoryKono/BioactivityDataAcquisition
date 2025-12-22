@@ -49,11 +49,7 @@ class ChEMBLActivityPipeline(BasePipeline):
         """Transform raw ChEMBL activity to normalized format using Domain Entity."""
         return await self._transformer.transform(context, record)
 
-    def should_write_gold(
-        self, context: PipelineContext, record: dict[str, Any]
-    ) -> bool:
-        """Filter records for Gold layer."""
-        return self._gold_filter.should_include(context, record)
+    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]
