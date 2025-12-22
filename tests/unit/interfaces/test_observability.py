@@ -4,24 +4,33 @@
 
 from unittest import mock
 import pytest
-from src.interfaces import observability
+from bioetl.interfaces import observability
+from bioetl.infrastructure.observability import server as obs_server
+
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
 @pytest.fixture(autouse=True)
 def reset_server_started():
     """Reset the `_SERVER_STARTED` before each test."""
-    observability._SERVER_STARTED = False  # Ensure isolation
+    obs_server._SERVER_STARTED = False  # Ensure isolation
     yield
-    observability._SERVER_STARTED = False  # Cleanup
+    obs_server._SERVER_STARTED = False  # Cleanup
+
 
 def test_start_metrics_server_success():
     """Verify metrics_server starts successfully"""
-    with mock.patch("src.interfaces.observability.start_server") as mock_start:
+    with mock.patch(
+        "bioetl.infrastructure.observability.server.start_http_server"
+    ) as mock_start:
         observability.start_metrics_server()
         mock_start.assert_called_once()
 
+
 def test_start_metrics_server_failure():
-    """Simulate server failure and verify """
-    with mock.patch("src.interfaces.observability.start_server", side_effect=Exception("Failed")):
+    """Simulate server failure and verify"""
+    with mock.patch(
+        "bioetl.infrastructure.observability.server.start_http_server",
+        side_effect=Exception("Failed"),
+    ):
         with pytest.raises(Exception, match="Failed"):
             observability.start_metrics_server()
