@@ -110,6 +110,10 @@ class DeltaWriter:
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
+        # Sort by primary keys for deterministic writing
+        if primary_keys:
+            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
+
         # Use pa.Table directly instead of RecordBatchReader for write operations
         # to ensure data is available for potential retries and to avoid consumption issues.
         # delta-rs handles pa.Table efficiently.
