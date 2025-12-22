@@ -146,6 +146,16 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
 
     watermark_field = yaml_config.source.watermark_field
 
+    # Extract storage config
+    silver_config = yaml_config.sink.get("silver")
+    write_mode = "merge" # Default
+    # Note: partition_cols are not explicitly in YAML schema yet, would need to be added to Schema first if needed dynamically.
+    # For now, we assume empty or derived.
+    # But wait, SinkLayerConfig in schema has 'mode' (str | None).
+
+    if silver_config and silver_config.mode:
+        write_mode = silver_config.mode
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
@@ -153,6 +163,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         primary_keys=yaml_config.primary_keys,
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
+        write_mode=write_mode, # Mapped from YAML
         gold_filter_types=yaml_config.gold_filter_types,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,

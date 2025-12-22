@@ -12,7 +12,8 @@ import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-
+import asyncio
+from datetime import timezone
 
 @pytest.fixture
 def batch_id() -> BatchID:
@@ -201,6 +202,43 @@ class TestBronzeWriterWriteLocal:
             decompressed = reader.read()
         expected = b"".join(sample_records)
         assert decompressed == expected
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_local_async(
+        self,
+        temp_dir: str,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that local write is performed asynchronously."""
+        writer = BronzeWriter(bucket=temp_dir)
+        date = datetime(2023, 1, 1, tzinfo=timezone.utc)
+
+        # We patch run_in_executor to verify it's called for file I/O
+        with patch.object(
+            asyncio.get_running_loop(),
+            "run_in_executor",
+            wraps=asyncio.get_running_loop().run_in_executor,
+        ) as mock_executor:
+            path = await writer.write_bronze(
+                records=iter(sample_records),
+                provider="test_provider",
+                entity="test_entity",
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+            )
+
+            # Verify run_in_executor was called at least twice (1 for compression, 1 for write)
+            assert mock_executor.call_count >= 2
+
+            # Verify file existence and content
+            full_path = Path(temp_dir) / path
+            assert full_path.exists()
+            assert full_path.with_suffix(".zst.meta.json").exists()
 
     @pytest.mark.asyncio
     async def test_write_bronze_with_json_copy(

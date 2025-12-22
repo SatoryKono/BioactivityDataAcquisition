@@ -155,12 +155,18 @@ class BronzeWriter:
         if self.is_local:
             full_path = Path(self.bucket) / relative_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(full_path, "wb") as f:
-                f.write(compressed_data)
-            # Write sidecar metadata file for local storage
+
+            def _write_local(data: bytes, path: Path, meta: dict, meta_path: Path):
+                with open(path, "wb") as f:
+                    f.write(data)
+                with open(meta_path, "w") as f:
+                    json.dump(meta, f)
+
             meta_path = full_path.with_suffix(".zst.meta.json")
-            with open(meta_path, "w") as f:
-                json.dump(metadata, f)
+            await loop.run_in_executor(
+                None,
+                lambda: _write_local(compressed_data, full_path, metadata, meta_path),
+            )
         else:
             # Include run metadata in S3 object metadata for traceability
             s3_metadata = {
