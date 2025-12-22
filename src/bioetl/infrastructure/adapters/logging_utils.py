@@ -5,14 +5,13 @@ Provides standardized error logging format across all data source adapters.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any, TYPE_CHECKING
+import logging
 
-if TYPE_CHECKING:
-    import structlog
-
+import logging
 
 def log_adapter_error(
-    logger: structlog.BoundLogger,
+    logger: Any,
     provider: str,
     operation: str,
     *,
@@ -24,21 +23,17 @@ def log_adapter_error(
     Формат сообщения: "{provider} {operation} failed"
 
     Args:
-        logger: Structlog logger instance
+        logger: Structlog logger or standard logging.Logger instance
         provider: Provider name (e.g., "chembl", "pubchem", "uniprot")
         operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
         exc_info: Include exception traceback (default: True)
         **context: Additional context fields to include in log
-
-    Example:
-        >>> log_adapter_error(
-        ...     logger,
-        ...     provider="pubchem",
-        ...     operation="compound batch fetch",
-        ...     batch_start=100,
-        ...     batch_end=199,
-        ... )
-        # Logs: "pubchem compound batch fetch failed" with context fields
     """
     message = f"{provider} {operation} failed"
-    logger.error(message, exc_info=exc_info, **context)
+    
+    # Handle standard logging.Logger
+    if isinstance(logger, logging.Logger):
+        logger.error(message, exc_info=exc_info, extra=context)
+    else:
+        # Assume structlog or compatible
+        logger.error(message, exc_info=exc_info, **context)

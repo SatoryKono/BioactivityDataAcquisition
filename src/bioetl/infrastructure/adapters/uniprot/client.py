@@ -52,7 +52,6 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         super().__init__(http_client)
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
-        self.provider_name = "uniprot"
         self.strict_error_handling = strict_error_handling
         self._fetch_strategies = {
             "protein": self._fetch_proteins,
@@ -274,7 +273,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         """Check UniProt API health status using a lightweight search query."""
         try:
             # Lightweight search probe: Ubiquitin (P62988)
-            params = {"query": "accession:P62988", "size": 1, "format": "json"}
+            params = {"query": "accession:P622988", "size": 1, "format": "json"}
             resp = await self.http_client.get(f"{self.base_url}/uniprotkb/search", params=params)
             if resp.status_code != 200:
                 return HealthStatus.DEGRADED

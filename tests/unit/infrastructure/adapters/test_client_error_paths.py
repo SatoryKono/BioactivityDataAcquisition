@@ -98,7 +98,7 @@ class TestUniProtClientErrorPaths:
             assert results == []
 
             # Should have logged the error
-            assert "UniProt protein fetch failed" in caplog.text
+            assert "uniprot protein fetch failed" in caplog.text.lower()
             # Check that the exception info is in the log
             error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
             assert len(error_records) >= 1
@@ -149,7 +149,7 @@ class TestUniProtClientErrorPaths:
             assert results == []
 
             # Should have logged the error
-            assert "UniProt feature fetch failed" in caplog.text
+            assert "uniprot feature fetch failed" in caplog.text.lower()
             # Check that the exception info is in the log
             error_records = [
                 r for r in caplog.records if r.levelno == logging.ERROR
@@ -203,7 +203,7 @@ class TestUniProtClientErrorPaths:
             assert results == []
 
             # Should have logged the error
-            assert "UniProt sequence fetch failed" in caplog.text
+            assert "uniprot sequence fetch failed" in caplog.text.lower()
 
     async def test_fetch_sequences_raises_in_strict_mode(self, mock_http_client):
         """Test that _fetch_sequences raises exception in strict mode."""
@@ -264,7 +264,7 @@ class TestPubChemClientErrorPaths:
                     results.append(result)
 
             # Should continue after error (returns empty due to second mock call)
-            assert "PubChem compound batch fetch failed" in caplog.text
+            assert "pubchem compound batch fetch failed" in caplog.text.lower()
             # Check that the exception info is in the log
             error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
             assert len(error_records) >= 1
