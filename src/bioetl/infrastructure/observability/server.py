@@ -28,19 +28,22 @@ def start_metrics_server(port: int = 8000) -> None:
     """
     global _SERVER_PORT
 
+    def _raise_port_conflict_error(current_port: int, requested_port: int) -> None:
+        """Raise RuntimeError when server is running on a different port."""
+        error_msg = (
+            f"Metrics server already running on port {current_port}, "
+            f"cannot start on port {requested_port}"
+        )
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+
     # Check if server is already running
     if _SERVER_PORT is not None:
         if _SERVER_PORT == port:
             logger.debug(f"Metrics server already started on port {port}")
             return
         else:
-            # Server is running on a different port - this is a configuration error
-            error_msg = (
-                f"Metrics server already running on port {_SERVER_PORT}, "
-                f"cannot start on port {port}"
-            )
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
+            _raise_port_conflict_error(_SERVER_PORT, port)
 
     with _SERVER_LOCK:
         # Double-check after acquiring lock
@@ -48,12 +51,7 @@ def start_metrics_server(port: int = 8000) -> None:
             if _SERVER_PORT == port:
                 return
             else:
-                error_msg = (
-                    f"Metrics server already running on port {_SERVER_PORT}, "
-                    f"cannot start on port {port}"
-                )
-                logger.error(error_msg)
-                raise RuntimeError(error_msg)
+                _raise_port_conflict_error(_SERVER_PORT, port)
 
         try:
             start_http_server(port)

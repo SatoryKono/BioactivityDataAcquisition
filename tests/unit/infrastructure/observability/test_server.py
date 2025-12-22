@@ -1,6 +1,7 @@
 """Unit tests for Prometheus metrics server."""
 
 import errno
+import time
 from unittest.mock import patch
 
 import pytest
@@ -115,7 +116,6 @@ class TestStartMetricsServer:
             nonlocal call_count
             call_count += 1
             # Simulate some delay by checking global state
-            import time
             time.sleep(0.01)
         
         with patch(
