@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import Column, DataFrameSchema
 

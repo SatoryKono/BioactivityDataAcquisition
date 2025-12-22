@@ -16,8 +16,9 @@ import math
 from datetime import date, datetime
 from functools import singledispatch
 from typing import Any
+from dataclasses import dataclass
 
-from .types import ContentHash, DriftLevel, EntityID
+from .types import ContentHash, DriftLevel, EntityID, Watermark
 
 # =============================================================================
 # Content Hash Generation (RULES.md §2.8)
