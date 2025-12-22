@@ -78,18 +78,21 @@ def _normalize_list(value: list[Any]) -> list[Any]:
     return [_normalize_value(v) for v in value]
 
 
+def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
+    """Check if field should be included in hash calculation."""
+    if key in META_FIELDS:
+        return False
+    if exclude_none and value is None:
+        return False
+    return True
+
+
 def normalize_for_hash(record: dict[str, Any], exclude_none: bool = False) -> dict[str, Any]:
     """Normalize record before hashing to ensure consistency."""
-    if exclude_none:
-        return {
-            key: _normalize_value(value)
-            for key, value in record.items()
-            if key not in META_FIELDS and value is not None
-        }
     return {
         key: _normalize_value(value)
         for key, value in record.items()
-        if key not in META_FIELDS
+        if _should_include_field(key, value, exclude_none)
     }
 
 

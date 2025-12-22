@@ -190,17 +190,34 @@ class TestCsvExporterExport:
         assert "key" in content and "value" in content
 
     @pytest.mark.asyncio
-    async def test_export_overwrites_existing_file(self, tmp_path: Path) -> None:
-        """Test that export overwrites existing file."""
+    async def test_export_appends_to_existing_file(self, tmp_path: Path) -> None:
+        """Test that export appends to existing file by default."""
         exporter = CsvExporter(base_path=str(tmp_path))
 
         # First export
         table1 = pa.Table.from_pydict({"id": [1], "value": ["first"]})
         await exporter.export("test", table1)
 
-        # Second export
+        # Second export (default: append=True)
         table2 = pa.Table.from_pydict({"id": [2], "value": ["second"]})
         result_path = await exporter.export("test", table2)
+
+        content = result_path.read_text()
+        assert "first" in content
+        assert "second" in content
+
+    @pytest.mark.asyncio
+    async def test_export_overwrites_when_append_false(self, tmp_path: Path) -> None:
+        """Test that export overwrites existing file when append=False."""
+        exporter = CsvExporter(base_path=str(tmp_path))
+
+        # First export
+        table1 = pa.Table.from_pydict({"id": [1], "value": ["first"]})
+        await exporter.export("test", table1)
+
+        # Second export with append=False
+        table2 = pa.Table.from_pydict({"id": [2], "value": ["second"]})
+        result_path = await exporter.export("test", table2, append=False)
 
         content = result_path.read_text()
         assert "second" in content
