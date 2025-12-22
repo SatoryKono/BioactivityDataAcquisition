@@ -28,7 +28,7 @@ class PubMedPublicationsPipeline(BasePipeline):
         return await self._transformer.transform(context, record)
 
     def extract_watermark(
-        self, context: PipelineContext, record: dict[str, Any]
+        self, _context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
         """Extract PMID as watermark."""
         pmid = record.get("pmid", "")

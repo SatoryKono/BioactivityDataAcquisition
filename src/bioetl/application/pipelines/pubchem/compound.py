@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
 
 
 class PubChemCompoundPipeline(BasePipeline):
@@ -26,7 +28,7 @@ class PubChemCompoundPipeline(BasePipeline):
         return await self._transformer.transform(context, record)
 
     def extract_watermark(
-        self, context: PipelineContext, record: dict[str, Any]
+        self, _context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
         """Extract CID as watermark (обёртка Watermark)."""
         return Watermark.from_offset(int(record.get("cid", 0)))

@@ -20,7 +20,7 @@ class PubChemCompoundTransformer(BaseTransformer):
 
     async def transform(
         self,
-        context: PipelineContext,
+        _context: PipelineContext,
         record: BronzeRecord,
     ) -> SilverRecord | None:
         """Transform raw PubChem record to Silver format."""

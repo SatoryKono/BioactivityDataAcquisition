@@ -271,14 +271,14 @@ def test_domain_layer_uses_protocol_for_ports(src_dir: Path) -> None:
         content = f.read()
 
     # Check for Protocol usage
-    assert "from typing" in content and "Protocol" in content, (
-        "Domain ports should use typing.Protocol for interface definitions"
-    )
+    assert (
+        "from typing" in content and "Protocol" in content
+    ), "Domain ports should use typing.Protocol for interface definitions"
 
     # Check that Protocol classes are defined
-    assert "class" in content and "(Protocol)" in content, (
-        "Port interfaces should be classes inheriting from Protocol"
-    )
+    assert (
+        "class" in content and "(Protocol)" in content
+    ), "Port interfaces should be classes inheriting from Protocol"
 
 
 def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
@@ -317,9 +317,9 @@ def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
         except SyntaxError:
             continue
 
-    assert not violations, (
-        f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
-    )
+    assert (
+        not violations
+    ), f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
 
 
 def test_no_empty_source_files(src_dir: Path) -> None:
@@ -623,9 +623,10 @@ def test_domain_value_objects_are_frozen(src_dir: Path) -> None:
                         f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
                     )
 
-    assert not violations, (
-        "Found mutable domain dataclasses (must be frozen=True):\n"
-        + "\n".join(f"  - {v}" for v in violations)
+    assert (
+        not violations
+    ), "Found mutable domain dataclasses (must be frozen=True):\n" + "\n".join(
+        f"  - {v}" for v in violations
     )
 
 
@@ -675,14 +676,16 @@ def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
                 # Check if it's a dataclass
                 is_dataclass = False
                 for decorator in node.decorator_list:
-                    if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
-                        is_dataclass = True
-                    elif isinstance(decorator, ast.Call):
-                        if (
+                    if (
+                        isinstance(decorator, ast.Name) and decorator.id == "dataclass"
+                    ) or (
+                        isinstance(decorator, ast.Call)
+                        and (
                             isinstance(decorator.func, ast.Name)
                             and decorator.func.id == "dataclass"
-                        ):
-                            is_dataclass = True
+                        )
+                    ):
+                        is_dataclass = True
 
                 if not is_dataclass:
                     continue

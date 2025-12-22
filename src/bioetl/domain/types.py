@@ -92,9 +92,11 @@ class Watermark:
             return self._value
         try:
             return int(self._value)  # type: ignore
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as err:
             # This might be risky if we assume it works, but useful for PubChem
-            raise ValueError(f"Cannot convert Watermark value '{self._value}' to int")
+            raise ValueError(
+                f"Cannot convert Watermark value '{self._value}' to int"
+            ) from err
 
 
 class RunType(str, Enum):

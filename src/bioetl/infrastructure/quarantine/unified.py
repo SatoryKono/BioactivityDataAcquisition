@@ -12,9 +12,8 @@ Requirements:
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
@@ -32,6 +31,9 @@ from bioetl.infrastructure.quarantine.operations import (
     purge_records,
     replay_records,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class UnifiedQuarantine:

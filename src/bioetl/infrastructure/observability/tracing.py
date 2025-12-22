@@ -8,10 +8,7 @@ from typing import Any
 try:
     from opentelemetry import trace
     from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import (
-        BatchSpanProcessor,
-        ConsoleSpanExporter,
-    )
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
     try:
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
@@ -37,10 +34,7 @@ class OpenTelemetryTracer:
         provider = TracerProvider()
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
-        if OTLPSpanExporter:
-            exporter = OTLPSpanExporter()
-        else:
-            exporter = ConsoleSpanExporter()
+        exporter = OTLPSpanExporter() if OTLPSpanExporter else ConsoleSpanExporter()
 
         processor = BatchSpanProcessor(exporter)
         provider.add_span_processor(processor)

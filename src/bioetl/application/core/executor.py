@@ -7,8 +7,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.types import BatchID, Watermark
 
@@ -16,6 +14,8 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.record_processor import RecordProcessor
 
 
 class PipelineExecutor:
@@ -101,6 +101,7 @@ class PipelineExecutor:
                     )
                 except Exception:
                     # Ignore errors during emergency checkpoint save
+                    # Cannot use contextlib.suppress here due to async context
                     pass
             raise
 

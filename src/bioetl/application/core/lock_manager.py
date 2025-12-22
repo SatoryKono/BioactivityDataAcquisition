@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.domain.ports import LockPort
 
 
 class LockManager:
@@ -106,10 +107,8 @@ class LockManager:
     async def release(self) -> None:
         if self._heartbeat_task:
             self._heartbeat_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._heartbeat_task
-            except asyncio.CancelledError:
-                pass
         await self._lock.release(
             self._lock_key, self._run_id, exclusive=self._exclusive
         )

@@ -9,11 +9,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Activity
-from bioetl.domain.transformations import (
-    generate_entity_id,
-    safe_float,
-    safe_int,
-)
+from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -91,7 +87,9 @@ class ActivityTransformer(BaseTransformer):
                 "standard_flag": safe_int(record.get("standard_flag")),
                 # Derived metrics
                 "pchembl_value": safe_float(record.get("pchembl_value")),
-                "ligand_efficiency": self.serialize_json(record.get("ligand_efficiency")),
+                "ligand_efficiency": self.serialize_json(
+                    record.get("ligand_efficiency")
+                ),
                 # Units ontology
                 "qudt_units": record.get("qudt_units"),
                 "uo_units": record.get("uo_units"),

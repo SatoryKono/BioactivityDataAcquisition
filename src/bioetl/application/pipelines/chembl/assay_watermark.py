@@ -19,9 +19,7 @@ class AssayWatermarkExtractor:
     def __init__(self, watermark_field: str | None = None):
         self.watermark_field = watermark_field
 
-    def extract(
-        self, _context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
+    def extract(self, _context: PipelineContext, record: dict[str, Any]) -> Watermark:
         """Extract watermark value from assay record.
 
         Args:

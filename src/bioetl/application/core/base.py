@@ -12,20 +12,15 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Self
 from uuid import uuid4
 
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import ShutdownSignal
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import (
-    BronzeRecord,
-    RunID,
-    RunType,
-    SilverRecord,
-    Watermark,
-)
+from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord, Watermark
 
 if TYPE_CHECKING:
     import structlog
+
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 
 class BasePipeline(ABC):

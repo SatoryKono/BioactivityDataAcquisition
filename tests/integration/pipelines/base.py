@@ -1,18 +1,17 @@
 """Base class for pipeline integration tests."""
 
 import os
-import shutil
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
 import structlog
-from structlog.testing import capture_logs
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+
+# Import factories to ensure they are registered/available
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import Settings
@@ -20,11 +19,6 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-
-# Import factories to ensure they are registered/available
-from bioetl.composition.factories.pipeline_factories import (
-    chembl_activity_factory,
-)
 
 logger = structlog.get_logger()
 
@@ -52,11 +46,19 @@ class IntegrationPipelineTestCase:
         self.json_path = str(self.storage_root / "json")
 
         # Create directories
-        for path in [self.bronze_path, self.silver_path, self.gold_path, self.checkpoints_path, self.json_path]:
+        for path in [
+            self.bronze_path,
+            self.silver_path,
+            self.gold_path,
+            self.checkpoints_path,
+            self.json_path,
+        ]:
             os.makedirs(path, exist_ok=True)
 
         # Patch StorageFactory.create to return local paths
-        with patch("bioetl.composition.factories.base_services_factory.StorageFactory.create") as mock_create:
+        with patch(
+            "bioetl.composition.factories.base_services_factory.StorageFactory.create"
+        ) as mock_create:
             mock_create.side_effect = self._create_local_storage_context
             yield
 
@@ -76,7 +78,7 @@ class IntegrationPipelineTestCase:
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
                 bucket=self.bronze_path,
-                endpoint_url=None, # Local file mode
+                endpoint_url=None,  # Local file mode
                 access_key=None,
                 secret_key=None,
                 save_json=save_json,
@@ -115,11 +117,12 @@ class IntegrationPipelineTestCase:
     def runtime_config(self):
         """Return default runtime config."""
         from bioetl.domain.types import RunType
+
         return RuntimeConfig(
             run_type=RunType.INCREMENTAL,
             heartbeat_interval=10,
             resume=False,
-            limit=None, # Can be overridden in tests
+            limit=None,  # Can be overridden in tests
         )
 
     @pytest.fixture
@@ -132,7 +135,7 @@ class IntegrationPipelineTestCase:
         settings: Settings,
         runtime_config: RuntimeConfig,
         run_id,
-        config_overrides: dict[str, Any] | None = None
+        config_overrides: dict[str, Any] | None = None,
     ) -> PipelineRunner:
         """Create a pipeline runner with the given factory and settings.
 
@@ -162,8 +165,8 @@ class IntegrationPipelineTestCase:
             runtime=runtime_config,
             settings=settings,
             logger=structlog.get_logger(),
-            tracer=MagicMock(), # NoOpTracing
-            config=pipeline_config
+            tracer=MagicMock(),  # NoOpTracing
+            config=pipeline_config,
         )
 
         return runner

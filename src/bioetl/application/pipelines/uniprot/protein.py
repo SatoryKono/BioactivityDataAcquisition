@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
 
 
 class UniProtProteinPipeline(BasePipeline):
@@ -26,7 +28,7 @@ class UniProtProteinPipeline(BasePipeline):
         return await self._transformer.transform(context, record)
 
     def extract_watermark(
-        self, context: PipelineContext, record: dict[str, Any]
+        self, _context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
         """Extract watermark as accession string wrapped in Watermark."""
         accession = str(record.get("primaryAccession", ""))

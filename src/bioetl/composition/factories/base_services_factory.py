@@ -9,10 +9,7 @@ from bioetl.composition.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
-from bioetl.composition.factories.storage_factory import (
-    StorageContext,
-    StorageFactory,
-)
+from bioetl.composition.factories.storage_factory import StorageContext, StorageFactory
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
@@ -112,6 +109,6 @@ class BaseServicesFactory:
         return NoOpMetrics()
 
     @staticmethod
-    def _create_tracing(settings: Settings) -> TracingPort:
+    def _create_tracing(_settings: Settings) -> TracingPort:
         # Placeholder for real OTel implementation
         return NoOpTracing()

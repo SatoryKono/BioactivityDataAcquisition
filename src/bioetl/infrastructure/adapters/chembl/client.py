@@ -9,7 +9,6 @@ Uses chembl_webresource_client library for API access.
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
@@ -17,16 +16,17 @@ from typing import TYPE_CHECKING, Any
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Iterator
     from concurrent.futures import ThreadPoolExecutor
 
     from httpx import Response
+
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 # ChEMBL API base URL
