@@ -19,6 +19,7 @@ import pytest
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -107,13 +108,14 @@ class TestChEMBLPipelineE2E:
             "bioetl.composition.factories.base_services_factory.StorageFactory.create",
             return_value=storage_context,
         ):
-            runner = bootstrap_pipeline(
+            ctx = PipelineRunContext(
                 pipeline_name="chembl_activity",
                 run_id=uuid4(),
                 run_type=RunType.INCREMENTAL,
                 resume=False,
                 limit=e2e_pipeline_limit,
             )
+            runner = bootstrap_pipeline(ctx)
 
             # Execute pipeline
             await runner.run()
@@ -197,13 +199,14 @@ async def test_pubchem_compound_pipeline(
         "bioetl.composition.factories.base_services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
+        ctx = PipelineRunContext(
             pipeline_name="pubchem_compound",
             run_id=uuid4(),
             run_type=RunType.INCREMENTAL,
             resume=False,
             limit=e2e_pipeline_limit,
         )
+        runner = bootstrap_pipeline(ctx)
 
         # Execute pipeline
         await runner.run()
@@ -284,13 +287,14 @@ async def test_pipeline_resume_after_failure(
         "bioetl.composition.factories.base_services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
+        ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
             resume=False,
             limit=5,
         )
+        runner = bootstrap_pipeline(ctx)
 
         await runner.run()
 
@@ -309,13 +313,14 @@ async def test_pipeline_resume_after_failure(
         "bioetl.composition.factories.base_services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
+        ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=uuid4(),  # New run_id for fresh start
             run_type=RunType.INCREMENTAL,
             resume=False,
             limit=5,
         )
+        runner = bootstrap_pipeline(ctx)
 
         await runner.run()
 
@@ -389,13 +394,14 @@ async def test_pipeline_idempotency(
         "bioetl.composition.factories.base_services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
+        ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             run_type=RunType.INCREMENTAL,
             resume=False,
             limit=5,
         )
+        runner = bootstrap_pipeline(ctx)
 
         await runner.run()
 
@@ -415,13 +421,14 @@ async def test_pipeline_idempotency(
             "bioetl.composition.factories.base_services_factory.StorageFactory.create",
             return_value=storage_context,
         ):
-            runner = bootstrap_pipeline(
+            ctx = PipelineRunContext(
                 pipeline_name="chembl_activity",
                 run_id=uuid4(),
                 run_type=RunType.INCREMENTAL,
                 resume=False,
                 limit=5,
             )
+            runner = bootstrap_pipeline(ctx)
 
             await runner.run()
 

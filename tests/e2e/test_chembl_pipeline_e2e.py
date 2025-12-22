@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
 
 
@@ -98,13 +99,14 @@ async def test_chembl_pipeline_e2e(
             pass  # Ignore if exists
 
     # 2. Bootstrap
-    runner = bootstrap_pipeline(
+    ctx = PipelineRunContext(
         pipeline_name=pipeline_name,
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=10,
     )
+    runner = bootstrap_pipeline(ctx)
 
     # 3. Monkeypatch Data Source Fetch (avoid calling real ChEMBL API)
     # We want to test the PIPELINE logic (transform, write, lock, checkpoint),
