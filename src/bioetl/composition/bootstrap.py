@@ -28,10 +28,7 @@ from bioetl.infrastructure.observability.logging import (
 )
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.server import start_metrics_server
-from bioetl.infrastructure.observability.tracing import (
-    NoOpTracer,
-    OpenTelemetryTracer,
-)
+from bioetl.infrastructure.observability.tracing import NoOpTracer, OpenTelemetryTracer
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter

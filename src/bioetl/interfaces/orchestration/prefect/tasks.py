@@ -16,8 +16,8 @@ from prefect import flow, task
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
-    from bioetl.domain.types import Watermark
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.types import Watermark
 
 
 # =============================================================================

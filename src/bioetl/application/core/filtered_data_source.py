@@ -8,13 +8,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.filter_config import InputFilterConfig
-from bioetl.domain.types import HealthStatus, Watermark
-
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, InputFilterPort
+    from bioetl.domain.types import HealthStatus, Watermark
 
 
 class FilteredDataSource:
@@ -73,7 +72,12 @@ class FilteredDataSource:
         await self._data_source.__aenter__()
 
         # Pre-load filter IDs from CSV
-        if self._filter_config.enabled and self._filter_reader:
+        if (
+            self._filter_config.enabled
+            and self._filter_reader
+            and self._filter_config.source_path
+            and self._filter_config.column_name
+        ):
             self._filter_ids = await self._filter_reader.load_filter_ids(
                 source_path=self._filter_config.source_path,
                 column_name=self._filter_config.column_name,

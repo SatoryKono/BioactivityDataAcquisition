@@ -1,6 +1,5 @@
 """Integration tests for DeltaWriter."""
 
-import shutil
 from pathlib import Path
 
 import pyarrow as pa
@@ -9,15 +8,18 @@ from deltalake import DeltaTable
 
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
+
 @pytest.fixture
 def temp_delta_path(tmp_path):
     path = tmp_path / "delta"
     path.mkdir()
     return str(path)
 
+
 @pytest.fixture
 def delta_writer(temp_delta_path):
     return DeltaWriter(base_path=temp_delta_path)
+
 
 @pytest.fixture
 def sample_records():
@@ -28,7 +30,7 @@ def sample_records():
             "_run_id": "run1",
             "_run_type": "incremental",
             "_source_batch_id": "batch1",
-            "_ingestion_ts": "2023-01-01T00:00:00"
+            "_ingestion_ts": "2023-01-01T00:00:00",
         },
         {
             "id": "2",
@@ -36,29 +38,35 @@ def sample_records():
             "_run_id": "run1",
             "_run_type": "incremental",
             "_source_batch_id": "batch1",
-            "_ingestion_ts": "2023-01-01T00:00:00"
-        }
+            "_ingestion_ts": "2023-01-01T00:00:00",
+        },
     ]
+
 
 @pytest.fixture
 def sample_schema():
-    return pa.schema([
-        ("id", pa.string()),
-        ("val", pa.string()),
-        ("_run_id", pa.string()),
-        ("_run_type", pa.string()),
-        ("_source_batch_id", pa.string()),
-        ("_ingestion_ts", pa.string())
-    ])
+    return pa.schema(
+        [
+            ("id", pa.string()),
+            ("val", pa.string()),
+            ("_run_id", pa.string()),
+            ("_run_type", pa.string()),
+            ("_source_batch_id", pa.string()),
+            ("_ingestion_ts", pa.string()),
+        ]
+    )
+
 
 @pytest.mark.asyncio
-async def test_write_silver_default_merge(delta_writer, temp_delta_path, sample_records, sample_schema):
+async def test_write_silver_default_merge(
+    delta_writer, temp_delta_path, sample_records, sample_schema
+):
     """Test default merge behavior."""
     await delta_writer.write_silver(
         table_name="test_table",
         records=sample_records,
         primary_keys=["id"],
-        schema=sample_schema
+        schema=sample_schema,
     )
 
     dt = DeltaTable(f"{temp_delta_path}/test_table")
@@ -69,26 +77,26 @@ async def test_write_silver_default_merge(delta_writer, temp_delta_path, sample_
         {
             "id": "1",
             "val": "A_updated",
-             "_run_id": "run2",
+            "_run_id": "run2",
             "_run_type": "incremental",
             "_source_batch_id": "batch2",
-            "_ingestion_ts": "2023-01-02T00:00:00"
+            "_ingestion_ts": "2023-01-02T00:00:00",
         },
         {
             "id": "3",
             "val": "C",
-             "_run_id": "run2",
+            "_run_id": "run2",
             "_run_type": "incremental",
             "_source_batch_id": "batch2",
-            "_ingestion_ts": "2023-01-02T00:00:00"
-        }
+            "_ingestion_ts": "2023-01-02T00:00:00",
+        },
     ]
 
     await delta_writer.write_silver(
         table_name="test_table",
         records=new_records,
         primary_keys=["id"],
-        schema=sample_schema
+        schema=sample_schema,
     )
 
     # Reload Delta Table to see changes
@@ -99,15 +107,18 @@ async def test_write_silver_default_merge(delta_writer, temp_delta_path, sample_
     assert df.loc[df["id"] == "2", "val"].iloc[0] == "B"
     assert df.loc[df["id"] == "3", "val"].iloc[0] == "C"
 
+
 @pytest.mark.asyncio
-async def test_write_silver_append_mode(delta_writer, temp_delta_path, sample_records, sample_schema):
+async def test_write_silver_append_mode(
+    delta_writer, temp_delta_path, sample_records, sample_schema
+):
     """Test append mode (duplicates allowed)."""
     await delta_writer.write_silver(
         table_name="test_append",
         records=sample_records,
         primary_keys=["id"],
         schema=sample_schema,
-        mode="append"
+        mode="append",
     )
 
     # Append same records again
@@ -116,20 +127,23 @@ async def test_write_silver_append_mode(delta_writer, temp_delta_path, sample_re
         records=sample_records,
         primary_keys=["id"],
         schema=sample_schema,
-        mode="append"
+        mode="append",
     )
 
     dt = DeltaTable(f"{temp_delta_path}/test_append")
     assert len(dt.to_pandas()) == 4  # Should be doubled
 
+
 @pytest.mark.asyncio
-async def test_write_silver_overwrite_mode(delta_writer, temp_delta_path, sample_records, sample_schema):
+async def test_write_silver_overwrite_mode(
+    delta_writer, temp_delta_path, sample_records, sample_schema
+):
     """Test overwrite mode."""
     await delta_writer.write_silver(
         table_name="test_overwrite",
         records=sample_records,
         primary_keys=["id"],
-        schema=sample_schema
+        schema=sample_schema,
     )
 
     new_records = [
@@ -139,7 +153,7 @@ async def test_write_silver_overwrite_mode(delta_writer, temp_delta_path, sample
             "_run_id": "run3",
             "_run_type": "incremental",
             "_source_batch_id": "batch3",
-             "_ingestion_ts": "2023-01-03T00:00:00"
+            "_ingestion_ts": "2023-01-03T00:00:00",
         }
     ]
 
@@ -148,7 +162,7 @@ async def test_write_silver_overwrite_mode(delta_writer, temp_delta_path, sample
         records=new_records,
         primary_keys=["id"],
         schema=sample_schema,
-        mode="overwrite"
+        mode="overwrite",
     )
 
     dt = DeltaTable(f"{temp_delta_path}/test_overwrite")
@@ -156,8 +170,11 @@ async def test_write_silver_overwrite_mode(delta_writer, temp_delta_path, sample
     assert len(df) == 1
     assert df.iloc[0]["id"] == "3"
 
+
 @pytest.mark.asyncio
-async def test_write_silver_partitioning(delta_writer, temp_delta_path, sample_records, sample_schema):
+async def test_write_silver_partitioning(
+    delta_writer, temp_delta_path, sample_records, sample_schema
+):
     """Test partitioning."""
     await delta_writer.write_silver(
         table_name="test_partition",
@@ -165,7 +182,7 @@ async def test_write_silver_partitioning(delta_writer, temp_delta_path, sample_r
         primary_keys=["id"],
         schema=sample_schema,
         mode="overwrite",
-        partition_cols=["val"]
+        partition_cols=["val"],
     )
 
     base_path = Path(temp_delta_path) / "test_partition"

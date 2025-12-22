@@ -5,12 +5,7 @@ Tests business logic within Enum classes.
 
 import pytest
 
-from bioetl.domain.types import (
-    CircuitBreakerState,
-    ErrorType,
-    HealthStatus,
-    RunType,
-)
+from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus, RunType
 
 
 @pytest.mark.unit

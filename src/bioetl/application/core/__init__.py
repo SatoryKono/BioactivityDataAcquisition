@@ -18,24 +18,21 @@ from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 
 # Re-exports from consolidated domain location
-from bioetl.domain.config import (
-    PipelineConfig,
-    RuntimeConfig,
-)
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 __all__ = [
     # Base classes
     "BasePipeline",
     "BaseTransformer",
-    # Decomposed config (ADR-0005) - consolidated in domain.config
-    "PipelineConfig",
-    "RuntimeConfig",
-    "PipelineServices",
-    # Shutdown coordination (ADR-0005)
-    "ShutdownSignal",
-    "PipelineShutdownError",
     # Components
     "CheckpointManager",
     "LockManager",
+    # Decomposed config (ADR-0005) - consolidated in domain.config
+    "PipelineConfig",
+    "PipelineServices",
+    "PipelineShutdownError",
     "QuarantineManager",
+    "RuntimeConfig",
+    # Shutdown coordination (ADR-0005)
+    "ShutdownSignal",
 ]

@@ -3,7 +3,6 @@
 Handles the exposure of metrics and other observability signals to external systems.
 """
 
-
 # We import from infrastructure to avoid direct dependency on prometheus_client here
 # if we want to be strict, but start_http_server is the standard way.
 # However, to satisfy the architecture test "Forbidden import 'prometheus_client' outside observability",

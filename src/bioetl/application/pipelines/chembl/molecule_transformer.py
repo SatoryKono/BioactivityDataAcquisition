@@ -9,10 +9,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Molecule
-from bioetl.domain.transformations import (
-    generate_entity_id,
-    safe_int,
-)
+from bioetl.domain.transformations import generate_entity_id, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -65,12 +62,22 @@ class MoleculeTransformer(BaseTransformer):
                 "inorganic_flag": safe_int(record.get("inorganic_flag")),
                 "polymer_flag": safe_int(record.get("polymer_flag")),
                 # Complex fields (JSON serialized)
-                "molecule_hierarchy": self.serialize_json(record.get("molecule_hierarchy")),
-                "molecule_properties": self.serialize_json(record.get("molecule_properties")),
-                "molecule_structures": self.serialize_json(record.get("molecule_structures")),
-                "molecule_synonyms": self.serialize_json(record.get("molecule_synonyms")),
+                "molecule_hierarchy": self.serialize_json(
+                    record.get("molecule_hierarchy")
+                ),
+                "molecule_properties": self.serialize_json(
+                    record.get("molecule_properties")
+                ),
+                "molecule_structures": self.serialize_json(
+                    record.get("molecule_structures")
+                ),
+                "molecule_synonyms": self.serialize_json(
+                    record.get("molecule_synonyms")
+                ),
                 "cross_references": self.serialize_json(record.get("cross_references")),
-                "atc_classifications": self.serialize_json(record.get("atc_classifications")),
+                "atc_classifications": self.serialize_json(
+                    record.get("atc_classifications")
+                ),
             }
 
             content_hash = self.compute_content_hash(business_data, exclude_none=True)

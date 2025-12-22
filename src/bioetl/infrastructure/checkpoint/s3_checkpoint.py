@@ -45,7 +45,9 @@ class S3Checkpoint:
     ) -> None:
         """Initialize S3 checkpoint storage."""
         self.bucket = bucket
-        self.pipeline_name = pipeline_name  # Unused but kept for interface compatibility
+        self.pipeline_name = (
+            pipeline_name  # Unused but kept for interface compatibility
+        )
         self.endpoint_url = endpoint_url
         self.is_local = not endpoint_url
 
@@ -201,7 +203,7 @@ class S3Checkpoint:
                     )
                     if pipeline_name:
                         pipelines.add(pipeline_name)
-        return sorted(list(pipelines))
+        return sorted(pipelines)
 
     async def exists(self, pipeline: str) -> bool:
         """Check if checkpoint exists."""

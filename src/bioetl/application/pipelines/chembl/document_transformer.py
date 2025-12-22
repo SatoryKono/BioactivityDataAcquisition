@@ -9,10 +9,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Document
-from bioetl.domain.transformations import (
-    generate_entity_id,
-    safe_int,
-)
+from bioetl.domain.transformations import generate_entity_id, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext

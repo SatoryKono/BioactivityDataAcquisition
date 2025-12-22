@@ -220,9 +220,7 @@ class CsvExporter:
 
         # Build column types from new_data schema to ensure consistent types
         # This prevents PyArrow from inferring int64 for string columns like activity_id
-        column_types = {
-            field.name: field.type for field in new_data.schema
-        }
+        column_types = {field.name: field.type for field in new_data.schema}
         convert_options = pv.ConvertOptions(column_types=column_types)
 
         try:

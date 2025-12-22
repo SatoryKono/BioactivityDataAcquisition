@@ -35,7 +35,7 @@ class MemoryLock(LockPort):
         """
         async with self._global_lock:
             if key in self._locks:
-                existing_owner, lock = self._locks[key]
+                _existing_owner, lock = self._locks[key]
                 if lock.locked():
                     # Strictly non-reentrant: cannot acquire if already locked
                     return False
@@ -126,7 +126,7 @@ class MemoryLock(LockPort):
         async with self._global_lock:
             if key not in self._locks:
                 return False
-            existing_owner, lock = self._locks[key]
+            existing_owner, _lock = self._locks[key]
             return existing_owner == str(owner_id)
 
     async def aclose(self) -> None:

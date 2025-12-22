@@ -26,9 +26,10 @@ import pandera as pandera_pa
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
-from pandera.polars import DataFrameSchema
 
 if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
+
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -196,11 +197,7 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path,
-                    data=arrow_data,
-                    mode=mode,
-                    partition_by=partition_cols,
-                    storage_options=self.storage_options: write_deltalake(
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
@@ -236,10 +233,7 @@ class GoldWriter:
         business_key = scd_config["business_key"]
 
         # Sort records by business key for deterministic processing
-        if isinstance(business_key, str):
-            sort_keys = [business_key]
-        else:
-            sort_keys = business_key
+        sort_keys = [business_key] if isinstance(business_key, str) else business_key
 
         # Sort the input records list since we modify it in place
         records.sort(key=lambda r: tuple(r.get(k) for k in sort_keys))
@@ -259,8 +253,7 @@ class GoldWriter:
             try:
                 try:
                     dt = await self._run_in_executor(
-                        lambda table_path=table_path,
-                        storage_options=self.storage_options: DeltaTable(
+                        lambda table_path=table_path, storage_options=self.storage_options: DeltaTable(
                             table_path, storage_options=storage_options
                         )
                     )
@@ -268,11 +261,7 @@ class GoldWriter:
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path,
-                        data=arrow_data,
-                        mode="append",
-                        partition_by=partition_cols,
-                        storage_options=self.storage_options: write_deltalake(
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()

@@ -2,14 +2,12 @@
 
 import pytest
 import structlog
-from datetime import datetime
-from unittest.mock import MagicMock
 
 from bioetl.composition.factories.pipeline_factories import chembl_activity_factory
-from bioetl.domain.types import RunType
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 logger = structlog.get_logger()
+
 
 class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
@@ -18,17 +16,17 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         """Test happy path: Bronze -> Silver -> Gold."""
 
         # Override limit via config override since RuntimeConfig is frozen
-        config_overrides = {"limit": 10} # Actually limit is in RuntimeConfig
 
         # We need to create a new RuntimeConfig with limit=10
         from dataclasses import replace
+
         runtime_config = replace(runtime_config, limit=10)
 
         runner = self.create_runner(
             factory=chembl_activity_factory,
             settings=settings,
             runtime_config=runtime_config,
-            run_id=run_id
+            run_id=run_id,
         )
 
         # Run the pipeline
@@ -39,15 +37,16 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         # Verify Bronze files exist
         import glob
+
         # Look for both compressed and uncompressed just in case, though BronzeWriter uses zstd
         # Also check the path structure
         # BronzeWriter writes to: {base_path}/v1/{provider}/{entity}/{date}/...
-
         # Debug: list all files in storage root
         import os
-        for root, dirs, files in os.walk(self.storage_root):
-             for file in files:
-                 print(f"File found: {os.path.join(root, file)}")
+
+        for root, _dirs, files in os.walk(self.storage_root):
+            for file in files:
+                print(f"File found: {os.path.join(root, file)}")
 
         # Bronze writer appends 'bronze' prefix again if path doesn't have it?
         # Output says: File found: .../storage/bronze/bronze/v1/...
@@ -72,14 +71,17 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         bronze_files = glob.glob(f"{self.bronze_path}/**/*.jsonl.zst", recursive=True)
         if not bronze_files:
-             bronze_files = glob.glob(f"{self.bronze_path}/**/*.jsonl.zstd", recursive=True)
+            bronze_files = glob.glob(
+                f"{self.bronze_path}/**/*.jsonl.zstd", recursive=True
+            )
 
         assert len(bronze_files) > 0, f"No bronze files found in {self.bronze_path}"
 
         # Verify Silver Delta Table
         from deltalake import DeltaTable
+
         # Config says silver_table is 'chembl_activity' (underscore) not slash
-        silver_table_name = runner.pipeline.config.silver_table # e.g., chembl_activity
+        silver_table_name = runner.pipeline.config.silver_table  # e.g., chembl_activity
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)
@@ -99,12 +101,12 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # So it seems it wrote to `chembl/activity`.
 
         if not gold_table_name:
-             # Default fallback logic from PipelineRunner._clear_exports:
-             # gold_table = f"{self._config.provider}.{self._config.entity_type}"
-             # which is chembl.activity.
-             # BUT filesystem shows chembl/activity.
-             # DeltaWriter replaces . with /.
-             gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
+            # Default fallback logic from PipelineRunner._clear_exports:
+            # gold_table = f"{self._config.provider}.{self._config.entity_type}"
+            # which is chembl.activity.
+            # BUT filesystem shows chembl/activity.
+            # DeltaWriter replaces . with /.
+            gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
 
         gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"
 
@@ -113,14 +115,16 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         assert len(gold_df) > 0
 
     @pytest.mark.vcr
-    async def test_chembl_activity_error_handling(self, settings, runtime_config, run_id):
+    async def test_chembl_activity_error_handling(
+        self, settings, runtime_config, run_id
+    ):
         """Test error handling when API fails or data is bad."""
 
         runner = self.create_runner(
             factory=chembl_activity_factory,
             settings=settings,
             runtime_config=runtime_config,
-            run_id=run_id
+            run_id=run_id,
         )
 
         # Use a general exception since DataSourceError is not in exceptions.py
@@ -128,7 +132,8 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         from bioetl.domain.exceptions import ApiError
 
         async def mock_async_gen(*args, **kwargs):
-            if False: yield # make it a generator
+            if False:
+                yield  # make it a generator
             raise ApiError("Simulated API Failure")
 
         # Patch the instance method on the adapter object
@@ -151,4 +156,4 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # If `execute` raises, it bubble up.
 
         with pytest.raises(ApiError, match="Simulated API Failure"):
-             await runner.run()
+            await runner.run()

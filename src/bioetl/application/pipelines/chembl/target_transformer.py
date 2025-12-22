@@ -9,10 +9,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Target
-from bioetl.domain.transformations import (
-    generate_entity_id,
-    safe_int,
-)
+from bioetl.domain.transformations import generate_entity_id, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -53,7 +50,9 @@ class TargetTransformer(BaseTransformer):
                 "tax_id": safe_int(record.get("tax_id")),
                 "species_group_flag": record.get("species_group_flag"),
                 # Complex fields (JSON serialized)
-                "target_components": self.serialize_json(record.get("target_components")),
+                "target_components": self.serialize_json(
+                    record.get("target_components")
+                ),
                 "cross_references": self.serialize_json(record.get("cross_references")),
             }
 

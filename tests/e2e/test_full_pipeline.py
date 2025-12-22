@@ -303,7 +303,7 @@ async def test_pipeline_resume_after_failure(
     assert len(silver_files_first) > 0, "No Silver files after first run"
 
     # Check checkpoint exists
-    checkpoint_files = list(e2e_temp_storage["checkpoints"].rglob("*"))
+    list(e2e_temp_storage["checkpoints"].rglob("*"))
     # Note: Checkpoint might be in S3 bucket, not local filesystem
     # For E2E we'd need to verify via checkpoint service
 

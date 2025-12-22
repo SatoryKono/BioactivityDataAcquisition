@@ -6,9 +6,8 @@ Contains operations for reading and analyzing quarantined records.
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pyarrow.compute as pc
 from deltalake import DeltaTable
@@ -16,6 +15,9 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.types import DQStatus
 from bioetl.infrastructure.quarantine.helpers import quote_literal
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 def inspect_records(
