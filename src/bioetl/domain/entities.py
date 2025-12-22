@@ -285,6 +285,56 @@ class Target(BaseEntity):
 
 
 @dataclass(frozen=True, kw_only=True)
+class Molecule(BaseEntity):
+    """Represents a chemical compound (ChEMBL Molecule).
+
+    Contains all fields from ChEMBL molecule API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/molecule
+    """
+
+    # Primary identifier
+    molecule_chembl_id: str
+
+    # Core metadata
+    pref_name: str | None = None
+    molecule_type: str | None = None  # Small molecule, Protein, Antibody, etc.
+    structure_type: str | None = None  # MOL, NONE, SEQ, BOTH
+    max_phase: int | None = None  # Clinical phase 0-4
+    first_approval: int | None = None
+
+    # Flags
+    oral: bool | None = None
+    parenteral: bool | None = None
+    topical: bool | None = None
+    black_box_warning: int | None = None
+    natural_product: int | None = None
+    first_in_class: int | None = None
+    prodrug: int | None = None
+    therapeutic_flag: bool | None = None
+    withdrawn_flag: bool | None = None
+    inorganic_flag: int | None = None
+    polymer_flag: int | None = None
+
+    # Complex fields (JSON serialized)
+    molecule_hierarchy: str | None = None  # JSON string
+    molecule_properties: str | None = None  # JSON string
+    molecule_structures: str | None = None  # JSON string
+    molecule_synonyms: str | None = None  # JSON string
+    cross_references: str | None = None  # JSON string
+    atc_classifications: str | None = None  # JSON string
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.molecule_chembl_id:
+            raise ValueError("Molecule ChEMBL ID is required")
+        if self.max_phase is not None and not (0 <= self.max_phase <= 4):
+            raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")
+
+
+@dataclass(frozen=True, kw_only=True)
 class Assay(BaseEntity):
     """Represents a bioassay definition (ChEMBL Assay).
 
