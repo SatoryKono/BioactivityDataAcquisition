@@ -1,6 +1,6 @@
-# AGENT.md: Инструкции для Агента BioETL (v2)
+# AGENT.md: Инструкции для Агента BioETL (v2.1)
 
-*Синхронизировано с RULES.md v5.0 (2025-12-15)*
+*Синхронизировано с RULES.md v5.1 (2025-12-22)*
 
 Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/RULES.md`.
 
@@ -101,12 +101,33 @@ src/bioetl/
 
 ### 4.3. Конкурентность и Блокировки
 
+См. [ADR-003](docs/02-architecture/decisions/ADR-003-redis-for-distributed-locking.md).
+
 - **Механизм:** Redis (`SETNX` + `EXPIRE`).
 - **Ключ:** `lock:{provider}_{entity}`.
 - **Heartbeat:** Воркер **MUST** обновлять TTL блокировки каждые 20 секунд.
 - **Fencing:** Потеря блокировки = немедленное аварийное завершение воркера **ДО** записи данных.
 
-### 4.4. Стек Технологий
+### 4.4. Circuit Breaker
+
+См. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
+
+- **Trigger**: 5 последовательных ошибок соединения/таймаута.
+- **Open Duration**: 5 минут (configurable).
+- **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open.
+- **Observability**: Метрики `circuit_breaker_state`, `trips_total`.
+
+### 4.5. Graceful Shutdown
+
+См. [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
+
+При получении SIGTERM/SIGINT:
+1. Прекратить извлечение новых записей.
+2. Дождаться завершения записи текущего батча.
+3. Сохранить чекпоинт в S3.
+4. Выйти с кодом 0.
+
+### 4.6. Стек Технологий
 
 | Категория | Инструмент | Назначение |
 |-----------|------------|------------|
@@ -118,13 +139,13 @@ src/bioetl/
 | **Типизация** | mypy, `typing.Protocol` | Строгая статическая проверка |
 | **Линтинг** | Ruff | Форматирование и линтинг |
 
-### 4.5. Асинхронность
+### 4.7. Асинхронность
 
 - **Блокирующие операции** (Delta Lake, Pandera): `await loop.run_in_executor(None, func, *args)`
 - **Event Loop:** Не создавать новые loops — использовать `asyncio.get_running_loop()`
 - **Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
 
-### 4.6. Тестирование
+### 4.8. Тестирование
 
 | Уровень | Директория | Правила |
 |---------|------------|---------|
@@ -134,7 +155,7 @@ src/bioetl/
 | **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** >80% line coverage
+**Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`)
 
 ---
 
@@ -199,10 +220,27 @@ flowchart TD
 
 ### 7.2. Создание Нового Пайплайна
 1.  **Конфиг:** Создай `configs/pipelines/{provider}/{entity}.yaml`. Определи `load_strategy` (`incremental` или `full`).
-2.  **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
-3.  **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.
-4.  **Регистрация:** Зарегистрируй в `PipelineRegistry` (через декоратор `@register`).
-5.  **Тесты:** Напиши `unit` и `integration` тесты.
+2.  **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer.py`).
+3.  **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
+4.  **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.
+5.  **Регистрация:** Зарегистрируй в `PipelineRegistry` (через декоратор `@register`).
+6.  **Тесты:** Напиши `unit` и `integration` тесты.
+
+### 7.3. Использование BaseTransformer
+
+```python
+from bioetl.application.core.base_transformer import BaseTransformer
+
+class MyTransformer(BaseTransformer):
+    def _transform_record(self, record: dict) -> dict:
+        # Реализуй логику трансформации
+        return {...}
+```
+
+**Преимущества:**
+- Единообразный интерфейс
+- Встроенное логирование и метрики
+- Стандартная обработка ошибок
 
 ---
 
@@ -265,6 +303,22 @@ git commit -m "..."
 - **Тесты падают в CI, но не локально**: Вероятно, отсутствует VCR-кассета. Запиши её.
 - **Неясности в задаче**: **СПРОСИ ПОЛЬЗОВАТЕЛЯ**.
 - **Баги в правилах**: Предложи исправление в `docs/RULES.md`.
+
+---
+
+## 11. Architecture Decision Records (ADR)
+
+| ADR | Название | Описание |
+|-----|----------|----------|
+| [ADR-001](docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Выбор формата хранения |
+| [ADR-002](docs/02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Bronze/Silver/Gold слои |
+| [ADR-003](docs/02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis Locking | Распределённые блокировки |
+| [ADR-004](docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Валидация моделей |
+| [ADR-005](docs/02-architecture/decisions/ADR-005-composition-layer-separation.md) | Composition Layer | Разделение слоёв DI |
+| [ADR-006](docs/02-architecture/decisions/ADR-006-logger-metrics-ports.md) | Logger/Metrics Ports | Порты для observability |
+| [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker | Защита от каскадных сбоев |
+| [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown | Стратегия завершения |
+| [ADR-009](docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin | Паттерн пагинации |
 
 ---
 
