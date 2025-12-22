@@ -47,7 +47,7 @@ sink:
     gold:
         enabled: true
         validation:
-            strict: false # mapped from old validation.strict_mode
+            strict: true
         path: "data/output/gold"
         format: delta
         mode: overwrite

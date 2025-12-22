@@ -37,7 +37,7 @@
     "gold_filter_types": [],
     "gold_min_confidence": null,
     "gold_table": null,
-    "gold_write_mode": "append",
+    "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "pubchem_compound",
     "primary_keys": [
@@ -60,7 +60,7 @@
     "gold_filter_types": [],
     "gold_min_confidence": null,
     "gold_table": null,
-    "gold_write_mode": "append",
+    "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "pubmed_publications",
     "primary_keys": [
@@ -83,7 +83,7 @@
     "gold_filter_types": [],
     "gold_min_confidence": null,
     "gold_table": null,
-    "gold_write_mode": "append",
+    "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "uniprot_protein",
     "primary_keys": [

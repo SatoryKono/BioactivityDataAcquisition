@@ -1,10 +1,89 @@
-"""Input filter configuration for pipeline filtering.
+"""Filter configuration for pipeline filtering.
 
-Defines the configuration for filtering API requests based on
-input IDs from external sources (e.g., CSV files).
+Defines the configuration for:
+- Input filtering: API requests based on input IDs from external sources (CSV files)
+- Gold filtering: Configurable column-based filters for Gold layer records
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
+
+
+@dataclass(frozen=True)
+class GoldColumnFilter:
+    """Фильтр по колонке со списком допустимых значений.
+
+    Attributes:
+        column: Имя колонки для фильтрации.
+        values: Множество допустимых значений (оператор "in").
+    """
+
+    column: str
+    values: frozenset[str]
+
+    def __post_init__(self) -> None:
+        """Validate filter configuration."""
+        if not self.column:
+            raise ValueError("column name cannot be empty")
+        if not self.values:
+            raise ValueError(f"values for column '{self.column}' cannot be empty")
+
+
+@dataclass(frozen=True)
+class GoldFilterConfig:
+    """Полная конфигурация Gold фильтров.
+
+    Attributes:
+        column_filters: Фильтры по колонкам (значение должно быть в списке).
+        required_fields: Обязательные поля (должны быть не null/пустые).
+        exclude_if_present: Исключающие поля (если есть значение — запись исключается).
+    """
+
+    column_filters: tuple[GoldColumnFilter, ...] = ()
+    required_fields: tuple[str, ...] = ()
+    exclude_if_present: tuple[str, ...] = ()
+
+    def should_include(self, record: dict[str, Any]) -> bool:
+        """Проверяет все правила фильтрации.
+
+        Args:
+            record: Запись для проверки.
+
+        Returns:
+            True если запись проходит все фильтры, False иначе.
+        """
+        # 1. Проверка required_fields (должны быть не null/пустые)
+        for fld in self.required_fields:
+            value = record.get(fld)
+            if value is None or value == "":
+                return False
+
+        # 2. Проверка exclude_if_present (если есть значение — исключить)
+        for fld in self.exclude_if_present:
+            value = record.get(fld)
+            if value is not None and value != "":
+                return False
+
+        # 3. Проверка column_filters (все должны пройти)
+        for col_filter in self.column_filters:
+            value = record.get(col_filter.column)
+            # Значение должно быть строкой и входить в допустимый набор
+            if str(value) not in col_filter.values:
+                return False
+
+        return True
+
+    def is_empty(self) -> bool:
+        """Проверяет, пуста ли конфигурация фильтров.
+
+        Returns:
+            True если нет ни одного фильтра.
+        """
+        return (
+            not self.column_filters
+            and not self.required_fields
+            and not self.exclude_if_present
+        )
 
 
 @dataclass(frozen=True)
