@@ -16,8 +16,8 @@
           "values": ["IC50", "Ki"]
         }
       ],
-      "exclude_if_present": ["data_validity_comment"],
-      "required_fields": ["standard_value", "standard_units", "target_chembl_id"]
+      "exclude_if_present": [],
+      "required_fields": ["standard_type", "standard_value", "standard_units", "target_chembl_id"]
     },
     "gold_min_confidence": null,
     "gold_table": null,
