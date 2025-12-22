@@ -139,6 +139,7 @@ class PipelineYamlConfig(BaseModel):
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
     gold_filter_types: list[str] = Field(default_factory=list)
+    gold_min_confidence: int | None = Field(default=None, ge=0, le=9)
 
     # Medallion Layers
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
