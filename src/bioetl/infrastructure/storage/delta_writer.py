@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
@@ -39,6 +38,8 @@ from bioetl.domain.exceptions import (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -101,7 +102,7 @@ class DeltaWriter:
             if value is None:
                 return None
             if key in string_fields and isinstance(value, (dict, list)):
-                return json.dumps(value)
+                return json.dumps(value, sort_keys=True)
             return value
 
         filtered_records = [
