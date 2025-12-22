@@ -153,10 +153,24 @@ class BasePipeline(ABC):
         pass
 
     def should_write_gold(
-        self, _context: PipelineContext, _record: dict[str, Any]
+        self, _context: PipelineContext, record: dict[str, Any]
     ) -> bool:
-        """Determine if a Silver record should be written to Gold."""
-        return True
+        """Determine if a Silver record should be written to Gold.
+
+        Uses gold_filters from config if configured, otherwise passes all records.
+        Subclasses can override for custom filtering logic.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            record: Silver record to evaluate.
+
+        Returns:
+            True if record should be written to Gold layer.
+        """
+        gold_filters = self._config.gold_filters
+        if gold_filters is None or gold_filters.is_empty():
+            return True
+        return gold_filters.should_include(record)
 
     @abstractmethod
     def extract_watermark(

@@ -13,6 +13,18 @@ silver_table: "chembl_activity"
 # Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/chembl.yaml
 
+# New configurable gold filters (replaces gold_filter_types)
+gold_filters:
+    columns:
+        standard_type: [IC50, Ki]
+    required_fields:
+        - standard_value
+        - standard_units
+        - target_chembl_id
+    exclude_if_present:
+        - data_validity_comment
+
+# deprecated, kept for backward compatibility
 gold_filter_types:
     - IC50
     - Ki
@@ -51,7 +63,7 @@ sink:
             strict: true
         path: "data/output/gold"
         format: delta
-        mode: append
+        mode: overwrite
         csv_export:
             enabled: true
             path: "data/output/csv/gold"

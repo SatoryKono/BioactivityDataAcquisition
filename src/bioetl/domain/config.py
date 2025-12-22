@@ -12,9 +12,12 @@ Consolidated configuration classes (post-refactoring):
 """
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.types import RunType
+
+if TYPE_CHECKING:
+    from bioetl.domain.filter_config import GoldFilterConfig
 
 
 @dataclass(frozen=True)
@@ -88,7 +91,8 @@ class PipelineConfig:
     partition_cols: list[str] = field(default_factory=list)
 
     # Processing
-    gold_filter_types: list[str] = field(default_factory=list)
+    gold_filter_types: list[str] = field(default_factory=list)  # deprecated
+    gold_filters: "GoldFilterConfig | None" = None  # New configurable filters
     gold_min_confidence: int | None = None  # Min confidence for Gold layer (0-9)
     batch_size: int = 100
     checkpoint_interval: int = 1000
