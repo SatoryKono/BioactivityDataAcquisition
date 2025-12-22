@@ -100,6 +100,10 @@ class PipelineRunner:
         with observer:
             # Observer handles ShutdownSignal suppression and status recording
             async with self._services, self._lock_manager:
+                # Clear CSV export files at the start of the run
+                # to avoid appending to stale data from previous runs
+                self._clear_csv_exports()
+
                 watermark = await self._checkpoint_manager.load_checkpoint()
                 await self._executor.execute(
                     watermark=watermark,
@@ -113,3 +117,23 @@ class PipelineRunner:
                 "Pipeline execution finished",
                 extra={"records_fetched": self._executor.records_fetched},
             )
+
+    def _clear_csv_exports(self) -> None:
+        """Clear CSV export files at the start of a pipeline run.
+
+        This ensures fresh CSV exports without duplicates from previous runs.
+        Only clears if the storage adapter supports CSV export clearing.
+        """
+        try:
+            storage = self._services.storage
+            if hasattr(storage, "clear_csv"):
+                table_name = self._config.silver_table
+                deleted_count = storage.clear_csv(table_name)
+                if deleted_count > 0:
+                    self._logger.info(
+                        "Cleared CSV export files",
+                        extra={"deleted_count": deleted_count, "table_name": table_name},
+                    )
+        except AttributeError:
+            # Storage not available (e.g., in tests with mocks)
+            pass

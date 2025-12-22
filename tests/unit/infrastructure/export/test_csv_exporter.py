@@ -222,3 +222,54 @@ class TestCsvExporterExport:
         content = result_path.read_text()
         assert "second" in content
         assert "first" not in content
+
+
+@pytest.mark.unit
+class TestCsvExporterClear:
+    """Tests for CsvExporter.clear() method."""
+
+    def test_clear_specific_table(self, tmp_path: Path) -> None:
+        """Test clearing a specific table's CSV file."""
+        exporter = CsvExporter(base_path=str(tmp_path))
+
+        # Create test files
+        (tmp_path / "table1.csv").write_text("data1")
+        (tmp_path / "table2.csv").write_text("data2")
+
+        deleted = exporter.clear("table1")
+
+        assert len(deleted) == 1
+        assert not (tmp_path / "table1.csv").exists()
+        assert (tmp_path / "table2.csv").exists()
+
+    def test_clear_all_csv_files(self, tmp_path: Path) -> None:
+        """Test clearing all CSV files."""
+        exporter = CsvExporter(base_path=str(tmp_path))
+
+        # Create test files
+        (tmp_path / "table1.csv").write_text("data1")
+        (tmp_path / "table2.csv").write_text("data2")
+        (tmp_path / "other.txt").write_text("not csv")
+
+        deleted = exporter.clear()
+
+        assert len(deleted) == 2
+        assert not (tmp_path / "table1.csv").exists()
+        assert not (tmp_path / "table2.csv").exists()
+        assert (tmp_path / "other.txt").exists()  # Non-CSV not deleted
+
+    def test_clear_nonexistent_directory(self, tmp_path: Path) -> None:
+        """Test clearing when base_path doesn't exist."""
+        exporter = CsvExporter(base_path=str(tmp_path / "nonexistent"))
+
+        deleted = exporter.clear()
+
+        assert deleted == []
+
+    def test_clear_nonexistent_table(self, tmp_path: Path) -> None:
+        """Test clearing a table that doesn't exist."""
+        exporter = CsvExporter(base_path=str(tmp_path))
+
+        deleted = exporter.clear("nonexistent")
+
+        assert deleted == []
