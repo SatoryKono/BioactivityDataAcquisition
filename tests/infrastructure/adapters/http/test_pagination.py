@@ -1,7 +1,6 @@
 """Tests for PaginatedFetcherMixin."""
 
 import pytest
-from unittest.mock import Mock
 
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
@@ -20,8 +19,8 @@ async def test_paginated_fetch_basic():
 
     async def fetch_page(cursor, _):
         if cursor is None:
-            return [1, 2], 'c2'
-        elif cursor == 'c2':
+            return [1, 2], "c2"
+        elif cursor == "c2":
             return [3, 4], None
         return [], None
 
@@ -42,7 +41,7 @@ async def test_paginated_fetch_with_limit():
         # Since we don't have 'fetched' count passed in, we use cursor state or internal state
         # But 'cursor' here is just passed back.
         # For this test, we can just return dummy items.
-        return [1, 2], 'next'
+        return [1, 2], "next"
 
     results = []
     async for item in fetcher.paginated_fetch(fetch_page, limit=3):
@@ -79,11 +78,12 @@ async def test_paginated_fetch_empty_page_with_cursor():
     fetcher = MockFetcher()
 
     count = 0
+
     async def fetch_page(cursor, _):
         nonlocal count
         count += 1
         if count == 1:
-            return [], 'c2' # Empty page but has next
+            return [], "c2"  # Empty page but has next
         if count == 2:
             return [1], None
         return [], None

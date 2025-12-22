@@ -1,6 +1,6 @@
 """Unit tests for the CLI module."""
 
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
@@ -45,7 +45,9 @@ class TestQuarantineCommands:
     def test_quarantine_inspect_command(self, mock_bootstrap_quarantine, runner):
         """Test that quarantine inspect command works."""
         mock_quarantine_service = AsyncMock()
-        mock_quarantine_service.inspect.return_value = [{"error_code": "ERR01", "payload": "{}"}]
+        mock_quarantine_service.inspect.return_value = [
+            {"error_code": "ERR01", "payload": "{}"}
+        ]
         mock_bootstrap_quarantine.return_value = mock_quarantine_service
 
         result = runner.invoke(
@@ -136,7 +138,6 @@ class TestRunCommand:
         mock_runner_instance.run = AsyncMock(side_effect=PipelineShutdownError())
         mock_bootstrap.return_value = mock_runner_instance
         mock_asyncio_run.side_effect = PipelineShutdownError("Shutdown")
-
 
         result = runner.invoke(
             cli,

@@ -60,4 +60,65 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP622988&size=1&format=json
+  response:
+    body:
+      string: '{"url":"http://rest.uniprot.org/uniprotkb/search","messages":["The
+        ''accession'' filter value ''P622988'' has invalid format. It should be a
+        valid UniProtKB accession"]}'
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      Access-Control-Allow-Methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      Access-Control-Max-Age:
+      - '1728000'
+      Cache-Control:
+      - public, max-age=43200
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 22 Dec 2025 06:39:46 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      X-API-Deployment-Date:
+      - 11-December-2025
+      X-UniProt-Release:
+      - '2025_04'
+      X-UniProt-Release-Date:
+      - 15-October-2025
+      content-length:
+      - '165'
+      x-cache:
+      - miss uncacheable
+    status:
+      code: 400
+      message: Bad Request
 version: 1

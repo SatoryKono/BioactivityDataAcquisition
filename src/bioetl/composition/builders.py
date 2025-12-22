@@ -11,7 +11,9 @@ from typing import TYPE_CHECKING
 from bioetl.domain.filter_config import InputFilterConfig
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.schemas.pipeline_config import InputFilterConfig as YamlInputFilter
+    from bioetl.infrastructure.schemas.pipeline_config import (
+        InputFilterConfig as YamlInputFilter,
+    )
 
 
 class FilterConfigBuilder:

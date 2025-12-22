@@ -9,11 +9,12 @@ This ensures proper behavior of:
 """
 
 import asyncio
-import pytest
 from uuid import uuid4
+
+import pytest
+
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
-from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
 
 # Use fakeredis for integration tests as per plan
 # This works without a real Redis instance but validates logic fully.
@@ -23,7 +24,9 @@ from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
 @pytest.fixture
 async def redis_lock(fake_redis):
     """Provide a RedisDistributedLock instance using fake_redis."""
-    lock = RedisDistributedLock(redis_client=fake_redis, default_ttl=2, heartbeat_interval=1)
+    lock = RedisDistributedLock(
+        redis_client=fake_redis, default_ttl=2, heartbeat_interval=1
+    )
     # Ensure scripts are loaded
     await lock._ensure_scripts()
     return lock
@@ -33,7 +36,9 @@ async def redis_lock(fake_redis):
 class TestRedisDistributedLock:
     """Integration tests for RedisDistributedLock."""
 
-    async def test_acquire_and_release_success(self, redis_lock: RedisDistributedLock, run_id: RunID) -> None:
+    async def test_acquire_and_release_success(
+        self, redis_lock: RedisDistributedLock, run_id: RunID
+    ) -> None:
         """Test basic acquire and release cycle."""
         key = "test_resource"
 
@@ -65,7 +70,9 @@ class TestRedisDistributedLock:
         # Verify owner is still Owner 1
         assert await redis_lock.get_owner(key) == str(owner1)
 
-    async def test_non_reentrant(self, redis_lock: RedisDistributedLock, run_id: RunID) -> None:
+    async def test_non_reentrant(
+        self, redis_lock: RedisDistributedLock, run_id: RunID
+    ) -> None:
         """Verify the lock is non-reentrant even for the same owner."""
         key = "reentrant_check"
 
@@ -88,7 +95,9 @@ class TestRedisDistributedLock:
         assert released is False
         assert await redis_lock.is_locked(key) is True
 
-    async def test_ttl_expiration(self, redis_lock: RedisDistributedLock, run_id: RunID) -> None:
+    async def test_ttl_expiration(
+        self, redis_lock: RedisDistributedLock, run_id: RunID
+    ) -> None:
         """Test that lock expires after TTL."""
         key = "ttl_check"
         # Use short TTL
@@ -101,7 +110,9 @@ class TestRedisDistributedLock:
 
         assert await redis_lock.is_locked(key) is False
 
-    async def test_exclusive_vs_shared_locking(self, redis_lock: RedisDistributedLock) -> None:
+    async def test_exclusive_vs_shared_locking(
+        self, redis_lock: RedisDistributedLock
+    ) -> None:
         """Test mutual exclusion between 'shared' (regular) and exclusive modes."""
         key = "mode_check"
         owner1 = RunID(uuid4())
@@ -122,7 +133,9 @@ class TestRedisDistributedLock:
         assert await redis_lock.acquire(key, owner2, exclusive=False) is False
         await redis_lock.release(key, owner1, exclusive=False)
 
-    async def test_heartbeat_extends_ttl(self, redis_lock: RedisDistributedLock, run_id: RunID) -> None:
+    async def test_heartbeat_extends_ttl(
+        self, redis_lock: RedisDistributedLock, run_id: RunID
+    ) -> None:
         """Test that heartbeat extends the lock."""
         key = "heartbeat_check"
         ttl = 1

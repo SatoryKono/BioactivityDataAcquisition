@@ -22,8 +22,9 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+
 from bioetl.domain.config import PipelineConfig
+from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
 # Path to store snapshots
 SNAPSHOT_DIR = Path("tests/snapshots")
@@ -47,7 +48,7 @@ def load_snapshots() -> dict[str, Any]:
     """Load existing snapshots from JSON file."""
     if not SNAPSHOT_FILE.exists():
         return {}
-    with open(SNAPSHOT_FILE, "r") as f:
+    with open(SNAPSHOT_FILE) as f:
         return json.load(f)
 
 
@@ -65,7 +66,9 @@ def golden_snapshots() -> dict[str, Any]:
 
 
 @pytest.mark.parametrize("pipeline_name", PIPELINES)
-def test_pipeline_config_golden_master(pipeline_name: str, golden_snapshots: dict[str, Any]) -> None:
+def test_pipeline_config_golden_master(
+    pipeline_name: str, golden_snapshots: dict[str, Any]
+) -> None:
     """
     Test that the loaded configuration matches the Golden Master snapshot.
     """

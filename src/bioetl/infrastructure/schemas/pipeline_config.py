@@ -80,6 +80,7 @@ class InputFilterConfig(BaseModel):
 
 class ApiConfig(BaseModel):
     """Configuration for API connection details."""
+
     base_url: str | None = None
     rate_limit: float | None = None
     timeout: int | None = None
@@ -87,6 +88,7 @@ class ApiConfig(BaseModel):
 
 class SourceConfig(BaseModel):
     """Configuration for the data source."""
+
     load_strategy: Literal["full", "incremental"] = "full"
     search_term: str | None = None
     email: str | None = None
@@ -98,7 +100,6 @@ class SourceConfig(BaseModel):
 
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
-
 
     enabled: bool = True
     path: str | None = None

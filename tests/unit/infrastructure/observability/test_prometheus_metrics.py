@@ -30,15 +30,19 @@ class TestPrometheusMetrics:
             prometheus_metrics.observe_histogram(
                 name="pipeline_duration_seconds",
                 value=123.45,
-                labels={"pipeline_name": "test", "status": "success", "run_type": "full"},
+                labels={
+                    "pipeline_name": "test",
+                    "status": "success",
+                    "run_type": "full",
+                },
             )
 
             HISTOGRAMS["pipeline_duration_seconds"].labels.assert_called_once_with(
                 pipeline_name="test", status="success", run_type="full"
             )
-            HISTOGRAMS["pipeline_duration_seconds"].labels().observe.assert_called_once_with(
-                123.45
-            )
+            HISTOGRAMS[
+                "pipeline_duration_seconds"
+            ].labels().observe.assert_called_once_with(123.45)
 
     def test_observe_histogram_unknown_metric(self, prometheus_metrics):
         """Test observe_histogram with unknown metric name does nothing."""
@@ -64,7 +68,9 @@ class TestPrometheusMetrics:
             COUNTERS["records_processed_total"].labels.assert_called_once_with(
                 pipeline_name="test", status="success"
             )
-            COUNTERS["records_processed_total"].labels().inc.assert_called_once_with(100)
+            COUNTERS["records_processed_total"].labels().inc.assert_called_once_with(
+                100
+            )
 
     def test_increment_counter_unknown_metric(self, prometheus_metrics):
         """Test increment_counter with unknown metric name does nothing."""

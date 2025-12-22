@@ -221,9 +221,7 @@ class TestRedisDistributedLock:
         assert is_locked is False
 
     @pytest.mark.asyncio
-    async def test_aclose(
-        self, redis_client_fixture, request, run_id: RunID
-    ) -> None:
+    async def test_aclose(self, redis_client_fixture, request, run_id: RunID) -> None:
         """aclose should close the Redis connection."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
@@ -323,9 +321,7 @@ class TestRedisDistributedLock:
 
         # Second owner waits but times out
         with pytest.raises(LockAcquisitionError):
-            await lock.acquire(
-                "test_key", other_owner, wait=True, wait_timeout=1
-            )
+            await lock.acquire("test_key", other_owner, wait=True, wait_timeout=1)
 
     @pytest.mark.asyncio
     async def test_heartbeat_loop_raises_on_lock_lost(

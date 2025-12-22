@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -123,6 +123,7 @@ async def test_base_pipeline_should_write_gold(mock_pipeline):
 async def test_base_pipeline_extract_watermark(mock_pipeline):
     """Test default extract_watermark returns Watermark with datetime value."""
     from datetime import datetime
+
     from bioetl.domain.types import Watermark
 
     result = mock_pipeline.extract_watermark(mock_pipeline.context, {})

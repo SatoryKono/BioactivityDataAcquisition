@@ -95,13 +95,13 @@ class PipelineExecutor:
             # If shutdown came from external signal (LockManager heartbeats etc),
             # we should attempt to save checkpoint if we have a last record.
             if last_record:
-                 try:
-                     await self._checkpoint_manager.save_checkpoint(
+                try:
+                    await self._checkpoint_manager.save_checkpoint(
                         last_record, self.records_fetched
                     )
-                 except Exception:
-                     # Ignore errors during emergency checkpoint save
-                     pass
+                except Exception:
+                    # Ignore errors during emergency checkpoint save
+                    pass
             raise
 
     async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:

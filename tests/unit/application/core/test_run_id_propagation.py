@@ -6,7 +6,6 @@ Verifies that run_id is consistently propagated:
 - Through logs
 """
 
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -76,14 +75,16 @@ def mock_services(mock_storage, mock_quarantine):
 @pytest.fixture
 def silver_schema() -> pa.Schema:
     """Create a sample silver schema."""
-    return pa.schema([
-        pa.field("id", pa.string()),
-        pa.field("value", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-    ])
+    return pa.schema(
+        [
+            pa.field("id", pa.string()),
+            pa.field("value", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
 
 
 @pytest.mark.unit
@@ -100,6 +101,7 @@ class TestRunIdPropagation:
         silver_schema: pa.Schema,
     ) -> None:
         """Test that the same run_id is propagated to both Bronze and Silver."""
+
         # Create a simple transform that returns the record with an id field
         async def transform(ctx, record):
             return {"id": str(record.get("id")), "value": record.get("value")}
@@ -152,6 +154,7 @@ class TestRunIdPropagation:
         silver_schema: pa.Schema,
     ) -> None:
         """Test that the same run_id is used across multiple batches."""
+
         async def transform(ctx, record):
             return {"id": str(record.get("id")), "value": record.get("value")}
 

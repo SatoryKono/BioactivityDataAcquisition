@@ -1,9 +1,9 @@
 import pytest
-from pathlib import Path
 import yaml
-import os
+
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
 
 @pytest.fixture
 def setup_configs(tmp_path, monkeypatch):
@@ -23,7 +23,7 @@ def setup_configs(tmp_path, monkeypatch):
         "primary_keys": ["id"],
         "silver_table": "dummy.test_silver",
         "batch_size": 100,
-        "checkpoint_interval": 1000
+        "checkpoint_interval": 1000,
     }
 
     # Create dummy/test.yaml (for dummy_test)
@@ -35,18 +35,21 @@ def setup_configs(tmp_path, monkeypatch):
     chembl_dir = pipelines_dir / "chembl"
     chembl_dir.mkdir()
     chembl_config = base_config.copy()
-    chembl_config.update({
-        "pipeline_name": "chembl_activity",
-        "provider": "chembl",
-        "entity_type": "activity",
-        "silver_table": "chembl.activity_silver"
-    })
+    chembl_config.update(
+        {
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity_type": "activity",
+            "silver_table": "chembl.activity_silver",
+        }
+    )
     (chembl_dir / "activity.yaml").write_text(yaml.dump(chembl_config))
 
     # Change CWD to tmp_path so "configs/pipelines/..." resolves to our temp files
     monkeypatch.chdir(tmp_path)
 
     return pipelines_dir
+
 
 def test_load_dynamic_pipeline(setup_configs):
     """Verify that a dynamically created pipeline loads correctly."""
@@ -56,6 +59,7 @@ def test_load_dynamic_pipeline(setup_configs):
     assert config.pipeline_name == "dummy_test"
     assert config.provider == "dummy"
 
+
 def test_load_registered_pipeline(setup_configs):
     """Verify that a standard pipeline loads correctly via dynamic resolution."""
     # chembl_activity should resolve to configs/pipelines/chembl/activity.yaml
@@ -64,16 +68,19 @@ def test_load_registered_pipeline(setup_configs):
     assert config.provider == "chembl"
     assert config.entity_type == "activity"
 
+
 def test_load_nonexistent_pipeline(setup_configs):
     """Verify that a truly nonexistent pipeline raises ValueError."""
     with pytest.raises(ValueError, match="Configuration file not found"):
         load_pipeline_config("nonexistent_pipeline")
+
 
 def test_load_invalid_name_format(setup_configs):
     """Verify behavior with name that doesn't split by underscore."""
     # This might fall back to configs/pipelines/invalidname.yaml which doesn't exist
     with pytest.raises(ValueError, match="Configuration file not found"):
         load_pipeline_config("invalidname")
+
 
 def test_load_fallback_no_underscore(setup_configs):
     """Verify fallback for names without underscore if file exists."""
@@ -87,7 +94,7 @@ def test_load_fallback_no_underscore(setup_configs):
         "primary_keys": ["id"],
         "silver_table": "simple.table",
         "batch_size": 100,
-        "checkpoint_interval": 1000
+        "checkpoint_interval": 1000,
     }
 
     (pipelines_dir / "simple.yaml").write_text(yaml.dump(simple_config))
@@ -115,6 +122,7 @@ def test_dq_thresholds_are_validated_once(setup_configs):
     with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
         load_pipeline_config("dummy_invalid")
 
+
 def test_gold_filter_types_loading(setup_configs):
     """Verify loading of gold_filter_types from YAML."""
     pipelines_dir = setup_configs
@@ -125,7 +133,7 @@ def test_gold_filter_types_loading(setup_configs):
         "entity_type": "filters",
         "primary_keys": ["id"],
         "silver_table": "chembl.filters",
-        "gold_filter_types": ["TYPE1", "TYPE2"]
+        "gold_filter_types": ["TYPE1", "TYPE2"],
     }
 
     (pipelines_dir / "chembl" / "filters.yaml").write_text(yaml.dump(config_data))

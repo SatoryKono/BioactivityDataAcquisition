@@ -22,7 +22,8 @@ class TestSetupShutdownHandlers:
 
             # Check SIGTERM handler was set
             sigterm_calls = [
-                call for call in mock_signal.call_args_list
+                call
+                for call in mock_signal.call_args_list
                 if call[0][0] == signal.SIGTERM
             ]
             assert len(sigterm_calls) == 1
@@ -36,7 +37,8 @@ class TestSetupShutdownHandlers:
 
             # Check SIGINT handler was set
             sigint_calls = [
-                call for call in mock_signal.call_args_list
+                call
+                for call in mock_signal.call_args_list
                 if call[0][0] == signal.SIGINT
             ]
             assert len(sigint_calls) == 1
@@ -75,7 +77,9 @@ class TestSetupShutdownHandlers:
         shutdown_signal = ShutdownSignal()
 
         with patch.object(signal, "signal", side_effect=ValueError("Not main thread")):
-            with patch("bioetl.interfaces.orchestration.signals.structlog") as mock_structlog:
+            with patch(
+                "bioetl.interfaces.orchestration.signals.structlog"
+            ) as mock_structlog:
                 mock_logger = MagicMock()
                 mock_structlog.get_logger.return_value = mock_logger
 

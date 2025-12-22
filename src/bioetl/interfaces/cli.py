@@ -15,12 +15,12 @@ import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.registry import PipelineRegistry
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
     bootstrap_pipeline,
     bootstrap_quarantine,
 )
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_settings
 from bioetl.interfaces.observability import start_metrics_server
@@ -120,7 +120,9 @@ def run(
     try:
         settings = get_settings()
         if start_metrics_server(settings.metrics_port):
-            logger.info(f"Prometheus metrics server started on port {settings.metrics_port}")
+            logger.info(
+                f"Prometheus metrics server started on port {settings.metrics_port}"
+            )
     except Exception as e:
         logger.warning("Failed to start metrics server", error=str(e))
 
@@ -160,7 +162,9 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
             return
 
         for rec in records:
-            click.echo(f"Error: {rec.get('error_code')} | Payload: {rec.get('payload')}")
+            click.echo(
+                f"Error: {rec.get('error_code')} | Payload: {rec.get('payload')}"
+            )
 
     asyncio.run(_inspect())
 

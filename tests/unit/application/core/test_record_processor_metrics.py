@@ -5,11 +5,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
-from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.types import BatchID, RunID, RunType
 
 
@@ -18,6 +17,7 @@ def mock_metrics():
     """Create mock metrics."""
     metrics = AsyncMock()
     return metrics
+
 
 @pytest.fixture
 def mock_services(mock_metrics):
@@ -28,6 +28,7 @@ def mock_services(mock_metrics):
     services.quarantine = AsyncMock()
     return services
 
+
 @pytest.fixture
 def mock_error_classifier():
     """Create mock error classifier."""
@@ -35,6 +36,7 @@ def mock_error_classifier():
     # Mock classify to control error type
     classifier.classify = MagicMock()
     return classifier
+
 
 @pytest.fixture
 def mock_context():
@@ -46,6 +48,7 @@ def mock_context():
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
+
 
 @pytest.fixture
 def record_processor(
@@ -80,7 +83,7 @@ class TestRecordProcessorMetrics:
 
         await record_processor.process_batch(records, batch_id)
 
-        pipeline_label = "test_entity" # "test_entity" since provider="test", entity="entity" -> "test_entity"
+        pipeline_label = "test_entity"  # "test_entity" since provider="test", entity="entity" -> "test_entity"
         run_type_label = mock_context.run_type.value
 
         # Verify batch size histogram
@@ -137,12 +140,20 @@ class TestRecordProcessorMetrics:
         mock_metrics.increment_counter.assert_any_call(
             "records_processed_total",
             1,
-            {"pipeline": pipeline_label, "stage": "quarantined", "run_type": run_type_label},
+            {
+                "pipeline": pipeline_label,
+                "stage": "quarantined",
+                "run_type": run_type_label,
+            },
         )
 
         # Expect error counter
         mock_metrics.increment_counter.assert_any_call(
             "errors_total",
             1,
-            {"pipeline": pipeline_label, "stage": "transform", "error_code": ErrorType.DATA_QUALITY.value},
+            {
+                "pipeline": pipeline_label,
+                "stage": "transform",
+                "error_code": ErrorType.DATA_QUALITY.value,
+            },
         )

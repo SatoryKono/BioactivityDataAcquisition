@@ -49,7 +49,9 @@ class TestRetryConfig:
 
     def test_calculate_delay_respects_max_delay(self):
         """Test that delay is capped at max_delay."""
-        config = RetryConfig(base_delay=10.0, multiplier=2.0, max_delay=15.0, jitter=0.0)
+        config = RetryConfig(
+            base_delay=10.0, multiplier=2.0, max_delay=15.0, jitter=0.0
+        )
         delay = config.calculate_delay(5)  # Would be 320 without cap
         assert delay == 15.0
 
@@ -99,7 +101,9 @@ class TestIsRetryableError:
         """Test HTTPStatusError with retryable status code."""
         response = MagicMock()
         response.status_code = 503
-        exc = httpx.HTTPStatusError("Service Unavailable", request=MagicMock(), response=response)
+        exc = httpx.HTTPStatusError(
+            "Service Unavailable", request=MagicMock(), response=response
+        )
         assert _is_retryable_error(exc) is True
 
     def test_http_status_error_with_non_retryable_code(self):
@@ -263,9 +267,7 @@ class TestUnifiedHTTPClientRequestMethods:
         assert response == mock_response
 
     @pytest.mark.asyncio
-    async def test_get_with_params_and_headers(
-        self, http_client, mock_circuit_breaker
-    ):
+    async def test_get_with_params_and_headers(self, http_client, mock_circuit_breaker):
         """Test GET request with params and headers."""
         mock_response = MagicMock()
         mock_response.status_code = 200

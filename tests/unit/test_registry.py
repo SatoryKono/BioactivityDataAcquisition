@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.registry import PipelineRegistry
 
 
 @pytest.fixture(autouse=True)
@@ -48,11 +48,13 @@ def test_registry_completeness():
 
     # Check for missing handlers
     missing_handlers = [
-        name for name in found_configs
-        if name not in registered_pipelines
+        name for name in found_configs if name not in registered_pipelines
     ]
 
-    assert not missing_handlers, f"The following pipelines have configs but no registered factory: {missing_handlers}"
+    assert not missing_handlers, (
+        f"The following pipelines have configs but no registered factory: {missing_handlers}"
+    )
+
 
 def test_registry_contains_expected_pipelines():
     """Sanity check that key pipelines are present."""

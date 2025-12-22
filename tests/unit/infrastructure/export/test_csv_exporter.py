@@ -42,11 +42,13 @@ class TestCsvExporterFlatten:
 
     def test_flatten_simple_types(self) -> None:
         """Test that simple types are preserved."""
-        table = pa.Table.from_pydict({
-            "id": [1, 2],
-            "name": ["a", "b"],
-            "value": [1.5, 2.5],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "name": ["a", "b"],
+                "value": [1.5, 2.5],
+            }
+        )
 
         result = CsvExporter._flatten_for_csv(table)
 
@@ -55,10 +57,12 @@ class TestCsvExporterFlatten:
 
     def test_flatten_list_type(self) -> None:
         """Test that list types are converted to JSON strings."""
-        table = pa.Table.from_pydict({
-            "id": [1, 2],
-            "tags": [["a", "b"], ["c"]],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "tags": [["a", "b"], ["c"]],
+            }
+        )
 
         result = CsvExporter._flatten_for_csv(table)
 
@@ -67,10 +71,12 @@ class TestCsvExporterFlatten:
 
     def test_flatten_struct_type(self) -> None:
         """Test that struct types are converted to JSON strings."""
-        table = pa.Table.from_pydict({
-            "id": [1, 2],
-            "metadata": [{"key": "value1"}, {"key": "value2"}],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "metadata": [{"key": "value1"}, {"key": "value2"}],
+            }
+        )
 
         result = CsvExporter._flatten_for_csv(table)
 
@@ -81,10 +87,12 @@ class TestCsvExporterFlatten:
 
     def test_flatten_null_values(self) -> None:
         """Test that null values in complex types are handled."""
-        table = pa.Table.from_pydict({
-            "id": [1, 2],
-            "tags": [["a", "b"], None],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "tags": [["a", "b"], None],
+            }
+        )
 
         result = CsvExporter._flatten_for_csv(table)
 
@@ -101,10 +109,12 @@ class TestCsvExporterExport:
     async def test_export_creates_file(self, tmp_path: Path) -> None:
         """Test that export creates the CSV file."""
         exporter = CsvExporter(base_path=str(tmp_path))
-        table = pa.Table.from_pydict({
-            "id": [1, 2],
-            "name": ["a", "b"],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "name": ["a", "b"],
+            }
+        )
 
         result_path = await exporter.export("test_table", table)
 
@@ -127,10 +137,12 @@ class TestCsvExporterExport:
     async def test_export_with_custom_delimiter(self, tmp_path: Path) -> None:
         """Test export with custom delimiter."""
         exporter = CsvExporter(base_path=str(tmp_path), delimiter=";")
-        table = pa.Table.from_pydict({
-            "id": [1, 2],
-            "name": ["a", "b"],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "name": ["a", "b"],
+            }
+        )
 
         result_path = await exporter.export("test", table)
 
@@ -143,10 +155,12 @@ class TestCsvExporterExport:
     async def test_export_without_header(self, tmp_path: Path) -> None:
         """Test export without header row."""
         exporter = CsvExporter(base_path=str(tmp_path), header=False)
-        table = pa.Table.from_pydict({
-            "id": [1],
-            "name": ["test"],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1],
+                "name": ["test"],
+            }
+        )
 
         result_path = await exporter.export("test", table)
 
@@ -160,11 +174,13 @@ class TestCsvExporterExport:
     async def test_export_complex_types(self, tmp_path: Path) -> None:
         """Test that complex types are properly serialized to JSON."""
         exporter = CsvExporter(base_path=str(tmp_path))
-        table = pa.Table.from_pydict({
-            "id": [1],
-            "tags": [["tag1", "tag2"]],
-            "metadata": [{"key": "value"}],
-        })
+        table = pa.Table.from_pydict(
+            {
+                "id": [1],
+                "tags": [["tag1", "tag2"]],
+                "metadata": [{"key": "value"}],
+            }
+        )
 
         result_path = await exporter.export("test", table)
 

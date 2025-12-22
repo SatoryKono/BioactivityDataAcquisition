@@ -5,10 +5,9 @@ Provides standardized error logging format across all data source adapters.
 
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
 import logging
+from typing import Any
 
-import logging
 
 def log_adapter_error(
     logger: Any,
@@ -30,7 +29,7 @@ def log_adapter_error(
         **context: Additional context fields to include in log
     """
     message = f"{provider} {operation} failed"
-    
+
     # Handle standard logging.Logger
     if isinstance(logger, logging.Logger):
         logger.error(message, exc_info=exc_info, extra=context)

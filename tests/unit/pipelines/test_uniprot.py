@@ -1,9 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def test_create_pipeline():
     runtime.run_type = "batch"
     services = MagicMock()
     services.logger.bind.return_value = MagicMock()
-    config = MagicMock() # Relax spec to allow attributes
+    config = MagicMock()  # Relax spec to allow attributes
     config.pipeline_name = "uniprot"
     config.dataset_name = "protein"
     config.provider = "uniprot"
@@ -50,31 +50,10 @@ async def test_transform_bronze_to_silver_valid(pipeline, context):
     record = {
         "primaryAccession": "P12345",
         "uniProtkbId": "PROT_HUMAN",
-        "proteinDescription": {
-            "recommendedName": {
-                "fullName": {
-                    "value": "Protein A"
-                }
-            }
-        },
-        "genes": [
-            {
-                "geneName": {
-                    "value": "GENE1"
-                }
-            },
-            {
-                "geneName": {
-                    "value": "GENE2"
-                }
-            }
-        ],
-        "organism": {
-            "taxonId": 9606
-        },
-        "sequence": {
-            "length": 300
-        }
+        "proteinDescription": {"recommendedName": {"fullName": {"value": "Protein A"}}},
+        "genes": [{"geneName": {"value": "GENE1"}}, {"geneName": {"value": "GENE2"}}],
+        "organism": {"taxonId": 9606},
+        "sequence": {"length": 300},
     }
 
     result = await pipeline.transform_bronze_to_silver(context, record)
@@ -92,9 +71,7 @@ async def test_transform_bronze_to_silver_valid(pipeline, context):
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver_minimal(pipeline, context):
     """Test transformation with minimal data (missing nested fields)."""
-    record = {
-        "primaryAccession": "P67890"
-    }
+    record = {"primaryAccession": "P67890"}
 
     result = await pipeline.transform_bronze_to_silver(context, record)
 
@@ -114,15 +91,9 @@ async def test_transform_bronze_to_silver_malformed_nested(pipeline, context):
     record = {
         "primaryAccession": "P99999",
         # Malformed proteinDescription (missing recommendedName)
-        "proteinDescription": {
-            "somethingElse": {}
-        },
+        "proteinDescription": {"somethingElse": {}},
         # Malformed genes (missing geneName)
-        "genes": [
-            {
-                "wrongKey": "value"
-            }
-        ]
+        "genes": [{"wrongKey": "value"}],
     }
 
     result = await pipeline.transform_bronze_to_silver(context, record)
@@ -137,11 +108,7 @@ async def test_transform_bronze_to_silver_malformed_nested(pipeline, context):
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver_exceptions(pipeline, context):
     """Test transformation exception handling in helper methods."""
-    record = {
-        "primaryAccession": "P_ERR",
-        "proteinDescription": None,
-        "genes": None
-    }
+    record = {"primaryAccession": "P_ERR", "proteinDescription": None, "genes": None}
 
     result = await pipeline.transform_bronze_to_silver(context, record)
 

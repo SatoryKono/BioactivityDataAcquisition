@@ -8,11 +8,11 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.domain.types import RunType
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture
@@ -73,6 +73,7 @@ def mock_uniprot_services(mock_logger) -> PipelineServices:
     mock_metrics = MagicMock()
 
     import structlog
+
     logger = structlog.get_logger()
 
     return PipelineServices(
@@ -122,26 +123,19 @@ class TestUniProtProteinPipelineTransform:
             "primaryAccession": "P12345",
             "uniProtkbId": "MYC_HUMAN",
             "proteinDescription": {
-                "recommendedName": {
-                    "fullName": {
-                        "value": "Myc proto-oncogene protein"
-                    }
-                }
+                "recommendedName": {"fullName": {"value": "Myc proto-oncogene protein"}}
             },
             "genes": [
                 {"geneName": {"value": "MYC"}},
                 {"geneName": {"value": "BHLHE39"}},
             ],
-            "organism": {
-                "taxonId": 9606
-            },
-            "sequence": {
-                "length": 439,
-                "value": "MDFFRVVENQQPPATMPLNVSFTNRNYDLDYD..."
-            },
+            "organism": {"taxonId": 9606},
+            "sequence": {"length": 439, "value": "MDFFRVVENQQPPATMPLNVSFTNRNYDLDYD..."},
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["accession"] == "P12345"
@@ -178,7 +172,9 @@ class TestUniProtProteinPipelineTransform:
             "uniProtkbId": "TEST_HUMAN",
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["accession"] == "Q99999"
@@ -211,7 +207,9 @@ class TestUniProtProteinPipelineTransform:
 
         bronze_record = {"uniProtkbId": "NO_ACCESSION"}  # No primaryAccession
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is None
 
@@ -242,7 +240,9 @@ class TestUniProtProteinPipelineTransform:
             "sequence": {"length": 100},
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["accession"] == "A0A000"
@@ -275,7 +275,9 @@ class TestUniProtProteinPipelineTransform:
             "genes": [],
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["gene_names"] == []
@@ -390,7 +392,9 @@ class TestUniProtProteinPipelineEdgeCases:
             ],
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         # Should only include valid gene names
@@ -420,7 +424,9 @@ class TestUniProtProteinPipelineEdgeCases:
             "organism": None,
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["organism_id"] is None

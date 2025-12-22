@@ -4,7 +4,6 @@ import json
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
-import pyarrow as pa
 import pytest
 
 from bioetl.domain.types import BatchID, DQStatus
@@ -92,9 +91,7 @@ def batch_id():
 @pytest.fixture
 def mock_write_deltalake():
     """Mock write_deltalake function."""
-    with patch(
-        "bioetl.infrastructure.quarantine.unified.write_deltalake"
-    ) as mock:
+    with patch("bioetl.infrastructure.quarantine.unified.write_deltalake") as mock:
         yield mock
 
 
@@ -102,10 +99,9 @@ def mock_write_deltalake():
 def mock_delta_table():
     """Mock DeltaTable class in all modules."""
     mock = MagicMock()
-    with patch(
-        "bioetl.infrastructure.quarantine.unified.DeltaTable", mock
-    ), patch(
-        "bioetl.infrastructure.quarantine.operations.DeltaTable", mock
+    with (
+        patch("bioetl.infrastructure.quarantine.unified.DeltaTable", mock),
+        patch("bioetl.infrastructure.quarantine.operations.DeltaTable", mock),
     ):
         yield mock
 
@@ -293,8 +289,10 @@ class TestUnifiedQuarantineInspect:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        with patch.object(pc, "equal", return_value=MagicMock()), \
-             patch.object(pc, "and_", return_value=MagicMock()):
+        with (
+            patch.object(pc, "equal", return_value=MagicMock()),
+            patch.object(pc, "and_", return_value=MagicMock()),
+        ):
             result = await quarantine.inspect(
                 pipeline="test",
                 limit=50,
@@ -339,8 +337,10 @@ class TestUnifiedQuarantineReplay:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        with patch.object(pc, "equal", return_value=MagicMock()), \
-             patch.object(pc, "and_", return_value=MagicMock()):
+        with (
+            patch.object(pc, "equal", return_value=MagicMock()),
+            patch.object(pc, "and_", return_value=MagicMock()),
+        ):
             result = list(
                 quarantine.replay(
                     pipeline="test", error_code="INVALID_DATA", max_age_days=3

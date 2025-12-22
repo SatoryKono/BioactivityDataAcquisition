@@ -15,7 +15,9 @@ class PipelineFactoryProtocol(Protocol):
     pipeline_name: str
     silver_schema: pa.Schema | None
 
-    def create_with_services(self, runtime: Any, settings: Any, logger: Any, **kwargs: Any) -> Any:
+    def create_with_services(
+        self, runtime: Any, settings: Any, logger: Any, **kwargs: Any
+    ) -> Any:
         """Create pipeline with services."""
         ...
 

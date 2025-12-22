@@ -12,7 +12,6 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-
 # Default test run metadata
 TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
 TEST_RUN_TYPE = RunType.INCREMENTAL
@@ -188,11 +187,16 @@ class TestBronzeWriter:
         _args, kwargs = json_call
         assert kwargs["Bucket"] == "test-bucket"
         assert kwargs["Bucket"] == "test-bucket"
-        assert kwargs["Key"] == "json/test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
+        assert (
+            kwargs["Key"]
+            == "json/test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
+        )
         assert kwargs["Body"] == b'{"id": 1}\n'
         assert kwargs["ContentType"] == "application/x-ndjson"
 
-    async def test_write_bronze_save_json_copy_failure_logs_warning(self, mock_s3_client):
+    async def test_write_bronze_save_json_copy_failure_logs_warning(
+        self, mock_s3_client
+    ):
         """Test that JSON copy failure logs warning but doesn't raise."""
         from botocore.exceptions import ClientError
 
@@ -204,13 +208,13 @@ class TestBronzeWriter:
             access_key="test",
             secret_key="test",
             save_json=True,
-            logger=mock_logger
+            logger=mock_logger,
         )
 
         # First call (compressed) succeeds, second call (json) fails
         mock_s3_client.put_object.side_effect = [
             None,
-            ClientError({"Error": {"Code": "AccessDenied"}}, "PutObject")
+            ClientError({"Error": {"Code": "AccessDenied"}}, "PutObject"),
         ]
 
         records = [b'{"id": 1}\n']
@@ -379,14 +383,17 @@ class TestDeltaWriter:
         ]
 
         import pyarrow as pa
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("value", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("value", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         await writer.write_silver(
             table_name="test_table", records=records, primary_keys=["id"], schema=schema
         )
@@ -418,14 +425,17 @@ class TestDeltaWriter:
         ]
 
         import pyarrow as pa
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("value", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("value", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         await writer.write_silver(
             table_name="test_table", records=records, primary_keys=["id"], schema=schema
         )
@@ -438,5 +448,8 @@ class TestDeltaWriter:
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
-                table_name="test_table", records=[], primary_keys=["id"], schema=MagicMock()
+                table_name="test_table",
+                records=[],
+                primary_keys=["id"],
+                schema=MagicMock(),
             )

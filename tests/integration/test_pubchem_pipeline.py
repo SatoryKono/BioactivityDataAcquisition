@@ -8,11 +8,11 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.domain.types import RunType
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture
@@ -75,6 +75,7 @@ def mock_pubchem_services(mock_logger) -> PipelineServices:
     mock_metrics = MagicMock()
 
     import structlog
+
     logger = structlog.get_logger()
 
     return PipelineServices(
@@ -130,7 +131,9 @@ class TestPubChemCompoundPipelineTransform:
             "iupac_name": "2-acetyloxybenzoic acid",
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["cid"] == "2244"  # Now string
@@ -167,7 +170,9 @@ class TestPubChemCompoundPipelineTransform:
             "molecular_weight": 250.5,
         }
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is not None
         assert silver_record["cid"] == "123456"  # Now string
@@ -198,7 +203,9 @@ class TestPubChemCompoundPipelineTransform:
 
         bronze_record = {"molecular_weight": 100.0}  # No CID
 
-        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
 
         assert silver_record is None
 

@@ -3,10 +3,10 @@
 from unittest.mock import MagicMock, patch
 
 import pandera.polars as pa
+import pyarrow as pa_arrow
 import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import DataFrameSchema
-import pyarrow as pa_arrow
 
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 

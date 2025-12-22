@@ -31,7 +31,10 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
     (("AuthFailure", "Unauthorized", "Forbidden"), ErrorType.AUTH_FAILURE),
     # Recoverable errors (can retry)
     (("RateLimit", "TooManyRequests", "429"), ErrorType.RATE_LIMIT),
-    (("CircuitBreakerOpen", "Timeout", "TimeoutError", "504", "502"), ErrorType.TIMEOUT),
+    (
+        ("CircuitBreakerOpen", "Timeout", "TimeoutError", "504", "502"),
+        ErrorType.TIMEOUT,
+    ),
     (("Upload", "NetworkError", "RetryExhausted"), ErrorType.NETWORK_ERROR),
     # Data quality errors (skip record)
     (("Schema", "Validation", "SchemaValidation"), ErrorType.SCHEMA_VIOLATION),

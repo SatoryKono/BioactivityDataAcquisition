@@ -1,29 +1,30 @@
 import pytest
-from hypothesis import given, strategies as st, settings, HealthCheck
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
-from bioetl.domain.error_classifier import ErrorClassifier, _ERROR_KEYWORDS
+from bioetl.domain.error_classifier import _ERROR_KEYWORDS, ErrorClassifier
 from bioetl.domain.exceptions import (
-    BioETLError,
-    CriticalError,
-    RecoverableError,
-    DataQualityError,
-    LockLostError,
-    LockAcquisitionError,
-    CheckpointConflictError,
-    MergeConflictError,
-    RateLimitError,
-    RetryExhaustedError,
-    CircuitBreakerOpenError,
     ApiError,
-    ChemblApiError,
+    BioETLError,
     BucketNotFoundError,
-    StorageError,
-    UploadError,
-    TableNotFoundError,
-    SchemaViolationError,
-    MissingRequiredFieldError,
-    InvalidDataFormatError,
+    CheckpointConflictError,
+    ChemblApiError,
+    CircuitBreakerOpenError,
+    CriticalError,
+    DataQualityError,
     DataQualityThresholdError,
+    InvalidDataFormatError,
+    LockAcquisitionError,
+    LockLostError,
+    MergeConflictError,
+    MissingRequiredFieldError,
+    RateLimitError,
+    RecoverableError,
+    RetryExhaustedError,
+    SchemaViolationError,
+    StorageError,
+    TableNotFoundError,
+    UploadError,
 )
 from bioetl.domain.types import ErrorType
 

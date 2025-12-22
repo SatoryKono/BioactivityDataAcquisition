@@ -122,9 +122,7 @@ def create_pubmed_data_source(
     # Determine API key: config takes precedence over settings
     configured_api_key = pipeline_config.source.api_key
     settings_api_key = (
-        settings.pubmed_api_key.get_secret_value()
-        if settings.pubmed_api_key
-        else None
+        settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
     )
     api_key = configured_api_key or settings_api_key
 

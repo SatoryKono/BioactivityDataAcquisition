@@ -3,15 +3,13 @@
 Verifies that the S3Checkpoint class correctly interacts with an S3-compatible
 storage system for saving, loading, deleting, and listing checkpoints.
 """
-import asyncio
-import pytest
-import boto3
-from uuid import uuid4
-from datetime import datetime, timezone
 
+from datetime import UTC, datetime
+from uuid import uuid4
+
+import pytest
 from moto import mock_aws
 
-from bioetl.domain.exceptions import CheckpointConflictError
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.storage.s3_pool import S3ClientPool
@@ -28,11 +26,12 @@ def s3_client(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", TEST_REGION)
-    
+
     S3ClientPool.clear_pool()
-    
+
     with mock_aws():
         import boto3
+
         client = boto3.client("s3", region_name=TEST_REGION)
         client.create_bucket(Bucket=TEST_BUCKET)
         yield client
@@ -64,7 +63,7 @@ class TestS3Checkpoint:
         # Arrange
         pipeline_name = "test_pipeline_1"
         run_id = RunID(uuid4())
-        watermark_ts = datetime.now(timezone.utc)
+        watermark_ts = datetime.now(UTC)
         watermark = Watermark.from_timestamp(watermark_ts)
         metadata = {"key": "value", "run_type": "incremental"}
 
@@ -84,9 +83,7 @@ class TestS3Checkpoint:
         assert loaded_run_id == run_id
         assert loaded_metadata == metadata
 
-    async def test_load_non_existent_checkpoint(
-        self, checkpoint_storage: S3Checkpoint
-    ):
+    async def test_load_non_existent_checkpoint(self, checkpoint_storage: S3Checkpoint):
         """Verify that loading a non-existent checkpoint returns None."""
         # Arrange
         pipeline_name = "non_existent_pipeline"
@@ -119,7 +116,9 @@ class TestS3Checkpoint:
         # Arrange
         pipelines_to_create = ["pipeline_a", "pipeline_b", "pipeline_c"]
         for name in pipelines_to_create:
-            await checkpoint_storage.save(name, Watermark.from_offset(1), RunID(uuid4()), {})
+            await checkpoint_storage.save(
+                name, Watermark.from_offset(1), RunID(uuid4()), {}
+            )
 
         # Act
         listed_pipelines = await checkpoint_storage.list_all()
@@ -132,13 +131,17 @@ class TestS3Checkpoint:
         # Arrange
         existing_pipeline = "existing_one"
         non_existing_pipeline = "non_existing_one"
-        await checkpoint_storage.save(existing_pipeline, Watermark.from_offset(1), RunID(uuid4()), {})
+        await checkpoint_storage.save(
+            existing_pipeline, Watermark.from_offset(1), RunID(uuid4()), {}
+        )
 
         # Act & Assert
         assert await checkpoint_storage.exists(existing_pipeline) is True
         assert await checkpoint_storage.exists(non_existing_pipeline) is False
 
-    @pytest.mark.skip(reason="Atomic save conflict requires real S3 with ETag support, not available in local file mode")
+    @pytest.mark.skip(
+        reason="Atomic save conflict requires real S3 with ETag support, not available in local file mode"
+    )
     async def test_atomic_save_conflict(
         self, checkpoint_storage: S3Checkpoint, s3_client
     ):

@@ -1,9 +1,9 @@
 """Unit tests for ChemblAdapter."""
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -28,7 +28,7 @@ async def test_fetch_activity(adapter, mock_http_client):
     mock_response = MagicMock()
     mock_response.json.return_value = {
         "activities": [{"activity_id": 1}],
-        "page_meta": {"next": None}
+        "page_meta": {"next": None},
     }
     mock_http_client.get.return_value = mock_response
 
@@ -48,13 +48,13 @@ async def test_fetch_pagination(adapter, mock_http_client):
     resp1 = MagicMock()
     resp1.json.return_value = {
         "activities": [{"activity_id": 1}],
-        "page_meta": {"next": "page2"}
+        "page_meta": {"next": "page2"},
     }
     # Second page
     resp2 = MagicMock()
     resp2.json.return_value = {
         "activities": [{"activity_id": 2}],
-        "page_meta": {"next": None}
+        "page_meta": {"next": None},
     }
 
     mock_http_client.get.side_effect = [resp1, resp2]
@@ -133,7 +133,9 @@ async def test_context_manager(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_health_check_resets_errors_on_degraded_response(adapter, mock_http_client):
+async def test_health_check_resets_errors_on_degraded_response(
+    adapter, mock_http_client
+):
     """Test that error counter resets on successful HTTP response even if status is DEGRADED.
 
     Regression test: Previously _consecutive_errors was only reset when status="UP",

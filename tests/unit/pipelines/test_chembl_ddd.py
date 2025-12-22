@@ -1,13 +1,16 @@
 """Unit tests for ChEMBL DDD integration."""
 
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+
+import pytest
+
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
+
 
 @pytest.fixture
 def chembl_pipeline() -> ChEMBLActivityPipeline:
@@ -33,6 +36,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
     )
     return ChEMBLActivityPipeline(config=config, runtime=runtime, services=services)
 
+
 @pytest.fixture
 def context(chembl_pipeline) -> PipelineContext:
     return PipelineContext(
@@ -41,6 +45,7 @@ def context(chembl_pipeline) -> PipelineContext:
         logger=chembl_pipeline.logger,
     )
 
+
 @pytest.mark.asyncio
 async def test_transform_valid_record(chembl_pipeline, context):
     """Verify that a valid record is correctly transformed."""
@@ -48,12 +53,13 @@ async def test_transform_valid_record(chembl_pipeline, context):
         "activity_id": "100",
         "molecule_chembl_id": "M1",
         "pchembl_value": 5.5,
-        "standard_value": 100
+        "standard_value": 100,
     }
     result = await chembl_pipeline.transform_bronze_to_silver(context, record)
     assert result is not None
     assert result["activity_id"] == "100"
     assert result["pchembl_value"] == 5.5
+
 
 @pytest.mark.asyncio
 async def test_transform_invalid_pchembl(chembl_pipeline, context):
@@ -61,8 +67,8 @@ async def test_transform_invalid_pchembl(chembl_pipeline, context):
     record = {
         "activity_id": "101",
         "molecule_chembl_id": "M1",
-        "pchembl_value": -1.0, # INVALID
-        "standard_value": 100
+        "pchembl_value": -1.0,  # INVALID
+        "standard_value": 100,
     }
     result = await chembl_pipeline.transform_bronze_to_silver(context, record)
 
@@ -73,6 +79,7 @@ async def test_transform_invalid_pchembl(chembl_pipeline, context):
     chembl_pipeline.logger.warning.assert_called()
     call_args = chembl_pipeline.logger.warning.call_args
     assert "entity_validation_failed" in call_args[0]
+
 
 @pytest.mark.asyncio
 async def test_transform_missing_id(chembl_pipeline, context):

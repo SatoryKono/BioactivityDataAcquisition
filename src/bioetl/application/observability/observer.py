@@ -59,7 +59,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                     "bioetl.pipeline": self.pipeline_name,
                     "bioetl.run_id": self.run_id,
                     "bioetl.run_type": self.run_type,
-                }
+                },
             )
             self.span.__enter__()
 
@@ -82,7 +82,9 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         if exc_val:
             if isinstance(exc_val, PipelineShutdownError):
                 status = "shutdown"
-                suppress_exception = True  # We suppress the shutdown signal to allow clean exit
+                suppress_exception = (
+                    True  # We suppress the shutdown signal to allow clean exit
+                )
             else:
                 status = "failed"
 

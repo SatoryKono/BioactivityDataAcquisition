@@ -1,7 +1,6 @@
 """Unit tests for PipelineExecutor."""
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 
@@ -25,7 +24,9 @@ def mock_record_processor():
     """Create mock record processor."""
     processor = MagicMock(spec=RecordProcessor)
     processor.process_batch = AsyncMock(
-        return_value=BatchResult(bronze_count=0, silver_count=0, gold_count=0, quarantined_count=0)
+        return_value=BatchResult(
+            bronze_count=0, silver_count=0, gold_count=0, quarantined_count=0
+        )
     )
     return processor
 
@@ -105,7 +106,9 @@ class TestPipelineExecutorInit:
 class TestPipelineExecutorExecute:
     """Tests for execute method."""
 
-    async def test_execute_processes_records(self, executor, mock_services, mock_record_processor):
+    async def test_execute_processes_records(
+        self, executor, mock_services, mock_record_processor
+    ):
         """Test that execute processes records correctly."""
 
         async def mock_fetch(**kwargs):
@@ -196,7 +199,9 @@ class TestPipelineExecutorExecute:
         with pytest.raises(PipelineShutdownError):
             await executor.execute(watermark=None, limit=None)
 
-    async def test_execute_empty_data(self, executor, mock_services, mock_record_processor):
+    async def test_execute_empty_data(
+        self, executor, mock_services, mock_record_processor
+    ):
         """Test execute with no data."""
 
         async def mock_fetch(**kwargs):

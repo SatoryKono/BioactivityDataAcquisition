@@ -1,12 +1,12 @@
 """Integration tests for the ChEMBL Activity pipeline."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
@@ -75,6 +75,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
 
     # 4. Create real infrastructure components
     import structlog
+
     logger = structlog.get_logger()
 
     lock = RedisDistributedLock(redis_client)
@@ -124,7 +125,6 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
     assert silver_record["activity_id"] == "1"
     assert silver_record["molecule_chembl_id"] == "CHEMBL1"
     assert silver_record["standard_value"] == 10.0
-
 
     # 8. Test should_write_gold
     assert pipeline.should_write_gold(context, silver_record) is True

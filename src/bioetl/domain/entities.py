@@ -25,6 +25,7 @@ class BaseEntity:
 
     Contains system fields required for lineage and versioning.
     """
+
     entity_id: EntityID
     content_hash: ContentHash
 
@@ -135,7 +136,9 @@ class Activity(BaseEntity):
     def _validate_pchembl_value(self) -> None:
         """Validate pchembl_value is non-negative if present."""
         if self.pchembl_value is not None and self.pchembl_value < 0:
-            raise ValueError(f"pChemBL value must be non-negative, got {self.pchembl_value}")
+            raise ValueError(
+                f"pChemBL value must be non-negative, got {self.pchembl_value}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -160,7 +163,9 @@ class Compound(BaseEntity):
 
         # Invariant: At least one structural representation should be present
         if not any([self.canonical_smiles, self.isomeric_smiles, self.inchi]):
-            raise ValueError("Compound must have at least one structural identifier (SMILES/InChI)")
+            raise ValueError(
+                "Compound must have at least one structural identifier (SMILES/InChI)"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -180,7 +185,9 @@ class Protein(BaseEntity):
             raise ValueError("Protein accession is required")
 
         if self.sequence_length is not None and self.sequence_length <= 0:
-            raise ValueError(f"Sequence length must be positive, got {self.sequence_length}")
+            raise ValueError(
+                f"Sequence length must be positive, got {self.sequence_length}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)

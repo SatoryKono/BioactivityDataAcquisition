@@ -5,8 +5,8 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.domain.types import RunType
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 
 
 @pytest.fixture
@@ -104,7 +104,9 @@ class TestBootstrapPipeline:
                 limit=None,
             )
 
-    @pytest.mark.skip(reason="Requires full integration setup - covered by integration tests")
+    @pytest.mark.skip(
+        reason="Requires full integration setup - covered by integration tests"
+    )
     @patch("bioetl.composition.bootstrap.get_settings")
     @patch("bioetl.composition.bootstrap.PipelineRegistry")
     def test_bootstrap_pipeline_chembl_activity(
@@ -256,10 +258,10 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test create_with_services creates pipeline."""
-        from bioetl.domain.config import RuntimeConfig
         from bioetl.composition.factories.pipeline_factories import (
             chembl_activity_factory,
         )
+        from bioetl.domain.config import RuntimeConfig
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services

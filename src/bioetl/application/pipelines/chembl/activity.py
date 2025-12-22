@@ -37,8 +37,12 @@ class ChEMBLActivityPipeline(BasePipeline):
         """Initialize pipeline and pre-compute filter sets."""
         super().__init__(config, runtime, services)
         self._transformer = ActivityTransformer(provider=self.provider)
-        self._gold_filter = ActivityGoldFilter(preferred_types=self.config.gold_filter_types)
-        self._watermark_extractor = ActivityWatermarkExtractor(watermark_field=self.config.watermark_field)
+        self._gold_filter = ActivityGoldFilter(
+            preferred_types=self.config.gold_filter_types
+        )
+        self._watermark_extractor = ActivityWatermarkExtractor(
+            watermark_field=self.config.watermark_field
+        )
 
     async def transform_bronze_to_silver(
         self,

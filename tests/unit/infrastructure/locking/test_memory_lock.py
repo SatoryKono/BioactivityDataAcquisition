@@ -1,7 +1,5 @@
 """Unit tests for MemoryLock."""
 
-import asyncio
-
 import pytest
 
 from bioetl.infrastructure.locking.memory_lock import MemoryLock

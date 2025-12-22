@@ -5,10 +5,10 @@ import respx
 from httpx import Response
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
 
 @pytest.fixture

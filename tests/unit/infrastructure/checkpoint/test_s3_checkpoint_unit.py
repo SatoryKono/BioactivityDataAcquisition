@@ -1,9 +1,9 @@
 """Unit tests for S3Checkpoint."""
 
 import asyncio
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import UUID
-from datetime import datetime
 
 import pytest
 from botocore.exceptions import ClientError
@@ -15,8 +15,10 @@ from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
     """Create a run_in_executor replacement that returns awaitable sync results."""
+
     async def sync_executor(_, fn, *args):
         return fn(*args)
+
     return sync_executor
 
 
@@ -109,7 +111,9 @@ async def test_save_conflict(checkpoint_store, mock_s3_client):
 async def test_load_exists(checkpoint_store, mock_s3_client):
     """Test loading an existing checkpoint."""
     mock_response = MagicMock()
-    mock_response["Body"].read.return_value = b'{"pipeline": "p1", "watermark": "100", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {"a": 1}}'
+    mock_response[
+        "Body"
+    ].read.return_value = b'{"pipeline": "p1", "watermark": "100", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {"a": 1}}'
     mock_s3_client.get_object.return_value = mock_response
 
     result = await checkpoint_store.load("pipeline1")
@@ -156,8 +160,13 @@ async def test_list_all(checkpoint_store, mock_s3_client):
     """Test listing all checkpoints."""
     paginator = mock_s3_client.get_paginator.return_value
     paginator.paginate.return_value = [
-        {"CommonPrefixes": [{"Prefix": "checkpoints/pipeline1/"}, {"Prefix": "checkpoints/pipeline2/"}]},
-        {"CommonPrefixes": [{"Prefix": "checkpoints/pipeline3/"}]}
+        {
+            "CommonPrefixes": [
+                {"Prefix": "checkpoints/pipeline1/"},
+                {"Prefix": "checkpoints/pipeline2/"},
+            ]
+        },
+        {"CommonPrefixes": [{"Prefix": "checkpoints/pipeline3/"}]},
     ]
 
     pipelines = await checkpoint_store.list_all()
@@ -199,7 +208,6 @@ class TestS3CheckpointLocal:
 
         # Load
         watermark, loaded_run_id, _ = await store.load("p1")
-        from datetime import datetime
         # 2024-01-01 could be parsed as date if ISO format
         # But here we saved "2024-01-01" as string/ID if passed as ID.
         # Wait, from_id("2024-01-01") -> value="2024-01-01".

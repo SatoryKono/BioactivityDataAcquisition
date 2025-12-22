@@ -70,9 +70,8 @@ def test_pipeline_observer_failure(metrics_mock, logger_mock, run_id):
         logger=logger_mock,
     )
 
-    with pytest.raises(ValueError):
-        with observer:
-            raise ValueError("Something went wrong")
+    with pytest.raises(ValueError), observer:
+        raise ValueError("Something went wrong")
 
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()

@@ -11,18 +11,18 @@ from uuid import UUID
 
 # Factories are imported to ensure registration happens
 import bioetl.composition.factories.pipeline_factories  # noqa: F401
-from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.application.registry import PipelineRegistry
-from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
 from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.domain.config import RuntimeConfig
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
@@ -80,7 +80,7 @@ def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
     return S3Checkpoint(
         bucket=settings.s3.bucket_checkpoints,
         pipeline_name=pipeline_name,
-        endpoint_url=settings.aws.endpoint_url
+        endpoint_url=settings.aws.endpoint_url,
     )
 
 

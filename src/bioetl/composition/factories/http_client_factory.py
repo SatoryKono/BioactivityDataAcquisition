@@ -48,10 +48,14 @@ class HttpClientFactory:
             rate = 10.0
             capacity = 20
 
-        if provider == "uniprot" and settings and getattr(settings, "uniprot_api_key", None):
-             # Hypothetical override if uniprot key is in settings
-             rate = 100.0
-             capacity = 200
+        if (
+            provider == "uniprot"
+            and settings
+            and getattr(settings, "uniprot_api_key", None)
+        ):
+            # Hypothetical override if uniprot key is in settings
+            rate = 100.0
+            capacity = 200
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucket(rate=rate, capacity=capacity),

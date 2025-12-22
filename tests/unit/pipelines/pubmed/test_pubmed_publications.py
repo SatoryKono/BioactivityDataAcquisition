@@ -1,13 +1,13 @@
 """Unit tests for PubMed Publications Pipeline."""
-from datetime import UTC, datetime
+
 from typing import cast
 from unittest.mock import MagicMock
 
 import pytest
+
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
-from bioetl.domain.types import BronzeRecord, RunType
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID
+from bioetl.domain.types import BronzeRecord, RunID, RunType
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def pipeline_context(mock_services):
     return PipelineContext(
         run_id=RunID("00000000-0000-0000-0000-000000000000"),
         run_type=RunType.INCREMENTAL,
-        logger=mock_services.logger
+        logger=mock_services.logger,
     )
 
 
@@ -73,11 +73,10 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     </PubmedArticle>
     """
 
-    bronze_record: BronzeRecord = cast(BronzeRecord, {
-        "pmid": "12345",
-        "_raw_xml": xml_content,
-        "source_batch_id": "test_batch"
-    })
+    bronze_record: BronzeRecord = cast(
+        "BronzeRecord",
+        {"pmid": "12345", "_raw_xml": xml_content, "source_batch_id": "test_batch"},
+    )
 
     # Since we are testing logic that uses datetime.now(UTC), we don't need context.run_start_time
     # which we confirmed was removed from PipelineContext
@@ -100,11 +99,10 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver_invalid_xml(pipeline, pipeline_context):
     """Test transformation with invalid XML handles error gracefully."""
-    bronze_record: BronzeRecord = cast(BronzeRecord, {
-        "pmid": "12345",
-        "_raw_xml": "<Invalid>XML",
-        "source_batch_id": "test_batch"
-    })
+    bronze_record: BronzeRecord = cast(
+        "BronzeRecord",
+        {"pmid": "12345", "_raw_xml": "<Invalid>XML", "source_batch_id": "test_batch"},
+    )
 
     silver_record = await pipeline.transform_bronze_to_silver(
         pipeline_context, bronze_record

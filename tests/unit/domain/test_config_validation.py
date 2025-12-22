@@ -1,7 +1,6 @@
 import pytest
 
-from bioetl.domain.config import DQConfig
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import DQConfig, PipelineConfig
 
 
 def test_dq_config_rejects_soft_over_hard() -> None:

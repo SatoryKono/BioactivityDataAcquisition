@@ -1,6 +1,6 @@
 """Unit tests for infrastructure factories."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -131,9 +131,7 @@ class TestStorageAdapter:
         return writer
 
     @pytest.fixture
-    def storage_adapter(
-        self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
-    ):
+    def storage_adapter(self, mock_bronze_writer, mock_silver_writer, mock_gold_writer):
         """Create StorageAdapter instance."""
         from bioetl.composition.factories.storage_factory import StorageAdapter
 
@@ -155,9 +153,7 @@ class TestStorageAdapter:
         assert storage_adapter.silver == mock_silver_writer
         assert storage_adapter.gold == mock_gold_writer
 
-    async def test_write_bronze_delegates(
-        self, storage_adapter, mock_bronze_writer
-    ):
+    async def test_write_bronze_delegates(self, storage_adapter, mock_bronze_writer):
         """Test write_bronze delegates to bronze writer."""
         batch_id = BatchID(uuid4())
         run_id = RunID(uuid4())
@@ -176,13 +172,11 @@ class TestStorageAdapter:
 
         mock_bronze_writer.write_bronze.assert_called_once()
 
-    async def test_write_silver_delegates(
-        self, storage_adapter, mock_silver_writer
-    ):
+    async def test_write_silver_delegates(self, storage_adapter, mock_silver_writer):
         """Test write_silver delegates to silver writer."""
         run_id = uuid4()
         batch_id = BatchID(uuid4())
-        ts = datetime.now(timezone.utc)
+        ts = datetime.now(UTC)
 
         records = [
             {

@@ -41,7 +41,9 @@ def mock_record_processor():
     """Create mock RecordProcessor."""
     processor = AsyncMock()
     processor.process_batch = AsyncMock(
-        return_value=BatchResult(bronze_count=1, silver_count=1, gold_count=1, quarantined_count=0)
+        return_value=BatchResult(
+            bronze_count=1, silver_count=1, gold_count=1, quarantined_count=0
+        )
     )
     return processor
 
@@ -83,7 +85,9 @@ async def test_executor_execute_happy_path(executor, mock_services):
     # Silver/Gold counts depend on RecordProcessor implementation
 
 
-async def test_executor_execute_with_checkpoint(executor, mock_services, mock_checkpoint_manager):
+async def test_executor_execute_with_checkpoint(
+    executor, mock_services, mock_checkpoint_manager
+):
     """Test that the checkpoint is saved every 1000 records."""
     mock_services.data_source.fetch.return_value = AsyncIterator(
         [{"id": i} for i in range(1000)]

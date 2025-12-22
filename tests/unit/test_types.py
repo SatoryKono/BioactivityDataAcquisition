@@ -115,9 +115,9 @@ class TestErrorType:
         for error in critical_errors:
             assert error.is_critical() is True, f"{error} should be critical"
             assert error.is_recoverable() is False, f"{error} should not be recoverable"
-            assert (
-                error.is_data_quality() is False
-            ), f"{error} should not be data quality"
+            assert error.is_data_quality() is False, (
+                f"{error} should not be data quality"
+            )
 
     def test_recoverable_errors(self) -> None:
         """Recoverable errors should be retried."""
@@ -129,9 +129,9 @@ class TestErrorType:
         for error in recoverable_errors:
             assert error.is_recoverable() is True, f"{error} should be recoverable"
             assert error.is_critical() is False, f"{error} should not be critical"
-            assert (
-                error.is_data_quality() is False
-            ), f"{error} should not be data quality"
+            assert error.is_data_quality() is False, (
+                f"{error} should not be data quality"
+            )
 
     def test_data_quality_errors(self) -> None:
         """Data quality errors should skip the record."""
@@ -153,9 +153,9 @@ class TestErrorType:
                 error.is_recoverable(),
                 error.is_data_quality(),
             ]
-            assert (
-                sum(categories) == 1
-            ), f"{error} should belong to exactly one category"
+            assert sum(categories) == 1, (
+                f"{error} should belong to exactly one category"
+            )
 
 
 class TestDataClassification:
