@@ -62,3 +62,33 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = False
+
+
+class ChEMBLAssayGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Assay in Gold layer.
+
+    Validated fields for high-quality assay data export.
+    """
+
+    # Core identifiers
+    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_chembl_id: Series[str] = pa.Field(nullable=True)
+    document_chembl_id: Series[str] = pa.Field(nullable=True)
+
+    # Assay type
+    assay_type: Series[str] = pa.Field(nullable=False)
+    assay_type_description: Series[str] = pa.Field(nullable=True)
+
+    # BAO annotations
+    bao_format: Series[str] = pa.Field(nullable=True)
+    bao_label: Series[str] = pa.Field(nullable=True)
+
+    # Quality indicators
+    confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        strict = False  # Allow extra columns

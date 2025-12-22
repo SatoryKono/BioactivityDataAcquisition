@@ -130,3 +130,55 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
     ]
 )
+
+# Schema for ChEMBL Assay
+# See: https://www.ebi.ac.uk/chembl/api/data/assay
+CHEMBL_ASSAY_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("assay_chembl_id", pa.string()),
+        # Core identifiers
+        pa.field("target_chembl_id", pa.string()),
+        pa.field("document_chembl_id", pa.string()),
+        pa.field("cell_chembl_id", pa.string()),
+        pa.field("tissue_chembl_id", pa.string()),
+        pa.field("src_id", pa.int64()),
+        pa.field("src_assay_id", pa.string()),
+        pa.field("aidx", pa.string()),
+        # Assay classification
+        pa.field("assay_type", pa.string()),
+        pa.field("assay_type_description", pa.string()),
+        pa.field("assay_category", pa.string()),
+        pa.field("assay_test_type", pa.string()),
+        pa.field("assay_group", pa.string()),
+        # Biological context
+        pa.field("assay_organism", pa.string()),
+        pa.field("assay_tax_id", pa.int64()),
+        pa.field("assay_cell_type", pa.string()),
+        pa.field("assay_tissue", pa.string()),
+        pa.field("assay_strain", pa.string()),
+        pa.field("assay_subcellular_fraction", pa.string()),
+        # BAO (BioAssay Ontology) annotations
+        pa.field("bao_format", pa.string()),
+        pa.field("bao_label", pa.string()),
+        # Description and confidence
+        pa.field("description", pa.string()),
+        pa.field("confidence_score", pa.int64()),
+        pa.field("confidence_description", pa.string()),
+        pa.field("relationship_type", pa.string()),
+        pa.field("relationship_description", pa.string()),
+        # Variant information
+        pa.field("variant_sequence", pa.string()),
+        # Complex fields (stored as JSON strings)
+        pa.field("assay_classifications", pa.string()),  # JSON string
+        pa.field("assay_parameters", pa.string()),  # JSON string
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+    ]
+)
