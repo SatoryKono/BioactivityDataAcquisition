@@ -60,7 +60,6 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # But if it thinks `bucket` is a bucket name, and we pass a full path, it might be weird.
         # But for local file test, it seems to just append.
 
-        bronze_files = glob.glob(f"{self.bronze_path}/**/*.jsonl.zstd", recursive=True)
         # assert len(bronze_files) > 0, f"No bronze files found in {self.bronze_path}"
         # The glob might be failing because of double bronze.
         # self.bronze_path is /tmp/.../storage/bronze
