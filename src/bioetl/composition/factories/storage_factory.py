@@ -96,6 +96,33 @@ class StorageAdapter:
             mode=mode,
         )
 
+    def clear_csv(self, table_name: str | None = None) -> int:
+        """Clear CSV export files for Silver and Gold layers.
+
+        Should be called at the start of a pipeline run to ensure
+        fresh CSV exports without duplicates from previous runs.
+
+        Args:
+            table_name: If provided, only clear CSV for this table.
+                       If None, clear all CSV files.
+
+        Returns:
+            Total number of files deleted.
+        """
+        deleted_count = 0
+
+        # Clear Silver CSV if exporter is configured
+        if self.silver.csv_exporter:
+            deleted = self.silver.csv_exporter.clear(table_name)
+            deleted_count += len(deleted)
+
+        # Clear Gold CSV if exporter is configured
+        if self.gold.csv_exporter:
+            deleted = self.gold.csv_exporter.clear(table_name)
+            deleted_count += len(deleted)
+
+        return deleted_count
+
     async def aclose(self) -> None:
         """Close resources.
 

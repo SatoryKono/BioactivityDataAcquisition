@@ -46,6 +46,34 @@ class CsvExporter:
         self.header = header
         self.encoding = encoding
 
+    def clear(self, table_name: str | None = None) -> list[Path]:
+        """Clear CSV files from the export directory.
+
+        Args:
+            table_name: If provided, only clear CSV for this table.
+                       If None, clear all CSV files in base_path.
+
+        Returns:
+            List of deleted file paths.
+        """
+        deleted = []
+        if not self.base_path.exists():
+            return deleted
+
+        if table_name:
+            # Clear specific table CSV
+            csv_path = self.base_path / f"{table_name}.csv"
+            if csv_path.exists():
+                csv_path.unlink()
+                deleted.append(csv_path)
+        else:
+            # Clear all CSV files in base_path
+            for csv_file in self.base_path.glob("*.csv"):
+                csv_file.unlink()
+                deleted.append(csv_file)
+
+        return deleted
+
     @staticmethod
     def _flatten_for_csv(table: pa.Table) -> pa.Table:
         """Convert complex types (list, struct) to JSON strings for CSV export.
