@@ -244,3 +244,45 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
     ]
 )
+
+# Schema for ChEMBL Molecule
+# See: https://www.ebi.ac.uk/chembl/api/data/molecule
+CHEMBL_MOLECULE_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("molecule_chembl_id", pa.string()),
+        # Core metadata
+        pa.field("pref_name", pa.string()),
+        pa.field("molecule_type", pa.string()),
+        pa.field("structure_type", pa.string()),
+        pa.field("max_phase", pa.int64()),
+        pa.field("first_approval", pa.int64()),
+        # Flags
+        pa.field("oral", pa.bool_()),
+        pa.field("parenteral", pa.bool_()),
+        pa.field("topical", pa.bool_()),
+        pa.field("black_box_warning", pa.int64()),
+        pa.field("natural_product", pa.int64()),
+        pa.field("first_in_class", pa.int64()),
+        pa.field("prodrug", pa.int64()),
+        pa.field("therapeutic_flag", pa.bool_()),
+        pa.field("withdrawn_flag", pa.bool_()),
+        pa.field("inorganic_flag", pa.int64()),
+        pa.field("polymer_flag", pa.int64()),
+        # Complex fields (JSON strings)
+        pa.field("molecule_hierarchy", pa.string()),
+        pa.field("molecule_properties", pa.string()),
+        pa.field("molecule_structures", pa.string()),
+        pa.field("molecule_synonyms", pa.string()),
+        pa.field("cross_references", pa.string()),
+        pa.field("atc_classifications", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+    ]
+)

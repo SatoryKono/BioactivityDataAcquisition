@@ -38,6 +38,7 @@ ENTITY_MAPPING = {
     "activity": "activity",
     "assay": "assay",
     "compound": "molecule",
+    "molecule": "molecule",
     "target": "target",
     "document": "document",
     "cell_line": "cell_line",
