@@ -1,0 +1,34 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev --extra tracing
+
+      - name: Run Tests with Coverage
+        run: |
+          # Run unit and integration tests with coverage
+          # Enforce 80% coverage threshold as requested
+          uv run pytest tests/ -v -m "not e2e" --cov=src/bioetl --cov-fail-under=80
