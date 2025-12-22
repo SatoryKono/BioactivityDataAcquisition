@@ -30,6 +30,37 @@
     "watermark_field": "updated_on",
     "write_mode": "merge"
   },
+  "chembl_document": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "document",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [
+        {
+          "column": "doc_type",
+          "values": ["PATENT", "PUBLICATION"]
+        }
+      ],
+      "exclude_if_present": [],
+      "required_fields": ["title"]
+    },
+    "gold_table": null,
+    "gold_write_mode": "overwrite",
+    "partition_cols": [],
+    "pipeline_name": "chembl_document",
+    "primary_keys": [
+      "document_chembl_id"
+    ],
+    "provider": "chembl",
+    "silver_table": "chembl_document",
+    "watermark_field": null,
+    "write_mode": "merge"
+  },
   "pubchem_compound": {
     "batch_size": 100,
     "checkpoint_interval": 1000,
