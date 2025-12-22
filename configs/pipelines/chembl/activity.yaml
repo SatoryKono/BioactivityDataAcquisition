@@ -51,7 +51,7 @@ sink:
             strict: true
         path: "data/output/gold"
         format: delta
-        mode: overwrite
+        mode: append
         csv_export:
             enabled: true
             path: "data/output/csv/gold"
