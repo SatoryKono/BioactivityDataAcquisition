@@ -1,0 +1,24 @@
+# configs/sources/pubchem.yaml
+# Конфигурация источника данных PubChem PUG REST API.
+
+source:
+    type: api
+    load_strategy: incremental
+    watermark_field: cid
+    batch_size: 50
+    provider_config:
+        provider: pubchem
+        base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        # PubChem specific limits
+        batch_size: 50 # PUG REST often limits batch sizes
+        
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    rate_limit:
+        requests_per_second: 5.0
+        burst: 10
