@@ -5,7 +5,7 @@ Defines the configuration for:
 - Gold filtering: Configurable column-based filters for Gold layer records
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -52,26 +52,32 @@ class GoldFilterConfig:
         Returns:
             True если запись проходит все фильтры, False иначе.
         """
-        # 1. Проверка required_fields (должны быть не null/пустые)
-        for fld in self.required_fields:
-            value = record.get(fld)
-            if value is None or value == "":
-                return False
+        return (
+            self._check_required_fields(record)
+            and self._check_exclude_if_present(record)
+            and self._check_column_filters(record)
+        )
 
-        # 2. Проверка exclude_if_present (если есть значение — исключить)
-        for fld in self.exclude_if_present:
-            value = record.get(fld)
-            if value is not None and value != "":
-                return False
+    def _check_required_fields(self, record: dict[str, Any]) -> bool:
+        """Проверяет наличие обязательных полей."""
+        return all(
+            record.get(fld) not in (None, "")
+            for fld in self.required_fields
+        )
 
-        # 3. Проверка column_filters (все должны пройти)
-        for col_filter in self.column_filters:
-            value = record.get(col_filter.column)
-            # Значение должно быть строкой и входить в допустимый набор
-            if str(value) not in col_filter.values:
-                return False
+    def _check_exclude_if_present(self, record: dict[str, Any]) -> bool:
+        """Проверяет отсутствие исключающих полей."""
+        return all(
+            record.get(fld) in (None, "")
+            for fld in self.exclude_if_present
+        )
 
-        return True
+    def _check_column_filters(self, record: dict[str, Any]) -> bool:
+        """Проверяет соответствие значений колонок допустимым."""
+        return all(
+            str(record.get(f.column)) in f.values
+            for f in self.column_filters
+        )
 
     def is_empty(self) -> bool:
         """Проверяет, пуста ли конфигурация фильтров.

@@ -39,9 +39,21 @@ PIPELINES = [
 ]
 
 
+def _convert_for_json(obj: Any) -> Any:
+    """Convert non-JSON-serializable types for snapshotting."""
+    if isinstance(obj, frozenset):
+        return sorted(obj)  # Convert to sorted list for stable comparisons
+    if isinstance(obj, dict):
+        return {k: _convert_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_convert_for_json(item) for item in obj]
+    return obj
+
+
 def serialize_config(config: PipelineConfig) -> dict[str, Any]:
     """Serialize PipelineConfig to a dictionary for snapshotting."""
-    return asdict(config)
+    raw_dict = asdict(config)
+    return _convert_for_json(raw_dict)
 
 
 def load_snapshots() -> dict[str, Any]:
