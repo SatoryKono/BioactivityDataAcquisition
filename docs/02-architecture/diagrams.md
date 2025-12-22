@@ -15,6 +15,13 @@ flowchart TD
         E(Loader)
     end
 
+    subgraph "Composition Layer"
+        CP[Bootstrap / Factories]
+    end
+
+    CLI --> CP
+    CP --> B
+
     subgraph "Data Lake (Medallion)"
         F[Bronze Layer]
         G[Silver Layer]

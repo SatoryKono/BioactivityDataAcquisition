@@ -1,53 +1,22 @@
 """
-Template for a Factory.
-Location: src/bioetl/composition/factories/<provider>.py
+Template for adding a pipeline factory in v5.1.
+Location: src/bioetl/composition/factories/pipeline_factories.py
 """
-from typing import TYPE_CHECKING
+from bioetl.application.pipelines.{{provider}}.{{entity}} import {{Provider}}{{Entity}}Pipeline
+from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+from bioetl.infrastructure.schemas.silver import {{PROVIDER}}_{{ENTITY}}_SCHEMA
+from bioetl.infrastructure.schemas.gold import {{Provider}}{{Entity}}GoldSchema
 
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.composition.factories.clients import create_redis_client, get_aws_credentials
-from bioetl.composition.factories.storage_factory import StorageAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.config import Settings
-# Import specific adapter
-# from bioetl.infrastructure.adapters.{{provider}}.client import {{Provider}}Adapter
+# 1. Define the factory instance
+{{provider}}_{{entity}}_factory = GenericPipelineFactory(
+    pipeline_name="{{provider}}_{{entity}}",
+    pipeline_class={{Provider}}{{Entity}}Pipeline,
+    provider="{{provider}}",
+    silver_schema={{PROVIDER}}_{{ENTITY}}_SCHEMA,
+    gold_schema={{Provider}}{{Entity}}GoldSchema, # Optional
+)
 
-if TYPE_CHECKING:
-    import structlog
-
-class {{Provider}}PipelineFactory:
-    """Factory for {{Provider}} pipelines."""
-
-    @staticmethod
-    def build_services(
-        settings: Settings,
-        logger: "structlog.BoundLogger",
-        **kwargs,
-    ) -> PipelineServices:
-        """Builds PipelineServices from settings."""
-
-        # 1. HTTP Client
-        http_client = UnifiedHTTPClient(
-            TokenBucket(rate=5.0, capacity=10),
-            CircuitBreaker(provider="{{provider}}")
-        )
-
-        # 2. Data Source Adapter
-        # data_source = {{Provider}}Adapter(http_client=http_client)
-        data_source = None # Replace with actual adapter
-
-        # 3. Storage & Infrastructure (Standard setup)
-        # Reuse standard factory logic or copy from existing factories
-        # ...
-
-        return PipelineServices(
-            data_source=data_source,
-            # storage=storage,
-            # lock=lock,
-            # checkpoint=checkpoint,
-            # quarantine=quarantine,
-            # metrics=metrics,
-            logger=logger,
-        )
+# 2. Add to register_all_pipelines() function
+def register_all_pipelines() -> None:
+    # ... existing registrations ...
+    PipelineRegistry.register_factory({{provider}}_{{entity}}_factory)

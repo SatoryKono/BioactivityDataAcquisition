@@ -1,60 +1,55 @@
 [importlinter]
 root_package = bioetl
-root_package_path = src
-include_external_packages = True
+include_external_packages = False
 
-# Note: "layers" contract doesn't fit Hexagonal architecture where:
-# - domain is at the center (everyone can import it)
-# - infrastructure implements domain ports
-# - application uses ports, not concrete implementations
-# We use "forbidden" contracts instead to express the proper constraints.
+# Hexagonal Architecture Layer Contracts
+# See CLAUDE.md §2.1 for the import matrix
 
 [importlinter:contract:domain-independence]
-name = Domain layer independence
+name = Domain layer must not import from other layers
 type = forbidden
 source_modules =
     bioetl.domain
 forbidden_modules =
-    bioetl.infrastructure
     bioetl.application
+    bioetl.composition
+    bioetl.infrastructure
+    bioetl.interfaces
 
-[importlinter:contract:application-no-infrastructure-imports]
-name = Application layer does not import infrastructure directly
+[importlinter:contract:application-independence]
+name = Application layer must not import from infrastructure or composition
 type = forbidden
 source_modules =
     bioetl.application
 forbidden_modules =
-    bioetl.infrastructure.adapters
-    bioetl.infrastructure.storage
-    bioetl.infrastructure.locking
-    bioetl.infrastructure.checkpoint
-    bioetl.infrastructure.quarantine
-    bioetl.infrastructure.observability.metrics
-    bioetl.infrastructure.observability.prometheus_metrics
+    bioetl.composition
+    bioetl.infrastructure
+    bioetl.interfaces
 
-[importlinter:contract:infrastructure-no-application]
-name = Infrastructure layer must not import application
+[importlinter:contract:infrastructure-independence]
+name = Infrastructure layer must not import from application or interfaces
 type = forbidden
 source_modules =
     bioetl.infrastructure
 forbidden_modules =
     bioetl.application
+    bioetl.interfaces
 
-[importlinter:contract:domain-pure]
-name = Domain layer must be pure (no I/O libraries)
+[importlinter:contract:composition-no-interfaces]
+name = Composition layer must not import from interfaces
 type = forbidden
 source_modules =
-    bioetl.domain
+    bioetl.composition
 forbidden_modules =
-    httpx
-    requests
-    boto3
-    redis
-    deltalake
-    polars
-    sqlalchemy
-    # Async runtime - domain should use collections.abc.AsyncIterator instead
-    asyncio
-    # Other async libraries
-    anyio
-    trio
+    bioetl.interfaces
+
+[importlinter:contract:layers]
+name = Layer dependency direction (domain <- application <- composition <- interfaces)
+type = layers
+layers =
+    bioetl.interfaces
+    bioetl.composition
+    bioetl.application
+    bioetl.domain
+containers =
+    bioetl

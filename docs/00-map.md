@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.0 | Last updated: 2025-12-20*
+*Synced with RULES.md v5.1 | Last updated: 2025-12-22*
 
 ## Quick Links
 
@@ -46,6 +46,7 @@ docs/
 │   ├── container-diagram.md     # C4 Container Diagram
 │   ├── data-flow.md             # High-level Medallion data flow
 │   ├── 04-interfaces-layer.md   # Interfaces layer docs
+│   ├── 05-composition-layer.md  # Composition layer (DI) docs
 │   ├── decisions/               # Architecture Decision Records (ADR-001..006)
 │   └── diagrams/                # Diagram source files
 │
@@ -89,6 +90,7 @@ docs/
 | [system-context.md](02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
 | [container-diagram.md](02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
 | [data-flow.md](02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
+| [05-composition-layer.md](02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
 | [ADR-001: Delta Lake](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
 | [ADR-002: Medallion](02-architecture/decisions/ADR-002-medallion-architecture.md)            | Data layering pattern                    | §1       |
 | [ADR-003: Redis Locking](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Distributed locking                      | §6       |
@@ -156,10 +158,11 @@ src/bioetl/
 │
 ├── composition/                 # Composition Root (DI container)
 │   ├── bootstrap.py             # Pipeline bootstrap & wiring
-│   └── factories/               # Pipeline-specific factories
-│       ├── base_pipeline_factory.py
-│       ├── base_services_factory.py
-│       └── chembl_activity.py
+│   ├── registry.py              # Pipeline discovery
+│   └── factories/               # Consolidated factories
+│       ├── generic_factory.py   # Universal pipeline factory
+│       ├── data_source_registry.py # Central source creation
+│       └── storage_factory.py   # Multi-layer storage factory
 │
 ├── infrastructure/              # I/O adapters (§1.1)
 │   ├── adapters/                # External API clients
@@ -244,4 +247,4 @@ graph TD
 
 ---
 
-*Last updated: 2025-12-20. Update when adding new documentation.*
+*Last updated: 2025-12-22. Update when adding new documentation.*

@@ -83,57 +83,51 @@ class PubMedPublicationPipeline(BasePipeline):
     pass
 ```
 
-## Шаг 4: Фабрика и Bootstrap (Composition Root)
+## Шаг 4: Регистрация (Composition Layer)
 
-Создайте фабрику, которая соберет все зависимости для нового источника. Фабрики располагаются в `src/bioetl/composition/factories/`.
+В v5.1 сборка пайплайнов декларативна и централизована.
 
-**Пример:** `src/bioetl/composition/factories/pubmed.py`
-
-```python
-from bioetl.infrastructure.config import Settings
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.infrastructure.adapters.pubmed.client import PubMedAdapter
-# ... другие импорты
-
-class PubMedPipelineFactory:
-    @staticmethod
-    def build_services(settings: Settings, logger, **kwargs) -> PipelineServices:
-        # 1. Создаем HTTP клиент
-        http_client = UnifiedHTTPClient(...) # с RateLimiter для PubMed
-
-        # 2. Создаем специфичный адаптер
-        data_source = PubMedAdapter(http_client, api_key=settings.pubmed_api_key)
-
-        # 3. Собираем стандартные сервисы (storage, lock, checkpoint...)
-        # (код аналогичен другим фабрикам)
-
-        return PipelineServices(
-            data_source=data_source,
-            # ...
-        )
-```
-
-### Регистрация в `bootstrap.py`
-
-Файл: `src/bioetl/composition/bootstrap.py`
+### 4.1 Регистрация создателя DataSource
+Добавьте функцию создания вашего адаптера в `src/bioetl/composition/factories/data_source_registry.py`.
 
 ```python
-from bioetl.composition.factories.pubmed import PubMedPipelineFactory
-from bioetl.application.pipelines.pubmed_publication import PubMedPublicationPipeline
+def create_pubmed_data_source(settings, pipeline_config, filter_config=None):
+    http_client = HttpClientFactory.create_for_provider("pubmed", settings)
+    data_source = PubMedAdapter(http_client, api_key=settings.pubmed_api_key)
+    return _wrap_with_filter(data_source, filter_config)
 
-# ...
-
-def bootstrap_pipeline(pipeline_name: str, ...):
+# Зарегистрируйте в словаре _creators класса DataSourceRegistry
+_creators = {
     # ...
-    elif pipeline_name == "pubmed_publication":
-        services = PubMedPipelineFactory.build_services(settings, logger)
-        pipeline = PubMedPublicationPipeline.create(runtime, services)
-    # ...
+    "pubmed": create_pubmed_data_source,
+}
 ```
+
+### 4.2 Регистрация пайплайна
+Добавьте определение пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`.
+
+```python
+from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.infrastructure.schemas.silver import PUBMED_PUBLICATION_SCHEMA
+
+pubmed_publications_factory = GenericPipelineFactory(
+    pipeline_name="pubmed_publications",
+    pipeline_class=PubMedPublicationsPipeline,
+    provider="pubmed",
+    silver_schema=PUBMED_PUBLICATION_SCHEMA,
+)
+
+def register_all_pipelines() -> None:
+    # ...
+    PipelineRegistry.register_factory(pubmed_publications_factory)
+```
+
+Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publications`.
 
 ## Чек-лист
 
 - [ ] Адаптер источника реализован.
 - [ ] Конфиг YAML создан.
 - [ ] Пайплайн реализован.
-- [ ] Фабрика создана и подключена в `bootstrap.py`.
+- [ ] Источник зарегистрирован в `DataSourceRegistry`.
+- [ ] Пайплайн зарегистрирован в `pipeline_factories.py`.
