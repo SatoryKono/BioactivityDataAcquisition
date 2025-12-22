@@ -1,0 +1,24 @@
+# configs/sources/pubmed.yaml
+# Конфигурация источника данных PubMed (NCBI Entrez E-utilities).
+
+source:
+    type: api
+    load_strategy: full
+    # PubMed не имеет простого watermark поля как ID, используем параметры поиска
+    batch_size: 100
+    provider_config:
+        provider: pubmed
+        base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+        client:
+            timeout_sec: 60.0
+            max_retries: 3
+        # Email is required by NCBI guidelines, injected via env var usually but good to have default placeholder
+        default_email: "bioetl-bot@example.com" 
+        
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    rate_limit:
+        requests_per_second: 3.0 # Default without API key
+        burst: 5
