@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.core.base import BasePipeline
 from bioetl.domain.entities import Publication
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
+from bioetl.domain.types import Watermark
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -107,3 +108,10 @@ class PubMedPublicationsPipeline(BasePipeline):
                 "XML_parse_error", error=str(e), pmid=record.get("pmid")
             )
             return None
+
+    def extract_watermark(
+        self, context: PipelineContext, record: dict[str, Any]
+    ) -> Watermark:
+        """Extract PMID as watermark."""
+        pmid = record.get("pmid", "")
+        return Watermark.from_id(str(pmid))

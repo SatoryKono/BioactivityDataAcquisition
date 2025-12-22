@@ -9,7 +9,6 @@ Refactored per ADR-0005.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Self
 from uuid import uuid4
 
@@ -159,8 +158,12 @@ class BasePipeline(ABC):
         """Determine if a Silver record should be written to Gold."""
         return True
 
+    @abstractmethod
     def extract_watermark(
-        self, _context: PipelineContext, _record: dict[str, Any]
+        self, context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
-        """Extract watermark value from a record."""
-        return Watermark.from_timestamp(datetime.now(UTC))
+        """Extract watermark value from a record.
+        
+        Each pipeline MUST implement its own watermark extraction strategy.
+        """
+        ...
