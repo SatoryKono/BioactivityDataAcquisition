@@ -25,7 +25,7 @@ class PubMedPublicationsPipeline(BasePipeline):
         record: BronzeRecord,
     ) -> SilverRecord | None:
         """Трансформирует сырую XML-запись в формат Silver."""
-        return self._transformer.transform(context, record, self.logger)
+        return await self._transformer.transform(context, record)
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]

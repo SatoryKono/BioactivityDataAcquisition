@@ -10,6 +10,7 @@ Configuration consolidation (all in bioetl.domain.config):
 """
 
 from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
@@ -23,8 +24,9 @@ from bioetl.domain.config import (
 )
 
 __all__ = [
-    # Base pipeline
+    # Base classes
     "BasePipeline",
+    "BaseTransformer",
     # Decomposed config (ADR-0005) - consolidated in domain.config
     "PipelineConfig",
     "RuntimeConfig",
