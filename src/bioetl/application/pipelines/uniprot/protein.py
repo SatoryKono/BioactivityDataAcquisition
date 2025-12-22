@@ -23,7 +23,7 @@ class UniProtProteinPipeline(BasePipeline):
         self, context: PipelineContext, record: BronzeRecord
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
-        return self._transformer.transform(record)
+        return await self._transformer.transform(context, record)
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]

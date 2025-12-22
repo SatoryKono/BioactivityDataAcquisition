@@ -5,12 +5,11 @@ Transforms Bronze records to Silver format (Target entity inflation).
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Target
 from bioetl.domain.transformations import (
-    generate_content_hash,
     generate_entity_id,
     safe_int,
 )
@@ -20,20 +19,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-def _serialize_json(value: Any) -> str | None:
-    """Serialize complex values (dict/list) to JSON string."""
-    if value is None:
-        return None
-    if isinstance(value, (dict, list)):
-        return json.dumps(value, ensure_ascii=False)
-    return str(value)
-
-
-class TargetTransformer:
+class TargetTransformer(BaseTransformer):
     """Transforms ChEMBL bronze target records to silver."""
 
     def __init__(self, provider: str = "chembl"):
-        self.provider = provider
+        super().__init__(provider)
 
     async def transform(
         self,
@@ -63,15 +53,11 @@ class TargetTransformer:
                 "tax_id": safe_int(record.get("tax_id")),
                 "species_group_flag": record.get("species_group_flag"),
                 # Complex fields (JSON serialized)
-                "target_components": _serialize_json(record.get("target_components")),
-                "cross_references": _serialize_json(record.get("cross_references")),
+                "target_components": self.serialize_json(record.get("target_components")),
+                "cross_references": self.serialize_json(record.get("cross_references")),
             }
 
-            content_hash = generate_content_hash(
-                business_data,
-                self.provider,
-                exclude_none=True,
-            )
+            content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
             entity = Target(
                 entity_id=entity_id,
@@ -91,12 +77,6 @@ class TargetTransformer:
             return None
 
         # Convert Entity to SilverRecord for storage
-        silver_record = entity.__dict__.copy()
-
-        # Handle lineage fields renaming and formatting
-        silver_record["_run_id"] = str(silver_record.pop("run_id"))
-        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-        silver_record["_source_batch_id"] = str(silver_record.pop("source_batch_id"))
-        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
+        silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)
