@@ -10,6 +10,7 @@ Usage:
 """
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
@@ -17,12 +18,14 @@ from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
+    ChEMBLAssayGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     UniProtProteinGoldSchema,
 )
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
+    CHEMBL_ASSAY_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
@@ -38,6 +41,15 @@ chembl_activity_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
     gold_schema=ChEMBLActivityGoldSchema,
+)
+
+# ChEMBL Assay Pipeline
+chembl_assay_factory = GenericPipelineFactory(
+    pipeline_name="chembl_assay",
+    pipeline_class=ChEMBLAssayPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_ASSAY_SCHEMA,
+    gold_schema=ChEMBLAssayGoldSchema,
 )
 
 # PubChem Compound Pipeline
@@ -82,6 +94,7 @@ def register_all_pipelines() -> None:
         return
 
     PipelineRegistry.register_factory(chembl_activity_factory)
+    PipelineRegistry.register_factory(chembl_assay_factory)
     PipelineRegistry.register_factory(pubchem_compound_factory)
     PipelineRegistry.register_factory(uniprot_protein_factory)
     PipelineRegistry.register_factory(pubmed_publications_factory)
@@ -100,6 +113,7 @@ def is_registered() -> bool:
 
 __all__ = [
     "chembl_activity_factory",
+    "chembl_assay_factory",
     "is_registered",
     "pubchem_compound_factory",
     "pubmed_publications_factory",

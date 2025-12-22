@@ -16,20 +16,31 @@ if TYPE_CHECKING:
 class AssayWatermarkExtractor:
     """Extracts watermark from ChEMBL assay records."""
 
-    def __init__(self, watermark_field: str = "assay_chembl_id"):
+    def __init__(self, watermark_field: str | None = None):
         self.watermark_field = watermark_field
 
     def extract(
-        self, context: PipelineContext, record: dict[str, Any]
+        self, _context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
         """Extract watermark value from assay record.
 
         Args:
-            context: Pipeline context (unused but required by interface)
+            _context: Pipeline context (unused but required by interface)
             record: Assay record dictionary
 
         Returns:
             Watermark containing the extracted value
         """
-        value = record.get(self.watermark_field)
-        return Watermark(value=value)
+        # Primary: use assay_chembl_id
+        assay_id = record.get("assay_chembl_id")
+        if assay_id is not None:
+            return Watermark.from_id(str(assay_id))
+
+        # Fallback to configured watermark field
+        fallback_field = self.watermark_field
+        fallback_value = record.get(fallback_field) if fallback_field else None
+
+        if fallback_value is None:
+            return Watermark.from_id("")
+
+        return Watermark.from_id(str(fallback_value))

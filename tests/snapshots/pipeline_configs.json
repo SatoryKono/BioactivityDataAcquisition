@@ -12,6 +12,7 @@
       "IC50",
       "Ki"
     ],
+    "gold_min_confidence": null,
     "gold_table": null,
     "pipeline_name": "chembl_activity",
     "primary_keys": [
@@ -31,6 +32,7 @@
     "entity_type": "compound",
     "fields": [],
     "gold_filter_types": [],
+    "gold_min_confidence": null,
     "gold_table": null,
     "pipeline_name": "pubchem_compound",
     "primary_keys": [
@@ -50,6 +52,7 @@
     "entity_type": "publication",
     "fields": [],
     "gold_filter_types": [],
+    "gold_min_confidence": null,
     "gold_table": null,
     "pipeline_name": "pubmed_publications",
     "primary_keys": [
@@ -69,6 +72,7 @@
     "entity_type": "protein",
     "fields": [],
     "gold_filter_types": [],
+    "gold_min_confidence": null,
     "gold_table": null,
     "pipeline_name": "uniprot_protein",
     "primary_keys": [

@@ -200,6 +200,7 @@ graph TD
     subgraph configs
         direction LR
         A(pipelines) --> A1("chembl/activity.yaml")
+        A --> A2("chembl/assay.yaml")
         B(schemas) --> B1("bronze/README.md")
         B --> B2("silver/README.md")
         B --> B3("gold/README.md")

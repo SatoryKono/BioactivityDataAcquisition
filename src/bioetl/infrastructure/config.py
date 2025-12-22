@@ -154,6 +154,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
         gold_filter_types=yaml_config.gold_filter_types,
+        gold_min_confidence=yaml_config.gold_min_confidence,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=source_fields,
