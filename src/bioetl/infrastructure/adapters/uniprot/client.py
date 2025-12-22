@@ -11,6 +11,7 @@ Requirements:
 Documentation: https://www.uniprot.org/help/api
 """
 
+import asyncio
 import logging
 from collections.abc import AsyncIterator
 from typing import Any
@@ -200,12 +201,10 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
             logger.warning("Watermark is not supported for feature fetch, ignoring.")
 
         features = await self._get_features_json(query)
-        fetched = 0
-        for feature in features:
-            if limit and fetched >= limit:
+        for i, feature in enumerate(features):
+            if limit and i >= limit:
                 break
             yield self._format_feature(query, feature)
-            fetched += 1
 
     def _format_feature(self, query: str, feature: dict[str, Any]) -> dict[str, Any]:
         """Format a single feature."""
@@ -234,7 +233,9 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         """Yield parsed sequences."""
         fasta_text = await self._get_sequence_fasta(query)
         if fasta_text:
-            for seq in self._parse_fasta(fasta_text):
+            loop = asyncio.get_running_loop()
+            seqs = await loop.run_in_executor(None, self._parse_fasta, fasta_text)
+            for seq in seqs:
                 yield seq
 
     async def _fetch_sequences(

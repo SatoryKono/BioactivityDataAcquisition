@@ -32,3 +32,21 @@ class PipelineContext:
             run_type=self.run_type,
             logger=new_logger,
         )
+
+
+@dataclass(frozen=True)
+class PipelineRunContext:
+    """Context object encapsulating pipeline launch parameters.
+
+    Used to pass runtime arguments from CLI/Orchestrator to the Composition Root.
+    """
+
+    pipeline_name: str
+    run_id: RunID
+    run_type: RunType
+    resume: bool = False
+    limit: int | None = None
+    input_csv: str | None = None
+    filter_column: str | None = None
+    filter_field: str | None = None
+    query: str | None = None
