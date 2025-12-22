@@ -32,7 +32,7 @@ class AssayGoldFilter:
         self.min_confidence = min_confidence
 
     def should_include(
-        self, context: PipelineContext, record: dict[str, Any]
+        self, _context: PipelineContext, record: dict[str, Any]
     ) -> bool:
         """Determine if assay record should be included in Gold layer.
 
