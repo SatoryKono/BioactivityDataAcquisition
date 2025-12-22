@@ -324,7 +324,10 @@ class TestYamlConfigToDomain:
         yaml_config.primary_keys = ["id"]
         yaml_config.silver_table = "silver_table"
         yaml_config.gold_table = "gold_table"
-        yaml_config.gold_filter_types = None
+        yaml_config.gold_filters = MagicMock()
+        yaml_config.gold_filters.columns = {}
+        yaml_config.gold_filters.required_fields = []
+        yaml_config.gold_filters.exclude_if_present = []
         yaml_config.batch_size = 200
         yaml_config.checkpoint_interval = 2000
         yaml_config.source = MagicMock()
@@ -355,7 +358,10 @@ class TestYamlConfigToDomain:
         yaml_config.primary_keys = ["id"]
         yaml_config.silver_table = "silver"
         yaml_config.gold_table = None
-        yaml_config.gold_filter_types = None
+        yaml_config.gold_filters = MagicMock()
+        yaml_config.gold_filters.columns = {}
+        yaml_config.gold_filters.required_fields = []
+        yaml_config.gold_filters.exclude_if_present = []
         yaml_config.batch_size = 100
         yaml_config.checkpoint_interval = 1000
         yaml_config.source = MagicMock()
@@ -383,7 +389,10 @@ class TestYamlConfigToDomain:
         yaml_config.primary_keys = ["id"]
         yaml_config.silver_table = "silver"
         yaml_config.gold_table = None
-        yaml_config.gold_filter_types = None
+        yaml_config.gold_filters = MagicMock()
+        yaml_config.gold_filters.columns = {}
+        yaml_config.gold_filters.required_fields = []
+        yaml_config.gold_filters.exclude_if_present = []
         yaml_config.batch_size = 100
         yaml_config.checkpoint_interval = 1000
         yaml_config.source = MagicMock()

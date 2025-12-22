@@ -8,7 +8,6 @@
     },
     "entity_type": "activity",
     "fields": [],
-    "gold_filter_types": [],
     "gold_filters": {
       "column_filters": [
         {
@@ -19,7 +18,6 @@
       "exclude_if_present": [],
       "required_fields": ["standard_type", "standard_value", "standard_units", "target_chembl_id"]
     },
-    "gold_min_confidence": null,
     "gold_table": null,
     "gold_write_mode": "overwrite",
     "partition_cols": [],
@@ -41,13 +39,11 @@
     },
     "entity_type": "compound",
     "fields": [],
-    "gold_filter_types": [],
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
       "required_fields": []
     },
-    "gold_min_confidence": null,
     "gold_table": null,
     "gold_write_mode": "overwrite",
     "partition_cols": [],
@@ -69,13 +65,11 @@
     },
     "entity_type": "publication",
     "fields": [],
-    "gold_filter_types": [],
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
       "required_fields": []
     },
-    "gold_min_confidence": null,
     "gold_table": null,
     "gold_write_mode": "overwrite",
     "partition_cols": [],
@@ -97,13 +91,11 @@
     },
     "entity_type": "protein",
     "fields": [],
-    "gold_filter_types": [],
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
       "required_fields": []
     },
-    "gold_min_confidence": null,
     "gold_table": null,
     "gold_write_mode": "overwrite",
     "partition_cols": [],
