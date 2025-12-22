@@ -243,7 +243,7 @@ class TestChemblActivityFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.composition.factories.generic_factory.yaml_config_to_domain")
+    @patch("bioetl.composition.mappers.config_mapper.yaml_config_to_domain")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
     @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")

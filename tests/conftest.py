@@ -205,7 +205,8 @@ def run_id() -> "RunID":
 def clear_settings_cache():
     """Clear the settings cache before and after each test."""
     try:
-        from bioetl.infrastructure.config import get_pipeline_config, get_settings
+        from bioetl.composition.mappers.config_mapper import get_pipeline_config
+        from bioetl.infrastructure.config import get_settings
 
         get_settings.cache_clear()
         get_pipeline_config.cache_clear()

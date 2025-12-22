@@ -20,7 +20,8 @@ from bioetl.composition.factories.data_source_registry import (
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.filter_config import InputFilterConfig
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.composition.mappers.config_mapper import yaml_config_to_domain
+from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.application.core.runner import PipelineRunner
 
 if TYPE_CHECKING:
