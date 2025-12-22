@@ -76,59 +76,39 @@ class RecordProcessor:
             services.metrics, pipeline_label, run_type_label
         )
 
-    async def process_batch(
-        self,
-        records: list[dict[str, Any]],
-        batch_id: BatchID,
-    ) -> BatchResult:
-        """Process a batch of records through Bronze -> Silver -> Gold."""
-        # Capture consistent timestamp for this batch
-        ingestion_ts = datetime.now(UTC)
+    def _log_and_track_write_error(
+        self, layer: str, error: Exception, batch_id: BatchID
+    ) -> None:
+        """Log write error and track metrics."""
+        error_type = self._error_classifier.classify(error)
+        self._context.logger.error(
+            f"{layer} write failed",
+            error=str(error),
+            error_type=error_type.value,
+            batch_id=str(batch_id),
+        )
+        self._batch_metrics.track_error(f"{layer}_write", error_type)
 
-        # 1. Write to Bronze
-        # Pass ingestion_ts to ensure Bronze path matches metadata
-        try:
-            await self._write_bronze_batch(records, batch_id, ingestion_ts)
-        except Exception as e:
-            error_type = self._error_classifier.classify(e)
-            self._context.logger.error(
-                "Bronze write failed",
-                error=str(e),
-                error_type=error_type.value,
-                batch_id=str(batch_id),
-            )
-            self._batch_metrics.track_error("bronze_write", error_type)
-            # Re-raise to trigger checkpointing logic in Executor or termination
-            # Critical persistence failure means we cannot proceed with this batch
-            raise
-
-        records_bronze = len(records)
-        self._batch_metrics.track_batch_size("bronze", records_bronze)
-        self._batch_metrics.track_processed_records("bronze", records_bronze)
-
-        # 2. Transform and collect Silver/Gold
+    async def _transform_records_batch(
+        self, records: list[dict[str, Any]], batch_id: BatchID
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
+        """Transform all records, returning silver, gold, and quarantine count."""
         silver_records: list[dict[str, Any]] = []
         gold_records: list[dict[str, Any]] = []
         records_quarantined = 0
 
         for raw_record in records:
-            # Bind logger with record context
             record_context = self._context.bind_logger(
                 batch_id=str(batch_id),
                 entity_id=raw_record.get("activity_id"),
             )
-
-            # Use helper method for single record transformation
             try:
                 transformed = await self._transform_record(record_context, raw_record)
                 if transformed:
                     silver_records.append(transformed)
-                    # Use helper method for gold filtering
                     if self._gold_filter(record_context, transformed):
                         gold_records.append(transformed)
             except Exception as e:
-                # Error handling encapsulated here or in helper?
-                # Keeping it here for now to access quarantine manager which uses raw_record
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():
                     await self._quarantine_manager.quarantine_record(
@@ -139,7 +119,31 @@ class RecordProcessor:
                 else:
                     raise
 
-        # Check DQ thresholds
+        return silver_records, gold_records, records_quarantined
+
+    async def process_batch(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+    ) -> BatchResult:
+        """Process a batch of records through Bronze -> Silver -> Gold."""
+        ingestion_ts = datetime.now(UTC)
+
+        # 1. Write to Bronze
+        try:
+            await self._write_bronze_batch(records, batch_id, ingestion_ts)
+        except Exception as e:
+            self._log_and_track_write_error("bronze", e, batch_id)
+            raise
+
+        records_bronze = len(records)
+        self._batch_metrics.track_batch_size("bronze", records_bronze)
+        self._batch_metrics.track_processed_records("bronze", records_bronze)
+
+        # 2. Transform and collect Silver/Gold
+        silver_records, gold_records, records_quarantined = (
+            await self._transform_records_batch(records, batch_id)
+        )
         self._collect_dq_stats(records, records_quarantined)
 
         # Update metrics
@@ -152,14 +156,7 @@ class RecordProcessor:
             try:
                 await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
             except Exception as e:
-                error_type = self._error_classifier.classify(e)
-                self._context.logger.error(
-                    "Silver write failed",
-                    error=str(e),
-                    error_type=error_type.value,
-                    batch_id=str(batch_id),
-                )
-                self._batch_metrics.track_error("silver_write", error_type)
+                self._log_and_track_write_error("silver", e, batch_id)
                 raise
 
         # 4. Write to Gold
@@ -167,14 +164,7 @@ class RecordProcessor:
             try:
                 await self._write_gold_batch(gold_records)
             except Exception as e:
-                error_type = self._error_classifier.classify(e)
-                self._context.logger.error(
-                    "Gold write failed",
-                    error=str(e),
-                    error_type=error_type.value,
-                    batch_id=str(batch_id),
-                )
-                self._batch_metrics.track_error("gold_write", error_type)
+                self._log_and_track_write_error("gold", e, batch_id)
                 raise
 
         return BatchResult(

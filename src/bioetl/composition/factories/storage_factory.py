@@ -172,102 +172,86 @@ class StorageFactory:
     """Factory for creating configured StorageAdapters."""
 
     @staticmethod
+    def _create_csv_exporter_from_config(csv_cfg: Any) -> CsvExporter | None:
+        """Create a CsvExporter from configuration if enabled."""
+        if csv_cfg and csv_cfg.enabled:
+            return CsvExporter(
+                base_path=csv_cfg.path,
+                delimiter=csv_cfg.delimiter,
+                header=csv_cfg.header,
+                encoding=csv_cfg.encoding,
+            )
+        return None
+
+    @staticmethod
+    def _get_local_paths() -> tuple[str, str, str, str]:
+        """Get storage paths for local runs."""
+        base_output_path = "data/output"
+        return (
+            f"{base_output_path}/bronze",
+            f"{base_output_path}/silver",
+            f"{base_output_path}/gold",
+            f"{base_output_path}/checkpoints",
+        )
+
+    @staticmethod
+    def _get_cloud_paths(s3_config: Any) -> tuple[str, str, str, str]:
+        """Get storage paths for cloud runs."""
+        return (
+            s3_config.bucket_bronze,
+            f"s3://{s3_config.bucket_silver}",
+            f"s3://{s3_config.bucket_gold}",
+            s3_config.bucket_checkpoints,
+        )
+
+    @staticmethod
     def create(
         settings: Settings,
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
     ) -> StorageContext:
-        """Create a StorageAdapter based on environment and pipeline configuration.
-
-        Handles path resolution for local vs cloud runs and configures
-        CSV/JSON export options for local debugging.
-
-        Args:
-            settings: Application settings
-            config: Typed pipeline configuration
-            logger: Structured logger
-
-        Returns:
-            StorageContext containing adapter and resolved paths
-        """
-        # Import here to avoid circular imports during module loading
+        """Create a StorageAdapter based on environment and pipeline configuration."""
         from bioetl.composition.factories.clients import get_aws_credentials
 
         is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
-        aws_config = settings.aws
-        s3_config = settings.s3
         storage_options = settings.storage_options if not is_local_run else None
         access_key, secret_key = get_aws_credentials(settings)
 
-        # Extract sink configs
         bronze_config = config.sink.get("bronze")
         silver_config = config.sink.get("silver")
         gold_config = config.sink.get("gold")
 
-        # Initialize export variables
         json_path = None
         silver_csv_exporter: CsvExporter | None = None
         gold_csv_exporter: CsvExporter | None = None
 
         if is_local_run:
-            logger.info(
-                "Local run detected. Overriding storage paths to 'data/output'."
+            logger.info("Local run detected. Overriding storage paths to 'data/output'.")
+            bronze_path, silver_base_path, gold_base_path, checkpoints_path = (
+                StorageFactory._get_local_paths()
             )
-            base_output_path = "data/output"
-            bronze_path = f"{base_output_path}/bronze"
-            silver_base_path = f"{base_output_path}/silver"
-            gold_base_path = f"{base_output_path}/gold"
-            checkpoints_path = f"{base_output_path}/checkpoints"
-
-            # Handle JSON export (Bronze)
             if bronze_config and bronze_config.save_json:
-                json_path = f"{base_output_path}/json"
-
-            # Handle CSV export (Silver)
-            if silver_config and silver_config.csv_export.enabled:
-                csv_cfg = silver_config.csv_export
-                silver_csv_exporter = CsvExporter(
-                    base_path=csv_cfg.path,
-                    delimiter=csv_cfg.delimiter,
-                    header=csv_cfg.header,
-                    encoding=csv_cfg.encoding,
+                json_path = "data/output/json"
+            if silver_config:
+                silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+                    silver_config.csv_export
                 )
-
-            # Handle CSV export (Gold)
-            if gold_config and gold_config.csv_export.enabled:
-                csv_cfg = gold_config.csv_export
-                gold_csv_exporter = CsvExporter(
-                    base_path=csv_cfg.path,
-                    delimiter=csv_cfg.delimiter,
-                    header=csv_cfg.header,
-                    encoding=csv_cfg.encoding,
+            if gold_config:
+                gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+                    gold_config.csv_export
                 )
         else:
-            # Cloud paths
-            bronze_path = s3_config.bucket_bronze
-            silver_base_path = f"s3://{s3_config.bucket_silver}"
-            gold_base_path = f"s3://{s3_config.bucket_gold}"
-            checkpoints_path = s3_config.bucket_checkpoints
-
-        # Logging
-        if json_path:
-            logger.info("JSON export enabled for Bronze layer")
-        if silver_csv_exporter:
-            logger.info(
-                f"CSV export enabled for Silver layer: {silver_csv_exporter.base_path}"
-            )
-        if gold_csv_exporter:
-            logger.info(
-                f"CSV export enabled for Gold layer: {gold_csv_exporter.base_path}"
+            bronze_path, silver_base_path, gold_base_path, checkpoints_path = (
+                StorageFactory._get_cloud_paths(settings.s3)
             )
 
-        # Determine save_json flag
+        StorageFactory._log_export_status(logger, json_path, silver_csv_exporter, gold_csv_exporter)
         save_json = bronze_config.save_json if bronze_config else False
 
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
                 bucket=bronze_path,
-                endpoint_url=aws_config.endpoint_url if not is_local_run else None,
+                endpoint_url=settings.aws.endpoint_url if not is_local_run else None,
                 access_key=access_key,
                 secret_key=secret_key,
                 save_json=save_json,
@@ -293,3 +277,18 @@ class StorageFactory:
             gold_path=gold_base_path,
             checkpoints_path=checkpoints_path,
         )
+
+    @staticmethod
+    def _log_export_status(
+        logger: structlog.BoundLogger,
+        json_path: str | None,
+        silver_csv_exporter: CsvExporter | None,
+        gold_csv_exporter: CsvExporter | None,
+    ) -> None:
+        """Log export configuration status."""
+        if json_path:
+            logger.info("JSON export enabled for Bronze layer")
+        if silver_csv_exporter:
+            logger.info(f"CSV export enabled for Silver layer: {silver_csv_exporter.base_path}")
+        if gold_csv_exporter:
+            logger.info(f"CSV export enabled for Gold layer: {gold_csv_exporter.base_path}")
