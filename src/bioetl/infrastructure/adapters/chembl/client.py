@@ -18,6 +18,11 @@ from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -179,6 +184,12 @@ class ChemblAdapter(BaseHttpAdapter):
         """Handle fetch errors."""
         self._consecutive_errors += 1
         self._update_health()
+        log_adapter_error(
+            logger,
+            provider="chembl",
+            operation="fetch",
+            error=str(e),
+        )
         raise ChemblApiError(str(e)) from e
 
     async def _fetch_filtered(

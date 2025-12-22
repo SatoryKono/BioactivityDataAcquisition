@@ -292,9 +292,9 @@ class OpenTargetsAssociationsPipelineFactory(BasePipelineFactory[OpenTargetsAsso
         return OpenTargetsAdapter(http_client=http_client)
 
 # Регистрация делает пайплайн доступным для запуска через CLI
-PipelineRegistry.register(
-    "open_targets_associations", OpenTargetsAssociationsPipelineFactory, SOME_GENERIC_SCHEMA
-)
+# Создаем экземпляр фабрики и регистрируем
+factory = OpenTargetsAssociationsPipelineFactory()
+PipelineRegistry.register_factory(factory)
 ```
 
 ---

@@ -21,6 +21,7 @@ from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
 
 logger = logging.getLogger(__name__)
 
@@ -151,10 +152,12 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
 
     def _handle_fetch_error(self, entity_type: str, query: str | None, cursor: str | None = None) -> None:
         """Handle fetch errors centrally."""
-        logger.error(
-            f"UniProt {entity_type} fetch failed",
-            exc_info=True,
-            extra={"query": query, "cursor": cursor},
+        log_adapter_error(
+            logger,
+            provider="uniprot",
+            operation=f"{entity_type} fetch",
+            query=query,
+            cursor=cursor,
         )
         if self.strict_error_handling:
             raise
@@ -268,14 +271,15 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         return records
 
     async def health_check(self) -> HealthStatus:
-        """Check UniProt API health status."""
+        """Check UniProt API health status using a lightweight search query."""
         try:
-             # Check specific health URL first
-            resp = await self.http_client.get(f"{self.base_url}/rest/beta/health")
+            # Lightweight search probe: Ubiquitin (P62988)
+            params = {"query": "accession:P62988", "size": 1, "format": "json"}
+            resp = await self.http_client.get(f"{self.base_url}/uniprotkb/search", params=params)
             if resp.status_code != 200:
                 return HealthStatus.DEGRADED
         except Exception:
-            pass # Fallback to CB check
+            pass  # Fallback to circuit breaker check
 
         return await super().health_check()
 

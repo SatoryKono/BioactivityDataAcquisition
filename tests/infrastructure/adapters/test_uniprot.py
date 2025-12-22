@@ -173,7 +173,7 @@ async def test_fetch_sequences_missing_query(uniprot_client):
 @respx.mock
 async def test_health_check_healthy(uniprot_client):
     """Test health check returns HEALTHY."""
-    respx.get("https://rest.uniprot.org/rest/beta/health").mock(
+    respx.get("https://rest.uniprot.org/uniprotkb/search").mock(
         return_value=Response(200)
     )
     async with uniprot_client:
@@ -188,7 +188,7 @@ async def test_health_check_on_server_error(uniprot_client):
     When http_client raises HTTPStatusError on 500, it's caught and
     falls back to circuit breaker state (HEALTHY if no failures).
     """
-    respx.get("https://rest.uniprot.org/rest/beta/health").mock(
+    respx.get("https://rest.uniprot.org/uniprotkb/search").mock(
         return_value=Response(500)
     )
     async with uniprot_client:
@@ -204,7 +204,7 @@ async def test_health_check_on_connection_error(uniprot_client):
     Connection errors fall back to circuit breaker state which may
     be DEGRADED if there were prior failures.
     """
-    respx.get("https://rest.uniprot.org/rest/beta/health").mock(
+    respx.get("https://rest.uniprot.org/uniprotkb/search").mock(
         side_effect=Exception("Connection error")
     )
     async with uniprot_client:

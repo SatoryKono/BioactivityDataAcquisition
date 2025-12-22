@@ -248,27 +248,7 @@ class TestPipelineRegistryIntegration:
         definition = PipelineRegistry.get("test_generic")
         assert definition.factory is factory
         assert definition.silver_schema is mock_schema
-        assert definition.is_instance is True
 
         # Cleanup
         del PipelineRegistry._registry["test_generic"]
 
-    def test_legacy_register_still_works(self):
-        """Test that legacy class-based registration still works."""
-
-        class MockFactory:
-            pipeline_name = "test_legacy"
-            silver_schema = None
-
-            @classmethod
-            def create_with_services(cls, **kwargs):
-                return MagicMock()
-
-        PipelineRegistry.register("test_legacy", MockFactory)
-
-        definition = PipelineRegistry.get("test_legacy")
-        assert definition.factory is MockFactory
-        assert definition.is_instance is False
-
-        # Cleanup
-        del PipelineRegistry._registry["test_legacy"]
