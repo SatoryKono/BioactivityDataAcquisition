@@ -20,11 +20,9 @@
 │   │       └── {entity}.yaml   # e.g., activity.yaml
 │   └── providers/              # Конфиги провайдеров (rate limits, URLs)
 ├── docs/                       # Документация
-│   ├── application/            # Use Cases (описания пайплайнов)
-│   │   └── pipelines/          # По провайдерам и сущностям
-│   ├── architecture/           # ADR, принципы
-│   │   ├── decisions/          # NNNN-title-in-kebab-case.md
-│   │   └── diagrams/           # Mermaid/PlantUML
+│   ├── 02-architecture/        # ADR, принципы, диаграммы
+│   ├── 03-guides/              # Руководства
+│   ├── 04-reference/           # Описания пайплайнов, CLI
 │   ├── contracts/              # Data Contracts
 │   │   └── gold/               # JSON Schema для Gold-таблиц
 │   ├── domain/                 # Глоссарий, Схемы (Pandera)
@@ -87,14 +85,14 @@
 
 ### 2. ADR (MUST)
 
-- Размещаются в `docs/architecture/decisions/`.
+- Размещаются в `docs/02-architecture/decisions/`.
 - Формат: `NNNN-title-in-kebab-case.md`.
 
 ### 3. Пайплайны (MUST)
 
 | Артефакт | Path |
 |----------|------|
-| Документация | `docs/application/pipelines/{provider}/{entity}/` |
+| Документация | `docs/04-reference/pipelines/` |
 | Код | `src/bioetl/application/pipelines/{provider}/{entity}/` |
 | Конфиг | `configs/pipelines/{provider}/{entity}.yaml` |
 
@@ -169,7 +167,7 @@ Unified Quarantine таблица: `common.quarantine`.
 
 ## Диаграммы (SHOULD)
 
-Соблюдать `docs/architecture/diagrams/00-diagramming-policy.md`:
+Соблюдать `docs/02-architecture/diagrams/00-diagramming-policy.md`:
 - Первичный формат: Mermaid/PlantUML (текст).
 - Один файл — одна диаграмма.
 - Обновлять при архитектурных изменениях.

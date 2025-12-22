@@ -90,6 +90,7 @@
 - Только через `UnifiedAPIClient` или специализированные клиенты.
 - Таймауты, ретраи с backoff, TTL-кэш, circuit breaker.
 - Политика 429/5xx: exponential backoff, бюджет попыток, троттлинг.
+- **Naming**: Функции верхнего уровня с сетевыми вызовами **MUST** иметь префикс `fetch_`.
 
 **Circuit Breaker параметры**:
 | Параметр | Значение |
@@ -142,7 +143,7 @@
 
 ### 2.11. Диаграммы (SHOULD)
 
-Соблюдать `docs/architecture/diagrams/00-diagramming-policy.md`:
+Соблюдать `docs/02-architecture/diagrams/00-diagramming-policy.md`:
 
 - Хранить первичный текстовый формат (Mermaid/PlantUML).
 - Один файл — одна диаграмма.
