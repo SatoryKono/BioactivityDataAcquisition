@@ -157,13 +157,13 @@ class TestStorageFactoryLocal:
         with (
             patch(
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
-            ) as mock_bronze,
+            ),
             patch(
                 "bioetl.composition.factories.storage_factory.DeltaWriter"
-            ) as mock_delta,
+            ),
             patch(
                 "bioetl.composition.factories.storage_factory.GoldWriter"
-            ) as mock_gold,
+            ),
         ):
             result = StorageFactory.create(
                 settings=mock_settings_local,
@@ -190,10 +190,10 @@ class TestStorageFactoryLocal:
             ) as mock_bronze,
             patch(
                 "bioetl.composition.factories.storage_factory.DeltaWriter"
-            ) as mock_delta,
+            ),
             patch(
                 "bioetl.composition.factories.storage_factory.GoldWriter"
-            ) as mock_gold,
+            ),
         ):
             StorageFactory.create(
                 settings=mock_settings_local,
@@ -221,7 +221,7 @@ class TestStorageFactoryLocal:
         with (
             patch(
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
-            ) as mock_bronze,
+            ),
             patch(
                 "bioetl.composition.factories.storage_factory.DeltaWriter"
             ) as mock_delta,

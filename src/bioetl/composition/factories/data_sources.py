@@ -4,7 +4,7 @@ Implements Abstract Factory pattern for data sources.
 """
 
 import importlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from bioetl.domain.ports import DataSourcePort
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class DataSourceFactory:
     """Factory for creating data source adapters."""
 
-    _adapters = {
+    _adapters: ClassVar[dict[str, tuple[str, str]]] = {
         "chembl": ("bioetl.infrastructure.adapters.chembl.client", "ChemblAdapter"),
         "pubchem": ("bioetl.infrastructure.adapters.pubchem.client", "PubChemClient"),
         "uniprot": ("bioetl.infrastructure.adapters.uniprot.client", "UniProtClient"),

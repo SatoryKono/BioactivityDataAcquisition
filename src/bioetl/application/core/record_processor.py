@@ -7,17 +7,19 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.config import DQConfig, TableConfig
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityThresholdError
-from bioetl.domain.types import BatchID
+
+if TYPE_CHECKING:
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.types import BatchID
 
 
 @dataclass(frozen=True, slots=True)

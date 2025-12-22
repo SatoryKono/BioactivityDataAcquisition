@@ -12,14 +12,13 @@ from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.transformations import generate_content_hash
-from bioetl.domain.types import ContentHash
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, ContentHash, SilverRecord
 
 
 class BaseTransformer(ABC):

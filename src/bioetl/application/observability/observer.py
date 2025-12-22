@@ -11,15 +11,16 @@ from __future__ import annotations
 
 import time
 from contextlib import AbstractContextManager
-from types import TracebackType
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.domain.ports import MetricsPort, TracingPort
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     import structlog
 
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
 
 

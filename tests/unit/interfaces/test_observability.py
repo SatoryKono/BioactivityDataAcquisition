@@ -3,9 +3,11 @@
 # Below are the test functions to ensure server initialization behaviour.
 
 from unittest import mock
+
 import pytest
-from bioetl.interfaces import observability
+
 from bioetl.infrastructure.observability import server as obs_server
+from bioetl.interfaces import observability
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
@@ -31,6 +33,5 @@ def test_start_metrics_server_failure():
     with mock.patch(
         "bioetl.infrastructure.observability.server.start_http_server",
         side_effect=Exception("Failed"),
-    ):
-        with pytest.raises(Exception, match="Failed"):
-            observability.start_metrics_server()
+    ), pytest.raises(Exception, match="Failed"):
+        observability.start_metrics_server()

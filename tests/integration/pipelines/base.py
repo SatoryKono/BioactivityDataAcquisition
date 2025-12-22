@@ -1,18 +1,17 @@
 """Base class for pipeline integration tests."""
 
 import os
-import shutil
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
 import structlog
-from structlog.testing import capture_logs
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+
+# Import factories to ensure they are registered/available
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import Settings
@@ -20,11 +19,6 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-
-# Import factories to ensure they are registered/available
-from bioetl.composition.factories.pipeline_factories import (
-    chembl_activity_factory,
-)
 
 logger = structlog.get_logger()
 

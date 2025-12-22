@@ -88,7 +88,7 @@ class TestLockManager:
         mock_lock_port.heartbeat.return_value = False
 
         # Test the loop directly by mocking sleep to control execution
-        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+        with patch("asyncio.sleep", new_callable=AsyncMock):
             # We need sleep to run once then stop loop or raise error
             # But the loop condition is !shutdown.is_requested
             # So the first iteration will:
