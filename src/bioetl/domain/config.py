@@ -81,6 +81,7 @@ class PipelineConfig:
 
     # Processing
     gold_filter_types: list[str] = field(default_factory=list)
+    gold_min_confidence: int | None = None  # Min confidence for Gold layer (0-9)
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: list[str] = field(default_factory=list)
