@@ -61,7 +61,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, QuarantinePort
     from bioetl.domain.types import RunType
-    from bioetl.interfaces.orchestration.runner import PipelineRunner
+    from bioetl.application.core.runner import PipelineRunner
 
 
 def bootstrap_quarantine() -> QuarantinePort:

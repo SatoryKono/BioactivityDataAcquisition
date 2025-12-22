@@ -11,7 +11,7 @@ from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSign
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
-from bioetl.interfaces.orchestration.runner import PipelineRunner
+from bioetl.application.core.runner import PipelineRunner
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def shutdown_signal():
 @pytest.fixture
 def mock_lock_manager():
     """Mock LockManager class."""
-    with patch("bioetl.interfaces.orchestration.runner.LockManager") as mock:
+    with patch("bioetl.application.core.runner.LockManager") as mock:
         lock_manager = MagicMock()
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock(return_value=None)

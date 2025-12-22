@@ -1,6 +1,7 @@
 """Pipeline Runner.
 
-This is a "Driving Adapter" in the Hexagonal Architecture.
+Application Service that orchestrates pipeline execution lifecycle.
+Coordinates locking, checkpointing, and execution.
 """
 
 from __future__ import annotations

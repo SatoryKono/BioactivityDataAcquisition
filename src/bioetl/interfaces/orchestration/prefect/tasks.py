@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
     from bioetl.domain.types import Watermark
-    from bioetl.interfaces.orchestration.runner import PipelineRunner
+    from bioetl.application.core.runner import PipelineRunner
 
 
 # =============================================================================

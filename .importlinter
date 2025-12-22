@@ -25,8 +25,6 @@ forbidden_modules =
     bioetl.composition
     bioetl.infrastructure
     bioetl.interfaces
-ignore_imports =
-    bioetl.application.registry -> bioetl.composition.registry
 
 [importlinter:contract:infrastructure-independence]
 name = Infrastructure layer must not import from application or interfaces
@@ -44,6 +42,3 @@ source_modules =
     bioetl.composition
 forbidden_modules =
     bioetl.interfaces
-ignore_imports =
-    bioetl.composition.bootstrap -> bioetl.interfaces.orchestration.runner
-    bioetl.composition.factories.generic_factory -> bioetl.interfaces.orchestration.runner

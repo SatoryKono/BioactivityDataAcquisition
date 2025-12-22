@@ -21,7 +21,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.filter_config import InputFilterConfig
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
-from bioetl.interfaces.orchestration.runner import PipelineRunner
+from bioetl.application.core.runner import PipelineRunner
 
 if TYPE_CHECKING:
     import pyarrow as pa
