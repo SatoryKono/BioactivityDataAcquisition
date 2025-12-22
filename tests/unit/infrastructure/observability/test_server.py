@@ -64,12 +64,9 @@ class TestStartMetricsServer:
 
     def test_address_already_in_use_raises_error(self):
         """Test EADDRINUSE error is raised, not silently ignored."""
-        os_error = OSError("Address already in use")
-        os_error.errno = errno.EADDRINUSE
-        
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server",
-            side_effect=os_error
+            side_effect=OSError(errno.EADDRINUSE, "Address already in use")
         ):
             with pytest.raises(OSError) as exc_info:
                 server.start_metrics_server(8000)
@@ -83,12 +80,9 @@ class TestStartMetricsServer:
 
     def test_other_os_error_is_propagated(self):
         """Test other OSError types are propagated without modification."""
-        os_error = OSError("Permission denied")
-        os_error.errno = errno.EACCES
-        
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server",
-            side_effect=os_error
+            side_effect=OSError(errno.EACCES, "Permission denied")
         ):
             with pytest.raises(OSError) as exc_info:
                 server.start_metrics_server(8000)

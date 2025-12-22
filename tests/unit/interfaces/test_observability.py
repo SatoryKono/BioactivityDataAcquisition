@@ -31,12 +31,9 @@ def test_start_metrics_server_success():
 @pytest.mark.unit
 def test_start_metrics_server_address_in_use():
     """Test start_metrics_server raises OSError when port is in use."""
-    os_error = OSError("Address already in use")
-    os_error.errno = errno.EADDRINUSE
-    
     with patch(
         "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=os_error,
+        side_effect=OSError(errno.EADDRINUSE, "Address already in use"),
     ):
         with pytest.raises(OSError) as exc_info:
             start_metrics_server(9090)
@@ -48,12 +45,9 @@ def test_start_metrics_server_address_in_use():
 @pytest.mark.unit
 def test_start_metrics_server_other_failure():
     """Test start_metrics_server propagates other OSErrors."""
-    os_error = OSError("Permission denied")
-    os_error.errno = errno.EACCES
-    
     with patch(
         "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=os_error,
+        side_effect=OSError(errno.EACCES, "Permission denied"),
     ):
         with pytest.raises(OSError):
             start_metrics_server(9090)
