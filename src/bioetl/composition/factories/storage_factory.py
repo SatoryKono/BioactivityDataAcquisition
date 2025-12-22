@@ -226,7 +226,9 @@ class StorageFactory:
         gold_csv_exporter: CsvExporter | None = None
 
         if is_local_run:
-            logger.info("Local run detected. Overriding storage paths to 'data/output'.")
+            logger.info(
+                "Local run detected. Overriding storage paths to 'data/output'."
+            )
             bronze_path, silver_base_path, gold_base_path, checkpoints_path = (
                 StorageFactory._get_local_paths()
             )
@@ -245,7 +247,9 @@ class StorageFactory:
                 StorageFactory._get_cloud_paths(settings.s3)
             )
 
-        StorageFactory._log_export_status(logger, json_path, silver_csv_exporter, gold_csv_exporter)
+        StorageFactory._log_export_status(
+            logger, json_path, silver_csv_exporter, gold_csv_exporter
+        )
         save_json = bronze_config.save_json if bronze_config else False
 
         adapter = StorageAdapter(
@@ -289,6 +293,10 @@ class StorageFactory:
         if json_path:
             logger.info("JSON export enabled for Bronze layer")
         if silver_csv_exporter:
-            logger.info(f"CSV export enabled for Silver layer: {silver_csv_exporter.base_path}")
+            logger.info(
+                f"CSV export enabled for Silver layer: {silver_csv_exporter.base_path}"
+            )
         if gold_csv_exporter:
-            logger.info(f"CSV export enabled for Gold layer: {gold_csv_exporter.base_path}")
+            logger.info(
+                f"CSV export enabled for Gold layer: {gold_csv_exporter.base_path}"
+            )
