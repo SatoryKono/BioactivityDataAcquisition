@@ -97,6 +97,10 @@ data/checkpoints/
 tmp/
 *.tmp
 
+# Test artifacts
+test-checkpoints/
+.benchmarks/
+
 # Node
 node_modules/
 
