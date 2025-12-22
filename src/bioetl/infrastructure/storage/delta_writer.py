@@ -137,7 +137,7 @@ class DeltaWriter:
                     ),
                 )
             elif mode == "append":
-                 # Direct append logic (bypass merge)
+                # Direct append logic (bypass merge)
                 await loop.run_in_executor(
                     None,
                     lambda: write_deltalake(
@@ -153,7 +153,9 @@ class DeltaWriter:
                 try:
                     dt = await loop.run_in_executor(
                         None,
-                        lambda: DeltaTable(table_path, storage_options=self.storage_options),
+                        lambda: DeltaTable(
+                            table_path, storage_options=self.storage_options
+                        ),
                     )
                     await self._merge_records(dt, arrow_data, primary_keys)
                 except DeltaTableNotFoundError:

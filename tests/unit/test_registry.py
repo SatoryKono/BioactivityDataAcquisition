@@ -51,9 +51,9 @@ def test_registry_completeness():
         name for name in found_configs if name not in registered_pipelines
     ]
 
-    assert not missing_handlers, (
-        f"The following pipelines have configs but no registered factory: {missing_handlers}"
-    )
+    assert (
+        not missing_handlers
+    ), f"The following pipelines have configs but no registered factory: {missing_handlers}"
 
 
 def test_registry_contains_expected_pipelines():

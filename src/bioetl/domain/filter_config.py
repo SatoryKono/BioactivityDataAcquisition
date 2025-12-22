@@ -60,24 +60,15 @@ class GoldFilterConfig:
 
     def _check_required_fields(self, record: dict[str, Any]) -> bool:
         """Проверяет наличие обязательных полей."""
-        return all(
-            record.get(fld) not in (None, "")
-            for fld in self.required_fields
-        )
+        return all(record.get(fld) not in (None, "") for fld in self.required_fields)
 
     def _check_exclude_if_present(self, record: dict[str, Any]) -> bool:
         """Проверяет отсутствие исключающих полей."""
-        return all(
-            record.get(fld) in (None, "")
-            for fld in self.exclude_if_present
-        )
+        return all(record.get(fld) in (None, "") for fld in self.exclude_if_present)
 
     def _check_column_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет соответствие значений колонок допустимым."""
-        return all(
-            str(record.get(f.column)) in f.values
-            for f in self.column_filters
-        )
+        return all(str(record.get(f.column)) in f.values for f in self.column_filters)
 
     def is_empty(self) -> bool:
         """Проверяет, пуста ли конфигурация фильтров.
