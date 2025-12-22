@@ -206,3 +206,69 @@ class Publication(BaseEntity):
         super().__post_init__()
         if not self.pmid:
             raise ValueError("Publication PMID is required")
+
+
+@dataclass(frozen=True, kw_only=True)
+class Assay(BaseEntity):
+    """Represents a bioassay definition (ChEMBL Assay).
+
+    Contains all fields from ChEMBL assay API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/assay
+    """
+
+    # Primary identifier
+    assay_chembl_id: str
+
+    # Core identifiers
+    target_chembl_id: str | None = None
+    document_chembl_id: str | None = None
+    cell_chembl_id: str | None = None
+    tissue_chembl_id: str | None = None
+    src_id: int | None = None
+    src_assay_id: str | None = None
+    aidx: str | None = None
+
+    # Assay classification
+    assay_type: str | None = None
+    assay_type_description: str | None = None
+    assay_category: str | None = None
+    assay_test_type: str | None = None
+    assay_group: str | None = None
+
+    # Biological context
+    assay_organism: str | None = None
+    assay_tax_id: int | None = None
+    assay_cell_type: str | None = None
+    assay_tissue: str | None = None
+    assay_strain: str | None = None
+    assay_subcellular_fraction: str | None = None
+
+    # BAO (BioAssay Ontology) annotations
+    bao_format: str | None = None
+    bao_label: str | None = None
+
+    # Description and confidence
+    description: str | None = None
+    confidence_score: int | None = None
+    confidence_description: str | None = None
+    relationship_type: str | None = None
+    relationship_description: str | None = None
+
+    # Variant information
+    variant_sequence: str | None = None
+
+    # Complex fields (stored as JSON strings)
+    assay_classifications: str | None = None  # JSON string of list
+    assay_parameters: str | None = None  # JSON string of list
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.assay_chembl_id:
+            raise ValueError("Assay ChEMBL ID is required")
+        if self.confidence_score is not None and not (0 <= self.confidence_score <= 9):
+            raise ValueError(
+                f"Confidence score must be 0-9, got {self.confidence_score}"
+            )
