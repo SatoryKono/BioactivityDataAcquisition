@@ -14,7 +14,7 @@ from uuid import uuid4
 import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
     bootstrap_pipeline,
