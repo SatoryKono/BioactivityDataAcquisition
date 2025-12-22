@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.0 (2025-12-15)*
+*Синхронизировано с RULES.md v5.1 (2025-12-22)*
 
 ---
 
@@ -120,9 +120,22 @@ sha256(provider + canonical_json(record))
 
 ### 4.3. Circuit Breaker
 
+См. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
+
 - **Trigger**: 5 consecutive errors
 - **Open Duration**: 5 мин
 - **Recovery**: Half-Open → 1 probe → Closed/Open
+- **Observability**: Метрики `circuit_breaker_state`, `trips_total`
+
+### 4.4. Graceful Shutdown
+
+См. [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
+
+При получении SIGTERM/SIGINT:
+1. Прекратить извлечение новых записей
+2. Дождаться завершения записи текущего батча
+3. Сохранить чекпоинт в S3
+4. Выйти с кодом 0
 
 ---
 
@@ -155,7 +168,7 @@ sha256(provider + canonical_json(record))
 | **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** >95% line coverage
+**Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`)
 
 ### Команды
 
@@ -217,12 +230,15 @@ await loop.run_in_executor(None, func, *args)
 | Domain Ports | `src/bioetl/domain/ports.py` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
+| Pipeline Core | `src/bioetl/application/core/` |
+| BaseTransformer | `src/bioetl/application/core/base_transformer.py` |
 | Factories | `src/bioetl/composition/factories/` |
 | Bootstrap | `src/bioetl/composition/bootstrap.py` |
 | CLI | `src/bioetl/interfaces/cli.py` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | Tests | `tests/` |
 | VCR Cassettes | `tests/fixtures/vcr/` |
+| ADR | `docs/02-architecture/decisions/` |
 
 ---
 
@@ -328,10 +344,11 @@ git commit -m "..."
 ### 14.2. Новый Пайплайн
 
 1. **Конфиг:** `configs/pipelines/{provider}/{entity}.yaml`
-2. **Пайплайн:** `src/bioetl/application/pipelines/`
-3. **Фабрика:** `src/bioetl/composition/factories/`
-4. **Регистрация:** `PipelineRegistry` (декоратор `@register`)
-5. **Тесты:** unit + integration
+2. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer.py`)
+3. **Пайплайн:** `src/bioetl/application/pipelines/`
+4. **Фабрика:** `src/bioetl/composition/factories/`
+5. **Регистрация:** `PipelineRegistry` (декоратор `@register`)
+6. **Тесты:** unit + integration
 
 ---
 
@@ -350,10 +367,11 @@ git commit -m "..."
 
 | Документ | Описание |
 |----------|----------|
-| `docs/RULES.md` | Конституция проекта v5.0 |
+| `docs/RULES.md` | Конституция проекта v5.1 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `AGENT.md` | Детальные инструкции для агента |
+| `docs/02-architecture/decisions/` | ADR (001-009) |
+| `AGENT.md` | Детальные инструкции для агента v2.1 |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
 
 ---
