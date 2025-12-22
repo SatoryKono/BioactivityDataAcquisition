@@ -115,7 +115,7 @@ class TestStartMetricsServer:
         def mock_start_http(port):
             nonlocal call_count
             call_count += 1
-            # Simulate some delay by checking global state
+            # Simulate processing delay
             time.sleep(0.01)
         
         with patch(

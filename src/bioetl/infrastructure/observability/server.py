@@ -13,6 +13,24 @@ _SERVER_PORT: Optional[int] = None
 _SERVER_LOCK = Lock()
 
 
+def _raise_port_conflict_error(current_port: int, requested_port: int) -> None:
+    """Raise RuntimeError when server is running on a different port.
+    
+    Args:
+        current_port: Port on which server is currently running
+        requested_port: Port that was requested to start
+        
+    Raises:
+        RuntimeError: Always raises with descriptive error message
+    """
+    error_msg = (
+        f"Metrics server already running on port {current_port}, "
+        f"cannot start on port {requested_port}"
+    )
+    logger.error(error_msg)
+    raise RuntimeError(error_msg)
+
+
 def start_metrics_server(port: int = 8000) -> None:
     """Start Prometheus metrics HTTP server.
 
@@ -27,15 +45,6 @@ def start_metrics_server(port: int = 8000) -> None:
         OSError: If port is already in use by another process
     """
     global _SERVER_PORT
-
-    def _raise_port_conflict_error(current_port: int, requested_port: int) -> None:
-        """Raise RuntimeError when server is running on a different port."""
-        error_msg = (
-            f"Metrics server already running on port {current_port}, "
-            f"cannot start on port {requested_port}"
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
 
     # Check if server is already running
     if _SERVER_PORT is not None:
