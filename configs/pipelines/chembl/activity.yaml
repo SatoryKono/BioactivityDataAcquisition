@@ -22,7 +22,7 @@ transform:
     steps:
         - normalize_values
         - add_metadata
-        - calculate_content_lf  hash
+        - calculate_content_hash
 
 sink:
     bronze:

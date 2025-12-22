@@ -108,55 +108,38 @@ class ChEMBLTargetPipeline(BasePipeline):
         return True
 ```
 
-## Шаг 3: Регистрация в Bootstrap (Composition Root)
+## Шаг 3: Регистрация (Composition Layer)
 
-Откройте `src/bioetl/composition/bootstrap.py` и зарегистрируйте новый пайплайн.
+В v5.1 вам больше не нужно вручную менять `bootstrap.py`. Достаточно зарегистрировать новый экземпляр `GenericPipelineFactory`.
 
-1.  **Импортируйте** новый класс пайплайна и его конфиг.
-2.  **Создайте фабрику** в `src/bioetl/composition/factories/` (или обновите существующую).
-3.  **Добавьте условие** в функцию `bootstrap_pipeline`.
-
-**Пример фабрики в `src/bioetl/composition/factories/chembl_target.py`:**
+Откройте `src/bioetl/composition/factories/pipeline_factories.py` и добавьте определение:
 
 ```python
-from bioetl.application.pipelines.chembl_target import ChEMBLTargetPipeline, CHEMBL_TARGET_CONFIG
-from bioetl.composition.factories.chembl_activity import ChEMBLActivityPipelineFactory
+from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
+from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_SCHEMA
 
-class ChEMBLTargetPipelineFactory:
-    """Фабрика для Target пайплайна (переиспользует сервисы ChEMBL)."""
-    @staticmethod
-    def create_with_services(runtime, settings, logger):
-        # Переиспользование логики создания сервисов (http client, storage и т.д.)
-        services = ChEMBLActivityPipelineFactory.build_services(settings, logger)
+# Определение фабрики
+chembl_target_factory = GenericPipelineFactory(
+    pipeline_name="chembl_target",
+    pipeline_class=ChEMBLTargetPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_TARGET_SCHEMA,
+)
 
-        return ChEMBLTargetPipeline.create(
-            runtime=runtime,
-            services=services,
-            config=CHEMBL_TARGET_CONFIG
-        )
+def register_all_pipelines() -> None:
+    # ...
+    PipelineRegistry.register_factory(chembl_target_factory)
 ```
 
-**Пример изменений в `src/bioetl/composition/bootstrap.py`:**
-
-```python
-from bioetl.composition.factories.chembl_target import ChEMBLTargetPipelineFactory
-
-def bootstrap_pipeline(pipeline_name: str, ...):
-    # ...
-    if pipeline_name == "chembl_activity":
-        # ... (существующий код)
-    elif pipeline_name == "chembl_target":
-        pipeline = ChEMBLTargetPipelineFactory.create_with_services(
-            runtime=runtime_config,
-            settings=settings,
-            logger=logger,
-        )
-    # ...
+Теперь пайплайн доступен для запуска:
+```bash
+python -m bioetl run --pipeline chembl_target
 ```
 
 ## Чек-лист
 
 - [ ] Конфиг YAML создан.
 - [ ] Класс пайплайна реализован (Silver трансформация).
-- [ ] Пайплайн зарегистрирован в `bootstrap.py`.
-- [ ] Тесты добавлены (unit тесты трансформации).
+- [ ] Схема Silver (PyArrow) определена в `infrastructure/schemas/silver.py`.
+- [ ] Пайплайн зарегистрирован в `pipeline_factories.py`.
+- [ ] Тесты добавлены.

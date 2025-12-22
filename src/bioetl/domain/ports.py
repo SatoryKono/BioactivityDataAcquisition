@@ -496,6 +496,7 @@ class OrchestrationPort(Protocol):
         ...
 
 
+@runtime_checkable
 class LoggerPort(Protocol):
     """Port for structured logging.
 
