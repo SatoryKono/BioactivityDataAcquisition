@@ -61,6 +61,37 @@
     "watermark_field": null,
     "write_mode": "merge"
   },
+  "chembl_target": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "target",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [
+        {
+          "column": "target_type",
+          "values": ["PROTEIN COMPLEX", "SINGLE PROTEIN"]
+        }
+      ],
+      "exclude_if_present": [],
+      "required_fields": ["pref_name"]
+    },
+    "gold_table": null,
+    "gold_write_mode": "overwrite",
+    "partition_cols": [],
+    "pipeline_name": "chembl_target",
+    "primary_keys": [
+      "target_chembl_id"
+    ],
+    "provider": "chembl",
+    "silver_table": "chembl_target",
+    "watermark_field": null,
+    "write_mode": "merge"
+  },
   "pubchem_compound": {
     "batch_size": 100,
     "checkpoint_interval": 1000,
