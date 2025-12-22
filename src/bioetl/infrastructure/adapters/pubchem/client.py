@@ -11,27 +11,23 @@ Requirements:
 Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 """
 
-import asyncio
 import logging
-import weakref
 from collections.abc import AsyncIterator
-from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Self
+from typing import Any
 
 import pubchempy as pcp
 
 from bioetl.domain.types import HealthStatus, Watermark
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
+from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 logger = logging.getLogger(__name__)
 
 
-class PubChemClient:
+class PubChemClient(BaseSyncAdapter):
     """PubChem API client implementing DataSourcePort.
 
     Provides access to chemical compound data from PubChem database.
@@ -57,52 +53,20 @@ class PubChemClient:
         max_workers: int = 4,
         strict_error_handling: bool = False,
     ) -> None:
-        """Initialize PubChem client.
-
-        Args:
-            rate: Requests per second (default: 5.0 per RULES.md)
-            circuit_breaker_threshold: Failures before opening circuit
-            circuit_breaker_timeout: Recovery timeout in seconds
-            max_workers: Thread pool size for sync operations
-            strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
-        """
-        self.strict_error_handling = strict_error_handling
-
-        # Rate limiter (5 req/sec)
-        self.rate_limiter = TokenBucket(rate=rate, capacity=int(rate * 2))
-
-        # Circuit breaker
-        self.circuit_breaker = CircuitBreaker(
-            provider=self.provider_name,
-            failure_threshold=circuit_breaker_threshold,
-            recovery_timeout=circuit_breaker_timeout,
+        """Initialize PubChem client."""
+        super().__init__(
+            rate=rate,
+            circuit_breaker_threshold=circuit_breaker_threshold,
+            circuit_breaker_timeout=circuit_breaker_timeout,
+            max_workers=max_workers,
+            strict_error_handling=strict_error_handling,
         )
-
-        # Thread pool for sync API calls
-        self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
-
-        # Ensure cleanup if aclose() is forgotten
-        self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
 
         self._fetch_strategies = {
             "compound": self._fetch_compounds,
             "substance": self._fetch_substances,
             "assay": self._fetch_assays,
         }
-
-    async def __aenter__(self) -> Self:
-        """Enter async context manager.
-
-        Initializes resources if needed (currently just ThreadPool which is init in __init__).
-        """
-        return self
-
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Exit async context manager.
-
-        Closes the thread pool.
-        """
-        await self.close()
 
     async def fetch(
         self,
@@ -335,19 +299,6 @@ class PubChemClient:
             "target": assay.get("target"),
         }
 
-    async def _run_in_executor(self, func: Any, *args: Any) -> Any:
-        """Run synchronous function in thread pool.
-
-        Args:
-            func: Synchronous function to run
-            *args: Arguments to pass to function
-
-        Returns:
-            Function result
-        """
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(self.thread_pool, func, *args)
-
     async def health_check(self) -> HealthStatus:
         """Check PubChem API health status.
 
@@ -381,17 +332,6 @@ class PubChemClient:
 
         except Exception:
             return HealthStatus.UNHEALTHY
-
-    async def close(self) -> None:
-        """Close thread pool."""
-        self.thread_pool.shutdown(wait=True)
-
-    async def aclose(self) -> None:
-        """Gracefully close resources.
-
-        Implements DataSourcePort.aclose().
-        """
-        await self.close()
 
     def __repr__(self) -> str:
         """String representation."""
