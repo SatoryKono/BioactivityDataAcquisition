@@ -32,6 +32,11 @@ class PageFetcher(Protocol[T]):
 class PaginatedFetcherMixin:
     """Mixin for implementing standardized pagination logic in HTTP adapters."""
 
+    @staticmethod
+    def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
+        """Check if we've reached the global fetch limit."""
+        return limit is not None and fetched >= limit
+
     async def paginated_fetch(
         self,
         fetch_func: Callable[[Any | None, int], Awaitable[tuple[list[T], Any | None]]],
@@ -54,29 +59,18 @@ class PaginatedFetcherMixin:
         fetched = 0
         cursor = initial_cursor
 
-        while True:
-            # Check global limit before fetching next page
-            if limit is not None and fetched >= limit:
-                break
-
-            # Fetch next batch
+        while not self._should_stop_fetching(fetched, limit):
             items, next_cursor = await fetch_func(cursor, fetched)
 
-            if not items:
-                # If no items returned, we are usually done.
-                # Check next_cursor just in case API returns empty page but valid cursor?
-                # For safety, if no items and no cursor, break.
-                # If cursor exists but no items, continue? (Rare case)
-                if next_cursor is None:
-                    break
+            if not items and next_cursor is None:
+                break
 
             for item in items:
                 yield item
                 fetched += 1
-                if limit is not None and fetched >= limit:
-                    break
+                if self._should_stop_fetching(fetched, limit):
+                    return
 
             if next_cursor is None:
                 break
-
             cursor = next_cursor
