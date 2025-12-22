@@ -5,12 +5,11 @@ Transforms Bronze records to Silver format (Molecule entity inflation).
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import (
-    generate_content_hash,
     generate_entity_id,
     safe_int,
 )
@@ -20,20 +19,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-def _serialize_json(value: Any) -> str | None:
-    """Serialize complex values (dict/list) to JSON string."""
-    if value is None:
-        return None
-    if isinstance(value, (dict, list)):
-        return json.dumps(value, ensure_ascii=False)
-    return str(value)
-
-
-class MoleculeTransformer:
+class MoleculeTransformer(BaseTransformer):
     """Transforms ChEMBL bronze molecule records to silver."""
 
     def __init__(self, provider: str = "chembl"):
-        self.provider = provider
+        super().__init__(provider)
 
     async def transform(
         self,
@@ -75,19 +65,15 @@ class MoleculeTransformer:
                 "inorganic_flag": safe_int(record.get("inorganic_flag")),
                 "polymer_flag": safe_int(record.get("polymer_flag")),
                 # Complex fields (JSON serialized)
-                "molecule_hierarchy": _serialize_json(record.get("molecule_hierarchy")),
-                "molecule_properties": _serialize_json(record.get("molecule_properties")),
-                "molecule_structures": _serialize_json(record.get("molecule_structures")),
-                "molecule_synonyms": _serialize_json(record.get("molecule_synonyms")),
-                "cross_references": _serialize_json(record.get("cross_references")),
-                "atc_classifications": _serialize_json(record.get("atc_classifications")),
+                "molecule_hierarchy": self.serialize_json(record.get("molecule_hierarchy")),
+                "molecule_properties": self.serialize_json(record.get("molecule_properties")),
+                "molecule_structures": self.serialize_json(record.get("molecule_structures")),
+                "molecule_synonyms": self.serialize_json(record.get("molecule_synonyms")),
+                "cross_references": self.serialize_json(record.get("cross_references")),
+                "atc_classifications": self.serialize_json(record.get("atc_classifications")),
             }
 
-            content_hash = generate_content_hash(
-                business_data,
-                self.provider,
-                exclude_none=True,
-            )
+            content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
             entity = Molecule(
                 entity_id=entity_id,
@@ -107,12 +93,6 @@ class MoleculeTransformer:
             return None
 
         # Convert Entity to SilverRecord for storage
-        silver_record = entity.__dict__.copy()
-
-        # Handle lineage fields renaming and formatting
-        silver_record["_run_id"] = str(silver_record.pop("run_id"))
-        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-        silver_record["_source_batch_id"] = str(silver_record.pop("source_batch_id"))
-        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
+        silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)

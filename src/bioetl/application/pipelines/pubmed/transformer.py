@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Publication
-from bioetl.domain.transformations import generate_content_hash, generate_entity_id
+from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
-
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
@@ -31,17 +29,16 @@ def _parse_author_list(article_node: ET.Element) -> list[str]:
     return authors
 
 
-class PubMedPublicationTransformer:
+class PubMedPublicationTransformer(BaseTransformer):
     """Transformer for PubMed publication records."""
 
     def __init__(self, provider: str = "pubmed"):
-        self.provider = provider
+        super().__init__(provider)
 
-    def transform(
+    async def transform(
         self,
         context: PipelineContext,
         record: BronzeRecord,
-        logger: BoundLogger,
     ) -> SilverRecord | None:
         """Трансформирует сырую XML-запись в формат Silver."""
         raw_xml = record.get("_raw_xml")
@@ -77,7 +74,7 @@ class PubMedPublicationTransformer:
                 provider=self.provider,
                 id_field="pmid",
             )
-            content_hash = generate_content_hash(business_data, self.provider)
+            content_hash = self.compute_content_hash(business_data, exclude_none=False)
 
             publication = Publication(
                 entity_id=entity_id,
@@ -88,22 +85,11 @@ class PubMedPublicationTransformer:
                 **business_data,
             )
 
-            silver_record: dict[str, Any] = {
-                "entity_id": publication.entity_id,
-                "content_hash": publication.content_hash,
-                "pmid": publication.pmid,
-                "title": publication.title,
-                "abstract": publication.abstract,
-                "journal": publication.journal,
-                "publication_year": publication.publication_year,
-                "authors": publication.authors,
-                "_run_id": str(context.run_id),
-                "_run_type": str(context.run_type.value),
-                "_ingestion_ts": datetime.now(UTC).isoformat(),
-            }
+            # Convert Entity to SilverRecord for storage
+            silver_record = self.entity_to_silver_record(publication)
 
             return cast("SilverRecord", silver_record)
 
         except ET.ParseError as e:
-            logger.warning("XML_parse_error", error=str(e), pmid=record.get("pmid"))
+            context.logger.warning("XML_parse_error", error=str(e), pmid=record.get("pmid"))
             return None

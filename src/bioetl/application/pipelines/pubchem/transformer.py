@@ -2,19 +2,27 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-from bioetl.domain.transformations import generate_content_hash, generate_entity_id
-from bioetl.domain.types import BronzeRecord, SilverRecord
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.transformations import generate_entity_id
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class PubChemCompoundTransformer:
+class PubChemCompoundTransformer(BaseTransformer):
     """Transformer for PubChem compound records."""
 
     def __init__(self, provider: str = "pubchem"):
-        self.provider = provider
+        super().__init__(provider)
 
-    def transform(self, record: BronzeRecord) -> SilverRecord | None:
+    async def transform(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+    ) -> SilverRecord | None:
         """Transform raw PubChem record to Silver format."""
         cid = record.get("cid")
         if not cid:
@@ -40,7 +48,7 @@ class PubChemCompoundTransformer:
         normalized["entity_id"] = entity_id
 
         # Генерация content_hash согласно RULES.md §2.8.1
-        content_hash = generate_content_hash(normalized, self.provider)
+        content_hash = self.compute_content_hash(normalized, exclude_none=False)
         normalized["content_hash"] = content_hash
 
         return cast("SilverRecord", normalized)

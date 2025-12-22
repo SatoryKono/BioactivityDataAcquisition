@@ -5,12 +5,11 @@ Transforms Bronze records to Silver format (Activity entity inflation).
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Activity
 from bioetl.domain.transformations import (
-    generate_content_hash,
     generate_entity_id,
     safe_float,
     safe_int,
@@ -21,20 +20,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-def _serialize_json(value: Any) -> str | None:
-    """Serialize complex values (dict/list) to JSON string."""
-    if value is None:
-        return None
-    if isinstance(value, (dict, list)):
-        return json.dumps(value, ensure_ascii=False)
-    return str(value)
-
-
-class ActivityTransformer:
+class ActivityTransformer(BaseTransformer):
     """Transforms ChEMBL bronze records to silver."""
 
     def __init__(self, provider: str = "chembl"):
-        self.provider = provider
+        super().__init__(provider)
 
     async def transform(
         self,
@@ -101,7 +91,7 @@ class ActivityTransformer:
                 "standard_flag": safe_int(record.get("standard_flag")),
                 # Derived metrics
                 "pchembl_value": safe_float(record.get("pchembl_value")),
-                "ligand_efficiency": _serialize_json(record.get("ligand_efficiency")),
+                "ligand_efficiency": self.serialize_json(record.get("ligand_efficiency")),
                 # Units ontology
                 "qudt_units": record.get("qudt_units"),
                 "uo_units": record.get("uo_units"),
@@ -114,19 +104,15 @@ class ActivityTransformer:
                 "data_validity_description": record.get("data_validity_description"),
                 "potential_duplicate": safe_int(record.get("potential_duplicate")),
                 # Action and properties
-                "action_type": _serialize_json(record.get("action_type")),
-                "activity_properties": _serialize_json(
+                "action_type": self.serialize_json(record.get("action_type")),
+                "activity_properties": self.serialize_json(
                     record.get("activity_properties")
                 ),
                 "toid": safe_int(record.get("toid")),
             }
 
             # Generate content hash based on business data (exclude None values)
-            content_hash = generate_content_hash(
-                business_data,
-                self.provider,
-                exclude_none=True,
-            )
+            content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
             entity = Activity(
                 entity_id=entity_id,
@@ -144,13 +130,6 @@ class ActivityTransformer:
             return None
 
         # 2. Convert Entity to SilverRecord for storage
-        # Optimization: Use __dict__ copy instead of manual field mapping (50+ fields)
-        silver_record = entity.__dict__.copy()
-
-        # Handle lineage fields renaming and formatting
-        silver_record["_run_id"] = str(silver_record.pop("run_id"))
-        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-        silver_record["_source_batch_id"] = str(silver_record.pop("source_batch_id"))
-        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
+        silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)
