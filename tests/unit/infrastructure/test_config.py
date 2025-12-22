@@ -29,7 +29,7 @@ def test_yaml_config_to_domain_mapping():
     assert domain_config.pipeline_name == "test_pipeline"
     assert domain_config.write_mode == "append"
     # Table config verification
-    assert domain_config.table.write_mode == "append"
+    assert domain_config.table.silver_write_mode == "append"
     assert domain_config.table.silver_table == "silver.test"
 
 def test_yaml_config_to_domain_default_mode():

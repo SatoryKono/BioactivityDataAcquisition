@@ -1,8 +1,12 @@
-"""Unit tests for InputFilterConfig."""
+"""Unit tests for filter configuration classes."""
 
 import pytest
 
-from bioetl.domain.filter_config import InputFilterConfig
+from bioetl.domain.filter_config import (
+    GoldColumnFilter,
+    GoldFilterConfig,
+    InputFilterConfig,
+)
 
 
 @pytest.mark.unit
@@ -113,3 +117,209 @@ class TestInputFilterConfigValidation:
         )
 
         assert config.enabled is False
+
+
+# =============================================================================
+# GoldColumnFilter Tests
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestGoldColumnFilter:
+    """Tests for GoldColumnFilter."""
+
+    def test_create_valid_filter(self):
+        """Test creating a valid column filter."""
+        filter_ = GoldColumnFilter(
+            column="standard_type",
+            values=frozenset(["IC50", "Ki"]),
+        )
+
+        assert filter_.column == "standard_type"
+        assert filter_.values == frozenset(["IC50", "Ki"])
+
+    def test_empty_column_raises(self):
+        """Test that empty column name raises ValueError."""
+        with pytest.raises(ValueError, match="column name cannot be empty"):
+            GoldColumnFilter(column="", values=frozenset(["IC50"]))
+
+    def test_empty_values_raises(self):
+        """Test that empty values raises ValueError."""
+        with pytest.raises(ValueError, match="values for column .* cannot be empty"):
+            GoldColumnFilter(column="standard_type", values=frozenset())
+
+    def test_filter_is_frozen(self):
+        """Test that filter is immutable."""
+        filter_ = GoldColumnFilter(
+            column="standard_type",
+            values=frozenset(["IC50"]),
+        )
+
+        with pytest.raises(AttributeError):
+            filter_.column = "new_column"
+
+
+# =============================================================================
+# GoldFilterConfig Tests
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestGoldFilterConfig:
+    """Tests for GoldFilterConfig."""
+
+    def test_empty_config(self):
+        """Test creating an empty filter config."""
+        config = GoldFilterConfig()
+
+        assert config.column_filters == ()
+        assert config.required_fields == ()
+        assert config.exclude_if_present == ()
+        assert config.is_empty() is True
+
+    def test_config_with_column_filters(self):
+        """Test creating config with column filters."""
+        filter1 = GoldColumnFilter("col1", frozenset(["a", "b"]))
+        filter2 = GoldColumnFilter("col2", frozenset(["x"]))
+
+        config = GoldFilterConfig(column_filters=(filter1, filter2))
+
+        assert len(config.column_filters) == 2
+        assert config.is_empty() is False
+
+    def test_config_with_required_fields(self):
+        """Test creating config with required fields."""
+        config = GoldFilterConfig(required_fields=("field1", "field2"))
+
+        assert config.required_fields == ("field1", "field2")
+        assert config.is_empty() is False
+
+    def test_config_with_exclude_if_present(self):
+        """Test creating config with exclude_if_present."""
+        config = GoldFilterConfig(exclude_if_present=("bad_field",))
+
+        assert config.exclude_if_present == ("bad_field",)
+        assert config.is_empty() is False
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigShouldInclude:
+    """Tests for GoldFilterConfig.should_include method."""
+
+    def test_empty_config_includes_all(self):
+        """Test that empty config includes all records."""
+        config = GoldFilterConfig()
+
+        assert config.should_include({}) is True
+        assert config.should_include({"any": "field"}) is True
+
+    def test_required_fields_pass(self):
+        """Test required fields filter - passes when fields have values."""
+        config = GoldFilterConfig(required_fields=("field1", "field2"))
+
+        record = {"field1": "value1", "field2": "value2"}
+        assert config.should_include(record) is True
+
+    def test_required_fields_fail_on_none(self):
+        """Test required fields filter - fails on None value."""
+        config = GoldFilterConfig(required_fields=("field1",))
+
+        assert config.should_include({"field1": None}) is False
+
+    def test_required_fields_fail_on_empty_string(self):
+        """Test required fields filter - fails on empty string."""
+        config = GoldFilterConfig(required_fields=("field1",))
+
+        assert config.should_include({"field1": ""}) is False
+
+    def test_required_fields_fail_on_missing(self):
+        """Test required fields filter - fails on missing field."""
+        config = GoldFilterConfig(required_fields=("field1",))
+
+        assert config.should_include({}) is False
+
+    def test_exclude_if_present_pass(self):
+        """Test exclude_if_present - passes when field is absent."""
+        config = GoldFilterConfig(exclude_if_present=("bad_field",))
+
+        assert config.should_include({}) is True
+        assert config.should_include({"other": "value"}) is True
+
+    def test_exclude_if_present_pass_on_none(self):
+        """Test exclude_if_present - passes when field is None."""
+        config = GoldFilterConfig(exclude_if_present=("bad_field",))
+
+        assert config.should_include({"bad_field": None}) is True
+
+    def test_exclude_if_present_pass_on_empty_string(self):
+        """Test exclude_if_present - passes when field is empty string."""
+        config = GoldFilterConfig(exclude_if_present=("bad_field",))
+
+        assert config.should_include({"bad_field": ""}) is True
+
+    def test_exclude_if_present_fail(self):
+        """Test exclude_if_present - fails when field has value."""
+        config = GoldFilterConfig(exclude_if_present=("bad_field",))
+
+        assert config.should_include({"bad_field": "has value"}) is False
+
+    def test_column_filters_pass(self):
+        """Test column filters - passes when value is in allowed set."""
+        filter_ = GoldColumnFilter("type", frozenset(["IC50", "Ki"]))
+        config = GoldFilterConfig(column_filters=(filter_,))
+
+        assert config.should_include({"type": "IC50"}) is True
+        assert config.should_include({"type": "Ki"}) is True
+
+    def test_column_filters_fail(self):
+        """Test column filters - fails when value is not in allowed set."""
+        filter_ = GoldColumnFilter("type", frozenset(["IC50", "Ki"]))
+        config = GoldFilterConfig(column_filters=(filter_,))
+
+        assert config.should_include({"type": "EC50"}) is False
+        assert config.should_include({"type": None}) is False
+        assert config.should_include({}) is False
+
+    def test_column_filters_convert_to_string(self):
+        """Test column filters convert values to string for comparison."""
+        filter_ = GoldColumnFilter("score", frozenset(["8", "9"]))
+        config = GoldFilterConfig(column_filters=(filter_,))
+
+        # Numeric value should be converted to string
+        assert config.should_include({"score": 8}) is True
+        assert config.should_include({"score": 9}) is True
+        assert config.should_include({"score": 7}) is False
+
+    def test_all_filters_combined(self):
+        """Test combination of all filter types."""
+        filter_ = GoldColumnFilter("type", frozenset(["IC50"]))
+        config = GoldFilterConfig(
+            column_filters=(filter_,),
+            required_fields=("value",),
+            exclude_if_present=("invalid",),
+        )
+
+        # Passes all filters
+        assert config.should_include({
+            "type": "IC50",
+            "value": 100,
+        }) is True
+
+        # Fails column filter
+        assert config.should_include({
+            "type": "Ki",
+            "value": 100,
+        }) is False
+
+        # Fails required field
+        assert config.should_include({
+            "type": "IC50",
+            "value": None,
+        }) is False
+
+        # Fails exclude_if_present
+        assert config.should_include({
+            "type": "IC50",
+            "value": 100,
+            "invalid": "has value",
+        }) is False

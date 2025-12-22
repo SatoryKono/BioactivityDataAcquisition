@@ -234,7 +234,6 @@ class CsvExporter:
 
             # Concatenate with matching schemas
             return pa.concat_tables([existing_table, new_data])
-        except (pa.ArrowInvalid, pa.ArrowTypeError) as e:
+        except (pa.ArrowInvalid, pa.ArrowTypeError):
             # Schema incompatible - return only new data (effectively overwrite)
-            logger.warning("csv_schema_mismatch_overwriting: %s", str(e))
             return new_data

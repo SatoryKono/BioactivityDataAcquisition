@@ -237,6 +237,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
             primary_keys=pipeline.config.primary_keys,
             silver_table=pipeline.config.silver_table,
             gold_table=pipeline.config.gold_table,
+            silver_write_mode=pipeline.config.write_mode,
+            gold_write_mode=pipeline.config.gold_write_mode,
         )
 
         record_processor = RecordProcessor(

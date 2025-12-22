@@ -109,6 +109,31 @@ class SinkLayerConfig(BaseModel):
     csv_export: CsvExportConfig = Field(default_factory=CsvExportConfig)
 
 
+class GoldFiltersConfig(BaseModel):
+    """Schema для gold_filters в YAML.
+
+    Позволяет конфигурировать фильтры Gold слоя:
+    - columns: колонки с допустимыми значениями (оператор "in")
+    - required_fields: обязательные поля (не null)
+    - exclude_if_present: исключающие поля
+
+    Пример YAML:
+        gold_filters:
+          columns:
+            standard_type: [IC50, Ki]
+            assay_type: [B, F]
+          required_fields:
+            - standard_value
+            - target_chembl_id
+          exclude_if_present:
+            - data_validity_comment
+    """
+
+    columns: dict[str, list[str]] = Field(default_factory=dict)
+    required_fields: list[str] = Field(default_factory=list)
+    exclude_if_present: list[str] = Field(default_factory=list)
+
+
 class PipelineYamlConfig(BaseModel):
     """Strict schema for pipeline YAML configuration.
 
@@ -138,7 +163,8 @@ class PipelineYamlConfig(BaseModel):
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
-    gold_filter_types: list[str] = Field(default_factory=list)
+    gold_filter_types: list[str] = Field(default_factory=list)  # deprecated
+    gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_min_confidence: int | None = Field(default=None, ge=0, le=9)
 
     # Medallion Layers

@@ -246,11 +246,17 @@ class RecordProcessor:
         table_name = (
             self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
         )
+        # For "overwrite" mode, use "append" for batch writes since table is cleared at run start
+        # This allows accumulating batches within a run while still replacing previous run data
+        write_mode = self._table_config.silver_write_mode
+        if write_mode == "overwrite":
+            write_mode = "append"
         await self._storage.write_silver(
             table_name=table_name,
             records=records_with_meta,
             primary_keys=self._table_config.primary_keys,
             schema=self._silver_schema,
+            mode=write_mode,
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
@@ -271,6 +277,13 @@ class RecordProcessor:
         table_name = (
             self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
         )
+        # For "overwrite" mode, use "append" for batch writes since table is cleared at run start
+        # This allows accumulating batches within a run while still replacing previous run data
+        write_mode = self._table_config.gold_write_mode
+        if write_mode == "overwrite":
+            write_mode = "append"
         await self._storage.write_gold(
-            table_name=table_name, records=records, mode="append"
+            table_name=table_name,
+            records=records,
+            mode=write_mode,
         )
