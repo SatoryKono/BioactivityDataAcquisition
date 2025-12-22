@@ -17,6 +17,7 @@ from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
         LockPort,
         MetricsPort,
         QuarantinePort,
+        TracingPort,
     )
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -58,6 +60,7 @@ class BaseServicesFactory:
         checkpoint = cls._create_checkpoint(settings, storage_ctx)
         quarantine = cls._create_quarantine(settings, storage_ctx)
         metrics = cls._create_metrics(settings)
+        tracing = cls._create_tracing(settings)
 
         return PipelineServices(
             data_source=data_source,
@@ -66,6 +69,7 @@ class BaseServicesFactory:
             checkpoint=checkpoint,
             quarantine=quarantine,
             metrics=metrics,
+            tracing=tracing,
             logger=logger,
         )
 
@@ -106,3 +110,8 @@ class BaseServicesFactory:
         if getattr(settings, "metrics", None) and settings.metrics.enabled:
             return PrometheusMetrics()
         return NoOpMetrics()
+
+    @staticmethod
+    def _create_tracing(settings: Settings) -> TracingPort:
+        # Placeholder for real OTel implementation
+        return NoOpTracing()

@@ -109,39 +109,61 @@ class DeltaWriter:
             for rec in records
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
-        # Use RecordBatchReader for better compatibility with delta-rs Arrow C Data interface
-        arrow_reader = pa.RecordBatchReader.from_batches(
-            schema, arrow_data.to_batches()
-        )
+
+        # Use pa.Table directly instead of RecordBatchReader for write operations
+        # to ensure data is available for potential retries and to avoid consumption issues.
+        # delta-rs handles pa.Table efficiently.
 
         loop = asyncio.get_running_loop()
 
         try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path, storage_options=self.storage_options),
-            )
-            await self._merge_records(dt, arrow_reader, primary_keys)
-        except DeltaTableNotFoundError:
-            try:
-                # Re-create reader as it might have been consumed
-                arrow_reader = pa.RecordBatchReader.from_batches(
-                    schema, arrow_data.to_batches()
-                )
+            # Handle different write modes
+            if mode == "overwrite":
+                # Direct overwrite logic
                 await loop.run_in_executor(
                     None,
                     lambda: write_deltalake(
                         table_or_uri=table_path,
-                        data=arrow_reader,
+                        data=arrow_data,
+                        mode="overwrite",
+                        partition_by=partition_cols,
+                        schema_mode="overwrite",  # Allow schema evolution on overwrite
+                        storage_options=self.storage_options,
+                    ),
+                )
+            elif mode == "append":
+                 # Direct append logic (bypass merge)
+                await loop.run_in_executor(
+                    None,
+                    lambda: write_deltalake(
+                        table_or_uri=table_path,
+                        data=arrow_data,
                         mode="append",
                         partition_by=partition_cols,
                         storage_options=self.storage_options,
                     ),
                 )
-            except ArrowTypeError as schema_exc:
-                raise SchemaViolationError(
-                    table_name, errors=[str(schema_exc)]
-                ) from schema_exc
+            else:
+                # Default: merge logic
+                try:
+                    dt = await loop.run_in_executor(
+                        None,
+                        lambda: DeltaTable(table_path, storage_options=self.storage_options),
+                    )
+                    await self._merge_records(dt, arrow_data, primary_keys)
+                except DeltaTableNotFoundError:
+                    # Fallback to create table if not exists (append mode effectively creates it)
+                     await loop.run_in_executor(
+                        None,
+                        lambda: write_deltalake(
+                            table_or_uri=table_path,
+                            data=arrow_data,
+                            mode="append",
+                            partition_by=partition_cols,
+                            storage_options=self.storage_options,
+                        ),
+                    )
+
         except (SchemaMismatchError, ArrowTypeError) as e:
             raise SchemaViolationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
@@ -190,7 +212,6 @@ class DeltaWriter:
             ),
         )
 
-    # ... (the rest of the file remains the same)
     async def vacuum(
         self,
         table_name: str,

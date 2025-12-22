@@ -14,13 +14,15 @@
     ],
     "gold_min_confidence": null,
     "gold_table": null,
+    "partition_cols": [],
     "pipeline_name": "chembl_activity",
     "primary_keys": [
       "activity_id"
     ],
     "provider": "chembl",
     "silver_table": "chembl_activity",
-    "watermark_field": "updated_on"
+    "watermark_field": "updated_on",
+    "write_mode": "merge"
   },
   "pubchem_compound": {
     "batch_size": 100,
@@ -34,13 +36,15 @@
     "gold_filter_types": [],
     "gold_min_confidence": null,
     "gold_table": null,
+    "partition_cols": [],
     "pipeline_name": "pubchem_compound",
     "primary_keys": [
       "cid"
     ],
     "provider": "pubchem",
     "silver_table": "pubchem_compound",
-    "watermark_field": "cid"
+    "watermark_field": "cid",
+    "write_mode": "merge"
   },
   "pubmed_publications": {
     "batch_size": 100,
@@ -54,13 +58,15 @@
     "gold_filter_types": [],
     "gold_min_confidence": null,
     "gold_table": null,
+    "partition_cols": [],
     "pipeline_name": "pubmed_publications",
     "primary_keys": [
       "pmid"
     ],
     "provider": "pubmed",
     "silver_table": "pubmed_publications",
-    "watermark_field": null
+    "watermark_field": null,
+    "write_mode": "merge"
   },
   "uniprot_protein": {
     "batch_size": 100,
@@ -74,12 +80,14 @@
     "gold_filter_types": [],
     "gold_min_confidence": null,
     "gold_table": null,
+    "partition_cols": [],
     "pipeline_name": "uniprot_protein",
     "primary_keys": [
       "accession"
     ],
     "provider": "uniprot",
     "silver_table": "uniprot_protein",
-    "watermark_field": "accession"
+    "watermark_field": "accession",
+    "write_mode": "merge"
   }
 }
