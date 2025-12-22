@@ -87,7 +87,7 @@ def run(
 
     try:
         # Bootstrap returns a fully constructed runner
-        runner = bootstrap_pipeline(
+        ctx = PipelineRunContext(
             pipeline_name=pipeline,
             run_id=run_id,
             run_type=RunType(run_type),
@@ -97,6 +97,7 @@ def run(
             filter_column=filter_column,
             filter_field=filter_field,
         )
+        runner = bootstrap_pipeline(ctx)
     except (ValueError, FileNotFoundError) as e:
         click.echo(f"Configuration error: {e}", err=True)
         sys.exit(1)
