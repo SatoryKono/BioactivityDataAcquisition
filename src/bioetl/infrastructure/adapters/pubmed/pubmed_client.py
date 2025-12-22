@@ -69,6 +69,45 @@ class PubMedAdapter:
             logger.error("Failed to fetch PMIDs", error=str(e))
             raise ApiError(f"PubMed search failed: {e}") from e
 
+    def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
+        """Build parameters for efetch API call."""
+        params = {
+            "db": "pubmed",
+            "id": ",".join(id_batch),
+            "retmode": "xml",
+            "rettype": "abstract",
+            "email": self.email,
+        }
+        if self.api_key:
+            params["api_key"] = self.api_key
+        return params
+
+    @staticmethod
+    def _extract_record_from_article(article_node: ET.Element) -> dict[str, Any]:
+        """Extract record dict from a PubmedArticle XML node."""
+        pmid_node = article_node.find(".//PMID")
+        title_node = article_node.find(".//ArticleTitle")
+        return {
+            "pmid": pmid_node.text if pmid_node is not None else None,
+            "article_title": title_node.text if title_node is not None else "No title found",
+            "_raw_xml": ET.tostring(article_node, encoding="unicode"),
+        }
+
+    async def _fetch_batch(self, id_batch: list[str]) -> ET.Element | None:
+        """Fetch a batch of articles and return parsed XML root."""
+        params = self._build_fetch_params(id_batch)
+        try:
+            response = await self.http_client.get(
+                f"{ENTREZ_API_BASE}efetch.fcgi", params=params
+            )
+            return ET.fromstring(response.text)
+        except ET.ParseError as e:
+            logger.error("XML parse error", error=str(e))
+            return None
+        except Exception as e:
+            logger.error("Batch fetch failed", error=str(e))
+            raise ApiError(f"PubMed fetch failed: {e}") from e
+
     async def fetch(
         self,
         entity_type: str,
@@ -78,22 +117,8 @@ class PubMedAdapter:
         filter_ids: set[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubMed records.
-
-        Args:
-            entity_type: Must be 'publication'
-            watermark: Unused for now (required by protocol)
-            limit: Max records to fetch
-            query: PubMed search query (defaults to pharmacogenomics search)
-            filter_ids: Optional set of IDs to filter by (unused in PubMed)
-            filter_field: Optional field name to filter on (unused in PubMed)
-
-        Yields:
-            Dict containing pmid, article_title, and raw_xml
-        """
-        # Note: filter_ids and filter_field are ignored for PubMed -
-        # filtering should be done via query parameter
-        _ = filter_ids, filter_field  # Mark as intentionally unused
+        """Fetch PubMed records."""
+        _ = filter_ids, filter_field, watermark  # Mark as intentionally unused
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
@@ -105,54 +130,15 @@ class PubMedAdapter:
 
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):
-            id_batch = pmids[i : i + self.batch_size]
+            root = await self._fetch_batch(pmids[i : i + self.batch_size])
+            if root is None:
+                continue
 
-            fetch_url = f"{ENTREZ_API_BASE}efetch.fcgi"
-            params = {
-                "db": "pubmed",
-                "id": ",".join(id_batch),
-                "retmode": "xml",
-                "rettype": "abstract",
-                "email": self.email,
-            }
-            if self.api_key:
-                params["api_key"] = self.api_key
-
-            try:
-                response = await self.http_client.get(fetch_url, params=params)
-
-                try:
-                    root = ET.fromstring(response.text)
-                except ET.ParseError as e:
-                    logger.error(
-                        "XML parse error", error=str(e), text_sample=response.text[:100]
-                    )
-                    continue  # Skip batch on XML error
-
-                for article_node in root.findall(".//PubmedArticle"):
-                    pmid_node = article_node.find(".//PMID")
-                    title_node = article_node.find(".//ArticleTitle")
-
-                    record = {
-                        "pmid": pmid_node.text if pmid_node is not None else None,
-                        "article_title": (
-                            title_node.text
-                            if title_node is not None
-                            else "No title found"
-                        ),
-                        "_raw_xml": ET.tostring(article_node, encoding="unicode"),
-                    }
-                    yield record
-
-                    total_fetched += 1
-                    if limit and total_fetched >= limit:
-                        return
-
-            except Exception as e:
-                logger.error("Batch fetch failed", error=str(e))
-                # Depending on strictness, we might want to raise or continue
-                # For now, we log and raise to stop the pipeline on API errors
-                raise ApiError(f"PubMed fetch failed: {e}") from e
+            for article_node in root.findall(".//PubmedArticle"):
+                yield self._extract_record_from_article(article_node)
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
 
     async def health_check(self) -> HealthStatus:
         """Check PubMed API availability."""

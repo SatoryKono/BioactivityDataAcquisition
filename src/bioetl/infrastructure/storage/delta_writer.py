@@ -67,6 +67,88 @@ class DeltaWriter:
         self.storage_options = storage_options or {}
         self.csv_exporter = csv_exporter
 
+    def _prepare_arrow_data(
+        self,
+        records: list[dict[str, Any]],
+        schema: pa.Schema,
+        primary_keys: list[str],
+    ) -> pa.Table:
+        """Prepare Arrow table from records with schema filtering and sorting."""
+        schema_fields = set(schema.names)
+        string_fields = {
+            field.name
+            for field in schema
+            if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
+        }
+
+        def serialize_value(key: str, value: Any) -> Any:
+            if value is None:
+                return None
+            if key in string_fields and isinstance(value, (dict, list)):
+                return json.dumps(value, sort_keys=True)
+            return value
+
+        filtered_records = [
+            {k: serialize_value(k, v) for k, v in rec.items() if k in schema_fields}
+            for rec in records
+        ]
+        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+
+        if primary_keys:
+            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
+        return arrow_data
+
+    async def _write_overwrite(
+        self, table_path: str, data: pa.Table, partition_cols: list[str] | None
+    ) -> None:
+        """Write data in overwrite mode."""
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: write_deltalake(
+                table_or_uri=table_path,
+                data=data,
+                mode="overwrite",
+                partition_by=partition_cols,
+                schema_mode="overwrite",
+                storage_options=self.storage_options,
+            ),
+        )
+
+    async def _write_append(
+        self, table_path: str, data: pa.Table, partition_cols: list[str] | None
+    ) -> None:
+        """Write data in append mode."""
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: write_deltalake(
+                table_or_uri=table_path,
+                data=data,
+                mode="append",
+                partition_by=partition_cols,
+                storage_options=self.storage_options,
+            ),
+        )
+
+    async def _write_merge(
+        self,
+        table_path: str,
+        data: pa.Table,
+        primary_keys: list[str],
+        partition_cols: list[str] | None,
+    ) -> None:
+        """Write data using merge/upsert strategy."""
+        loop = asyncio.get_running_loop()
+        try:
+            dt = await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            )
+            await self._merge_records(dt, data, primary_keys)
+        except DeltaTableNotFoundError:
+            await self._write_append(table_path, data, partition_cols)
+
     async def write_silver(
         self,
         table_name: str,
@@ -87,90 +169,17 @@ class DeltaWriter:
             )
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-
-        # Filter records to only include fields in schema to avoid null type columns
-        # Also serialize dict/list values to JSON strings for string-typed columns
-        schema_fields = set(schema.names)
-        string_fields = {
-            field.name
-            for field in schema
-            if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
-        }
-
-        def serialize_value(key: str, value):
-            """Serialize dict/list values to JSON strings for string columns."""
-            if value is None:
-                return None
-            if key in string_fields and isinstance(value, (dict, list)):
-                return json.dumps(value, sort_keys=True)
-            return value
-
-        filtered_records = [
-            {k: serialize_value(k, v) for k, v in rec.items() if k in schema_fields}
-            for rec in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
-
-        # Sort by primary keys for deterministic writing
-        if primary_keys:
-            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
-
-        # Use pa.Table directly instead of RecordBatchReader for write operations
-        # to ensure data is available for potential retries and to avoid consumption issues.
-        # delta-rs handles pa.Table efficiently.
-
-        loop = asyncio.get_running_loop()
+        arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
 
         try:
-            # Handle different write modes
             if mode == "overwrite":
-                # Direct overwrite logic
-                await loop.run_in_executor(
-                    None,
-                    lambda: write_deltalake(
-                        table_or_uri=table_path,
-                        data=arrow_data,
-                        mode="overwrite",
-                        partition_by=partition_cols,
-                        schema_mode="overwrite",  # Allow schema evolution on overwrite
-                        storage_options=self.storage_options,
-                    ),
-                )
+                await self._write_overwrite(table_path, arrow_data, partition_cols)
             elif mode == "append":
-                # Direct append logic (bypass merge)
-                await loop.run_in_executor(
-                    None,
-                    lambda: write_deltalake(
-                        table_or_uri=table_path,
-                        data=arrow_data,
-                        mode="append",
-                        partition_by=partition_cols,
-                        storage_options=self.storage_options,
-                    ),
-                )
+                await self._write_append(table_path, arrow_data, partition_cols)
             else:
-                # Default: merge logic
-                try:
-                    dt = await loop.run_in_executor(
-                        None,
-                        lambda: DeltaTable(
-                            table_path, storage_options=self.storage_options
-                        ),
-                    )
-                    await self._merge_records(dt, arrow_data, primary_keys)
-                except DeltaTableNotFoundError:
-                    # Fallback to create table if not exists (append mode effectively creates it)
-                    await loop.run_in_executor(
-                        None,
-                        lambda: write_deltalake(
-                            table_or_uri=table_path,
-                            data=arrow_data,
-                            mode="append",
-                            partition_by=partition_cols,
-                            storage_options=self.storage_options,
-                        ),
-                    )
-
+                await self._write_merge(
+                    table_path, arrow_data, primary_keys, partition_cols
+                )
         except (SchemaMismatchError, ArrowTypeError) as e:
             raise SchemaViolationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
@@ -178,9 +187,7 @@ class DeltaWriter:
                 raise MergeConflictError(table_name, conflicts=1) from e
             raise
 
-        # Delegate CSV export to CsvExporter if configured
         if self.csv_exporter:
-            # Match CSV append behavior to Delta mode
             csv_append = mode != "overwrite"
             await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
 

@@ -16,17 +16,41 @@ if TYPE_CHECKING:
 
 def _parse_author_list(article_node: ET.Element) -> list[str]:
     """Извлекает список авторов из XML-узла статьи."""
-    authors = []
     author_list_node = article_node.find(".//AuthorList")
     if author_list_node is None:
         return []
 
+    authors = []
     for author_node in author_list_node.findall(".//Author"):
         last_name_node = author_node.find("LastName")
         initials_node = author_node.find("Initials")
         if last_name_node is not None and initials_node is not None:
             authors.append(f"{last_name_node.text}, {initials_node.text}")
     return authors
+
+
+def _get_node_text(node: ET.Element | None) -> str | None:
+    """Extract text from an XML node, returning None if node is None."""
+    return node.text if node is not None else None
+
+
+def _get_publication_year(node: ET.Element | None) -> int | None:
+    """Extract publication year from a node, returning None if invalid."""
+    if node is not None and node.text:
+        return int(node.text)
+    return None
+
+
+def _extract_business_data(article_node: ET.Element, pmid: str) -> dict:
+    """Extract business data from article XML node."""
+    return {
+        "pmid": pmid,
+        "title": _get_node_text(article_node.find(".//ArticleTitle")),
+        "abstract": _get_node_text(article_node.find(".//Abstract/AbstractText")),
+        "journal": _get_node_text(article_node.find(".//Journal/Title")),
+        "publication_year": _get_publication_year(article_node.find(".//PubDate/Year")),
+        "authors": _parse_author_list(article_node),
+    }
 
 
 class PubMedPublicationTransformer(BaseTransformer):
@@ -47,30 +71,11 @@ class PubMedPublicationTransformer(BaseTransformer):
 
         try:
             article_node = ET.fromstring(raw_xml)
-            pmid_node = article_node.find(".//PMID")
-            pmid = pmid_node.text if pmid_node is not None else None
-
+            pmid = _get_node_text(article_node.find(".//PMID"))
             if not pmid:
                 return None
 
-            title_node = article_node.find(".//ArticleTitle")
-            journal_node = article_node.find(".//Journal/Title")
-            pub_year_node = article_node.find(".//PubDate/Year")
-            abstract_node = article_node.find(".//Abstract/AbstractText")
-
-            business_data = {
-                "pmid": pmid,
-                "title": title_node.text if title_node is not None else None,
-                "abstract": abstract_node.text if abstract_node is not None else None,
-                "journal": journal_node.text if journal_node is not None else None,
-                "publication_year": (
-                    int(pub_year_node.text)
-                    if pub_year_node is not None and pub_year_node.text
-                    else None
-                ),
-                "authors": _parse_author_list(article_node),
-            }
-
+            business_data = _extract_business_data(article_node, pmid)
             entity_id = generate_entity_id(
                 record={"pmid": pmid},
                 provider=self.provider,
@@ -86,11 +91,7 @@ class PubMedPublicationTransformer(BaseTransformer):
                 source_batch_id=None,
                 **business_data,
             )
-
-            # Convert Entity to SilverRecord for storage
-            silver_record = self.entity_to_silver_record(publication)
-
-            return cast("SilverRecord", silver_record)
+            return cast("SilverRecord", self.entity_to_silver_record(publication))
 
         except ET.ParseError as e:
             context.logger.warning(

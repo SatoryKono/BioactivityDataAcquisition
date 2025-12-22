@@ -78,28 +78,31 @@ class CsvExporter:
         return deleted
 
     @staticmethod
+    def _is_complex_type(field_type: pa.DataType) -> bool:
+        """Check if a PyArrow type is complex (list or struct)."""
+        return (
+            pa.types.is_list(field_type)
+            or pa.types.is_large_list(field_type)
+            or pa.types.is_struct(field_type)
+        )
+
+    @staticmethod
+    def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
+        """Serialize a column of complex values to JSON strings."""
+        json_strings = [
+            json.dumps(val.as_py()) if val.as_py() is not None else None
+            for val in col
+        ]
+        return pa.array(json_strings, type=pa.string())
+
+    @staticmethod
     def _flatten_for_csv(table: pa.Table) -> pa.Table:
-        """Convert complex types (list, struct) to JSON strings for CSV export.
-
-        Args:
-            table: PyArrow table with potentially complex types
-
-        Returns:
-            PyArrow table with complex types serialized to JSON strings
-        """
+        """Convert complex types (list, struct) to JSON strings for CSV export."""
         new_columns = []
         for i, field in enumerate(table.schema):
             col = table.column(i)
-            if (
-                pa.types.is_list(field.type)
-                or pa.types.is_large_list(field.type)
-                or pa.types.is_struct(field.type)
-            ):
-                json_strings = [
-                    json.dumps(val.as_py()) if val.as_py() is not None else None
-                    for val in col
-                ]
-                new_columns.append(pa.array(json_strings, type=pa.string()))
+            if CsvExporter._is_complex_type(field.type):
+                new_columns.append(CsvExporter._serialize_column_to_json(col))
             else:
                 new_columns.append(col)
 
@@ -107,13 +110,7 @@ class CsvExporter:
             [
                 pa.field(
                     f.name,
-                    (
-                        pa.string()
-                        if pa.types.is_list(f.type)
-                        or pa.types.is_large_list(f.type)
-                        or pa.types.is_struct(f.type)
-                        else f.type
-                    ),
+                    pa.string() if CsvExporter._is_complex_type(f.type) else f.type,
                     f.nullable,
                 )
                 for f in table.schema

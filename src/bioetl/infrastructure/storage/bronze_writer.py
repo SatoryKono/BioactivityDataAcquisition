@@ -308,6 +308,35 @@ class BronzeWriter:
             if line.strip():
                 yield json.loads(line)
 
+    def _list_batches_local(self, prefix: str, date: datetime | None) -> list[str]:
+        """List batch files from local filesystem."""
+        base_path = Path(self.bucket) / prefix
+        if not base_path.exists():
+            return []
+
+        pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
+        files = list(base_path.glob(pattern))
+        return [str(p.relative_to(self.bucket)) for p in files]
+
+    async def _list_batches_s3(self, prefix: str, date: datetime | None) -> list[str]:
+        """List batch files from S3."""
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: self.s3_client.list_objects_v2(Bucket=self.bucket, Prefix=prefix),
+        )
+
+        all_files = [
+            obj["Key"]
+            for obj in response.get("Contents", [])
+            if obj["Key"].endswith(".jsonl.zst")
+        ]
+
+        if date:
+            date_str = date.strftime("%Y-%m-%d")
+            return [key for key in all_files if f"batch_{date_str}" in key]
+        return all_files
+
     async def list_batches(
         self,
         provider: str,
@@ -315,49 +344,10 @@ class BronzeWriter:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        # New path structure: bronze/v1/{provider}/{entity}/...
-        # If date is provided: bronze/v1/{provider}/{entity}/{date}/
-        # If not: bronze/v1/{provider}/{entity}/ (recursive search needed)
-
         prefix = f"bronze/v1/{provider}/{entity}/"
         if date:
-            date_str = date.strftime("%Y-%m-%d")
-            prefix = f"{prefix}{date_str}/"
+            prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
         if self.is_local:
-            base_path = Path(self.bucket) / prefix
-            if not base_path.exists():
-                return []
-
-            # Recursive search if no date specified
-            pattern = "**/*.jsonl.zst"
-            # If date is specified, prefix already includes date, so search direct children
-            if date:
-                pattern = "batch_*.jsonl.zst"
-
-            files = list(base_path.glob(pattern))
-
-            # Note: The original code used relative_to(self.bucket).
-            # With the new nested structure, this returns paths like 'bronze/v1/...'.
-            return [str(p.relative_to(self.bucket)) for p in files]
-        else:
-            loop = asyncio.get_running_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: self.s3_client.list_objects_v2(
-                    Bucket=self.bucket,
-                    Prefix=prefix,
-                ),
-            )
-
-            all_files = [
-                obj["Key"]
-                for obj in response.get("Contents", [])
-                if obj["Key"].endswith(".jsonl.zst")
-            ]
-
-            if date:
-                date_str = date.strftime("%Y-%m-%d")
-                return [key for key in all_files if f"batch_{date_str}" in key]
-
-            return all_files
+            return self._list_batches_local(prefix, date)
+        return await self._list_batches_s3(prefix, date)
