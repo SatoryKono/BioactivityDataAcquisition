@@ -12,6 +12,7 @@ Consolidated configuration classes (post-refactoring):
 """
 
 from dataclasses import dataclass, field
+from typing import Literal
 
 from bioetl.domain.types import RunType
 
@@ -56,6 +57,9 @@ class TableConfig:
     primary_keys: list[str] = field(default_factory=lambda: ["entity_id"])
     silver_table: str | None = None
     gold_table: str | None = None
+    # New fields for storage contract alignment
+    write_mode: Literal["merge", "append", "delete"] = "merge"
+    partition_cols: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -78,6 +82,8 @@ class PipelineConfig:
     primary_keys: list[str]
     silver_table: str
     gold_table: str | None = None
+    write_mode: Literal["merge", "append", "delete"] = "merge"
+    partition_cols: list[str] = field(default_factory=list)
 
     # Processing
     gold_filter_types: list[str] = field(default_factory=list)
@@ -121,6 +127,8 @@ class PipelineConfig:
             primary_keys=self.primary_keys,
             silver_table=self.silver_table,
             gold_table=self.gold_table,
+            write_mode=self.write_mode,
+            partition_cols=self.partition_cols,
         )
 
 

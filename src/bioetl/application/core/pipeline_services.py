@@ -18,6 +18,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     QuarantinePort,
     StoragePort,
+    TracingPort,
 )
 
 
@@ -38,6 +39,7 @@ class PipelineServices:
         checkpoint: Port for pipeline state persistence.
         quarantine: Port for failed record isolation.
         metrics: Port for observability metrics collection.
+        tracing: Port for distributed tracing.
         logger: Structured logger for pipeline events.
 
     Example:
@@ -58,6 +60,7 @@ class PipelineServices:
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
     metrics: MetricsPort
+    tracing: TracingPort
     logger: LoggerPort
 
     def __post_init__(self) -> None:

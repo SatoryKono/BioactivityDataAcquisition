@@ -175,6 +175,7 @@ class StoragePort(Protocol):
         primary_keys: list[str],
         schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
+        partition_cols: list[str] | None = None,
     ) -> None:
         """
         Write transformed records to the Silver layer.
@@ -185,6 +186,7 @@ class StoragePort(Protocol):
             primary_keys: A list of column names that form the primary key.
             schema: The PyArrow schema definition for the records (ArrowSchema alias).
             mode: The write mode (e.g., 'merge', 'append', 'delete').
+            partition_cols: Optional list of columns to partition by.
         """
         ...
 

@@ -71,6 +71,7 @@ class StorageAdapter:
         primary_keys: list[str],
         schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
+        partition_cols: list[str] | None = None,
     ) -> None:
         """Write transformed records to Silver layer."""
         await self.silver.write_silver(
@@ -78,6 +79,8 @@ class StorageAdapter:
             records=records,
             primary_keys=primary_keys,
             schema=schema,
+            mode=mode,
+            partition_cols=partition_cols,
         )
 
     async def write_gold(
