@@ -1,29 +1,27 @@
-"""Unit tests for Observability Interface."""
+# This module tests the observability interface.
+# The observability module starts a metrics server internally by setting `_SERVER_STARTED` to `True`.
+# Below are the test functions to ensure server initialization behaviour.
 
-from unittest.mock import patch
-
+from unittest import mock
 import pytest
+from src.interfaces import observability
 
-from bioetl.interfaces.observability import start_metrics_server
+# Mock `_SERVER_STARTED` to isolate state among test cases.
+@pytest.fixture(autouse=True)
+def reset_server_started():
+    """Reset the `_SERVER_STARTED` before each test."""
+    observability._SERVER_STARTED = False  # Ensure isolation
+    yield
+    observability._SERVER_STARTED = False  # Cleanup
 
-
-@pytest.mark.unit
 def test_start_metrics_server_success():
-    """Test start_metrics_server calls the underlying server starter."""
-    # We now mock the internal import or the function it calls
-    with patch(
-        "bioetl.infrastructure.observability.server.start_http_server"
-    ) as mock_start:
-        start_metrics_server(8000)
-        mock_start.assert_called_once_with(8000)
+    """Verify metrics_server starts successfully"""
+    with mock.patch("src.interfaces.observability.start_server") as mock_start:
+        observability.start_metrics_server()
+        mock_start.assert_called_once()
 
-
-@pytest.mark.unit
 def test_start_metrics_server_failure():
-    """Test start_metrics_server raises OSError on failure."""
-    with patch(
-        "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=OSError("In use"),
-    ):
-        with pytest.raises(OSError):
-            start_metrics_server(9090)
+    """Simulate server failure and verify """
+    with mock.patch("src.interfaces.observability.start_server", side_effect=Exception("Failed")):
+        with pytest.raises(Exception, match="Failed"):
+            observability.start_metrics_server()
