@@ -153,7 +153,7 @@ class DeltaWriter:
                     await self._merge_records(dt, arrow_data, primary_keys)
                 except DeltaTableNotFoundError:
                     # Fallback to create table if not exists (append mode effectively creates it)
-                     await loop.run_in_executor(
+                    await loop.run_in_executor(
                         None,
                         lambda: write_deltalake(
                             table_or_uri=table_path,
