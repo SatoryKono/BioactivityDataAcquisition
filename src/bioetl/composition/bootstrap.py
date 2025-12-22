@@ -7,17 +7,16 @@ to provide a ready-to-use PipelineRunner for execution.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 # Factories are imported to ensure registration happens
 import bioetl.composition.factories.pipeline_factories  # noqa: F401
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
 from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -57,11 +56,13 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     import structlog
 
-    from bioetl.domain.ports import CheckpointPort, QuarantinePort
-    from bioetl.domain.types import RunType
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.ports import CheckpointPort, QuarantinePort
 
 
 def bootstrap_quarantine() -> QuarantinePort:
@@ -101,51 +102,33 @@ def bootstrap_tracer(service_name: str = "bioetl"):
     return NoOpTracer()
 
 
-def bootstrap_pipeline(
-    pipeline_name: str,
-    run_id: UUID,
-    run_type: RunType,
-    resume: bool,
-    limit: int | None,
-    input_csv: str | None = None,
-    filter_column: str | None = None,
-    filter_field: str | None = None,
-    query: str | None = None,
-) -> PipelineRunner:
+def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
     """Composition Root: Assembles and returns a fully configured PipelineRunner.
 
     Args:
-        pipeline_name: Name of the pipeline to run
-        run_id: Unique identifier for this run
-        run_type: Type of run (incremental, backfill, rebuild)
-        resume: Whether to resume from last checkpoint
-        limit: Maximum number of records to process
-        input_csv: Optional path to CSV file with filter IDs (overrides config)
-        filter_column: Column name in CSV containing filter IDs (overrides config)
-        filter_field: API field name to filter by (overrides config)
-        query: Optional query string for data sources that support it
+        ctx: Pipeline run context containing launch parameters
     """
     settings = get_settings()
-    logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
+    logger = bootstrap_logger(pipeline=ctx.pipeline_name, run_id=ctx.run_id)
     tracer = bootstrap_tracer()
 
     # Load validated YAML config
-    yaml_config = load_pipeline_config(pipeline_name)
+    yaml_config = load_pipeline_config(ctx.pipeline_name)
 
     runtime_config = RuntimeConfig(
-        run_type=run_type,
-        resume=resume,
-        limit=limit,
+        run_type=ctx.run_type,
+        resume=ctx.resume,
+        limit=ctx.limit,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
-        query=query,
+        query=ctx.query,
     )
 
     # Build filter config using the dedicated builder
     filter_config = FilterConfigBuilder.build(
         yaml_filter=yaml_config.input_filter,
-        cli_csv=input_csv,
-        cli_column=filter_column,
-        cli_field=filter_field,
+        cli_csv=ctx.input_csv,
+        cli_column=ctx.filter_column,
+        cli_field=ctx.filter_field,
     )
 
     if filter_config:
@@ -154,15 +137,15 @@ def bootstrap_pipeline(
             csv_path=filter_config.source_path,
             column=filter_config.column_name,
             filter_field=filter_config.filter_field,
-            source="cli" if input_csv else "config",
+            source="cli" if ctx.input_csv else "config",
         )
 
     # Resolve pipeline factory and delegate runner creation
-    pipeline_def = PipelineRegistry.get(pipeline_name)
+    pipeline_def = PipelineRegistry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
 
     return factory.create_runner(
-        run_id=run_id,
+        run_id=ctx.run_id,
         runtime=runtime_config,
         settings=settings,
         logger=logger,
