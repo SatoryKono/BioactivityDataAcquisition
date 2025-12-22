@@ -182,3 +182,65 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
     ]
 )
+
+# Schema for ChEMBL Target
+# See: https://www.ebi.ac.uk/chembl/api/data/target
+CHEMBL_TARGET_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("target_chembl_id", pa.string()),
+        # Core metadata
+        pa.field("pref_name", pa.string()),
+        pa.field("target_type", pa.string()),
+        pa.field("organism", pa.string()),
+        pa.field("tax_id", pa.int64()),
+        pa.field("species_group_flag", pa.bool_()),
+        # Complex fields (JSON strings)
+        pa.field("target_components", pa.string()),
+        pa.field("cross_references", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+    ]
+)
+
+# Schema for ChEMBL Document
+# See: https://www.ebi.ac.uk/chembl/api/data/document
+CHEMBL_DOCUMENT_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("document_chembl_id", pa.string()),
+        # Publication identifiers
+        pa.field("pubmed_id", pa.int64()),
+        pa.field("doi", pa.string()),
+        pa.field("patent_id", pa.string()),
+        # Core metadata
+        pa.field("title", pa.string()),
+        pa.field("authors", pa.string()),
+        pa.field("abstract", pa.string()),
+        pa.field("doc_type", pa.string()),
+        # Journal information
+        pa.field("journal", pa.string()),
+        pa.field("journal_full_title", pa.string()),
+        pa.field("year", pa.int64()),
+        pa.field("volume", pa.string()),
+        pa.field("issue", pa.string()),
+        pa.field("first_page", pa.string()),
+        pa.field("last_page", pa.string()),
+        # Source information
+        pa.field("src_id", pa.int64()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+    ]
+)

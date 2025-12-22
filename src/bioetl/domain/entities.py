@@ -209,6 +209,82 @@ class Publication(BaseEntity):
 
 
 @dataclass(frozen=True, kw_only=True)
+class Document(BaseEntity):
+    """Represents a scientific document/publication (ChEMBL Document).
+
+    Contains all fields from ChEMBL document API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/document
+    """
+
+    # Primary identifier
+    document_chembl_id: str
+
+    # Publication identifiers
+    pubmed_id: int | None = None
+    doi: str | None = None
+    patent_id: str | None = None
+
+    # Core metadata
+    title: str | None = None
+    authors: str | None = None  # Combined authors string
+    abstract: str | None = None
+    doc_type: str | None = None  # PUBLICATION, PATENT, etc.
+
+    # Journal information
+    journal: str | None = None
+    journal_full_title: str | None = None
+    year: int | None = None
+    volume: str | None = None
+    issue: str | None = None
+    first_page: str | None = None
+    last_page: str | None = None
+
+    # Source information
+    src_id: int | None = None
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.document_chembl_id:
+            raise ValueError("Document ChEMBL ID is required")
+        if self.year is not None and (self.year < 1800 or self.year > 2100):
+            raise ValueError(f"Year must be between 1800-2100, got {self.year}")
+
+
+@dataclass(frozen=True, kw_only=True)
+class Target(BaseEntity):
+    """Represents a biological target (ChEMBL Target).
+
+    Contains all fields from ChEMBL target API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/target
+    """
+
+    # Primary identifier
+    target_chembl_id: str
+
+    # Core metadata
+    pref_name: str | None = None
+    target_type: str | None = None  # SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, etc.
+    organism: str | None = None
+    tax_id: int | None = None
+    species_group_flag: bool | None = None
+
+    # Complex fields (JSON serialized)
+    target_components: str | None = None  # JSON string of array
+    cross_references: str | None = None  # JSON string of array
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.target_chembl_id:
+            raise ValueError("Target ChEMBL ID is required")
+
+
+@dataclass(frozen=True, kw_only=True)
 class Assay(BaseEntity):
     """Represents a bioassay definition (ChEMBL Assay).
 
