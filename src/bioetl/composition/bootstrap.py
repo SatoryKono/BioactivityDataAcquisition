@@ -27,6 +27,7 @@ from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.observability.server import start_metrics_server
 from bioetl.infrastructure.observability.tracing import (
     NoOpTracer,
     OpenTelemetryTracer,
@@ -122,6 +123,14 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         query=ctx.query,
     )
+
+    # Ensure metrics server is running (idempotent call)
+    # This guarantees observability even if pipeline is run programmatically (outside CLI)
+    try:
+        start_metrics_server(settings.metrics_port)
+    except Exception as e:
+        # Don't block pipeline startup if metrics fail, but log it
+        logger.warning("failed_to_start_metrics_server", error=str(e))
 
     # Build filter config using the dedicated builder
     filter_config = FilterConfigBuilder.build(
