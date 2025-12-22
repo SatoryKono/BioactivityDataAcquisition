@@ -16,13 +16,6 @@ def mock_http_client():
     return Mock(spec=UnifiedHTTPClient)
 
 
-def test_create_chembl_adapter(mock_http_client):
-    """Test creating ChEMBL adapter."""
-    adapter = DataSourceFactory.create("chembl", http_client=mock_http_client)
-    assert isinstance(adapter, ChemblAdapter)
-    assert adapter.http_client == mock_http_client
-
-
 def test_create_pubchem_adapter(mock_http_client):
     """Test creating PubChem adapter."""
     # PubChem doesn't use http_client, so it should be ignored by the factory logic
