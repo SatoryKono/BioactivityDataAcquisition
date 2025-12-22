@@ -121,10 +121,7 @@ def run(
     # Start Prometheus metrics server
     try:
         settings = get_settings()
-        if start_metrics_server(settings.metrics_port):
-            logger.info(
-                f"Prometheus metrics server started on port {settings.metrics_port}"
-            )
+        start_metrics_server(settings.metrics_port)
     except Exception as e:
         logger.warning("Failed to start metrics server", error=str(e))
 
