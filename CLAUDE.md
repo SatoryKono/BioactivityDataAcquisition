@@ -206,7 +206,7 @@ await loop.run_in_executor(None, func, *args)
 |----------|---------|------------|--------------|
 | ChEMBL | chembl_webresource_client | None | `/chembl/api/data/status.json` |
 | PubChem | pubchempy | 5 req/sec | Lightweight compound query |
-| UniProt | unipressed | 100 req/sec (API key) | `/rest/beta/health` |
+| UniProt | unipressed | 100 req/sec (API key) | Search Probe |
 
 ---
 

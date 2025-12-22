@@ -5,7 +5,7 @@ Implements RULES.md Appendix A - UniProt specifications.
 Requirements:
 - Uses httpx for async REST API access
 - Rate limit: 100 req/sec (with API key)
-- Health check: GET /rest/beta/health
+- Health check: Search probe (Ubiquitin)
 - Entities: proteins, features, sequences
 
 Documentation: https://www.uniprot.org/help/api

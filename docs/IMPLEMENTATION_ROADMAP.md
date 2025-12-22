@@ -431,7 +431,8 @@ We have significantly advanced the documentation phase, originally scheduled for
   - Async httpx-based REST API client
   - Rate limit: 100 req/sec (with API key), 10 req/sec (without)
   - Entities: proteins, features, sequences
-  - Health check: `/rest/beta/health`
+      - Health check: Search probe (Ubiquitin)
+  
   - UniProt query syntax support
   - Cursor-based pagination (500 records/page)
   - FASTA format parsing

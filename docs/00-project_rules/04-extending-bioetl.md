@@ -239,62 +239,50 @@ class OpenTargetsAssociationsPipeline(BasePipeline):
 
 ### Шаг 4: Создание Фабрики (Composition)
 
-Фабрика — это клей, который соединяет конфигурацию, адаптер и пайплайн вместе.
+Фабрика — это клей, который соединяет конфигурацию, адаптер и пайплайн вместе. В v5.1 мы используем `GenericPipelineFactory` для декларативного создания пайплайнов.
 
-**4.1. Создайте файл фабрики:**
+**4.1. Добавьте пайплайн в реестр фабрик:**
 
-```bash
-touch src/bioetl/composition/factories/open_targets_associations.py
-```
-
-**4.2. Реализуйте фабрику и зарегистрируйте пайплайн:**
-
-Фабрика должна уметь создавать экземпляр пайплайна и его зависимостей (включая наш новый адаптер). В конце файла пайплайн регистрируется в `PipelineRegistry`, чтобы CLI мог его найти.
+Обычно фабрики консолидированы в `src/bioetl/composition/factories/pipeline_factories.py`.
 
 ```python
-# src/bioetl/composition/factories/open_targets_associations.py
-from __future__ import annotations
-from typing import TYPE_CHECKING
-
+# src/bioetl/composition/factories/pipeline_factories.py
+# ... существующие импорты ...
 from bioetl.application.pipelines.open_targets.associations import OpenTargetsAssociationsPipeline
-from bioetl.application.registry import PipelineRegistry
-from bioetl.infrastructure.adapters.open_targets_client import OpenTargetsAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
-from bioetl.infrastructure.schemas.silver import SOME_GENERIC_SCHEMA # Замените на реальную схему
+from bioetl.infrastructure.schemas.silver import OPEN_TARGETS_ASSOCIATIONS_SCHEMA
+from bioetl.infrastructure.schemas.gold import OpenTargetsAssociationsGoldSchema
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports import DataSourcePort
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+# ...
 
+# OpenTargets Associations Pipeline
+open_targets_associations_factory = GenericPipelineFactory(
+    pipeline_name="open_targets_associations",
+    pipeline_class=OpenTargetsAssociationsPipeline,
+    provider="open_targets",
+    silver_schema=OPEN_TARGETS_ASSOCIATIONS_SCHEMA,
+    gold_schema=OpenTargetsAssociationsGoldSchema,
+)
 
-class OpenTargetsAssociationsPipelineFactory(BasePipelineFactory[OpenTargetsAssociationsPipeline]):
-    """Фабрика для создания пайплайна OpenTargets Associations."""
+def register_all_pipelines() -> None:
+    # ...
+    PipelineRegistry.register_factory(open_targets_associations_factory)
+    # ...
+```
 
-    pipeline_name = "open_targets_associations"
-    pipeline_class = OpenTargetsAssociationsPipeline
-    silver_schema = SOME_GENERIC_SCHEMA # Укажите Pandera схему для Silver
+**4.2. Настройте создание DataSource:**
 
+Если вашему адаптеру нужны специфические параметры, добавьте логику в `DataSourceFactory`:
+
+```python
+# src/bioetl/composition/factories/data_sources.py
+
+class DataSourceFactory:
+    # ...
     @classmethod
-    def create_data_source(
-        cls,
-        settings: Settings,
-        pipeline_config: PipelineYamlConfig,
-    ) -> DataSourcePort:
-        """Создает источник данных OpenTargets."""
-        http_client = UnifiedHTTPClient(
-            TokenBucket(rate=5.0, capacity=10), # Лимиты для OpenTargets
-            CircuitBreaker(provider="open_targets")
-        )
-        return OpenTargetsAdapter(http_client=http_client)
-
-# Регистрация делает пайплайн доступным для запуска через CLI
-# Создаем экземпляр фабрики и регистрируем
-factory = OpenTargetsAssociationsPipelineFactory()
-PipelineRegistry.register_factory(factory)
+    def create(cls, provider: str, http_client: UnifiedHTTPClient) -> DataSourcePort:
+        if provider == "open_targets":
+            return OpenTargetsAdapter(http_client=http_client)
+        # ...
 ```
 
 ---

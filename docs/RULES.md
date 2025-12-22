@@ -416,7 +416,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 |----------|------------|------------|----------------|-----------|--------------|
 | **ChEMBL** | `chembl_webresource_client` | Нет явного лимита | Exponential backoff | Public | `GET /chembl/api/data/status.json` |
 | **PubChem** | `pubchempy` | 5 req/sec | 429 -> wait Retry-After | Public | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| **UniProt** | `unipressed` | 100 req/sec (c API key) | Exponential backoff | API Key | `GET /rest/beta/health` |
+| **UniProt** | `unipressed` | 100 req/sec (c API key) | Exponential backoff | API Key | Lightweight Search Probe |
 | **OpenAlex** | `pyalex` | 10 req/sec (polite pool) | 429 -> backoff | API Key (Email) | Generic Probe* |
 | **Semantic** | `semanticscholar` | 100 req/5min | Sliding window | API Key | Generic Probe* |
 | **PubMed** | `biopython` | 3 req/sec (10 c key) | 429 -> backoff | API Key | Generic Probe* |
