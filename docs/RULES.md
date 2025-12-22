@@ -1,5 +1,5 @@
-# BioETL: Правила Проекта 
-*Версия: 5.0 (Production Ready), 2025-12-15* 
+# BioETL: Правила Проекта
+*Версия: 5.1 (ADR Updates), 2025-12-22* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -204,9 +204,9 @@ Lock key включает тип запуска:
 - **Multiplier**: 2.0 (wait 1s, 2s, 4s...) 
 - **Jitter**: Random(0.1s, 0.5s). Jitter **SHOULD** применяться для избежания thundering herd.
  
-### 3.1.4. Circuit Breaker (Размыкатель цепи) 
-Паттерн защиты от каскадных сбоев. 
-- **Trigger**: 5 последовательных ошибок соединения/таймаута. 
+### 3.1.4. Circuit Breaker (Размыкатель цепи)
+Паттерн защиты от каскадных сбоев. См. [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
+- **Trigger**: 5 последовательных ошибок соединения/таймаута.
 - **Open Duration**: 5 минут (configurable: `circuit_breaker.recovery_timeout`).
 - **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open +5 мин.
 - **Observability**: Метрики `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open), `trips_total`. Алерт при зависании в Open > 10 мин. 
@@ -229,7 +229,8 @@ Lock key включает тип запуска:
 | record_count | SHOULD | 1000 |
 | error_type | При ошибках | `SCHEMA_VIOLATION` |
  
-### 3.3. Конкурентность и Блокировки 
+### 3.3. Конкурентность и Блокировки
+См. [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md).
 - **Механизм**: Redis `SETNX` + `EXPIRE`.
 - **TTL**: 60 секунд.
 - **Heartbeat**: Обновление TTL каждые 20 секунд.
@@ -305,7 +306,8 @@ Lock key включает тип запуска:
 - **Формат**: `BIOETL_{PROVIDER}_{KEY}` (например, `BIOETL_PUBCHEM_API_KEY`). 
 - **Запрещено**: Хардкод секретов **MUST NOT**. Файлы `.env` в git **MUST NOT**. 
  
-### 5.3. Graceful Shutdown (Штатное завершение) 
+### 5.3. Graceful Shutdown (Штатное завершение)
+См. [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
 При получении SIGTERM/SIGINT: 
 1. Прекратить извлечение (fetch) новых записей. 
 2. Дождаться завершения записи текущего батча. 
@@ -542,7 +544,22 @@ fields:
 - Bump major version схемы
 - ADR с обоснованием изменения
  
-## История Изменений (Changelog) 
+## Приложение F: Реестр Architecture Decision Records (ADR)
+
+| ADR | Название | Статус | Дата |
+|-----|----------|--------|------|
+| [ADR-001](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Accepted | 2025-05 |
+| [ADR-002](02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Accepted | 2025-05 |
+| [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis for Distributed Locking | Accepted | 2025-05 |
+| [ADR-004](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Accepted | 2025-05 |
+| [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) | Composition Layer Separation | Accepted | 2025-12 |
+| [ADR-006](02-architecture/decisions/ADR-006-logger-metrics-ports.md) | Logger and Metrics Ports | Accepted | 2025-12-18 |
+| [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker Implementation | Accepted | 2025-12-22 |
+| [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy | Accepted | 2025-12-22 |
+| [ADR-009](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin Design | Accepted | 2025-12-22 |
+
+## История Изменений (Changelog)
+- **5.1** (2025-12-22): ADR additions (007-009), ADR index appendix.
 - **5.0** (2025-12-15): Production Ready. Final Governance Polish, Circuit Breaker half-open observability, Backfill lock timeouts, Generic Health Probes, Deprecation clarification.
 - **4.6** (2025-12-15): Governance & Stability. RFC 2119, Entity ID vs Content Hash, Bronze Lifecycle, Hard Limits, Threat Model. Added Log Schema, Provider Health Matrix, Circuit Breaker details, Backfill Locking, and Deprecation workflows.
 - **4.5** (2025-05-20): Final Polish & Governance. Medallion Paths, DQ Levels, Observability, Fencing Tokens, Security IAM. 
