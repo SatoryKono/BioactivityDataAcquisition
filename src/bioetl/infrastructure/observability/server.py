@@ -16,7 +16,7 @@ _SERVER_LOCK = Lock()
 def _raise_port_conflict_error(current_port: int, requested_port: int) -> None:
     """Raise RuntimeError when server is running on a different port.
     
-    Internal helper function for consistent error handling in start_metrics_server.
+    Internal helper function for consistent error handling in `start_metrics_server`.
     
     Args:
         current_port: Port on which server is currently running

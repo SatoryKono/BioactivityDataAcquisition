@@ -37,7 +37,6 @@ def test_start_metrics_server_address_in_use():
     ):
         with pytest.raises(OSError) as exc_info:
             start_metrics_server(9090)
-        
         # Should include helpful error message
         assert "Port 9090 is already in use by another process" in str(exc_info.value)
 
