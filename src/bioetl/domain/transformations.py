@@ -78,8 +78,14 @@ def _normalize_list(value: list[Any]) -> list[Any]:
     return [_normalize_value(v) for v in value]
 
 
-def normalize_for_hash(record: dict[str, Any]) -> dict[str, Any]:
+def normalize_for_hash(record: dict[str, Any], exclude_none: bool = False) -> dict[str, Any]:
     """Normalize record before hashing to ensure consistency."""
+    if exclude_none:
+        return {
+            key: _normalize_value(value)
+            for key, value in record.items()
+            if key not in META_FIELDS and value is not None
+        }
     return {
         key: _normalize_value(value)
         for key, value in record.items()
@@ -97,9 +103,11 @@ def canonical_json_dumps(obj: dict[str, Any]) -> str:
     )
 
 
-def generate_content_hash(record: dict[str, Any], provider: str) -> ContentHash:
+def generate_content_hash(
+    record: dict[str, Any], provider: str, exclude_none: bool = False
+) -> ContentHash:
     """Generate SHA256 content hash for record versioning."""
-    normalized = normalize_for_hash(record)
+    normalized = normalize_for_hash(record, exclude_none=exclude_none)
     canonical = canonical_json_dumps(normalized)
     data = f"{provider}{canonical}"
     hash_digest = hashlib.sha256(data.encode("utf-8")).hexdigest()

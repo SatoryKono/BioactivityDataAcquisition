@@ -123,8 +123,9 @@ class ActivityTransformer:
 
             # Generate content hash based on business data (exclude None values)
             content_hash = generate_content_hash(
-                {k: v for k, v in business_data.items() if v is not None},
+                business_data,
                 self.provider,
+                exclude_none=True,
             )
 
             entity = Activity(
