@@ -213,18 +213,25 @@ class CsvExporter:
         Returns:
             Concatenated PyArrow table, or just new_data if schemas are incompatible
         """
-        read_options = pv.ReadOptions()
         parse_options = pv.ParseOptions(delimiter=self.delimiter)
+
+        # Build column types from new_data schema to ensure consistent types
+        # This prevents PyArrow from inferring int64 for string columns like activity_id
+        column_types = {
+            field.name: field.type for field in new_data.schema
+        }
+        convert_options = pv.ConvertOptions(column_types=column_types)
 
         try:
             existing_table = pv.read_csv(
                 existing_path,
-                read_options=read_options,
                 parse_options=parse_options,
+                convert_options=convert_options,
             )
 
-            # Try to concatenate with schema promotion to handle type differences
-            return pa.concat_tables([existing_table, new_data], promote_options="default")
-        except (pa.ArrowInvalid, pa.ArrowTypeError):
+            # Concatenate with matching schemas
+            return pa.concat_tables([existing_table, new_data])
+        except (pa.ArrowInvalid, pa.ArrowTypeError) as e:
             # Schema incompatible - return only new data (effectively overwrite)
+            print(f"[DEBUG] CSV schema mismatch, overwriting: {e}")
             return new_data
