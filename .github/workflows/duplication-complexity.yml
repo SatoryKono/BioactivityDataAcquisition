@@ -73,6 +73,9 @@ jobs:
 
           violations = []
           for filepath, functions in data.items():
+              # Skip test files - test complexity is checked separately
+              if filepath.startswith("tests/"):
+                  continue
               for func in functions:
                   cc = func.get("complexity", 0)
                   name = func.get("name", "unknown")
