@@ -66,7 +66,6 @@ class PubChemClient:
             max_workers: Thread pool size for sync operations
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
         """
-        self.provider_name = "pubchem"
         self.strict_error_handling = strict_error_handling
 
         # Rate limiter (5 req/sec)
