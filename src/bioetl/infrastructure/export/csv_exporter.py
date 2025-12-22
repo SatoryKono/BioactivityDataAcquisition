@@ -90,8 +90,7 @@ class CsvExporter:
     def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
         """Serialize a column of complex values to JSON strings."""
         json_strings = [
-            json.dumps(val.as_py()) if val.as_py() is not None else None
-            for val in col
+            json.dumps(val.as_py()) if val.as_py() is not None else None for val in col
         ]
         return pa.array(json_strings, type=pa.string())
 
