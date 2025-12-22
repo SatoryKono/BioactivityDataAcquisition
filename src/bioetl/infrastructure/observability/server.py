@@ -3,46 +3,72 @@
 import errno
 import logging
 from threading import Lock
+from typing import Optional
 
 from prometheus_client import start_http_server
 
 logger = logging.getLogger(__name__)
 
-_SERVER_STARTED = False
+_SERVER_PORT: Optional[int] = None
 _SERVER_LOCK = Lock()
 
 
 def start_metrics_server(port: int = 8000) -> None:
     """Start Prometheus metrics HTTP server.
 
-    Ensures the server is started only once per process.
+    Ensures the server is started only once per process on the specified port.
     Run in a daemon thread (non-blocking).
 
     Args:
         port: Port to bind the HTTP server (default: 8000)
-    """
-    global _SERVER_STARTED
 
-    if _SERVER_STARTED:
-        logger.debug("Metrics server already started")
-        return
+    Raises:
+        RuntimeError: If server is already running on a different port
+        OSError: If port is already in use by another process
+    """
+    global _SERVER_PORT
+
+    # Check if server is already running
+    if _SERVER_PORT is not None:
+        if _SERVER_PORT == port:
+            logger.debug(f"Metrics server already started on port {port}")
+            return
+        else:
+            # Server is running on a different port - this is a configuration error
+            error_msg = (
+                f"Metrics server already running on port {_SERVER_PORT}, "
+                f"cannot start on port {port}"
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
     with _SERVER_LOCK:
-        if _SERVER_STARTED:
-            return
+        # Double-check after acquiring lock
+        if _SERVER_PORT is not None:
+            if _SERVER_PORT == port:
+                return
+            else:
+                error_msg = (
+                    f"Metrics server already running on port {_SERVER_PORT}, "
+                    f"cannot start on port {port}"
+                )
+                logger.error(error_msg)
+                raise RuntimeError(error_msg)
 
         try:
             start_http_server(port)
-            _SERVER_STARTED = True
+            _SERVER_PORT = port
             logger.info(f"Prometheus metrics server started on port {port}")
         except OSError as e:
-            # Handle "Address already in use" gracefully
+            # Handle "Address already in use" - this is a fatal error
             if e.errno == errno.EADDRINUSE:
-                logger.warning(
-                    f"Port {port} is already in use. Metrics server might be running in another process or instance."
+                error_msg = (
+                    f"Port {port} is already in use by another process. "
+                    f"Metrics server cannot be started. Please check if another "
+                    f"instance is running or choose a different port."
                 )
-                # We mark it as started to avoid retrying in this process
-                _SERVER_STARTED = True
+                logger.error(error_msg, exc_info=True)
+                raise OSError(error_msg) from e
             else:
                 logger.error(f"Failed to start metrics server on port {port}: {e}")
                 raise
