@@ -141,3 +141,30 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = False  # Allow extra columns
+
+
+class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Molecule in Gold layer.
+
+    Validated fields for high-quality molecule data export.
+    """
+
+    # Primary identifier
+    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Key metadata
+    pref_name: Series[str] = pa.Field(nullable=True)
+    molecule_type: Series[str] = pa.Field(nullable=True)
+    max_phase: Series[float] = pa.Field(nullable=True, ge=0, le=4, coerce=True)
+
+    # Flags
+    oral: Series[bool] = pa.Field(nullable=True)
+    therapeutic_flag: Series[bool] = pa.Field(nullable=True)
+    withdrawn_flag: Series[bool] = pa.Field(nullable=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        strict = False  # Allow extra columns

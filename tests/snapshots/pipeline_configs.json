@@ -61,6 +61,37 @@
     "watermark_field": null,
     "write_mode": "merge"
   },
+  "chembl_molecule": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "dq": {
+      "hard_fail_threshold": 0.2,
+      "soft_fail_threshold": 0.05
+    },
+    "entity_type": "molecule",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [
+        {
+          "column": "molecule_type",
+          "values": ["Small molecule"]
+        }
+      ],
+      "exclude_if_present": [],
+      "required_fields": ["pref_name"]
+    },
+    "gold_table": null,
+    "gold_write_mode": "overwrite",
+    "partition_cols": [],
+    "pipeline_name": "chembl_molecule",
+    "primary_keys": [
+      "molecule_chembl_id"
+    ],
+    "provider": "chembl",
+    "silver_table": "chembl_molecule",
+    "watermark_field": null,
+    "write_mode": "merge"
+  },
   "chembl_target": {
     "batch_size": 100,
     "checkpoint_interval": 1000,
