@@ -489,7 +489,7 @@ class OrchestrationPort(Protocol):
         """Trigger an immediate pipeline execution. Returns Run ID."""
         ...
 
-    async def get_status(self, run_id: Any) -> str:
+    async def get_status(self, run_id: RunID) -> str:
         """Get the status of a pipeline run."""
         ...
 
