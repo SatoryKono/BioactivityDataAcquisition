@@ -258,9 +258,12 @@ ignore = [
     "RUF002",  # Ambiguous unicode - project uses Russian docstrings
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["bioetl", "tests"]
+
 [tool.ruff.lint.per-file-ignores]
-# Tests may have unused arguments to match Protocol signatures
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043"]
+# Tests may have unused arguments, ignore import order (handled by isort)
+"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine
@@ -272,9 +275,6 @@ ignore = [
 # Interfaces layer
 "src/bioetl/interfaces/**/*.py" = ["ARG001", "ARG002"]
 
-[tool.ruff.lint.isort]
-known-first-party = ["bioetl"]
-
 # ============ MUTMUT (Mutation Testing) ============
 [tool.mutmut]
 paths_to_mutate = "src/bioetl/domain/,src/bioetl/application/"
@@ -282,6 +282,13 @@ tests_dir = "tests/"
 runner = "python -m pytest -x --tb=short"
 # Skip infrastructure layer - focus on business logic
 dict_synonyms = "Struct, NamedStruct"
+
+# ============ ISORT ============
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["bioetl", "tests"]
+src_paths = ["src", "tests"]
 
 # ============ XENON (Complexity Thresholds) ============
 # Enforced in CI: xenon --max-absolute B --max-modules B --max-average A

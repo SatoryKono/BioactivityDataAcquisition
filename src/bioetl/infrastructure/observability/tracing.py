@@ -8,10 +8,7 @@ from typing import Any
 try:
     from opentelemetry import trace
     from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import (
-        BatchSpanProcessor,
-        ConsoleSpanExporter,
-    )
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
     try:
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (

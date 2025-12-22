@@ -30,8 +30,11 @@ def test_start_metrics_server_success():
 
 def test_start_metrics_server_failure():
     """Simulate server failure and verify"""
-    with mock.patch(
-        "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=Exception("Failed"),
-    ), pytest.raises(Exception, match="Failed"):
+    with (
+        mock.patch(
+            "bioetl.infrastructure.observability.server.start_http_server",
+            side_effect=Exception("Failed"),
+        ),
+        pytest.raises(Exception, match="Failed"),
+    ):
         observability.start_metrics_server()

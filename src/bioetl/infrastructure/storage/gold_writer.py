@@ -197,11 +197,7 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path,
-                    data=arrow_data,
-                    mode=mode,
-                    partition_by=partition_cols,
-                    storage_options=self.storage_options: write_deltalake(
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
@@ -257,8 +253,7 @@ class GoldWriter:
             try:
                 try:
                     dt = await self._run_in_executor(
-                        lambda table_path=table_path,
-                        storage_options=self.storage_options: DeltaTable(
+                        lambda table_path=table_path, storage_options=self.storage_options: DeltaTable(
                             table_path, storage_options=storage_options
                         )
                     )
@@ -266,11 +261,7 @@ class GoldWriter:
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path,
-                        data=arrow_data,
-                        mode="append",
-                        partition_by=partition_cols,
-                        storage_options=self.storage_options: write_deltalake(
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()

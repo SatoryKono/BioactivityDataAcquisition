@@ -155,9 +155,9 @@ async def test_checkpoint_with_minio(e2e_minio_client):
 
     assert loaded_metadata == checkpoint_data, "Checkpoint metadata should match"
     assert loaded_run_id == run_id, "Run ID should match"
-    assert loaded_watermark.to_api_param() == watermark.to_api_param(), (
-        "Checkpoint watermark should match"
-    )
+    assert (
+        loaded_watermark.to_api_param() == watermark.to_api_param()
+    ), "Checkpoint watermark should match"
 
     # Verify checkpoint file exists in MinIO
     # Note: the key for 'latest' is just the pipeline name

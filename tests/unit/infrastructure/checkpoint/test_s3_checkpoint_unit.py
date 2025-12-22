@@ -111,9 +111,9 @@ async def test_save_conflict(checkpoint_store, mock_s3_client):
 async def test_load_exists(checkpoint_store, mock_s3_client):
     """Test loading an existing checkpoint."""
     mock_response = MagicMock()
-    mock_response[
-        "Body"
-    ].read.return_value = b'{"pipeline": "p1", "watermark": "100", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {"a": 1}}'
+    mock_response["Body"].read.return_value = (
+        b'{"pipeline": "p1", "watermark": "100", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {"a": 1}}'
+    )
     mock_s3_client.get_object.return_value = mock_response
 
     result = await checkpoint_store.load("pipeline1")

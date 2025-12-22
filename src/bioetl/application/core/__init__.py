@@ -18,10 +18,7 @@ from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 
 # Re-exports from consolidated domain location
-from bioetl.domain.config import (
-    PipelineConfig,
-    RuntimeConfig,
-)
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 __all__ = [
     # Base classes

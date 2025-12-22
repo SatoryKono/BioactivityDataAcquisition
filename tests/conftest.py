@@ -367,5 +367,3 @@ def circuit_breaker():
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
     return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=60)
-
-

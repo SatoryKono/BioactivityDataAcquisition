@@ -17,9 +17,7 @@ class ConcretePipeline(BasePipeline):
     ) -> dict | None:
         return record
 
-    def extract_watermark(
-        self, _context: PipelineContext, record: dict
-    ) -> Watermark:
+    def extract_watermark(self, _context: PipelineContext, record: dict) -> Watermark:
         """Extract test_id as watermark."""
         return Watermark.from_id(str(record.get("test_id", "")))
 

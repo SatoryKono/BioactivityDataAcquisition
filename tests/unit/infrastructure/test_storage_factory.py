@@ -155,15 +155,9 @@ class TestStorageFactoryLocal:
     ):
         """Test that local runs use data/output paths."""
         with (
-            patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
-            ),
-            patch(
-                "bioetl.composition.factories.storage_factory.DeltaWriter"
-            ),
-            patch(
-                "bioetl.composition.factories.storage_factory.GoldWriter"
-            ),
+            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
+            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
+            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             result = StorageFactory.create(
                 settings=mock_settings_local,
@@ -188,12 +182,8 @@ class TestStorageFactoryLocal:
             patch(
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
             ) as mock_bronze,
-            patch(
-                "bioetl.composition.factories.storage_factory.DeltaWriter"
-            ),
-            patch(
-                "bioetl.composition.factories.storage_factory.GoldWriter"
-            ),
+            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
+            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             StorageFactory.create(
                 settings=mock_settings_local,
@@ -219,9 +209,7 @@ class TestStorageFactoryLocal:
         from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
         with (
-            patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
-            ),
+            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
             patch(
                 "bioetl.composition.factories.storage_factory.DeltaWriter"
             ) as mock_delta,

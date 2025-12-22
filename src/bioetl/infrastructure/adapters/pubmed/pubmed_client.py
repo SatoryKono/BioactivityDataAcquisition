@@ -135,9 +135,11 @@ class PubMedAdapter:
 
                     record = {
                         "pmid": pmid_node.text if pmid_node is not None else None,
-                        "article_title": title_node.text
-                        if title_node is not None
-                        else "No title found",
+                        "article_title": (
+                            title_node.text
+                            if title_node is not None
+                            else "No title found"
+                        ),
                         "_raw_xml": ET.tostring(article_node, encoding="unicode"),
                     }
                     yield record

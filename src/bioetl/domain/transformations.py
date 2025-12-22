@@ -85,7 +85,9 @@ def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     return not (exclude_none and value is None)
 
 
-def normalize_for_hash(record: dict[str, Any], exclude_none: bool = False) -> dict[str, Any]:
+def normalize_for_hash(
+    record: dict[str, Any], exclude_none: bool = False
+) -> dict[str, Any]:
     """Normalize record before hashing to ensure consistency."""
     return {
         key: _normalize_value(value)

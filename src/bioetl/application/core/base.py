@@ -14,13 +14,7 @@ from uuid import uuid4
 
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import (
-    BronzeRecord,
-    RunID,
-    RunType,
-    SilverRecord,
-    Watermark,
-)
+from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord, Watermark
 
 if TYPE_CHECKING:
     import structlog

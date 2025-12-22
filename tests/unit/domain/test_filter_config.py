@@ -300,26 +300,46 @@ class TestGoldFilterConfigShouldInclude:
         )
 
         # Passes all filters
-        assert config.should_include({
-            "type": "IC50",
-            "value": 100,
-        }) is True
+        assert (
+            config.should_include(
+                {
+                    "type": "IC50",
+                    "value": 100,
+                }
+            )
+            is True
+        )
 
         # Fails column filter
-        assert config.should_include({
-            "type": "Ki",
-            "value": 100,
-        }) is False
+        assert (
+            config.should_include(
+                {
+                    "type": "Ki",
+                    "value": 100,
+                }
+            )
+            is False
+        )
 
         # Fails required field
-        assert config.should_include({
-            "type": "IC50",
-            "value": None,
-        }) is False
+        assert (
+            config.should_include(
+                {
+                    "type": "IC50",
+                    "value": None,
+                }
+            )
+            is False
+        )
 
         # Fails exclude_if_present
-        assert config.should_include({
-            "type": "IC50",
-            "value": 100,
-            "invalid": "has value",
-        }) is False
+        assert (
+            config.should_include(
+                {
+                    "type": "IC50",
+                    "value": 100,
+                    "invalid": "has value",
+                }
+            )
+            is False
+        )

@@ -14,10 +14,10 @@ from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
     SchemaViolationError,
-    UploadError,
 )
+from bioetl.domain.exceptions import TableNotFoundError as CustomTableNotFoundError
 from bioetl.domain.exceptions import (
-    TableNotFoundError as CustomTableNotFoundError,
+    UploadError,
 )
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
