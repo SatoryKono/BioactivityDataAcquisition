@@ -229,6 +229,7 @@ class TestStorageAdapter:
         mock_gold_writer.write_gold.assert_called_once_with(
             table_name="gold.metrics",
             records=records,
+            primary_keys=None,
             mode="overwrite",
         )
 
