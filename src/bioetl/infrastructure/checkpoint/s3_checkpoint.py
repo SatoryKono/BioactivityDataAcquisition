@@ -37,6 +37,7 @@ class S3Checkpoint:
     def __init__(
         self,
         bucket: str,
+        pipeline_name: str | None = None,
         endpoint_url: str | None = None,
         region: str = "us-east-1",
         access_key: str | None = None,
@@ -44,6 +45,7 @@ class S3Checkpoint:
     ) -> None:
         """Initialize S3 checkpoint storage."""
         self.bucket = bucket
+        self.pipeline_name = pipeline_name  # Unused but kept for interface compatibility
         self.endpoint_url = endpoint_url
         self.is_local = not endpoint_url
 
