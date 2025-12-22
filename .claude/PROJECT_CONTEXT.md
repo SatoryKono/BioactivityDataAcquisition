@@ -1,7 +1,7 @@
 # BioETL: Контекст Проекта для Claude
 
-*Синхронизировано с CLAUDE.md и RULES.md v5.0*
-*Последнее обновление: 2025-12-19*
+*Синхронизировано с CLAUDE.md и RULES.md v5.1*
+*Последнее обновление: 2025-12-22*
 
 ---
 
@@ -112,12 +112,24 @@ sha256(provider + canonical_json(record))
 
 ### 3.3. Circuit Breaker
 
+См. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
+
 | Параметр | Значение |
 |----------|----------|
 | Trigger | 5 consecutive errors |
 | Open Duration | 5 мин |
 | Recovery | Half-Open → 1 probe → Closed/Open |
 | Metric | `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open) |
+
+### 3.4. Graceful Shutdown
+
+См. [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
+
+При получении SIGTERM/SIGINT:
+1. Прекратить извлечение новых записей
+2. Дождаться завершения записи текущего батча
+3. Сохранить чекпоинт в S3
+4. Выйти с кодом 0
 
 ---
 
@@ -305,6 +317,8 @@ await loop.run_in_executor(thread_pool, fetch_func)
 | Domain Ports | `src/bioetl/domain/ports.py` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
+| Pipeline Core | `src/bioetl/application/core/` |
+| BaseTransformer | `src/bioetl/application/core/base_transformer.py` |
 | Factories | `src/bioetl/composition/factories/` |
 | Bootstrap | `src/bioetl/composition/bootstrap.py` |
 | CLI | `src/bioetl/interfaces/cli.py` |
@@ -367,10 +381,11 @@ await loop.run_in_executor(thread_pool, fetch_func)
 | Документ | Описание |
 |----------|----------|
 | `CLAUDE.md` | Справочник для Claude Code |
-| `AGENT.md` | Детальные инструкции для агента |
-| `docs/RULES.md` | Конституция проекта v5.0 |
+| `AGENT.md` | Детальные инструкции для агента v2.1 |
+| `docs/RULES.md` | Конституция проекта v5.1 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
+| `docs/02-architecture/decisions/` | ADR (001-009) |
 
 ---
 
