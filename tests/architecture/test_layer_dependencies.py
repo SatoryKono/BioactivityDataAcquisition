@@ -203,12 +203,23 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     if not importlinter_config.exists():
         pytest.skip(".importlinter config not found")
 
+    # Find lint-imports executable (check venv first, then system)
+    import shutil
+
+    lint_imports_cmd = shutil.which("lint-imports")
+    if lint_imports_cmd is None:
+        venv_lint_imports = project_root / ".venv" / "bin" / "lint-imports"
+        if venv_lint_imports.exists():
+            lint_imports_cmd = str(venv_lint_imports)
+        else:
+            pytest.skip("lint-imports executable not found")
+
     # Override PYTHONPATH to ensure correct project is used
     env = os.environ.copy()
     env["PYTHONPATH"] = str(src_dir)
 
     result = subprocess.run(
-        ["lint-imports", "--config", str(importlinter_config)],
+        [lint_imports_cmd, "--config", str(importlinter_config)],
         capture_output=True,
         text=True,
         cwd=str(project_root),
