@@ -13,7 +13,7 @@ from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
-from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,

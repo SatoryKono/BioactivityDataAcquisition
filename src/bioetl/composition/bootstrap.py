@@ -11,7 +11,7 @@ from uuid import UUID
 
 # Factories are imported to ensure registration happens
 import bioetl.composition.factories.pipeline_factories  # noqa: F401
-from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.clients import (
     create_redis_client,
