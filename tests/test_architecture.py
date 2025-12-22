@@ -10,12 +10,10 @@ Combines standard pytest checks and AST-based enforcement to ensure:
 
 import ast
 import inspect
-import re
 import tomllib
-from pathlib import Path
 from collections.abc import AsyncGenerator, AsyncIterator
+from pathlib import Path
 from typing import Any, get_origin, get_type_hints
-from unittest.mock import patch
 
 import pytest
 
@@ -263,12 +261,12 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
 
     # Import schemas and entities
     try:
+        from bioetl.domain.entities import Activity, BaseEntity, Compound, Protein
         from bioetl.infrastructure.schemas.silver import (
             CHEMBL_ACTIVITY_SCHEMA,
             PUBCHEM_COMPOUND_SCHEMA,
             UNIPROT_PROTEIN_SCHEMA,
         )
-        from bioetl.domain.entities import Activity, Compound, Protein, BaseEntity
     except ImportError as e:
         pytest.fail(f"Could not import schemas or entities: {e}")
 
@@ -345,9 +343,9 @@ def test_io_ports_are_async():
 
             method = getattr(port, method_name)
             # Check if it's an async function (coroutine or async generator)
-            is_async = inspect.iscoroutinefunction(method) or inspect.isasyncgenfunction(
+            is_async = inspect.iscoroutinefunction(
                 method
-            )
+            ) or inspect.isasyncgenfunction(method)
 
             # Also check if return type is AsyncIterator/AsyncGenerator (for Protocol definitions)
             if not is_async:
@@ -415,12 +413,25 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
                 tree = ast.parse(content, filename=str(py_file))
                 in_type_checking = False
                 for node in ast.walk(tree):
-                    if isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
+                    if (
+                        isinstance(node, ast.If)
+                        and isinstance(node.test, ast.Name)
+                        and node.test.id == "TYPE_CHECKING"
+                    ):
                         in_type_checking = True
-                    if isinstance(node, (ast.Import, ast.ImportFrom)) and not in_type_checking:
-                        module = node.module if isinstance(node, ast.ImportFrom) else None
-                        if module and module.startswith("bioetl.infrastructure.adapters"):
-                             violations.append(f"{py_file.name}:{node.lineno} imports {module}")
+                    if (
+                        isinstance(node, (ast.Import, ast.ImportFrom))
+                        and not in_type_checking
+                    ):
+                        module = (
+                            node.module if isinstance(node, ast.ImportFrom) else None
+                        )
+                        if module and module.startswith(
+                            "bioetl.infrastructure.adapters"
+                        ):
+                            violations.append(
+                                f"{py_file.name}:{node.lineno} imports {module}"
+                            )
             except SyntaxError:
                 pass
 
@@ -466,7 +477,14 @@ def test_infrastructure_boundaries(src_dir: Path):
 def test_no_unsafe_functions(src_dir: Path):
     """No print() or unsafe builtins."""
     violations = []
-    allowed = {"cli.py", "__main__.py", "repro_watermark.py", "verify_bootstrap.py", "reproduce_issue.py", "cleanup_cache.py"}
+    allowed = {
+        "cli.py",
+        "__main__.py",
+        "repro_watermark.py",
+        "verify_bootstrap.py",
+        "reproduce_issue.py",
+        "cleanup_cache.py",
+    }
 
     for py_file in (src_dir / "bioetl").rglob("*.py"):
         if py_file.name in allowed:
@@ -515,7 +533,9 @@ def test_dependencies_versions(pyproject_toml: Path):
         data = tomllib.load(f)
     deps = data.get("project", {}).get("dependencies", [])
     for dep in deps:
-        assert any(op in dep for op in [">=", "==", "~=", "<", ">"]), f"No version for {dep}"
+        assert any(op in dep for op in [">=", "==", "~=", "<", ">"]), (
+            f"No version for {dep}"
+        )
 
 
 def test_deprecated_files(project_root: Path):
@@ -523,7 +543,7 @@ def test_deprecated_files(project_root: Path):
     deprecated = [
         "src/bioetl/bootstrap.py",
         "src/bioetl/factories",
-        "src/bioetl/application/core/orchestrator.py", # Removed in refactoring
+        "src/bioetl/application/core/orchestrator.py",  # Removed in refactoring
     ]
     for p in deprecated:
         assert not (project_root / p).exists(), f"Deprecated path exists: {p}"
@@ -588,25 +608,27 @@ def test_adapters_implement_protocols(src_dir: Path):
 
     # Import Protocols
     from bioetl.domain.ports import (
-        DataSourcePort,
         CheckpointPort,
+        DataSourcePort,
         LockPort,
-        QuarantinePort,
         StoragePort,
-        MetricsPort,
     )
 
     # Import Adapters (Lazy import to avoid import errors if deps are missing)
     try:
+        from bioetl.composition.factories.storage_factory import StorageAdapter
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
         from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
-        from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
-        from bioetl.composition.factories.storage_factory import StorageAdapter
-        from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
         from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+        from bioetl.infrastructure.observability.prometheus_metrics import (
+            PrometheusMetrics,
+        )
+        from bioetl.infrastructure.quarantine.unified_quarantine import (
+            UnifiedQuarantine,
+        )
     except ImportError as e:
         pytest.fail(f"Could not import adapters for protocol check: {e}")
 
@@ -658,7 +680,7 @@ def test_adapters_implement_protocols(src_dir: Path):
             # It should be either in annotations (dataclass) or in dir (property/attribute)
             # Note: Protocol fields might be implemented as properties, so checking cls_dir is important
             if field not in cls_dir and field not in cls_annotations:
-                 missing.append(field)
+                missing.append(field)
 
         if missing:
             violations.append(
@@ -674,6 +696,7 @@ def test_http_adapters_inherit_base(src_dir: Path):
     This ensures consistent lifecycle management and HTTP client usage.
     """
     from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+
     try:
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
@@ -722,7 +745,7 @@ def test_public_methods_have_docstrings(src_dir: Path):
                                                     py_file,
                                                     item.lineno,
                                                     f"Public method '{item.name}' missing docstring",
-                                                    src_dir
+                                                    src_dir,
                                                 )
                                             )
                 except SyntaxError:

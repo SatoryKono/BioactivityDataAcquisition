@@ -70,9 +70,7 @@ class TestUniProtClientErrorPaths:
         cb.call = AsyncMock(side_effect=ConnectionError("Network error"))
         return cb
 
-    async def test_fetch_proteins_logs_error_on_failure(
-        self, mock_http_client, caplog
-    ):
+    async def test_fetch_proteins_logs_error_on_failure(self, mock_http_client, caplog):
         """Test that _fetch_proteins logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
@@ -109,9 +107,7 @@ class TestUniProtClientErrorPaths:
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         # Make http_client.get raise an exception
-        mock_http_client.get = AsyncMock(
-            side_effect=ConnectionError("Network error")
-        )
+        mock_http_client.get = AsyncMock(side_effect=ConnectionError("Network error"))
         client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(ConnectionError, match="Network error"):
@@ -122,9 +118,7 @@ class TestUniProtClientErrorPaths:
                 )
             ]
 
-    async def test_fetch_features_logs_error_on_failure(
-        self, mock_http_client, caplog
-    ):
+    async def test_fetch_features_logs_error_on_failure(self, mock_http_client, caplog):
         """Test that _fetch_features logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
@@ -143,7 +137,12 @@ class TestUniProtClientErrorPaths:
             client = UniProtClient(http_client=mock_http_client)
 
             with caplog.at_level(logging.ERROR):
-                results = [r async for r in client._fetch_features("P12345", watermark=None, limit=10)]
+                results = [
+                    r
+                    async for r in client._fetch_features(
+                        "P12345", watermark=None, limit=10
+                    )
+                ]
 
             # Should return empty results on failure
             assert results == []
@@ -151,9 +150,7 @@ class TestUniProtClientErrorPaths:
             # Should have logged the error
             assert "uniprot feature fetch failed" in caplog.text.lower()
             # Check that the exception info is in the log
-            error_records = [
-                r for r in caplog.records if r.levelno == logging.ERROR
-            ]
+            error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
             assert len(error_records) >= 1
             assert "Request timeout" in error_records[0].exc_text
 
@@ -162,13 +159,16 @@ class TestUniProtClientErrorPaths:
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         # Make http_client.get raise an exception
-        mock_http_client.get = AsyncMock(
-            side_effect=TimeoutError("Request timeout")
-        )
+        mock_http_client.get = AsyncMock(side_effect=TimeoutError("Request timeout"))
         client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(TimeoutError, match="Request timeout"):
-            _ = [r async for r in client._fetch_features("P12345", watermark=None, limit=10)]
+            _ = [
+                r
+                async for r in client._fetch_features(
+                    "P12345", watermark=None, limit=10
+                )
+            ]
 
     async def test_fetch_sequences_logs_error_on_failure(
         self, mock_http_client, caplog
@@ -196,7 +196,10 @@ class TestUniProtClientErrorPaths:
 
             with caplog.at_level(logging.ERROR):
                 results = [
-                    r async for r in client._fetch_sequences("gene:TP53", watermark=None, limit=10)
+                    r
+                    async for r in client._fetch_sequences(
+                        "gene:TP53", watermark=None, limit=10
+                    )
                 ]
 
             # Should return empty results on failure
@@ -219,7 +222,12 @@ class TestUniProtClientErrorPaths:
         client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
 
         with pytest.raises(httpx.HTTPStatusError):
-            _ = [r async for r in client._fetch_sequences("gene:TP53", watermark=None, limit=10)]
+            _ = [
+                r
+                async for r in client._fetch_sequences(
+                    "gene:TP53", watermark=None, limit=10
+                )
+            ]
 
 
 class TestPubChemClientErrorPaths:

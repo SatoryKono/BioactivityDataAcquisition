@@ -1,7 +1,8 @@
 """Unit tests for the transformation logic in pipelines."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
@@ -24,11 +25,15 @@ def mock_pipeline_base():
 
 class TestPubChemCompoundPipeline:
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_success(self, mock_context, mock_pipeline_base):
+    async def test_transform_bronze_to_silver_success(
+        self, mock_context, mock_pipeline_base
+    ):
         # Arrange
         config = MagicMock()
         config.provider = "pubchem"
-        pipeline = PubChemCompoundPipeline(config=config, runtime=MagicMock(), services=MagicMock())
+        pipeline = PubChemCompoundPipeline(
+            config=config, runtime=MagicMock(), services=MagicMock()
+        )
 
         record = {
             "cid": 123,
@@ -50,9 +55,13 @@ class TestPubChemCompoundPipeline:
         assert result["content_hash"] is not None
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_no_cid(self, mock_context, mock_pipeline_base):
+    async def test_transform_bronze_to_silver_no_cid(
+        self, mock_context, mock_pipeline_base
+    ):
         # Arrange
-        pipeline = PubChemCompoundPipeline(config=MagicMock(), runtime=MagicMock(), services=MagicMock())
+        pipeline = PubChemCompoundPipeline(
+            config=MagicMock(), runtime=MagicMock(), services=MagicMock()
+        )
         record = {"molecular_formula": "C6H6"}
 
         # Act
@@ -64,16 +73,22 @@ class TestPubChemCompoundPipeline:
 
 class TestUniProtProteinPipeline:
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_success(self, mock_context, mock_pipeline_base):
+    async def test_transform_bronze_to_silver_success(
+        self, mock_context, mock_pipeline_base
+    ):
         # Arrange
         config = MagicMock()
         config.provider = "uniprot"
-        pipeline = UniProtProteinPipeline(config=config, runtime=MagicMock(), services=MagicMock())
+        pipeline = UniProtProteinPipeline(
+            config=config, runtime=MagicMock(), services=MagicMock()
+        )
 
         record = {
             "primaryAccession": "P12345",
             "uniProtkbId": "TEST_ID",
-            "proteinDescription": {"recommendedName": {"fullName": {"value": "Test Protein"}}},
+            "proteinDescription": {
+                "recommendedName": {"fullName": {"value": "Test Protein"}}
+            },
             "genes": [{"geneName": {"value": "TP1"}}],
             "organism": {"taxonId": 9606},
             "sequence": {"length": 100},
@@ -92,9 +107,13 @@ class TestUniProtProteinPipeline:
         assert result["content_hash"] is not None
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_no_accession(self, mock_context, mock_pipeline_base):
+    async def test_transform_bronze_to_silver_no_accession(
+        self, mock_context, mock_pipeline_base
+    ):
         # Arrange
-        pipeline = UniProtProteinPipeline(config=MagicMock(), runtime=MagicMock(), services=MagicMock())
+        pipeline = UniProtProteinPipeline(
+            config=MagicMock(), runtime=MagicMock(), services=MagicMock()
+        )
         record = {"uniProtkbId": "TEST_ID"}
 
         # Act

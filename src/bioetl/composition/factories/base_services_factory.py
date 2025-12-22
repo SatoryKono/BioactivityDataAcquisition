@@ -1,4 +1,5 @@
 """Base factory for creating PipelineServices."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
@@ -75,7 +76,9 @@ class BaseServicesFactory:
         return MemoryLock()
 
     @staticmethod
-    def _create_checkpoint(settings: Settings, storage_ctx: StorageContext) -> CheckpointPort:
+    def _create_checkpoint(
+        settings: Settings, storage_ctx: StorageContext
+    ) -> CheckpointPort:
         is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
         access_key, secret_key = get_aws_credentials(settings)
 
@@ -87,7 +90,9 @@ class BaseServicesFactory:
         )
 
     @staticmethod
-    def _create_quarantine(settings: Settings, storage_ctx: StorageContext) -> QuarantinePort:
+    def _create_quarantine(
+        settings: Settings, storage_ctx: StorageContext
+    ) -> QuarantinePort:
         is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
         storage_options = settings.storage_options if not is_local_run else None
 

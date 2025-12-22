@@ -1,10 +1,9 @@
 """Tests for GenericPipelineFactory and DataSourceRegistry."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.factories.data_source_registry import (
     DataSourceRegistry,
     create_chembl_data_source,
@@ -14,6 +13,7 @@ from bioetl.composition.factories.generic_factory import (
     GenericPipelineFactory,
     create_pipeline_factory,
 )
+from bioetl.composition.registry import PipelineRegistry
 
 
 @pytest.fixture
@@ -171,7 +171,9 @@ class TestGenericPipelineFactory:
 
         result = factory.create_data_source(mock_settings, mock_pipeline_config)
 
-        custom_creator.assert_called_once_with(mock_settings, mock_pipeline_config, None)
+        custom_creator.assert_called_once_with(
+            mock_settings, mock_pipeline_config, None
+        )
         assert result is mock_data_source
 
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
@@ -251,4 +253,3 @@ class TestPipelineRegistryIntegration:
 
         # Cleanup
         del PipelineRegistry._registry["test_generic"]
-

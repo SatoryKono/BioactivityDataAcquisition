@@ -68,7 +68,7 @@ class AnomalyDetector:
         baseline.extend(values)
 
         if len(baseline) > self.baseline_window:
-            self._baselines[metric_name] = baseline[-self.baseline_window:]
+            self._baselines[metric_name] = baseline[-self.baseline_window :]
 
     def add_baseline_value(self, metric_name: str, value: float) -> None:
         """Add single value to baseline."""
@@ -98,9 +98,13 @@ class AnomalyDetector:
         if len(baseline) < self.min_baseline_samples:
             return None
 
-        return self.strategy.detect(metric_name, current_value, baseline, self.z_score_threshold)
+        return self.strategy.detect(
+            metric_name, current_value, baseline, self.z_score_threshold
+        )
 
-    def _check_thresholds(self, metric_name: str, current_value: float) -> Anomaly | None:
+    def _check_thresholds(
+        self, metric_name: str, current_value: float
+    ) -> Anomaly | None:
         """Check if the current value exceeds configured thresholds."""
         if metric_name not in self._thresholds:
             return None
@@ -109,7 +113,9 @@ class AnomalyDetector:
         if min_val <= current_value <= max_val:
             return None
 
-        return self._create_threshold_anomaly(metric_name, current_value, min_val, max_val)
+        return self._create_threshold_anomaly(
+            metric_name, current_value, min_val, max_val
+        )
 
     def _create_threshold_anomaly(
         self,
@@ -122,12 +128,18 @@ class AnomalyDetector:
         baseline_mean = (min_val + max_val) / 2
         baseline_stddev = (max_val - min_val) / 4
 
-        z_score = abs(current_value - baseline_mean) / baseline_stddev if baseline_stddev > 0 else 10.0
+        z_score = (
+            abs(current_value - baseline_mean) / baseline_stddev
+            if baseline_stddev > 0
+            else 10.0
+        )
 
         if current_value < min_val:
             message = f"Value {current_value:.2f} below minimum threshold {min_val:.2f}"
         else:
-            message = f"Value {current_value:.2f} exceeds maximum threshold {max_val:.2f}"
+            message = (
+                f"Value {current_value:.2f} exceeds maximum threshold {max_val:.2f}"
+            )
 
         return Anomaly(
             metric_name=metric_name,

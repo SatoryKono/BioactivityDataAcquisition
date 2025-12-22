@@ -9,6 +9,8 @@ import warnings
 from bioetl.composition.registry import (
     PipelineDefinition,
     PipelineFactoryProtocol,
+)
+from bioetl.composition.registry import (
     PipelineRegistry as NewPipelineRegistry,
 )
 

@@ -1,6 +1,7 @@
 """
 Callback protocols for the pipeline.
 """
+
 from __future__ import annotations
 
 from collections.abc import Awaitable

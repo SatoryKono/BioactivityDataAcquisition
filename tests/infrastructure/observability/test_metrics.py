@@ -1,7 +1,6 @@
 """Unit tests for Metrics adapters."""
 
 import warnings
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -24,7 +23,7 @@ class TestPrometheusMetrics:
             "pipeline": "test_pipe",
             "stage": "transform",
             "status": "success",
-            "run_type": "manual"
+            "run_type": "manual",
         }
         val = 15.5
 
@@ -43,11 +42,7 @@ class TestPrometheusMetrics:
         counter = COUNTERS["records_processed_total"]
 
         # Correct labels based on metrics.py definition: ["pipeline", "stage", "run_type"]
-        labels = {
-            "pipeline": "test_pipe",
-            "stage": "bronze",
-            "run_type": "scheduled"
-        }
+        labels = {"pipeline": "test_pipe", "stage": "bronze", "run_type": "scheduled"}
         start_val = counter.labels(**labels)._value.get()
 
         metrics.increment_counter("records_processed_total", 5, labels)

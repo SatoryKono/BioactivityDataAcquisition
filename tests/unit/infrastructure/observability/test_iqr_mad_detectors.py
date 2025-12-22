@@ -4,7 +4,10 @@ import pytest
 
 from bioetl.infrastructure.observability.anomaly.detectors.iqr import IQRDetector
 from bioetl.infrastructure.observability.anomaly.detectors.mad import MADDetector
-from bioetl.infrastructure.observability.anomaly.types import AnomalySeverity, AnomalyType
+from bioetl.infrastructure.observability.anomaly.types import (
+    AnomalySeverity,
+    AnomalyType,
+)
 
 
 @pytest.mark.unit

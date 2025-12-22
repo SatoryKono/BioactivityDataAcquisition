@@ -1,5 +1,4 @@
-"""Common domain constants.
-"""
+"""Common domain constants."""
 
 from typing import Final
 

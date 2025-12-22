@@ -2,13 +2,13 @@
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
 
-from uuid import uuid4
-from bioetl.domain.types import RunType
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -64,6 +64,7 @@ class TestChEMBLIntegration:
 
         # Clear settings cache so new env vars take effect
         from bioetl.infrastructure.config import get_settings
+
         get_settings.cache_clear()
 
         # Create real storage writers pointing to tmp paths
@@ -116,7 +117,9 @@ class TestChEMBLIntegration:
         # Cleanup: clear settings cache
         get_settings.cache_clear()
 
-    @pytest.mark.skip(reason="VCR cassette needs re-recording: activity_id__in mismatch after merge")
+    @pytest.mark.skip(
+        reason="VCR cassette needs re-recording: activity_id__in mismatch after merge"
+    )
     async def test_chembl_extract_transform_load(self, pipeline, silver_path):
         """Test full ETL flow for ChEMBL activity."""
         # 1. Execute Pipeline

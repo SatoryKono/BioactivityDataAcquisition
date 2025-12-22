@@ -81,7 +81,9 @@ class DeltaWriter:
 
         required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
         if missing_fields := required_fields - set(records[0].keys()):
-            raise ValueError(f"Records missing required metadata fields: {missing_fields}")
+            raise ValueError(
+                f"Records missing required metadata fields: {missing_fields}"
+            )
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
@@ -89,7 +91,8 @@ class DeltaWriter:
         # Also serialize dict/list values to JSON strings for string-typed columns
         schema_fields = set(schema.names)
         string_fields = {
-            field.name for field in schema
+            field.name
+            for field in schema
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
@@ -107,7 +110,9 @@ class DeltaWriter:
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
         # Use RecordBatchReader for better compatibility with delta-rs Arrow C Data interface
-        arrow_reader = pa.RecordBatchReader.from_batches(schema, arrow_data.to_batches())
+        arrow_reader = pa.RecordBatchReader.from_batches(
+            schema, arrow_data.to_batches()
+        )
 
         loop = asyncio.get_running_loop()
 
@@ -120,7 +125,9 @@ class DeltaWriter:
         except DeltaTableNotFoundError:
             try:
                 # Re-create reader as it might have been consumed
-                arrow_reader = pa.RecordBatchReader.from_batches(schema, arrow_data.to_batches())
+                arrow_reader = pa.RecordBatchReader.from_batches(
+                    schema, arrow_data.to_batches()
+                )
                 await loop.run_in_executor(
                     None,
                     lambda: write_deltalake(
@@ -132,7 +139,9 @@ class DeltaWriter:
                     ),
                 )
             except ArrowTypeError as schema_exc:
-                raise SchemaViolationError(table_name, errors=[str(schema_exc)]) from schema_exc
+                raise SchemaViolationError(
+                    table_name, errors=[str(schema_exc)]
+                ) from schema_exc
         except (SchemaMismatchError, ArrowTypeError) as e:
             raise SchemaViolationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
@@ -151,7 +160,9 @@ class DeltaWriter:
         primary_keys: list[str],
     ) -> None:
         """Merge records into existing Delta table."""
-        merge_condition = " AND ".join(f"target.{key} = source.{key}" for key in primary_keys)
+        merge_condition = " AND ".join(
+            f"target.{key} = source.{key}" for key in primary_keys
+        )
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,

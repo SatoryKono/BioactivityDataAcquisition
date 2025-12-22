@@ -7,7 +7,6 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -57,11 +56,13 @@ def mock_storage():
     storage.write_gold = AsyncMock()
     return storage
 
+
 @pytest.fixture
 def mock_metrics():
     """Create mock metrics."""
     metrics = AsyncMock()
     return metrics
+
 
 @pytest.fixture
 def mock_quarantine_port():
@@ -69,6 +70,7 @@ def mock_quarantine_port():
     port = AsyncMock()
     port.write = AsyncMock()
     return port
+
 
 @pytest.fixture
 def mock_services(mock_storage, mock_metrics, mock_quarantine_port):

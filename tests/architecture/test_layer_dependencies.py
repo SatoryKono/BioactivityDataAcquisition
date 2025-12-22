@@ -260,14 +260,14 @@ def test_domain_layer_uses_protocol_for_ports(src_dir: Path) -> None:
         content = f.read()
 
     # Check for Protocol usage
-    assert (
-        "from typing" in content and "Protocol" in content
-    ), "Domain ports should use typing.Protocol for interface definitions"
+    assert "from typing" in content and "Protocol" in content, (
+        "Domain ports should use typing.Protocol for interface definitions"
+    )
 
     # Check that Protocol classes are defined
-    assert (
-        "class" in content and "(Protocol)" in content
-    ), "Port interfaces should be classes inheriting from Protocol"
+    assert "class" in content and "(Protocol)" in content, (
+        "Port interfaces should be classes inheriting from Protocol"
+    )
 
 
 def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
@@ -306,9 +306,9 @@ def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
         except SyntaxError:
             continue
 
-    assert (
-        not violations
-    ), f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+    assert not violations, (
+        f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+    )
 
 
 def test_no_empty_source_files(src_dir: Path) -> None:
@@ -541,8 +541,10 @@ def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
             for j, check_line in enumerate(lines):
                 if "if TYPE_CHECKING:" in check_line:
                     in_type_checking = True
-                elif in_type_checking and check_line.strip() and not check_line.startswith(
-                    (" ", "\t")
+                elif (
+                    in_type_checking
+                    and check_line.strip()
+                    and not check_line.startswith((" ", "\t"))
                 ):
                     in_type_checking = False
                 if j + 1 == i and in_type_checking:
@@ -597,12 +599,18 @@ def test_domain_value_objects_are_frozen(src_dir: Path) -> None:
                             is_dataclass = True
                             # Check keywords for frozen=True
                             for keyword in decorator.keywords:
-                                if keyword.arg == "frozen" and isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
+                                if (
+                                    keyword.arg == "frozen"
+                                    and isinstance(keyword.value, ast.Constant)
+                                    and keyword.value.value is True
+                                ):
                                     is_frozen = True
 
                 if is_dataclass and not is_frozen:
                     # Exemptions can be added here if strictly necessary, but default rule is strict
-                    violations.append(f"{py_file.name}:{node.lineno} - {node.name} is not frozen")
+                    violations.append(
+                        f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
+                    )
 
     assert not violations, (
         "Found mutable domain dataclasses (must be frozen=True):\n"
@@ -659,7 +667,10 @@ def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
                     if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
                         is_dataclass = True
                     elif isinstance(decorator, ast.Call):
-                        if isinstance(decorator.func, ast.Name) and decorator.func.id == "dataclass":
+                        if (
+                            isinstance(decorator.func, ast.Name)
+                            and decorator.func.id == "dataclass"
+                        ):
                             is_dataclass = True
 
                 if not is_dataclass:
@@ -668,13 +679,15 @@ def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
                 # Check fields for mutable defaults
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign):
-                        if item.value: # Has a default value
+                        if item.value:  # Has a default value
                             is_mutable = False
                             if isinstance(item.value, (ast.List, ast.Dict, ast.Set)):
                                 is_mutable = True
                             elif isinstance(item.value, ast.Call):
                                 # Check for simple calls like list(), dict(), set()
-                                if isinstance(item.value.func, ast.Name) and item.value.func.id in ("list", "dict", "set"):
+                                if isinstance(
+                                    item.value.func, ast.Name
+                                ) and item.value.func.id in ("list", "dict", "set"):
                                     is_mutable = True
 
                             if is_mutable:

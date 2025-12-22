@@ -12,10 +12,9 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 def mock_delta_table():
     """Fixture for a mocked DeltaTable."""
     mock = MagicMock()
-    with patch(
-        "bioetl.infrastructure.quarantine.unified.DeltaTable", mock
-    ), patch(
-        "bioetl.infrastructure.quarantine.operations.DeltaTable", mock
+    with (
+        patch("bioetl.infrastructure.quarantine.unified.DeltaTable", mock),
+        patch("bioetl.infrastructure.quarantine.operations.DeltaTable", mock),
     ):
         yield mock
 

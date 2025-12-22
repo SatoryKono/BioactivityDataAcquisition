@@ -1,10 +1,10 @@
 """Unit tests for ChEMBL activity pipeline watermark extraction."""
 
 from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.pipeline_services import PipelineServices
@@ -62,7 +62,6 @@ def test_extract_watermark_with_activity_id(
     chembl_pipeline: ChEMBLActivityPipeline, context: PipelineContext
 ) -> None:
     """Возвращает activity_id как строку wrapped в Watermark."""
-    from bioetl.domain.types import Watermark
 
     record = {"activity_id": 123, "updated_on": "2024-01-01T00:00:00+00:00"}
 
@@ -76,7 +75,6 @@ def test_extract_watermark_with_fallback_field(
     chembl_pipeline: ChEMBLActivityPipeline, context: PipelineContext
 ) -> None:
     """Парсит updated_on из конфигурации в datetime UTC wrapped в Watermark."""
-    from bioetl.domain.types import Watermark
 
     record = {"updated_on": "2024-02-02T10:00:00"}
 
@@ -92,7 +90,6 @@ def test_extract_watermark_without_cursor_fields(
     chembl_pipeline: ChEMBLActivityPipeline, context: PipelineContext
 ) -> None:
     """Возвращает пустую строку wrapped в Watermark без доступных курсоров."""
-    from bioetl.domain.types import Watermark
 
     watermark = chembl_pipeline.extract_watermark(context, {})
 

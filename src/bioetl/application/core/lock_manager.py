@@ -152,13 +152,13 @@ class LockManager:
 
                 # However, following the explicit plan instruction:
                 if self._checkpoint_manager:
-                     # CheckpointManager needs records/last_record to save.
-                     # LockManager doesn't track this.
-                     # It can only trigger a save if it knew the state.
-                     # Since it doesn't, we can't really call save_checkpoint(record, count).
-                     # We would need to signal the Executor to save.
-                     # Raising PipelineShutdownError signals the Executor.
-                     pass
+                    # CheckpointManager needs records/last_record to save.
+                    # LockManager doesn't track this.
+                    # It can only trigger a save if it knew the state.
+                    # Since it doesn't, we can't really call save_checkpoint(record, count).
+                    # We would need to signal the Executor to save.
+                    # Raising PipelineShutdownError signals the Executor.
+                    pass
 
                 raise PipelineShutdownError("Lock lost")
 

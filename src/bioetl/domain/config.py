@@ -10,6 +10,7 @@ Consolidated configuration classes (post-refactoring):
 - PipelineConfig: Complete immutable pipeline configuration
 - RuntimeConfig: CLI/runtime parameters (Value Object)
 """
+
 from dataclasses import dataclass, field
 
 from bioetl.domain.types import RunType
@@ -18,6 +19,7 @@ from bioetl.domain.types import RunType
 @dataclass(frozen=True)
 class DQConfig:
     """Configuration for Data Quality thresholds."""
+
     soft_fail_threshold: float = 0.05
     hard_fail_threshold: float = 0.20
 
@@ -50,6 +52,7 @@ class DQConfig:
 @dataclass(frozen=True)
 class TableConfig:
     """Configuration for database tables and keys."""
+
     primary_keys: list[str] = field(default_factory=lambda: ["entity_id"])
     silver_table: str | None = None
     gold_table: str | None = None
@@ -92,7 +95,10 @@ class PipelineConfig:
             (not self.pipeline_name, "pipeline_name cannot be empty"),
             (not self.provider, "provider cannot be empty"),
             (not self.entity_type, "entity_type cannot be empty"),
-            (self.batch_size <= 0, f"batch_size must be positive, got {self.batch_size}"),
+            (
+                self.batch_size <= 0,
+                f"batch_size must be positive, got {self.batch_size}",
+            ),
             (
                 self.checkpoint_interval <= 0,
                 f"checkpoint_interval must be positive, got {self.checkpoint_interval}",

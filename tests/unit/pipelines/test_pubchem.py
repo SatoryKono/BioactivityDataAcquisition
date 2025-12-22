@@ -1,9 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def pipeline():
     config.pipeline_name = "pubchem"
     config.dataset_name = "compound"
     config.provider = "pubchem"
-    runtime.run_type = "batch" # Mock run_type
+    runtime.run_type = "batch"  # Mock run_type
 
     return PubChemCompoundPipeline(config=config, runtime=runtime, services=services)
 
@@ -32,10 +32,10 @@ def context():
 def test_create_pipeline():
     """Test pipeline factory method."""
     runtime = MagicMock()
-    runtime.run_type = "batch" # Mock run_type
+    runtime.run_type = "batch"  # Mock run_type
     services = MagicMock()
     services.logger.bind.return_value = MagicMock()
-    config = MagicMock() # Relax spec to allow attributes
+    config = MagicMock()  # Relax spec to allow attributes
     config.pipeline_name = "pubchem"
     config.dataset_name = "compound"
     config.provider = "pubchem"
@@ -75,9 +75,7 @@ async def test_transform_bronze_to_silver_valid(pipeline, context):
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver_missing_fields(pipeline, context):
     """Test transformation with missing optional fields."""
-    record = {
-        "cid": 67890
-    }
+    record = {"cid": 67890}
 
     result = await pipeline.transform_bronze_to_silver(context, record)
 

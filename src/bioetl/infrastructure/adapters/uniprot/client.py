@@ -88,9 +88,18 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     ) -> dict[str, Any]:
         """Build the parameter dictionary for a protein fetch request."""
         fields = [
-            "accession", "id", "gene_names", "organism_name", "organism_id",
-            "protein_name", "length", "sequence", "cc_function", "ft_domain",
-            "xref_pdb", "xref_chembl"
+            "accession",
+            "id",
+            "gene_names",
+            "organism_name",
+            "organism_id",
+            "protein_name",
+            "length",
+            "sequence",
+            "cc_function",
+            "ft_domain",
+            "xref_pdb",
+            "xref_chembl",
         ]
         params = {
             "query": query,
@@ -149,7 +158,9 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         async for item in self.paginated_fetch(fetch_page, limit=limit):
             yield item
 
-    def _handle_fetch_error(self, entity_type: str, query: str | None, cursor: str | None = None) -> None:
+    def _handle_fetch_error(
+        self, entity_type: str, query: str | None, cursor: str | None = None
+    ) -> None:
         """Handle fetch errors centrally."""
         log_adapter_error(
             logger,
@@ -164,7 +175,9 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _get_features_json(self, query: str) -> list[dict[str, Any]]:
         """Retrieve features JSON."""
         try:
-            response = await self.http_client.get(f"{self.base_url}/uniprotkb/{query}.json")
+            response = await self.http_client.get(
+                f"{self.base_url}/uniprotkb/{query}.json"
+            )
             if response.status_code == 200:
                 return response.json().get("features", [])
             return []
@@ -184,7 +197,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
 
         # Watermark not supported for features
         if watermark:
-             logger.warning("Watermark is not supported for feature fetch, ignoring.")
+            logger.warning("Watermark is not supported for feature fetch, ignoring.")
 
         features = await self._get_features_json(query)
         fetched = 0
@@ -236,7 +249,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
 
         # Watermark not supported for sequences in this mode
         if watermark:
-             logger.warning("Watermark is not supported for sequence fetch, ignoring.")
+            logger.warning("Watermark is not supported for sequence fetch, ignoring.")
 
         fetched = 0
         async for seq_record in self._get_parsed_sequences(query):
@@ -274,7 +287,9 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         try:
             # Lightweight search probe: Ubiquitin (P62988)
             params = {"query": "accession:P622988", "size": 1, "format": "json"}
-            resp = await self.http_client.get(f"{self.base_url}/uniprotkb/search", params=params)
+            resp = await self.http_client.get(
+                f"{self.base_url}/uniprotkb/search", params=params
+            )
             if resp.status_code != 200:
                 return HealthStatus.DEGRADED
         except Exception:

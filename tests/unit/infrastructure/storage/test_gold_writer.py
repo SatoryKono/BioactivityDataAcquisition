@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 import pyarrow as pa
+import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import Column, DataFrameSchema
 
@@ -298,7 +298,6 @@ class TestGoldWriterRead:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_read_gold_returns_records(self, mock_delta_table, gold_writer):
         """Test read_gold returns records from table."""
-        import pyarrow as pa
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -320,7 +319,6 @@ class TestGoldWriterRead:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_read_gold_filters_current_only(self, mock_delta_table, gold_writer):
         """Test read_gold filters for current records when is_current column exists."""
-        import pyarrow as pa
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -351,7 +349,6 @@ class TestGoldWriterHistory:
         self, mock_delta_table, gold_writer
     ):
         """Test get_history returns all historical versions."""
-        import pyarrow as pa
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -376,7 +373,6 @@ class TestGoldWriterHistory:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_get_history_with_multiple_keys(self, mock_delta_table, gold_writer):
         """Test get_history with multiple business key values."""
-        import pyarrow as pa
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -406,14 +402,12 @@ class TestGoldWriterTypeSanitization:
 
     def test_sanitize_null_type(self, gold_writer):
         """Test sanitization of null type to string."""
-        import pyarrow as pa
 
         result = gold_writer._sanitize_type_for_delta(pa.null())
         assert result == pa.string()
 
     def test_sanitize_list_with_null_inner(self, gold_writer):
         """Test sanitization of list<null> to list<string>."""
-        import pyarrow as pa
 
         null_list_type = pa.list_(pa.null())
         result = gold_writer._sanitize_type_for_delta(null_list_type)
@@ -421,7 +415,6 @@ class TestGoldWriterTypeSanitization:
 
     def test_sanitize_large_list_type(self, gold_writer):
         """Test sanitization of large_list type."""
-        import pyarrow as pa
 
         large_list_type = pa.large_list(pa.null())
         result = gold_writer._sanitize_type_for_delta(large_list_type)
@@ -429,9 +422,10 @@ class TestGoldWriterTypeSanitization:
 
     def test_sanitize_struct_with_null_field(self, gold_writer):
         """Test sanitization of struct with null field."""
-        import pyarrow as pa
 
-        struct_type = pa.struct([pa.field("name", pa.string()), pa.field("value", pa.null())])
+        struct_type = pa.struct(
+            [pa.field("name", pa.string()), pa.field("value", pa.null())]
+        )
         result = gold_writer._sanitize_type_for_delta(struct_type)
 
         # Check the value field is now string
@@ -439,7 +433,6 @@ class TestGoldWriterTypeSanitization:
 
     def test_sanitize_map_type(self, gold_writer):
         """Test sanitization of map type."""
-        import pyarrow as pa
 
         map_type = pa.map_(pa.string(), pa.null())
         result = gold_writer._sanitize_type_for_delta(map_type)
@@ -447,7 +440,6 @@ class TestGoldWriterTypeSanitization:
 
     def test_sanitize_non_null_type_unchanged(self, gold_writer):
         """Test that non-null types are unchanged."""
-        import pyarrow as pa
 
         int_type = pa.int64()
         result = gold_writer._sanitize_type_for_delta(int_type)

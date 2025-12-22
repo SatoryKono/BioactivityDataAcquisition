@@ -4,19 +4,13 @@ Implements R16 - E2E tests with Docker.
 Verifies the full pipeline flow using real Redis and MinIO instances.
 """
 
-import asyncio
-import json
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.record_processor import BatchResult, RecordProcessor
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import get_settings
 
 
 @pytest.fixture(autouse=True)
@@ -89,6 +83,7 @@ async def test_chembl_pipeline_e2e(
 
     # Ensure buckets exist
     import boto3
+
     s3 = boto3.client(
         "s3",
         endpoint_url=minio_service,
@@ -145,12 +140,15 @@ async def test_chembl_pipeline_e2e(
 
     # Verify Checkpoint is deleted after successful run (by design)
     # Checkpoints only persist if pipeline fails mid-execution for resume capability
-    objs = s3.list_objects_v2(Bucket="test-checkpoints", Prefix=f"checkpoints/{pipeline_name}/")
-    assert "Contents" not in objs or len(objs.get("Contents", [])) == 0, \
+    objs = s3.list_objects_v2(
+        Bucket="test-checkpoints", Prefix=f"checkpoints/{pipeline_name}/"
+    )
+    assert "Contents" not in objs or len(objs.get("Contents", [])) == 0, (
         "Checkpoint should be deleted after successful pipeline completion"
+    )
 
     # Verify Bronze
-    objs = s3.list_objects_v2(Bucket="test-bronze", Prefix=f"bronze/v1/chembl/activity/")
+    objs = s3.list_objects_v2(Bucket="test-bronze", Prefix="bronze/v1/chembl/activity/")
     assert "Contents" in objs
     assert len(objs["Contents"]) > 0
 

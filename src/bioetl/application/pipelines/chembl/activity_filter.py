@@ -21,9 +21,7 @@ class ActivityGoldFilter:
             "Ki",
         }
 
-    def should_include(
-        self, _context: PipelineContext, record: dict[str, Any]
-    ) -> bool:
+    def should_include(self, _context: PipelineContext, record: dict[str, Any]) -> bool:
         """Filter records for Gold layer."""
         if record.get("standard_value") is None:
             return False

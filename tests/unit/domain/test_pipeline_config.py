@@ -2,8 +2,7 @@
 
 import pytest
 
-from bioetl.domain.config import DQConfig
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import DQConfig, PipelineConfig
 
 
 @pytest.mark.unit
@@ -256,7 +255,12 @@ class TestPipelineConfig:
             gold_table="chembl_activity_gold",
             batch_size=250,
             checkpoint_interval=2500,
-            fields=["activity_id", "assay_chembl_id", "standard_value", "pchembl_value"],
+            fields=[
+                "activity_id",
+                "assay_chembl_id",
+                "standard_value",
+                "pchembl_value",
+            ],
             watermark_field="modified_on",
             dq=dq,
         )

@@ -39,9 +39,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
     A settings source that loads variables from a YAML file.
     """
 
-    def get_field_value(
-        self, field: Field, field_name: str
-    ) -> tuple[Any, str] | None:
+    def get_field_value(self, field: Field, field_name: str) -> tuple[Any, str] | None:
         """
         Get value of a field from YAML file.
         """
@@ -58,9 +56,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         field_value = file_content.get(field_name)
         return field_value, field_name
 
-    def prepare_field_value(
-        self, field_name: str, field: Field, value: Any
-    ) -> Any:
+    def prepare_field_value(self, field_name: str, field: Field, value: Any) -> Any:
         """
         Prepare value of a field.
         """
@@ -76,9 +72,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
 
             field_value, field_key = field_value_and_key
             if field_value is not None:
-                field_value = self.prepare_field_value(
-                    field_name, field, field_value
-                )
+                field_value = self.prepare_field_value(field_name, field, field_value)
                 d[field_key] = field_value
 
         return d
@@ -148,7 +142,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     source_fields = yaml_config.source.fields
     if source_fields and isinstance(source_fields[0], dict):
         # Handle cases where fields are dicts like [{'name': 'col1'}, ...]
-        source_fields = [field['name'] for field in source_fields if 'name' in field]
+        source_fields = [field["name"] for field in source_fields if "name" in field]
 
     watermark_field = yaml_config.source.watermark_field
 

@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 
 # Need SilverRecord available at runtime for cast
 if TYPE_CHECKING:
-     from bioetl.domain.types import SilverRecord
+    from bioetl.domain.types import SilverRecord
+
 
 def _parse_author_list(article_node: ET.Element) -> list[str]:
     """Извлекает список авторов из XML-узла статьи."""
@@ -30,6 +31,7 @@ def _parse_author_list(article_node: ET.Element) -> list[str]:
         if last_name_node is not None and initials_node is not None:
             authors.append(f"{last_name_node.text}, {initials_node.text}")
     return authors
+
 
 class PubMedPublicationsPipeline(BasePipeline):
     """Пайплайн для данных о публикациях из PubMed."""
@@ -62,7 +64,9 @@ class PubMedPublicationsPipeline(BasePipeline):
                 "title": title_node.text if title_node is not None else None,
                 "abstract": abstract_node.text if abstract_node is not None else None,
                 "journal": journal_node.text if journal_node is not None else None,
-                "publication_year": int(pub_year_node.text) if pub_year_node is not None and pub_year_node.text else None,
+                "publication_year": int(pub_year_node.text)
+                if pub_year_node is not None and pub_year_node.text
+                else None,
                 "authors": _parse_author_list(article_node),
             }
 
@@ -99,5 +103,7 @@ class PubMedPublicationsPipeline(BasePipeline):
             return cast("SilverRecord", silver_record)
 
         except ET.ParseError as e:
-            self.logger.warning("XML_parse_error", error=str(e), pmid=record.get("pmid"))
+            self.logger.warning(
+                "XML_parse_error", error=str(e), pmid=record.get("pmid")
+            )
             return None

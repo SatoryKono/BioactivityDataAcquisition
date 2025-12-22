@@ -1,11 +1,11 @@
 """Unit tests for domain entities."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.entities import Activity, BaseEntity, Compound, Protein
+from bioetl.domain.entities import Activity, Compound, Protein
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
 
@@ -60,7 +60,7 @@ class TestBaseEntity:
         )
         assert activity.ingestion_ts is not None
         assert isinstance(activity.ingestion_ts, datetime)
-        assert activity.ingestion_ts.tzinfo == timezone.utc
+        assert activity.ingestion_ts.tzinfo == UTC
 
 
 @pytest.mark.unit
@@ -214,7 +214,9 @@ class TestCompound:
 
     def test_compound_requires_structural_identifier(self, base_entity_kwargs):
         """Test that at least one structural identifier is required."""
-        with pytest.raises(ValueError, match="Compound must have at least one structural identifier"):
+        with pytest.raises(
+            ValueError, match="Compound must have at least one structural identifier"
+        ):
             Compound(
                 **base_entity_kwargs,
                 cid="12345",
@@ -223,7 +225,9 @@ class TestCompound:
 
     def test_compound_inchikey_alone_not_sufficient(self, base_entity_kwargs):
         """Test that InChIKey alone is not sufficient."""
-        with pytest.raises(ValueError, match="Compound must have at least one structural identifier"):
+        with pytest.raises(
+            ValueError, match="Compound must have at least one structural identifier"
+        ):
             Compound(
                 **base_entity_kwargs,
                 cid="12345",

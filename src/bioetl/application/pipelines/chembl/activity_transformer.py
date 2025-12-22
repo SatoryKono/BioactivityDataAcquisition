@@ -115,7 +115,9 @@ class ActivityTransformer:
                 "potential_duplicate": safe_int(record.get("potential_duplicate")),
                 # Action and properties
                 "action_type": _serialize_json(record.get("action_type")),
-                "activity_properties": _serialize_json(record.get("activity_properties")),
+                "activity_properties": _serialize_json(
+                    record.get("activity_properties")
+                ),
                 "toid": safe_int(record.get("toid")),
             }
 

@@ -1,4 +1,5 @@
 """In-memory storage for integration tests."""
+
 from collections import defaultdict
 
 from bioetl.domain.ports import StoragePort

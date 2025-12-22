@@ -1,7 +1,6 @@
 """Unit tests for domain ports (Protocols)."""
 
 from typing import Any
-from uuid import uuid4
 
 import pytest
 
@@ -116,6 +115,7 @@ class TestStoragePortProtocol:
         """StoragePort should require a specific write_silver signature."""
         from collections.abc import Iterator
         from typing import Literal
+
         from bioetl.domain.types import BatchID
 
         class ValidStorage:

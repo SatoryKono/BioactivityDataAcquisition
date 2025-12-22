@@ -21,18 +21,14 @@ class PrefectOrchestrationAdapter:
     """
 
     async def schedule(
-        self,
-        pipeline_name: str,
-        params: dict[str, Any] | None = None
+        self, pipeline_name: str, params: dict[str, Any] | None = None
     ) -> None:
         """Schedule a pipeline execution."""
         # Stub implementation for now as we don't have a full Prefect server setup
         pass
 
     async def trigger(
-        self,
-        pipeline_name: str,
-        params: dict[str, Any] | None = None
+        self, pipeline_name: str, params: dict[str, Any] | None = None
     ) -> RunID:
         """Trigger an immediate pipeline execution."""
         from uuid import uuid4

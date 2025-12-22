@@ -6,30 +6,30 @@ Pipelines can be registered declaratively using configuration rather than class 
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar, Any
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 from uuid import UUID
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.domain.config import TableConfig
-from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
     DataSourceRegistry,
 )
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.domain.config import TableConfig
+from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.filter_config import InputFilterConfig
+from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 
 if TYPE_CHECKING:
     import pyarrow as pa
     import structlog
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.domain.config import RuntimeConfig
     from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -91,8 +91,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.gold_schema = gold_schema
 
         # Use custom creator or look up from registry
-        self._create_data_source = (
-            data_source_creator or DataSourceRegistry.get(provider)
+        self._create_data_source = data_source_creator or DataSourceRegistry.get(
+            provider
         )
 
     def create_data_source(

@@ -4,6 +4,7 @@ This module provides a concrete implementation for listening to OS signals
 (SIGTERM, SIGINT) and translating them into an application-level
 ShutdownSignal request.
 """
+
 import signal
 from typing import Any
 
@@ -32,4 +33,3 @@ def setup_shutdown_handlers(shutdown_signal: ShutdownSignal) -> None:
     except ValueError:
         # This can happen if not in the main thread
         logger.warning("Cannot set signal handlers in a non-main thread.")
-

@@ -69,6 +69,7 @@ class TestDeltaWriterValidation:
         writer = DeltaWriter(base_path="s3://bucket")
 
         import pyarrow as pa
+
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
         with pytest.raises(ValueError, match="No records to write"):
@@ -88,6 +89,7 @@ class TestDeltaWriterValidation:
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
         import pyarrow as pa
+
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
         with pytest.raises(ValueError, match="Records missing required metadata"):
@@ -114,6 +116,7 @@ class TestDeltaWriterValidation:
         ]
 
         import pyarrow as pa
+
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
         with pytest.raises(ValueError, match="Records missing required metadata"):
@@ -162,27 +165,24 @@ class TestDeltaWriterMergePredicate:
     def test_build_single_key_predicate(self):
         """Test predicate building with single primary key."""
         primary_keys = ["entity_id"]
-        predicate = " AND ".join(
-            f"target.{key} = source.{key}" for key in primary_keys
-        )
+        predicate = " AND ".join(f"target.{key} = source.{key}" for key in primary_keys)
 
         assert predicate == "target.entity_id = source.entity_id"
 
     def test_build_multi_key_predicate(self):
         """Test predicate building with multiple primary keys."""
         primary_keys = ["entity_id", "version"]
-        predicate = " AND ".join(
-            f"target.{key} = source.{key}" for key in primary_keys
-        )
+        predicate = " AND ".join(f"target.{key} = source.{key}" for key in primary_keys)
 
-        assert predicate == "target.entity_id = source.entity_id AND target.version = source.version"
+        assert (
+            predicate
+            == "target.entity_id = source.entity_id AND target.version = source.version"
+        )
 
     def test_build_compound_key_predicate(self):
         """Test predicate building with compound primary keys."""
         primary_keys = ["provider", "entity_type", "entity_id"]
-        predicate = " AND ".join(
-            f"target.{key} = source.{key}" for key in primary_keys
-        )
+        predicate = " AND ".join(f"target.{key} = source.{key}" for key in primary_keys)
 
         expected = (
             "target.provider = source.provider AND "
@@ -414,7 +414,9 @@ class TestDeltaWriterTimeTravel:
 
         writer = DeltaWriter(base_path="s3://bucket/silver")
 
-        with pytest.raises(ValueError, match="Must specify either version or timestamp"):
+        with pytest.raises(
+            ValueError, match="Must specify either version or timestamp"
+        ):
             await writer.time_travel("test.table")
 
     @pytest.mark.asyncio
@@ -444,20 +446,21 @@ class TestDeltaWriterErrorHandling:
         """Test write_silver raises SchemaViolationError for schema mismatch."""
         from unittest.mock import patch
 
+        import pyarrow as pa
         from deltalake.exceptions import SchemaMismatchError
 
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        import pyarrow as pa
-
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         with patch(
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
@@ -478,21 +481,22 @@ class TestDeltaWriterErrorHandling:
         """Test write_silver raises MergeConflictError for merge conflicts."""
         from unittest.mock import MagicMock, patch
 
+        import pyarrow as pa
         from deltalake.exceptions import DeltaError
 
         from bioetl.domain.exceptions import MergeConflictError
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        import pyarrow as pa
-
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         mock_table = MagicMock()
         mock_merge = MagicMock()

@@ -188,7 +188,9 @@ class RecordProcessor:
         """Transform a single record using the callback."""
         return await self._transform(record_context, raw_record)
 
-    def _collect_dq_stats(self, records: list[dict[str, Any]], quarantined_count: int) -> None:
+    def _collect_dq_stats(
+        self, records: list[dict[str, Any]], quarantined_count: int
+    ) -> None:
         """Collect DQ stats and check thresholds."""
         if not self._dq_config or not records:
             return

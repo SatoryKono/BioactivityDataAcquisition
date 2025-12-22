@@ -10,16 +10,18 @@ from botocore.exceptions import ClientError
 from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
-from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
     SchemaViolationError,
-    TableNotFoundError as CustomTableNotFoundError,
     UploadError,
 )
+from bioetl.domain.exceptions import (
+    TableNotFoundError as CustomTableNotFoundError,
+)
+from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
 # Default test run metadata
 TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
@@ -28,8 +30,10 @@ TEST_RUN_TYPE = RunType.INCREMENTAL
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
     """Create a run_in_executor replacement that returns awaitable sync results."""
+
     async def sync_executor(_, fn, *args):
         return fn(*args)
+
     return sync_executor
 
 
@@ -61,7 +65,9 @@ class TestBronzeWriterExceptions:
     """Tests for exception handling in BronzeWriter."""
 
     @pytest.mark.asyncio
-    async def test_write_bronze_raises_bucket_not_found(self, bronze_writer, mock_s3_client):
+    async def test_write_bronze_raises_bucket_not_found(
+        self, bronze_writer, mock_s3_client
+    ):
         """Test that BucketNotFoundError is raised for 'NoSuchBucket' error."""
         # Make run_in_executor execute synchronously for testing
         bronze_writer.loop = asyncio.get_event_loop()
@@ -74,12 +80,19 @@ class TestBronzeWriterExceptions:
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         with pytest.raises(BucketNotFoundError):
             await bronze_writer.write_bronze(
-                iter([b"{}"]), "p", "e", datetime.now(), batch_id,
-                run_id=run_id, run_type=RunType.INCREMENTAL
+                iter([b"{}"]),
+                "p",
+                "e",
+                datetime.now(),
+                batch_id,
+                run_id=run_id,
+                run_type=RunType.INCREMENTAL,
             )
 
     @pytest.mark.asyncio
-    async def test_write_bronze_raises_upload_error(self, bronze_writer, mock_s3_client):
+    async def test_write_bronze_raises_upload_error(
+        self, bronze_writer, mock_s3_client
+    ):
         """Test that UploadError is raised for other client errors."""
         # Make run_in_executor execute synchronously for testing
         bronze_writer.loop = asyncio.get_event_loop()
@@ -92,8 +105,13 @@ class TestBronzeWriterExceptions:
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         with pytest.raises(UploadError):
             await bronze_writer.write_bronze(
-                iter([b"{}"]), "p", "e", datetime.now(), batch_id,
-                run_id=run_id, run_type=RunType.INCREMENTAL
+                iter([b"{}"]),
+                "p",
+                "e",
+                datetime.now(),
+                batch_id,
+                run_id=run_id,
+                run_type=RunType.INCREMENTAL,
             )
 
 
@@ -131,15 +149,20 @@ class TestDeltaWriterExceptions:
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         import pyarrow as pa
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         with pytest.raises(SchemaViolationError):
-            await writer.write_silver("test.table", [valid_record], ["id"], schema=schema)
+            await writer.write_silver(
+                "test.table", [valid_record], ["id"], schema=schema
+            )
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
@@ -161,15 +184,20 @@ class TestDeltaWriterExceptions:
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         import pyarrow as pa
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         with pytest.raises(MergeConflictError):
-            await writer.write_silver("test.table", [valid_record], ["id"], schema=schema)
+            await writer.write_silver(
+                "test.table", [valid_record], ["id"], schema=schema
+            )
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.write_deltalake")
@@ -188,15 +216,20 @@ class TestDeltaWriterExceptions:
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         import pyarrow as pa
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         with pytest.raises(SchemaViolationError):
-            await writer.write_silver("test.table", [valid_record], ["id"], schema=schema)
+            await writer.write_silver(
+                "test.table", [valid_record], ["id"], schema=schema
+            )
 
     @pytest.mark.asyncio
     async def test_vacuum_raises_table_not_found(self):

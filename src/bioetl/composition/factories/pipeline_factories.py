@@ -15,17 +15,17 @@ from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsP
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.registry import PipelineRegistry
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+from bioetl.infrastructure.schemas.gold import (
+    ChEMBLActivityGoldSchema,
+    PubChemCompoundGoldSchema,
+    PubMedPublicationGoldSchema,
+    UniProtProteinGoldSchema,
+)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
-)
-from bioetl.infrastructure.schemas.gold import (
-    ChEMBLActivityGoldSchema,
-    PubChemCompoundGoldSchema,
-    UniProtProteinGoldSchema,
-    PubMedPublicationGoldSchema,
 )
 
 # Flag to track if registration has been performed

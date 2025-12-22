@@ -6,9 +6,9 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
 from bioetl.interfaces.orchestration.runner import PipelineRunner
@@ -226,9 +226,7 @@ class TestPipelineRunnerRun:
         assert any("pipeline_finished" in call or "finished" in call for call in calls)
 
     @pytest.mark.asyncio
-    async def test_run_handles_shutdown_error(
-        self, runner, mock_executor, mock_logger
-    ):
+    async def test_run_handles_shutdown_error(self, runner, mock_executor, mock_logger):
         """Test run handles PipelineShutdownError gracefully."""
         mock_executor.execute.side_effect = PipelineShutdownError("Shutdown requested")
 
@@ -238,7 +236,9 @@ class TestPipelineRunnerRun:
         mock_logger.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_run_raises_general_exception(self, runner, mock_executor, mock_logger):
+    async def test_run_raises_general_exception(
+        self, runner, mock_executor, mock_logger
+    ):
         """Test run re-raises general exceptions."""
         mock_executor.execute.side_effect = RuntimeError("Test error")
 
@@ -257,7 +257,9 @@ class TestPipelineRunnerRun:
         assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
 
     @pytest.mark.asyncio
-    async def test_run_records_metrics_on_failure(self, runner, mock_services, mock_executor):
+    async def test_run_records_metrics_on_failure(
+        self, runner, mock_services, mock_executor
+    ):
         """Test metrics are recorded even on failure."""
         mock_executor.execute.side_effect = RuntimeError("Error")
 

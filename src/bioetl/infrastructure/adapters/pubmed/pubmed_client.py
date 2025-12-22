@@ -1,11 +1,12 @@
 # src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
 from __future__ import annotations
 
-import structlog
 import xml.etree.ElementTree as ET
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
+
+import structlog
 
 from bioetl.domain.exceptions import ApiError
 from bioetl.domain.types import HealthStatus, Watermark
@@ -23,6 +24,7 @@ class PubMedAdapter:
 
     Implements DataSourcePort for PubMed data extraction.
     """
+
     http_client: UnifiedHTTPClient
     email: str
     api_key: str | None = None
@@ -102,7 +104,7 @@ class PubMedAdapter:
 
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):
-            id_batch = pmids[i:i + self.batch_size]
+            id_batch = pmids[i : i + self.batch_size]
 
             fetch_url = f"{ENTREZ_API_BASE}efetch.fcgi"
             params = {
@@ -121,7 +123,9 @@ class PubMedAdapter:
                 try:
                     root = ET.fromstring(response.text)
                 except ET.ParseError as e:
-                    logger.error("XML parse error", error=str(e), text_sample=response.text[:100])
+                    logger.error(
+                        "XML parse error", error=str(e), text_sample=response.text[:100]
+                    )
                     continue  # Skip batch on XML error
 
                 for article_node in root.findall(".//PubmedArticle"):
@@ -130,8 +134,10 @@ class PubMedAdapter:
 
                     record = {
                         "pmid": pmid_node.text if pmid_node is not None else None,
-                        "article_title": title_node.text if title_node is not None else "No title found",
-                        "_raw_xml": ET.tostring(article_node, encoding='unicode')
+                        "article_title": title_node.text
+                        if title_node is not None
+                        else "No title found",
+                        "_raw_xml": ET.tostring(article_node, encoding="unicode"),
                     }
                     yield record
 
@@ -154,13 +160,19 @@ class PubMedAdapter:
                 "term": "health",
                 "retmax": "1",
                 "retmode": "json",
-                "email": self.email
+                "email": self.email,
             }
             if self.api_key:
                 params["api_key"] = self.api_key
 
-            response = await self.http_client.get(f"{ENTREZ_API_BASE}esearch.fcgi", params=params)
-            return HealthStatus.HEALTHY if response.status_code == 200 else HealthStatus.UNHEALTHY
+            response = await self.http_client.get(
+                f"{ENTREZ_API_BASE}esearch.fcgi", params=params
+            )
+            return (
+                HealthStatus.HEALTHY
+                if response.status_code == 200
+                else HealthStatus.UNHEALTHY
+            )
         except Exception:
             return HealthStatus.UNHEALTHY
 

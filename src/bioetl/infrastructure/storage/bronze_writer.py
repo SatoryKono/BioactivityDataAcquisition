@@ -116,7 +116,9 @@ class BronzeWriter:
 
         date_str = date.strftime("%Y-%m-%d")
         # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
-        relative_path = f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+        relative_path = (
+            f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+        )
         ingestion_ts = datetime.now(UTC)
 
         # Build metadata for lineage tracking

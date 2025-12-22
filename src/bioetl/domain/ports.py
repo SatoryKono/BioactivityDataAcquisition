@@ -360,6 +360,7 @@ class QuarantinePort(Protocol):
     This interface provides a way to isolate records that fail processing
     for later analysis, preventing them from stopping the entire pipeline.
     """
+
     async def write(
         self,
         pipeline: str,
@@ -475,17 +476,13 @@ class OrchestrationPort(Protocol):
     """
 
     async def schedule(
-        self,
-        pipeline_name: str,
-        params: dict[str, Any] | None = None
+        self, pipeline_name: str, params: dict[str, Any] | None = None
     ) -> None:
         """Schedule a pipeline execution."""
         ...
 
     async def trigger(
-        self,
-        pipeline_name: str,
-        params: dict[str, Any] | None = None
+        self, pipeline_name: str, params: dict[str, Any] | None = None
     ) -> Any:
         """Trigger an immediate pipeline execution. Returns Run ID."""
         ...

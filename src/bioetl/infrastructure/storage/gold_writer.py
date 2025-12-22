@@ -74,6 +74,7 @@ class GoldWriter:
             if not schema.strict:
                 raise ValueError("Gold layer requires strict=True schema validation")
             import polars as pl
+
             df = pl.DataFrame(records)
             try:
                 await self._run_in_executor(lambda: schema.validate(df, lazy=False))
@@ -87,9 +88,13 @@ class GoldWriter:
                 raise ValueError("scd_config required for SCD Type 2 mode")
             await self._write_scd2(table_path, records, scd_config, partition_cols)
         elif mode in ("overwrite", "append"):
-            await self._write_simple(table_path, table_name, records, mode, partition_cols, schema)
+            await self._write_simple(
+                table_path, table_name, records, mode, partition_cols, schema
+            )
         else:
-            raise ValueError(f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'")
+            raise ValueError(
+                f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'"
+            )
 
     async def _run_in_executor(self, func, *args):
         """Run a function in the executor."""
@@ -146,7 +151,15 @@ class GoldWriter:
                         new_columns.append(col.cast(new_type))
                     except pa.ArrowInvalid:
                         # If cast fails, convert to string via Python
-                        new_columns.append(pa.array([str(v) if v is not None else None for v in col.to_pylist()], type=pa.string()))
+                        new_columns.append(
+                            pa.array(
+                                [
+                                    str(v) if v is not None else None
+                                    for v in col.to_pylist()
+                                ],
+                                type=pa.string(),
+                            )
+                        )
                 else:
                     new_columns.append(col)
                 new_fields.append(pa.field(field.name, new_type, field.nullable))
@@ -171,9 +184,15 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    mode=mode,
+                    partition_by=partition_cols,
+                    storage_options=self.storage_options: write_deltalake(
                         table_or_uri=table_or_uri,
-                        data=pa.RecordBatchReader.from_batches(data.schema, data.to_batches()),
+                        data=pa.RecordBatchReader.from_batches(
+                            data.schema, data.to_batches()
+                        ),
                         mode=mode,
                         partition_by=partition_by,
                         storage_options=storage_options,
@@ -185,7 +204,7 @@ class GoldWriter:
                 if attempt == 2:
                     raise e
                 # Exponential backoff with jitter (Base 0.5s, Multiplier 2, Jitter 0.1s)
-                delay = 0.5 * (2 ** attempt) + random.uniform(0, 0.1)
+                delay = 0.5 * (2**attempt) + random.uniform(0, 0.1)
                 await asyncio.sleep(delay)
 
         # Delegate CSV export to CsvExporter if configured
@@ -217,7 +236,8 @@ class GoldWriter:
             try:
                 try:
                     dt = await self._run_in_executor(
-                        lambda table_path=table_path, storage_options=self.storage_options: DeltaTable(
+                        lambda table_path=table_path,
+                        storage_options=self.storage_options: DeltaTable(
                             table_path, storage_options=storage_options
                         )
                     )
@@ -225,9 +245,15 @@ class GoldWriter:
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols,
+                        storage_options=self.storage_options: write_deltalake(
                             table_or_uri=table_or_uri,
-                            data=pa.RecordBatchReader.from_batches(data.schema, data.to_batches()),
+                            data=pa.RecordBatchReader.from_batches(
+                                data.schema, data.to_batches()
+                            ),
                             mode=mode,
                             partition_by=partition_by,
                             storage_options=storage_options,
@@ -238,7 +264,7 @@ class GoldWriter:
                 if attempt == 2:
                     raise e
                 # Exponential backoff with jitter
-                delay = 0.5 * (2 ** attempt) + random.uniform(0, 0.1)
+                delay = 0.5 * (2**attempt) + random.uniform(0, 0.1)
                 await asyncio.sleep(delay)
 
     async def _merge_scd2(
@@ -257,14 +283,18 @@ class GoldWriter:
         new_data = self._to_arrow_table(records)
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
         current_flag_col = scd_config.get("current_flag_col", "is_current")
-        merge_condition = " AND ".join(f"target.{key} = source.{key}" for key in business_keys)
+        merge_condition = " AND ".join(
+            f"target.{key} = source.{key}" for key in business_keys
+        )
         merge_condition += f" AND target.{current_flag_col} = true"
         now = datetime.now(UTC).isoformat()
 
         await self._run_in_executor(
             lambda: (
                 dt.merge(
-                    source=pa.RecordBatchReader.from_batches(new_data.schema, new_data.to_batches()),
+                    source=pa.RecordBatchReader.from_batches(
+                        new_data.schema, new_data.to_batches()
+                    ),
                     predicate=merge_condition,
                     source_alias="source",
                     target_alias="target",
@@ -293,6 +323,7 @@ class GoldWriter:
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
         if current_only and "is_current" in arrow_table.column_names:
             import pyarrow.compute as pc
+
             arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
         return arrow_table.to_pylist()
 
@@ -307,6 +338,7 @@ class GoldWriter:
         )
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
         import pyarrow.compute as pc
+
         mask = None
         for key, value in business_key_values.items():
             condition = pc.equal(arrow_table[key], value)

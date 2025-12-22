@@ -8,6 +8,7 @@ Uses chembl_webresource_client library for API access.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -17,10 +18,7 @@ from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +28,6 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 # ChEMBL API base URL
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
@@ -319,5 +316,3 @@ class ChemblAdapter(BaseHttpAdapter):
         data = response.json()
         page_meta = data.get("page_meta", {})
         return page_meta.get("total_count", 0)
-
-

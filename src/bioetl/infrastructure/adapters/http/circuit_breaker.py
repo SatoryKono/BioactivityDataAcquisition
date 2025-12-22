@@ -27,8 +27,6 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-
-
 @dataclass
 class CircuitBreaker:
     """Circuit breaker implementation for HTTP clients.

@@ -313,9 +313,7 @@ class TestLineageTrackerQueryBatchHistory:
         assert isinstance(result, pl.DataFrame)
         assert result.height == 0
 
-    def test_query_batch_history_with_filters(
-        self, lineage_tracker, mock_delta_table
-    ):
+    def test_query_batch_history_with_filters(self, lineage_tracker, mock_delta_table):
         """Test query with layer and provider filters."""
         mock_table = MagicMock()
         mock_df = pl.DataFrame(
@@ -335,9 +333,7 @@ class TestLineageTrackerQueryBatchHistory:
 
         assert isinstance(result, pl.DataFrame)
 
-    def test_query_batch_history_default_limit(
-        self, lineage_tracker, mock_delta_table
-    ):
+    def test_query_batch_history_default_limit(self, lineage_tracker, mock_delta_table):
         """Test query respects default limit."""
         mock_table = MagicMock()
         mock_df = pl.DataFrame(
@@ -476,12 +472,17 @@ class TestLineageTrackerGetBatchStatistics:
         mock_table = MagicMock()
         # Create timestamps as floats (Unix timestamps)
         import time
+
         current_time = time.time()
         mock_df = pl.DataFrame(
             {
                 "pipeline_name": ["test_pipeline", "test_pipeline", "test_pipeline"],
                 "layer": ["bronze", "bronze", "bronze"],
-                "timestamp": [current_time - 100, current_time - 200, current_time - 300],
+                "timestamp": [
+                    current_time - 100,
+                    current_time - 200,
+                    current_time - 300,
+                ],
                 "record_count": [100, 200, 300],
             }
         )

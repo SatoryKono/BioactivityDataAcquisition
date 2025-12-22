@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.shutdown import ShutdownSignal, PipelineShutdownError
+from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 
@@ -121,7 +121,10 @@ class TestLockManager:
         )
 
     async def test_start_heartbeat_failure(
-        self, lock_manager: LockManager, mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
+        self,
+        lock_manager: LockManager,
+        mock_lock_port: AsyncMock,
+        mock_shutdown_signal: Mock,
     ) -> None:
         """Heartbeat failure on start triggers shutdown before work begins."""
 
@@ -143,7 +146,9 @@ class TestLockManager:
                 pass
 
 
-def test_lock_key_format_incremental(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> None:
+def test_lock_key_format_incremental(
+    mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
+) -> None:
     manager = LockManager.create(
         lock_port=mock_lock_port,
         run_id=RunID("run_123"),
@@ -162,7 +167,9 @@ def test_lock_key_format_incremental(mock_lock_port: AsyncMock, mock_shutdown_si
     assert manager._exclusive is False
 
 
-def test_lock_key_format_exclusive(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> None:
+def test_lock_key_format_exclusive(
+    mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
+) -> None:
     manager = LockManager.create(
         lock_port=mock_lock_port,
         run_id=RunID("run_123"),

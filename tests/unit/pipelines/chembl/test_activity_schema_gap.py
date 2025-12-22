@@ -1,13 +1,16 @@
 """Unit tests for ChEMBL Activity Entity schema gap fix."""
 
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+
+import pytest
+
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
+
 
 @pytest.fixture
 def chembl_pipeline() -> ChEMBLActivityPipeline:
@@ -33,6 +36,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
     )
     return ChEMBLActivityPipeline(config=config, runtime=runtime, services=services)
 
+
 @pytest.fixture
 def context(chembl_pipeline) -> PipelineContext:
     return PipelineContext(
@@ -40,6 +44,7 @@ def context(chembl_pipeline) -> PipelineContext:
         run_type=RunType.INCREMENTAL,
         logger=chembl_pipeline.logger,
     )
+
 
 @pytest.mark.asyncio
 async def test_transform_populates_extended_fields(chembl_pipeline, context):
@@ -53,7 +58,7 @@ async def test_transform_populates_extended_fields(chembl_pipeline, context):
         "assay_type": "B",
         "assay_description": "Test Assay",
         "document_chembl_id": "DOC123",
-        "document_year": 2023
+        "document_year": 2023,
     }
 
     result = await chembl_pipeline.transform_bronze_to_silver(context, record)
@@ -65,6 +70,7 @@ async def test_transform_populates_extended_fields(chembl_pipeline, context):
     assert result["assay_description"] == "Test Assay"
     assert result["document_chembl_id"] == "DOC123"
     assert result["document_year"] == 2023
+
 
 @pytest.mark.asyncio
 async def test_transform_handles_missing_extended_fields(chembl_pipeline, context):

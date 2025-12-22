@@ -33,9 +33,7 @@ async def test_redis_locks(e2e_redis_client):
     owner_id = "test_owner"
 
     # Acquire lock
-    acquired = await e2e_redis_client.set(
-        lock_key, owner_id, nx=True, ex=60
-    )
+    acquired = await e2e_redis_client.set(lock_key, owner_id, nx=True, ex=60)
     assert acquired is True, "Should acquire lock"
 
     # Try to acquire again (should fail)
@@ -80,11 +78,7 @@ def test_minio_object_operations(e2e_minio_client):
     content = b"Hello from E2E test"
 
     # Upload object
-    e2e_minio_client.put_object(
-        Bucket=bucket,
-        Key=key,
-        Body=content
-    )
+    e2e_minio_client.put_object(Bucket=bucket, Key=key, Body=content)
 
     # Download object
     response = e2e_minio_client.get_object(Bucket=bucket, Key=key)
@@ -129,9 +123,10 @@ async def test_redis_lock_integration_with_bioetl(e2e_redis_client):
 @pytest.mark.slow
 async def test_checkpoint_with_minio(e2e_minio_client):
     """Test S3Checkpoint with real MinIO."""
-    from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-    from bioetl.domain.types import Watermark
     from uuid import uuid4
+
+    from bioetl.domain.types import Watermark
+    from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
     checkpoint = S3Checkpoint(
         bucket="checkpoints",
@@ -147,10 +142,10 @@ async def test_checkpoint_with_minio(e2e_minio_client):
 
     # Save checkpoint
     await checkpoint.save(
-        pipeline=pipeline_name, 
-        run_id=run_id, 
-        watermark=watermark, 
-        metadata=checkpoint_data
+        pipeline=pipeline_name,
+        run_id=run_id,
+        watermark=watermark,
+        metadata=checkpoint_data,
     )
 
     # Load checkpoint
@@ -160,7 +155,9 @@ async def test_checkpoint_with_minio(e2e_minio_client):
 
     assert loaded_metadata == checkpoint_data, "Checkpoint metadata should match"
     assert loaded_run_id == run_id, "Run ID should match"
-    assert loaded_watermark.to_api_param() == watermark.to_api_param(), "Checkpoint watermark should match"
+    assert loaded_watermark.to_api_param() == watermark.to_api_param(), (
+        "Checkpoint watermark should match"
+    )
 
     # Verify checkpoint file exists in MinIO
     # Note: the key for 'latest' is just the pipeline name
