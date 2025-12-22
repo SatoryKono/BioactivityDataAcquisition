@@ -11,12 +11,15 @@ Architecture:
 
 import asyncio
 import json
+import logging
 import os
 import tempfile
 from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.csv as pv
+
+logger = logging.getLogger(__name__)
 
 
 class CsvExporter:
