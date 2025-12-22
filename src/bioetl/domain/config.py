@@ -57,8 +57,9 @@ class TableConfig:
     primary_keys: list[str] = field(default_factory=lambda: ["entity_id"])
     silver_table: str | None = None
     gold_table: str | None = None
-    # New fields for storage contract alignment
-    write_mode: Literal["merge", "append", "delete"] = "merge"
+    # Write modes from YAML sink config
+    silver_write_mode: Literal["merge", "append", "overwrite"] = "merge"
+    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
     partition_cols: list[str] = field(default_factory=list)
 
 
@@ -82,7 +83,8 @@ class PipelineConfig:
     primary_keys: list[str]
     silver_table: str
     gold_table: str | None = None
-    write_mode: Literal["merge", "append", "delete"] = "merge"
+    write_mode: Literal["merge", "append", "overwrite"] = "merge"
+    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
     partition_cols: list[str] = field(default_factory=list)
 
     # Processing
@@ -128,7 +130,8 @@ class PipelineConfig:
             primary_keys=self.primary_keys,
             silver_table=self.silver_table,
             gold_table=self.gold_table,
-            write_mode=self.write_mode,
+            silver_write_mode=self.write_mode,
+            gold_write_mode=self.gold_write_mode,
             partition_cols=self.partition_cols,
         )
 

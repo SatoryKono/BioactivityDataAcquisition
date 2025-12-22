@@ -251,6 +251,7 @@ class RecordProcessor:
             records=records_with_meta,
             primary_keys=self._table_config.primary_keys,
             schema=self._silver_schema,
+            mode=self._table_config.silver_write_mode,
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
@@ -272,5 +273,7 @@ class RecordProcessor:
             self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
         )
         await self._storage.write_gold(
-            table_name=table_name, records=records, mode="append"
+            table_name=table_name,
+            records=records,
+            mode=self._table_config.gold_write_mode,
         )

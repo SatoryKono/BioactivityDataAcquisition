@@ -173,7 +173,9 @@ class DeltaWriter:
 
         # Delegate CSV export to CsvExporter if configured
         if self.csv_exporter:
-            await self.csv_exporter.export(table_name, arrow_data)
+            # Match CSV append behavior to Delta mode
+            csv_append = mode != "overwrite"
+            await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
 
     async def _merge_records(
         self,
