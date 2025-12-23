@@ -182,6 +182,9 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("confidence_description", pa.string()),
         pa.field("relationship_type", pa.string()),
         pa.field("relationship_description", pa.string()),
+        # Additional metadata
+        pa.field("assay_pref_name", pa.string()),
+        pa.field("score", pa.float64()),
         # Variant information
         pa.field("variant_sequence", pa.string()),
         # Complex fields (stored as JSON strings)
