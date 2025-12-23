@@ -5,9 +5,8 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
 
-import structlog
-
 from bioetl.domain.exceptions import ApiError
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, Watermark
 
 if TYPE_CHECKING:
@@ -16,7 +15,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-logger = structlog.get_logger()
 
 
 @dataclass
@@ -24,9 +22,17 @@ class PubMedAdapter:
     """PubMed adapter using UnifiedHTTPClient.
 
     Implements DataSourcePort for PubMed data extraction.
+
+    Args:
+        http_client: UnifiedHTTPClient instance for making HTTP requests.
+        logger: LoggerPort instance for structured logging.
+        email: Email address for NCBI API (required).
+        api_key: Optional NCBI API key for higher rate limits.
+        batch_size: Number of records to fetch per batch.
     """
 
     http_client: UnifiedHTTPClient
+    logger: LoggerPort
     email: str
     api_key: str | None = None
     batch_size: int = 200
@@ -66,7 +72,7 @@ class PubMedAdapter:
             data = response.json()
             return data.get("esearchresult", {}).get("idlist", [])
         except Exception as e:
-            logger.error("Failed to fetch PMIDs", error=str(e))
+            self.logger.error("Failed to fetch PMIDs", error=str(e))
             raise ApiError(f"PubMed search failed: {e}") from e
 
     def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
@@ -104,10 +110,10 @@ class PubMedAdapter:
             )
             return ET.fromstring(response.text)
         except ET.ParseError as e:
-            logger.error("XML parse error", error=str(e))
+            self.logger.error("XML parse error", error=str(e))
             return None
         except Exception as e:
-            logger.error("Batch fetch failed", error=str(e))
+            self.logger.error("Batch fetch failed", error=str(e))
             raise ApiError(f"PubMed fetch failed: {e}") from e
 
     async def fetch(

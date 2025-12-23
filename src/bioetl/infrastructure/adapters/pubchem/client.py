@@ -11,20 +11,17 @@ Requirements:
 Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 """
 
-import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
 import pubchempy as pcp
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
-from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
-
-logger = logging.getLogger(__name__)
 
 
 class PubChemClient(BaseSyncAdapter):
@@ -47,15 +44,26 @@ class PubChemClient(BaseSyncAdapter):
 
     def __init__(
         self,
+        logger: LoggerPort,
         rate: float = 5.0,  # 5 req/sec per RULES.md
         circuit_breaker_threshold: int = 5,
         circuit_breaker_timeout: int = 300,
         max_workers: int = 4,
         strict_error_handling: bool = False,
     ) -> None:
-        """Initialize PubChem client."""
+        """Initialize PubChem client.
+
+        Args:
+            logger: LoggerPort instance for structured logging.
+            rate: Requests per second (default: 5.0 per RULES.md).
+            circuit_breaker_threshold: Failures before opening circuit.
+            circuit_breaker_timeout: Recovery timeout in seconds.
+            max_workers: Thread pool size.
+            strict_error_handling: Whether to raise exceptions or log warnings.
+        """
         super().__init__(
             rate=rate,
+            logger=logger,
             circuit_breaker_threshold=circuit_breaker_threshold,
             circuit_breaker_timeout=circuit_breaker_timeout,
             max_workers=max_workers,
@@ -102,8 +110,8 @@ class PubChemClient(BaseSyncAdapter):
                 self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
             )
         except Exception:
-            log_adapter_error(
-                logger,
+            self.logger.error(
+                "pubchem compound batch fetch failed",
                 provider="pubchem",
                 operation="compound batch fetch",
                 batch_start=cid_batch[0],
@@ -133,12 +141,10 @@ class PubChemClient(BaseSyncAdapter):
                 # Track consecutive empty results (from errors or no data)
                 consecutive_empty += 1
                 if consecutive_empty >= max_consecutive_empty:
-                    logger.warning(
+                    self.logger.warning(
                         "Stopping incremental fetch after consecutive empty batches",
-                        extra={
-                            "consecutive_empty": consecutive_empty,
-                            "current_cid": current_cid,
-                        },
+                        consecutive_empty=consecutive_empty,
+                        current_cid=current_cid,
                     )
                     break
             else:
