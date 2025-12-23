@@ -34,6 +34,7 @@ from bioetl.domain.config import PipelineConfig
 from bioetl.domain.filter_config import (
     GoldColumnFilter,
     GoldFilterConfig,
+    GoldListLengthFilter,
     GoldRangeFilter,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -181,9 +182,18 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         )
         for col, r in gf.ranges.items()
     )
+    list_length_filters = tuple(
+        GoldListLengthFilter(
+            column=col,
+            min_length=r.min,
+            max_length=r.max,
+        )
+        for col, r in gf.list_lengths.items()
+    )
     gold_filters = GoldFilterConfig(
         column_filters=column_filters,
         range_filters=range_filters,
+        list_length_filters=list_length_filters,
         required_fields=tuple(gf.required_fields),
         exclude_if_present=tuple(gf.exclude_if_present),
     )

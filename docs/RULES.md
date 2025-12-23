@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.1 (ADR Updates), 2025-12-22* 
+*Версия: 5.2 (Local-Only Deployment), 2025-12-23* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -230,19 +230,29 @@ Lock key включает тип запуска:
 | error_type | При ошибках | `SCHEMA_VIOLATION` |
  
 ### 3.3. Конкурентность и Блокировки
-См. [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md).
-- **Механизм**: Redis `SETNX` + `EXPIRE`.
-- **TTL**: 60 секунд.
-- **Heartbeat**: Обновление TTL каждые 20 секунд.
-- **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`. Смешивание бэкендов (Redis + DB) запрещено.
-- **Fencing Token**: В тело блокировки записывается `owner_id` (run_id воркера). 
-- **Lock Max Duration**: **4 часа**. Принудительное снятие по истечении. 
-- **Partitioned Runs**: Разрешены параллельные запуски на *непересекающихся* партициях дат. 
- 
-**Invariant**:
+
+> **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
+>
+> Текущая реализация использует **MemoryLock** для локального развёртывания.
+> Redis-блокировки (ADR-003) остаются спецификацией для будущего распределённого развёртывания.
+
+#### Текущая реализация (Local-Only)
+- **Механизм**: In-memory блокировки (`MemoryLock`)
+- **Scope**: Один процесс Python
+- **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`
+- **Lock Max Duration**: **4 часа**. Принудительное снятие по истечении.
+
+#### Спецификация для распределённого развёртывания
+См. [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) (отложено).
+- **Механизм**: Redis `SETNX` + `EXPIRE`
+- **TTL**: 60 секунд
+- **Heartbeat**: Обновление TTL каждые 20 секунд
+- **Fencing Token**: `owner_id` (run_id воркера)
+
+**Invariant** (применимо ко всем вариантам развёртывания):
 - Потеря блокировки = Потеря права на запись.
 - Если Heartbeat не прошел, воркер **MUST** аварийно завершиться до попытки коммита данных.
-- **Safety Guard**: Адаптер **MUST** валидировать наличие блокировки (проверка `owner_id` в Redis) непосредственно перед отправкой данных в S3/Delta Lake. Если проверка не проходит — операция отменяется, транзакция откатывается.
+- **Safety Guard**: Адаптер **MUST** валидировать наличие блокировки перед записью данных.
  
 ### 3.4. Метрики Качества Данных (DQ Metrics) 
 Метрики экспортируются в формате Prometheus с использованием лейблов для агрегации (`pipeline`, `entity`, `column`, `check`):
@@ -402,11 +412,22 @@ make test         # unit + integration (на кассетах)
 make lint         # ruff + mypy 
 make run-local    # запуск сэмплового пайплайна на фикстурах 
 ``` 
-### 8.2. Окружение 
-- **Docker Compose**: Для запуска локальных зависимостей (Postgres, Redis). 
-- **Volumes**: Данные Postgres/Redis персистятся в `./docker-data/` (добавлен в .gitignore). 
-- **Reset**: `make docker-reset` — очистка volumes для чистого старта. 
-- **Seed Data**: `make seed-local` — загрузка сэмпловых фикстур в локальную БД. 
+### 8.2. Окружение
+
+> **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
+
+**Текущая реализация (Local-Only):**
+- **Storage**: Локальная файловая система (`data/bronze`, `data/silver`, `data/gold`)
+- **Locking**: In-memory (`MemoryLock`)
+- **Checkpoints**: Локальные файлы (`data/checkpoints`)
+- **Зависимости**: Только Python 3.11+ и pip
+
+**Для распределённого развёртывания (будущее):**
+- Docker Compose: Postgres, Redis, MinIO
+- Volumes: `./docker-data/`
+- Reset: `make docker-reset`
+
+- **Seed Data**: `make seed-local` — загрузка сэмпловых фикстур.
 - **.env.example**: Шаблон переменных окружения (без секретов). 
  
 --- 
@@ -550,15 +571,17 @@ fields:
 |-----|----------|--------|------|
 | [ADR-001](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Accepted | 2025-05 |
 | [ADR-002](02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Accepted | 2025-05 |
-| [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis for Distributed Locking | Accepted | 2025-05 |
+| [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis for Distributed Locking | Superseded by ADR-010 | 2025-05 |
 | [ADR-004](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Accepted | 2025-05 |
 | [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) | Composition Layer Separation | Accepted | 2025-12 |
 | [ADR-006](02-architecture/decisions/ADR-006-logger-metrics-ports.md) | Logger and Metrics Ports | Accepted | 2025-12-18 |
 | [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker Implementation | Accepted | 2025-12-22 |
 | [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy | Accepted | 2025-12-22 |
 | [ADR-009](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin Design | Accepted | 2025-12-22 |
+| [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment | Accepted | 2025-12-23 |
 
 ## История Изменений (Changelog)
+- **5.2** (2025-12-23): Local-Only Deployment (ADR-010). Обновлены §3.3 и §8.2 для MemoryLock. ADR-003 superseded.
 - **5.1** (2025-12-22): ADR additions (007-009), ADR index appendix.
 - **5.0** (2025-12-15): Production Ready. Final Governance Polish, Circuit Breaker half-open observability, Backfill lock timeouts, Generic Health Probes, Deprecation clarification.
 - **4.6** (2025-12-15): Governance & Stability. RFC 2119, Entity ID vs Content Hash, Bronze Lifecycle, Hard Limits, Threat Model. Added Log Schema, Provider Health Matrix, Circuit Breaker details, Backfill Locking, and Deprecation workflows.

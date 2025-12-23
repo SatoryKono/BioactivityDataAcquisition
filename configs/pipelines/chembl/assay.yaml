@@ -18,6 +18,10 @@ gold_filters:
     columns:
         assay_type: [B, F]  # Binding, Functional
         confidence_score: ["8", "9"]  # Minimum 8 (0-9 scale)
+        relationship_type: [D] # Direct interaction only
+    required_fields:
+        - assay_type
+        - description
 
 transform:
     version: "1.0.0"

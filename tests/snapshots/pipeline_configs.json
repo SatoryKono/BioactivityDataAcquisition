@@ -44,6 +44,7 @@
         }
       ],
       "exclude_if_present": [],
+      "list_length_filters": [],
       "range_filters": [
         {
           "column": "standard_value",
@@ -191,6 +192,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "list_length_filters": [],
       "range_filters": [],
       "required_fields": []
     },
@@ -218,6 +220,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "list_length_filters": [],
       "range_filters": [],
       "required_fields": []
     },
@@ -245,6 +248,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "list_length_filters": [],
       "range_filters": [],
       "required_fields": []
     },
