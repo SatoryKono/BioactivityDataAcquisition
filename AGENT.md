@@ -1,6 +1,6 @@
-# AGENT.md: Инструкции для Агента BioETL (v2.1)
+# AGENT.md: Инструкции для Агента BioETL (v2.2)
 
-*Синхронизировано с RULES.md v5.1 (2025-12-22)*
+*Синхронизировано с RULES.md v5.2 (2025-12-23)*
 
 Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/RULES.md`.
 
@@ -57,7 +57,7 @@ src/bioetl/
 ├── domain/          # Чистая логика, Protocols (Ports), бизнес-модели
 ├── application/     # Пайплайны, Use Cases, оркестрация
 ├── composition/     # Composition Root (DI-контейнер, factories, bootstrap)
-├── infrastructure/  # Адаптеры (HTTP, S3, Redis), реализация портов
+├── infrastructure/  # Адаптеры (HTTP, локальное хранилище), реализация портов
 └── interfaces/      # CLI, PipelineRunner
 ```
 
@@ -101,12 +101,14 @@ src/bioetl/
 
 ### 4.3. Конкурентность и Блокировки
 
-См. [ADR-003](docs/02-architecture/decisions/ADR-003-redis-for-distributed-locking.md).
+> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
 
-- **Механизм:** Redis (`SETNX` + `EXPIRE`).
-- **Ключ:** `lock:{provider}_{entity}`.
-- **Heartbeat:** Воркер **MUST** обновлять TTL блокировки каждые 20 секунд.
-- **Fencing:** Потеря блокировки = немедленное аварийное завершение воркера **ДО** записи данных.
+**Текущая реализация (Local-Only):**
+- **Механизм:** In-memory блокировки (`MemoryLock`)
+- **Scope:** Один процесс Python
+- **Ключ:** `lock:{provider}_{entity}`
+
+**Invariant:** Потеря блокировки = немедленное аварийное завершение воркера **ДО** записи данных.
 
 ### 4.4. Circuit Breaker
 
@@ -124,17 +126,19 @@ src/bioetl/
 При получении SIGTERM/SIGINT:
 1. Прекратить извлечение новых записей.
 2. Дождаться завершения записи текущего батча.
-3. Сохранить чекпоинт в S3.
+3. Сохранить локальный чекпоинт (`LocalCheckpoint`).
 4. Выйти с кодом 0.
 
 ### 4.6. Стек Технологий
+
+> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
 
 | Категория | Инструмент | Назначение |
 |-----------|------------|------------|
 | **Данные** | Polars, Delta Lake, Pandera | Обработка, хранение, валидация |
 | **Сеть** | `httpx` (async) | HTTP-клиент |
-| **Оркестрация** | Prefect | Запуск пайплайнов |
-| **Блокировки** | Redis | Распределённые локи |
+| **Блокировки** | `MemoryLock` (in-process) | Конкурентный доступ к ресурсам |
+| **Чекпоинты** | `LocalCheckpoint` | Локальные чекпоинты в JSON |
 | **Метрики** | Prometheus | Observability |
 | **Типизация** | mypy, `typing.Protocol` | Строгая статическая проверка |
 | **Линтинг** | Ruff | Форматирование и линтинг |
@@ -312,13 +316,14 @@ git commit -m "..."
 |-----|----------|----------|
 | [ADR-001](docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Выбор формата хранения |
 | [ADR-002](docs/02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Bronze/Silver/Gold слои |
-| [ADR-003](docs/02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis Locking | Распределённые блокировки |
+| [ADR-003](docs/02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis Locking | ~~Распределённые блокировки~~ (Superseded by ADR-010) |
 | [ADR-004](docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Валидация моделей |
 | [ADR-005](docs/02-architecture/decisions/ADR-005-composition-layer-separation.md) | Composition Layer | Разделение слоёв DI |
 | [ADR-006](docs/02-architecture/decisions/ADR-006-logger-metrics-ports.md) | Logger/Metrics Ports | Порты для observability |
 | [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker | Защита от каскадных сбоев |
 | [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown | Стратегия завершения |
 | [ADR-009](docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin | Паттерн пагинации |
+| [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment | MemoryLock + LocalCheckpoint |
 
 ---
 
