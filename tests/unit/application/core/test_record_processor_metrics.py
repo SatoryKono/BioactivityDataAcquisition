@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
@@ -57,16 +58,19 @@ def record_processor(
     mock_context,
 ):
     """Create RecordProcessor instance with dummy callbacks."""
+    config = RecordProcessorConfig(
+        pipeline_name="test_pipeline",
+        provider="test",
+        entity_type="entity",
+        silver_schema=MagicMock(),
+    )
     return RecordProcessor(
         services=mock_services,
         error_classifier=mock_error_classifier,
         context=mock_context,
-        pipeline_name="test_pipeline",
-        provider="test",
-        entity_type="entity",
+        config=config,
         transform_callback=AsyncMock(return_value={"id": 1}),
         gold_filter_callback=MagicMock(return_value=True),
-        silver_schema=MagicMock(),
     )
 
 
