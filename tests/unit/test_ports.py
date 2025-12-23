@@ -9,7 +9,6 @@ from bioetl.domain.ports import (
     DataSourcePort,
     LockPort,
     MetricsPort,
-    OrchestrationPort,
     QuarantinePort,
     StoragePort,
 )
@@ -391,54 +390,3 @@ class TestMetricsPortProtocol:
             # Missing increment_counter
 
         assert not isinstance(InvalidMetrics(), MetricsPort)
-
-
-@pytest.mark.unit
-class TestOrchestrationPortProtocol:
-    """Tests for the OrchestrationPort protocol."""
-
-    def test_valid_orchestration_implementation(self) -> None:
-        """OrchestrationPort should accept valid implementations."""
-
-        class ValidOrchestration:
-            async def schedule(
-                self,
-                pipeline_name: str,
-                params: dict[str, Any] | None = None,
-            ) -> None:
-                pass
-
-            async def trigger(
-                self,
-                pipeline_name: str,
-                params: dict[str, Any] | None = None,
-            ) -> Any:
-                return "run-123"
-
-            async def get_status(self, run_id: Any) -> str:
-                return "running"
-
-            async def aclose(self) -> None:
-                pass
-
-        assert isinstance(ValidOrchestration(), OrchestrationPort)
-
-    def test_missing_schedule_fails(self) -> None:
-        """OrchestrationPort should reject implementations missing schedule."""
-
-        class InvalidOrchestration:
-            # Missing schedule
-            async def trigger(
-                self,
-                pipeline_name: str,
-                params: dict[str, Any] | None = None,
-            ) -> Any:
-                return "run-123"
-
-            async def get_status(self, run_id: Any) -> str:
-                return "running"
-
-            async def aclose(self) -> None:
-                pass
-
-        assert not isinstance(InvalidOrchestration(), OrchestrationPort)
