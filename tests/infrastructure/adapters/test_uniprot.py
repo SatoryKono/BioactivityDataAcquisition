@@ -1,5 +1,7 @@
 "Tests for UniProt Client."
 
+from unittest.mock import MagicMock
+
 import pytest
 import respx
 from httpx import Response
@@ -12,6 +14,12 @@ from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
 
 @pytest.fixture
+def mock_logger():
+    """Create a mock logger for testing."""
+    return MagicMock()
+
+
+@pytest.fixture
 def unified_http_client():
     """Fixture for UnifiedHTTPClient."""
     rate_limiter = TokenBucket(rate=100.0, capacity=100)
@@ -20,9 +28,9 @@ def unified_http_client():
 
 
 @pytest.fixture
-def uniprot_client(unified_http_client):
+def uniprot_client(unified_http_client, mock_logger):
     """Fixture for UniProtClient."""
-    return UniProtClient(http_client=unified_http_client)
+    return UniProtClient(http_client=unified_http_client, logger=mock_logger)
 
 
 @pytest.fixture

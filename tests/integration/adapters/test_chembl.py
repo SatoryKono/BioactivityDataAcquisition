@@ -7,6 +7,7 @@ To record new cassettes: pytest --vcr-record=new_episodes
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -20,6 +21,11 @@ class TestChemblAdapter:
     """
 
     @pytest.fixture
+    def mock_logger(self) -> MagicMock:
+        """Create a mock logger for testing."""
+        return MagicMock()
+
+    @pytest.fixture
     def chembl_client(self, token_bucket: Any, circuit_breaker: Any) -> Any:
         """Create ChEMBL HTTP client for testing."""
         from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -31,18 +37,18 @@ class TestChemblAdapter:
         )
 
     @pytest.fixture
-    def chembl_adapter(self, chembl_client: Any) -> Any:
+    def chembl_adapter(self, chembl_client: Any, mock_logger: MagicMock) -> Any:
         """Create ChemblAdapter instance."""
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
-        return ChemblAdapter(http_client=chembl_client)
+        return ChemblAdapter(http_client=chembl_client, logger=mock_logger)
 
     def test_provider_name(self, chembl_adapter: Any) -> None:
         """Adapter should have correct provider name."""
         assert chembl_adapter.provider_name == "chembl"
 
     @pytest.mark.vcr
-    async def test_fetch_activities(self, chembl_client: Any) -> None:
+    async def test_fetch_activities(self, chembl_client: Any, mock_logger: MagicMock) -> None:
         """Test fetching activities from ChEMBL.
 
         This test requires a VCR cassette.
@@ -51,7 +57,7 @@ class TestChemblAdapter:
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
         async with chembl_client:
-            adapter = ChemblAdapter(http_client=chembl_client, batch_size=10)
+            adapter = ChemblAdapter(http_client=chembl_client, logger=mock_logger, batch_size=10)
 
             records = []
             async for record in adapter.fetch("activity", limit=5):
@@ -63,7 +69,7 @@ class TestChemblAdapter:
                 assert "activity_id" in record
 
     @pytest.mark.vcr
-    async def test_health_check(self, chembl_client: Any) -> None:
+    async def test_health_check(self, chembl_client: Any, mock_logger: MagicMock) -> None:
         """Test ChEMBL health check endpoint.
 
         This test requires a VCR cassette.
@@ -73,7 +79,7 @@ class TestChemblAdapter:
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
         async with chembl_client:
-            adapter = ChemblAdapter(http_client=chembl_client)
+            adapter = ChemblAdapter(http_client=chembl_client, logger=mock_logger)
             status = await adapter.health_check()
 
             # Should return a valid health status
@@ -84,7 +90,7 @@ class TestChemblAdapter:
             ]
 
     @pytest.mark.vcr
-    async def test_get_entity_count(self, chembl_client: Any) -> None:
+    async def test_get_entity_count(self, chembl_client: Any, mock_logger: MagicMock) -> None:
         """Test getting entity count from ChEMBL.
 
         This test requires a VCR cassette.
@@ -93,7 +99,7 @@ class TestChemblAdapter:
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
         async with chembl_client:
-            adapter = ChemblAdapter(http_client=chembl_client)
+            adapter = ChemblAdapter(http_client=chembl_client, logger=mock_logger)
             count = await adapter.get_entity_count("compound")
 
             # ChEMBL has millions of compounds

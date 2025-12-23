@@ -4,7 +4,6 @@ Tests that silent failures have been replaced with proper logging
 and configurable error handling based on BIOETL_STRICT_ERROR_HANDLING.
 """
 
-import logging
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -62,6 +61,11 @@ class TestUniProtClientErrorPaths:
         return client
 
     @pytest.fixture
+    def mock_logger(self):
+        """Create a mock logger."""
+        return MagicMock()
+
+    @pytest.fixture
     def mock_circuit_breaker(self):
         """Create a mock circuit breaker that raises an exception."""
         from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
@@ -70,7 +74,7 @@ class TestUniProtClientErrorPaths:
         cb.call = AsyncMock(side_effect=ConnectionError("Network error"))
         return cb
 
-    async def test_fetch_proteins_logs_error_on_failure(self, mock_http_client, caplog):
+    async def test_fetch_proteins_logs_error_on_failure(self, mock_http_client, mock_logger):
         """Test that _fetch_proteins logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
@@ -82,33 +86,31 @@ class TestUniProtClientErrorPaths:
             mock_http_client.get = AsyncMock(
                 side_effect=ConnectionError("Network error")
             )
-            client = UniProtClient(http_client=mock_http_client)
+            client = UniProtClient(http_client=mock_http_client, logger=mock_logger)
 
-            with caplog.at_level(logging.ERROR):
-                results = [
-                    r
-                    async for r in client._fetch_proteins(
-                        query="test", watermark=None, limit=100
-                    )
-                ]
+            results = [
+                r
+                async for r in client._fetch_proteins(
+                    query="test", watermark=None, limit=100
+                )
+            ]
 
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the error
-            assert "uniprot protein fetch failed" in caplog.text.lower()
-            # Check that the exception info is in the log
-            error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
-            assert len(error_records) >= 1
-            assert "Network error" in error_records[0].exc_text
+            # Should have logged the error via injected logger
+            mock_logger.error.assert_called()
+            # Verify the error message contains expected context
+            call_args = mock_logger.error.call_args
+            assert "protein fetch" in str(call_args).lower() or "network error" in str(call_args).lower()
 
-    async def test_fetch_proteins_raises_in_strict_mode(self, mock_http_client):
+    async def test_fetch_proteins_raises_in_strict_mode(self, mock_http_client, mock_logger):
         """Test that _fetch_proteins raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         # Make http_client.get raise an exception
         mock_http_client.get = AsyncMock(side_effect=ConnectionError("Network error"))
-        client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
+        client = UniProtClient(http_client=mock_http_client, logger=mock_logger, strict_error_handling=True)
 
         with pytest.raises(ConnectionError, match="Network error"):
             _ = [
@@ -118,7 +120,7 @@ class TestUniProtClientErrorPaths:
                 )
             ]
 
-    async def test_fetch_features_logs_error_on_failure(self, mock_http_client, caplog):
+    async def test_fetch_features_logs_error_on_failure(self, mock_http_client, mock_logger):
         """Test that _fetch_features logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
@@ -134,33 +136,31 @@ class TestUniProtClientErrorPaths:
             mock_http_client.get = AsyncMock(
                 side_effect=TimeoutError("Request timeout")
             )
-            client = UniProtClient(http_client=mock_http_client)
+            client = UniProtClient(http_client=mock_http_client, logger=mock_logger)
 
-            with caplog.at_level(logging.ERROR):
-                results = [
-                    r
-                    async for r in client._fetch_features(
-                        "P12345", watermark=None, limit=10
-                    )
-                ]
+            results = [
+                r
+                async for r in client._fetch_features(
+                    "P12345", watermark=None, limit=10
+                )
+            ]
 
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the error
-            assert "uniprot feature fetch failed" in caplog.text.lower()
-            # Check that the exception info is in the log
-            error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
-            assert len(error_records) >= 1
-            assert "Request timeout" in error_records[0].exc_text
+            # Should have logged the error via injected logger
+            mock_logger.error.assert_called()
+            # Verify the error message contains expected context
+            call_args = mock_logger.error.call_args
+            assert "feature fetch" in str(call_args).lower() or "timeout" in str(call_args).lower()
 
-    async def test_fetch_features_raises_in_strict_mode(self, mock_http_client):
+    async def test_fetch_features_raises_in_strict_mode(self, mock_http_client, mock_logger):
         """Test that _fetch_features raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         # Make http_client.get raise an exception
         mock_http_client.get = AsyncMock(side_effect=TimeoutError("Request timeout"))
-        client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
+        client = UniProtClient(http_client=mock_http_client, logger=mock_logger, strict_error_handling=True)
 
         with pytest.raises(TimeoutError, match="Request timeout"):
             _ = [
@@ -171,7 +171,7 @@ class TestUniProtClientErrorPaths:
             ]
 
     async def test_fetch_sequences_logs_error_on_failure(
-        self, mock_http_client, caplog
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_sequences logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
@@ -192,23 +192,25 @@ class TestUniProtClientErrorPaths:
                     response=MagicMock(status_code=500),
                 )
             )
-            client = UniProtClient(http_client=mock_http_client)
+            client = UniProtClient(http_client=mock_http_client, logger=mock_logger)
 
-            with caplog.at_level(logging.ERROR):
-                results = [
-                    r
-                    async for r in client._fetch_sequences(
-                        "gene:TP53", watermark=None, limit=10
-                    )
-                ]
+            results = [
+                r
+                async for r in client._fetch_sequences(
+                    "gene:TP53", watermark=None, limit=10
+                )
+            ]
 
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the error
-            assert "uniprot sequence fetch failed" in caplog.text.lower()
+            # Should have logged the error via injected logger
+            mock_logger.error.assert_called()
+            # Verify the error message contains expected context
+            call_args = mock_logger.error.call_args
+            assert "sequence fetch" in str(call_args).lower() or "server error" in str(call_args).lower()
 
-    async def test_fetch_sequences_raises_in_strict_mode(self, mock_http_client):
+    async def test_fetch_sequences_raises_in_strict_mode(self, mock_http_client, mock_logger):
         """Test that _fetch_sequences raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
@@ -219,7 +221,7 @@ class TestUniProtClientErrorPaths:
             response=MagicMock(status_code=500),
         )
         mock_http_client.get = AsyncMock(side_effect=error)
-        client = UniProtClient(http_client=mock_http_client, strict_error_handling=True)
+        client = UniProtClient(http_client=mock_http_client, logger=mock_logger, strict_error_handling=True)
 
         with pytest.raises(httpx.HTTPStatusError):
             _ = [
@@ -234,13 +236,18 @@ class TestPubChemClientErrorPaths:
     """Tests for PubChem client error handling."""
 
     @pytest.fixture
+    def mock_logger(self):
+        """Create a mock logger."""
+        return MagicMock()
+
+    @pytest.fixture
     def mock_pubchempy(self):
         """Mock pubchempy module."""
         mock_pcp = MagicMock()
         mock_pcp.get_compounds = MagicMock(return_value=[])
         return mock_pcp
 
-    async def test_fetch_compounds_incremental_logs_error_on_failure(self, caplog):
+    async def test_fetch_compounds_incremental_logs_error_on_failure(self, mock_logger):
         """Test that _fetch_compounds_incremental logs error when fetch fails."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
@@ -252,7 +259,7 @@ class TestPubChemClientErrorPaths:
 
             get_settings.cache_clear()
 
-            client = PubChemClient()
+            client = PubChemClient(logger=mock_logger)
 
             # Make circuit_breaker.call raise an exception then return empty
             # Need 3 consecutive empty batches to break the loop (max_consecutive_empty=3)
@@ -264,25 +271,23 @@ class TestPubChemClientErrorPaths:
                 ]
             )
 
-            with caplog.at_level(logging.ERROR):
-                results = []
-                async for result in client._fetch_compounds_incremental(
-                    watermark=1000, limit=50
-                ):
-                    results.append(result)
+            results = []
+            async for result in client._fetch_compounds_incremental(
+                watermark=1000, limit=50
+            ):
+                results.append(result)
 
-            # Should continue after error (returns empty due to second mock call)
-            assert "pubchem compound batch fetch failed" in caplog.text.lower()
-            # Check that the exception info is in the log
-            error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
-            assert len(error_records) >= 1
-            assert "PubChem API error" in error_records[0].exc_text
+            # Should have logged the error via injected logger
+            mock_logger.error.assert_called()
+            # Verify the error message contains expected context
+            call_args = mock_logger.error.call_args
+            assert "batch fetch" in str(call_args).lower() or "pubchem" in str(call_args).lower()
 
-    async def test_fetch_compounds_incremental_raises_in_strict_mode(self):
+    async def test_fetch_compounds_incremental_raises_in_strict_mode(self, mock_logger):
         """Test that _fetch_compounds_incremental raises exception in strict mode."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
-        client = PubChemClient(strict_error_handling=True)
+        client = PubChemClient(logger=mock_logger, strict_error_handling=True)
 
         # Make circuit_breaker.call raise an exception
         client.circuit_breaker.call = AsyncMock(

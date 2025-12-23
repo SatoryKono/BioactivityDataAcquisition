@@ -7,12 +7,11 @@ Provides common functionality for adapters that must use synchronous libraries
 from __future__ import annotations
 
 import asyncio
-import logging
 import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Self
 
-from bioetl.domain.ports import DataSourcePort
+from bioetl.domain.ports import DataSourcePort, LoggerPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.health import (
@@ -20,16 +19,22 @@ from bioetl.infrastructure.adapters.http.health import (
 )
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
-logger = logging.getLogger(__name__)
-
 
 class BaseSyncAdapter(DataSourcePort):
     """Base class for adapters using synchronous libraries.
 
     Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreaker.
+
+    Attributes:
+        provider_name: Unique identifier for the data provider.
+        logger: LoggerPort instance for structured logging.
+        rate_limiter: Token bucket rate limiter.
+        circuit_breaker: Circuit breaker for fault tolerance.
+        thread_pool: Thread pool for executing sync code.
     """
 
     provider_name: str
+    logger: LoggerPort
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
@@ -37,6 +42,7 @@ class BaseSyncAdapter(DataSourcePort):
     def __init__(
         self,
         rate: float,
+        logger: LoggerPort,
         circuit_breaker_threshold: int = 5,
         circuit_breaker_timeout: int = 300,
         max_workers: int = 4,
@@ -46,11 +52,13 @@ class BaseSyncAdapter(DataSourcePort):
 
         Args:
             rate: Requests per second.
+            logger: LoggerPort instance for structured logging.
             circuit_breaker_threshold: Failures before opening circuit.
             circuit_breaker_timeout: Recovery timeout in seconds.
             max_workers: Thread pool size.
             strict_error_handling: Whether to raise exceptions or log warnings.
         """
+        self.logger = logger
         self.strict_error_handling = strict_error_handling
 
         # Common infrastructure components

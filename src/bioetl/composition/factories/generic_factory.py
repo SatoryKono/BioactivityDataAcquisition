@@ -100,6 +100,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        logger: structlog.BoundLogger,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create data source using the configured creator.
@@ -107,12 +108,15 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Args:
             settings: Application settings
             pipeline_config: Pipeline configuration
+            logger: LoggerPort instance for structured logging
             filter_config: Optional filter configuration
 
         Returns:
             Configured DataSourcePort
         """
-        return self._create_data_source(settings, pipeline_config, filter_config)
+        return self._create_data_source(
+            settings, pipeline_config, logger, filter_config
+        )
 
     def build_services(
         self,
@@ -133,7 +137,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             Configured PipelineServices instance
         """
         pipeline_config = config or load_pipeline_config(self.pipeline_name)
-        data_source = self.create_data_source(settings, pipeline_config, filter_config)
+        data_source = self.create_data_source(
+            settings, pipeline_config, logger, filter_config
+        )
 
         return BaseServicesFactory.create_common_services(
             settings=settings,
