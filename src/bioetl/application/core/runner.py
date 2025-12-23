@@ -121,12 +121,24 @@ class PipelineRunner:
     def _clear_exports(self) -> None:
         """Clear export files and Delta tables at the start of a pipeline run.
 
-        This ensures fresh data without duplicates from previous runs.
-        Clears both CSV exports and Delta tables for Silver and Gold layers.
+        Enforces Medallion architecture invariants:
+        - Only clears data for rebuild/backfill runs
+        - Incremental runs use merge/upsert and should NOT clear existing data
 
-        Note: clear_csv and clear_delta are part of StoragePort contract.
-        They return 0 if no files/tables were cleared (e.g., exporters not configured).
+        This ensures data integrity and prevents accidental data loss.
         """
+        from bioetl.domain.types import RunType
+
+        # Medallion invariant: only clear for destructive run types
+        should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
+
+        if not should_clear:
+            self._logger.debug(
+                "Skipping clear for incremental run",
+                extra={"run_type": self._runtime.run_type.value},
+            )
+            return
+
         storage = self._services.storage
         silver_table = self._config.silver_table
         # Gold table defaults to {provider}.{entity_type} if not specified
@@ -135,24 +147,20 @@ class PipelineRunner:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        # Collect unique table names to clear
-        tables_to_clear = {silver_table, gold_table}
+        # Clear Silver and Gold layers using StoragePort methods
+        silver_cleared = storage.clear_silver(silver_table)
+        gold_cleared = storage.clear_gold(gold_table)
 
-        # Clear CSV exports and Delta tables for each table
-        total_csv_cleared = 0
-        total_delta_cleared = 0
+        total_cleared = silver_cleared + gold_cleared
 
-        for table_name in tables_to_clear:
-            total_csv_cleared += storage.clear_csv(table_name)
-            total_delta_cleared += storage.clear_delta(table_name)
-
-        if total_csv_cleared > 0:
+        if total_cleared > 0:
             self._logger.info(
-                "Cleared CSV export files",
-                extra={"deleted_count": total_csv_cleared},
-            )
-        if total_delta_cleared > 0:
-            self._logger.info(
-                "Cleared Delta tables",
-                extra={"cleared_count": total_delta_cleared},
+                "Cleared storage for rebuild/backfill run",
+                extra={
+                    "run_type": self._runtime.run_type.value,
+                    "silver_table": silver_table,
+                    "gold_table": gold_table,
+                    "silver_cleared": silver_cleared,
+                    "gold_cleared": gold_cleared,
+                },
             )

@@ -2,6 +2,7 @@
 
 from typing import cast
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -32,7 +33,8 @@ def mock_runtime():
 
 @pytest.fixture
 def pipeline(mock_config, mock_runtime, mock_services):
-    return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services)
+    run_id = RunID(uuid4())
+    return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services, run_id)
 
 
 @pytest.fixture
