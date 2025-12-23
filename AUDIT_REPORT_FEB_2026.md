@@ -1,92 +1,89 @@
-# Отчет об архитектурном аудите BioETL (Февраль 2026)
+# Architectural Audit Report: BioETL (Feb 2026)
 
-**Дата аудита:** 01.02.2026
-**Дата обновления:** 02.02.2026
-**Версия проекта:** 5.2 (Refactored)
-**Аудитор:** Jules (AI Agent)
+## 1. Executive Summary
 
----
+This report provides a comprehensive architectural review of the BioETL project (v5.2) based on the current codebase and documentation (`AGENT.md`, `RULES.md`). The project demonstrates an exceptionally high level of maturity, strictly adhering to Hexagonal Architecture (Ports & Adapters) and Domain-Driven Design (DDD) principles. The recent refactoring phases have successfully addressed major technical debt, resulting in a robust, testable, and maintainable system.
 
-## 1. Числовая оценка состояния проекта
-
-Общая оценка сформирована на основе анализа 10 ключевых категорий архитектурного здоровья, базируясь на текущем состоянии ветки `main`.
-
-| Категория | Описание | Вес | Оценка (1–10) | Взвешенный балл |
-|-----------|----------|-----|---------------|-----------------|
-| **1. Архитектура слоев** | Соблюдение границ Hexagonal Architecture (Domain/App/Infra). Строго контролируется тестами. | 15% | 10 | 1.50 |
-| **2. Модульность** | Связность (Cohesion) и зацепление (Coupling). Использование DI, отсутствие God Objects. | 10% | 9 | 0.90 |
-| **3. Доменная модель** | Наличие богатой модели, Value Objects, инвариантов. Отсутствие "анемичности". | 15% | 10 | 1.50 |
-| **4. Тестирование** | Покрытие, стабильность, наличие архитектурных тестов. (Текущее состояние: 1 тест падает). | 10% | 9 | 0.90 |
-| **5. Обработка ошибок** | Типизированные исключения, Recovery Strategy, Dead Letter Queue (Quarantine). | 10% | 10 | 1.00 |
-| **6. Наблюдаемость** | Структурированное логирование, метрики, трассировка. (Нарушение: использование `print`). | 10% | 9 | 0.90 |
-| **7. Производительность** | Асинхронность, батчинг, отсутствие блокировок Event Loop (CPU-bound tasks in executors). | 10% | 9 | 0.90 |
-| **8. Безопасность** | Управление секретами, защита PII, отсутствие unsafe builtins. | 5% | 9 | 0.45 |
-| **9. Документация** | Docs-as-Code, актуальность схем (contracts), понятность README/CONTRIBUTING. | 10% | 10 | 1.00 |
-| **10. Технический долг** | Known issues, deprecated code, TODOs. | 5% | 9 | 0.45 |
-| **ИТОГО** | | **100%** | | **9.50** |
-
-### Интерпретация результата: **9.50 / 10 (Исключительно)**
-Проект демонстрирует исключительную архитектурную зрелость. Система тестов `tests/architecture/test_layer_dependencies.py` гарантирует соблюдение границ слоев. Основные механизмы (DI, Checkpoints, Quarantine) реализованы эталонно.
-Проблема с использованием `print()` в инфраструктурном коде была устранена. Проведен рефакторинг `RecordProcessor` (Parameter Object) и `GenericPipelineFactory` (Extract Method), что улучшило читаемость и поддерживаемость.
+**Overall Integrity Score:** **9.25 / 10** (Excellent)
 
 ---
 
-## 2. Архитектурный обзор
+## 2. Numerical Assessment
 
-### 2.1. Соблюдение слоистой структуры
-Проект строго следует принципам **Hexagonal Architecture**:
-*   **Domain**: Содержит только бизнес-логику и интерфейсы (`Protocols`). Зависимости направлены внутрь.
-*   **Application**: Реализует сценарии использования (Pipelines), зависит только от абстракций.
-*   **Infrastructure**: Содержит реализации адаптеров (UniProt, Chembl), зависит от внешних библиотек.
-*   **Interfaces**: Содержит точки входа (CLI), зависит от Application и Infrastructure (через Composition Root).
-*   **Composition**: Выделен явный корень композиции (`bootstrap.py`), отвечающий за сборку графа зависимостей.
-
-### 2.2. Принципы Ports & Adapters и DDD
-*   Все внешние взаимодействия (HTTP, S3, Redis) скрыты за портами (`DataSourcePort`, `StoragePort`, `LockPort`).
-*   Порты определены как `typing.Protocol` в `src/bioetl/domain/ports.py`, что обеспечивает гибкость (duck typing) и строгую проверку типов.
-*   Доменные сущности (`Activity`, `Molecule`) реализованы как `frozen dataclasses` с валидацией инвариантов.
-
-### 2.3. Границы модулей и зависимости
-*   Запрещенные импорты (например, Domain -> Infra) блокируются тестами в CI.
-*   Именование классов и модулей следует единому стандарту (`*Adapter`, `*Port`, `*Service`).
+| Category | Weight | Score (1-10) | Weighted Score | Justification |
+| :--- | :---: | :---: | :---: | :--- |
+| **1. Architecture & Layers** | 0.15 | 10 | 1.50 | Strict separation enforced by `tests/architecture`. Zero violations found. |
+| **2. Modularity & Coupling** | 0.10 | 9 | 0.90 | Composition root (`bootstrap.py`) and Factories are well-defined. 'God classes' refactored. |
+| **3. Domain Model Quality** | 0.10 | 9 | 0.90 | Rich, frozen dataclasses. Strict DDD compliance. No I/O in domain. |
+| **4. Testing** | 0.15 | 9 | 1.35 | High coverage, VCR integration, Property-based testing, Arch tests. |
+| **5. Error Handling** | 0.10 | 9 | 0.90 | Typed exceptions, Circuit Breaker, Error Classifier implemented. |
+| **6. Observability** | 0.10 | 9 | 0.90 | Structlog, Prometheus, Tracing ports defined. |
+| **7. Performance** | 0.10 | 9 | 0.90 | Async I/O, `orjson` (added), Polars/Delta integration. |
+| **8. Security** | 0.05 | 9 | 0.45 | SAST, Dependency scanning, PII hashing, Secrets management. |
+| **9. Documentation** | 0.10 | 10 | 1.00 | "Docs-as-code", comprehensive `RULES.md`, ADRs, decision logs. |
+| **10. Tech Debt** | 0.05 | 9 | 0.45 | Codebase is fresh after major refactoring. Minor TODOs remain. |
+| **TOTAL** | **1.00** | **-** | **9.25** | **State: Excellent / Sustainable** |
 
 ---
 
-## 3. Выявленные проблемы и статус исправлений
+## 3. Qualitative Analysis
 
-### 3.1. Нарушение стандартов Observability (Resolved)
-*   **Место:** `src/bioetl/infrastructure/export/csv_exporter.py:236`
-*   **Проблема:** Использование `print()` для отладочного вывода.
-*   **Статус:** **Исправлено**. `print()` заменен на логгер.
+### 3.1. Layered Structure & Hexagonal Architecture
+The project strictly follows the `domain` -> `application` -> `infrastructure` dependency rule. The `interfaces` layer correctly acts as the driving adapter.
+- **Strengths:** Explicit `Ports` (Protocols) in `domain/ports.py`. Infrastructure adapters implement these ports without the domain knowing about the implementation.
+- **Verification:** `tests/architecture/test_layer_dependencies.py` ensures no regression.
 
-### 3.2. Потенциальные "God Objects" (Improved)
-*   **Место:** `RecordProcessor`
-*   **Наблюдение:** Класс выполняет множество функций.
-*   **Статус:** **Улучшено**. Внедрен паттерн Parameter Object (`RecordProcessorConfig`), упрощающий инициализацию и снижающий связность.
+### 3.2. Domain-Driven Design (DDD)
+- **Entities:** Rich domain models (e.g., `Activity`) are implemented as frozen dataclasses with invariant validation (`__post_init__`).
+- **Value Objects:** Concepts like `Watermark` and `DataSourceFilter` are properly encapsulated.
 
-### 3.3. Модернизация Типизации (In Progress)
-*   **Наблюдение:** Не везде использовался `typing.override`.
-*   **Статус:** **Частично реализовано**. Внедрено в `UniProtClient`.
+### 3.3. Modularity & Boundaries
+- **Composition Root:** `src/bioetl/composition` effectively isolates dependency injection logic from business logic.
+- **Separation of Concerns:** `RecordProcessor` focuses on the ETL flow, while `PipelineRunner` handles orchestration.
 
----
-
-## 4. План рефакторинга (Выполненные шаги)
-
-### Приоритет 1: Исправление Observability (Done)
-*   `print()` удален из кодовой базы.
-
-### Приоритет 2: Улучшение Composition Root (Done)
-*   Рефакторинг `GenericPipelineFactory` завершен: выделены методы `_create_checkpoint_manager` и `_create_record_processor`.
-*   Внедрен `RecordProcessorConfig`.
-
-### Приоритет 3: Усиление контроля типов (In Progress)
-*   Начато внедрение `typing.override`.
+### 3.4. Naming & Standards
+- **Consistency:** Naming conventions (`*Port`, `*Adapter`, `*Factory`) are consistent throughout.
+- **File Structure:** Mirrors the architectural layers perfectly.
 
 ---
 
-## 5. Метрики и контроль качества
+## 4. Identified Issues & Risks
 
-Для предотвращения регрессии рекомендуется:
+While the state is excellent, continuous evolution requires addressing the following:
 
-1.  **Strict Linting:** Включить правило `T201` (print found) в `ruff`, чтобы ловить `print()` на этапе линтинга, а не только в тестах.
-2.  **Архитектурный тест на God Objects:** Добавить метрику LCOM (Lack of Cohesion of Methods) или просто подсчет публичных методов для ключевых классов (`RecordProcessor`). Если методов > 20 — предупреждение.
+1.  **Serialization Performance:**
+    *   *Issue:* Standard `json` library was used in hot paths (`RecordProcessor`).
+    *   *Status:* **Addressed** (partially) by recent switch to `orjson`.
+
+2.  **Health Check Depth:**
+    *   *Issue:* `BaseHttpAdapter` relies heavily on Circuit Breaker state for health checks.
+    *   *Risk:* Passive checks might miss "zombie" states where the connection is open but the upstream application is stuck.
+
+3.  **Strict Typing Granularity:**
+    *   *Issue:* Some generic protocols or collections could benefit from more precise TypeVars to avoid `Any` leakage in complex chains.
+
+4.  **Orchestration Maturity:**
+    *   *Issue:* Transition to Prefect is "in progress" (Adapter exists), but local runner is still primary.
+    *   *Risk:* Maintenance of two orchestration paths.
+
+---
+
+## 5. Refactoring Plan
+
+**Objective:** Optimize performance and observability while maintaining architectural strictness.
+
+### Priority 1: Performance Optimization (Completed/In-Progress)
+- [x] **Replace `json` with `orjson`**: Modify `RecordProcessor` to use `orjson` for Bronze serialization. (Done)
+- [ ] **Optimize String Operations**: Review hot loops for excessive string concatenations or unnecessary decodings.
+
+### Priority 2: Observability Enhancements (High)
+- [ ] **Active Health Probes**:
+    - Update `BaseHttpAdapter` to support an abstract `_perform_active_probe()` method.
+    - Implement lightweight probes (e.g., `HEAD` requests or specific status endpoints) for all major providers (ChEMBL, UniProt, PubChem).
+- [ ] **Granular Metrics**: Ensure `RecordProcessor` emits metrics for *each* transformation step, not just the batch as a whole.
+
+### Priority 3: Type Safety & Generics (Medium)
+- [ ] **Refine Generics**: Review `DataSourcePort` and `Pipeline` classes to use `TypeVar` for `RecordType` instead of `dict[str, Any]` where possible, improving static analysis.
+
+### Priority 4: Orchestration Convergence (Low/Strategic)
+- [ ] **Finalize Prefect Integration**: If the goal is distributed execution, verify the `PrefectOrchestrationAdapter` against a real Prefect instance and update docs.
