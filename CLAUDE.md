@@ -162,7 +162,7 @@ sha256(provider + canonical_json(record))
 |---------|------------|---------|
 | **Unit** | `tests/unit/` | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
 | **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
-| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
+| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, Local-Only архитектура |
 | **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
@@ -177,9 +177,32 @@ make test-integration     # Integration с VCR
 make arch-test            # Architecture tests
 make arch-lint            # import-linter contracts
 
+# E2E тесты
+pytest tests/e2e/ -v -m e2e
+
 # Один тест
 .venv/Scripts/python -m pytest tests/unit/domain/test_types.py -v
 ```
+
+### E2E Тесты
+
+E2E тесты проверяют полный цикл пайплайна от fetch до Gold:
+
+```python
+from tests.e2e.conftest import create_test_context, assert_silver_table_has_records
+from bioetl.composition.bootstrap import bootstrap_pipeline
+
+ctx = create_test_context("chembl_activity", limit=10)
+runner = bootstrap_pipeline(ctx)
+await runner.run()
+assert_silver_table_has_records(data_dir, "chembl_activity", expected_min=1)
+```
+
+**Helpers** (`tests/e2e/conftest.py`):
+- `create_test_context(pipeline_name, limit, run_type)` - создание контекста
+- `assert_bronze_files_exist(data_dir, provider, entity)` - проверка Bronze
+- `assert_silver_table_has_records(data_dir, table_name, expected_min)` - проверка Silver
+- `assert_gold_table_has_records(data_dir, table_name, expected_min)` - проверка Gold
 
 ### VCR.py (MUST)
 

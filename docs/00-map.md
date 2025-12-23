@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.1 | Last updated: 2025-12-22*
+*Synced with RULES.md v5.2 | Last updated: 2025-12-23*
 
 ## Quick Links
 
@@ -97,6 +97,11 @@ docs/
 | [ADR-004: Pydantic](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Validation approach                      | -        |
 | [ADR-005: Composition Layer](02-architecture/decisions/ADR-005-composition-layer-separation.md) | DI and layer separation               | §1.1     |
 | [ADR-006: Logger/Metrics Ports](02-architecture/decisions/ADR-006-logger-metrics-ports.md)   | Port abstractions                        | §1.1     |
+| [ADR-007: Circuit Breaker](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Failure handling pattern               | §3.1.4   |
+| [ADR-008: Graceful Shutdown](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | SIGTERM/SIGINT handling                  | §5.3     |
+| [ADR-009: Paginated Fetcher](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)   | Pagination abstraction                   | App D    |
+| [ADR-010: Local-Only Deploy](02-architecture/decisions/ADR-010-local-only-deployment.md)     | File-based deployment (no Docker)        | §5.6     |
+| [ADR-011: Watermark Removal](02-architecture/decisions/ADR-011-remove-watermark-mechanism.md) | Simplified checkpoint model             | §2.4     |
 
 ### Data Management
 
@@ -129,6 +134,7 @@ docs/
 | Adding Pipelines | [add-pipeline-existing-source.md](03-guides/add-pipeline-existing-source.md)                    | App D    |
 | Pipeline Review  | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                | §4.2     |
 | Testing          | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4.2     |
+| E2E Testing      | [tests/e2e/](../tests/e2e/) + [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md) | §4.2.3 |
 | Code Style       | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4       |
 
 ---
@@ -189,6 +195,21 @@ src/bioetl/
     └── orchestration/           # Pipeline orchestration adapters
         ├── signals.py           # OS signal handlers
         └── prefect/             # Prefect integration
+
+tests/
+├── unit/                        # Isolated unit tests (mock I/O)
+│   ├── domain/                  # Domain logic tests
+│   ├── application/             # Pipeline/transformer tests
+│   └── infrastructure/          # Adapter tests
+├── integration/                 # Integration tests (VCR cassettes)
+│   └── adapters/                # HTTP adapter tests
+├── e2e/                         # E2E tests (Local-Only arch)
+│   ├── conftest.py              # E2E helpers & fixtures
+│   └── test_pipeline_e2e.py     # Full pipeline cycle tests
+├── architecture/                # Architecture validation tests
+│   └── test_layer_imports.py    # Import matrix enforcement
+└── fixtures/                    # Test fixtures
+    └── vcr/                     # VCR cassettes for HTTP
 ```
 
 ---
@@ -235,17 +256,18 @@ graph TD
 
 ## Document Status
 
-| Document                 | Last Updated | Status                      |
-|--------------------------|--------------|----------------------------|
-| RULES.md (docs/)         | 2025-12-15   | v5.0 (Production Ready)     |
-| 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md        |
-| 00-rules-summary.md      | 2025-12-15   | v5.0 Synced                 |
-| 00-map.md                | 2025-12-20   | Updated (cleanup, new ADRs) |
-| CHANGELOG.md             | 2025-12-16   | Updated (v5.0.0)            |
-| 03-guides/               | 2025-12-20   | Consolidated (6 guides)     |
-| ADR-001..006             | 2025-12-20   | All 6 ADRs documented       |
-| pyproject.toml           | 2025-12-16   | Version 5.0.0               |
+| Document                 | Last Updated | Status                       |
+|--------------------------|--------------|------------------------------|
+| RULES.md (docs/)         | 2025-12-23   | v5.2 (E2E Testing added)     |
+| 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md         |
+| 00-rules-summary.md      | 2025-12-23   | v5.2 Synced                  |
+| 00-map.md                | 2025-12-23   | Updated (tests/, ADR-007-011)|
+| CHANGELOG.md             | 2025-12-23   | Unreleased (E2E, xrefs fix)  |
+| 03-guides/               | 2025-12-20   | Consolidated (6 guides)      |
+| ADR-001..011             | 2025-12-23   | All 11 ADRs documented       |
+| tests/e2e/               | 2025-12-23   | NEW: Local-Only E2E tests    |
+| pyproject.toml           | 2025-12-16   | Version 5.0.0                |
 
 ---
 
-*Last updated: 2025-12-22. Update when adding new documentation.*
+*Last updated: 2025-12-23. Update when adding new documentation.*
