@@ -40,6 +40,11 @@ class TargetTransformer(BaseTransformer):
                 id_field="target_chembl_id",
             )
 
+            # Extract flattened components
+            flattened_components = self._flatten_target_components(
+                record.get("target_components")
+            )
+
             business_data: dict[str, Any] = {
                 # Primary identifier
                 "target_chembl_id": str(target_chembl_id),
@@ -54,6 +59,8 @@ class TargetTransformer(BaseTransformer):
                     record.get("target_components")
                 ),
                 "cross_references": self.serialize_json(record.get("cross_references")),
+                # Flattened components
+                **flattened_components,
             }
 
             content_hash = self.compute_content_hash(business_data, exclude_none=True)
@@ -79,3 +86,47 @@ class TargetTransformer(BaseTransformer):
         silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)
+
+    def _flatten_target_components(
+        self, components: list[dict[str, Any]] | None
+    ) -> dict[str, list[Any] | None]:
+        """Flatten target components into aggregated lists.
+
+        Args:
+            components: List of component dicts from ChEMBL API.
+
+        Returns:
+            Dict with aggregated lists for accessions, IDs, types, relationships, and descriptions.
+        """
+        if not components or not isinstance(components, list):
+            return {
+                "component_accessions": None,
+                "component_ids": None,
+                "component_types": None,
+                "component_relationships": None,
+                "component_descriptions": None,
+            }
+
+        accessions = [c.get("accession") for c in components if c.get("accession")]
+        ids = [
+            safe_int(c.get("component_id"))
+            for c in components
+            if c.get("component_id") is not None
+        ]
+        types = [c.get("component_type") for c in components if c.get("component_type")]
+        relationships = [
+            c.get("relationship") for c in components if c.get("relationship")
+        ]
+        descriptions = [
+            c.get("component_description")
+            for c in components
+            if c.get("component_description")
+        ]
+
+        return {
+            "component_accessions": accessions if accessions else None,
+            "component_ids": ids if ids else None,
+            "component_types": types if types else None,
+            "component_relationships": relationships if relationships else None,
+            "component_descriptions": descriptions if descriptions else None,
+        }

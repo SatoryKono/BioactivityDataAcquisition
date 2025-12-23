@@ -82,6 +82,9 @@ def test_chembl_should_write_gold_true(chembl_pipeline):
         "standard_units": "nM",
         "target_chembl_id": "CHEMBL2",
         "standard_type": "IC50",
+        "standard_relation": "=",
+        "assay_type": "B",
+        "potential_duplicate": "0",
     }
     context = PipelineContext(
         run_id=chembl_pipeline.context.run_id,

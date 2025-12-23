@@ -164,11 +164,12 @@ class TestDeterministicBronzeWrite:
 class TestDeterministicCsvFilterRead:
     """Tests for deterministic CSV filter ID reading."""
 
-    async def test_csv_filter_reader_returns_sorted_list(self, tmp_path: Path):
-        """Test that CsvFilterReader returns sorted list for deterministic order."""
+    async def test_csv_filter_reader_returns_sorted_tuple(self, tmp_path: Path):
+        """Test that CsvFilterReader returns FilterLoadResult with sorted IDs."""
         from bioetl.infrastructure.adapters.input.csv_filter_reader import (
             CsvFilterReader,
         )
+        from bioetl.domain.filter_config import FilterLoadResult
 
         # Create CSV with IDs in random order
         csv_file = tmp_path / "filter_ids.csv"
@@ -177,8 +178,9 @@ class TestDeterministicCsvFilterRead:
         reader = CsvFilterReader()
         result = await reader.load_filter_ids(str(csv_file), "id")
 
-        assert isinstance(result, list), "Should return list, not set"
-        assert result == ["A_ID", "B_ID", "C_ID", "D_ID", "Z_ID"], (
+        assert isinstance(result, FilterLoadResult), "Should return FilterLoadResult"
+        assert isinstance(result.ids, tuple), "IDs should be a tuple"
+        assert result.ids == ("A_ID", "B_ID", "C_ID", "D_ID", "Z_ID"), (
             "IDs should be sorted alphabetically"
         )
 
@@ -196,13 +198,13 @@ class TestDeterministicCsvFilterRead:
         results = []
         for _ in range(5):
             result = await reader.load_filter_ids(str(csv_file), "id")
-            results.append(result)
+            results.append(result.ids)
 
         # All reads should produce identical results
         assert all(r == results[0] for r in results), (
             "Multiple reads should produce identical sorted results"
         )
-        assert results[0] == ["ID_1", "ID_2", "ID_3"]
+        assert results[0] == ("ID_1", "ID_2", "ID_3")
 
 
 class TestSortByConfig:

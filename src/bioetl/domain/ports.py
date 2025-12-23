@@ -11,6 +11,7 @@ from collections.abc import AsyncIterator, Iterator
 from datetime import datetime
 from typing import Any, Literal, Protocol, Self, runtime_checkable
 
+from bioetl.domain.filter_config import FilterLoadResult
 from bioetl.domain.types import (
     ArrowSchema,
     BatchID,
@@ -117,17 +118,18 @@ class InputFilterPort(Protocol):
         self,
         source_path: str,
         column_name: str,
-    ) -> list[str]:
+    ) -> FilterLoadResult:
         """Load unique IDs from an external source.
 
         IDs are returned in sorted order for deterministic processing.
+        Includes metadata about duplicates found in the source.
 
         Args:
             source_path: Path to the filter source (e.g., CSV file path).
             column_name: Name of the column containing filter IDs.
 
         Returns:
-            Sorted list of unique ID strings to filter by.
+            FilterLoadResult with sorted unique IDs and duplicate statistics.
 
         Raises:
             FileNotFoundError: If the source file does not exist.

@@ -30,6 +30,19 @@ BATCH_SIZE_RECORDS = Histogram(
     buckets=[100, 500, 1000, 5000, 10000, 50000],
 )
 
+# Input filter metrics
+FILTER_IDS_LOADED_TOTAL = Counter(
+    "bioetl_filter_ids_loaded_total",
+    "Total unique IDs loaded from input filter source",
+    ["pipeline", "source_file"],
+)
+
+FILTER_IDS_DUPLICATES_TOTAL = Counter(
+    "bioetl_filter_ids_duplicates_total",
+    "Total duplicate IDs found in input filter source",
+    ["pipeline", "source_file"],
+)
+
 
 class MetricsCollector:
     """

@@ -125,10 +125,19 @@ class SinkLayerConfig(BaseModel):
     )
 
 
+class GoldRangeFilterConfig(BaseModel):
+    """Schema for range filters in YAML."""
+    min: float | None = None
+    max: float | None = None
+    include_min: bool = True
+    include_max: bool = True
+
+
 class GoldFiltersConfig(BaseModel):
     """Schema for gold_filters in YAML."""
 
     columns: dict[str, list[str]] = Field(default_factory=dict)
+    ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
     required_fields: list[str] = Field(default_factory=list)
     exclude_if_present: list[str] = Field(default_factory=list)
 

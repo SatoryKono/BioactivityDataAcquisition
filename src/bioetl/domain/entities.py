@@ -280,6 +280,13 @@ class Target(BaseEntity):
     target_components: str | None = None  # JSON string of array
     cross_references: str | None = None  # JSON string of array
 
+    # Flattened component fields (aggregated lists)
+    component_accessions: list[str] | None = None
+    component_ids: list[int] | None = None
+    component_types: list[str] | None = None
+    component_relationships: list[str] | None = None
+    component_descriptions: list[str] | None = None
+
     def __post_init__(self) -> None:
         super().__post_init__()
         self._validate_invariants()

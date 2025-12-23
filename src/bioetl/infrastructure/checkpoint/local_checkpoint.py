@@ -11,7 +11,7 @@ Requirements:
 Architecture:
 - Stores checkpoints as JSON on local filesystem
 - Path: {base_path}/checkpoints/{pipeline}/latest.json
-- Atomic writes via temp file + os.rename
+- Atomic writes via temp file + os.replace
 - Metadata includes watermark, run_id, and custom metadata
 """
 

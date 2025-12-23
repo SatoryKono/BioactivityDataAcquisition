@@ -16,7 +16,7 @@ from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterRead
 
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.ports import DataSourcePort, MetricsPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -29,6 +29,8 @@ class DataSourceCreator(Protocol):
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
         filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
     ) -> DataSourcePort:
         """Create a configured data source.
 
@@ -36,6 +38,8 @@ class DataSourceCreator(Protocol):
             settings: Application settings
             pipeline_config: Pipeline configuration from YAML
             filter_config: Optional input filter configuration
+            metrics: Optional metrics port for recording filter statistics
+            pipeline_name: Pipeline name for metrics labels
 
         Returns:
             Configured DataSourcePort instance
@@ -46,12 +50,16 @@ class DataSourceCreator(Protocol):
 def _wrap_with_filter(
     data_source: DataSourcePort,
     filter_config: InputFilterConfig | None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Wrap data source with FilteredDataSource if filter is enabled.
 
     Args:
         data_source: Base data source to wrap
         filter_config: Optional filter configuration
+        metrics: Optional metrics port for recording filter statistics
+        pipeline_name: Pipeline name for metrics labels
 
     Returns:
         Original data source or FilteredDataSource wrapper
@@ -61,6 +69,8 @@ def _wrap_with_filter(
             data_source=data_source,
             filter_reader=CsvFilterReader(),
             filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
         )
     return data_source
 
@@ -69,17 +79,21 @@ def create_chembl_data_source(
     settings: Settings,
     _pipeline_config: PipelineYamlConfig,
     filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering."""
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
     base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
-    return _wrap_with_filter(base_adapter, filter_config)
+    return _wrap_with_filter(base_adapter, filter_config, metrics, pipeline_name)
 
 
 def create_pubchem_data_source(
     settings: Settings,
     _pipeline_config: PipelineYamlConfig,
     filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create PubChem data source."""
     # PubChem rate limit: 5 requests/second without API key
@@ -89,13 +103,15 @@ def create_pubchem_data_source(
         rate=5.0,
         strict_error_handling=settings.strict_error_handling,
     )
-    return _wrap_with_filter(data_source, filter_config)
+    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
 
 
 def create_uniprot_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create UniProt data source."""
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)
@@ -106,13 +122,15 @@ def create_uniprot_data_source(
         base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
         strict_error_handling=settings.strict_error_handling,
     )
-    return _wrap_with_filter(data_source, filter_config)
+    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
 
 
 def create_pubmed_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create PubMed data source."""
     from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
@@ -133,7 +151,7 @@ def create_pubmed_data_source(
         email=email,
         api_key=api_key,
     )
-    return _wrap_with_filter(data_source, filter_config)
+    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
 
 
 class DataSourceRegistry:

@@ -17,6 +17,14 @@ source_file: ../../sources/chembl.yaml
 gold_filters:
     columns:
         standard_type: [IC50, Ki]
+        standard_units: [nM]
+        standard_relation: ["="]
+        assay_type: [B, F]
+        potential_duplicate: ["0"]
+    ranges:
+        standard_value:
+            min: 0
+            include_min: false
     required_fields:
         - standard_type
         - standard_value
