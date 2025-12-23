@@ -151,6 +151,12 @@ class TestStoragePortProtocol:
             async def aclose(self) -> None:
                 pass
 
+            def clear_csv(self, table_name: str | None = None) -> int:
+                return 0
+
+            def clear_delta(self, table_name: str | None = None) -> int:
+                return 0
+
         assert isinstance(ValidStorage(), StoragePort)
 
         # Note: @runtime_checkable protocols only check for method presence,
