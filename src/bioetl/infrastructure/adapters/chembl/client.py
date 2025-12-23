@@ -13,7 +13,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import ChemblApiError
-from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
@@ -23,6 +22,7 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 

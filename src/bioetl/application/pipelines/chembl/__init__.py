@@ -28,18 +28,18 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 
 __all__ = [
+    # Transformers
+    "ActivityTransformer",
+    "AssayTransformer",
     # Pipelines
     "ChEMBLActivityPipeline",
     "ChEMBLAssayPipeline",
     "ChEMBLDocumentPipeline",
     "ChEMBLMoleculePipeline",
-    "ChEMBLTargetPipeline",
     "ChEMBLTargetComponentPipeline",
-    # Transformers
-    "ActivityTransformer",
-    "AssayTransformer",
+    "ChEMBLTargetPipeline",
     "DocumentTransformer",
     "MoleculeTransformer",
-    "TargetTransformer",
     "TargetComponentTransformer",
+    "TargetTransformer",
 ]
