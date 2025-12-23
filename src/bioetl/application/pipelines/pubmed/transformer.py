@@ -258,7 +258,7 @@ def _extract_business_data(root: ET.Element, pmid: str) -> dict[str, Any]:
     accepted_date = _extract_history_date(history, "accepted")
     received_date = _extract_history_date(history, "received")
     revised_date = _extract_history_date(history, "revised")
-    epub_date = _extract_history_date(history, "epublish")
+    epub_date = _extract_article_date(article, "Electronic")
 
     # Pagination
     pagination = article.find(".//Pagination/MedlinePgn")
