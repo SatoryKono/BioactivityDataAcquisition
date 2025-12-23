@@ -122,12 +122,20 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
 )
 
 # Schema for PubMed Publication
+# Matches Publication entity from domain/entities.py
 PUBMED_PUBLICATION_SCHEMA = pa.schema(
     [
+        # System fields
         pa.field("entity_id", pa.string()),
-        pa.field("pmid", pa.string()),
-        pa.field("article_title", pa.string()),
         pa.field("content_hash", pa.string()),
+        # Business fields
+        pa.field("pmid", pa.string()),
+        pa.field("title", pa.string()),
+        pa.field("abstract", pa.string()),
+        pa.field("journal", pa.string()),
+        pa.field("publication_year", pa.int64()),
+        pa.field("authors", pa.list_(pa.string())),
+        # Metadata fields
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
