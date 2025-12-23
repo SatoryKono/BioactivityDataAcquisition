@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports import GoldValidatorPort
     from bioetl.domain.types import BatchID
 
 
@@ -47,6 +48,7 @@ class RecordProcessor:
         config: RecordProcessorConfig,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
+        gold_validator: GoldValidatorPort | None = None,
     ):
         self._storage = services.storage
         self._quarantine_manager = QuarantineManager(
@@ -58,6 +60,7 @@ class RecordProcessor:
         self._config = config
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
+        self._gold_validator = gold_validator
 
         # Convenience properties
         self._provider = config.provider
@@ -273,7 +276,7 @@ class RecordProcessor:
             write_mode = "append"
         await self._storage.write_gold(
             table_name=table_name,
-            records=records,
+            records=validated_records,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )
