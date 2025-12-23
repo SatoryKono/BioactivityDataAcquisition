@@ -41,20 +41,22 @@ class TestDeltaWriterInit:
         writer = DeltaWriter(base_path="s3://bucket/path/")
         assert writer.base_path == "s3://bucket/path"
 
-    def test_init_with_storage_options(self):
-        """Test initialization with storage options."""
+    def test_init_with_csv_exporter(self):
+        """Test initialization with CSV exporter."""
+        from unittest.mock import MagicMock
+
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        opts = {"AWS_ENDPOINT_URL": "http://localhost:9000"}
-        writer = DeltaWriter(base_path="s3://bucket", storage_options=opts)
-        assert writer.storage_options == opts
+        mock_exporter = MagicMock()
+        writer = DeltaWriter(base_path="/tmp/silver", csv_exporter=mock_exporter)
+        assert writer.csv_exporter is mock_exporter
 
-    def test_init_without_storage_options(self):
-        """Test initialization without storage options."""
+    def test_init_without_csv_exporter(self):
+        """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket")
-        assert writer.storage_options == {}
+        writer = DeltaWriter(base_path="/tmp/silver")
+        assert writer.csv_exporter is None
 
 
 @pytest.mark.unit

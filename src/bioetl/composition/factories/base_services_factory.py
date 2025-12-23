@@ -5,6 +5,7 @@ Simplified for local-only deployment.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.pipeline_services import PipelineServices
@@ -81,8 +82,11 @@ class BaseServicesFactory:
     @staticmethod
     def _create_quarantine(storage_ctx: StorageContext) -> QuarantinePort:
         """Create local quarantine storage."""
+        silver_path = storage_ctx.silver_path
+        if isinstance(silver_path, str):
+            silver_path = Path(silver_path)
         return UnifiedQuarantine(
-            base_path=str(storage_ctx.silver_path / "common" / "quarantine"),
+            base_path=str(silver_path / "common" / "quarantine"),
         )
 
     @staticmethod
