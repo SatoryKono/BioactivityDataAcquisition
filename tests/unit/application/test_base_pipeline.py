@@ -8,7 +8,7 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType, Watermark
+from bioetl.domain.types import RunType
 
 
 class ConcretePipeline(BasePipeline):
@@ -16,10 +16,6 @@ class ConcretePipeline(BasePipeline):
         self, _context: PipelineContext, record: dict
     ) -> dict | None:
         return record
-
-    def extract_watermark(self, _context: PipelineContext, record: dict) -> Watermark:
-        """Extract test_id as watermark."""
-        return Watermark.from_id(str(record.get("test_id", "")))
 
 
 @pytest.fixture
@@ -126,8 +122,3 @@ async def test_base_pipeline_should_write_gold(mock_pipeline):
     assert result is True
 
 
-async def test_base_pipeline_extract_watermark(mock_pipeline):
-    """Test extract_watermark returns Watermark."""
-    result = mock_pipeline.extract_watermark(mock_pipeline.context, {"test_id": "123"})
-    assert isinstance(result, Watermark)
-    assert result.value == "123"

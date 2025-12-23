@@ -12,7 +12,7 @@ Architecture:
 - Stores checkpoints as JSON on local filesystem
 - Path: {base_path}/checkpoints/{pipeline}/latest.json
 - Atomic writes via temp file + os.replace
-- Metadata includes watermark, run_id, and custom metadata
+- Metadata includes run_id and custom metadata
 """
 
 import json
@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from bioetl.domain.types import RunID, Watermark
+from bioetl.domain.types import RunID
 
 
 class LocalCheckpoint:
@@ -48,7 +48,6 @@ class LocalCheckpoint:
     async def save(
         self,
         pipeline: str,
-        watermark: Watermark,
         run_id: RunID,
         metadata: dict[str, Any] | None = None,
     ) -> None:
@@ -57,14 +56,11 @@ class LocalCheckpoint:
         full_path = self.base_path / key
         full_path.parent.mkdir(parents=True, exist_ok=True)
 
-        watermark_str = watermark.to_api_param()
-
         checkpoint_data = {
             "pipeline": pipeline,
-            "watermark": watermark_str,
             "run_id": str(run_id),
             "metadata": metadata or {},
-            "version": "1.0",
+            "version": "2.0",
         }
         checkpoint_json = json.dumps(checkpoint_data, indent=2)
 
@@ -87,7 +83,7 @@ class LocalCheckpoint:
 
     async def load(
         self, pipeline: str
-    ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
+    ) -> tuple[RunID, dict[str, Any]] | None:
         """Load last checkpoint."""
         key = self._get_key(pipeline)
         full_path = self.base_path / key
@@ -99,26 +95,9 @@ class LocalCheckpoint:
             checkpoint_json = f.read()
 
         checkpoint_data = json.loads(checkpoint_json)
-        watermark_str = checkpoint_data["watermark"]
-
-        # Determine type and wrap in Watermark object
-        value: Any
-        try:
-            from datetime import datetime
-
-            value = datetime.fromisoformat(watermark_str)
-            watermark = Watermark.from_timestamp(value)
-        except (ValueError, TypeError):
-            try:
-                value = int(watermark_str)
-                watermark = Watermark.from_offset(value)
-            except ValueError:
-                value = watermark_str
-                watermark = Watermark.from_id(value)
-
         run_id = RunID(UUID(checkpoint_data["run_id"]))
         metadata = checkpoint_data.get("metadata", {})
-        return (watermark, run_id, metadata)
+        return (run_id, metadata)
 
     async def delete(self, pipeline: str) -> None:
         """Delete checkpoint."""

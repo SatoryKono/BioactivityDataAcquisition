@@ -95,7 +95,6 @@ class PipelineConfig:
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: list[str] = field(default_factory=list)
-    watermark_field: str | None = None
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)

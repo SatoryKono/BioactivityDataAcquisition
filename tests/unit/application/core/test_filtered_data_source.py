@@ -6,7 +6,7 @@ import pytest
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.domain.filter_config import FilterLoadResult, InputFilterConfig
-from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.domain.types import HealthStatus
 
 
 @pytest.fixture
@@ -235,20 +235,18 @@ class TestFilteredDataSourceFetch:
         assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
 
     @pytest.mark.asyncio
-    async def test_fetch_with_watermark_and_limit(
+    async def test_fetch_with_limit(
         self, mock_data_source, disabled_filter_config
     ):
-        """Test fetch passes watermark and limit to wrapped source."""
+        """Test fetch passes limit to wrapped source."""
         filtered = FilteredDataSource(
             data_source=mock_data_source,
             filter_reader=None,
             filter_config=disabled_filter_config,
         )
 
-        watermark = Watermark.from_timestamp("2024-01-01T00:00:00Z")
-
         records = []
-        async for record in filtered.fetch("activity", watermark=watermark, limit=10):
+        async for record in filtered.fetch("activity", limit=10):
             records.append(record)
 
         assert len(records) == 3

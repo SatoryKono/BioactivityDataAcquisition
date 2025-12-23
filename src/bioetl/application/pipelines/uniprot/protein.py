@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
+from bioetl.domain.types import BronzeRecord, SilverRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -14,8 +14,6 @@ if TYPE_CHECKING:
 
 class UniProtProteinPipeline(BasePipeline):
     """Pipeline for processing UniProt proteins."""
-
-    # create method removed (DRY)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -26,10 +24,3 @@ class UniProtProteinPipeline(BasePipeline):
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
         return await self._transformer.transform(context, record)
-
-    def extract_watermark(
-        self, _context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
-        """Extract watermark as accession string wrapped in Watermark."""
-        accession = str(record.get("primaryAccession", ""))
-        return Watermark.from_id(accession)

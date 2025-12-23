@@ -18,7 +18,7 @@ from typing import Any
 import httpx
 
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
@@ -62,7 +62,6 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     async def fetch(
         self,
         entity_type: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: set[str] | None = None,
@@ -80,7 +79,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
             )
 
         # Ensure arguments are passed correctly to strategies
-        async for record in strategy(query=query, watermark=watermark, limit=limit):
+        async for record in strategy(query=query, limit=limit):
             yield record
 
     def _build_protein_fetch_params(
@@ -122,21 +121,13 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         cursor = data.get("nextCursor")
         return results, cursor
 
-    def _build_query(self, query: str | None, watermark: Watermark | None) -> str:
-        """Build the query string."""
-        query = query or "*"
-        if watermark:
-            query = f"{query} AND accession_id:[{watermark.to_api_param()} TO *]"
-        return query
-
     async def _fetch_proteins(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch protein entries from UniProt."""
-        query = self._build_query(query, watermark)
+        query = query or "*"
         size = 500
 
         async def fetch_page(
@@ -188,16 +179,11 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _fetch_features(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch protein features from UniProt."""
         if not query:
             raise ValueError("Query is required for feature search")
-
-        # Watermark not supported for features
-        if watermark:
-            self.logger.warning("Watermark is not supported for feature fetch, ignoring.")
 
         features = await self._get_features_json(query)
         for i, feature in enumerate(features):
@@ -240,16 +226,11 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _fetch_sequences(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch protein sequences from UniProt."""
         if not query:
             raise ValueError("Query is required for sequence fetch")
-
-        # Watermark not supported for sequences in this mode
-        if watermark:
-            self.logger.warning("Watermark is not supported for sequence fetch, ignoring.")
 
         fetched = 0
         async for seq_record in self._get_parsed_sequences(query):
