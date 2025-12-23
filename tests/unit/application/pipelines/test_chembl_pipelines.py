@@ -9,8 +9,10 @@ from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
+from uuid import uuid4
+
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
 
@@ -41,6 +43,12 @@ def runtime_config():
     )
 
 
+@pytest.fixture
+def run_id() -> RunID:
+    """Create a test run ID."""
+    return RunID(uuid4())
+
+
 def create_pipeline_config(
     pipeline_name: str,
     entity_type: str,
@@ -62,7 +70,7 @@ class TestChEMBLAssayPipeline:
     """Tests for ChEMBLAssayPipeline."""
 
     @pytest.fixture
-    def pipeline(self, mock_services, runtime_config):
+    def pipeline(self, mock_services, runtime_config, run_id):
         """Create assay pipeline instance."""
         config = create_pipeline_config(
             pipeline_name="chembl_assay",
@@ -74,6 +82,7 @@ class TestChEMBLAssayPipeline:
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            run_id=run_id,
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -110,7 +119,7 @@ class TestChEMBLDocumentPipeline:
     """Tests for ChEMBLDocumentPipeline."""
 
     @pytest.fixture
-    def pipeline(self, mock_services, runtime_config):
+    def pipeline(self, mock_services, runtime_config, run_id):
         """Create document pipeline instance."""
         config = create_pipeline_config(
             pipeline_name="chembl_document",
@@ -122,6 +131,7 @@ class TestChEMBLDocumentPipeline:
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            run_id=run_id,
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -158,7 +168,7 @@ class TestChEMBLMoleculePipeline:
     """Tests for ChEMBLMoleculePipeline."""
 
     @pytest.fixture
-    def pipeline(self, mock_services, runtime_config):
+    def pipeline(self, mock_services, runtime_config, run_id):
         """Create molecule pipeline instance."""
         config = create_pipeline_config(
             pipeline_name="chembl_molecule",
@@ -170,6 +180,7 @@ class TestChEMBLMoleculePipeline:
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            run_id=run_id,
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -206,7 +217,7 @@ class TestChEMBLTargetPipeline:
     """Tests for ChEMBLTargetPipeline."""
 
     @pytest.fixture
-    def pipeline(self, mock_services, runtime_config):
+    def pipeline(self, mock_services, runtime_config, run_id):
         """Create target pipeline instance."""
         config = create_pipeline_config(
             pipeline_name="chembl_target",
@@ -218,6 +229,7 @@ class TestChEMBLTargetPipeline:
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            run_id=run_id,
         )
 
     def test_pipeline_initialization(self, pipeline):

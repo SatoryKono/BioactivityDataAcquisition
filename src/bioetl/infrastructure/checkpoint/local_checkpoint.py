@@ -73,12 +73,13 @@ class LocalCheckpoint:
         try:
             with os.fdopen(fd, "w") as f:
                 f.write(checkpoint_json)
-            # Use os.replace for cross-platform atomic overwrite
-            os.replace(temp_path, full_path)
+            # Use Path.replace for cross-platform atomic overwrite
+            Path(temp_path).replace(full_path)
         except Exception:
             # Clean up temp file on error
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
+            temp_file = Path(temp_path)
+            if temp_file.exists():
+                temp_file.unlink()
             raise
 
     async def load(

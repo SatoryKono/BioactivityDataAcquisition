@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
@@ -41,6 +40,7 @@ from bioetl.domain.exceptions import (
 
 if TYPE_CHECKING:
     from datetime import datetime
+    from pathlib import Path
 
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 

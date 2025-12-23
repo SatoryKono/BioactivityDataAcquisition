@@ -186,9 +186,7 @@ class GoldFilterConfig:
         """Проверяет, находится ли длина в допустимых границах."""
         if min_len is not None and length < min_len:
             return False
-        if max_len is not None and length > max_len:
-            return False
-        return True
+        return not (max_len is not None and length > max_len)
 
     def _check_list_contains_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет содержание списков."""

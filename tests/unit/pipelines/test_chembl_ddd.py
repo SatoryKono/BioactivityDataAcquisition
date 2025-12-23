@@ -35,7 +35,10 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         tracing=MagicMock(),
         logger=logger,
     )
-    return ChEMBLActivityPipeline(config=config, runtime=runtime, services=services)
+    run_id = RunID(uuid4())
+    return ChEMBLActivityPipeline(
+        config=config, runtime=runtime, services=services, run_id=run_id
+    )
 
 
 @pytest.fixture

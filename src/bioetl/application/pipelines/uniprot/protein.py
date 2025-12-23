@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.domain.types import BronzeRecord, SilverRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class UniProtProteinPipeline(BasePipeline):

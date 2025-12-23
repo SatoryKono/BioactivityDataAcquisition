@@ -6,12 +6,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import ApiError
-from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
