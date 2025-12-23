@@ -10,8 +10,8 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
-from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.exceptions import DataQualityThresholdError
 
 if TYPE_CHECKING:
@@ -43,31 +43,28 @@ class RecordProcessor:
         services: PipelineServices,
         error_classifier: ErrorClassifier,
         context: PipelineContext,
-        pipeline_name: str,
-        provider: str,
-        entity_type: str,
+        config: RecordProcessorConfig,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
-        silver_schema: Any,
-        gold_schema: Any | None = None,
-        dq_config: DQConfig | None = None,
-        table_config: TableConfig | None = None,
     ):
         self._storage = services.storage
         self._quarantine_manager = QuarantineManager(
             quarantine_port=services.quarantine,
-            pipeline_name=pipeline_name,
+            pipeline_name=config.pipeline_name,
         )
         self._error_classifier = error_classifier
         self._context = context
-        self._provider = provider
-        self._entity_type = entity_type
+        self._config = config
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
-        self._silver_schema = silver_schema
-        self._gold_schema = gold_schema
-        self._dq_config = dq_config
-        self._table_config = table_config or TableConfig()
+
+        # Convenience properties
+        self._provider = config.provider
+        self._entity_type = config.entity_type
+        self._silver_schema = config.silver_schema
+        self._gold_schema = config.gold_schema
+        self._dq_config = config.dq_config
+        self._table_config = config.table_config
 
         # Instantiate Metrics Recorder
         pipeline_label = f"{self._provider}_{self._entity_type}"

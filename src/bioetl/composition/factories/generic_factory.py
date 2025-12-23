@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.runner import PipelineRunner
@@ -226,42 +227,15 @@ class GenericPipelineFactory(Generic[TPipeline]):
             filter_config=filter_config,
         )
 
-        # Create Checkpoint Manager
-        checkpoint_manager = CheckpointManager(
-            checkpoint_port=pipeline.services.checkpoint,
+        # Create Helper Components
+        checkpoint_manager = self._create_checkpoint_manager(
+            pipeline=pipeline,
             logger=logger,
-            pipeline_name=pipeline.config.pipeline_name,
             run_id=run_id,
             resume=runtime.resume,
-            watermark_extractor=lambda record: pipeline.extract_watermark(
-                pipeline.context, record
-            ),
         )
 
-        # Create Record Processor
-        error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=pipeline.config.primary_keys,
-            silver_table=pipeline.config.silver_table,
-            gold_table=pipeline.config.gold_table,
-            silver_write_mode=pipeline.config.write_mode,
-            gold_write_mode=pipeline.config.gold_write_mode,
-        )
-
-        record_processor = RecordProcessor(
-            services=pipeline.services,
-            error_classifier=error_classifier,
-            context=pipeline.context,
-            pipeline_name=pipeline.config.pipeline_name,
-            provider=pipeline.config.provider,
-            entity_type=pipeline.config.entity_type,
-            transform_callback=pipeline.transform_bronze_to_silver,
-            gold_filter_callback=pipeline.should_write_gold,
-            silver_schema=self.silver_schema,
-            gold_schema=self.gold_schema,
-            dq_config=pipeline.config.dq,
-            table_config=table_config,
-        )
+        record_processor = self._create_record_processor(pipeline)
 
         # Create Executor
         executor = PipelineExecutor(
@@ -286,6 +260,55 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             pipeline=pipeline,
             tracer=tracer,
+        )
+
+    def _create_checkpoint_manager(
+        self,
+        pipeline: TPipeline,
+        logger: structlog.BoundLogger,
+        run_id: UUID,
+        resume: bool,
+    ) -> CheckpointManager:
+        """Create configured CheckpointManager."""
+        return CheckpointManager(
+            checkpoint_port=pipeline.services.checkpoint,
+            logger=logger,
+            pipeline_name=pipeline.config.pipeline_name,
+            run_id=run_id,
+            resume=resume,
+            watermark_extractor=lambda record: pipeline.extract_watermark(
+                pipeline.context, record
+            ),
+        )
+
+    def _create_record_processor(self, pipeline: TPipeline) -> RecordProcessor:
+        """Create configured RecordProcessor."""
+        error_classifier = ErrorClassifier()
+        table_config = TableConfig(
+            primary_keys=pipeline.config.primary_keys,
+            silver_table=pipeline.config.silver_table,
+            gold_table=pipeline.config.gold_table,
+            silver_write_mode=pipeline.config.write_mode,
+            gold_write_mode=pipeline.config.gold_write_mode,
+        )
+
+        processor_config = RecordProcessorConfig(
+            pipeline_name=pipeline.config.pipeline_name,
+            provider=pipeline.config.provider,
+            entity_type=pipeline.config.entity_type,
+            silver_schema=self.silver_schema,
+            gold_schema=self.gold_schema,
+            dq_config=pipeline.config.dq,
+            table_config=table_config,
+        )
+
+        return RecordProcessor(
+            services=pipeline.services,
+            error_classifier=error_classifier,
+            context=pipeline.context,
+            config=processor_config,
+            transform_callback=pipeline.transform_bronze_to_silver,
+            gold_filter_callback=pipeline.should_write_gold,
         )
 
 
