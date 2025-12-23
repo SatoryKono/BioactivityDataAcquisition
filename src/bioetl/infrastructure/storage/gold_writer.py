@@ -20,7 +20,6 @@ from __future__ import annotations
 import asyncio
 import random
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import pandera as pandera_pa
@@ -29,6 +28,8 @@ from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pandera.polars import DataFrameSchema
 
     from bioetl.infrastructure.export.csv_exporter import CsvExporter

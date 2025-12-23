@@ -18,7 +18,7 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
 
 
 @pytest.fixture
@@ -74,6 +74,14 @@ def mock_services(mock_storage, mock_quarantine):
 
 
 @pytest.fixture
+def mock_gold_validator():
+    """Create mock gold validator."""
+    validator = MagicMock()
+    validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+    return validator
+
+
+@pytest.fixture
 def silver_schema() -> pa.Schema:
     """Create a sample silver schema."""
     return pa.schema(
@@ -100,6 +108,7 @@ class TestRunIdPropagation:
         mock_services: MagicMock,
         mock_storage: MagicMock,
         silver_schema: pa.Schema,
+        mock_gold_validator: MagicMock,
     ) -> None:
         """Test that the same run_id is propagated to both Bronze and Silver."""
 
@@ -126,6 +135,7 @@ class TestRunIdPropagation:
             config=config,
             transform_callback=transform,
             gold_filter_callback=gold_filter,
+            gold_validator=mock_gold_validator,
         )
 
         # Process a batch
@@ -157,6 +167,7 @@ class TestRunIdPropagation:
         mock_services: MagicMock,
         mock_storage: MagicMock,
         silver_schema: pa.Schema,
+        mock_gold_validator: MagicMock,
     ) -> None:
         """Test that the same run_id is used across multiple batches."""
 
@@ -182,6 +193,7 @@ class TestRunIdPropagation:
             config=config,
             transform_callback=transform,
             gold_filter_callback=gold_filter,
+            gold_validator=mock_gold_validator,
         )
 
         # Process multiple batches
@@ -209,6 +221,7 @@ class TestRunIdPropagation:
         mock_services: MagicMock,
         mock_storage: MagicMock,
         silver_schema: pa.Schema,
+        mock_gold_validator: MagicMock,
     ) -> None:
         """Test that different run types are correctly propagated."""
         for run_type in [RunType.INCREMENTAL, RunType.BACKFILL, RunType.REBUILD]:
@@ -245,6 +258,7 @@ class TestRunIdPropagation:
                 config=config,
                 transform_callback=transform,
                 gold_filter_callback=gold_filter,
+                gold_validator=mock_gold_validator,
             )
 
             records = [{"id": 1, "value": "test"}]

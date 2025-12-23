@@ -13,7 +13,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
 
@@ -123,12 +123,21 @@ def gold_filter_callback():
 
 
 @pytest.fixture
+def mock_gold_validator():
+    """Create mock gold validator."""
+    validator = MagicMock()
+    validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+    return validator
+
+
+@pytest.fixture
 def record_processor(
     mock_services,
     mock_error_classifier,
     mock_context,
     transform_callback,
     gold_filter_callback,
+    mock_gold_validator,
 ):
     """Create RecordProcessor instance."""
     config = RecordProcessorConfig(
@@ -145,6 +154,7 @@ def record_processor(
         config=config,
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
+        gold_validator=mock_gold_validator,
     )
 
 
@@ -235,6 +245,9 @@ class TestRecordProcessorProcessBatch:
             silver_schema=MagicMock(),
         )
 
+        gold_validator = MagicMock()
+        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
@@ -242,6 +255,7 @@ class TestRecordProcessorProcessBatch:
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=gold_validator,
         )
 
         records = [
@@ -274,6 +288,9 @@ class TestRecordProcessorProcessBatch:
             silver_schema=MagicMock(),
         )
 
+        gold_validator = MagicMock()
+        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
@@ -281,6 +298,7 @@ class TestRecordProcessorProcessBatch:
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=gold_validator,
         )
 
         records = [{"id": "test", "value": 5}]
@@ -332,6 +350,9 @@ class TestRecordProcessorProcessBatch:
             dq_config=config.dq,
         )
 
+        gold_validator = MagicMock()
+        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
@@ -339,6 +360,7 @@ class TestRecordProcessorProcessBatch:
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=gold_validator,
         )
 
         records = [
@@ -381,6 +403,9 @@ class TestRecordProcessorProcessBatch:
             dq_config=config.dq,
         )
 
+        gold_validator = MagicMock()
+        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
@@ -388,6 +413,7 @@ class TestRecordProcessorProcessBatch:
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=gold_validator,
         )
 
         records = [

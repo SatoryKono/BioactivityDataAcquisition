@@ -150,6 +150,53 @@ class StorageAdapter:
 
         return cleared_count
 
+    def clear_csv(self, table_name: str | None = None) -> int:
+        """Clear CSV export files for Silver and Gold layers.
+
+        Implements StoragePort.clear_csv().
+
+        Args:
+            table_name: If provided, only clear CSV for this table.
+                       If None, clear all CSV files.
+
+        Returns:
+            Number of files cleared.
+        """
+        cleared_count = 0
+
+        if self.silver.csv_exporter:
+            deleted = self.silver.csv_exporter.clear(table_name)
+            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+
+        if self.gold.csv_exporter:
+            deleted = self.gold.csv_exporter.clear(table_name)
+            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+
+        return cleared_count
+
+    def clear_delta(self, table_name: str | None = None) -> int:
+        """Clear Delta tables for Silver and Gold layers.
+
+        Implements StoragePort.clear_delta().
+
+        Args:
+            table_name: If provided, only clear Delta table for this table.
+                       If None, clear all Delta tables.
+
+        Returns:
+            Number of tables cleared.
+        """
+        cleared_count = 0
+
+        if table_name:
+            cleared_count += self.silver.clear(table_name)
+            cleared_count += self.gold.clear(table_name)
+        else:
+            # Clear all tables is not implemented for Delta
+            pass
+
+        return cleared_count
+
     async def aclose(self) -> None:
         """Close resources.
 
