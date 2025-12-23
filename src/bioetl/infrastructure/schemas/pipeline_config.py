@@ -139,12 +139,19 @@ class GoldListLengthFilterConfig(BaseModel):
     max: int | None = None
 
 
+class GoldListContainsFilterConfig(BaseModel):
+    """Schema for list contains filters in YAML."""
+    values: list[str]
+    mode: Literal["all", "any"] = "all"
+
+
 class GoldFiltersConfig(BaseModel):
     """Schema for gold_filters in YAML."""
 
     columns: dict[str, list[str]] = Field(default_factory=dict)
     ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
     list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
+    list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
     required_fields: list[str] = Field(default_factory=list)
     exclude_if_present: list[str] = Field(default_factory=list)
 

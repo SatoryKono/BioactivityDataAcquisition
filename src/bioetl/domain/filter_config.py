@@ -82,6 +82,29 @@ class GoldListLengthFilter:
 
 
 @dataclass(frozen=True)
+class GoldListContainsFilter:
+    """Фильтр на содержание значений в списке (subset).
+
+    Attributes:
+        column: Имя колонки (список).
+        values: Допустимые значения.
+        mode: 'all' (все элементы списка должны быть в values) или 'any' (хотя бы один).
+    """
+
+    column: str
+    values: frozenset[str]
+    mode: str = "all"  # "all" or "any"
+
+    def __post_init__(self) -> None:
+        if not self.column:
+            raise ValueError("column name cannot be empty")
+        if not self.values:
+            raise ValueError(f"values for column '{self.column}' cannot be empty")
+        if self.mode not in ("all", "any"):
+            raise ValueError("mode must be 'all' or 'any'")
+
+
+@dataclass(frozen=True)
 class GoldFilterConfig:
     """Полная конфигурация Gold фильтров.
 
@@ -89,6 +112,7 @@ class GoldFilterConfig:
         column_filters: Фильтры по колонкам (значение должно быть в списке).
         range_filters: Фильтры диапазонов значений.
         list_length_filters: Фильтры по длине списков.
+        list_contains_filters: Фильтры по содержанию списков.
         required_fields: Обязательные поля (должны быть не null/пустые).
         exclude_if_present: Исключающие поля (если есть значение — запись исключается).
     """
@@ -96,6 +120,7 @@ class GoldFilterConfig:
     column_filters: tuple[GoldColumnFilter, ...] = ()
     range_filters: tuple[GoldRangeFilter, ...] = ()
     list_length_filters: tuple[GoldListLengthFilter, ...] = ()
+    list_contains_filters: tuple[GoldListContainsFilter, ...] = ()
     required_fields: tuple[str, ...] = ()
     exclude_if_present: tuple[str, ...] = ()
 
@@ -108,13 +133,15 @@ class GoldFilterConfig:
         Returns:
             True если запись проходит все фильтры, False иначе.
         """
-        return (
-            self._check_required_fields(record)
-            and self._check_exclude_if_present(record)
-            and self._check_column_filters(record)
-            and self._check_range_filters(record)
-            and self._check_list_length_filters(record)
-        )
+        checks = [
+            self._check_required_fields,
+            self._check_exclude_if_present,
+            self._check_column_filters,
+            self._check_range_filters,
+            self._check_list_length_filters,
+            self._check_list_contains_filters,
+        ]
+        return all(check(record) for check in checks)
 
     def _check_required_fields(self, record: dict[str, Any]) -> bool:
         """Проверяет наличие обязательных полей."""
@@ -152,18 +179,51 @@ class GoldFilterConfig:
             return 0
         if isinstance(val, list):
             return len(val)
-        return 1  # Одиночное значение = длина 1
+        return 1
 
     @staticmethod
-    def _length_in_bounds(
-        length: int, min_len: int | None, max_len: int | None
-    ) -> bool:
+    def _length_in_bounds(length: int, min_len: int | None, max_len: int | None) -> bool:
         """Проверяет, находится ли длина в допустимых границах."""
         if min_len is not None and length < min_len:
             return False
         if max_len is not None and length > max_len:
             return False
         return True
+
+    def _check_list_contains_filters(self, record: dict[str, Any]) -> bool:
+        """Проверяет содержание списков."""
+        return all(
+            self._check_single_list_contains(record, f)
+            for f in self.list_contains_filters
+        )
+
+    def _check_single_list_contains(
+        self, record: dict[str, Any], f: GoldListContainsFilter
+    ) -> bool:
+        """Проверяет содержание одного списка."""
+        val = record.get(f.column)
+        if not val:  # None or empty list - пропускаем (vacuous truth)
+            return True
+
+        val_set = self._to_string_set(val)
+        return self._matches_contains_mode(val_set, f.values, f.mode)
+
+    @staticmethod
+    def _to_string_set(val: Any) -> set[str]:
+        """Преобразует значение в множество строк."""
+        if not isinstance(val, list):
+            val = [val]
+        return {str(v) for v in val}
+
+    @staticmethod
+    def _matches_contains_mode(
+        val_set: set[str], allowed: frozenset[str], mode: str
+    ) -> bool:
+        """Проверяет соответствие множества значений режиму фильтра."""
+        if mode == "all":
+            return val_set.issubset(allowed)
+        # mode == "any"
+        return bool(val_set.intersection(allowed))
 
     def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:
         """Проверяет одно значение на попадание в диапазон."""
@@ -204,13 +264,15 @@ class GoldFilterConfig:
         Returns:
             True если нет ни одного фильтра.
         """
-        return (
-            not self.column_filters
-            and not self.range_filters
-            and not self.list_length_filters
-            and not self.required_fields
-            and not self.exclude_if_present
+        all_filters = (
+            self.column_filters,
+            self.range_filters,
+            self.list_length_filters,
+            self.list_contains_filters,
+            self.required_fields,
+            self.exclude_if_present,
         )
+        return not any(all_filters)
 
 
 @dataclass(frozen=True)
