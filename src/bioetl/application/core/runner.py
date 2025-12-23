@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.observability.observer import PipelineObserver
 
 if TYPE_CHECKING:
@@ -17,6 +16,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
+    from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -41,9 +41,25 @@ class PipelineRunner:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: structlog.BoundLogger,
+        lock_manager: LockManager,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
     ) -> None:
+        """Initialize PipelineRunner with injected dependencies.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Pipeline services.
+            context: Pipeline context.
+            executor: Pipeline executor.
+            checkpoint_manager: Checkpoint manager.
+            shutdown_signal: Shutdown signal handler.
+            logger: Bound logger.
+            lock_manager: Injected lock manager (DI pattern).
+            pipeline: Optional BasePipeline instance.
+            tracer: Optional tracing port.
+        """
         self._config = config
         self._runtime = runtime
         self._services = services
@@ -52,24 +68,9 @@ class PipelineRunner:
         self._checkpoint_manager = checkpoint_manager
         self.shutdown_signal = shutdown_signal
         self._logger = logger
+        self._lock_manager = lock_manager
         self.pipeline = pipeline
         self._tracer = tracer
-
-        # The runner is responsible for creating application services
-        self._lock_manager = LockManager.create(
-            lock_port=self._services.lock,
-            run_id=self._context.run_id,
-            provider=self._config.provider,
-            entity_type=self._config.entity_type,
-            run_type=self._runtime.run_type,
-            lock_ttl=self._runtime.effective_lock_ttl,
-            wait_for_lock=self._runtime.wait_for_lock,
-            wait_timeout=self._runtime.lock_wait_timeout,
-            heartbeat_interval=self._runtime.heartbeat_interval,
-            logger=self._logger,
-            shutdown_signal=self.shutdown_signal,
-            checkpoint_manager=self._checkpoint_manager,  # Inject dependency
-        )
 
     @property
     def logger(self) -> structlog.BoundLogger:
@@ -112,7 +113,7 @@ class PipelineRunner:
                 )
                 await self._checkpoint_manager.delete_checkpoint()
 
-            # Add extra info to logs if needed, though observer handles success/failure logging
+            # Observer handles success/failure logging
             self._logger.debug(
                 "Pipeline execution finished",
                 extra={"records_fetched": self._executor.records_fetched},

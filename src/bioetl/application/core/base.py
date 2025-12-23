@@ -44,7 +44,7 @@ class BasePipeline:
     ) -> Self:
         """Create pipeline instance.
 
-        Default factory method. Subclasses can override if custom initialization is needed.
+        Default factory method. Subclasses can override for custom init.
 
         Args:
             runtime: Runtime configuration.

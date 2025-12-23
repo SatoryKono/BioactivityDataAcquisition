@@ -248,8 +248,8 @@ class RecordProcessor:
         table_name = (
             self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
         )
-        # For "overwrite" mode, use "append" for batch writes since table is cleared at run start
-        # This allows accumulating batches within a run while still replacing previous run data
+        # For "overwrite" mode, use "append" since table is cleared at start
+        # This accumulates batches within run while replacing previous data
         write_mode = self._table_config.silver_write_mode
         if write_mode == "overwrite":
             write_mode = "append"
@@ -271,8 +271,8 @@ class RecordProcessor:
         table_name = (
             self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
         )
-        # For "overwrite" mode, use "append" for batch writes since table is cleared at run start
-        # This allows accumulating batches within a run while still replacing previous run data
+        # For "overwrite" mode, use "append" since table is cleared at start
+        # This accumulates batches within run while replacing previous data
         write_mode = self._table_config.gold_write_mode
         if write_mode == "overwrite":
             write_mode = "append"

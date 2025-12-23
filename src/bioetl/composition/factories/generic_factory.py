@@ -1,7 +1,7 @@
 """Generic Pipeline Factory.
 
-Provides a configurable factory that eliminates the need for boilerplate subclasses.
-Pipelines can be registered declaratively using configuration rather than class inheritance.
+Provides a configurable factory that eliminates boilerplate subclasses.
+Pipelines are registered declaratively using configuration.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.executor import PipelineExecutor
+from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.runner import PipelineRunner
@@ -51,8 +52,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
     centralizes pipeline definitions.
 
     Example:
-        >>> from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-        >>> from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
+        >>> from bioetl.application.pipelines.chembl.activity import (
+        ...     ChEMBLActivityPipeline,
+        ... )
+        >>> from bioetl.infrastructure.schemas.silver import (
+        ...     CHEMBL_ACTIVITY_SCHEMA,
+        ... )
         >>>
         >>> factory = GenericPipelineFactory(
         ...     pipeline_name="chembl_activity",
@@ -260,6 +265,22 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_interval=pipeline.config.checkpoint_interval,
         )
 
+        # Create LockManager (DI pattern - previously created inside PipelineRunner)
+        lock_manager = LockManager.create(
+            lock_port=pipeline.services.lock,
+            run_id=pipeline.context.run_id,
+            provider=pipeline.config.provider,
+            entity_type=pipeline.config.entity_type,
+            run_type=runtime.run_type,
+            lock_ttl=runtime.effective_lock_ttl,
+            wait_for_lock=runtime.wait_for_lock,
+            wait_timeout=runtime.lock_wait_timeout,
+            heartbeat_interval=runtime.heartbeat_interval,
+            logger=logger,
+            shutdown_signal=pipeline.shutdown_signal,
+            checkpoint_manager=checkpoint_manager,
+        )
+
         # Assemble Runner
         return PipelineRunner(
             config=pipeline.config,
@@ -270,6 +291,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=pipeline.shutdown_signal,
             logger=logger,
+            lock_manager=lock_manager,
             pipeline=pipeline,
             tracer=tracer,
         )
@@ -318,13 +340,13 @@ class GenericPipelineFactory(Generic[TPipeline]):
             else NoOpGoldValidator()
         )
 
-        # Create QuarantineManager (DI pattern - previously created inside RecordProcessor)
+        # Create QuarantineManager (DI pattern)
         quarantine_manager = QuarantineManager(
             quarantine_port=pipeline.services.quarantine,
             pipeline_name=pipeline.config.pipeline_name,
         )
 
-        # Create BatchMetricsRecorder (DI pattern - previously created inside RecordProcessor)
+        # Create BatchMetricsRecorder (DI pattern)
         pipeline_label = f"{pipeline.config.provider}_{pipeline.config.entity_type}"
         run_type_label = pipeline.context.run_type.value
         batch_metrics = BatchMetricsRecorder(
