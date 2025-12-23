@@ -508,9 +508,37 @@ class LoggerPort(Protocol):
         ...
 
 
+@runtime_checkable
+class GoldValidatorPort(Protocol):
+    """Port for Gold layer record validation.
+
+    This interface abstracts the validation mechanism for Gold records,
+    allowing different validation strategies (Pandera, Great Expectations, etc.)
+    to be injected without coupling RecordProcessor to a specific implementation.
+
+    Note: GoldValidatorPort uses synchronous methods as validation
+    should be a CPU-bound operation without I/O.
+    """
+
+    def validate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Validate records for Gold layer.
+
+        Args:
+            records: List of record dictionaries to validate.
+
+        Returns:
+            List of validated records (may be filtered or unchanged).
+
+        Raises:
+            Exception: If validation fails critically.
+        """
+        ...
+
+
 __all__ = [
     "CheckpointPort",
     "DataSourcePort",
+    "GoldValidatorPort",
     "InputFilterPort",
     "LockPort",
     "LoggerPort",

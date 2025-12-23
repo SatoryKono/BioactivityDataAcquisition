@@ -21,6 +21,7 @@ from bioetl.composition.factories.data_source_registry import (
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.infrastructure.validation import NoOpGoldValidator, PanderaGoldValidator
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -299,6 +300,13 @@ class GenericPipelineFactory(Generic[TPipeline]):
             table_config=table_config,
         )
 
+        # Create Gold validator from schema (DI pattern)
+        gold_validator = (
+            PanderaGoldValidator(self.gold_schema)
+            if self.gold_schema
+            else NoOpGoldValidator()
+        )
+
         return RecordProcessor(
             services=pipeline.services,
             error_classifier=error_classifier,
@@ -306,6 +314,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config=processor_config,
             transform_callback=pipeline.transform_bronze_to_silver,
             gold_filter_callback=pipeline.should_write_gold,
+            gold_validator=gold_validator,
         )
 
 
