@@ -54,6 +54,14 @@ class TargetTransformer(BaseTransformer):
                 "organism": record.get("organism"),
                 "tax_id": safe_int(record.get("tax_id")),
                 "species_group_flag": record.get("species_group_flag"),
+                "description": record.get("description"),
+                "downgraded": record.get("downgraded"),
+                # Optional fields (present for specific target types)
+                "dap_id": safe_int(record.get("dap_id")),
+                "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
+                "target_constraints": self.serialize_json(
+                    record.get("target_constraints")
+                ),
                 # Complex fields (JSON serialized)
                 "target_components": self.serialize_json(
                     record.get("target_components")
@@ -101,7 +109,8 @@ class TargetTransformer(BaseTransformer):
             components: List of component dicts from ChEMBL API.
 
         Returns:
-            Dict with aggregated lists for accessions, IDs, types, relationships, and descriptions.
+            Dict with aggregated lists for accessions, IDs, types, relationships,
+            descriptions, organisms, tax_ids, and protein classifications.
         """
         if not components or not isinstance(components, list):
             return {
@@ -110,7 +119,11 @@ class TargetTransformer(BaseTransformer):
                 "component_types": None,
                 "component_relationships": None,
                 "component_descriptions": None,
+                "component_organisms": None,
+                "component_tax_ids": None,
                 "protein_classifications": None,
+                "protein_classification_ids": None,
+                "protein_classification_names": None,
             }
 
         accessions = [c.get("accession") for c in components if c.get("accession")]
@@ -129,21 +142,38 @@ class TargetTransformer(BaseTransformer):
             if c.get("component_description")
         ]
 
-        # Flatten protein classifications
-        classifications = []
+        # Extract organisms and tax_ids from components
+        organisms = [c.get("organism") for c in components if c.get("organism")]
+        tax_ids = [
+            safe_int(c.get("tax_id"))
+            for c in components
+            if c.get("tax_id") is not None
+        ]
+
+        # Flatten protein classifications with full details
+        classification_short_names: list[str] = []
+        classification_ids: list[int] = []
+        classification_pref_names: list[str] = []
+
         for c in components:
-            # Check if protein_classifications exists and is a list
             pcs = c.get("protein_classifications")
             if pcs and isinstance(pcs, list):
                 for pc in pcs:
-                    # Extract short_name if available
                     if isinstance(pc, dict):
+                        # Extract short_name
                         short_name = pc.get("short_name")
                         if short_name:
-                            classifications.append(short_name)
-                        elif "protein_classification_id" in pc:
-                             # Fallback to ID if name not present but ID is
-                             classifications.append(str(pc["protein_classification_id"]))
+                            classification_short_names.append(short_name)
+
+                        # Extract protein_classification_id
+                        pc_id = safe_int(pc.get("protein_classification_id"))
+                        if pc_id is not None:
+                            classification_ids.append(pc_id)
+
+                        # Extract pref_name (class name)
+                        pref_name = pc.get("pref_name")
+                        if pref_name:
+                            classification_pref_names.append(pref_name)
 
         return {
             "component_accessions": accessions if accessions else None,
@@ -151,7 +181,17 @@ class TargetTransformer(BaseTransformer):
             "component_types": types if types else None,
             "component_relationships": relationships if relationships else None,
             "component_descriptions": descriptions if descriptions else None,
-            "protein_classifications": classifications if classifications else None,
+            "component_organisms": organisms if organisms else None,
+            "component_tax_ids": tax_ids if tax_ids else None,
+            "protein_classifications": (
+                classification_short_names if classification_short_names else None
+            ),
+            "protein_classification_ids": (
+                classification_ids if classification_ids else None
+            ),
+            "protein_classification_names": (
+                classification_pref_names if classification_pref_names else None
+            ),
         }
 
     def _aggregate_synonyms(

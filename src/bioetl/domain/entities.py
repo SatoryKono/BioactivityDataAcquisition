@@ -312,6 +312,13 @@ class Target(BaseEntity):
     organism: str | None = None
     tax_id: int | None = None
     species_group_flag: bool | None = None
+    description: str | None = None  # General target description
+    downgraded: bool | None = None  # Flag for deprecated/downgraded records
+
+    # Optional fields (present for specific target types)
+    dap_id: int | None = None  # Drug-Affinity Panel ID (if available)
+    pipeline_stages: str | None = None  # JSON string (for complexes/families)
+    target_constraints: str | None = None  # JSON string (if available)
 
     # Complex fields (JSON serialized)
     target_components: str | None = None  # JSON string of array
@@ -324,7 +331,13 @@ class Target(BaseEntity):
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
-    protein_classifications: list[str] | None = None
+    component_organisms: list[str] | None = None  # Organisms from components
+    component_tax_ids: list[int] | None = None  # Tax IDs from components
+
+    # Protein classification fields (aggregated from components)
+    protein_classifications: list[str] | None = None  # short_name values
+    protein_classification_ids: list[int] | None = None  # protein_classification_id
+    protein_classification_names: list[str] | None = None  # pref_name (class names)
 
     def __post_init__(self) -> None:
         super().__post_init__()
