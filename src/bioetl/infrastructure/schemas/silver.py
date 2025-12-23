@@ -123,19 +123,44 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
 
 # Schema for PubMed Publication
 # Matches Publication entity from domain/entities.py
+# See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
 PUBMED_PUBLICATION_SCHEMA = pa.schema(
     [
         # System fields
         pa.field("entity_id", pa.string()),
         pa.field("content_hash", pa.string()),
-        # Business fields
+        # Primary identifiers
         pa.field("pmid", pa.string()),
+        pa.field("doi", pa.string()),
+        pa.field("pmc_id", pa.string()),
+        # Title and abstract
         pa.field("title", pa.string()),
         pa.field("abstract", pa.string()),
+        # Journal information
         pa.field("journal", pa.string()),
-        pa.field("publication_year", pa.int64()),
+        pa.field("journal_abbrev", pa.string()),
+        pa.field("issn", pa.string()),
+        pa.field("volume", pa.string()),
+        pa.field("issue", pa.string()),
+        pa.field("pages", pa.string()),
+        # Authors
         pa.field("authors", pa.list_(pa.string())),
-        # Metadata fields
+        # Dates (ISO format strings)
+        pa.field("pub_date", pa.string()),
+        pa.field("pub_year", pa.int64()),
+        pa.field("publication_year", pa.int64()),  # Legacy alias
+        pa.field("accepted_date", pa.string()),
+        pa.field("received_date", pa.string()),
+        pa.field("revised_date", pa.string()),
+        pa.field("epub_date", pa.string()),
+        # Classification
+        pa.field("publication_types", pa.list_(pa.string())),
+        pa.field("keywords", pa.list_(pa.string())),
+        pa.field("mesh_terms", pa.list_(pa.string())),
+        # Additional metadata
+        pa.field("language", pa.string()),
+        pa.field("country", pa.string()),
+        # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),

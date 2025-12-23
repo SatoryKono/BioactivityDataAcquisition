@@ -58,16 +58,41 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     """Schema for PubMed Publication in Gold layer.
 
     Fields match Publication entity from domain/entities.py.
+    See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
     """
 
+    # Primary identifiers
     pmid: Series[str] = pa.Field(nullable=False)
+    doi: Series[str] = pa.Field(nullable=True)
+    pmc_id: Series[str] = pa.Field(nullable=True)
+
+    # Title and abstract
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
+
+    # Journal information
     journal: Series[str] = pa.Field(nullable=True)
+    journal_abbrev: Series[str] = pa.Field(nullable=True)
+    issn: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
+    pages: Series[str] = pa.Field(nullable=True)
+
+    # Dates
+    pub_date: Series[str] = pa.Field(nullable=True)
+    pub_year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
+    accepted_date: Series[str] = pa.Field(nullable=True)
+    received_date: Series[str] = pa.Field(nullable=True)
+    revised_date: Series[str] = pa.Field(nullable=True)
+    epub_date: Series[str] = pa.Field(nullable=True)
+
+    # Additional metadata
+    language: Series[str] = pa.Field(nullable=True)
+    country: Series[str] = pa.Field(nullable=True)
 
     class Config:
-        strict = False
+        strict = False  # Allow extra columns (authors, keywords, mesh_terms, etc.)
 
 
 class ChEMBLAssayGoldSchema(pa.DataFrameModel):

@@ -47,7 +47,7 @@ sink:
         format: delta
         mode: merge
         primary_key: ["pmid"]
-        partition_by: ["publication_year"]
+        partition_by: ["pub_year"]
         classification: public
         forensic_retention: true
         csv_export:

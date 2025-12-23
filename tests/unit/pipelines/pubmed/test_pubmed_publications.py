@@ -47,6 +47,7 @@ def pipeline_context(mock_services):
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     """Test transformation of valid Bronze record to Silver record."""
+    # XML structure matches real PubMed XML format
     xml_content = """
     <PubmedArticle>
         <MedlineCitation>
@@ -55,6 +56,17 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
                 <ArticleTitle>Test Title</ArticleTitle>
                 <Journal>
                     <Title>Test Journal</Title>
+                    <ISOAbbreviation>Test J</ISOAbbreviation>
+                    <ISSN>1234-5678</ISSN>
+                    <JournalIssue>
+                        <Volume>10</Volume>
+                        <Issue>5</Issue>
+                        <PubDate>
+                            <Year>2023</Year>
+                            <Month>Mar</Month>
+                            <Day>15</Day>
+                        </PubDate>
+                    </JournalIssue>
                 </Journal>
                 <Abstract>
                     <AbstractText>Test Abstract</AbstractText>
@@ -65,11 +77,38 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
                         <Initials>J</Initials>
                     </Author>
                 </AuthorList>
-                <PubDate>
-                    <Year>2023</Year>
-                </PubDate>
+                <Language>eng</Language>
+                <PublicationTypeList>
+                    <PublicationType>Journal Article</PublicationType>
+                </PublicationTypeList>
+                <ELocationID EIdType="doi">10.1234/test.2023</ELocationID>
             </Article>
+            <MedlineJournalInfo>
+                <Country>United States</Country>
+            </MedlineJournalInfo>
+            <KeywordList>
+                <Keyword>bioinformatics</Keyword>
+                <Keyword>drug discovery</Keyword>
+            </KeywordList>
         </MedlineCitation>
+        <PubmedData>
+            <ArticleIdList>
+                <ArticleId IdType="pubmed">12345</ArticleId>
+                <ArticleId IdType="pmc">PMC123456</ArticleId>
+            </ArticleIdList>
+            <History>
+                <PubMedPubDate PubStatus="received">
+                    <Year>2022</Year>
+                    <Month>12</Month>
+                    <Day>01</Day>
+                </PubMedPubDate>
+                <PubMedPubDate PubStatus="accepted">
+                    <Year>2023</Year>
+                    <Month>02</Month>
+                    <Day>15</Day>
+                </PubMedPubDate>
+            </History>
+        </PubmedData>
     </PubmedArticle>
     """
 
@@ -78,20 +117,36 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
         {"pmid": "12345", "_raw_xml": xml_content, "source_batch_id": "test_batch"},
     )
 
-    # Since we are testing logic that uses datetime.now(UTC), we don't need context.run_start_time
-    # which we confirmed was removed from PipelineContext
-
     silver_record = await pipeline.transform_bronze_to_silver(
         pipeline_context, bronze_record
     )
 
     assert silver_record is not None
+    # Basic fields
     assert silver_record["pmid"] == "12345"
     assert silver_record["title"] == "Test Title"
     assert silver_record["journal"] == "Test Journal"
     assert silver_record["abstract"] == "Test Abstract"
-    assert silver_record["publication_year"] == 2023
     assert silver_record["authors"] == ["Doe, J"]
+    # Date fields
+    assert silver_record["pub_year"] == 2023
+    assert silver_record["publication_year"] == 2023
+    assert silver_record["pub_date"] == "2023-03-15"
+    assert silver_record["accepted_date"] == "2023-02-15"
+    assert silver_record["received_date"] == "2022-12-01"
+    # Journal fields
+    assert silver_record["journal_abbrev"] == "Test J"
+    assert silver_record["issn"] == "1234-5678"
+    assert silver_record["volume"] == "10"
+    assert silver_record["issue"] == "5"
+    # Classification
+    assert silver_record["doi"] == "10.1234/test.2023"
+    assert silver_record["pmc_id"] == "PMC123456"
+    assert silver_record["publication_types"] == ["Journal Article"]
+    assert silver_record["keywords"] == ["bioinformatics", "drug discovery"]
+    assert silver_record["language"] == "eng"
+    assert silver_record["country"] == "United States"
+    # Metadata
     assert "_ingestion_ts" in silver_record
     assert isinstance(silver_record["_ingestion_ts"], str)
 
