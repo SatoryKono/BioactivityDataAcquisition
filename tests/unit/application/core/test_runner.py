@@ -57,6 +57,10 @@ def mock_services():
     services.metrics = MagicMock()
     services.metrics.observe_histogram = MagicMock()
     services.metrics.increment_counter = MagicMock()
+    # Storage with clear methods (part of StoragePort contract)
+    services.storage = MagicMock()
+    services.storage.clear_csv = MagicMock(return_value=0)
+    services.storage.clear_delta = MagicMock(return_value=0)
     return services
 
 
@@ -459,38 +463,6 @@ class TestPipelineRunnerClearExports:
         info_calls = [str(call) for call in mock_logger.info.call_args_list]
         assert not any("Cleared CSV" in call for call in info_calls)
         assert not any("Cleared Delta" in call for call in info_calls)
-
-    def test_clear_exports_handles_missing_clear_methods(
-        self,
-        pipeline_config,
-        runtime_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports handles storage without clear methods."""
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        # Storage without clear_csv or clear_delta methods
-        services.storage = MagicMock(spec=[])  # Empty spec = no methods
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=runtime_config,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        # Should not raise
-        runner._clear_exports()
 
     def test_clear_exports_uses_default_gold_table(
         self,
