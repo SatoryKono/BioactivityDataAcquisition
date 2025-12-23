@@ -142,8 +142,9 @@ class TestBronzeWriterWriteLocal:
             run_type=run_type,
         )
 
-        # Verify path format
-        assert "bronze/v1/chembl/activity/2024-01-15" in str(path)
+        # Verify path format (normalize for cross-platform)
+        path_str = str(path).replace("\\", "/")
+        assert "bronze/v1/chembl/activity/2024-01-15" in path_str
         assert str(batch_id) in str(path)
         assert str(path).endswith(".jsonl.zst")
 

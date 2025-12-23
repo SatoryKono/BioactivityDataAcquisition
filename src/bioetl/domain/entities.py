@@ -101,7 +101,12 @@ class Activity(BaseEntity):
 
     # Derived metrics
     pchembl_value: float | None = None
-    ligand_efficiency: str | None = None  # JSON string of dict
+
+    # Ligand efficiency metrics (flattened from ChEMBL API dict)
+    ligand_efficiency_bei: float | None = None  # Binding Efficiency Index
+    ligand_efficiency_le: float | None = None  # Ligand Efficiency
+    ligand_efficiency_lle: float | None = None  # Lipophilic Ligand Efficiency
+    ligand_efficiency_sei: float | None = None  # Surface Efficiency Index
 
     # Units ontology
     qudt_units: str | None = None

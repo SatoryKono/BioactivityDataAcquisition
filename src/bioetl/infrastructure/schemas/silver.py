@@ -55,7 +55,11 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("standard_flag", pa.int64()),
         # Derived metrics
         pa.field("pchembl_value", pa.float64()),
-        pa.field("ligand_efficiency", pa.string()),  # JSON string
+        # Ligand efficiency metrics (flattened)
+        pa.field("ligand_efficiency_bei", pa.float64()),
+        pa.field("ligand_efficiency_le", pa.float64()),
+        pa.field("ligand_efficiency_lle", pa.float64()),
+        pa.field("ligand_efficiency_sei", pa.float64()),
         # Units ontology
         pa.field("qudt_units", pa.string()),
         pa.field("uo_units", pa.string()),

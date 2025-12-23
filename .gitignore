@@ -110,3 +110,4 @@ puppeteer-config.json
 *.png
 nul
 profile.svg
+/data/json
