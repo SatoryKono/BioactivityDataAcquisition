@@ -344,3 +344,199 @@ class TestPipelineRunnerRun:
         mock_executor.execute.assert_called_once()
         call_kwargs = mock_executor.execute.call_args.kwargs
         assert call_kwargs["limit"] == 500
+
+
+@pytest.mark.unit
+class TestPipelineRunnerClearExports:
+    """Tests for PipelineRunner._clear_exports method."""
+
+    def test_clear_exports_calls_storage_methods(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports calls storage clear methods."""
+        # Create services with storage that has clear methods
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_csv = MagicMock(return_value=5)
+        services.storage.clear_delta = MagicMock(return_value=1)
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        runner._clear_exports()
+
+        # Should clear both silver and gold tables
+        assert services.storage.clear_csv.call_count == 2
+        assert services.storage.clear_delta.call_count == 2
+
+    def test_clear_exports_logs_when_files_cleared(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports logs when files are cleared."""
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_csv = MagicMock(return_value=3)
+        services.storage.clear_delta = MagicMock(return_value=2)
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        runner._clear_exports()
+
+        # Should log when files are cleared
+        info_calls = [str(call) for call in mock_logger.info.call_args_list]
+        assert any("Cleared CSV" in call for call in info_calls)
+        assert any("Cleared Delta" in call for call in info_calls)
+
+    def test_clear_exports_no_log_when_nothing_cleared(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports does not log when nothing cleared."""
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_csv = MagicMock(return_value=0)
+        services.storage.clear_delta = MagicMock(return_value=0)
+
+        mock_logger.reset_mock()
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        runner._clear_exports()
+
+        # Should not log about cleared files
+        info_calls = [str(call) for call in mock_logger.info.call_args_list]
+        assert not any("Cleared CSV" in call for call in info_calls)
+        assert not any("Cleared Delta" in call for call in info_calls)
+
+    def test_clear_exports_handles_missing_clear_methods(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports handles storage without clear methods."""
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        # Storage without clear_csv or clear_delta methods
+        services.storage = MagicMock(spec=[])  # Empty spec = no methods
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        # Should not raise
+        runner._clear_exports()
+
+    def test_clear_exports_uses_default_gold_table(
+        self,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports uses default gold table name when not specified."""
+        # Config without explicit gold_table
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="chembl.silver_activity",
+            gold_table=None,  # No explicit gold table
+        )
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_csv = MagicMock(return_value=0)
+        services.storage.clear_delta = MagicMock(return_value=0)
+
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        runner._clear_exports()
+
+        # Should use default gold table: provider.entity_type
+        call_args = [call[0][0] for call in services.storage.clear_csv.call_args_list]
+        assert "chembl.silver_activity" in call_args
+        assert "chembl.activity" in call_args  # Default gold table
