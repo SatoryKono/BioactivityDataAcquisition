@@ -342,6 +342,7 @@ class TestMoleculeTransformer:
 
         assert result is not None
         assert result["property_alogp"] == 2.5
+        assert result["property_mw_freebase"] == 300.5
         assert result["property_acd_logd"] == 1.8
         assert result["property_acd_logp"] == 2.3
         assert result["property_acd_most_apka"] == 4.5
