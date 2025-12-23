@@ -1,8 +1,12 @@
 # ADR-003: Why Redis for Distributed Locking?
 
-*   **Status**: Accepted
+*   **Status**: ~~Accepted~~ **Superseded by ADR-010**
 *   **Date**: 2025-05-20 (Implicitly from RULES.md v3.0)
+*   **Superseded By**: [ADR-010: Local-Only Deployment](ADR-010-local-only-deployment.md)
 *   **Context**: The system needs a mechanism to ensure that only one instance of a given pipeline (e.g., `chembl_activity`) can run at a time, especially during resource-intensive operations like backfills. This prevents race conditions, data corruption, and redundant API calls.
+
+> **Note**: This ADR has been superseded. The project now uses local-only deployment
+> with in-memory locking (MemoryLock). See ADR-010 for details.
 
 ## The Decision
 
