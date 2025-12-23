@@ -12,7 +12,9 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.application.core.gold_validator import ValidationResult
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
+from bioetl.domain.ports import GoldValidatorPort
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.config import get_pipeline_config
 
@@ -63,6 +65,8 @@ def mock_storage():
 def mock_metrics():
     """Create mock metrics."""
     metrics = AsyncMock()
+    metrics.observe_histogram = MagicMock()
+    metrics.increment_counter = MagicMock()
     return metrics
 
 
@@ -123,12 +127,21 @@ def gold_filter_callback():
 
 
 @pytest.fixture
+def mock_gold_validator():
+    """Mock gold validator port."""
+    validator = MagicMock(spec=GoldValidatorPort)
+    validator.validate.return_value = ValidationResult(valid=True, errors=[])
+    return validator
+
+
+@pytest.fixture
 def record_processor(
     mock_services,
     mock_error_classifier,
     mock_context,
     transform_callback,
     gold_filter_callback,
+    mock_gold_validator,
 ):
     """Create RecordProcessor instance."""
     config = RecordProcessorConfig(
@@ -145,6 +158,7 @@ def record_processor(
         config=config,
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
+        gold_validator=mock_gold_validator,
     )
 
 
@@ -242,6 +256,7 @@ class TestRecordProcessorProcessBatch:
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=MagicMock(spec=GoldValidatorPort),
         )
 
         records = [
@@ -281,6 +296,7 @@ class TestRecordProcessorProcessBatch:
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=MagicMock(spec=GoldValidatorPort),
         )
 
         records = [{"id": "test", "value": 5}]
@@ -339,12 +355,16 @@ class TestRecordProcessorProcessBatch:
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=MagicMock(spec=GoldValidatorPort),
         )
 
         records = [
             {"id": "good", "value": 1},
             {"id": "bad", "value": 2},
         ]
+
+        # Access the validator through the handler
+        processor._gold_handler._validator.validate.return_value = ValidationResult(valid=True, errors=[])
 
         with pytest.raises(DataQualityThresholdError):
             await processor.process_batch(records, BatchID(uuid4()))
@@ -388,7 +408,11 @@ class TestRecordProcessorProcessBatch:
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
+            gold_validator=MagicMock(spec=GoldValidatorPort),
         )
+
+        # Access the validator through the handler
+        processor._gold_handler._validator.validate.return_value = ValidationResult(valid=True, errors=[])
 
         records = [
             {"id": "good", "value": 1},

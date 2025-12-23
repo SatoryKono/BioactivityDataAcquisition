@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.domain.types import LayerType
 
 if TYPE_CHECKING:
     import structlog
@@ -122,10 +123,10 @@ class PipelineRunner:
         """Clear export files and Delta tables at the start of a pipeline run.
 
         This ensures fresh data without duplicates from previous runs.
-        Clears both CSV exports and Delta tables for Silver and Gold layers.
+        Purges targets for Silver and Gold layers.
 
-        Note: clear_csv and clear_delta are part of StoragePort contract.
-        They return 0 if no files/tables were cleared (e.g., exporters not configured).
+        Note: storage.purge_target is part of StoragePort contract.
+        It returns 0 if no items were cleared.
         """
         storage = self._services.storage
         silver_table = self._config.silver_table
@@ -135,24 +136,18 @@ class PipelineRunner:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        # Collect unique table names to clear
-        tables_to_clear = {silver_table, gold_table}
-
-        # Clear CSV exports and Delta tables for each table
-        total_csv_cleared = 0
-        total_delta_cleared = 0
-
-        for table_name in tables_to_clear:
-            total_csv_cleared += storage.clear_csv(table_name)
-            total_delta_cleared += storage.clear_delta(table_name)
-
-        if total_csv_cleared > 0:
+        # Purge Silver Layer
+        silver_purged = storage.purge_target(LayerType.SILVER, silver_table)
+        if silver_purged > 0:
             self._logger.info(
-                "Cleared CSV export files",
-                extra={"deleted_count": total_csv_cleared},
+                "Purged Silver layer targets",
+                extra={"target": silver_table, "count": silver_purged},
             )
-        if total_delta_cleared > 0:
+
+        # Purge Gold Layer
+        gold_purged = storage.purge_target(LayerType.GOLD, gold_table)
+        if gold_purged > 0:
             self._logger.info(
-                "Cleared Delta tables",
-                extra={"cleared_count": total_delta_cleared},
+                "Purged Gold layer targets",
+                extra={"target": gold_table, "count": gold_purged},
             )

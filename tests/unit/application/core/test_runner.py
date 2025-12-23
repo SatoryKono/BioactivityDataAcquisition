@@ -11,7 +11,13 @@ from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import (
+    BatchID,
+    HealthStatus,
+    LayerType,
+    RunID,
+    RunType,
+)
 
 
 @pytest.fixture
@@ -59,8 +65,7 @@ def mock_services():
     services.metrics.increment_counter = MagicMock()
     # Storage with clear methods (part of StoragePort contract)
     services.storage = MagicMock()
-    services.storage.clear_csv = MagicMock(return_value=0)
-    services.storage.clear_delta = MagicMock(return_value=0)
+    services.storage.purge_target = MagicMock(return_value=0)
     return services
 
 
@@ -362,14 +367,12 @@ class TestPipelineRunnerClearExports:
         mock_logger,
         mock_lock_manager,
     ):
-        """Test _clear_exports calls storage clear methods."""
-        # Create services with storage that has clear methods
+        """Test _clear_exports calls storage clearing methods."""
         services = MagicMock(spec=PipelineServices)
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=5)
-        services.storage.clear_delta = MagicMock(return_value=1)
+        services.storage.purge_target = MagicMock(return_value=0)
 
         runner = PipelineRunner(
             config=pipeline_config,
@@ -384,9 +387,18 @@ class TestPipelineRunnerClearExports:
 
         runner._clear_exports()
 
-        # Should clear both silver and gold tables
-        assert services.storage.clear_csv.call_count == 2
-        assert services.storage.clear_delta.call_count == 2
+        # Should call purge_target for both layers
+        assert services.storage.purge_target.call_count == 2
+
+        # Verify calls for silver layer
+        services.storage.purge_target.assert_any_call(
+            LayerType.SILVER, "test_silver"
+        )
+
+        # Verify calls for gold layer (default name)
+        services.storage.purge_target.assert_any_call(
+            LayerType.GOLD, "chembl.activity"
+        )
 
     def test_clear_exports_logs_when_files_cleared(
         self,
@@ -404,8 +416,8 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=3)
-        services.storage.clear_delta = MagicMock(return_value=2)
+        # Mock that files were cleared
+        services.storage.purge_target = MagicMock(return_value=5)
 
         runner = PipelineRunner(
             config=pipeline_config,
@@ -420,10 +432,16 @@ class TestPipelineRunnerClearExports:
 
         runner._clear_exports()
 
-        # Should log when files are cleared
-        info_calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("Cleared CSV" in call for call in info_calls)
-        assert any("Cleared Delta" in call for call in info_calls)
+        # Should log twice (once for Silver, once for Gold)
+        assert mock_logger.info.call_count == 2
+        mock_logger.info.assert_any_call(
+            "Purged Silver layer targets",
+            extra={"target": "test_silver", "count": 5},
+        )
+        mock_logger.info.assert_any_call(
+            "Purged Gold layer targets",
+            extra={"target": "chembl.activity", "count": 5},
+        )
 
     def test_clear_exports_no_log_when_nothing_cleared(
         self,
@@ -441,8 +459,7 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=0)
-        services.storage.clear_delta = MagicMock(return_value=0)
+        services.storage.purge_target = MagicMock(return_value=0)
 
         mock_logger.reset_mock()
 
@@ -459,10 +476,8 @@ class TestPipelineRunnerClearExports:
 
         runner._clear_exports()
 
-        # Should not log about cleared files
-        info_calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert not any("Cleared CSV" in call for call in info_calls)
-        assert not any("Cleared Delta" in call for call in info_calls)
+        # Should not log info
+        mock_logger.info.assert_not_called()
 
     def test_clear_exports_uses_default_gold_table(
         self,
@@ -489,8 +504,7 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=0)
-        services.storage.clear_delta = MagicMock(return_value=0)
+        services.storage.purge_target = MagicMock(return_value=0)
 
         runner = PipelineRunner(
             config=config,
@@ -505,7 +519,8 @@ class TestPipelineRunnerClearExports:
 
         runner._clear_exports()
 
-        # Should use default gold table: provider.entity_type
-        call_args = [call[0][0] for call in services.storage.clear_csv.call_args_list]
-        assert "chembl.silver_activity" in call_args
-        assert "chembl.activity" in call_args  # Default gold table
+        # Should use default gold table name
+        expected_gold_table = "chembl.activity"
+        services.storage.purge_target.assert_any_call(
+            LayerType.GOLD, expected_gold_table
+        )

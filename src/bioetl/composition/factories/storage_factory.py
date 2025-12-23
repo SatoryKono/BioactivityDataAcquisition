@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     import structlog
 
-    from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
+    from bioetl.domain.types import ArrowSchema, BatchID, LayerType, RunID, RunType
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -100,55 +100,27 @@ class StorageAdapter:
             mode=mode,
         )
 
-    def clear_csv(self, table_name: str | None = None) -> int:
-        """Clear CSV export files for Silver and Gold layers.
+    def purge_target(self, layer: LayerType, target: str | None = None) -> int:
+        """Purge data for a specific layer and target."""
+        purged_count = 0
 
-        Should be called at the start of a pipeline run to ensure
-        fresh CSV exports without duplicates from previous runs.
+        if layer == LayerType.SILVER:
+            # Purge Delta table
+            purged_count += self.silver.clear(target)
+            # Purge CSV export if configured
+            if self.silver.csv_exporter:
+                deleted = self.silver.csv_exporter.clear(target)
+                purged_count += len(deleted)
 
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
+        elif layer == LayerType.GOLD:
+            # Purge Delta table
+            purged_count += self.gold.clear(target)
+            # Purge CSV export if configured
+            if self.gold.csv_exporter:
+                deleted = self.gold.csv_exporter.clear(target)
+                purged_count += len(deleted)
 
-        Returns:
-            Total number of files deleted.
-        """
-        deleted_count = 0
-
-        # Clear Silver CSV if exporter is configured
-        if self.silver.csv_exporter:
-            deleted = self.silver.csv_exporter.clear(table_name)
-            deleted_count += len(deleted)
-
-        # Clear Gold CSV if exporter is configured
-        if self.gold.csv_exporter:
-            deleted = self.gold.csv_exporter.clear(table_name)
-            deleted_count += len(deleted)
-
-        return deleted_count
-
-    def clear_delta(self, table_name: str | None = None) -> int:
-        """Clear Delta tables for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh data without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear Delta table for this table.
-                       If None, clear all Delta tables.
-
-        Returns:
-            Total number of tables cleared.
-        """
-        cleared_count = 0
-
-        # Clear Silver Delta table
-        cleared_count += self.silver.clear(table_name)
-
-        # Clear Gold Delta table
-        cleared_count += self.gold.clear(table_name)
-
-        return cleared_count
+        return purged_count
 
     async def aclose(self) -> None:
         """Close resources.

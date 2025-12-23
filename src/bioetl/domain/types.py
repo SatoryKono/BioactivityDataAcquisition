@@ -243,3 +243,11 @@ class DQStatus(str, Enum):
 
     REPROCESSED = "REPROCESSED"
     """Successfully reprocessed and moved to Silver."""
+
+
+class LayerType(str, Enum):
+    """Data layer type (Medallion Architecture)."""
+
+    BRONZE = "BRONZE"
+    SILVER = "SILVER"
+    GOLD = "GOLD"

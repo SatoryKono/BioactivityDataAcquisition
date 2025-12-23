@@ -16,6 +16,7 @@ from bioetl.domain.types import (
     ArrowSchema,
     BatchID,
     HealthStatus,
+    LayerType,
     RunID,
     RunType,
 )
@@ -212,33 +213,23 @@ class StoragePort(Protocol):
         """Gracefully close the storage connection and release resources."""
         ...
 
-    def clear_csv(self, table_name: str | None = None) -> int:
-        """Clear CSV export files for Silver and Gold layers.
+    def purge_target(
+        self,
+        layer: LayerType,
+        target: str | None = None,
+    ) -> int:
+        """Purge data for a specific layer and target.
 
-        Should be called at the start of a pipeline run to ensure
-        fresh CSV exports without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Total number of files deleted.
-        """
-        ...
-
-    def clear_delta(self, table_name: str | None = None) -> int:
-        """Clear Delta tables for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh data without duplicates from previous runs.
+        This method abstracts the cleanup process (e.g., deleting Delta tables,
+        clearing CSV exports) for a given layer.
 
         Args:
-            table_name: If provided, only clear Delta table for this table.
-                       If None, clear all Delta tables.
+            layer: The layer to purge (SILVER or GOLD).
+            target: Optional target identifier (e.g. table name).
+                   If None, purges all targets in the layer.
 
         Returns:
-            Total number of tables cleared.
+            Total number of items (files/tables) purged.
         """
         ...
 
