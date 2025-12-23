@@ -82,6 +82,11 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
                     <PublicationType>Journal Article</PublicationType>
                 </PublicationTypeList>
                 <ELocationID EIdType="doi">10.1234/test.2023</ELocationID>
+                <ArticleDate DateType="Electronic">
+                    <Year>2023</Year>
+                    <Month>03</Month>
+                    <Day>10</Day>
+                </ArticleDate>
             </Article>
             <MedlineJournalInfo>
                 <Country>United States</Country>
