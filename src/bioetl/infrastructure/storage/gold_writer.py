@@ -139,6 +139,10 @@ class GoldWriter:
         """
         arrow_data = pa.Table.from_pylist(records)
 
+        # Enforce deterministic column order
+        column_names = sorted(arrow_data.column_names)
+        arrow_data = arrow_data.select(column_names)
+
         # Check if schema needs sanitization (contains null types anywhere)
         # Use lowercase check since PyArrow may print "null" or "Null"
         schema_str = str(arrow_data.schema).lower()

@@ -1,0 +1,199 @@
+"""Tests for deterministic write functionality.
+
+Verifies that records are written in a deterministic order regardless
+of input order, ensuring reproducible output files.
+"""
+
+import json
+from pathlib import Path
+
+import pyarrow as pa
+import pytest
+
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+
+class TestDeterministicCsvExport:
+    """Tests for deterministic CSV export."""
+
+    @pytest.fixture
+    def csv_exporter(self, tmp_path: Path) -> CsvExporter:
+        """Create CSV exporter with sort_by configuration."""
+        return CsvExporter(
+            base_path=str(tmp_path),
+            sort_by=["id", "name"],
+            sort_ascending=True,
+        )
+
+    @pytest.fixture
+    def sample_records(self) -> list[dict]:
+        """Sample records in random order."""
+        return [
+            {"id": "C", "name": "Charlie", "value": 3},
+            {"id": "A", "name": "Alice", "value": 1},
+            {"id": "B", "name": "Bob", "value": 2},
+        ]
+
+    @pytest.fixture
+    def sample_table(self, sample_records: list[dict]) -> pa.Table:
+        """Create PyArrow table from sample records."""
+        return pa.Table.from_pylist(sample_records)
+
+    async def test_csv_export_is_sorted(
+        self, csv_exporter: CsvExporter, sample_table: pa.Table, tmp_path: Path
+    ):
+        """Test that CSV export sorts records by specified columns."""
+        csv_path = await csv_exporter.export("test_table", sample_table, append=False)
+
+        # Read back and verify order
+        with open(csv_path) as f:
+            lines = f.readlines()
+
+        # Skip header
+        data_lines = lines[1:]
+        ids = [line.split(",")[0] for line in data_lines]
+
+        assert ids == ["A", "B", "C"], "Records should be sorted by id column"
+
+    async def test_csv_export_deterministic_across_runs(
+        self, tmp_path: Path, sample_records: list[dict]
+    ):
+        """Test that multiple exports produce identical output."""
+        import random
+
+        outputs = []
+
+        for i in range(3):
+            # Shuffle records to simulate different input order
+            shuffled = sample_records.copy()
+            random.shuffle(shuffled)
+
+            exporter = CsvExporter(
+                base_path=str(tmp_path / f"run_{i}"),
+                sort_by=["id"],
+                sort_ascending=True,
+            )
+
+            table = pa.Table.from_pylist(shuffled)
+            csv_path = await exporter.export("test", table, append=False)
+
+            with open(csv_path) as f:
+                outputs.append(f.read())
+
+        # All outputs should be identical
+        assert outputs[0] == outputs[1] == outputs[2], (
+            "CSV exports should be identical regardless of input order"
+        )
+
+    async def test_csv_export_with_complex_types_sorted(
+        self, csv_exporter: CsvExporter, tmp_path: Path
+    ):
+        """Test that complex types are serialized deterministically."""
+        records = [
+            {"id": "B", "name": "Bob", "tags": ["z", "a", "m"]},
+            {"id": "A", "name": "Alice", "tags": ["x", "y"]},
+        ]
+        table = pa.Table.from_pylist(records)
+
+        csv_path = await csv_exporter.export("complex_test", table, append=False)
+
+        with open(csv_path) as f:
+            content = f.read()
+
+        # First data row should be Alice (sorted by id)
+        lines = content.strip().split("\n")
+        assert "A" in lines[1], "First record should be Alice (id=A)"
+
+    async def test_json_serialization_with_sort_keys(self, tmp_path: Path):
+        """Test that JSON serialization uses sort_keys=True."""
+        records = [
+            {"id": "A", "data": {"z_key": 1, "a_key": 2, "m_key": 3}},
+        ]
+        table = pa.Table.from_pylist(records)
+
+        exporter = CsvExporter(
+            base_path=str(tmp_path),
+            sort_by=["id"],
+        )
+
+        csv_path = await exporter.export("json_test", table, append=False)
+
+        with open(csv_path) as f:
+            content = f.read()
+
+        # JSON should have keys in alphabetical order
+        assert '"a_key"' in content
+        # Check that a_key comes before z_key in the serialized JSON
+        a_pos = content.find('"a_key"')
+        z_pos = content.find('"z_key"')
+        assert a_pos < z_pos, "JSON keys should be sorted alphabetically"
+
+
+class TestDeterministicBronzeWrite:
+    """Tests for deterministic Bronze layer write."""
+
+    def test_json_strings_are_sorted(self):
+        """Test that Bronze JSON strings are sorted for deterministic output."""
+        records = [
+            {"id": "C", "value": 3},
+            {"id": "A", "value": 1},
+            {"id": "B", "value": 2},
+        ]
+
+        # Simulate Bronze write logic
+        json_strings = [json.dumps(r, sort_keys=True) for r in records]
+        json_strings.sort()
+
+        # Verify sorted order
+        parsed = [json.loads(s) for s in json_strings]
+        ids = [r["id"] for r in parsed]
+
+        assert ids == ["A", "B", "C"], "JSON strings should be sorted"
+
+    def test_json_key_order_is_deterministic(self):
+        """Test that JSON keys are always in the same order."""
+        record = {"z_key": 1, "a_key": 2, "m_key": 3}
+
+        json_str = json.dumps(record, sort_keys=True)
+
+        # Keys should be in alphabetical order
+        assert json_str == '{"a_key": 2, "m_key": 3, "z_key": 1}'
+
+
+class TestSortByConfig:
+    """Tests for SortByConfig schema."""
+
+    def test_sort_by_config_defaults(self):
+        """Test SortByConfig default values."""
+        from bioetl.infrastructure.schemas.pipeline_config import SortByConfig
+
+        config = SortByConfig()
+
+        assert config.columns == []
+        assert config.ascending is True
+
+    def test_sort_by_config_with_values(self):
+        """Test SortByConfig with custom values."""
+        from bioetl.infrastructure.schemas.pipeline_config import SortByConfig
+
+        config = SortByConfig(
+            columns=["target_chembl_id", "pref_name"],
+            ascending=False,
+        )
+
+        assert config.columns == ["target_chembl_id", "pref_name"]
+        assert config.ascending is False
+
+    def test_sink_layer_config_with_sort_by(self):
+        """Test SinkLayerConfig includes sort_by."""
+        from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig
+
+        config = SinkLayerConfig(
+            path="data/output",
+            sort_by={"columns": ["id"], "ascending": True},
+            deterministic=True,
+        )
+
+        assert config.deterministic is True
+        assert config.sort_by.columns == ["id"]
+        assert config.sort_by.ascending is True

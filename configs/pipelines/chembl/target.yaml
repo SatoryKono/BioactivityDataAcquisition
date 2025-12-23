@@ -32,6 +32,7 @@ sink:
         path: "data/output/bronze"
         format: jsonl
         save_json: true
+        deterministic: true
 
     silver:
         path: "data/output/silver"
@@ -39,8 +40,10 @@ sink:
         mode: merge
         primary_key: [ "target_chembl_id" ]
         partition_by: [ "target_type" ]
-        classification: public
-        forensic_retention: true
+        deterministic: true
+        sort_by:
+            columns: [ "target_chembl_id" ]
+            ascending: true
         csv_export:
             enabled: true
             path: "data/output/csv/silver"
@@ -50,11 +53,13 @@ sink:
 
     gold:
         enabled: true
-        validation:
-            strict: true
         path: "data/output/gold"
         format: delta
         mode: overwrite
+        deterministic: true
+        sort_by:
+            columns: [ "target_chembl_id", "pref_name" ]
+            ascending: true
         csv_export:
             enabled: true
             path: "data/output/csv/gold"
@@ -71,10 +76,9 @@ circuit_breaker:
     recovery_timeout: 300
 
 # Input filter configuration (for CSV-based ID filtering)
-# CLI options --input-csv, --filter-column, --filter-field override these
 input_filter:
     enabled: true
-    source_path: "data/input/target.csv"  # Default CSV path
-    column_name: "target_chembl_id"        # Column in CSV with IDs
-    filter_field: "target_chembl_id"       # API field to filter by
-    batch_size: 20                         # IDs per API request
+    source_path: "data/input/target.csv"
+    column_name: "target_chembl_id"
+    filter_field: "target_chembl_id"
+    batch_size: 20

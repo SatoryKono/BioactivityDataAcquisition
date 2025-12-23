@@ -11,6 +11,7 @@ import zstandard as zstd
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 # Default test run metadata
 TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
@@ -453,3 +454,57 @@ class TestDeltaWriter:
                 primary_keys=["id"],
                 schema=MagicMock(),
             )
+
+
+@pytest.mark.unit
+class TestGoldWriter:
+    """Test GoldWriter functionality."""
+
+    @pytest.fixture
+    def mock_gold_writer_deps(self):
+        """Fixture for mocking GoldWriter dependencies."""
+        with (
+            patch(
+                "bioetl.infrastructure.storage.gold_writer.DeltaTable"
+            ) as mock_delta_table,
+            patch(
+                "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+            ) as mock_write_deltalake,
+        ):
+            yield mock_delta_table, mock_write_deltalake
+
+    async def test_gold_writer_sorts_columns(self, mock_gold_writer_deps):
+        """Test that GoldWriter sorts columns alphabetically in _to_arrow_table."""
+        _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
+
+        writer = GoldWriter(base_path="/tmp/gold")
+
+        # Records with mixed key order
+        records = [
+            {"b": 2, "a": 1, "c": 3},
+            {"c": 30, "b": 20, "a": 10},
+        ]
+
+        await writer.write_gold(
+            table_name="test_table",
+            records=records,
+            mode="overwrite",
+        )
+
+        # Verify write_deltalake was called
+        assert mock_write_deltalake.called
+
+        # Get the arrow table passed to write_deltalake
+        call_args = mock_write_deltalake.call_args
+        kwargs = call_args.kwargs
+
+        # data might be a RecordBatchReader
+        data = kwargs.get("data")
+        assert data is not None
+
+        schema = data.schema
+        column_names = schema.names
+
+        assert column_names == ["a", "b", "c"], (
+            f"Expected sorted columns ['a', 'b', 'c'], got {column_names}"
+        )

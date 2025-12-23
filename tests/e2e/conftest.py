@@ -1,6 +1,18 @@
-"""Fixtures for E2E tests with real Docker infrastructure."""
+"""Fixtures for E2E tests with real Docker infrastructure.
+
+E2E тесты предполагают, что Docker-сервисы УЖЕ запущены через:
+    docker compose -f docker-compose.test.yml up -d
+
+Или через Makefile:
+    make test-e2e       # Запускает Docker, тесты, останавливает Docker
+    make test-e2e-local # Использует уже запущенные сервисы
+"""
 
 import os
+import socket
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -11,92 +23,128 @@ if TYPE_CHECKING:
     import redis.asyncio as aioredis
 
 
+# Конфигурация E2E сервисов
+E2E_MINIO_ENDPOINT = os.environ.get("BIOETL_S3_ENDPOINT", "http://localhost:9000")
+E2E_MINIO_ACCESS_KEY = os.environ.get("BIOETL_S3_ACCESS_KEY", "minioadmin")
+E2E_MINIO_SECRET_KEY = os.environ.get("BIOETL_S3_SECRET_KEY", "minioadmin")
+E2E_REDIS_URL = os.environ.get("BIOETL_REDIS_URL", "redis://localhost:16379")
+
+
+def _wait_for_service(check_fn: callable, timeout: float = 30.0, pause: float = 0.5):
+    """Ожидание готовности сервиса."""
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            if check_fn():
+                return True
+        except Exception:
+            pass
+        time.sleep(pause)
+    return False
+
+
+def _is_minio_ready() -> bool:
+    """Проверка доступности MinIO."""
+    try:
+        urllib.request.urlopen(f"{E2E_MINIO_ENDPOINT}/minio/health/live", timeout=2)
+        return True
+    except (urllib.error.URLError, ConnectionError, OSError):
+        return False
+
+
+def _is_redis_ready() -> bool:
+    """Проверка доступности Redis."""
+    try:
+        host = "localhost"
+        port = 16379
+        if "://" in E2E_REDIS_URL:
+            url_part = E2E_REDIS_URL.split("://")[1]
+            if ":" in url_part:
+                host, port_str = url_part.split(":")
+                port = int(port_str)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        sock.connect((host, port))
+        sock.close()
+        return True
+    except (OSError, ConnectionError):
+        return False
+
+
 @pytest.fixture(scope="session", autouse=True)
 def e2e_environment():
-    """Set up environment for E2E tests."""
-    # Set test environment variables
+    """Настройка окружения для E2E тестов."""
     os.environ["BIOETL_ENV"] = "dev"
     os.environ["BIOETL_TEST_MODE"] = "true"
-    os.environ["BIOETL_S3_ENDPOINT"] = "http://localhost:9000"
-    os.environ["BIOETL_S3_ACCESS_KEY"] = "minioadmin"
-    os.environ["BIOETL_S3_SECRET_KEY"] = "minioadmin"
-    os.environ["BIOETL_REDIS_URL"] = "redis://localhost:16379"
+    os.environ["BIOETL_S3_ENDPOINT"] = E2E_MINIO_ENDPOINT
+    os.environ["BIOETL_S3_ACCESS_KEY"] = E2E_MINIO_ACCESS_KEY
+    os.environ["BIOETL_S3_SECRET_KEY"] = E2E_MINIO_SECRET_KEY
+    os.environ["BIOETL_REDIS_URL"] = E2E_REDIS_URL
+
+    if not _wait_for_service(_is_minio_ready, timeout=30.0):
+        pytest.skip(
+            "MinIO недоступен. Запустите: docker compose -f docker-compose.test.yml up -d"
+        )
+
+    if not _wait_for_service(_is_redis_ready, timeout=30.0):
+        pytest.skip(
+            "Redis недоступен. Запустите: docker compose -f docker-compose.test.yml up -d"
+        )
 
     yield
 
-    # Cleanup settings cache after session
     try:
         from bioetl.infrastructure.config import get_settings
-
         get_settings.cache_clear()
     except ImportError:
         pass
 
 
-@pytest.fixture
-async def e2e_minio_client(minio_service) -> "boto3.client":
-    """Create MinIO client and ensure buckets exist for E2E tests."""
+@pytest.fixture(scope="session")
+def e2e_minio_client(e2e_environment) -> "boto3.client":
+    """Создание MinIO клиента и необходимых бакетов для E2E тестов."""
     import boto3
+    from botocore.config import Config
 
     client = boto3.client(
         "s3",
-        endpoint_url=minio_service,
-        aws_access_key_id="minioadmin",
-        aws_secret_access_key="minioadmin",
+        endpoint_url=E2E_MINIO_ENDPOINT,
+        aws_access_key_id=E2E_MINIO_ACCESS_KEY,
+        aws_secret_access_key=E2E_MINIO_SECRET_KEY,
+        config=Config(signature_version="s3v4"),
     )
 
-    # Create required buckets
     buckets = ["bronze", "silver", "gold", "checkpoints"]
     for bucket in buckets:
         try:
             client.create_bucket(Bucket=bucket)
         except client.exceptions.BucketAlreadyOwnedByYou:
-            pass  # Bucket already exists
+            pass
+        except client.exceptions.BucketAlreadyExists:
+            pass
         except Exception as e:
-            # In case of any other error, try to continue
             print(f"Warning: Could not create bucket {bucket}: {e}")
 
-    yield client
-
-    # Cleanup: Delete all objects and buckets (optional, for isolation)
-    # Note: Commented out to avoid accidental data loss during development
-    # for bucket in buckets:
-    #     try:
-    #         # Delete all objects in bucket
-    #         response = client.list_objects_v2(Bucket=bucket)
-    #         if "Contents" in response:
-    #             for obj in response["Contents"]:
-    #                 client.delete_object(Bucket=bucket, Key=obj["Key"])
-    #         # Delete bucket
-    #         client.delete_bucket(Bucket=bucket)
-    #     except Exception:
-    #         pass
+    return client
 
 
 @pytest.fixture
-async def e2e_redis_client(redis_service) -> "aioredis.Redis":
-    """Create Redis client for E2E tests with cleanup."""
+async def e2e_redis_client(e2e_environment) -> "aioredis.Redis":
+    """Создание Redis клиента для E2E тестов с очисткой."""
     import redis.asyncio as aioredis
 
-    client = aioredis.from_url(redis_service)
-
-    # Ensure clean state
+    client = aioredis.from_url(E2E_REDIS_URL)
     await client.flushdb()
 
     yield client
 
-    # Cleanup
     await client.flushdb()
     await client.aclose()
 
 
 @pytest.fixture
 def e2e_temp_storage(tmp_path: Path) -> dict[str, Path]:
-    """Create temporary directories for E2E test storage.
-
-    Returns:
-        dict: Paths for bronze, silver, gold, and checkpoints
-    """
+    """Создание временных директорий для хранилища E2E тестов."""
     bronze_path = tmp_path / "bronze"
     silver_path = tmp_path / "silver"
     gold_path = tmp_path / "gold"
@@ -117,27 +165,21 @@ def e2e_temp_storage(tmp_path: Path) -> dict[str, Path]:
 
 @pytest.fixture
 async def e2e_cleanup_infrastructure(e2e_redis_client):
-    """Ensure infrastructure state is cleaned between E2E tests."""
-    # Pre-test cleanup
+    """Обеспечение чистого состояния инфраструктуры между E2E тестами."""
     await e2e_redis_client.flushdb()
 
     yield
 
-    # Post-test cleanup
     await e2e_redis_client.flushdb()
 
-    # Clear S3 client pool
     try:
         from bioetl.infrastructure.storage.s3_client_pool import S3ClientPool
-
         S3ClientPool.clear_pool()
     except ImportError:
         pass
 
-    # Clear settings cache
     try:
         from bioetl.infrastructure.config import get_pipeline_config, get_settings
-
         get_settings.cache_clear()
         get_pipeline_config.cache_clear()
     except ImportError:
@@ -146,13 +188,25 @@ async def e2e_cleanup_infrastructure(e2e_redis_client):
 
 @pytest.fixture
 def e2e_pipeline_limit() -> int:
-    """Limit number of records for E2E tests to keep them fast."""
+    """Лимит записей для E2E тестов."""
     return 10
 
 
 @pytest.fixture
 def e2e_vcr_disabled():
-    """Ensure VCR is disabled for E2E tests (we want real HTTP calls)."""
-    # E2E tests should make real HTTP calls, not use VCR cassettes
-    # This fixture serves as a marker/documentation
+    """Маркер отключения VCR для E2E тестов."""
     pass
+
+
+# Фикстуры для совместимости с pytest-docker API
+# Используются тестами, которые ожидают URL сервисов
+@pytest.fixture(scope="session")
+def minio_service(e2e_environment) -> str:
+    """URL MinIO сервиса для E2E тестов (совместимость с pytest-docker)."""
+    return E2E_MINIO_ENDPOINT
+
+
+@pytest.fixture(scope="session")
+def redis_service(e2e_environment) -> str:
+    """URL Redis сервиса для E2E тестов (совместимость с pytest-docker)."""
+    return E2E_REDIS_URL
