@@ -12,19 +12,16 @@ Documentation: https://www.uniprot.org/help/api
 """
 
 import asyncio
-import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
-from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
-
-logger = logging.getLogger(__name__)
 
 
 class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
@@ -38,6 +35,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     def __init__(
         self,
         http_client: UnifiedHTTPClient,
+        logger: LoggerPort,
         api_key: str | None = None,
         base_url: str = "https://rest.uniprot.org",
         strict_error_handling: bool = False,
@@ -46,11 +44,12 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
 
         Args:
             http_client: Injected UnifiedHTTPClient
+            logger: LoggerPort instance for structured logging
             api_key: UniProt API key (optional)
             base_url: UniProt REST API base URL
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
         """
-        super().__init__(http_client)
+        super().__init__(http_client, logger)
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.strict_error_handling = strict_error_handling
@@ -163,8 +162,8 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         self, entity_type: str, query: str | None, cursor: str | None = None
     ) -> None:
         """Handle fetch errors centrally."""
-        log_adapter_error(
-            logger,
+        self.logger.error(
+            f"uniprot {entity_type} fetch failed",
             provider="uniprot",
             operation=f"{entity_type} fetch",
             query=query,
@@ -198,7 +197,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
 
         # Watermark not supported for features
         if watermark:
-            logger.warning("Watermark is not supported for feature fetch, ignoring.")
+            self.logger.warning("Watermark is not supported for feature fetch, ignoring.")
 
         features = await self._get_features_json(query)
         for i, feature in enumerate(features):
@@ -250,7 +249,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
 
         # Watermark not supported for sequences in this mode
         if watermark:
-            logger.warning("Watermark is not supported for sequence fetch, ignoring.")
+            self.logger.warning("Watermark is not supported for sequence fetch, ignoring.")
 
         fetched = 0
         async for seq_record in self._get_parsed_sequences(query):

@@ -10,8 +10,14 @@ from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
 
 @pytest.fixture
-def pubchem_client():
-    client = PubChemClient(rate=100)  # High rate to avoid delays
+def mock_logger():
+    """Create a mock logger for testing."""
+    return MagicMock()
+
+
+@pytest.fixture
+def pubchem_client(mock_logger):
+    client = PubChemClient(logger=mock_logger, rate=100)  # High rate to avoid delays
     yield client
     # Cleanup logic if necessary (though close() calls shutdown on threadpool)
     client.thread_pool.shutdown(wait=False)

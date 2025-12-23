@@ -4,6 +4,8 @@ Tests adapter initialization, configuration, and basic functionality.
 Uses mocking for external API calls.
 """
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -18,43 +20,48 @@ from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 class TestChemblAdapter:
     """Test ChEMBL adapter initialization and configuration."""
 
-    def test_adapter_creation(self):
+    @pytest.fixture
+    def mock_logger(self):
+        """Create a mock logger."""
+        return MagicMock()
+
+    def test_adapter_creation(self, mock_logger):
         """Test ChEMBL adapter can be created."""
         bucket = TokenBucket(rate=10.0, capacity=10)
         cb = CircuitBreaker(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client)
+        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
 
         assert adapter.provider_name == "chembl"
         assert adapter.batch_size == 1000
 
-    def test_adapter_with_custom_batch_size(self):
+    def test_adapter_with_custom_batch_size(self, mock_logger):
         """Test ChEMBL adapter with custom batch size."""
         bucket = TokenBucket(rate=10.0, capacity=10)
         cb = CircuitBreaker(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client, batch_size=500)
+        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger, batch_size=500)
 
         assert adapter.batch_size == 500
 
-    def test_entity_mapping(self):
+    def test_entity_mapping(self, mock_logger):
         """Test entity type to resource URL mapping."""
         bucket = TokenBucket(rate=10.0, capacity=10)
         cb = CircuitBreaker(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client)
+        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
 
         # Valid entity types
         assert "activity" in adapter._get_resource_url("activity")
         assert "molecule" in adapter._get_resource_url("compound")
         assert "target" in adapter._get_resource_url("target")
 
-    def test_invalid_entity_type(self):
+    def test_invalid_entity_type(self, mock_logger):
         """Test error handling for invalid entity type."""
         bucket = TokenBucket(rate=10.0, capacity=10)
         cb = CircuitBreaker(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client)
+        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
 
         with pytest.raises(ValueError, match="Unknown entity type"):
             adapter._get_resource_url("invalid_entity")
@@ -64,29 +71,34 @@ class TestChemblAdapter:
 class TestPubChemClient:
     """Test PubChem client initialization and configuration."""
 
-    def test_client_creation(self):
+    @pytest.fixture
+    def mock_logger(self):
+        """Create a mock logger."""
+        return MagicMock()
+
+    def test_client_creation(self, mock_logger):
         """Test PubChem client can be created."""
-        client = PubChemClient()
+        client = PubChemClient(logger=mock_logger)
 
         assert client.provider_name == "pubchem"
         assert client.rate_limiter.rate == 5.0  # 5 req/sec per RULES.md
 
-    def test_client_with_custom_rate(self):
+    def test_client_with_custom_rate(self, mock_logger):
         """Test PubChem client with custom rate limit."""
-        client = PubChemClient(rate=10.0)
+        client = PubChemClient(rate=10.0, logger=mock_logger)
 
         assert client.rate_limiter.rate == 10.0
 
-    def test_thread_pool_created(self):
+    def test_thread_pool_created(self, mock_logger):
         """Test thread pool is created for sync operations."""
-        client = PubChemClient(max_workers=2)
+        client = PubChemClient(max_workers=2, logger=mock_logger)
 
         assert client.thread_pool is not None
         assert client.thread_pool._max_workers == 2
 
-    async def test_compound_to_dict(self):
+    async def test_compound_to_dict(self, mock_logger):
         """Test compound conversion to dictionary."""
-        client = PubChemClient()
+        client = PubChemClient(logger=mock_logger)
 
         # Mock compound object
         class MockCompound:
@@ -125,32 +137,35 @@ class TestUniProtClient:
         cb = CircuitBreaker(provider="uniprot")
         return UnifiedHTTPClient(bucket, cb)
 
-    def test_client_creation_without_api_key(self, http_client):
+    @pytest.fixture
+    def mock_logger(self):
+        """Create a mock logger."""
+        return MagicMock()
+
+    def test_client_creation_without_api_key(self, http_client, mock_logger):
         """Test UniProt client without API key."""
-        client = UniProtClient(http_client=http_client)
+        client = UniProtClient(http_client=http_client, logger=mock_logger)
 
         assert client.provider_name == "uniprot"
         assert client.api_key is None
 
-    def test_client_creation_with_api_key(self, http_client):
+    def test_client_creation_with_api_key(self, http_client, mock_logger):
         """Test UniProt client with API key."""
-        client = UniProtClient(http_client=http_client, api_key="test_key")
+        client = UniProtClient(http_client=http_client, logger=mock_logger, api_key="test_key")
 
         assert client.api_key == "test_key"
 
-    def test_client_with_custom_base_url(self, http_client):
+    def test_client_with_custom_base_url(self, http_client, mock_logger):
         """Test UniProt client with custom base URL."""
-        from unittest.mock import MagicMock
-
-        http_client = MagicMock()
+        mock_http = MagicMock()
         custom_url = "https://custom.uniprot.org"
-        client = UniProtClient(http_client=http_client, base_url=custom_url)
+        client = UniProtClient(http_client=mock_http, logger=mock_logger, base_url=custom_url)
 
         assert client.base_url == custom_url
 
-    def test_fasta_parsing(self, http_client):
+    def test_fasta_parsing(self, http_client, mock_logger):
         """Test FASTA format parsing."""
-        client = UniProtClient(http_client=http_client)
+        client = UniProtClient(http_client=http_client, logger=mock_logger)
 
         fasta_text = """>sp|P04637|P53_HUMAN Cellular tumor antigen p53
 MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP

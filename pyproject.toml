@@ -187,33 +187,8 @@ module = [
 ]
 ignore_missing_imports = true
 
-# Infrastructure layer is more lenient - interacts with many external libs
-[[tool.mypy.overrides]]
-module = [
-    "bioetl.infrastructure.*",
-]
-ignore_errors = true
-
-# Composition layer bridges infrastructure and application
-[[tool.mypy.overrides]]
-module = [
-    "bioetl.composition.*",
-]
-ignore_errors = true
-
-# Interfaces layer
-[[tool.mypy.overrides]]
-module = [
-    "bioetl.interfaces.*",
-]
-ignore_errors = true
-
-# Application layer - needs some leniency for external types
-[[tool.mypy.overrides]]
-module = [
-    "bioetl.application.*",
-]
-ignore_errors = true
+# Note: All layers now pass strict mypy checks.
+# ignore_errors was removed as part of architecture review (2025-12-23).
 
 # ============ RUFF ============
 [tool.ruff]

@@ -14,6 +14,8 @@ from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 
+from bioetl.domain.ports import LoggerPort
+
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, MetricsPort
@@ -28,6 +30,7 @@ class DataSourceCreator(Protocol):
         self,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
         metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
@@ -37,6 +40,7 @@ class DataSourceCreator(Protocol):
         Args:
             settings: Application settings
             pipeline_config: Pipeline configuration from YAML
+            logger: LoggerPort instance for structured logging
             filter_config: Optional input filter configuration
             metrics: Optional metrics port for recording filter statistics
             pipeline_name: Pipeline name for metrics labels
@@ -78,19 +82,23 @@ def _wrap_with_filter(
 def create_chembl_data_source(
     settings: Settings,
     _pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering."""
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
-    base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
+    base_adapter = DataSourceFactory.create(
+        "chembl", http_client=http_client, logger=logger
+    )
     return _wrap_with_filter(base_adapter, filter_config, metrics, pipeline_name)
 
 
 def create_pubchem_data_source(
     settings: Settings,
     _pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
@@ -100,6 +108,7 @@ def create_pubchem_data_source(
     data_source = DataSourceFactory.create(
         "pubchem",
         http_client=None,
+        logger=logger,
         rate=5.0,
         strict_error_handling=settings.strict_error_handling,
     )
@@ -109,6 +118,7 @@ def create_pubchem_data_source(
 def create_uniprot_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
@@ -119,6 +129,7 @@ def create_uniprot_data_source(
     data_source = DataSourceFactory.create(
         "uniprot",
         http_client=http_client,
+        logger=logger,
         base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
         strict_error_handling=settings.strict_error_handling,
     )
@@ -128,6 +139,7 @@ def create_uniprot_data_source(
 def create_pubmed_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
@@ -148,6 +160,7 @@ def create_pubmed_data_source(
 
     data_source = PubMedAdapter(
         http_client=http_client,
+        logger=logger,
         email=email,
         api_key=api_key,
     )
@@ -167,10 +180,10 @@ class DataSourceRegistry:
     """
 
     _creators: ClassVar[dict[str, DataSourceCreator]] = {
-        "chembl": create_chembl_data_source,
-        "pubchem": create_pubchem_data_source,
-        "uniprot": create_uniprot_data_source,
-        "pubmed": create_pubmed_data_source,
+        "chembl": create_chembl_data_source,  # type: ignore[dict-item]
+        "pubchem": create_pubchem_data_source,  # type: ignore[dict-item]
+        "uniprot": create_uniprot_data_source,  # type: ignore[dict-item]
+        "pubmed": create_pubmed_data_source,  # type: ignore[dict-item]
     }
 
     @classmethod
