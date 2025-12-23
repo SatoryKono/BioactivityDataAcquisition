@@ -14,6 +14,9 @@ from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
+from bioetl.application.pipelines.chembl.target_component import (
+    ChEMBLTargetComponentPipeline,
+)
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
@@ -24,6 +27,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLAssayGoldSchema,
     ChEMBLDocumentGoldSchema,
     ChEMBLMoleculeGoldSchema,
+    ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
@@ -34,6 +38,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_DOCUMENT_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
+    CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
@@ -77,6 +82,15 @@ chembl_target_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_TARGET_SCHEMA,
     gold_schema=ChEMBLTargetGoldSchema,
+)
+
+# ChEMBL Target Component Pipeline
+chembl_target_component_factory = GenericPipelineFactory(
+    pipeline_name="chembl_target_component",
+    pipeline_class=ChEMBLTargetComponentPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
+    gold_schema=ChEMBLTargetComponentGoldSchema,
 )
 
 # ChEMBL Molecule Pipeline
@@ -133,6 +147,7 @@ def register_all_pipelines() -> None:
     PipelineRegistry.register_factory(chembl_assay_factory)
     PipelineRegistry.register_factory(chembl_document_factory)
     PipelineRegistry.register_factory(chembl_target_factory)
+    PipelineRegistry.register_factory(chembl_target_component_factory)
     PipelineRegistry.register_factory(chembl_molecule_factory)
     PipelineRegistry.register_factory(pubchem_compound_factory)
     PipelineRegistry.register_factory(uniprot_protein_factory)
@@ -155,6 +170,7 @@ __all__ = [
     "chembl_assay_factory",
     "chembl_document_factory",
     "chembl_molecule_factory",
+    "chembl_target_component_factory",
     "chembl_target_factory",
     "is_registered",
     "pubchem_compound_factory",

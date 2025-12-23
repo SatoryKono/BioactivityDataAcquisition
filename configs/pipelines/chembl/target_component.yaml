@@ -1,0 +1,70 @@
+# configs/pipelines/chembl/target_component.yaml
+# Конфигурация пайплайна для сущности Target Component (ChEMBL).
+
+pipeline_name: chembl_target_component
+provider: chembl
+entity_type: target_component
+version: "1.0.0"
+description: "ChEMBL Target Components (protein sequences, etc.)"
+
+primary_keys: ["component_id"]
+silver_table: chembl_target_component
+gold_table: chembl_target_component
+
+# Ссылка на файл с конфигурацией источника данных
+source_file: ../../sources/chembl.yaml
+
+batch_size: 1000
+checkpoint_interval: 1000
+
+source:
+    load_strategy: full
+
+sink:
+    bronze:
+        path: data/bronze/chembl/target_component
+        format: jsonl
+        save_json: true
+
+    silver:
+        path: data/silver/chembl/target_component
+        format: delta
+        partition_by: ["organism"]
+        mode: merge
+        csv_export:
+            enabled: true
+            path: "data/output/csv/silver"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+    gold:
+        path: data/gold/chembl/target_component
+        format: delta
+        mode: overwrite
+        csv_export:
+            enabled: true
+            path: "data/output/csv/gold"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+gold_filters:
+    required_fields: ["accession"]
+    columns:
+        component_type: ["PROTEIN"]
+
+dq_rules:
+    soft_fail_threshold: 0.05
+    hard_fail_threshold: 0.20
+
+circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+
+input_filter:
+    enabled: true
+    source_path: "data/input/target_component.csv"
+    column_name: "component_id"
+    filter_field: "component_id"
+    batch_size: 100

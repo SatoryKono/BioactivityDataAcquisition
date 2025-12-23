@@ -8,6 +8,9 @@ import pytest
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
+from bioetl.application.pipelines.chembl.target_component_transformer import (
+    TargetComponentTransformer,
+)
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
@@ -344,7 +347,11 @@ class TestTargetTransformer:
                     "component_type": "PROTEIN",
                     "target_component_xrefs": [
                         {"xref_id": "Q12809", "xref_src_db": "UniProt"},
-                        {"xref_id": "HGNC:6251", "xref_name": "KCNH2", "xref_src_db": "HGNC"},
+                        {
+                            "xref_id": "HGNC:6251",
+                            "xref_name": "KCNH2",
+                            "xref_src_db": "HGNC",
+                        },
                     ],
                 },
                 {
@@ -408,3 +415,62 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record)
 
         assert result is not None
+
+
+@pytest.mark.unit
+class TestTargetComponentTransformer:
+    """Tests for TargetComponentTransformer."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create TargetComponentTransformer instance."""
+        return TargetComponentTransformer(provider="chembl")
+
+    @pytest.mark.asyncio
+    async def test_transform_valid_record(self, transformer, mock_context):
+        """Test transformation of valid target component record."""
+        record = {
+            "component_id": 123,
+            "accession": "P12345",
+            "component_type": "PROTEIN",
+            "description": "Test Component",
+            "organism": "Homo sapiens",
+            "tax_id": 9606,
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["component_id"] == 123
+        assert result["accession"] == "P12345"
+        assert result["component_type"] == "PROTEIN"
+        assert result["tax_id"] == 9606
+        assert "entity_id" in result
+        assert "content_hash" in result
+
+    @pytest.mark.asyncio
+    async def test_transform_missing_component_id(self, transformer, mock_context):
+        """Test transformation returns None when component_id is missing."""
+        record = {
+            "accession": "P12345",
+            "component_type": "PROTEIN",
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_with_json_fields(self, transformer, mock_context):
+        """Test transformation handles complex JSON fields."""
+        record = {
+            "component_id": 123,
+            "target_component_synonyms": [{"synonym": "Synonym1"}],
+            "target_component_xrefs": [{"xref_id": "X123"}],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert isinstance(result.get("target_component_synonyms"), str)
+        assert isinstance(result.get("target_component_xrefs"), str)

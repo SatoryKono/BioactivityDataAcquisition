@@ -117,6 +117,29 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
         strict = False  # Allow extra columns
 
 
+class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Target Component in Gold layer.
+
+    Validated fields for high-quality target component data export.
+    """
+
+    # Primary identifier
+    component_id: Series[int] = pa.Field(nullable=False)
+
+    # Key metadata
+    accession: Series[str] = pa.Field(nullable=True)
+    component_type: Series[str] = pa.Field(nullable=True)
+    organism: Series[str] = pa.Field(nullable=True)
+    tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        strict = False  # Allow extra columns
+
+
 class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Document in Gold layer.
 
