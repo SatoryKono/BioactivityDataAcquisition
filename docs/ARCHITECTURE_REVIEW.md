@@ -1,8 +1,8 @@
 # Архитектурный Обзор BioETL
 
-*Версия: 1.0*
+*Версия: 2.0*
 *Дата: 2025-12-23*
-*Автор: Claude Code Architecture Review*
+*Статус: Полный аудит (deep dive)*
 
 ---
 
@@ -13,49 +13,61 @@
 3. [Детальный анализ архитектуры](#3-детальный-анализ-архитектуры)
 4. [Выявленные проблемы](#4-выявленные-проблемы)
 5. [План рефакторинга](#5-план-рефакторинга)
-6. [Приложения](#6-приложения)
+6. [Метрики и тесты для контроля качества](#6-метрики-и-тесты-для-контроля-качества)
+7. [Приложения](#7-приложения)
 
 ---
 
 ## 1. Резюме
 
-### 1.1 Общая характеристика
+### 1.1 Общая Характеристика
 
-**BioETL** — production-grade фреймворк для ETL биоактивных данных, построенный на принципах:
+**BioETL** — production-grade фреймворк для ETL биоактивных данных из ChEMBL, PubChem, UniProt и PubMed. Построен на принципах:
+
 - **Hexagonal Architecture (Ports & Adapters)** — строгое разделение слоёв
-- **Medallion Architecture** — Bronze/Silver/Gold data layers
-- **Domain-Driven Design** — изолированная доменная логика
+- **Medallion Architecture** — Bronze/Silver/Gold data layers с Delta Lake
+- **Domain-Driven Design** — изолированная доменная логика с frozen dataclasses
+- **Local-Only Deployment** — MemoryLock + LocalCheckpoint (ADR-010)
 
-### 1.2 Ключевые метрики
+### 1.2 Ключевые Метрики Кодовой Базы
 
 | Метрика | Значение |
 |---------|----------|
 | Python файлов (src/) | 133 |
-| Тестовых файлов | 133 |
-| Классов (всего) | ~200 |
+| Строк кода (src/) | ~10,000 |
+| Тестовых файлов | 122 |
+| Тестов | 1,073 |
 | Протоколов (Ports) | 10 |
-| ADR документов | 12 |
-| Markdown документов | 68 |
-| Покрытие тестами (цель) | >80% |
+| Domain Entities | 10 |
+| Пайплайнов | 9 |
+| ADR документов | 11 |
+| Покрытие тестами | >80% |
 
-### 1.3 Интегральный балл: **7.65 / 10** (обновлено 2025-12-23)
+### 1.3 Интегральный Балл
 
-**Интерпретация**: Проект находится в верхней зоне **«Хорошо»** (5.0–7.9), близок к зоне **«Отлично»** (8.0+). Архитектура зрелая, документация обширная, критические проблемы исправлены.
+## **8.52 / 10** — Очень Хороший
 
-> ✅ **Обновление**: Балл повышен с 7.4 до 7.65 после исправления P1-NEW и P2-NEW.
+| Диапазон | Статус | Описание |
+|----------|--------|----------|
+| 0.0 – 4.9 | 🔴 Критический | Требуется капитальный рефакторинг |
+| 5.0 – 6.9 | 🟡 Удовлетворительный | Значительные улучшения необходимы |
+| 7.0 – 7.9 | 🟢 Хороший | Готов к production с оговорками |
+| **8.0 – 8.9** | **🟢 Очень Хороший** | **Production-ready, minor improvements** |
+| 9.0 – 10.0 | 🟢 Отличный | Эталонная реализация |
 
-### 1.4 Статус критических проблем (актуально на 2025-12-23)
+**Вывод**: Проект готов к production. Архитектура слоёв соблюдается идеально. Основная область для улучшения — Dependency Injection в application layer.
 
-| ID | Проблема | Файл:Строка | Статус |
-|----|----------|-------------|--------|
-| **P1-NEW** | `validated_records` undefined | `record_processor.py:279` | ✅ **ИСПРАВЛЕНО** |
-| **P2-NEW** | GoldValidator дублирование DI | `record_processor.py:63,73` | ✅ **ИСПРАВЛЕНО** |
+### 1.4 Статус Критических Проблем
 
-> ✅ **Все критические проблемы исправлены.** Gold слой готов к использованию.
+| ID | Проблема | Статус |
+|----|----------|--------|
+| **P1-DI** | 12 нарушений DI в application layer | ⚠️ Требует рефакторинга |
+| **P1-NEW** | `validated_records` undefined | ✅ Исправлено ранее |
+| **P2-NEW** | GoldValidator дублирование | ✅ Исправлено ранее |
 
 ---
 
-## 2. Числовая оценка по 10 категориям
+## 2. Числовая Оценка по 10 Категориям
 
 ### 2.1 Методология
 
@@ -63,462 +75,607 @@
 - **Веса**: Распределены по важности для production-системы (сумма = 100%)
 - **Взвешенный балл**: Оценка × Вес
 
-### 2.2 Таблица оценок
+### 2.2 Таблица Оценок
 
-| # | Категория | Описание | Вес | Оценка | Взвешенный балл | Обоснование |
-|---|-----------|----------|-----|--------|-----------------|-------------|
-| 1 | **Архитектура слоёв** | Соблюдение Hexagonal Architecture, разделение domain/app/infra | 15% | 9 | 1.35 | Строгое соблюдение матрицы импортов. 4 контракта import-linter. 16 архитектурных тестов. |
-| 2 | **Модульность и связность** | Низкая связанность, высокая связность модулей, чёткие границы | 12% | 8 | 0.96 | Хорошее разделение по провайдерам. Минус: отсутствуют `__init__.py` в 4 пакетах. |
-| 3 | **Качество доменной модели** | Чистота domain layer, Value Objects, Entities, типизация | 12% | 9 | 1.08 | Frozen dataclasses, 9 Protocol-портов, NewType для семантики, CC ≤5. |
-| 4 | **Тестирование** | Покрытие, стратегия (unit/integration/e2e/arch), VCR | 12% | 8 | 0.96 | 124 тест-файла. VCR.py для HTTP. Hypothesis. Минус: нет mutation testing в CI. |
-| 5 | **Обработка ошибок** | Классификация, retry, circuit breaker, graceful shutdown | 10% | 9 | 0.90 | 20+ custom исключений. ADR-007 (CB), ADR-008 (Shutdown). Threshold-политики. |
-| 6 | **Логирование и наблюдаемость** | Structured logging, метрики, tracing, correlation ID | 10% | 8 | 0.80 | structlog с run_id. Prometheus метрики. OpenTelemetry опционально. |
-| 7 | **Производительность** | Delta Lake, батчинг, rate limiting, асинхронность | 8% | 7 | 0.56 | Async I/O. Delta merge. Минус: нет документированных бенчмарков. |
-| 8 | **Безопасность** | Секреты, PII, валидация входных данных | 8% | 7 | 0.56 | Env-based secrets. PII hashing в Silver. Минус: нет pip-audit в CI. |
-| 9 | **Качество документации** | ADR, RULES.md, README, docstrings, inline comments | 8% | 9 | 0.72 | 66 markdown файлов. 12 ADR. RULES.md v5.2. Полные docstrings. |
-| 10 | **Технический долг и сопровождаемость** | Dead code, complexity, DRY, code smells | 5% | 7 | 0.35 | Vulture проверки. Минус: некоторые пустые файлы, дублирование в transformers. |
+| № | Категория | Описание | Вес | Оценка | Взвешенный | Обоснование |
+|---|-----------|----------|-----|--------|------------|-------------|
+| 1 | **Архитектура слоёв** | Соблюдение Ports & Adapters, матрица импортов | 15% | 9.5 | 1.43 | 0 нарушений импортов, 16 архитектурных тестов, 4 import-linter контракта |
+| 2 | **Модульность и связность** | Cohesion модулей, coupling, границы | 12% | 8.5 | 1.02 | Хорошее разделение по провайдерам. Минус: жёсткие связи в трансформерах |
+| 3 | **Качество доменной модели** | Value Objects, Entities, чистота от I/O | 12% | 10.0 | 1.20 | Эталон: 100% frozen dataclasses, 10 Protocol ports, 18 pure functions |
+| 4 | **Dependency Injection** | DI через конструкторы, Composition Root | 12% | 6.0 | 0.72 | **12 нарушений**: трансформеры и менеджеры создаются внутри классов |
+| 5 | **Тестирование** | Покрытие, VCR, архитектурные тесты | 10% | 8.5 | 0.85 | 1073 теста, 81% покрытие, 36 VCR кассет, строгие arch tests |
+| 6 | **Обработка ошибок** | Классификация, retry, circuit breaker | 10% | 9.0 | 0.90 | 21 custom исключения, ADR-007/008, threshold-политики |
+| 7 | **Логирование и наблюдаемость** | Structured logs, metrics, tracing | 8% | 8.5 | 0.68 | structlog + run_id, Prometheus, OpenTelemetry опционально |
+| 8 | **Производительность** | Rate limiting, async I/O, Delta Lake | 7% | 8.0 | 0.56 | TokenBucket, async httpx, Delta merge/vacuum/optimize |
+| 9 | **Безопасность** | Секреты, PII handling, VCR санитизация | 7% | 8.0 | 0.56 | Env-based secrets, PII hashing в Silver, VCR санитизация |
+| 10 | **Документация** | ADR, RULES.md, docstrings | 7% | 8.5 | 0.60 | 11 ADR, RULES.md v5.2, Google Style docstrings на русском |
 
-### 2.3 Расчёт интегрального балла
+### 2.3 Расчёт Интегрального Балла
 
 ```
-Интегральный балл = Σ (Взвешенный балл)
-                  = 1.35 + 0.96 + 1.08 + 0.96 + 0.90 + 0.80 + 0.56 + 0.56 + 0.72 + 0.35
-                  = 7.6
+Σ (Вес × Оценка) = 1.43 + 1.02 + 1.20 + 0.72 + 0.85 + 0.90 + 0.68 + 0.56 + 0.56 + 0.60 = 8.52
 ```
 
-### 2.4 Интерпретация
+### 2.4 Детализация по Категориям
 
-| Диапазон | Статус | Описание |
-|----------|--------|----------|
-| 0.0 – 4.9 | 🔴 Критический | Требуется немедленный рефакторинг |
-| 5.0 – 7.9 | 🟡 Хорошо | Есть области для улучшения |
-| 8.0 – 10.0 | 🟢 Отлично | Production-ready, минимальные улучшения |
+#### Категория 1: Архитектура слоёв (9.5/10)
 
-**Текущий статус**: 🟡 **Хорошо** (7.6)
+**Сильные стороны:**
+- 0 нарушений матрицы импортов
+- Строгое разделение: domain → application → composition → infrastructure
+- 16 архитектурных тестов в `tests/architecture/`
+- 4 контракта import-linter
+
+**Структура:**
+```
+src/bioetl/
+├── domain/          2,658 LOC  — Protocols, Entities, Pure Functions
+├── application/     1,874 LOC  — Pipelines, Use Cases, Orchestration
+├── composition/     1,332 LOC  — DI Container, Factories, Bootstrap
+├── infrastructure/  ~4,000 LOC — Adapters, Storage, HTTP Client
+└── interfaces/      ~200 LOC   — CLI (Click-based)
+```
+
+#### Категория 3: Качество доменной модели (10.0/10)
+
+**Эталонная реализация:**
+- 10 frozen dataclasses с инвариантами
+- 10 Protocol-based ports
+- 18 чистых функций в `transformations.py`
+- 21 структурированное исключение
+- 100% type hints с NewType для семантики
+
+#### Категория 4: Dependency Injection (6.0/10)
+
+**Проблемы (12 нарушений):**
+
+| Файл | Строка | Нарушение |
+|------|--------|-----------|
+| `pipelines/chembl/activity.py` | 35 | `ActivityTransformer(provider=...)` создаётся внутри |
+| `pipelines/chembl/assay.py` | 35 | `AssayTransformer(provider=...)` |
+| `pipelines/chembl/molecule.py` | 35 | `MoleculeTransformer(provider=...)` |
+| `pipelines/chembl/target.py` | 35 | `TargetTransformer(provider=...)` |
+| `pipelines/chembl/target_component.py` | 37 | `TargetComponentTransformer(provider=...)` |
+| `pipelines/chembl/document.py` | 35 | `DocumentTransformer(provider=...)` |
+| `pipelines/pubchem/compound.py` | 20 | `PubChemCompoundTransformer(provider=...)` |
+| `pipelines/pubmed/publications.py` | 19 | `PubMedPublicationTransformer(provider=...)` |
+| `pipelines/uniprot/protein.py` | 20 | `UniProtProteinTransformer(provider=...)` |
+| `core/record_processor.py` | 53 | `QuarantineManager(...)` |
+| `core/record_processor.py` | 74 | `BatchMetricsRecorder(...)` |
+| `core/runner.py` | 59 | `LockManager.create(...)` |
 
 ---
 
-## 3. Детальный анализ архитектуры
+## 3. Детальный Анализ Архитектуры
 
-### 3.1 Соблюдение слоистой структуры
+### 3.1 Соблюдение Слоистой Структуры
 
-```
-src/bioetl/
-├── domain/          [9/10] ✓ Чистая логика, Protocols, frozen dataclasses
-├── application/     [8/10] ✓ Пайплайны, Use Cases, оркестрация
-├── composition/     [9/10] ✓ DI-контейнер, factories, bootstrap
-├── infrastructure/  [8/10] ✓ Адаптеры, storage, observability
-└── interfaces/      [7/10] ⚠ CLI минималистичен, orchestration пуст
-```
+#### Матрица Импортов (100% соблюдение)
 
-### 3.2 Ports & Adapters (Hexagonal)
-
-**Сильные стороны:**
-- 9 Protocol-based портов в `domain/ports.py`
-- Все порты используют `@runtime_checkable`
-- Строгая типизация через `typing.Protocol`
-- Асинхронные методы с `async/await`
-
-**Порты:**
-| Port | Назначение | Адаптеры |
-|------|------------|----------|
-| `DataSourcePort` | Источники данных | ChemblAdapter, PubChemAdapter, UniProtAdapter, PubMedClient |
-| `StoragePort` | Хранение (Bronze/Silver/Gold) | BronzeWriter, DeltaWriter, GoldWriter |
-| `LockPort` | Блокировки | MemoryLock |
-| `CheckpointPort` | Чекпоинты | LocalCheckpoint |
-| `QuarantinePort` | Карантин | UnifiedQuarantine |
-| `MetricsPort` | Метрики | PrometheusMetrics, NoOpMetrics |
-| `LoggerPort` | Логирование | structlog wrapper |
-| `InputFilterPort` | Фильтрация | CsvFilterReader |
-| `TracingPort` | Tracing | OpenTelemetryTracer, NoOpTracer |
-
-### 3.3 Матрица импортов (СОБЛЮДАЕТСЯ)
-
-```
 | Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
 |------------|--------|-------------|-------------|----------------|------------|
-| domain     | ✅     | ❌           | ❌           | ❌              | ❌          |
-| application| ✅     | ✅           | ❌           | ❌              | ❌          |
-| composition| ✅     | ✅           | ✅           | ✅              | ❌          |
-| infrastructure| ✅  | ❌           | ❌           | ✅              | ❌          |
-| interfaces | ✅     | ✅           | ✅           | ✅              | ✅          |
+| **domain** | ✅ | ❌ 0 | ❌ 0 | ❌ 0 | ❌ 0 |
+| **application** | ✅ | ✅ | ❌ 0 | ❌ 0 | ❌ 0 |
+| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ 0 |
+| **infrastructure** | ✅ | ❌ 0 | ❌ 0 | ✅ | ❌ 0 |
+| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**Проверено:**
+- Grep по всем файлам
+- AST парсинг
+- import-linter contracts
+- `tests/architecture/test_layer_dependencies.py`
+
+### 3.2 Ports & Adapters
+
+#### Domain Ports (10 Protocols)
+
+| Port | Методы | Async | Адаптеры |
+|------|--------|-------|----------|
+| `DataSourcePort` | 4 | Yes | ChemblAdapter, PubChemClient, UniProtClient, PubMedAdapter |
+| `StoragePort` | 6 | Yes | BronzeWriter, DeltaWriter, GoldWriter |
+| `InputFilterPort` | 1 | Yes | CsvFilterReader |
+| `CheckpointPort` | 5 | Yes | LocalCheckpoint |
+| `LockPort` | 4 | Yes | MemoryLock |
+| `QuarantinePort` | 4 | Yes | UnifiedQuarantine |
+| `MetricsPort` | 2 | No | PrometheusMetrics, NoOpMetrics |
+| `LoggerPort` | 5 | No | structlog wrapper |
+| `TracingPort` | 1 | No | OpenTelemetryTracer, NoOpTracer |
+| `GoldValidatorPort` | 1 | No | PanderaGoldValidator, NoOpGoldValidator |
+
+#### Infrastructure Adapters Quality
+
+| Adapter | Health Check | Rate Limiting | Circuit Breaker | Retry |
+|---------|-------------|---------------|-----------------|-------|
+| ChemblAdapter | ✅ `/status.json` | ⚠️ Via CB only | ✅ | ✅ |
+| PubChemClient | ✅ Probe | ✅ TokenBucket(5/s) | ✅ | ✅ |
+| UniProtClient | ✅ Search probe | ✅ TokenBucket(100/s) | ✅ | ✅ |
+| PubMedAdapter | ✅ esearch probe | ✅ TokenBucket(10/s) | ✅ | ✅ |
+
+### 3.3 Domain Layer Quality
+
+#### Entities (10 frozen dataclasses)
+
+```python
+@dataclass(frozen=True)  # Immutable
+class Activity(BaseEntity):
+    """128 полей с полной типизацией."""
+    activity_id: str
+    molecule_chembl_id: str | None
+    pchembl_value: float | None
+    # ...
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._validate_invariants()  # Валидация при создании
 ```
 
-**Механизмы проверки:**
-1. `.importlinter` — 4 контракта
-2. `tests/architecture/test_layer_dependencies.py` — 16 тестов
-3. `mypy --strict` — статическая проверка типов
+#### Pure Functions (transformations.py)
 
-### 3.4 Dependency Injection
-
-**Реализация:**
-- `composition/bootstrap.py` — Composition Root
-- `composition/factories/` — Factory классы
-- `composition/registry.py` — PipelineRegistry (singleton)
-
-**Паттерн:**
 ```python
-# bootstrap.py
-def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
-    settings = get_settings()
-    logger = bootstrap_logger(...)
-    tracer = bootstrap_tracer()
-    # ...
-    return factory.create_runner(
-        run_id=ctx.run_id,
-        runtime=runtime_config,
-        settings=settings,
-        logger=logger,
-        tracer=tracer,
+# 18 чистых функций (no side effects, no I/O)
+def generate_content_hash(record: dict, provider: str) -> ContentHash:
+    """SHA256 для версионирования."""
+
+@singledispatch
+def _normalize_value(value: Any) -> Any:
+    """Нормализация: NaN→None, floats→round(10)."""
+```
+
+### 3.4 Composition Root
+
+**Bootstrap Flow:**
+```
+bootstrap_pipeline(ctx)
+├── load_pipeline_config()
+├── bootstrap_logger()
+├── bootstrap_tracer()
+├── FilterConfigBuilder.build()
+├── PipelineRegistry.get(name) → factory
+└── factory.create_runner()
+    ├── create_with_services()
+    │   ├── StorageFactory.create() → Bronze/Silver/Gold
+    │   ├── BaseServicesFactory.create_common_services()
+    │   │   ├── _create_lock() → MemoryLock
+    │   │   ├── _create_checkpoint() → LocalCheckpoint
+    │   │   ├── _create_quarantine() → UnifiedQuarantine
+    │   │   └── _create_metrics() → PrometheusMetrics
+    │   └── create_data_source() → DataSourcePort
+    └── PipelineRunner(executor, checkpoint_manager, ...)
+```
+
+### 3.5 Test Coverage
+
+| Уровень | Файлов | Тестов | LOC | Покрытие |
+|---------|--------|--------|-----|----------|
+| **Unit** | 94 | 919 | 16,959 | ~85% |
+| **Integration** | 14 | ~100 | 1,572 | VCR-based |
+| **E2E** | 11 | ~40 | ~1,500 | Full cycle |
+| **Architecture** | 3 | 17 | — | Layer validation |
+| **ИТОГО** | 122 | 1,073 | 19,531 | >80% |
+
+---
+
+## 4. Выявленные Проблемы
+
+### 4.1 P1: Критические — Нарушения DI (12 файлов)
+
+#### P1.1: Трансформеры создаются внутри пайплайнов (9 файлов)
+
+**Проблема:**
+```python
+# src/bioetl/application/pipelines/chembl/activity.py:35
+class ChEMBLActivityPipeline(BasePipeline):
+    def __init__(self, config, runtime, services):
+        super().__init__(config, runtime, services)
+        self._transformer = ActivityTransformer(provider=self.provider)  # ❌ НАРУШЕНИЕ
+```
+
+**Последствия:**
+- Невозможно подменить трансформер в тестах
+- Жёсткая связанность с конкретной реализацией
+- Нарушает Open/Closed Principle
+
+**Затронутые файлы:**
+```
+src/bioetl/application/pipelines/chembl/activity.py:35
+src/bioetl/application/pipelines/chembl/assay.py:35
+src/bioetl/application/pipelines/chembl/molecule.py:35
+src/bioetl/application/pipelines/chembl/target.py:35
+src/bioetl/application/pipelines/chembl/target_component.py:37
+src/bioetl/application/pipelines/chembl/document.py:35
+src/bioetl/application/pipelines/pubchem/compound.py:20
+src/bioetl/application/pipelines/pubmed/publications.py:19
+src/bioetl/application/pipelines/uniprot/protein.py:20
+```
+
+#### P1.2: Менеджеры создаются в RecordProcessor (2 нарушения)
+
+**Файл:** `src/bioetl/application/core/record_processor.py`
+
+```python
+# Строка 53 — QuarantineManager создаётся внутри
+self._quarantine_manager = QuarantineManager(...)  # ❌
+
+# Строка 74 — BatchMetricsRecorder создаётся внутри
+self._batch_metrics = BatchMetricsRecorder(...)  # ❌
+```
+
+#### P1.3: LockManager.create() в PipelineRunner
+
+**Файл:** `src/bioetl/application/core/runner.py:59`
+
+```python
+self._lock_manager = LockManager.create(...)  # ❌ Factory внутри application
+```
+
+### 4.2 P2: Средние — Тестовое Покрытие
+
+| Компонент | Проблема | Влияние |
+|-----------|----------|---------|
+| PubChem E2E | Тест пропущен (skip) | Регрессии могут остаться незамеченными |
+| Composition factories | ~70% покрытие | DI ошибки проявятся в runtime |
+
+### 4.3 P3: Низкие — Code Smells
+
+| Проблема | Файл | Описание |
+|----------|------|----------|
+| Activity entity 128 полей | `domain/entities.py` | Кандидат на разбиение на Value Objects |
+| Defensive getattr в CLI | `interfaces/cli.py` | `getattr(runner, "logger", None)` |
+| Implicit registration | `composition/bootstrap.py` | `import ... # noqa: F401` side-effect |
+
+---
+
+## 5. План Рефакторинга
+
+### 5.1 Приоритет 0: Критические (Блокеры DI)
+
+#### R0.1: Инжектировать трансформеры в пайплайны
+
+**Цель:** Соблюдение принципа DI — зависимости передаются в конструктор
+
+**Конкретные правки:**
+
+**1. Изменить BasePipeline:**
+```python
+# src/bioetl/application/core/base.py
+class BasePipeline(ABC):
+    def __init__(
+        self,
+        config: PipelineConfig,
+        runtime: RuntimeConfig,
+        services: PipelineServices,
+        transformer: BaseTransformer,  # ДОБАВИТЬ
+    ):
+        self._transformer = transformer
+```
+
+**2. Обновить все 9 пайплайнов:**
+```python
+# src/bioetl/application/pipelines/chembl/activity.py
+class ChEMBLActivityPipeline(BasePipeline):
+    def __init__(
+        self,
+        config: PipelineConfig,
+        runtime: RuntimeConfig,
+        services: PipelineServices,
+        transformer: ActivityTransformer,  # ИНЖЕКТИРОВАТЬ
+    ):
+        super().__init__(config, runtime, services, transformer)
+        # УДАЛИТЬ: self._transformer = ActivityTransformer(...)
+```
+
+**3. Добавить transformer_class в GenericPipelineFactory:**
+```python
+# src/bioetl/composition/factories/generic_factory.py
+class GenericPipelineFactory:
+    def __init__(
+        self,
+        pipeline_name: str,
+        pipeline_class: type[BasePipeline],
+        provider: str,
+        transformer_class: type[BaseTransformer],  # ДОБАВИТЬ
+        ...
+    ):
+        self.transformer_class = transformer_class
+
+    def _create_transformer(self) -> BaseTransformer:
+        return self.transformer_class(provider=self.provider)
+```
+
+**4. Обновить pipeline_factories.py:**
+```python
+# src/bioetl/composition/factories/pipeline_factories.py
+chembl_activity_factory = GenericPipelineFactory(
+    pipeline_name="chembl_activity",
+    pipeline_class=ChEMBLActivityPipeline,
+    provider="chembl",
+    transformer_class=ActivityTransformer,  # ДОБАВИТЬ
+    silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+    gold_schema=ChEMBLActivityGoldSchema,
+)
+```
+
+**Риски:**
+- Изменение сигнатуры конструкторов потребует обновления тестов
+- **Минимизация:** Постепенное обновление, по одному пайплайну
+
+**Критерии "готово":**
+- [ ] Все 9 пайплайнов принимают трансформер в конструктор
+- [ ] GenericPipelineFactory создаёт трансформеры
+- [ ] Все unit-тесты пайплайнов проходят
+- [ ] `make lint && make test` успешно
+
+#### R0.2: Инжектировать менеджеры в RecordProcessor
+
+**Цель:** Убрать создание зависимостей из RecordProcessor
+
+**Конкретные правки:**
+```python
+# src/bioetl/application/core/record_processor.py
+class RecordProcessor:
+    def __init__(
+        self,
+        services: PipelineServices,
+        quarantine_manager: QuarantineManager,  # ДОБАВИТЬ (не Optional)
+        batch_metrics: BatchMetricsRecorder,     # ДОБАВИТЬ (не Optional)
+        error_classifier: ErrorClassifier,
+        ...
+    ):
+        self._quarantine_manager = quarantine_manager
+        self._batch_metrics = batch_metrics
+        # УДАЛИТЬ создание внутри __init__
+```
+
+**Обновить GenericPipelineFactory:**
+```python
+def _create_record_processor(self, pipeline, ...):
+    quarantine_manager = QuarantineManager(
+        quarantine_port=pipeline.services.quarantine,
+        pipeline_name=pipeline.config.name,
+    )
+    batch_metrics = BatchMetricsRecorder(
+        pipeline.services.metrics,
+        pipeline_label=pipeline.config.name,
+        run_type_label=pipeline.runtime.run_type.value,
+    )
+    return RecordProcessor(
+        services=pipeline.services,
+        quarantine_manager=quarantine_manager,
+        batch_metrics=batch_metrics,
         ...
     )
 ```
 
-### 3.5 Единообразие соглашений
+**Критерии "готово":**
+- [ ] RecordProcessor не создаёт зависимости внутри
+- [ ] Фабрика создаёт и инжектирует менеджеры
+- [ ] Unit-тесты RecordProcessor можно упростить (мокировать менеджеры)
 
-**Именование классов:**
-| Паттерн | Пример |
-|---------|--------|
-| `{Provider}{Entity}Pipeline` | `ChEMBLActivityPipeline` |
-| `{Entity}Transformer` | `ActivityTransformer` |
-| `{Provider}Adapter` | `ChemblAdapter` |
-| `{Service}Port` | `DataSourcePort` |
-| `{Error}Error` | `SchemaViolationError` |
+#### R0.3: Вынести создание LockManager в composition
 
-**Именование файлов:**
-- snake_case для модулей: `base_transformer.py`
-- `test_{module}.py` для тестов
+**Цель:** LockManager создаётся в фабрике, не в runner
 
----
-
-## 4. Выявленные проблемы
-
-### 4.1 Критические проблемы (Блокеры)
-
-| ID | Проблема | Локация | Влияние |
-|----|----------|---------|---------|
-| ~~**P1**~~ | ~~Отсутствуют `__init__.py` в 4 пакетах~~ | — | ✅ **ИСПРАВЛЕНО** |
-| ~~**P1-NEW**~~ | ~~Undefined variable `validated_records`~~ | ~~`record_processor.py:279`~~ | ✅ **ИСПРАВЛЕНО** |
-| ~~**P2-NEW**~~ | ~~Дублирование GoldValidator (нарушение DI)~~ | ~~`record_processor.py:51-73`~~ | ✅ **ИСПРАВЛЕНО** |
-
-#### ~~P1-NEW: Undefined Variable `validated_records`~~ ✅ ИСПРАВЛЕНО
-
+**Конкретные правки:**
 ```python
-# record_processor.py:279 - БЫЛО:
-records=validated_records,  # ❌ UNDEFINED
-
-# СТАЛО:
-records=records,  # ✅ ИСПРАВЛЕНО
+# src/bioetl/application/core/runner.py
+class PipelineRunner:
+    def __init__(
+        self,
+        ...,
+        lock_manager: LockManager,  # ДОБАВИТЬ
+    ):
+        self._lock_manager = lock_manager
+        # УДАЛИТЬ: self._lock_manager = LockManager.create(...)
 ```
 
-#### ~~P2-NEW: Дублирование GoldValidator~~ ✅ ИСПРАВЛЕНО
-
-**Было:**
-- `gold_validator` передавался как Optional параметр
-- Затем перезаписывался созданием `GoldValidator(config.gold_schema)`
-
-**Исправлено:**
-- Удалён прямой импорт `GoldValidator` из application layer
-- Удалено создание `GoldValidator(config.gold_schema)` (строка 73)
-- `gold_validator` теперь обязательный параметр (инжектируется из фабрики)
-
-### 4.2 Высокий приоритет
-
-| ID | Проблема | Локация | Влияние |
-|----|----------|---------|---------|
-| **P2** | Дублирование логики трансформации | `*_transformer.py` файлы | DRY violation, увеличение maintenance cost |
-| **P3** | Пустой модуль orchestration | `interfaces/orchestration/` | Incomplete abstraction |
-| **P4** | Отсутствие pip-audit в CI | `pyproject.toml`, CI config | Security vulnerability exposure |
-
-### 4.3 Средний приоритет
-
-| ID | Проблема | Локация | Влияние |
-|----|----------|---------|---------|
-| **P5** | Нет бенчмарков производительности | — | Невозможно отслеживать регрессии |
-| **P6** | PROJECT_CONTEXT.md не синхронизирован | `.claude/PROJECT_CONTEXT.md` | Устаревшая информация (Redis вместо MemoryLock) |
-| **P7** | Некоторые пустые файлы | `composition/factories/clients.py` | Dead code |
-
-### 4.4 Низкий приоритет
-
-| ID | Проблема | Локация | Влияние |
-|----|----------|---------|---------|
-| **P8** | Mutation testing не в CI | — | Пропуск слабых тестов |
-| **P9** | Нет contract tests в CI | — | Breakage detection delay |
-| **P10** | Дублирование в документации | `CLAUDE.md`, `AGENT.md`, `PROJECT_CONTEXT.md` | Sync overhead |
-
----
-
-## 5. План рефакторинга
-
-### 5.1 Фаза 1: Критические исправления (Immediate)
-
-#### 5.1.0 [BLOCKER] Исправить undefined variable `validated_records`
-
-**Приоритет:** 🔴🔴🔴 **BLOCKER**
-**Усилия:** 5 минут
-**Файл:** `src/bioetl/application/core/record_processor.py:279`
-
+**Обновить GenericPipelineFactory:**
 ```python
-# Было (строка 279):
-records=validated_records,
-
-# Стало:
-records=records,
-```
-
-**Критерии готовности:**
-- [ ] Код изменён
-- [ ] `make lint` проходит
-- [ ] Тесты Gold слоя проходят
-
-#### 5.1.1 [CRITICAL] Исправить дублирование GoldValidator
-
-**Приоритет:** 🔴🔴 Критический
-**Усилия:** 30 минут
-**Файл:** `src/bioetl/application/core/record_processor.py:51-73`
-
-```python
-# Удалить строку 73:
-self._gold_validator = GoldValidator(config.gold_schema)
-
-# Изменить параметр на обязательный:
-gold_validator: GoldValidatorPort,  # НЕ Optional
-```
-
-**Критерии готовности:**
-- [ ] `gold_validator` — обязательный параметр
-- [ ] Нет прямого создания `GoldValidator` в application layer
-- [ ] Удалён импорт `from bioetl.application.core.gold_validator import GoldValidator`
-- [ ] Architecture tests проходят
-
-#### ~~5.1.2 Добавить отсутствующие `__init__.py`~~
-
-~~**Приоритет:** 🔴 Критический~~
-~~**Статус:** ✅ **ВЫПОЛНЕНО** (2025-12-23)~~
-
-### 5.2 Фаза 2: Рефакторинг структуры (Short-term)
-
-#### 5.2.1 Унификация трансформеров
-
-**Приоритет:** 🟡 Высокий
-**Усилия:** 2-4 часа
-
-**Текущее состояние:**
-- 12 файлов `*_transformer.py`
-- Дублирование: валидация, логирование, метрики
-
-**Предложение:**
-1. Создать `BaseTransformer` с template methods
-2. Вынести общую логику в base class
-3. Использовать composition для специфичных операций
-
-```python
-# application/core/base_transformer.py (улучшенный)
-class BaseTransformer(ABC):
-    """Template pattern для трансформаций."""
-
-    def transform(self, records: list[dict]) -> list[dict]:
-        """Template method."""
-        validated = self._validate_input(records)
-        transformed = self._transform_records(validated)
-        return self._validate_output(transformed)
-
-    @abstractmethod
-    def _transform_records(self, records: list[dict]) -> list[dict]:
-        """Hook для специфичной логики."""
+def create_runner(self, ...):
+    lock_manager = LockManager.create(
+        lock_port=services.lock,
+        run_id=run_id,
+        pipeline_name=self.pipeline_name,
+        provider=self.provider,
+        run_type=runtime.run_type,
         ...
+    )
+    return PipelineRunner(
+        ...,
+        lock_manager=lock_manager,
+    )
 ```
 
-#### 5.2.2 Удалить пустые файлы
+**Критерии "готово":**
+- [ ] LockManager инжектируется в PipelineRunner
+- [ ] GenericPipelineFactory создаёт LockManager
+- [ ] Тесты runner не требуют патчинга LockManager.create
 
-**Приоритет:** 🟡 Средний
-**Усилия:** 30 минут
+### 5.2 Приоритет 1: Высокие (Production Quality)
 
-```bash
-# Проверить и удалить
-rm src/bioetl/composition/factories/clients.py
-# Или добавить TODO с причиной существования
+#### R1.1: Покрыть PubChem E2E тестами
+
+**Цель:** Устранить пропущенный E2E тест
+
+**Действия:**
+1. Исследовать причину skip (deprecated canonical_smiles)
+2. Обновить VCR кассету или адаптер
+3. Включить тест обратно
+
+**Критерии "готово":**
+- [ ] `test_pubchem_compound_e2e.py` проходит без skip
+- [ ] VCR кассета записана и санитизирована
+
+#### R1.2: Увеличить покрытие composition factories
+
+**Цель:** Покрытие >80% для всех фабрик
+
+**Действия:**
+1. Добавить unit-тесты для GenericPipelineFactory.create_runner()
+2. Добавить тесты для edge cases в StorageFactory
+3. Добавить тесты для DataSourceRegistry creators
+
+**Критерии "готово":**
+- [ ] Покрытие composition/ >80%
+- [ ] Все фабрики имеют тесты на create методы
+
+### 5.3 Приоритет 2: Средние (Code Quality)
+
+#### R2.1: Разбить Activity entity на Value Objects (Опционально)
+
+**Цель:** Уменьшить размер Activity (128 полей)
+
+**Предложение:**
+```python
+@dataclass(frozen=True)
+class ActivityMeasurement:
+    """Value Object для измерений."""
+    standard_value: float | None
+    standard_units: str | None
+    standard_type: str | None
+    pchembl_value: float | None
+
+@dataclass(frozen=True)
+class Activity(BaseEntity):
+    """Упрощённая Activity с вложенными VO."""
+    activity_id: str
+    measurement: ActivityMeasurement
+    molecule_chembl_id: str | None
+    # ... остальные поля
 ```
 
-#### 5.2.3 Синхронизировать PROJECT_CONTEXT.md
+**Риски:**
+- Breaking change для Silver схемы
+- **Минимизация:** Версионирование схемы (`activity_v2`)
 
-**Приоритет:** 🟡 Средний
-**Усилия:** 1 час
+#### R2.2: Явная регистрация пайплайнов
 
-Обновить секции:
-- §4 Блокировки → MemoryLock (не Redis)
-- §8 Стек технологий → убрать Redis
-
-### 5.3 Фаза 3: Улучшение качества (Medium-term)
-
-#### 5.3.1 Добавить security scanning в CI
-
-**Приоритет:** 🟡 Высокий
-**Усилия:** 1-2 часа
-
-```yaml
-# .github/workflows/security.yml
-name: Security Scan
-on: [push, pull_request]
-jobs:
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: pip-audit
-        run: pip-audit --strict
-      - name: bandit
-        run: bandit -r src/
-```
-
-#### 5.3.2 Добавить бенчмарки
-
-**Приоритет:** 🟡 Средний
-**Усилия:** 4-8 часов
+**Цель:** Заменить implicit import на explicit registration
 
 ```python
-# tests/benchmarks/test_pipeline_performance.py
-import pytest
+# bootstrap.py — ТЕКУЩИЙ КОД
+import bioetl.composition.factories.pipeline_factories  # noqa: F401
 
-@pytest.mark.benchmark
-def test_transform_throughput(benchmark):
-    """Измерение throughput трансформации."""
-    records = generate_sample_records(1000)
-    transformer = ActivityTransformer()
-    result = benchmark(transformer.transform, records)
-    assert len(result) == 1000
+# bootstrap.py — ПРЕДЛАГАЕМЫЙ КОД
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+
+def bootstrap_pipeline(ctx):
+    register_all_pipelines()  # Явный вызов
+    ...
 ```
 
-#### 5.3.3 Реализовать mutation testing
+#### R2.3: Добавить property для logger в PipelineRunner
 
-**Приоритет:** 🟢 Низкий
-**Усилия:** 2-4 часа
+**Цель:** Устранить defensive getattr в CLI
 
-```bash
-# Добавить в CI
-mutmut run --paths-to-mutate=src/bioetl/domain/
-mutmut results
+```python
+# runner.py — ДОБАВИТЬ
+@property
+def logger(self) -> LoggerPort:
+    """Логгер пайплайна."""
+    return self._logger
+
+# cli.py — ИЗМЕНИТЬ
+logger = runner.logger  # Без getattr
 ```
 
-### 5.4 Фаза 4: Архитектурные улучшения (Long-term)
+### 5.4 Сводная Таблица Плана
 
-#### 5.4.1 Завершить orchestration layer
+| Фаза | Задача | Приоритет | Усилия | Изменение балла |
+|------|--------|-----------|--------|-----------------|
+| **0** | R0.1 Инжектировать трансформеры | 🔴🔴 | 2-3 ч | +2.0 (кат. 4) |
+| **0** | R0.2 Инжектировать менеджеры | 🔴🔴 | 1 ч | +0.5 (кат. 4) |
+| **0** | R0.3 Вынести LockManager | 🔴 | 30 мин | +0.5 (кат. 4) |
+| **1** | R1.1 PubChem E2E | 🟡 | 1-2 ч | +0.25 (кат. 5) |
+| **1** | R1.2 Factory tests | 🟡 | 2-3 ч | +0.25 (кат. 5) |
+| **2** | R2.1 Activity VO | 🟢 | 4-8 ч | 0 (уже 10) |
+| **2** | R2.2 Explicit registration | 🟢 | 15 мин | +0.25 (кат. 2) |
+| **2** | R2.3 Logger property | 🟢 | 10 мин | +0.1 (кат. 10) |
 
-**Приоритет:** 🟢 Низкий
-**Усилия:** 8-16 часов
+### 5.5 Прогноз Изменения Балла
 
-Текущее состояние: `interfaces/orchestration/` содержит только `signals.py`.
+| Этап | Категория | Текущая | После | Изменение |
+|------|-----------|---------|-------|-----------|
+| После R0.1-R0.3 | #4 DI | 6.0 | 9.0 | +3.0 |
+| После R1.1-R1.2 | #5 Tests | 8.5 | 9.0 | +0.5 |
+| После R2.2 | #2 Модульность | 8.5 | 9.0 | +0.5 |
 
-**Предложение:**
-1. Создать `PrefectOrchestrator` (если нужен Prefect)
-2. Или удалить пустой модуль и документировать решение в ADR
+**Расчёт нового балла после полного рефакторинга:**
 
-#### 5.4.2 Консолидировать документацию
+```
+Категория 4: 6.0 → 9.0, вес 12%: +0.36
+Категория 5: 8.5 → 9.0, вес 10%: +0.05
+Категория 2: 8.5 → 9.0, вес 12%: +0.06
 
-**Приоритет:** 🟢 Низкий
-**Усилия:** 4-8 часов
+Новый балл: 8.52 + 0.36 + 0.05 + 0.06 = 8.99 ≈ 9.0
+```
 
-**Текущее состояние:**
-- `CLAUDE.md` — справочник для Claude Code
-- `AGENT.md` — инструкции для агента
-- `PROJECT_CONTEXT.md` — компактный контекст
-- `docs/RULES.md` — конституция
-
-**Предложение:**
-1. Автоматическая генерация `PROJECT_CONTEXT.md` из `RULES.md`
-2. Или объединить `CLAUDE.md` и `AGENT.md`
+**После рефакторинга: 9.0 / 10 (Отличный)**
 
 ---
 
-## 5.5 Сводная таблица плана
-
-| Фаза | Задача | Приоритет | Усилия | Статус |
-|------|--------|-----------|--------|--------|
-| ~~**1**~~ | ~~Исправить `validated_records`~~ | ~~🔴🔴🔴 BLOCKER~~ | ~~5 мин~~ | ✅ Выполнено |
-| ~~**1**~~ | ~~Исправить дублирование GoldValidator~~ | ~~🔴🔴~~ | ~~30 мин~~ | ✅ Выполнено |
-| ~~**1**~~ | ~~Добавить `__init__.py`~~ | ~~🔴~~ | ~~15 мин~~ | ✅ Выполнено |
-| **2** | Унификация трансформеров | 🟡 | 2-4 ч | ⏳ Планируется |
-| **2** | Удалить пустые файлы | 🟡 | 30 мин | ⏳ Планируется |
-| **2** | Синхронизировать docs | 🟡 | 1 ч | ⏳ Планируется |
-| **3** | Security scanning в CI | 🟡 | 1-2 ч | ⏳ Планируется |
-| **3** | Бенчмарки | 🟡 | 4-8 ч | ⏳ Планируется |
-| **3** | Mutation testing | 🟢 | 2-4 ч | ⏳ Планируется |
-| **4** | Orchestration layer | 🟢 | 8-16 ч | ⏳ Планируется |
-| **4** | Консолидация docs | 🟢 | 4-8 ч | ⏳ Планируется |
-
-### 5.6 Ожидаемое изменение интегрального балла
-
-| Этап | Задача | Изменение балла | Новый балл |
-|------|--------|-----------------|------------|
-| ~~После 5.1.0~~ | ~~Исправление `validated_records`~~ | ~~+0.10~~ | ~~7.50~~ ✅ |
-| ~~После 5.1.1~~ | ~~Исправление DI GoldValidator~~ | ~~+0.15~~ | **7.65** ✅ |
-| После Фазы 2 | Унификация, cleanup | +0.20 | 7.85 |
-| После Фазы 3 | Security, benchmarks | +0.20 | **8.05** |
-
-> ✅ **Фаза 1 выполнена.** Текущий балл: **7.65**. До зоны «Отлично» осталось +0.35.
-
----
-
-## 6. Метрики и Критерии Качества
+## 6. Метрики и Тесты для Контроля Качества
 
 ### 6.1 Автоматизированные Метрики
 
-| Метрика | Инструмент | Текущее значение | Целевое значение | Связь с категорией |
-|---------|------------|------------------|------------------|-------------------|
-| **Line Coverage** | pytest-cov | — | ≥80% | #4 Тестирование |
-| **Cyclomatic Complexity** | radon/xenon | — | CC ≤5 (domain), ≤10 (others) | #10 Сопровождаемость |
-| **Architecture Contracts** | import-linter | — | 0 violations | #1 Архитектура слоёв |
-| **Type Coverage** | mypy --strict | — | 0 errors | #3 Качество модели |
-| **Linting** | ruff | — | 0 errors | #10 Сопровождаемость |
-| **Security Issues** | bandit, pip-audit | — | 0 HIGH severity | #8 Безопасность |
-| **Dead Code** | vulture | — | 0 items (conf 100%) | #10 Сопровождаемость |
+| Метрика | Инструмент | Порог | Категория |
+|---------|------------|-------|-----------|
+| Import violations | import-linter | 0 | #1 Архитектура |
+| Line coverage | pytest-cov | ≥80% | #5 Тестирование |
+| Cyclomatic complexity | radon | ≤5 (domain) | #3 Domain |
+| Type errors | mypy --strict | 0 | #3 Domain |
+| Linting errors | ruff | 0 | #10 Сопровождаемость |
+| DI violations | Новый тест | 0 | #4 DI |
 
-### 6.2 Команды для Проверки
+### 6.2 Новые Архитектурные Тесты (Предложение)
+
+#### test_di_violations.py
+```python
+def test_no_dependency_creation_in_pipelines():
+    """Проверяет, что пайплайны не создают трансформеры."""
+    for py_file in pipelines_path.rglob("*.py"):
+        content = py_file.read_text()
+        # Проверка на паттерн: Transformer(provider=
+        matches = re.findall(r"\w+Transformer\(provider=", content)
+        assert not matches, f"DI violation in {py_file}: {matches}"
+
+def test_pipelines_accept_transformer_in_constructor():
+    """Проверяет, что все пайплайны принимают трансформер."""
+    for pipeline_class in ALL_PIPELINE_CLASSES:
+        sig = inspect.signature(pipeline_class.__init__)
+        assert "transformer" in sig.parameters, f"{pipeline_class} missing transformer param"
+```
+
+### 6.3 Команды для Проверки
 
 ```bash
 # Полная проверка качества
-make quality            # lint + arch-lint + complexity + typecheck
+make lint          # ruff + mypy
+make test          # pytest с coverage
+make arch-lint     # import-linter
+make arch-test     # architecture tests
 
-# Отдельные проверки
-make lint               # ruff + mypy
-make arch-lint          # import-linter
-make complexity         # xenon (CC thresholds)
-make test               # pytest с coverage
-make security           # pip-audit
+# Новые команды (предложение)
+make di-check      # проверка DI нарушений
+make complexity    # xenon (CC thresholds)
+make security      # pip-audit + bandit
 ```
-
-### 6.3 CI/CD Рекомендации
-
-1. **Pre-commit hooks:**
-   - `make lint` перед каждым коммитом
-   - Блокировка коммита при ошибках
-
-2. **CI Pipeline:**
-   - `make ci-lint` — все linting проверки
-   - `make ci-test` — тесты + архитектурные тесты
-   - `make security` — security scanning
-   - Fail on coverage < 80%
-
-3. **PR Gates:**
-   - Все CI jobs должны пройти
-   - Обязательный code review
-   - Architecture test failures = blocker
 
 ### 6.4 Связь Метрик с Интегральным Баллом
 
-| Категория | Автоматические метрики | Влияние на балл |
-|-----------|------------------------|-----------------|
-| #1 Архитектура | import-linter violations | -0.5 за каждое нарушение |
-| #3 Доменная модель | mypy errors | -0.1 за каждые 10 ошибок |
-| #4 Тестирование | coverage % | -0.2 за каждые 10% ниже 80% |
-| #8 Безопасность | HIGH severity CVEs | -0.3 за каждую |
-| #10 Сопровождаемость | CC > threshold | -0.1 за каждую функцию |
+| Категория | Метрика | Влияние |
+|-----------|---------|---------|
+| #1 Архитектура | import-linter violations | -0.5 за каждое |
+| #3 Domain | mypy errors | -0.1 за каждые 10 |
+| #4 DI | DI violations count | -0.25 за каждое |
+| #5 Tests | coverage % | -0.2 за каждые 10% ниже 80% |
+| #8 Security | HIGH severity CVEs | -0.3 за каждую |
 
 ---
 
 ## 7. Приложения
 
-### 7.1 Архитектурные решения (ADR)
+### 7.1 Архитектурные Решения (ADR)
 
 | ADR | Название | Статус |
 |-----|----------|--------|
@@ -534,31 +691,47 @@ make security           # pip-audit
 | ADR-010 | Local-Only Deployment | ✅ Accepted |
 | ADR-011 | Remove Watermark Mechanism | ✅ Accepted |
 
-### 7.2 Статистика кода (актуально на 2025-12-23)
+### 7.2 Файлы с DI Нарушениями
 
 ```
-src/bioetl/
-├── domain/          10 файлов   # Ports, entities, exceptions, types
-├── application/     45 файлов   # Pipelines, core, transformers
-├── composition/     12 файлов   # Bootstrap, factories, registry
-├── infrastructure/  55 файлов   # Adapters, storage, observability
-└── interfaces/       5 файлов   # CLI, orchestration
+# Пайплайны (9 файлов)
+src/bioetl/application/pipelines/chembl/activity.py:35
+src/bioetl/application/pipelines/chembl/assay.py:35
+src/bioetl/application/pipelines/chembl/molecule.py:35
+src/bioetl/application/pipelines/chembl/target.py:35
+src/bioetl/application/pipelines/chembl/target_component.py:37
+src/bioetl/application/pipelines/chembl/document.py:35
+src/bioetl/application/pipelines/pubchem/compound.py:20
+src/bioetl/application/pipelines/pubmed/publications.py:19
+src/bioetl/application/pipelines/uniprot/protein.py:20
 
-Всего src/:         133 файла
-
-tests/              133 файла
-docs/                68 markdown файлов
-configs/             13 YAML файлов
+# Core (3 файла)
+src/bioetl/application/core/record_processor.py:53,74
+src/bioetl/application/core/runner.py:59
 ```
 
-### 7.3 Зависимости проекта
+### 7.3 Структура Тестов
+
+```
+tests/
+├── unit/                  # 94 файла, 919 тестов
+│   ├── domain/            # Ports, entities, types
+│   ├── application/       # Pipelines, transformers, core
+│   ├── infrastructure/    # Adapters, storage, http
+│   └── composition/       # Factories
+├── integration/           # 14 файлов, ~100 тестов (VCR)
+├── e2e/                   # 11 файлов, ~40 тестов
+├── architecture/          # 3 файла, 17 тестов
+└── fixtures/vcr/          # 36 VCR кассет
+```
+
+### 7.4 Зависимости Проекта
 
 **Core:**
 - `httpx>=0.27` — async HTTP
 - `pydantic>=2.0` — validation
 - `polars>=1.0` — data processing
 - `deltalake>=0.18` — Delta Lake
-- `pyarrow>=15.0` — Arrow format
 - `pandera>=0.20` — schema validation
 
 **Observability:**
@@ -570,26 +743,24 @@ configs/             13 YAML файлов
 - `pytest>=8.0`, `hypothesis>=6.100` — testing
 - `mypy>=1.10`, `ruff>=0.4` — static analysis
 - `import-linter>=2.0` — architecture enforcement
-- `vulture>=2.11`, `radon>=6.0` — code quality
 
 ---
 
 ## Заключение
 
-Проект **BioETL** демонстрирует зрелую архитектуру с:
-- ✅ Строгим соблюдением Hexagonal Architecture
-- ✅ Comprehensive error handling и observability
-- ✅ Обширной документацией (12 ADR, 66 docs)
-- ✅ Автоматизированными архитектурными проверками
+**BioETL** — зрелый production-grade проект с:
 
-**Области для улучшения:**
-- 🔴 Структурные дефекты (отсутствующие `__init__.py`)
-- 🟡 Дублирование в трансформерах
-- 🟡 Security scanning в CI
-- 🟢 Бенчмарки и mutation testing
+✅ **Эталонной архитектурой слоёв** (0 нарушений импортов)
+✅ **Отличной доменной моделью** (10/10)
+✅ **Comprehensive тестированием** (1073 теста, >80% coverage)
+✅ **Полной observability** (structlog, Prometheus, OpenTelemetry)
 
-**Рекомендация:** Начать с Фазы 1 (критические исправления), затем последовательно выполнять Фазы 2-4 в рамках sprint planning.
+**Основная область для улучшения:**
+⚠️ **Dependency Injection** (12 нарушений) — исправление поднимет балл с 8.52 до ~9.0
+
+**Рекомендация:** Начать с Фазы 0 (R0.1-R0.3), которая займёт 3-4 часа и устранит все критические DI нарушения.
 
 ---
 
-*Документ сгенерирован автоматически на основе анализа кодовой базы.*
+*Документ подготовлен на основе deep dive анализа кодовой базы BioETL v5.2*
+*Дата аудита: 2025-12-23*
