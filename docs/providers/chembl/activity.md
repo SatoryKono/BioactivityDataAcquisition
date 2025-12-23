@@ -131,7 +131,17 @@ dq_rules:
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `pchembl_value` | `float` | pChEMBL = -log10(IC50 в молях) |
-| `ligand_efficiency` | `str` | Эффективность лиганда (JSON) |
+
+##### Метрики эффективности лиганда (Ligand Efficiency)
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `ligand_efficiency_bei` | `float` | **BEI** (Binding Efficiency Index) — эффективность связывания на атом |
+| `ligand_efficiency_le` | `float` | **LE** (Ligand Efficiency) — изменение энергии связывания на тяжелый атом |
+| `ligand_efficiency_lle` | `float` | **LLE** (Lipophilic Ligand Efficiency) — баланс активности и липофильности |
+| `ligand_efficiency_sei` | `float` | **SEI** (Surface Efficiency Index) — эффективность по площади поверхности |
+
+> **Примечание**: Все метрики ligand_efficiency вычисляются ChEMBL и предоставляются через API. В Silver слое они разворачиваются из вложенного словаря в отдельные колонки для удобства аналитики.
 
 #### Метаданные качества
 

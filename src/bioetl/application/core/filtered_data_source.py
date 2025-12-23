@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Any, Self
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, InputFilterPort
+    from bioetl.domain.filter_config import FilterLoadResult, InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort, InputFilterPort, MetricsPort
     from bioetl.domain.types import HealthStatus, Watermark
 
 
@@ -26,6 +26,7 @@ class FilteredDataSource:
     1. Loads filter IDs from CSV on context entry
     2. Calls fetch_filtered() on adapters that support it (e.g., ChemblAdapter)
     3. Delegates all other operations to the wrapped adapter
+    4. Records metrics about loaded IDs and duplicates
 
     Note:
         Filtering requires the underlying adapter to implement a fetch_filtered()
@@ -49,6 +50,8 @@ class FilteredDataSource:
         data_source: DataSourcePort,
         filter_reader: InputFilterPort | None,
         filter_config: InputFilterConfig,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
     ) -> None:
         """Initialize filtered data source wrapper.
 
@@ -56,16 +59,26 @@ class FilteredDataSource:
             data_source: The underlying data source adapter to wrap.
             filter_reader: Reader for loading filter IDs (e.g., CsvFilterReader).
             filter_config: Configuration for filtering behavior.
+            metrics: Optional metrics port for recording filter statistics.
+            pipeline_name: Pipeline name for metrics labels.
         """
         self._data_source = data_source
         self._filter_reader = filter_reader
         self._filter_config = filter_config
+        self._metrics = metrics
+        self._pipeline_name = pipeline_name
         self._filter_ids: list[str] | None = None
+        self._filter_result: FilterLoadResult | None = None
 
     @property
     def provider_name(self) -> str:
         """Provider name from the wrapped data source."""
         return self._data_source.provider_name
+
+    @property
+    def filter_result(self) -> FilterLoadResult | None:
+        """Access to filter load result with duplicate statistics."""
+        return self._filter_result
 
     async def __aenter__(self) -> Self:
         """Enter async context and load filter IDs if enabled."""
@@ -78,12 +91,38 @@ class FilteredDataSource:
             and self._filter_config.source_path
             and self._filter_config.column_name
         ):
-            self._filter_ids = await self._filter_reader.load_filter_ids(
+            self._filter_result = await self._filter_reader.load_filter_ids(
                 source_path=self._filter_config.source_path,
                 column_name=self._filter_config.column_name,
             )
+            self._filter_ids = list(self._filter_result.ids)
+
+            # Record metrics
+            self._record_filter_metrics()
 
         return self
+
+    def _record_filter_metrics(self) -> None:
+        """Record filter loading metrics."""
+        if not self._metrics or not self._filter_result:
+            return
+
+        source_file = self._filter_config.source_path or "unknown"
+
+        # Record unique IDs loaded
+        self._metrics.increment_counter(
+            "filter_ids_loaded_total",
+            self._filter_result.unique_count,
+            {"pipeline": self._pipeline_name, "source_file": source_file},
+        )
+
+        # Record duplicates if any
+        if self._filter_result.has_duplicates:
+            self._metrics.increment_counter(
+                "filter_ids_duplicates_total",
+                self._filter_result.duplicate_count,
+                {"pipeline": self._pipeline_name, "source_file": source_file},
+            )
 
     async def __aexit__(
         self,

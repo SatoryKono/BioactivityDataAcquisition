@@ -8,6 +8,8 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     BATCH_SIZE_RECORDS,
     ERRORS_TOTAL,
+    FILTER_IDS_DUPLICATES_TOTAL,
+    FILTER_IDS_LOADED_TOTAL,
     PIPELINE_DURATION_SECONDS,
     RECORDS_PROCESSED_TOTAL,
 )
@@ -22,6 +24,8 @@ HISTOGRAMS = {
 COUNTERS = {
     "records_processed_total": RECORDS_PROCESSED_TOTAL,
     "errors_total": ERRORS_TOTAL,
+    "filter_ids_loaded_total": FILTER_IDS_LOADED_TOTAL,
+    "filter_ids_duplicates_total": FILTER_IDS_DUPLICATES_TOTAL,
 }
 
 

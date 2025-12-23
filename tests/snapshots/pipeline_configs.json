@@ -12,11 +12,53 @@
       "column_filters": [
         {
           "column": "standard_type",
-          "values": ["IC50", "Ki"]
+          "values": [
+            "IC50",
+            "Ki"
+          ]
+        },
+        {
+          "column": "standard_units",
+          "values": [
+            "nM"
+          ]
+        },
+        {
+          "column": "standard_relation",
+          "values": [
+            "="
+          ]
+        },
+        {
+          "column": "assay_type",
+          "values": [
+            "B",
+            "F"
+          ]
+        },
+        {
+          "column": "potential_duplicate",
+          "values": [
+            "0"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "required_fields": ["standard_type", "standard_value", "standard_units", "target_chembl_id"]
+      "range_filters": [
+        {
+          "column": "standard_value",
+          "include_max": true,
+          "include_min": false,
+          "max_value": null,
+          "min_value": 0.0
+        }
+      ],
+      "required_fields": [
+        "standard_type",
+        "standard_value",
+        "standard_units",
+        "target_chembl_id"
+      ]
     },
     "gold_table": null,
     "gold_write_mode": "overwrite",
@@ -43,11 +85,16 @@
       "column_filters": [
         {
           "column": "doc_type",
-          "values": ["PATENT", "PUBLICATION"]
+          "values": [
+            "PATENT",
+            "PUBLICATION"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "required_fields": ["title"]
+      "required_fields": [
+        "title"
+      ]
     },
     "gold_table": null,
     "gold_write_mode": "overwrite",
@@ -74,11 +121,15 @@
       "column_filters": [
         {
           "column": "molecule_type",
-          "values": ["Small molecule"]
+          "values": [
+            "Small molecule"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "required_fields": ["pref_name"]
+      "required_fields": [
+        "pref_name"
+      ]
     },
     "gold_table": null,
     "gold_write_mode": "overwrite",
@@ -105,11 +156,16 @@
       "column_filters": [
         {
           "column": "target_type",
-          "values": ["PROTEIN COMPLEX", "SINGLE PROTEIN"]
+          "values": [
+            "PROTEIN COMPLEX",
+            "SINGLE PROTEIN"
+          ]
         }
       ],
       "exclude_if_present": [],
-      "required_fields": ["pref_name"]
+      "required_fields": [
+        "pref_name"
+      ]
     },
     "gold_table": null,
     "gold_write_mode": "overwrite",
@@ -135,6 +191,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "range_filters": [],
       "required_fields": []
     },
     "gold_table": null,
@@ -161,6 +218,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "range_filters": [],
       "required_fields": []
     },
     "gold_table": null,
@@ -187,6 +245,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "range_filters": [],
       "required_fields": []
     },
     "gold_table": null,

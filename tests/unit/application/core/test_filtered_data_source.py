@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
-from bioetl.domain.filter_config import InputFilterConfig
+from bioetl.domain.filter_config import FilterLoadResult, InputFilterConfig
 from bioetl.domain.types import HealthStatus, Watermark
 
 
@@ -54,7 +54,14 @@ def mock_data_source_with_filtered():
 def mock_filter_reader():
     """Create a mock filter reader."""
     reader = AsyncMock()
-    reader.load_filter_ids = AsyncMock(return_value=["CHEMBL1", "CHEMBL2", "CHEMBL3"])
+    filter_result = FilterLoadResult(
+        ids=("CHEMBL1", "CHEMBL2", "CHEMBL3"),
+        total_count=3,
+        unique_count=3,
+        duplicate_count=0,
+        duplicates=frozenset(),
+    )
+    reader.load_filter_ids = AsyncMock(return_value=filter_result)
     return reader
 
 
@@ -143,7 +150,10 @@ class TestFilteredDataSourceContextManager:
             source_path="data/molecules.csv",
             column_name="molecule_chembl_id",
         )
+        # FilterLoadResult.ids is a tuple, converted to list by FilteredDataSource
         assert filtered._filter_ids == ["CHEMBL1", "CHEMBL2", "CHEMBL3"]
+        assert filtered.filter_result is not None
+        assert filtered.filter_result.unique_count == 3
 
     @pytest.mark.asyncio
     async def test_aexit_delegates_to_wrapped(

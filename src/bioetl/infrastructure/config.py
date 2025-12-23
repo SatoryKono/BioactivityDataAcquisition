@@ -31,7 +31,11 @@ from pydantic_settings import (
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
-from bioetl.domain.filter_config import GoldColumnFilter, GoldFilterConfig
+from bioetl.domain.filter_config import (
+    GoldColumnFilter,
+    GoldFilterConfig,
+    GoldRangeFilter,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -167,8 +171,19 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         GoldColumnFilter(column=col, values=frozenset(vals))
         for col, vals in gf.columns.items()
     )
+    range_filters = tuple(
+        GoldRangeFilter(
+            column=col,
+            min_value=r.min,
+            max_value=r.max,
+            include_min=r.include_min,
+            include_max=r.include_max,
+        )
+        for col, r in gf.ranges.items()
+    )
     gold_filters = GoldFilterConfig(
         column_filters=column_filters,
+        range_filters=range_filters,
         required_fields=tuple(gf.required_fields),
         exclude_if_present=tuple(gf.exclude_if_present),
     )

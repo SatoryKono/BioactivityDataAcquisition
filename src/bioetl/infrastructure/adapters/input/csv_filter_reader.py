@@ -4,9 +4,15 @@ Implements InputFilterPort for reading filter IDs from CSV files.
 Uses Polars for efficient CSV parsing.
 """
 
+import logging
+from collections import Counter
 from pathlib import Path
 
 import polars as pl
+
+from bioetl.domain.filter_config import FilterLoadResult
+
+logger = logging.getLogger(__name__)
 
 
 class CsvFilterReader:
@@ -17,24 +23,27 @@ class CsvFilterReader:
 
     Example:
         >>> reader = CsvFilterReader()
-        >>> ids = await reader.load_filter_ids("data/input/molecules.csv", "molecule_chembl_id")
-        >>> print(ids)
-        {'CHEMBL25', 'CHEMBL612545', 'CHEMBL1201198'}
+        >>> result = await reader.load_filter_ids("data/input/molecules.csv", "molecule_chembl_id")
+        >>> print(result.ids)
+        ('CHEMBL1201198', 'CHEMBL25', 'CHEMBL612545')
+        >>> print(result.duplicate_count)
+        0
     """
 
     async def load_filter_ids(
         self,
         source_path: str,
         column_name: str,
-    ) -> list[str]:
+    ) -> FilterLoadResult:
         """Load unique IDs from a CSV file.
 
-        Reads the specified column from the CSV file and returns a sorted list of
-        unique, non-empty string values for deterministic processing.
+        Reads the specified column from the CSV file and returns a FilterLoadResult
+        with unique, sorted IDs and duplicate statistics.
+
         Handles common CSV issues:
         - Strips whitespace from values
         - Skips null/empty values
-        - Removes duplicates
+        - Removes duplicates (with statistics)
         - Sorts alphabetically for deterministic order
 
         Args:
@@ -42,7 +51,7 @@ class CsvFilterReader:
             column_name: Name of the column containing filter IDs.
 
         Returns:
-            Sorted list of unique ID strings.
+            FilterLoadResult with sorted unique IDs and duplicate statistics.
 
         Raises:
             FileNotFoundError: If the CSV file does not exist.
@@ -65,15 +74,45 @@ class CsvFilterReader:
                 f"Column '{column_name}' not found in CSV. Available columns: {available}"
             )
 
-        # Extract unique, non-null, stripped IDs and sort for deterministic order
-        ids = (
+        # Extract all non-null, stripped IDs (before deduplication)
+        all_ids = (
             df.select(pl.col(column_name).cast(pl.Utf8).str.strip_chars())
             .filter(pl.col(column_name).is_not_null())
             .filter(pl.col(column_name) != "")
-            .unique()
-            .sort(column_name)
             .to_series()
             .to_list()
         )
 
-        return ids
+        total_count = len(all_ids)
+
+        # Find duplicates
+        id_counts = Counter(all_ids)
+        duplicates = frozenset(id_val for id_val, count in id_counts.items() if count > 1)
+
+        # Get unique sorted IDs
+        unique_ids = tuple(sorted(set(all_ids)))
+        unique_count = len(unique_ids)
+        duplicate_count = total_count - unique_count
+
+        # Log duplicates if found
+        if duplicate_count > 0:
+            sample_duplicates = list(duplicates)[:10]
+            logger.warning(
+                "filter_ids_duplicates_found",
+                extra={
+                    "source_path": source_path,
+                    "column_name": column_name,
+                    "total_count": total_count,
+                    "unique_count": unique_count,
+                    "duplicate_count": duplicate_count,
+                    "sample_duplicates": sample_duplicates,
+                },
+            )
+
+        return FilterLoadResult(
+            ids=unique_ids,
+            total_count=total_count,
+            unique_count=unique_count,
+            duplicate_count=duplicate_count,
+            duplicates=duplicates,
+        )

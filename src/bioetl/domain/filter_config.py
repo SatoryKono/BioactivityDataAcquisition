@@ -30,16 +30,46 @@ class GoldColumnFilter:
 
 
 @dataclass(frozen=True)
+class GoldRangeFilter:
+    """Фильтр числового диапазона для колонки.
+
+    Attributes:
+        column: Имя колонки.
+        min_value: Минимальное значение.
+        max_value: Максимальное значение.
+        include_min: Включать ли минимум (>=). Default: True.
+        include_max: Включать ли максимум (<=). Default: True.
+    """
+
+    column: str
+    min_value: float | None = None
+    max_value: float | None = None
+    include_min: bool = True
+    include_max: bool = True
+
+    def __post_init__(self) -> None:
+        """Validate filter configuration."""
+        if not self.column:
+            raise ValueError("column name cannot be empty")
+        if self.min_value is None and self.max_value is None:
+            raise ValueError(
+                f"At least one of min_value or max_value must be provided for column '{self.column}'"
+            )
+
+
+@dataclass(frozen=True)
 class GoldFilterConfig:
     """Полная конфигурация Gold фильтров.
 
     Attributes:
         column_filters: Фильтры по колонкам (значение должно быть в списке).
+        range_filters: Фильтры диапазонов значений.
         required_fields: Обязательные поля (должны быть не null/пустые).
         exclude_if_present: Исключающие поля (если есть значение — запись исключается).
     """
 
     column_filters: tuple[GoldColumnFilter, ...] = ()
+    range_filters: tuple[GoldRangeFilter, ...] = ()
     required_fields: tuple[str, ...] = ()
     exclude_if_present: tuple[str, ...] = ()
 
@@ -56,6 +86,7 @@ class GoldFilterConfig:
             self._check_required_fields(record)
             and self._check_exclude_if_present(record)
             and self._check_column_filters(record)
+            and self._check_range_filters(record)
         )
 
     def _check_required_fields(self, record: dict[str, Any]) -> bool:
@@ -70,6 +101,43 @@ class GoldFilterConfig:
         """Проверяет соответствие значений колонок допустимым."""
         return all(str(record.get(f.column)) in f.values for f in self.column_filters)
 
+    def _check_range_filters(self, record: dict[str, Any]) -> bool:
+        """Проверяет попадание значений в диапазоны."""
+        return all(self._check_single_range(record, f) for f in self.range_filters)
+
+    def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:
+        """Проверяет одно значение на попадание в диапазон."""
+        val = record.get(f.column)
+        if val is None or val == "":
+            return False
+
+        try:
+            num_val = float(val)
+        except (ValueError, TypeError):
+            return False
+
+        return self._in_range(num_val, f)
+
+    def _in_range(self, num_val: float, f: GoldRangeFilter) -> bool:
+        """Проверяет, находится ли значение в диапазоне."""
+        min_ok = self._check_min_bound(num_val, f.min_value, f.include_min)
+        max_ok = self._check_max_bound(num_val, f.max_value, f.include_max)
+        return min_ok and max_ok
+
+    @staticmethod
+    def _check_min_bound(val: float, min_val: float | None, inclusive: bool) -> bool:
+        """Проверяет нижнюю границу диапазона."""
+        if min_val is None:
+            return True
+        return val >= min_val if inclusive else val > min_val
+
+    @staticmethod
+    def _check_max_bound(val: float, max_val: float | None, inclusive: bool) -> bool:
+        """Проверяет верхнюю границу диапазона."""
+        if max_val is None:
+            return True
+        return val <= max_val if inclusive else val < max_val
+
     def is_empty(self) -> bool:
         """Проверяет, пуста ли конфигурация фильтров.
 
@@ -78,9 +146,46 @@ class GoldFilterConfig:
         """
         return (
             not self.column_filters
+            and not self.range_filters
             and not self.required_fields
             and not self.exclude_if_present
         )
+
+
+@dataclass(frozen=True)
+class FilterLoadResult:
+    """Результат загрузки фильтра ID с метаданными о дубликатах.
+
+    Attributes:
+        ids: Уникальные отсортированные ID.
+        total_count: Всего записей в источнике (до дедупликации).
+        unique_count: Количество уникальных ID.
+        duplicate_count: Количество удалённых дубликатов.
+        duplicates: ID, которые встречались более одного раза.
+    """
+
+    ids: tuple[str, ...]
+    total_count: int
+    unique_count: int
+    duplicate_count: int
+    duplicates: frozenset[str]
+
+    def __post_init__(self) -> None:
+        """Validate result consistency."""
+        if self.unique_count != len(self.ids):
+            raise ValueError(
+                f"unique_count ({self.unique_count}) must match len(ids) ({len(self.ids)})"
+            )
+        if self.duplicate_count != self.total_count - self.unique_count:
+            raise ValueError(
+                f"duplicate_count ({self.duplicate_count}) must equal "
+                f"total_count - unique_count ({self.total_count - self.unique_count})"
+            )
+
+    @property
+    def has_duplicates(self) -> bool:
+        """Проверяет, были ли найдены дубликаты."""
+        return self.duplicate_count > 0
 
 
 @dataclass(frozen=True)
