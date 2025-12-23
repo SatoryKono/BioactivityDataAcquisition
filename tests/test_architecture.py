@@ -82,10 +82,8 @@ ALLOWED_DOMAIN_IMPORTS = {
 FORBIDDEN_APPLICATION_INFRASTRUCTURE = {
     "bioetl.infrastructure.adapters.chembl",
     "bioetl.infrastructure.adapters.pubchem",
-    "bioetl.infrastructure.checkpoint.s3_checkpoint",
-    "bioetl.infrastructure.locking.redis_lock",
-    "bioetl.infrastructure.storage.s3_storage",
-    "bioetl.infrastructure.quarantine.s3_quarantine",
+    "bioetl.infrastructure.checkpoint.local_checkpoint",
+    "bioetl.infrastructure.locking.memory_lock",
 }
 
 UNSAFE_BUILTINS = {"eval", "exec", "compile", "__import__"}
@@ -621,8 +619,8 @@ def test_adapters_implement_protocols(src_dir: Path):
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
-        from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-        from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.locking.memory_lock import MemoryLock
         from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
         from bioetl.infrastructure.observability.prometheus_metrics import (
             PrometheusMetrics,
@@ -638,8 +636,8 @@ def test_adapters_implement_protocols(src_dir: Path):
         (ChemblAdapter, DataSourcePort),
         (PubChemClient, DataSourcePort),
         (UniProtClient, DataSourcePort),
-        (S3Checkpoint, CheckpointPort),
-        (RedisDistributedLock, LockPort),
+        (LocalCheckpoint, CheckpointPort),
+        (MemoryLock, LockPort),
         (UnifiedQuarantine, QuarantinePort),
         (StorageAdapter, StoragePort),
         (PrometheusMetrics, MetricsPort),

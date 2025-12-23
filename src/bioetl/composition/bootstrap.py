@@ -86,7 +86,11 @@ def bootstrap_tracer(service_name: str = "bioetl"):
     """Bootstrap distributed tracing."""
     settings = get_settings()
     if settings.observability.tracing_enabled:
-        return OpenTelemetryTracer(service_name=service_name)
+        try:
+            return OpenTelemetryTracer(service_name=service_name)
+        except ImportError:
+            # OpenTelemetry not installed, fall back to no-op
+            pass
     return NoOpTracer()
 
 
