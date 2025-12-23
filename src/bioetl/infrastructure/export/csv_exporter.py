@@ -57,20 +57,31 @@ class CsvExporter:
         self.sort_ascending = sort_ascending
 
     def clear(self, table_name: str | None = None) -> list[Path]:
-        """Clear CSV files from the export directory."""
+        """Clear CSV files from the export directory.
+
+        Handles PermissionError gracefully on Windows when files are locked.
+        """
         deleted = []
         if not self.base_path.exists():
             return deleted
 
+        files_to_delete = []
         if table_name:
             csv_path = self.base_path / f"{table_name}.csv"
             if csv_path.exists():
-                csv_path.unlink()
-                deleted.append(csv_path)
+                files_to_delete.append(csv_path)
         else:
-            for csv_file in self.base_path.glob("*.csv"):
+            files_to_delete = list(self.base_path.glob("*.csv"))
+
+        for csv_file in files_to_delete:
+            try:
                 csv_file.unlink()
                 deleted.append(csv_file)
+            except PermissionError:
+                logger.warning(
+                    "Cannot delete locked CSV file: %s (file may be open in another program)",
+                    csv_file,
+                )
 
         return deleted
 
@@ -143,7 +154,12 @@ class CsvExporter:
         target_path: Path,
         write_options: pv.WriteOptions,
     ) -> None:
-        """Write CSV atomically to avoid file lock issues on Windows."""
+        """Write CSV atomically to avoid file lock issues on Windows.
+
+        If target file is locked, writes to a timestamped backup file instead.
+        """
+        import time
+
         target_dir = target_path.parent
         fd, temp_path_str = tempfile.mkstemp(
             suffix=".csv.tmp",
@@ -156,7 +172,17 @@ class CsvExporter:
             pv.write_csv(data, temp_path, write_options=write_options)
 
             if os.name == "nt" and target_path.exists():
-                target_path.unlink()
+                try:
+                    target_path.unlink()
+                except PermissionError:
+                    # File is locked by another process - use backup filename
+                    timestamp = int(time.time())
+                    backup_path = target_path.with_suffix(f".{timestamp}.csv")
+                    temp_path.rename(backup_path)
+                    logger.warning(
+                        "Target CSV locked, wrote to backup: %s", backup_path
+                    )
+                    return
 
             temp_path.rename(target_path)
         except Exception:

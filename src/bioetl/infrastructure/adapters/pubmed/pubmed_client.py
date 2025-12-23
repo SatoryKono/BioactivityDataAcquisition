@@ -116,6 +116,39 @@ class PubMedAdapter:
             self.logger.error("Batch fetch failed", error=str(e))
             raise ApiError(f"PubMed fetch failed: {e}") from e
 
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch PubMed records by ID list (bypass search)."""
+        if entity_type != "publication":
+            raise ValueError("PubMedAdapter only supports 'publication'")
+
+        if filter_field and filter_field != "pmid":
+            self.logger.warning(
+                "Unsupported filter_field: %s. Assuming PMIDs.", filter_field
+            )
+
+        total_fetched = 0
+        # If limit is set, we can restrict the list of IDs upfront
+        # assuming 1 ID -> 1 Record (which is true for PubMed efetch)
+        pmids = filter_ids[:limit] if limit else filter_ids
+
+        for i in range(0, len(pmids), self.batch_size):
+            batch_ids = pmids[i : i + self.batch_size]
+            root = await self._fetch_batch(batch_ids)
+            if root is None:
+                continue
+
+            for article_node in root.findall(".//PubmedArticle"):
+                yield self._extract_record_from_article(article_node)
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
+
     async def fetch(
         self,
         entity_type: str,

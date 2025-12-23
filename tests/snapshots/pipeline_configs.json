@@ -192,9 +192,12 @@
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "cid",
+        "molecular_formula"
+      ]
     },
-    "gold_table": null,
+    "gold_table": "pubchem_compound",
     "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "pubchem_compound",
@@ -215,14 +218,26 @@
     "entity_type": "publication",
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "pub_type",
+          "values": [
+            "Journal Article",
+            "Review"
+          ]
+        }
+      ],
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "pmid",
+        "title",
+        "pub_date"
+      ]
     },
-    "gold_table": null,
+    "gold_table": "pubmed_publications",
     "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "pubmed_publications",
@@ -243,14 +258,25 @@
     "entity_type": "protein",
     "fields": [],
     "gold_filters": {
-      "column_filters": [],
+      "column_filters": [
+        {
+          "column": "reviewed",
+          "values": [
+            "true"
+          ]
+        }
+      ],
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
-      "required_fields": []
+      "required_fields": [
+        "accession",
+        "entry_name",
+        "organism"
+      ]
     },
-    "gold_table": null,
+    "gold_table": "uniprot_protein",
     "gold_write_mode": "overwrite",
     "partition_cols": [],
     "pipeline_name": "uniprot_protein",
