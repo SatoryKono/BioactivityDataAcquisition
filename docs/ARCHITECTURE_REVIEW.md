@@ -37,9 +37,11 @@
 | ADR документов | 12 |
 | Покрытие тестами (цель) | >80% |
 
-### 1.3 Интегральный балл: **7.6 / 10**
+### 1.3 Интегральный балл: **7.4 / 10** (пересмотрено 2025-12-23)
 
-**Интерпретация**: Проект находится в зоне **«Хорошо»** (5.0–7.9) с элементами зоны **«Отлично»** (8.0–10.0). Архитектура зрелая, документация обширная, но есть области для улучшения.
+**Интерпретация**: Проект находится в зоне **«Хорошо»** (5.0–7.9). Архитектура зрелая, документация обширная, но обнаружены **критические проблемы** (undefined variable, нарушение DI), требующие немедленного исправления.
+
+> ⚠️ **Внимание**: Балл снижен с 7.6 до 7.4 из-за обнаружения BLOCKER-проблемы P1-NEW.
 
 ---
 
@@ -185,7 +187,49 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
 
 | ID | Проблема | Локация | Влияние |
 |----|----------|---------|---------|
-| **P1** | Отсутствуют `__init__.py` в 4 пакетах | `application/pipelines/{chembl,pubchem,uniprot}/`, `infrastructure/adapters/pubmed/` | ImportError при прямом импорте |
+| ~~**P1**~~ | ~~Отсутствуют `__init__.py` в 4 пакетах~~ | — | ✅ **ИСПРАВЛЕНО** (2025-12-23) |
+| **P1-NEW** | **Undefined variable `validated_records`** | `application/core/record_processor.py:279` | 🔴 **Код не работает!** Запись в Gold слой невозможна |
+| **P2-NEW** | **Дублирование GoldValidator (нарушение DI)** | `application/core/record_processor.py:51-73` | 🔴 GoldValidator создаётся напрямую вместо инъекции |
+
+#### P1-NEW: Undefined Variable `validated_records`
+
+```python
+# record_processor.py:262-282
+async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
+    result = self._gold_validator.validate(records)
+    if not result.valid:
+        raise SchemaViolationError("gold", result.errors)
+    # ...
+    await self._storage.write_gold(
+        # ...
+        records=validated_records,  # ❌ UNDEFINED! Должно быть `records`
+    )
+```
+
+**Исправление:**
+```python
+records=records,  # ✅ Использовать входной параметр
+```
+
+#### P2-NEW: Дублирование GoldValidator
+
+```python
+# record_processor.py:51-73
+def __init__(
+    self,
+    # ...
+    gold_validator: GoldValidatorPort | None = None,  # Инжектируется
+):
+    # ...
+    self._gold_validator = gold_validator  # ❌ Затирается ниже!
+    # ...
+    # Gold layer validator (SRP)
+    self._gold_validator = GoldValidator(config.gold_schema)  # ❌ Создаётся напрямую!
+```
+
+**Проблема:** Инжектированный `gold_validator` перезаписывается созданием нового экземпляра.
+
+**Исправление:** Удалить строку 73, использовать только инжектированный валидатор.
 
 ### 4.2 Высокий приоритет
 
@@ -217,32 +261,49 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
 
 ### 5.1 Фаза 1: Критические исправления (Immediate)
 
-#### 5.1.1 Добавить отсутствующие `__init__.py`
+#### 5.1.0 [BLOCKER] Исправить undefined variable `validated_records`
 
-**Приоритет:** 🔴 Критический
-**Усилия:** 15 минут
+**Приоритет:** 🔴🔴🔴 **BLOCKER**
+**Усилия:** 5 минут
+**Файл:** `src/bioetl/application/core/record_processor.py:279`
 
-```bash
-# Создать файлы
-touch src/bioetl/application/pipelines/chembl/__init__.py
-touch src/bioetl/application/pipelines/pubchem/__init__.py
-touch src/bioetl/application/pipelines/uniprot/__init__.py
-touch src/bioetl/infrastructure/adapters/pubmed/__init__.py
-```
-
-**Содержимое (пример для chembl):**
 ```python
-"""ChEMBL pipeline components."""
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
-# ... остальные exports
+# Было (строка 279):
+records=validated_records,
 
-__all__ = [
-    "ChEMBLActivityPipeline",
-    "ChEMBLMoleculePipeline",
-    # ...
-]
+# Стало:
+records=records,
 ```
+
+**Критерии готовности:**
+- [ ] Код изменён
+- [ ] `make lint` проходит
+- [ ] Тесты Gold слоя проходят
+
+#### 5.1.1 [CRITICAL] Исправить дублирование GoldValidator
+
+**Приоритет:** 🔴🔴 Критический
+**Усилия:** 30 минут
+**Файл:** `src/bioetl/application/core/record_processor.py:51-73`
+
+```python
+# Удалить строку 73:
+self._gold_validator = GoldValidator(config.gold_schema)
+
+# Изменить параметр на обязательный:
+gold_validator: GoldValidatorPort,  # НЕ Optional
+```
+
+**Критерии готовности:**
+- [ ] `gold_validator` — обязательный параметр
+- [ ] Нет прямого создания `GoldValidator` в application layer
+- [ ] Удалён импорт `from bioetl.application.core.gold_validator import GoldValidator`
+- [ ] Architecture tests проходят
+
+#### ~~5.1.2 Добавить отсутствующие `__init__.py`~~
+
+~~**Приоритет:** 🔴 Критический~~
+~~**Статус:** ✅ **ВЫПОЛНЕНО** (2025-12-23)~~
 
 ### 5.2 Фаза 2: Рефакторинг структуры (Short-term)
 
@@ -380,23 +441,93 @@ mutmut results
 
 ## 5.5 Сводная таблица плана
 
-| Фаза | Задача | Приоритет | Усилия | Зависимости |
-|------|--------|-----------|--------|-------------|
-| **1** | Добавить `__init__.py` | 🔴 | 15 мин | — |
-| **2** | Унификация трансформеров | 🟡 | 2-4 ч | Фаза 1 |
-| **2** | Удалить пустые файлы | 🟡 | 30 мин | — |
-| **2** | Синхронизировать docs | 🟡 | 1 ч | — |
-| **3** | Security scanning в CI | 🟡 | 1-2 ч | — |
-| **3** | Бенчмарки | 🟡 | 4-8 ч | — |
-| **3** | Mutation testing | 🟢 | 2-4 ч | — |
-| **4** | Orchestration layer | 🟢 | 8-16 ч | — |
-| **4** | Консолидация docs | 🟢 | 4-8 ч | — |
+| Фаза | Задача | Приоритет | Усилия | Статус |
+|------|--------|-----------|--------|--------|
+| **1** | **Исправить `validated_records`** | 🔴🔴🔴 BLOCKER | 5 мин | ⏳ Ожидает |
+| **1** | **Исправить дублирование GoldValidator** | 🔴🔴 | 30 мин | ⏳ Ожидает |
+| ~~**1**~~ | ~~Добавить `__init__.py`~~ | ~~🔴~~ | ~~15 мин~~ | ✅ Выполнено |
+| **2** | Унификация трансформеров | 🟡 | 2-4 ч | ⏳ Планируется |
+| **2** | Удалить пустые файлы | 🟡 | 30 мин | ⏳ Планируется |
+| **2** | Синхронизировать docs | 🟡 | 1 ч | ⏳ Планируется |
+| **3** | Security scanning в CI | 🟡 | 1-2 ч | ⏳ Планируется |
+| **3** | Бенчмарки | 🟡 | 4-8 ч | ⏳ Планируется |
+| **3** | Mutation testing | 🟢 | 2-4 ч | ⏳ Планируется |
+| **4** | Orchestration layer | 🟢 | 8-16 ч | ⏳ Планируется |
+| **4** | Консолидация docs | 🟢 | 4-8 ч | ⏳ Планируется |
+
+### 5.6 Ожидаемое изменение интегрального балла
+
+| Этап | Задача | Изменение балла | Новый балл |
+|------|--------|-----------------|------------|
+| После 5.1.0 | Исправление `validated_records` | +0.10 | 7.50 |
+| После 5.1.1 | Исправление DI GoldValidator | +0.15 | 7.65 |
+| После Фазы 2 | Унификация, cleanup | +0.20 | 7.85 |
+| После Фазы 3 | Security, benchmarks | +0.20 | **8.05** |
+
+> 📈 После исправления критических проблем и выполнения Фазы 3 проект достигнет зоны **«Отлично»** (≥8.0).
 
 ---
 
-## 6. Приложения
+## 6. Метрики и Критерии Качества
 
-### 6.1 Архитектурные решения (ADR)
+### 6.1 Автоматизированные Метрики
+
+| Метрика | Инструмент | Текущее значение | Целевое значение | Связь с категорией |
+|---------|------------|------------------|------------------|-------------------|
+| **Line Coverage** | pytest-cov | — | ≥80% | #4 Тестирование |
+| **Cyclomatic Complexity** | radon/xenon | — | CC ≤5 (domain), ≤10 (others) | #10 Сопровождаемость |
+| **Architecture Contracts** | import-linter | — | 0 violations | #1 Архитектура слоёв |
+| **Type Coverage** | mypy --strict | — | 0 errors | #3 Качество модели |
+| **Linting** | ruff | — | 0 errors | #10 Сопровождаемость |
+| **Security Issues** | bandit, pip-audit | — | 0 HIGH severity | #8 Безопасность |
+| **Dead Code** | vulture | — | 0 items (conf 100%) | #10 Сопровождаемость |
+
+### 6.2 Команды для Проверки
+
+```bash
+# Полная проверка качества
+make quality            # lint + arch-lint + complexity + typecheck
+
+# Отдельные проверки
+make lint               # ruff + mypy
+make arch-lint          # import-linter
+make complexity         # xenon (CC thresholds)
+make test               # pytest с coverage
+make security           # pip-audit
+```
+
+### 6.3 CI/CD Рекомендации
+
+1. **Pre-commit hooks:**
+   - `make lint` перед каждым коммитом
+   - Блокировка коммита при ошибках
+
+2. **CI Pipeline:**
+   - `make ci-lint` — все linting проверки
+   - `make ci-test` — тесты + архитектурные тесты
+   - `make security` — security scanning
+   - Fail on coverage < 80%
+
+3. **PR Gates:**
+   - Все CI jobs должны пройти
+   - Обязательный code review
+   - Architecture test failures = blocker
+
+### 6.4 Связь Метрик с Интегральным Баллом
+
+| Категория | Автоматические метрики | Влияние на балл |
+|-----------|------------------------|-----------------|
+| #1 Архитектура | import-linter violations | -0.5 за каждое нарушение |
+| #3 Доменная модель | mypy errors | -0.1 за каждые 10 ошибок |
+| #4 Тестирование | coverage % | -0.2 за каждые 10% ниже 80% |
+| #8 Безопасность | HIGH severity CVEs | -0.3 за каждую |
+| #10 Сопровождаемость | CC > threshold | -0.1 за каждую функцию |
+
+---
+
+## 7. Приложения
+
+### 7.1 Архитектурные решения (ADR)
 
 | ADR | Название | Статус |
 |-----|----------|--------|
@@ -412,7 +543,7 @@ mutmut results
 | ADR-010 | Local-Only Deployment | ✅ Accepted |
 | ADR-011 | Remove Watermark Mechanism | ✅ Accepted |
 
-### 6.2 Статистика кода
+### 7.2 Статистика кода
 
 ```
 src/bioetl/
@@ -427,7 +558,7 @@ docs/                66 markdown файлов
 configs/             13 YAML файлов
 ```
 
-### 6.3 Зависимости проекта
+### 7.3 Зависимости проекта
 
 **Core:**
 - `httpx>=0.27` — async HTTP
