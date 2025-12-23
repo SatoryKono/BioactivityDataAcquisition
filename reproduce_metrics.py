@@ -1,13 +1,13 @@
 import time
+
 import requests
-import threading
-from prometheus_client import start_http_server, Counter
+from prometheus_client import Counter, start_http_server
 
 # Define a metric
 c = Counter('bioetl_records_processed_total', 'Description of counter')
 c.inc()
 
-def test_server():
+def test_server() -> None:
     print("Starting server...")
     try:
         start_http_server(8001)

@@ -1,13 +1,15 @@
 """Unit tests for configuration mapping."""
 
-import pytest
-from bioetl.domain.config import PipelineConfig, TableConfig, DQConfig
+from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config import yaml_config_to_domain
+from bioetl.infrastructure.schemas.pipeline_config import (
+    DQConfig as YamlDQConfig,
+)
 from bioetl.infrastructure.schemas.pipeline_config import (
     PipelineYamlConfig,
     SinkLayerConfig,
-    DQConfig as YamlDQConfig,
 )
+
 
 def test_yaml_config_to_domain_mapping():
     """Test mapping from YAML schema to Domain config."""

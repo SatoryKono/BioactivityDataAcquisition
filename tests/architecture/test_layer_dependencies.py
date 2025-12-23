@@ -675,14 +675,11 @@ def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
                 # Check if it's a dataclass
                 is_dataclass = False
                 for decorator in node.decorator_list:
-                    if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
+                    if (isinstance(decorator, ast.Name) and decorator.id == "dataclass") or (isinstance(decorator, ast.Call) and (
+                        isinstance(decorator.func, ast.Name)
+                        and decorator.func.id == "dataclass"
+                    )):
                         is_dataclass = True
-                    elif isinstance(decorator, ast.Call):
-                        if (
-                            isinstance(decorator.func, ast.Name)
-                            and decorator.func.id == "dataclass"
-                        ):
-                            is_dataclass = True
 
                 if not is_dataclass:
                     continue

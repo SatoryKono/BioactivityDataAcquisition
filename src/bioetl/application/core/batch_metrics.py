@@ -7,10 +7,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.types import ErrorType
-
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.types import ErrorType
 
 
 class BatchMetricsRecorder:

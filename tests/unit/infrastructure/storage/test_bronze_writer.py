@@ -1,8 +1,9 @@
 """Unit tests for BronzeWriter."""
 
+import asyncio
 import json
 import tempfile
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
@@ -12,8 +13,7 @@ import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-import asyncio
-from datetime import timezone
+
 
 @pytest.fixture
 def batch_id() -> BatchID:
@@ -214,7 +214,7 @@ class TestBronzeWriterWriteLocal:
     ) -> None:
         """Test that local write is performed asynchronously."""
         writer = BronzeWriter(bucket=temp_dir)
-        date = datetime(2023, 1, 1, tzinfo=timezone.utc)
+        date = datetime(2023, 1, 1, tzinfo=UTC)
 
         # We patch run_in_executor to verify it's called for file I/O
         with patch.object(
@@ -450,7 +450,7 @@ class TestBronzeWriterS3:
         )
         date = datetime(2024, 1, 15)
 
-        path = await writer.write_bronze(
+        await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",

@@ -82,9 +82,7 @@ def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     """Check if field should be included in hash calculation."""
     if key in META_FIELDS:
         return False
-    if exclude_none and value is None:
-        return False
-    return True
+    return not (exclude_none and value is None)
 
 
 def normalize_for_hash(record: dict[str, Any], exclude_none: bool = False) -> dict[str, Any]:

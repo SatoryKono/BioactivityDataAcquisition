@@ -6,8 +6,8 @@ Uses standard deviation to identify outliers.
 from __future__ import annotations
 
 import statistics
-from collections.abc import Sequence
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
 from bioetl.infrastructure.observability.anomaly.types import (
@@ -15,6 +15,9 @@ from bioetl.infrastructure.observability.anomaly.types import (
     AnomalySeverity,
     AnomalyType,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class ZScoreDetector(DetectorStrategy):

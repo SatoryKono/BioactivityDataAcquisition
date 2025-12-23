@@ -18,10 +18,10 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunID
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 

@@ -20,7 +20,7 @@ class UniProtProteinTransformer(BaseTransformer):
 
     async def transform(
         self,
-        context: PipelineContext,
+        _context: PipelineContext,
         record: BronzeRecord,
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
@@ -29,8 +29,8 @@ class UniProtProteinTransformer(BaseTransformer):
             return None
 
         # Helper variables for safe access (handle explicit None values)
-        organism = record.get("organism") or {}
-        sequence = record.get("sequence") or {}
+        organism = cast("dict[str, Any]", record.get("organism") or {})
+        sequence = cast("dict[str, Any]", record.get("sequence") or {})
 
         normalized = {
             "accession": accession,

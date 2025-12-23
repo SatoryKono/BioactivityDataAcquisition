@@ -26,7 +26,7 @@ def check_file(filepath: Path) -> list[tuple[str, int, int]]:
     Returns:
         List of (class_name, arg_count, line_number) tuples for violations.
     """
-    violations = []
+    violations: list[tuple[str, int, int]] = []
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
     except SyntaxError:

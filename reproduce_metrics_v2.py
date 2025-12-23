@@ -1,15 +1,16 @@
+import contextlib
 import time
+
 import requests
-from bioetl.infrastructure.observability.server import start_metrics_server
 from prometheus_client import Counter
 
-# Define a metric if not already defined (registry is global)
-try:
-    c = Counter('bioetl_records_processed_total', 'Description of counter')
-except ValueError:
-    pass # Already defined
+from bioetl.infrastructure.observability.server import start_metrics_server
 
-def test_idempotency():
+# Define a metric if not already defined (registry is global)
+with contextlib.suppress(ValueError):
+    c = Counter('bioetl_records_processed_total', 'Description of counter')
+
+def test_idempotency() -> None:
     print("Call 1: Starting server...")
     start_metrics_server(8001)
 

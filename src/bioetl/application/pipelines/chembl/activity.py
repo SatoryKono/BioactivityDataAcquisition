@@ -12,16 +12,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.activity_watermark import (
     ActivityWatermarkExtractor,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
 
 if TYPE_CHECKING:
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
 
 
 class ChEMBLActivityPipeline(BasePipeline):
