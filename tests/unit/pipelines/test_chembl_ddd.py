@@ -7,6 +7,7 @@ import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
@@ -35,7 +36,10 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         tracing=MagicMock(),
         logger=logger,
     )
-    return ChEMBLActivityPipeline(config=config, runtime=runtime, services=services)
+    transformer = ActivityTransformer(provider="chembl")
+    return ChEMBLActivityPipeline(
+        config=config, runtime=runtime, services=services, transformer=transformer
+    )
 
 
 @pytest.fixture

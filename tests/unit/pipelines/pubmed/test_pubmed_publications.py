@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunID, RunType
 
@@ -32,7 +33,10 @@ def mock_runtime():
 
 @pytest.fixture
 def pipeline(mock_config, mock_runtime, mock_services):
-    return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services)
+    transformer = PubMedPublicationTransformer(provider="pubmed")
+    return PubMedPublicationsPipeline(
+        mock_config, mock_runtime, mock_services, transformer
+    )
 
 
 @pytest.fixture

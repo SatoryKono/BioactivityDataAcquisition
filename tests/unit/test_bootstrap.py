@@ -290,11 +290,13 @@ class TestChemblActivityFactory:
                 logger=mock_logger,
             )
 
-            mock_pipeline_class.create.assert_called_once_with(
-                runtime=runtime,
-                services=mock_services,
-                config=mock_domain_config,
-            )
+            # Verify create was called (now includes transformer arg)
+            mock_pipeline_class.create.assert_called_once()
+            call_kwargs = mock_pipeline_class.create.call_args.kwargs
+            assert call_kwargs["runtime"] == runtime
+            assert call_kwargs["services"] == mock_services
+            assert call_kwargs["config"] == mock_domain_config
+            assert "transformer" in call_kwargs  # Transformer is now injected
             assert result is mock_pipeline
         finally:
             # Restore original class
