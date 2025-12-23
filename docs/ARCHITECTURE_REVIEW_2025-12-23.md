@@ -302,16 +302,37 @@ async def test_chembl_activity_full_cycle():
 **Решение:** Порт не используется и не планируется к реализации. Удалить мёртвый код.
 
 **Файлы для изменения:**
-1. `src/bioetl/domain/ports.py` — удалить класс `OrchestrationPort`
-2. `src/bioetl/domain/ports.py` — удалить из `__all__`
-3. Проверить отсутствие импортов в других модулях
+
+| Файл | Действие | Строки |
+|------|----------|--------|
+| `src/bioetl/domain/ports.py` | Удалить класс `OrchestrationPort` | 472-498 |
+| `src/bioetl/domain/ports.py` | Удалить `"OrchestrationPort"` из `__all__` | 548 |
+| `tests/unit/test_ports.py` | Удалить импорт `OrchestrationPort` | 12 |
+| `tests/unit/test_ports.py` | Удалить класс `TestOrchestrationPortProtocol` | 397-444 |
+
+**Код для удаления:**
 
 ```python
-# Удалить из domain/ports.py:
+# 1. src/bioetl/domain/ports.py (строки 472-498):
 @runtime_checkable
 class OrchestrationPort(Protocol):
     """Port for pipeline orchestration."""
+    async def schedule(...) -> None: ...
+    async def trigger(...) -> Any: ...
+    async def get_status(...) -> str: ...
+    async def aclose(self) -> None: ...
+
+# 2. src/bioetl/domain/ports.py (строка 548):
+__all__ = [
     ...
+    "OrchestrationPort",  # <- удалить эту строку
+    ...
+]
+
+# 3. tests/unit/test_ports.py (строки 397-444):
+class TestOrchestrationPortProtocol:
+    """Tests for the OrchestrationPort protocol."""
+    # ... весь класс
 ```
 
 **Оценка трудозатрат:** 0.5 дня
