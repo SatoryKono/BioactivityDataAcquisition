@@ -61,7 +61,9 @@ class TargetTransformer(BaseTransformer):
                 "target_component_synonyms": self._aggregate_synonyms(
                     record.get("target_components")
                 ),
-                "cross_references": self.serialize_json(record.get("cross_references")),
+                "cross_references": self._aggregate_component_xrefs(
+                    record.get("target_components")
+                ),
                 # Flattened components
                 **flattened_components,
             }
@@ -155,3 +157,28 @@ class TargetTransformer(BaseTransformer):
                 all_synonyms.extend(synonyms)
 
         return self.serialize_json(all_synonyms) if all_synonyms else None
+
+    def _aggregate_component_xrefs(
+        self, components: list[dict[str, Any]] | None
+    ) -> str | None:
+        """Aggregate cross-references from all target components.
+
+        ChEMBL API stores cross-references inside each component's
+        target_component_xrefs field, not at the target level.
+
+        Args:
+            components: List of component dicts from ChEMBL API.
+
+        Returns:
+            JSON string of aggregated xrefs, or None if empty.
+        """
+        if not components or not isinstance(components, list):
+            return None
+
+        all_xrefs: list[dict[str, Any]] = []
+        for comp in components:
+            xrefs = comp.get("target_component_xrefs")
+            if xrefs and isinstance(xrefs, list):
+                all_xrefs.extend(xrefs)
+
+        return self.serialize_json(all_xrefs) if all_xrefs else None
