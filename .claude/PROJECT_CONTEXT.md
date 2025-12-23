@@ -1,7 +1,7 @@
 # BioETL: Контекст Проекта для Claude
 
-*Синхронизировано с CLAUDE.md и RULES.md v5.1*
-*Последнее обновление: 2025-12-22*
+*Синхронизировано с CLAUDE.md и RULES.md v5.2*
+*Последнее обновление: 2025-12-23*
 
 ---
 
@@ -32,7 +32,7 @@ src/bioetl/
 ├── domain/          # Чистая логика, Protocols (Ports). БЕЗ I/O.
 ├── application/     # Пайплайны, Use Cases, оркестрация
 ├── composition/     # Composition Root (DI-контейнер, factories, bootstrap)
-├── infrastructure/  # Адаптеры (HTTP, S3, Redis), реализация портов
+├── infrastructure/  # Адаптеры (HTTP, локальное хранилище), реализация портов
 └── interfaces/      # CLI, PipelineRunner
 ```
 
@@ -128,20 +128,20 @@ sha256(provider + canonical_json(record))
 При получении SIGTERM/SIGINT:
 1. Прекратить извлечение новых записей
 2. Дождаться завершения записи текущего батча
-3. Сохранить чекпоинт в S3
+3. Сохранить локальный чекпоинт
 4. Выйти с кодом 0
 
 ---
 
 ## 4. Блокировки (Locking)
 
+> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
+
 | Параметр | Значение |
 |----------|----------|
-| Механизм | Redis `SETNX` + `EXPIRE` |
-| TTL | 60 секунд |
-| Heartbeat | Каждые 20 секунд |
+| Механизм | In-memory (`MemoryLock`) |
+| Scope | Один процесс Python |
 | Max Duration | 4 часа |
-| Fencing Token | `owner_id` (run_id воркера) |
 
 **Invariant**: Потеря блокировки = аварийное завершение ДО попытки записи данных.
 
@@ -235,14 +235,16 @@ make arch-lint            # import-linter contracts
 
 ## 8. Стек Технологий
 
+> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
+
 | Категория | Инструмент | Назначение |
 |-----------|------------|------------|
 | **HTTP** | httpx (async) | HTTP-клиент |
 | **Data** | Polars, Delta Lake | Обработка, хранение |
 | **Validation** | Pandera | Валидация схем |
 | **Linting** | Ruff + mypy | Код и типы |
-| **Orchestration** | Prefect | Запуск пайплайнов |
-| **Locks** | Redis | Распределённые блокировки |
+| **Locks** | MemoryLock (in-process) | Конкурентный доступ |
+| **Checkpoints** | LocalCheckpoint | Локальные чекпоинты в JSON |
 
 ### Legacy Wrappers (MUST)
 
@@ -381,11 +383,11 @@ await loop.run_in_executor(thread_pool, fetch_func)
 | Документ | Описание |
 |----------|----------|
 | `CLAUDE.md` | Справочник для Claude Code |
-| `AGENT.md` | Детальные инструкции для агента v2.1 |
-| `docs/RULES.md` | Конституция проекта v5.1 |
+| `AGENT.md` | Детальные инструкции для агента v2.2 |
+| `docs/RULES.md` | Конституция проекта v5.2 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-009) |
+| `docs/02-architecture/decisions/` | ADR (001-011) |
 
 ---
 
