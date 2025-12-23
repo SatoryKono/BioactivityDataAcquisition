@@ -44,6 +44,7 @@
         }
       ],
       "exclude_if_present": [],
+      "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [
         {
@@ -192,6 +193,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": []
@@ -220,6 +222,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": []
@@ -248,6 +251,7 @@
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
+      "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": []

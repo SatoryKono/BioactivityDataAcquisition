@@ -17,6 +17,8 @@ source_file: ../../sources/chembl.yaml
 gold_filters:
     columns:
         molecule_type: [Small molecule]
+        structure_type: [MOL]
+        inorganic_flag: ["0"]
     required_fields:
         - molecule_chembl_id
 

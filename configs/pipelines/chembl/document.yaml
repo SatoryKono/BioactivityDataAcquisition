@@ -17,8 +17,14 @@ source_file: ../../sources/chembl.yaml
 gold_filters:
     columns:
         doc_type: [PUBLICATION]
+    ranges:
+        year:
+            min: 1950
+            include_min: false
     required_fields:
         - title
+        - pubmed_id
+        - doi
 
 transform:
     version: "1.0.0"
