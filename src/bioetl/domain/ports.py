@@ -469,36 +469,6 @@ class MetricsPort(Protocol):
 
 
 @runtime_checkable
-class OrchestrationPort(Protocol):
-    """
-    Port for pipeline orchestration.
-
-    Abstracts the workflow engine to allow triggering runs,
-    checking status, and scheduling.
-    """
-
-    async def schedule(
-        self, pipeline_name: str, params: dict[str, Any] | None = None
-    ) -> None:
-        """Schedule a pipeline execution."""
-        ...
-
-    async def trigger(
-        self, pipeline_name: str, params: dict[str, Any] | None = None
-    ) -> Any:
-        """Trigger an immediate pipeline execution. Returns Run ID."""
-        ...
-
-    async def get_status(self, run_id: RunID) -> str:
-        """Get the status of a pipeline run."""
-        ...
-
-    async def aclose(self) -> None:
-        """Close connection to orchestration backend."""
-        ...
-
-
-@runtime_checkable
 class LoggerPort(Protocol):
     """Port for structured logging.
 
@@ -545,7 +515,6 @@ __all__ = [
     "LockPort",
     "LoggerPort",
     "MetricsPort",
-    "OrchestrationPort",
     "QuarantinePort",
     "StoragePort",
 ]
