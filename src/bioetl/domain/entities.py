@@ -197,14 +197,51 @@ class Protein(BaseEntity):
 
 @dataclass(frozen=True, kw_only=True)
 class Publication(BaseEntity):
-    """Represents a scientific publication (e.g., from PubMed)."""
+    """Represents a scientific publication from PubMed.
 
+    Contains comprehensive metadata extracted from PubMed XML via Entrez API.
+    See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
+    """
+
+    # Primary identifier
     pmid: str
-    title: str | None = None  # None when title unavailable from source
+    doi: str | None = None
+
+    # Title and abstract
+    title: str | None = None
     abstract: str | None = None
+
+    # Journal information
     journal: str | None = None
-    publication_year: int | None = None
+    journal_abbrev: str | None = None
+    issn: str | None = None
+    volume: str | None = None
+    issue: str | None = None
+    pages: str | None = None
+
+    # Authors
     authors: list[str] = field(default_factory=list)
+
+    # Dates (stored as ISO strings YYYY-MM-DD or partial YYYY-MM, YYYY)
+    pub_date: str | None = None  # Publication date
+    pub_year: int | None = None  # Publication year (for partitioning)
+    accepted_date: str | None = None  # Date accepted
+    received_date: str | None = None  # Date received
+    revised_date: str | None = None  # Date revised
+    epub_date: str | None = None  # Electronic publication date
+
+    # Classification
+    publication_types: list[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    mesh_terms: list[str] = field(default_factory=list)
+
+    # Additional metadata
+    language: str | None = None
+    country: str | None = None
+    pmc_id: str | None = None  # PubMed Central ID
+
+    # Legacy field (kept for backward compatibility)
+    publication_year: int | None = None  # Alias for pub_year
 
     def __post_init__(self) -> None:
         """Post-initialization validation."""
