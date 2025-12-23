@@ -158,6 +158,8 @@ class TestUnifiedHTTPClientInit:
         )
         assert client.timeout == 30.0
         assert client.run_id is None
+        assert client.user_agent == "BioETL/5.0.0"
+        assert client.contact_email is None
         assert client._client is None
 
     def test_init_with_run_id(self, mock_rate_limiter, mock_circuit_breaker):
@@ -169,6 +171,24 @@ class TestUnifiedHTTPClientInit:
             run_id=run_id,
         )
         assert client.run_id == run_id
+
+    def test_init_with_custom_user_agent(self, mock_rate_limiter, mock_circuit_breaker):
+        """Test initialization with custom user_agent."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            user_agent="CustomApp/1.0.0",
+        )
+        assert client.user_agent == "CustomApp/1.0.0"
+
+    def test_init_with_contact_email(self, mock_rate_limiter, mock_circuit_breaker):
+        """Test initialization with contact_email."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            contact_email="admin@example.com",
+        )
+        assert client.contact_email == "admin@example.com"
 
 
 @pytest.mark.unit
@@ -205,6 +225,66 @@ class TestUnifiedHTTPClientContextManager:
             headers = client._client.headers
             assert "X-Correlation-ID" in headers
             assert headers["X-Correlation-ID"] == str(run_id)
+
+    @pytest.mark.asyncio
+    async def test_aenter_sets_default_user_agent(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test __aenter__ sets default User-Agent header."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+        )
+
+        async with client:
+            headers = client._client.headers
+            assert headers["User-Agent"] == "BioETL/5.0.0"
+
+    @pytest.mark.asyncio
+    async def test_aenter_sets_custom_user_agent(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test __aenter__ sets custom User-Agent header."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            user_agent="CustomApp/2.0.0",
+        )
+
+        async with client:
+            headers = client._client.headers
+            assert headers["User-Agent"] == "CustomApp/2.0.0"
+
+    @pytest.mark.asyncio
+    async def test_aenter_appends_contact_email_to_user_agent(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test __aenter__ appends contact_email to User-Agent when provided."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            contact_email="support@example.com",
+        )
+
+        async with client:
+            headers = client._client.headers
+            assert headers["User-Agent"] == "BioETL/5.0.0 (support@example.com)"
+
+    @pytest.mark.asyncio
+    async def test_aenter_with_custom_user_agent_and_email(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test __aenter__ with both custom user_agent and contact_email."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            user_agent="MyApp/3.0.0",
+            contact_email="admin@myapp.com",
+        )
+
+        async with client:
+            headers = client._client.headers
+            assert headers["User-Agent"] == "MyApp/3.0.0 (admin@myapp.com)"
 
 
 @pytest.mark.unit
