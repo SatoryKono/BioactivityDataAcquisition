@@ -416,6 +416,131 @@ class TestTargetTransformer:
 
         assert result is not None
 
+    @pytest.mark.asyncio
+    async def test_transform_with_new_metadata_fields(self, transformer, mock_context):
+        """Test transformation extracts new metadata fields (description, downgraded, dap_id)."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "pref_name": "Cyclooxygenase-2",
+            "target_type": "SINGLE PROTEIN",
+            "description": "Prostaglandin G/H synthase 2",
+            "downgraded": False,
+            "dap_id": 12345,
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["description"] == "Prostaglandin G/H synthase 2"
+        assert result["downgraded"] is False
+        assert result["dap_id"] == 12345
+
+    @pytest.mark.asyncio
+    async def test_transform_with_pipeline_stages_and_constraints(
+        self, transformer, mock_context
+    ):
+        """Test transformation handles pipeline_stages and target_constraints as JSON."""
+        record = {
+            "target_chembl_id": "CHEMBL240",
+            "pipeline_stages": [{"stage": "Phase 1", "status": "Active"}],
+            "target_constraints": [{"constraint_type": "assay"}],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert isinstance(result.get("pipeline_stages"), str)
+        assert isinstance(result.get("target_constraints"), str)
+        import json
+
+        stages = json.loads(result["pipeline_stages"])
+        assert stages[0]["stage"] == "Phase 1"
+
+    @pytest.mark.asyncio
+    async def test_transform_extracts_component_organisms_and_tax_ids(
+        self, transformer, mock_context
+    ):
+        """Test transformation extracts organisms and tax_ids from components."""
+        record = {
+            "target_chembl_id": "CHEMBL2111431",
+            "target_components": [
+                {
+                    "accession": "P12345",
+                    "component_id": 100,
+                    "component_type": "PROTEIN",
+                    "organism": "Homo sapiens",
+                    "tax_id": 9606,
+                },
+                {
+                    "accession": "P67890",
+                    "component_id": 101,
+                    "component_type": "PROTEIN",
+                    "organism": "Mus musculus",
+                    "tax_id": 10090,
+                },
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["component_organisms"] == ["Homo sapiens", "Mus musculus"]
+        assert result["component_tax_ids"] == [9606, 10090]
+
+    @pytest.mark.asyncio
+    async def test_transform_extracts_protein_classification_details(
+        self, transformer, mock_context
+    ):
+        """Test transformation extracts full protein classification details."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "target_components": [
+                {
+                    "accession": "P35354",
+                    "component_id": 200,
+                    "protein_classifications": [
+                        {
+                            "protein_classification_id": 597,
+                            "pref_name": "Enzyme",
+                            "short_name": "Oxidoreductase",
+                        },
+                        {
+                            "protein_classification_id": 598,
+                            "pref_name": "Cyclooxygenase",
+                            "short_name": "COX",
+                        },
+                    ],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["protein_classifications"] == ["Oxidoreductase", "COX"]
+        assert result["protein_classification_ids"] == [597, 598]
+        assert result["protein_classification_names"] == ["Enzyme", "Cyclooxygenase"]
+
+    @pytest.mark.asyncio
+    async def test_transform_handles_missing_new_fields_gracefully(
+        self, transformer, mock_context
+    ):
+        """Test transformation handles missing new fields (returns None)."""
+        record = {
+            "target_chembl_id": "CHEMBL123",
+            "pref_name": "Test Target",
+            # No description, downgraded, dap_id, pipeline_stages, target_constraints
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["description"] is None
+        assert result["downgraded"] is None
+        assert result["dap_id"] is None
+        assert result["pipeline_stages"] is None
+        assert result["target_constraints"] is None
+
 
 @pytest.mark.unit
 class TestTargetComponentTransformer:
