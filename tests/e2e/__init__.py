@@ -1,10 +1,9 @@
-"""End-to-end tests for BioETL pipelines.
+"""E2E (End-to-End) tests for BioETL pipelines.
 
-These tests use real Docker infrastructure (MinIO, Redis) to verify
-complete pipeline flows from Extract to Bronze/Silver/Gold.
+These tests verify complete pipeline execution from ingestion to Gold layer output
+using local file storage and in-memory infrastructure.
 
 Requirements:
-- Docker and docker-compose installed
-- Services started via `docker compose -f docker-compose.test.yml up -d`
-- Run with: `pytest tests/e2e/ -v -m e2e`
+- Python 3.11+
+- All dev dependencies installed
 """

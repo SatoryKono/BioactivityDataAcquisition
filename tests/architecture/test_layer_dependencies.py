@@ -19,13 +19,10 @@ import pytest
 INFRASTRUCTURE_IMPORTS = {
     "httpx",
     "requests",
-    "boto3",
     "sqlalchemy",
     "psycopg2",
     "deltalake",
     "polars",
-    "redis",
-    "aioredis",
     "asyncpg",
     "motor",
     "pymongo",

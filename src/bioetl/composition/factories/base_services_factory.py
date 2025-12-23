@@ -1,18 +1,16 @@
-"""Base factory for creating PipelineServices."""
+"""Base factory for creating PipelineServices.
+
+Simplified for local-only deployment.
+"""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.composition.factories.clients import (
-    create_redis_client,
-    get_aws_credentials,
-)
 from bioetl.composition.factories.storage_factory import StorageContext, StorageFactory
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -40,7 +38,7 @@ class DataSourceFactory(Protocol):
 
 
 class BaseServicesFactory:
-    """Reusable factory for common services."""
+    """Reusable factory for common services (local deployment)."""
 
     @classmethod
     def create_common_services(
@@ -53,11 +51,11 @@ class BaseServicesFactory:
         """Create services with injected data source."""
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
 
-        lock = cls._create_lock(settings, logger)
-        checkpoint = cls._create_checkpoint(settings, storage_ctx)
-        quarantine = cls._create_quarantine(settings, storage_ctx)
+        lock = cls._create_lock()
+        checkpoint = cls._create_checkpoint(storage_ctx)
+        quarantine = cls._create_quarantine(storage_ctx)
         metrics = cls._create_metrics(settings)
-        tracing = cls._create_tracing(settings)
+        tracing = cls._create_tracing()
 
         return PipelineServices(
             data_source=data_source,
@@ -71,35 +69,20 @@ class BaseServicesFactory:
         )
 
     @staticmethod
-    def _create_lock(settings: Settings, _logger: BoundLogger) -> LockPort:
-        if settings.env == "prod":
-            return RedisDistributedLock(create_redis_client(settings))
+    def _create_lock() -> LockPort:
+        """Create in-memory lock for local deployment."""
         return MemoryLock()
 
     @staticmethod
-    def _create_checkpoint(
-        settings: Settings, storage_ctx: StorageContext
-    ) -> CheckpointPort:
-        is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
-        access_key, secret_key = get_aws_credentials(settings)
-
-        return S3Checkpoint(
-            bucket=storage_ctx.checkpoints_path,
-            endpoint_url=settings.aws.endpoint_url if not is_local_run else None,
-            access_key=access_key,
-            secret_key=secret_key,
-        )
+    def _create_checkpoint(storage_ctx: StorageContext) -> CheckpointPort:
+        """Create local filesystem checkpoint."""
+        return LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
 
     @staticmethod
-    def _create_quarantine(
-        settings: Settings, storage_ctx: StorageContext
-    ) -> QuarantinePort:
-        is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
-        storage_options = settings.storage_options if not is_local_run else None
-
+    def _create_quarantine(storage_ctx: StorageContext) -> QuarantinePort:
+        """Create local quarantine storage."""
         return UnifiedQuarantine(
-            base_path=f"{storage_ctx.silver_path}/common/quarantine",
-            storage_options=storage_options,
+            base_path=str(storage_ctx.silver_path / "common" / "quarantine"),
         )
 
     @staticmethod
@@ -109,6 +92,6 @@ class BaseServicesFactory:
         return NoOpMetrics()
 
     @staticmethod
-    def _create_tracing(_settings: Settings) -> TracingPort:
+    def _create_tracing() -> TracingPort:
         # Placeholder for real OTel implementation
         return NoOpTracing()

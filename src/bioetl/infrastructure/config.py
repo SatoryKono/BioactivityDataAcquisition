@@ -11,8 +11,8 @@ Usage:
     from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
-    print(settings.s3.bucket_bronze)
-    print(settings.redis.host)
+    print(settings.data_dir)
+    print(settings.pipeline.batch_size)
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import AliasChoices, Field, SecretStr, model_validator
+from pydantic import Field, SecretStr
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -214,79 +214,6 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
     return yaml_config_to_domain(yaml_config)
 
 
-class AWSSettings(BaseSettings):
-    """AWS credentials and endpoint configuration."""
-
-    model_config = SettingsConfigDict(
-        frozen=True,
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
-
-    access_key_id: str | None = Field(
-        default=None,
-        validation_alias=AliasChoices(
-            "aws_access_key_id",
-            "bioetl_aws_access_key_id",
-        ),
-    )
-    secret_access_key: SecretStr | None = Field(
-        default=None,
-        validation_alias=AliasChoices(
-            "aws_secret_access_key",
-            "bioetl_aws_secret_access_key",
-        ),
-    )
-    endpoint_url: str | None = Field(
-        default=None,
-        validation_alias=AliasChoices(
-            "aws_endpoint_url",
-            "bioetl_aws_endpoint_url",
-        ),
-    )
-    default_region: str = Field(
-        default="us-east-1",
-        validation_alias=AliasChoices(
-            "aws_region",
-            "aws_default_region",
-            "bioetl_aws_region",
-        ),
-    )
-
-    @property
-    def region(self) -> str:
-        """Alias for default_region for backward compatibility."""
-        return self.default_region
-
-    @property
-    def is_configured(self) -> bool:
-        """Check if AWS credentials are configured."""
-        return bool(self.access_key_id and self.secret_access_key)
-
-
-class S3Settings(BaseSettings):
-    """S3 bucket configuration."""
-
-    model_config = SettingsConfigDict(frozen=True)
-
-    bucket_bronze: str = Field(default="bioetl-bronze")
-    bucket_silver: str = Field(default="bioetl-silver")
-    bucket_gold: str = Field(default="bioetl-gold")
-    bucket_checkpoints: str = Field(default="bioetl-checkpoints")
-
-
-class RedisSettings(BaseSettings):
-    """Redis connection configuration."""
-
-    model_config = SettingsConfigDict(frozen=True)
-
-    host: str = Field(default="localhost")
-    port: int = Field(default=6379, ge=1, le=65535)
-    password: SecretStr | None = Field(default=None)
-    db: int = Field(default=0, ge=0)
-
-
 class ObservabilitySettings(BaseSettings):
     """Observability configuration."""
 
@@ -315,7 +242,7 @@ class PipelineSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
-    """Main application settings."""
+    """Main application settings for local deployment."""
 
     model_config = SettingsConfigDict(
         env_prefix="BIOETL_",
@@ -336,9 +263,10 @@ class Settings(BaseSettings):
         "Recommended for dev/staging environments.",
     )
 
-    aws: AWSSettings = Field(default_factory=AWSSettings)
-    s3: S3Settings = Field(default_factory=S3Settings)
-    redis: RedisSettings = Field(default_factory=RedisSettings)
+    # Local storage paths
+    data_dir: Path = Field(default=Path("data"))
+    """Base directory for all data storage (bronze, silver, gold, checkpoints)."""
+
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
 
@@ -352,44 +280,30 @@ class Settings(BaseSettings):
         description="API key for PubMed",
     )
 
-    @model_validator(mode="after")
-    def check_s3_endpoint_for_dev(self) -> Settings:
-        """Validate S3 endpoint configuration.
-
-        For dev environment:
-        - If endpoint_url is set, S3/MinIO storage will be used
-        - If endpoint_url is None, local file storage will be used
-
-        For prod environment:
-        - AWS credentials should be configured (IAM role or env vars)
-        """
-        # test_mode bypasses validation
-        if self.test_mode:
-            return self
-        # dev without endpoint_url = local storage mode (allowed)
-        # prod typically uses IAM roles, so no explicit endpoint needed
-        return self
+    @property
+    def bronze_path(self) -> Path:
+        """Path for Bronze layer storage."""
+        return self.data_dir / "bronze"
 
     @property
-    def storage_options(self) -> dict[str, str] | None:
-        """Get storage options for Delta Lake/Polars."""
-        if not self.aws.endpoint_url:
-            return None
+    def silver_path(self) -> Path:
+        """Path for Silver layer storage."""
+        return self.data_dir / "silver"
 
-        secret = self.aws.secret_access_key
-        options = {
-            "AWS_ENDPOINT_URL": self.aws.endpoint_url,
-            "AWS_ACCESS_KEY_ID": self.aws.access_key_id or "",
-            "AWS_SECRET_ACCESS_KEY": secret.get_secret_value() if secret else "",
-        }
+    @property
+    def gold_path(self) -> Path:
+        """Path for Gold layer storage."""
+        return self.data_dir / "gold"
 
-        # delta-rs requires allow_http for HTTP endpoints (e.g., local MinIO)
-        if self.aws.endpoint_url.startswith("http://"):
-            options["allow_http"] = "true"
-            # Disable DynamoDB locking for local S3-compatible storage (e.g., MinIO)
-            options["AWS_S3_LOCKING_PROVIDER"] = "none"
+    @property
+    def checkpoint_path(self) -> Path:
+        """Path for checkpoint storage."""
+        return self.data_dir / "checkpoints"
 
-        return options
+    @property
+    def quarantine_path(self) -> Path:
+        """Path for quarantine storage."""
+        return self.data_dir / "quarantine"
 
     @classmethod
     def settings_customise_sources(
