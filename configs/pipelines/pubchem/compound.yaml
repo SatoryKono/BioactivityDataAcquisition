@@ -1,5 +1,5 @@
 # configs/pipelines/pubchem/compound.yaml
-# Pipeline configuration for PubChem Compounds.
+# Конфигурация пайплайна для сущности Compound из PubChem.
 
 pipeline_name: pubchem_compound
 provider: pubchem
@@ -9,9 +9,17 @@ description: "Pipeline for ingesting PubChem compounds"
 
 primary_keys: ["cid"]
 silver_table: "pubchem_compound"
+gold_table: "pubchem_compound"
 
-# Reference to shared source configuration
+# Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/pubchem.yaml
+
+# Gold layer filters
+gold_filters:
+    required_fields:
+        - cid
+        - molecular_formula
+    columns: {}
 
 transform:
     version: "1.0.0"
@@ -21,12 +29,12 @@ transform:
 
 sink:
     bronze:
-        path: "data/output/bronze"
+        path: "data/bronze/pubchem/compound"
         format: jsonl
         save_json: true
 
     silver:
-        path: "data/output/silver"
+        path: "data/silver/pubchem/compound"
         format: delta
         mode: merge
         primary_key: ["cid"]
@@ -44,7 +52,7 @@ sink:
         enabled: true
         validation:
             strict: true
-        path: "data/output/gold"
+        path: "data/gold/pubchem/compound"
         format: delta
         mode: overwrite
         csv_export:
@@ -61,3 +69,12 @@ dq_rules:
 circuit_breaker:
     failure_threshold: 5
     recovery_timeout: 300
+
+# Input filter configuration (for CSV-based ID filtering)
+# CLI options --input-csv, --filter-column, --filter-field override these
+input_filter:
+    enabled: true
+    source_path: "data/input/compounds.csv"
+    column_name: "cid"
+    filter_field: "cid"
+    batch_size: 100

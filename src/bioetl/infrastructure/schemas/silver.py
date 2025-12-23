@@ -205,6 +205,13 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("target_components", pa.string()),
         pa.field("cross_references", pa.string()),
+        # Flattened component fields
+        pa.field("component_accessions", pa.list_(pa.string())),
+        pa.field("component_ids", pa.list_(pa.int64())),
+        pa.field("component_types", pa.list_(pa.string())),
+        pa.field("component_relationships", pa.list_(pa.string())),
+        pa.field("component_descriptions", pa.list_(pa.string())),
+        pa.field("protein_classifications", pa.list_(pa.string())),
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
@@ -231,6 +238,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
+        pa.field("protein_classifications", pa.string()),
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),

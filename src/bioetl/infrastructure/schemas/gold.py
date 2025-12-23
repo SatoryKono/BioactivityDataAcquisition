@@ -108,6 +108,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     target_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    protein_classifications: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
@@ -131,6 +132,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     component_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    protein_classifications: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)

@@ -1,5 +1,5 @@
 # configs/pipelines/uniprot/protein.yaml
-# Pipeline configuration for UniProt Proteins.
+# Конфигурация пайплайна для сущности Protein из UniProt.
 
 pipeline_name: uniprot_protein
 provider: uniprot
@@ -9,9 +9,19 @@ description: "Pipeline for ingesting UniProt proteins"
 
 primary_keys: ["accession"]
 silver_table: "uniprot_protein"
+gold_table: "uniprot_protein"
 
-# Reference to shared source configuration
+# Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/uniprot.yaml
+
+# Gold layer filters
+gold_filters:
+    required_fields:
+        - accession
+        - entry_name
+        - organism
+    columns:
+        reviewed: ["true"]  # Swiss-Prot (reviewed) only
 
 transform:
     version: "1.0.0"
@@ -22,16 +32,16 @@ transform:
 
 sink:
     bronze:
-        path: "data/output/bronze"
+        path: "data/bronze/uniprot/protein"
         format: jsonl
         save_json: true
 
     silver:
-        path: "data/output/silver"
+        path: "data/silver/uniprot/protein"
         format: delta
         mode: merge
         primary_key: ["accession"]
-        partition_by: ["batch_date"]
+        partition_by: ["organism"]
         classification: public
         forensic_retention: true
         csv_export:
@@ -45,7 +55,7 @@ sink:
         enabled: true
         validation:
             strict: true
-        path: "data/output/gold"
+        path: "data/gold/uniprot/protein"
         format: delta
         mode: overwrite
         csv_export:
@@ -62,3 +72,12 @@ dq_rules:
 circuit_breaker:
     failure_threshold: 5
     recovery_timeout: 300
+
+# Input filter configuration (for CSV-based ID filtering)
+# CLI options --input-csv, --filter-column, --filter-field override these
+input_filter:
+    enabled: true
+    source_path: "data/input/proteins.csv"
+    column_name: "accession"
+    filter_field: "accession"
+    batch_size: 100
