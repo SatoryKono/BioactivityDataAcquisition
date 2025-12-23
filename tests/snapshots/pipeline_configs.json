@@ -218,23 +218,14 @@
     "entity_type": "publication",
     "fields": [],
     "gold_filters": {
-      "column_filters": [
-        {
-          "column": "pub_type",
-          "values": [
-            "Journal Article",
-            "Review"
-          ]
-        }
-      ],
+      "column_filters": [],
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": [
         "pmid",
-        "title",
-        "pub_date"
+        "title"
       ]
     },
     "gold_table": "pubmed_publications",

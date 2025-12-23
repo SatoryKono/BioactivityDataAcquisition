@@ -27,9 +27,7 @@ gold_filters:
     required_fields:
         - pmid
         - title
-        - pub_date
-    columns:
-        pub_type: ["Journal Article", "Review"]
+    columns: {}
 
 transform:
     version: "1.0.0"
@@ -49,7 +47,7 @@ sink:
         format: delta
         mode: merge
         primary_key: ["pmid"]
-        partition_by: ["pub_year"]
+        partition_by: ["publication_year"]
         classification: public
         forensic_retention: true
         csv_export:

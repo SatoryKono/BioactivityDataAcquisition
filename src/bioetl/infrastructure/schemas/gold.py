@@ -55,10 +55,16 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
-    """Schema for PubMed Publication in Gold layer."""
+    """Schema for PubMed Publication in Gold layer.
+
+    Fields match Publication entity from domain/entities.py.
+    """
 
     pmid: Series[str] = pa.Field(nullable=False)
-    article_title: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    journal: Series[str] = pa.Field(nullable=True)
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
 
     class Config:
         strict = False
