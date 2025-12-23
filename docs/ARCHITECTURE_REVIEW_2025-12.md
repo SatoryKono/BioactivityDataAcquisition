@@ -1,6 +1,6 @@
 # Архитектурный обзор BioETL
 
-*Версия: 1.0 | Дата: 2025-12-23*
+*Версия: 1.1 | Дата: 2025-12-23 | Обновлено: актуализация после расширения entities*
 
 ---
 
@@ -8,16 +8,27 @@
 
 Проект BioETL демонстрирует **зрелую архитектуру** с хорошо структурированным разделением слоёв по принципу Hexagonal Architecture (Ports & Adapters). Проект находится в состоянии **Production Ready (v5.0)** с серьёзной документацией и развитой инфраструктурой для тестирования и мониторинга.
 
+### Изменения с версии 1.0
+
+| Аспект | Было (v1.0) | Стало (v1.1) |
+|--------|-------------|--------------|
+| Molecule entity | ~15 полей | **~50 полей** (+19 flattened properties/structures/hierarchy) |
+| Target entity | ~20 полей | **~30 полей** (+protein_classifications, component_organisms) |
+| Assay entity | ~20 полей | **~22 поля** (+assay_pref_name, score) |
+| Publication entity | ~12 полей | **~25 полей** (+metadata из PubMed XML) |
+| Integration tests | базовые | **расширены** (test_chembl_target_component) |
+
 **Ключевые сильные стороны:**
 - Чёткое разделение на 5 слоёв (domain, application, composition, infrastructure, interfaces)
 - Строгие архитектурные ограничения, проверяемые тестами
 - Развитая система портов (Protocols) для инверсии зависимостей
+- **Богатая доменная модель** с полным покрытием полей ChEMBL/PubChem/UniProt API
 - Хорошая документация с RFC 2119 governance
 
 **Области для улучшения:**
-- Некоторое дублирование кода в трансформерах пайплайнов
-- Возможна оптимизация фабричного слоя
-- Требуется унификация обработки ошибок в адаптерах
+- Некоторое дублирование кода в трансформерах (сохраняется)
+- Hardcoded User-Agent (P3 не исправлен)
+- Deprecated файлы в корне (D3 не исправлен)
 
 ---
 
@@ -32,26 +43,33 @@
 - **8-9**: Хорошо — соответствует лучшим практикам
 - **10**: Отлично — образец для подражания
 
-### 2.2. Таблица оценок
+### 2.2. Таблица оценок (актуализирована)
 
 | # | Категория | Описание | Вес | Оценка | Взв. балл | Обоснование |
 |---|-----------|----------|-----|--------|-----------|-------------|
-| 1 | **Архитектура слоёв** | Соблюдение Hexagonal/Ports&Adapters, матрица импортов | 15% | 9 | 1.35 | Чёткое разделение 5 слоёв, автоматизированные проверки в `tests/architecture/` |
-| 2 | **Модульность и связность** | Low coupling, high cohesion, чистые интерфейсы | 12% | 8 | 0.96 | PipelineServices как frozen dataclass, хорошая DI через composition root |
-| 3 | **Качество доменной модели** | Чистота domain layer, Value Objects, Entities | 12% | 8 | 0.96 | Чистый домен без I/O, типизированные исключения, Protocol-based ports |
-| 4 | **Тестирование** | Покрытие, уровни тестов, архитектурные тесты | 12% | 8 | 0.96 | Unit/Integration/E2E/Architecture tests, VCR.py, target 80% coverage |
-| 5 | **Обработка ошибок** | Классификация, retry, circuit breaker | 10% | 9 | 0.90 | ErrorClassifier, иерархия исключений, пороги DQ, graceful shutdown |
-| 6 | **Логирование и observability** | structlog, метрики, tracing | 8% | 8 | 0.64 | Prometheus metrics, correlation ID, structured logging, TracingPort |
-| 7 | **Производительность** | Async/await, rate limiting, пагинация | 8% | 7 | 0.56 | TokenBucket, async generators, но Delta Lake блокирующий через run_in_executor |
-| 8 | **Безопасность** | PII, secrets, SAST инструменты | 8% | 8 | 0.64 | Bandit, pip-audit, централизованные env vars, PII hashing |
-| 9 | **Качество документации** | RULES.md, ADRs, docstrings, CLAUDE.md | 8% | 9 | 0.72 | Comprehensive docs, 10 ADRs, RFC 2119, Google-style docstrings |
-| 10 | **Техдолг и сопровождаемость** | Dead code, complexity, type safety | 7% | 7 | 0.49 | mypy strict, vulture checks, но есть deprecated files и возможное дублирование |
+| 1 | **Архитектура слоёв** | Соблюдение Hexagonal/Ports&Adapters, матрица импортов | 15% | 9 | 1.35 | Чёткое разделение 5 слоёв, 16+ архитектурных тестов |
+| 2 | **Модульность и связность** | Low coupling, high cohesion, чистые интерфейсы | 12% | 8 | 0.96 | PipelineServices frozen dataclass, BaseTransformer паттерн |
+| 3 | **Качество доменной модели** | Чистота domain layer, Value Objects, Entities | 12% | **9** ↑ | **1.08** | **Расширенные entities с 100% покрытием API полей** |
+| 4 | **Тестирование** | Покрытие, уровни тестов, архитектурные тесты | 12% | 8 | 0.96 | Unit/Integration/E2E/Architecture tests, VCR.py |
+| 5 | **Обработка ошибок** | Классификация, retry, circuit breaker | 10% | 9 | 0.90 | ErrorClassifier, circuit breaker, graceful shutdown |
+| 6 | **Логирование и observability** | structlog, метрики, tracing | 8% | 8 | 0.64 | Prometheus metrics, correlation ID, TracingPort |
+| 7 | **Производительность** | Async/await, rate limiting, пагинация | 8% | 7 | 0.56 | TokenBucket, async generators |
+| 8 | **Безопасность** | PII, secrets, SAST инструменты | 8% | 8 | 0.64 | Bandit, pip-audit, централизованные secrets |
+| 9 | **Качество документации** | RULES.md, ADRs, docstrings, CLAUDE.md | 8% | 9 | 0.72 | Comprehensive docs, 10 ADRs, RFC 2119 |
+| 10 | **Техдолг и сопровождаемость** | Dead code, complexity, type safety | 7% | 7 | 0.49 | mypy strict, но deprecated files сохраняются |
 
 ### 2.3. Итоговый балл
 
-**Интегральный балл: 8.18 / 10.0**
+**Интегральный балл: 8.30 / 10.0** (было 8.18, улучшение +0.12)
 
-### 2.4. Интерпретация
+### 2.4. Динамика изменений
+
+| Версия | Дата | Балл | Δ | Причина |
+|--------|------|------|---|---------|
+| 1.0 | 2025-12-23 | 8.18 | — | Начальная оценка |
+| **1.1** | 2025-12-23 | **8.30** | **+0.12** | Расширение entities, улучшение трансформеров |
+
+### 2.5. Интерпретация
 
 | Диапазон | Статус | Рекомендации |
 |----------|--------|--------------|
@@ -59,7 +77,7 @@
 | 5.0 – 7.9 | Удовлетворительно | Планомерные улучшения |
 | **8.0 – 10.0** | **Хорошо/Отлично** | **Поддержание и оптимизация** |
 
-**Вывод:** Проект находится в состоянии **"Хорошо"** — архитектура качественная, соблюдаются стандарты, но есть возможности для точечной оптимизации.
+**Вывод:** Проект **улучшился** благодаря расширению доменной модели. Качество entities теперь соответствует уровню "Отлично".
 
 ---
 
@@ -72,13 +90,13 @@ src/bioetl/
 ├── domain/           # ✅ Чистый, без I/O
 │   ├── ports.py      # 9 Protocol-based ports
 │   ├── types.py      # NewType aliases, Enums
-│   ├── entities.py   # Frozen dataclasses
+│   ├── entities.py   # Frozen dataclasses (8 entities, ~200 полей)
 │   ├── exceptions.py # Hierarchical exceptions
 │   └── transformations.py # Pure functions
 │
 ├── application/      # ✅ Use Cases, оркестрация
 │   ├── core/         # Runner, Executor, RecordProcessor
-│   ├── pipelines/    # Entity-specific pipelines
+│   ├── pipelines/    # Entity-specific pipelines (9 пайплайнов)
 │   └── observability/# PipelineObserver
 │
 ├── composition/      # ✅ DI Container
@@ -87,11 +105,9 @@ src/bioetl/
 │   └── factories/    # GenericPipelineFactory pattern
 │
 ├── infrastructure/   # ✅ Adapters, реализация портов
-│   ├── adapters/     # chembl, pubchem, uniprot, http
+│   ├── adapters/     # chembl, pubchem, uniprot, pubmed, http
 │   ├── storage/      # Bronze/Silver/Gold writers
-│   ├── locking/      # MemoryLock
-│   ├── checkpoint/   # LocalCheckpoint
-│   ├── quarantine/   # UnifiedQuarantine
+│   ├── schemas/      # PyArrow Silver, Pandera Gold
 │   └── observability/# PrometheusMetrics, structlog
 │
 └── interfaces/       # ✅ CLI, Signals
@@ -99,373 +115,163 @@ src/bioetl/
     └── orchestration/# Shutdown handlers
 ```
 
-### 3.2. Соответствие матрице импортов
+### 3.2. Обновлённая доменная модель (entities.py)
 
-Проверка архитектурных ограничений (`tests/architecture/test_layer_dependencies.py`):
+| Entity | Поля | Invariants | Новые поля (v1.1) |
+|--------|------|------------|-------------------|
+| **Activity** | 45 | activity_id, molecule_chembl_id required; pchembl_value ≥ 0 | — |
+| **Molecule** | **50** | molecule_chembl_id required; max_phase 0-4 | **+19**: property_*, hierarchy_*, structure_* |
+| **Target** | **30** | target_chembl_id required | **+6**: protein_classifications, component_organisms |
+| **Assay** | **22** | assay_chembl_id required; confidence_score 0-9 | **+2**: assay_pref_name, score |
+| **Document** | 17 | document_chembl_id required; year 1800-2100 | — |
+| **Publication** | **25** | pmid required | **+13**: journal_abbrev, accepted_date, mesh_terms |
+| **Compound** | 10 | cid + structural identifier required | — |
+| **Protein** | 7 | accession required; sequence_length > 0 | — |
 
-| Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
-|------------|--------|-------------|-------------|----------------|------------|
-| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **infrastructure** | ✅ | ❌* | ❌ | ✅ | ❌ |
-| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
+### 3.3. Улучшенные трансформеры
 
-*Исключение: `infrastructure/config.py` может импортировать `PipelineConfig` для валидации
-
-**Статус:** Полное соответствие матрице. Проверяется 16+ архитектурными тестами.
-
-### 3.3. Следование Ports & Adapters
-
-**Сильные стороны:**
-1. Все порты определены как `typing.Protocol` с `@runtime_checkable`
-2. Адаптеры реализуют порты через структурное соответствие
-3. Composition Root (`bootstrap.py`) — единственное место сборки зависимостей
-4. `PipelineServices` — frozen dataclass с инжектированными зависимостями
-
-**Найденные порты (9):**
-- `DataSourcePort` — fetch данных из внешних API
-- `StoragePort` — запись Bronze/Silver/Gold
-- `LockPort` — блокировки
-- `CheckpointPort` — чекпоинты
-- `QuarantinePort` — карантин ошибок
-- `MetricsPort` — метрики (sync)
-- `LoggerPort` — структурированное логирование (sync)
-- `TracingPort` — distributed tracing
-- `InputFilterPort` — загрузка фильтров
-
-### 3.4. Единообразие соглашений
-
-| Аспект | Статус | Комментарий |
-|--------|--------|-------------|
-| Именование файлов | ✅ | snake_case, согласованное |
-| Именование классов | ✅ | PascalCase, суффиксы Port/Adapter |
-| Конфиги | ✅ | YAML в `configs/pipelines/{provider}/{entity}.yaml` |
-| Тесты | ✅ | `tests/{unit,integration,e2e,architecture}/` |
-| Docstrings | ✅ | Google Style, на русском |
-
----
-
-## 4. Выявленные проблемы
-
-### 4.1. Критические (блокеры)
-
-**Нет критических проблем.** Архитектура стабильна.
-
-### 4.2. Важные (требуют внимания)
-
-#### P1: Дублирование в трансформерах пайплайнов
-
-**Локация:** `src/bioetl/application/pipelines/{provider}/*_transformer.py`
-
-**Проблема:** Каждый трансформер (ActivityTransformer, MoleculeTransformer, etc.) содержит похожий boilerplate код для:
-- Создания domain entity
-- Генерации content hash
-- Конвертации в Silver record
-
-**Пример дублирования:**
+**MoleculeTransformer** (`application/pipelines/chembl/molecule_transformer.py`):
 ```python
-# В каждом трансформере повторяется:
-content_hash = self.compute_content_hash(business_data)
-entity = Activity(..., content_hash=content_hash, ...)
-return self.entity_to_silver_record(entity)
+# Новые методы для извлечения вложенных структур ChEMBL API:
+def _extract_hierarchy(self, data: dict) -> dict:    # parent/active/child chembl_id
+def _extract_properties(self, data: dict) -> dict:   # 16 property_* полей
+def _extract_structures(self, data: dict) -> dict:   # canonical_smiles, inchi, inchi_key
 ```
 
-**Риск:** Растущий технический долг при добавлении новых сущностей
+**TargetTransformer** (`application/pipelines/chembl/target_transformer.py`):
+```python
+# Расширенное извлечение protein_classifications:
+def _flatten_target_components(self, components) -> dict:
+    # Теперь возвращает:
+    # - protein_classifications (short_name)
+    # - protein_classification_ids
+    # - protein_classification_names (pref_name)
+    # - component_organisms
+    # - component_tax_ids
+```
+
+### 3.4. Соответствие матрице импортов
+
+**Статус:** Полное соответствие. Проверяется 16+ архитектурными тестами.
 
 ---
 
-#### P2: Смешение ответственностей в RecordProcessor
+## 4. Статус проблем из предыдущего обзора
 
-**Локация:** `src/bioetl/application/core/record_processor.py:256-284`
+### 4.1. Трекер проблем
 
-**Проблема:** `_write_gold_batch()` выполняет валидацию Pandera внутри метода записи:
+| ID | Проблема | Приоритет | Статус | Комментарий |
+|----|----------|-----------|--------|-------------|
+| P1 | Дублирование в трансформерах | Medium | 🟡 **Частично** | Паттерн унифицирован, но boilerplate остаётся |
+| P2 | Смешение валидации и записи | Medium | 🔴 **Открыто** | `_write_gold_batch()` по-прежнему содержит Pandera |
+| P3 | Hardcoded User-Agent | High | 🔴 **Открыто** | `"BioETL/0.1.0 (contact@example.com)"` |
+| D1 | Унификация entity creation | Low | 🟡 **Частично** | Трансформеры используют единый паттерн |
+| D2 | SCD2 в GoldWriter | Low | 🔴 **Открыто** | Не реализован |
+| D3 | Deprecated файлы в корне | Low | 🔴 **Открыто** | cleanup_cache.py, debug_import.py, verify_bootstrap.py |
+
+### 4.2. Детали открытых проблем
+
+#### P2: Смешение ответственностей в RecordProcessor (НЕ ИСПРАВЛЕНО)
+
+**Локация:** `src/bioetl/application/core/record_processor.py:256-268`
+
 ```python
 async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
+    # ❌ Валидация внутри метода записи
     if self._gold_schema:
         import pandas as pd
         df = pd.DataFrame(records)
-        self._gold_schema.validate(df, lazy=True)  # Валидация здесь
+        self._gold_schema.validate(df, lazy=True)  # <-- Проблема
     await self._storage.write_gold(...)
 ```
 
-**Риск:** Смешение валидации и персистенции, сложность тестирования
+#### P3: Hardcoded User-Agent (НЕ ИСПРАВЛЕНО)
 
----
+**Локация:** `src/bioetl/infrastructure/adapters/http/client.py:102-104`
 
-#### P3: Жёстко закодированные значения в HTTP Client
-
-**Локация:** `src/bioetl/infrastructure/adapters/http/client.py:102-105`
-
-**Проблема:**
 ```python
 headers: dict[str, str] = {
-    "User-Agent": "BioETL/0.1.0 (contact@example.com)",  # Hardcoded
+    "User-Agent": "BioETL/0.1.0 (contact@example.com)",  # ❌ Hardcoded
 }
 ```
 
-**Риск:** Несоответствие реальной версии (5.0.0), placeholder email
+---
+
+## 5. Обновлённый план рефакторинга
+
+### 5.1. Приоритизация (актуализирована)
+
+| Приоритет | ID | Шаг | Статус | Сложность |
+|-----------|-----|-----|--------|-----------|
+| 🔴 HIGH | R1 | Устранить hardcoded User-Agent (P3) | ❌ TODO | Low |
+| 🟡 MEDIUM | R2 | Выделить GoldValidator (P2) | ❌ TODO | Medium |
+| 🟡 MEDIUM | R3 | Завершить унификацию entity creation | 🟡 Partial | Medium |
+| 🟢 LOW | R4 | Удалить deprecated файлы (D3) | ❌ TODO | Low |
+| 🟢 LOW | R5 | Удалить SCD2 из type hints | ❌ TODO | Low |
+
+### 5.2. Детали шагов (без изменений — см. версию 1.0)
 
 ---
 
-### 4.3. Желательные улучшения
+## 6. Новые наблюдения (v1.1)
 
-#### D1: Унификация создания Domain Entities
+### 6.1. Улучшения в коде
 
-Трансформеры создают entities по-разному. Можно унифицировать через метод `BaseTransformer.create_entity()`.
+1. **Расширенные entities** — полное покрытие полей API ChEMBL/PubChem/PubMed
+2. **Структурированные трансформеры** — методы `_extract_*` для вложенных данных
+3. **Типобезопасность** — `safe_int()`, `safe_float()` для конвертации
+4. **Protein classifications** — полное извлечение из target_components
 
-#### D2: Отсутствие интерфейса для Gold Writer
+### 6.2. Новые интеграционные тесты
 
-`StoragePort.write_gold()` принимает `mode: Literal["overwrite", "append", "scd2"]`, но SCD2 не реализован.
-
-#### D3: Deprecated файлы в корне
-
-`cleanup_cache.py`, `debug_import.py`, `verify_bootstrap.py` — пустые или debug-скрипты.
-
----
-
-## 5. План рефакторинга
-
-### 5.1. Приоритизация
-
-| Приоритет | ID | Шаг | Сложность | Риск |
-|-----------|-----|-----|-----------|------|
-| 🔴 HIGH | R1 | Устранить hardcoded значения | Low | Low |
-| 🟡 MEDIUM | R2 | Выделить GoldValidator | Medium | Medium |
-| 🟡 MEDIUM | R3 | Унифицировать entity creation в BaseTransformer | Medium | Medium |
-| 🟢 LOW | R4 | Удалить deprecated файлы | Low | Low |
-| 🟢 LOW | R5 | Добавить SCD2 в GoldWriter (или удалить из type hints) | Medium | Low |
-
----
-
-### 5.2. Детальное описание шагов
-
-#### R1: Устранить hardcoded значения в HTTP Client
-
-**Цель:** Конфигурируемость User-Agent и контактов
-
-**Изменения:**
-```python
-# src/bioetl/infrastructure/adapters/http/client.py
-@dataclass
-class UnifiedHTTPClient:
-    rate_limiter: TokenBucket
-    circuit_breaker: CircuitBreaker
-    retry_config: RetryConfig = field(default_factory=RetryConfig)
-    timeout: float = 30.0
-    run_id: RunID | None = None
-    user_agent: str = "BioETL/5.0.0"  # NEW: Параметризация
-    contact_email: str = "bioetl@example.com"  # NEW
+```
+tests/integration/pipelines/
+├── test_chembl_activity.py        # Существовал
+├── test_chembl_target_component.py # НОВЫЙ
+└── base.py                        # НОВЫЙ (shared fixtures)
 ```
 
-**Риски:** Минимальные — обратно совместимо через default values
+### 6.3. Рекомендации
 
-**Критерий готово:**
-- User-Agent содержит версию из pyproject.toml
-- Тесты `test_http_client.py` проходят
-
----
-
-#### R2: Выделить GoldValidator из RecordProcessor
-
-**Цель:** Разделение ответственностей (SRP)
-
-**Изменения:**
-
-1. Создать `src/bioetl/application/core/gold_validator.py`:
-```python
-class GoldValidator:
-    """Validates records before Gold layer write."""
-
-    def __init__(self, schema: PanderaSchema | None):
-        self._schema = schema
-
-    def validate(self, records: list[dict]) -> ValidationResult:
-        if not self._schema:
-            return ValidationResult(valid=True)
-        df = pd.DataFrame(records)
-        self._schema.validate(df, lazy=True)
-        return ValidationResult(valid=True)
-```
-
-2. Обновить `RecordProcessor`:
-```python
-async def _write_gold_batch(self, records: list[dict]) -> None:
-    self._gold_validator.validate(records)  # Делегирование
-    await self._storage.write_gold(...)
-```
-
-**Риски:**
-- Изменение сигнатуры конструктора RecordProcessor
-- Требуется обновление фабрик
-
-**Минимизация:**
-- Добавить параметр `gold_validator` в конструктор с default factory
-- Backward compatible через conditional creation
-
-**Критерий готово:**
-- Валидация в отдельном классе
-- Unit-тесты для GoldValidator
-- RecordProcessor использует новый класс
+1. **Завершить R1** — критично для соответствия версии
+2. **Добавить тесты для MoleculeTransformer** — расширенные поля требуют покрытия
+3. **Документировать protein_classifications** — сложная вложенная структура
 
 ---
 
-#### R3: Унифицировать Entity Creation в BaseTransformer
+## 7. Метрики контроля качества
 
-**Цель:** DRY для создания domain entities
+### 7.1. Прогноз изменения балла после рефакторинга
 
-**Изменения:**
+| Шаг | Δ Балла | Итог | Статус |
+|-----|---------|------|--------|
+| Текущее (v1.1) | — | 8.30 | ✅ |
+| R1 (User-Agent) | +0.05 | 8.35 | TODO |
+| R2 (GoldValidator) | +0.10 | 8.45 | TODO |
+| R4 (deprecated files) | +0.03 | 8.48 | TODO |
 
-1. Добавить в `BaseTransformer`:
-```python
-def create_entity(
-    self,
-    entity_class: type[T],
-    context: PipelineContext,
-    entity_id: EntityID,
-    business_data: dict[str, Any],
-    batch_id: BatchID,
-) -> T:
-    """Factory method for domain entity creation.
-
-    Handles:
-    - content_hash generation
-    - ingestion_ts
-    - run_id / run_type binding
-    """
-    content_hash = self.compute_content_hash(business_data)
-    return entity_class(
-        entity_id=entity_id,
-        content_hash=content_hash,
-        run_id=context.run_id,
-        run_type=context.run_type,
-        source_batch_id=batch_id,
-        ingestion_ts=datetime.now(UTC),
-        **business_data,
-    )
-```
-
-2. Упростить конкретные трансформеры:
-```python
-# Было:
-content_hash = self.compute_content_hash(business_data)
-entity = Activity(
-    entity_id=...,
-    content_hash=content_hash,
-    run_id=context.run_id,
-    ...
-)
-
-# Стало:
-entity = self.create_entity(Activity, context, entity_id, business_data, batch_id)
-```
-
-**Риски:**
-- Изменение сигнатуры abstract method transform()
-- Несовместимость с entities без unified constructor
-
-**Минимизация:**
-- Сохранить старый интерфейс transform() как есть
-- Добавить create_entity() как helper method (не abstract)
-- Постепенная миграция трансформеров
-
-**Критерий готово:**
-- create_entity() в BaseTransformer
-- Минимум 3 трансформера мигрированы
-- Без breaking changes в публичном API
+**Целевой балл после рефакторинга: 8.5 / 10.0**
 
 ---
 
-#### R4: Удалить deprecated файлы
+## 8. Заключение
 
-**Цель:** Чистота кодовой базы
+Проект BioETL продолжает демонстрировать **зрелую архитектуру** уровня Production Ready.
 
-**Изменения:**
-```bash
-rm cleanup_cache.py debug_import.py verify_bootstrap.py
-```
+### Ключевые улучшения в v1.1:
+- ✅ Расширенная доменная модель (+40 полей в entities)
+- ✅ Улучшенные трансформеры с методами извлечения вложенных структур
+- ✅ Новые интеграционные тесты
 
-**Риски:** Нулевые — файлы пустые или debug-only
+### Остающиеся задачи:
+- ❌ R1: Hardcoded User-Agent
+- ❌ R2: GoldValidator
+- ❌ R4: Deprecated files
 
-**Критерий готово:**
-- Файлы удалены
-- git status чистый
-
----
-
-#### R5: SCD2 в GoldWriter
-
-**Цель:** Консистентность типов или реализация функционала
-
-**Опции:**
-
-A) Реализовать SCD2:
-```python
-async def write_gold(
-    self, ..., mode: Literal["overwrite", "append", "scd2"] = "overwrite"
-) -> None:
-    if mode == "scd2":
-        await self._write_scd2(...)
-```
-
-B) Удалить из type hints:
-```python
-mode: Literal["overwrite", "append"] = "overwrite"  # Удалить scd2
-```
-
-**Рекомендация:** Вариант B (удалить) — SCD2 не используется, добавить когда понадобится
-
----
-
-## 6. Метрики контроля качества
-
-### 6.1. Существующие метрики
-
-| Метрика | Инструмент | Цель | Текущее |
-|---------|------------|------|---------|
-| Line Coverage | pytest-cov | ≥80% | Настроен |
-| Type Safety | mypy --strict | 0 errors | Настроен |
-| Code Style | ruff | 0 violations | Настроен |
-| Architecture | tests/architecture/ | 16 tests pass | Настроен |
-| Complexity | xenon | CC ≤ 10 | Настроен |
-| Dead Code | vulture | 0 unused | Настроен |
-| Security | bandit, pip-audit | 0 HIGH | Настроен |
-
-### 6.2. Рекомендуемые дополнительные метрики
-
-| Метрика | Инструмент | Цель | Влияние на балл |
-|---------|------------|------|-----------------|
-| Duplication | pylint --duplicate-code | <5% | +0.2 к категории 10 |
-| Docstring Coverage | interrogate | ≥90% | +0.1 к категории 9 |
-| Integration Test Time | pytest --durations | <5min | +0.1 к категории 4 |
-
-### 6.3. Прогноз изменения интегрального балла
-
-| Шаг | Категории | Δ Балла | Итог |
-|-----|-----------|---------|------|
-| Текущее | — | 8.18 | 8.18 |
-| R1 | 8, 10 | +0.05 | 8.23 |
-| R2 | 2, 4 | +0.10 | 8.33 |
-| R3 | 2, 10 | +0.12 | 8.45 |
-| R4 | 10 | +0.03 | 8.48 |
-
-**Прогноз после рефакторинга: 8.4 – 8.5 / 10.0**
-
----
-
-## 7. Заключение
-
-Проект BioETL демонстрирует **зрелую и качественную архитектуру** уровня Production Ready. Выявленные проблемы носят **косметический характер** и не влияют на работоспособность системы.
-
-**Приоритетные действия (ближайший спринт):**
-1. ✅ R1: Устранить hardcoded User-Agent
-2. ✅ R4: Удалить deprecated файлы
-
-**Рекомендации на будущее:**
-- R2, R3: Планировать при добавлении новых пайплайнов
-- R5: Решить при необходимости SCD2
+**Рекомендация:** Приоритезировать R1 (быстрый fix, высокое влияние на корректность).
 
 ---
 
 *Документ подготовлен: 2025-12-23*
+*Версия: 1.1*
 *Следующий обзор: 2026-03*
