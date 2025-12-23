@@ -11,8 +11,9 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.gold_validator import GoldValidator
 from bioetl.application.core.quarantine_manager import QuarantineManager
-from bioetl.domain.exceptions import DataQualityThresholdError
+from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationError
 
 if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
@@ -62,9 +63,11 @@ class RecordProcessor:
         self._provider = config.provider
         self._entity_type = config.entity_type
         self._silver_schema = config.silver_schema
-        self._gold_schema = config.gold_schema
         self._dq_config = config.dq_config
         self._table_config = config.table_config
+
+        # Gold layer validator (SRP)
+        self._gold_validator = GoldValidator(config.gold_schema)
 
         # Instantiate Metrics Recorder
         pipeline_label = f"{self._provider}_{self._entity_type}"
@@ -254,18 +257,10 @@ class RecordProcessor:
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
-        # Validate Gold records if schema is present
-        if self._gold_schema:
-            import pandas as pd
-
-            df = pd.DataFrame(records)
-            try:
-                # Pandera validation
-                self._gold_schema.validate(df, lazy=True)
-            except Exception as e:
-                # Re-wrap in DQ error or let bubble up depending on strategy
-                # For now, we let it bubble up to be caught by the outer loop
-                raise e
+        # Validate Gold records using dedicated validator (SRP)
+        result = self._gold_validator.validate(records)
+        if not result.valid:
+            raise SchemaViolationError("gold", result.errors)
 
         # Use configured table name or default
         table_name = (
