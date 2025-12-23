@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, RunID, SilverRecord
 
 
 class ChEMBLMoleculePipeline(BasePipeline):
@@ -29,9 +29,10 @@ class ChEMBLMoleculePipeline(BasePipeline):
         config: PipelineConfig,
         runtime: RuntimeConfig,
         services: PipelineServices,
+        run_id: RunID,
     ) -> None:
         """Initialize pipeline with transformer."""
-        super().__init__(config, runtime, services)
+        super().__init__(config, runtime, services, run_id)
         self._transformer = MoleculeTransformer(provider=self.provider)
 
     async def transform_bronze_to_silver(

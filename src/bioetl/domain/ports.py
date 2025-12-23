@@ -18,6 +18,7 @@ from bioetl.domain.types import (
     HealthStatus,
     RunID,
     RunType,
+    ValidationResult,
 )
 
 
@@ -580,17 +581,14 @@ class GoldValidatorPort(Protocol):
     should be a CPU-bound operation without I/O.
     """
 
-    def validate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
         """Validate records for Gold layer.
 
         Args:
             records: List of record dictionaries to validate.
 
         Returns:
-            List of validated records (may be filtered or unchanged).
-
-        Raises:
-            Exception: If validation fails critically.
+            ValidationResult with valid flag and any error messages.
         """
         ...
 

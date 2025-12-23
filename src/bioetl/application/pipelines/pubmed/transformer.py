@@ -223,7 +223,6 @@ def _extract_abstract(article_node: ET.Element) -> str | None:
     texts = []
     for abstract_text in abstract_node.findall("AbstractText"):
         label = abstract_text.get("Label")
-        text = abstract_text.text or ""
 
         # Handle inline elements
         full_text = "".join(abstract_text.itertext())

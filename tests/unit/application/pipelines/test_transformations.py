@@ -1,12 +1,14 @@
 """Unit tests for the transformation logic in pipelines."""
 
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import RunID
 
 
 # Mock context object for tests
@@ -23,16 +25,22 @@ def mock_pipeline_base():
     return mock
 
 
+@pytest.fixture
+def mock_run_id() -> RunID:
+    """Create a test run ID."""
+    return RunID(uuid4())
+
+
 class TestPubChemCompoundPipeline:
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_success(
-        self, mock_context, mock_pipeline_base
+        self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange
         config = MagicMock()
         config.provider = "pubchem"
         pipeline = PubChemCompoundPipeline(
-            config=config, runtime=MagicMock(), services=MagicMock()
+            config=config, runtime=MagicMock(), services=MagicMock(), run_id=mock_run_id
         )
 
         record = {
@@ -56,11 +64,11 @@ class TestPubChemCompoundPipeline:
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_no_cid(
-        self, mock_context, mock_pipeline_base
+        self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange
         pipeline = PubChemCompoundPipeline(
-            config=MagicMock(), runtime=MagicMock(), services=MagicMock()
+            config=MagicMock(), runtime=MagicMock(), services=MagicMock(), run_id=mock_run_id
         )
         record = {"molecular_formula": "C6H6"}
 
@@ -74,13 +82,13 @@ class TestPubChemCompoundPipeline:
 class TestUniProtProteinPipeline:
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_success(
-        self, mock_context, mock_pipeline_base
+        self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange
         config = MagicMock()
         config.provider = "uniprot"
         pipeline = UniProtProteinPipeline(
-            config=config, runtime=MagicMock(), services=MagicMock()
+            config=config, runtime=MagicMock(), services=MagicMock(), run_id=mock_run_id
         )
 
         record = {
@@ -108,11 +116,11 @@ class TestUniProtProteinPipeline:
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_no_accession(
-        self, mock_context, mock_pipeline_base
+        self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange
         pipeline = UniProtProteinPipeline(
-            config=MagicMock(), runtime=MagicMock(), services=MagicMock()
+            config=MagicMock(), runtime=MagicMock(), services=MagicMock(), run_id=mock_run_id
         )
         record = {"uniProtkbId": "TEST_ID"}
 

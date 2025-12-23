@@ -4,6 +4,7 @@ Implements RULES.md §1 - Domain Layer with pure types and value objects.
 No I/O operations allowed (REQ-ARCH-003).
 """
 
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
 from uuid import UUID
@@ -243,3 +244,16 @@ class DQStatus(str, Enum):
 
     REPROCESSED = "REPROCESSED"
     """Successfully reprocessed and moved to Silver."""
+
+
+@dataclass(frozen=True, slots=True)
+class ValidationResult:
+    """Result of record validation.
+
+    Attributes:
+        valid: True if validation passed.
+        errors: List of validation errors (empty if valid=True).
+    """
+
+    valid: bool
+    errors: list[str] = field(default_factory=list)

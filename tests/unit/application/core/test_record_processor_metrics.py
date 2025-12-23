@@ -10,7 +10,7 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
 
 
 @pytest.fixture
@@ -52,10 +52,19 @@ def mock_context():
 
 
 @pytest.fixture
+def mock_gold_validator():
+    """Create mock gold validator."""
+    validator = MagicMock()
+    validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+    return validator
+
+
+@pytest.fixture
 def record_processor(
     mock_services,
     mock_error_classifier,
     mock_context,
+    mock_gold_validator,
 ):
     """Create RecordProcessor instance with dummy callbacks."""
     config = RecordProcessorConfig(
@@ -71,6 +80,7 @@ def record_processor(
         config=config,
         transform_callback=AsyncMock(return_value={"id": 1}),
         gold_filter_callback=MagicMock(return_value=True),
+        gold_validator=mock_gold_validator,
     )
 
 

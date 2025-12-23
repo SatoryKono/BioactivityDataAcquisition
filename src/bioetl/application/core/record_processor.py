@@ -10,11 +10,11 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationError
 
 if TYPE_CHECKING:
+    from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
     from bioetl.domain.context import PipelineContext

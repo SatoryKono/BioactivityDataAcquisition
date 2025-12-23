@@ -354,7 +354,6 @@ class TestPipelineRunnerClearExports:
     def test_clear_exports_calls_storage_methods(
         self,
         pipeline_config,
-        runtime_config,
         mock_context,
         mock_executor,
         mock_checkpoint_manager,
@@ -362,18 +361,21 @@ class TestPipelineRunnerClearExports:
         mock_logger,
         mock_lock_manager,
     ):
-        """Test _clear_exports calls storage clear methods."""
+        """Test _clear_exports calls storage clear methods for REBUILD run."""
+        # Use REBUILD run type to trigger clearing
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
         # Create services with storage that has clear methods
         services = MagicMock(spec=PipelineServices)
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=5)
-        services.storage.clear_delta = MagicMock(return_value=1)
+        services.storage.clear_silver = MagicMock(return_value=5)
+        services.storage.clear_gold = MagicMock(return_value=1)
 
         runner = PipelineRunner(
             config=pipeline_config,
-            runtime=runtime_config,
+            runtime=rebuild_runtime,
             services=services,
             context=mock_context,
             executor=mock_executor,
@@ -385,13 +387,12 @@ class TestPipelineRunnerClearExports:
         runner._clear_exports()
 
         # Should clear both silver and gold tables
-        assert services.storage.clear_csv.call_count == 2
-        assert services.storage.clear_delta.call_count == 2
+        services.storage.clear_silver.assert_called_once()
+        services.storage.clear_gold.assert_called_once()
 
     def test_clear_exports_logs_when_files_cleared(
         self,
         pipeline_config,
-        runtime_config,
         mock_context,
         mock_executor,
         mock_checkpoint_manager,
@@ -400,16 +401,19 @@ class TestPipelineRunnerClearExports:
         mock_lock_manager,
     ):
         """Test _clear_exports logs when files are cleared."""
+        # Use REBUILD run type to trigger clearing
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
         services = MagicMock(spec=PipelineServices)
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=3)
-        services.storage.clear_delta = MagicMock(return_value=2)
+        services.storage.clear_silver = MagicMock(return_value=3)
+        services.storage.clear_gold = MagicMock(return_value=2)
 
         runner = PipelineRunner(
             config=pipeline_config,
-            runtime=runtime_config,
+            runtime=rebuild_runtime,
             services=services,
             context=mock_context,
             executor=mock_executor,
@@ -422,13 +426,11 @@ class TestPipelineRunnerClearExports:
 
         # Should log when files are cleared
         info_calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("Cleared CSV" in call for call in info_calls)
-        assert any("Cleared Delta" in call for call in info_calls)
+        assert any("Cleared storage" in call for call in info_calls)
 
     def test_clear_exports_no_log_when_nothing_cleared(
         self,
         pipeline_config,
-        runtime_config,
         mock_context,
         mock_executor,
         mock_checkpoint_manager,
@@ -437,18 +439,21 @@ class TestPipelineRunnerClearExports:
         mock_lock_manager,
     ):
         """Test _clear_exports does not log when nothing cleared."""
+        # Use REBUILD run type to trigger clearing logic
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
         services = MagicMock(spec=PipelineServices)
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=0)
-        services.storage.clear_delta = MagicMock(return_value=0)
+        services.storage.clear_silver = MagicMock(return_value=0)
+        services.storage.clear_gold = MagicMock(return_value=0)
 
         mock_logger.reset_mock()
 
         runner = PipelineRunner(
             config=pipeline_config,
-            runtime=runtime_config,
+            runtime=rebuild_runtime,
             services=services,
             context=mock_context,
             executor=mock_executor,
@@ -459,14 +464,12 @@ class TestPipelineRunnerClearExports:
 
         runner._clear_exports()
 
-        # Should not log about cleared files
+        # Should not log about cleared files when nothing was cleared
         info_calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert not any("Cleared CSV" in call for call in info_calls)
-        assert not any("Cleared Delta" in call for call in info_calls)
+        assert not any("Cleared storage" in call for call in info_calls)
 
     def test_clear_exports_uses_default_gold_table(
         self,
-        runtime_config,
         mock_context,
         mock_executor,
         mock_checkpoint_manager,
@@ -475,6 +478,9 @@ class TestPipelineRunnerClearExports:
         mock_lock_manager,
     ):
         """Test _clear_exports uses default gold table name when not specified."""
+        # Use REBUILD run type to trigger clearing
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
         # Config without explicit gold_table
         config = PipelineConfig(
             pipeline_name="test_pipeline",
@@ -489,12 +495,12 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_csv = MagicMock(return_value=0)
-        services.storage.clear_delta = MagicMock(return_value=0)
+        services.storage.clear_silver = MagicMock(return_value=0)
+        services.storage.clear_gold = MagicMock(return_value=0)
 
         runner = PipelineRunner(
             config=config,
-            runtime=runtime_config,
+            runtime=rebuild_runtime,
             services=services,
             context=mock_context,
             executor=mock_executor,
@@ -506,6 +512,5 @@ class TestPipelineRunnerClearExports:
         runner._clear_exports()
 
         # Should use default gold table: provider.entity_type
-        call_args = [call[0][0] for call in services.storage.clear_csv.call_args_list]
-        assert "chembl.silver_activity" in call_args
-        assert "chembl.activity" in call_args  # Default gold table
+        services.storage.clear_silver.assert_called_once_with("chembl.silver_activity")
+        services.storage.clear_gold.assert_called_once_with("chembl.activity")

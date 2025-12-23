@@ -6,24 +6,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
+
+from bioetl.domain.types import ValidationResult
 
 if TYPE_CHECKING:
     import pandera as pa
-
-
-@dataclass(frozen=True, slots=True)
-class ValidationResult:
-    """Результат валидации записей.
-
-    Attributes:
-        valid: True, если валидация прошла успешно.
-        errors: Список ошибок валидации (None если valid=True).
-    """
-
-    valid: bool
-    errors: list[str] = field(default_factory=list)
 
 
 class GoldValidator:
