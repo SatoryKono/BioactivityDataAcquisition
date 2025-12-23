@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.gold_validator import GoldValidator
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationError
 
@@ -48,7 +47,7 @@ class RecordProcessor:
         config: RecordProcessorConfig,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
-        gold_validator: GoldValidatorPort | None = None,
+        gold_validator: GoldValidatorPort,
     ):
         self._storage = services.storage
         self._quarantine_manager = QuarantineManager(
@@ -68,9 +67,6 @@ class RecordProcessor:
         self._silver_schema = config.silver_schema
         self._dq_config = config.dq_config
         self._table_config = config.table_config
-
-        # Gold layer validator (SRP)
-        self._gold_validator = GoldValidator(config.gold_schema)
 
         # Instantiate Metrics Recorder
         pipeline_label = f"{self._provider}_{self._entity_type}"
@@ -276,7 +272,7 @@ class RecordProcessor:
             write_mode = "append"
         await self._storage.write_gold(
             table_name=table_name,
-            records=validated_records,
+            records=records,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )
