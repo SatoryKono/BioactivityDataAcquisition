@@ -16,6 +16,7 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
+from typing_extensions import override
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, Watermark
@@ -59,6 +60,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
             "sequence": self._fetch_sequences,
         }
 
+    @override
     async def fetch(
         self,
         entity_type: str,
@@ -282,6 +284,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         add_record(current_header, current_sequence)
         return records
 
+    @override
     async def health_check(self) -> HealthStatus:
         """Check UniProt API health status using a lightweight search query."""
         try:

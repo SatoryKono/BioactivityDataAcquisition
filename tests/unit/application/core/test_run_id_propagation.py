@@ -12,6 +12,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
+from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import DQConfig, TableConfig
@@ -109,18 +110,22 @@ class TestRunIdPropagation:
         def gold_filter(ctx, record):
             return False  # Don't write to gold for this test
 
+        config = RecordProcessorConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            silver_schema=silver_schema,
+            dq_config=DQConfig(),
+            table_config=TableConfig(primary_keys=["id"]),
+        )
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=ErrorClassifier(),
             context=pipeline_context,
-            pipeline_name="test_pipeline",
-            provider="test",
-            entity_type="entity",
+            config=config,
             transform_callback=transform,
             gold_filter_callback=gold_filter,
-            silver_schema=silver_schema,
-            dq_config=DQConfig(),
-            table_config=TableConfig(primary_keys=["id"]),
         )
 
         # Process a batch
@@ -161,18 +166,22 @@ class TestRunIdPropagation:
         def gold_filter(ctx, record):
             return False
 
+        config = RecordProcessorConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            silver_schema=silver_schema,
+            dq_config=DQConfig(),
+            table_config=TableConfig(primary_keys=["id"]),
+        )
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=ErrorClassifier(),
             context=pipeline_context,
-            pipeline_name="test_pipeline",
-            provider="test",
-            entity_type="entity",
+            config=config,
             transform_callback=transform,
             gold_filter_callback=gold_filter,
-            silver_schema=silver_schema,
-            dq_config=DQConfig(),
-            table_config=TableConfig(primary_keys=["id"]),
         )
 
         # Process multiple batches
@@ -220,18 +229,22 @@ class TestRunIdPropagation:
             def gold_filter(ctx, record):
                 return False
 
+            config = RecordProcessorConfig(
+                pipeline_name="test_pipeline",
+                provider="test",
+                entity_type="entity",
+                silver_schema=silver_schema,
+                dq_config=DQConfig(),
+                table_config=TableConfig(primary_keys=["id"]),
+            )
+
             processor = RecordProcessor(
                 services=mock_services,
                 error_classifier=ErrorClassifier(),
                 context=context,
-                pipeline_name="test_pipeline",
-                provider="test",
-                entity_type="entity",
+                config=config,
                 transform_callback=transform,
                 gold_filter_callback=gold_filter,
-                silver_schema=silver_schema,
-                dq_config=DQConfig(),
-                table_config=TableConfig(primary_keys=["id"]),
             )
 
             records = [{"id": 1, "value": "test"}]
