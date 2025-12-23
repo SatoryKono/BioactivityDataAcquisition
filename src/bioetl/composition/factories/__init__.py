@@ -13,12 +13,6 @@ New in v5.1: Client, Storage, and DataSource factories consolidated here from
 infrastructure/factories/ following architectural requirements.
 """
 
-# Client factories
-from bioetl.composition.factories.clients import (
-    create_redis_client,
-    get_aws_credentials,
-)
-
 # Core factory infrastructure
 from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
@@ -57,8 +51,6 @@ __all__ = [
     "StorageFactory",
     "chembl_activity_factory",
     "create_pipeline_factory",
-    "create_redis_client",
-    "get_aws_credentials",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
     "uniprot_protein_factory",

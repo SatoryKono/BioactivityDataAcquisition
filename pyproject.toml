@@ -24,13 +24,9 @@ dependencies = [
     "deltalake>=0.18",
     "pyarrow>=15.0",
     "zstandard>=0.22",
-    "pandas>=2.0", # Added for pipeline functionality
-    # Orchestration & Validation (RULES.md Section 4.1)
-    "prefect>=3.0",
+    "pandas>=2.0",
+    # Validation
     "pandera>=0.20",
-    # Infrastructure
-    "redis>=5.0",
-    "boto3>=1.34",
     # Providers (RULES.md Appendix A)
     "pubchempy>=1.0.4",
     # Metrics
@@ -39,8 +35,6 @@ dependencies = [
     "click>=8.1",
     # Logging
     "structlog>=24.0",
-    "boto3-stubs~=1.42.10",
-    "py-spy[dev]>=0.4.1",
 ]
 
 [project.scripts]
@@ -68,12 +62,6 @@ dev = [
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
     "pytest-vcr>=1.0",
-    # Redis testing
-    "fakeredis>=2.21",
-    # AWS testing
-    "moto[s3]>=5.0",
-    # Docker testing
-    "pytest-docker>=2.0.0",
     # Code formatting and linting
     "black>=24.0",
     "isort>=5.13",
@@ -176,15 +164,10 @@ extra_checks = true
 module = [
     "deltalake.*",
     "polars.*",
-    "prefect.*",
     "pandera.*",
-    "redis.*",
-    "boto3.*",
-    "botocore.*",
     "pubchempy.*",
     "prometheus_client.*",
     "vcr.*",
-    "fakeredis.*",
     "structlog.*",
     "pyarrow",
     "pyarrow.*",

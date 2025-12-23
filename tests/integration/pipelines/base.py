@@ -77,22 +77,17 @@ class IntegrationPipelineTestCase:
 
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
-                bucket=self.bronze_path,
-                endpoint_url=None,  # Local file mode
-                access_key=None,
-                secret_key=None,
+                base_path=self.bronze_path,
                 save_json=save_json,
                 json_path=self.json_path if save_json else None,
                 logger=logger,
             ),
             silver_writer=DeltaWriter(
                 base_path=self.silver_path,
-                storage_options=None,
                 csv_exporter=None,
             ),
             gold_writer=GoldWriter(
                 base_path=self.gold_path,
-                storage_options=None,
                 csv_exporter=None,
             ),
         )

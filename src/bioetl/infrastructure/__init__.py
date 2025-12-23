@@ -2,8 +2,8 @@
 
 Contains concrete implementations for domain ports:
 - HTTP adapters (ChEMBL, PubChem, etc.)
-- Storage adapters (S3, Delta Lake)
-- Locking adapters (Redis)
+- Storage adapters (Local filesystem, Delta Lake)
+- Locking adapters (Memory lock)
 - Metrics exporters (Prometheus)
 
 See RULES.md Section 1.1 for architecture details.

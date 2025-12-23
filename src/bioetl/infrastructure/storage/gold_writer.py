@@ -9,7 +9,7 @@ Requirements:
 
 Architecture:
 - Uses Pandera for strict schema validation
-- Supports both Delta Lake and Parquet formats
+- Local filesystem storage with Delta Lake format
 - Implements SCD Type 2 (Slowly Changing Dimensions) for history tracking
 - Enforces data contracts
 - CSV export delegated to CsvExporter (composition)
@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 import random
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import pandera as pandera_pa
@@ -43,19 +44,16 @@ class GoldWriter:
 
     def __init__(
         self,
-        base_path: str,
-        storage_options: dict[str, str] | None = None,
+        base_path: str | Path,
         csv_exporter: CsvExporter | None = None,
     ) -> None:
         """Initialize Gold writer.
 
         Args:
-            base_path: Base path for Gold tables
-            storage_options: Storage options for S3/MinIO
+            base_path: Base path for Gold tables (local filesystem)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
         """
-        self.base_path = base_path.rstrip("/")
-        self.storage_options = storage_options or {}
+        self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
 
     async def write_gold(
@@ -201,14 +199,13 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
                         ),
                         mode=mode,
                         partition_by=partition_by,
-                        storage_options=storage_options,
                     )
                 )
                 break
@@ -257,22 +254,19 @@ class GoldWriter:
             try:
                 try:
                     dt = await self._run_in_executor(
-                        lambda table_path=table_path, storage_options=self.storage_options: DeltaTable(
-                            table_path, storage_options=storage_options
-                        )
+                        lambda table_path=table_path: DeltaTable(table_path)
                     )
                     await self._merge_scd2(dt, records, business_key, scd_config)
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()
                             ),
                             mode=mode,
                             partition_by=partition_by,
-                            storage_options=storage_options,
                         )
                     )
                 break
@@ -366,7 +360,7 @@ class GoldWriter:
     ) -> list[dict[str, Any]]:
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         dt = await self._run_in_executor(
-            lambda: DeltaTable(table_path, storage_options=self.storage_options)
+            lambda: DeltaTable(table_path)
         )
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
         if current_only and "is_current" in arrow_table.column_names:
@@ -382,7 +376,7 @@ class GoldWriter:
     ) -> list[dict[str, Any]]:
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         dt = await self._run_in_executor(
-            lambda: DeltaTable(table_path, storage_options=self.storage_options)
+            lambda: DeltaTable(table_path)
         )
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
         import pyarrow.compute as pc

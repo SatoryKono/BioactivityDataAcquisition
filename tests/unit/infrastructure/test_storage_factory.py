@@ -1,5 +1,6 @@
 """Unit tests for StorageFactory."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,34 +21,14 @@ def mock_logger():
 
 
 @pytest.fixture
-def mock_settings_local():
-    """Settings for local run (non-prod, no endpoint_url)."""
+def mock_settings(tmp_path):
+    """Settings for local run."""
     settings = MagicMock()
     settings.env = "dev"
-    settings.aws.endpoint_url = None
-    settings.aws.access_key = "test_key"
-    settings.aws.secret_key = "test_secret"
-    settings.s3.bucket_bronze = "prod-bronze"
-    settings.s3.bucket_silver = "prod-silver"
-    settings.s3.bucket_gold = "prod-gold"
-    settings.s3.bucket_checkpoints = "prod-checkpoints"
-    settings.storage_options = {"AWS_ACCESS_KEY_ID": "test"}
-    return settings
-
-
-@pytest.fixture
-def mock_settings_cloud():
-    """Settings for cloud run (prod with endpoint_url)."""
-    settings = MagicMock()
-    settings.env = "prod"
-    settings.aws.endpoint_url = "https://s3.amazonaws.com"
-    settings.aws.access_key = "prod_key"
-    settings.aws.secret_key = "prod_secret"
-    settings.s3.bucket_bronze = "prod-bronze-bucket"
-    settings.s3.bucket_silver = "prod-silver-bucket"
-    settings.s3.bucket_gold = "prod-gold-bucket"
-    settings.s3.bucket_checkpoints = "prod-checkpoints-bucket"
-    settings.storage_options = {"AWS_ACCESS_KEY_ID": "prod_key"}
+    settings.bronze_path = tmp_path / "bronze"
+    settings.silver_path = tmp_path / "silver"
+    settings.gold_path = tmp_path / "gold"
+    settings.checkpoint_path = tmp_path / "checkpoints"
     return settings
 
 
@@ -147,33 +128,33 @@ class TestStorageContext:
 class TestStorageFactoryLocal:
     """Tests for StorageFactory.create() in local mode."""
 
-    def test_local_run_uses_data_output_paths(
+    def test_local_run_uses_settings_paths(
         self,
-        mock_settings_local,
+        mock_settings,
         mock_config_minimal,
         mock_logger,
     ):
-        """Test that local runs use data/output paths."""
+        """Test that local runs use paths from settings."""
         with (
             patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
             patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
             patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             result = StorageFactory.create(
-                settings=mock_settings_local,
+                settings=mock_settings,
                 config=mock_config_minimal,
                 logger=mock_logger,
             )
 
             assert isinstance(result, StorageContext)
-            assert result.bronze_path == "data/output/bronze"
-            assert result.silver_path == "data/output/silver"
-            assert result.gold_path == "data/output/gold"
-            assert result.checkpoints_path == "data/output/checkpoints"
+            assert result.bronze_path == mock_settings.bronze_path
+            assert result.silver_path == mock_settings.silver_path
+            assert result.gold_path == mock_settings.gold_path
+            assert result.checkpoints_path == mock_settings.checkpoint_path
 
     def test_local_run_with_json_export(
         self,
-        mock_settings_local,
+        mock_settings,
         mock_config_with_exports,
         mock_logger,
     ):
@@ -186,26 +167,23 @@ class TestStorageFactoryLocal:
             patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             StorageFactory.create(
-                settings=mock_settings_local,
+                settings=mock_settings,
                 config=mock_config_with_exports,
                 logger=mock_logger,
             )
 
-            # Verify BronzeWriter was called with json_path
+            # Verify BronzeWriter was called with save_json
             mock_bronze.assert_called_once()
             call_kwargs = mock_bronze.call_args[1]
             assert call_kwargs["save_json"] is True
-            assert call_kwargs["json_path"] == "data/output/json"
 
     def test_local_run_with_csv_exports(
         self,
-        mock_settings_local,
+        mock_settings,
         mock_config_with_exports,
         mock_logger,
     ):
         """Test local run with CSV export enabled for Silver and Gold."""
-        from pathlib import Path
-
         from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
         with (
@@ -218,7 +196,7 @@ class TestStorageFactoryLocal:
             ) as mock_gold,
         ):
             StorageFactory.create(
-                settings=mock_settings_local,
+                settings=mock_settings,
                 config=mock_config_with_exports,
                 logger=mock_logger,
             )
@@ -241,118 +219,6 @@ class TestStorageFactoryLocal:
             assert gold_exporter.base_path == Path("data/export/gold.csv")
             assert gold_exporter.delimiter == ";"
 
-    def test_local_run_logs_info(
-        self,
-        mock_settings_local,
-        mock_config_minimal,
-        mock_logger,
-    ):
-        """Test that local run logs appropriate info message."""
-        with (
-            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
-        ):
-            StorageFactory.create(
-                settings=mock_settings_local,
-                config=mock_config_minimal,
-                logger=mock_logger,
-            )
-
-            mock_logger.info.assert_called()
-            # Find the call with "Local run detected"
-            local_run_calls = [
-                call
-                for call in mock_logger.info.call_args_list
-                if "Local run detected" in str(call)
-            ]
-            assert len(local_run_calls) >= 1
-
-
-@pytest.mark.unit
-class TestStorageFactoryCloud:
-    """Tests for StorageFactory.create() in cloud mode."""
-
-    def test_cloud_run_uses_s3_paths(
-        self,
-        mock_settings_cloud,
-        mock_config_minimal,
-        mock_logger,
-    ):
-        """Test that cloud runs use S3 bucket paths."""
-        with (
-            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
-        ):
-            result = StorageFactory.create(
-                settings=mock_settings_cloud,
-                config=mock_config_minimal,
-                logger=mock_logger,
-            )
-
-            assert isinstance(result, StorageContext)
-            assert result.bronze_path == "prod-bronze-bucket"
-            assert result.silver_path == "s3://prod-silver-bucket"
-            assert result.gold_path == "s3://prod-gold-bucket"
-            assert result.checkpoints_path == "prod-checkpoints-bucket"
-
-    def test_cloud_run_uses_endpoint_url(
-        self,
-        mock_settings_cloud,
-        mock_config_minimal,
-        mock_logger,
-    ):
-        """Test that cloud runs pass endpoint_url to BronzeWriter."""
-        with (
-            patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
-            ) as mock_bronze,
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
-        ):
-            StorageFactory.create(
-                settings=mock_settings_cloud,
-                config=mock_config_minimal,
-                logger=mock_logger,
-            )
-
-            mock_bronze.assert_called_once()
-            call_kwargs = mock_bronze.call_args[1]
-            assert call_kwargs["endpoint_url"] == "https://s3.amazonaws.com"
-
-    def test_cloud_run_uses_storage_options(
-        self,
-        mock_settings_cloud,
-        mock_config_minimal,
-        mock_logger,
-    ):
-        """Test that cloud runs pass storage_options to writers."""
-        with (
-            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
-            patch(
-                "bioetl.composition.factories.storage_factory.DeltaWriter"
-            ) as mock_delta,
-            patch(
-                "bioetl.composition.factories.storage_factory.GoldWriter"
-            ) as mock_gold,
-        ):
-            StorageFactory.create(
-                settings=mock_settings_cloud,
-                config=mock_config_minimal,
-                logger=mock_logger,
-            )
-
-            # DeltaWriter should receive storage_options
-            mock_delta.assert_called_once()
-            delta_kwargs = mock_delta.call_args[1]
-            assert delta_kwargs["storage_options"] == {"AWS_ACCESS_KEY_ID": "prod_key"}
-
-            # GoldWriter should receive storage_options
-            mock_gold.assert_called_once()
-            gold_kwargs = mock_gold.call_args[1]
-            assert gold_kwargs["storage_options"] == {"AWS_ACCESS_KEY_ID": "prod_key"}
-
 
 @pytest.mark.unit
 class TestStorageFactoryEdgeCases:
@@ -360,7 +226,7 @@ class TestStorageFactoryEdgeCases:
 
     def test_empty_sink_config(
         self,
-        mock_settings_local,
+        mock_settings,
         mock_config_empty_sink,
         mock_logger,
     ):
@@ -373,7 +239,7 @@ class TestStorageFactoryEdgeCases:
             patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             result = StorageFactory.create(
-                settings=mock_settings_local,
+                settings=mock_settings,
                 config=mock_config_empty_sink,
                 logger=mock_logger,
             )
@@ -385,42 +251,9 @@ class TestStorageFactoryEdgeCases:
             call_kwargs = mock_bronze.call_args[1]
             assert call_kwargs["save_json"] is False
 
-    def test_dev_env_with_endpoint_url_is_cloud(
-        self,
-        mock_config_minimal,
-        mock_logger,
-    ):
-        """Test that dev env with endpoint_url is treated as cloud."""
-        settings = MagicMock()
-        settings.env = "dev"  # Not prod
-        settings.aws.endpoint_url = "http://localhost:4566"  # But has endpoint
-        settings.aws.access_key = "test"
-        settings.aws.secret_key = "test"
-        settings.s3.bucket_bronze = "dev-bronze"
-        settings.s3.bucket_silver = "dev-silver"
-        settings.s3.bucket_gold = "dev-gold"
-        settings.s3.bucket_checkpoints = "dev-checkpoints"
-        settings.storage_options = {}
-
-        with (
-            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
-        ):
-            result = StorageFactory.create(
-                settings=settings,
-                config=mock_config_minimal,
-                logger=mock_logger,
-            )
-
-            # Should use S3 paths because endpoint_url is set
-            assert result.bronze_path == "dev-bronze"
-            assert result.silver_path == "s3://dev-silver"
-            assert result.gold_path == "s3://dev-gold"
-
     def test_adapter_is_properly_composed(
         self,
-        mock_settings_local,
+        mock_settings,
         mock_config_minimal,
         mock_logger,
     ):
@@ -445,7 +278,7 @@ class TestStorageFactoryEdgeCases:
             mock_gold.return_value = gold_instance
 
             result = StorageFactory.create(
-                settings=mock_settings_local,
+                settings=mock_settings,
                 config=mock_config_minimal,
                 logger=mock_logger,
             )

@@ -1,108 +1,13 @@
 """Unit tests for infrastructure factories."""
 
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pyarrow as pa
 import pytest
 
 from bioetl.domain.types import BatchID, RunID, RunType
-
-
-@pytest.mark.unit
-class TestCreateRedisClient:
-    """Tests for create_redis_client function."""
-
-    def test_create_redis_client_with_password(self):
-        """Test creating Redis client with password."""
-        from bioetl.composition.factories.clients import create_redis_client
-
-        settings = MagicMock()
-        settings.redis.host = "localhost"
-        settings.redis.port = 6379
-        settings.redis.db = 0
-        settings.redis.password = MagicMock()
-        settings.redis.password.get_secret_value.return_value = "secret"
-
-        with patch("bioetl.composition.factories.clients.aioredis.Redis") as mock_redis:
-            create_redis_client(settings)
-
-            mock_redis.assert_called_once_with(
-                host="localhost",
-                port=6379,
-                password="secret",
-                db=0,
-                decode_responses=True,
-            )
-
-    def test_create_redis_client_without_password(self):
-        """Test creating Redis client without password."""
-        from bioetl.composition.factories.clients import create_redis_client
-
-        settings = MagicMock()
-        settings.redis.host = "redis.example.com"
-        settings.redis.port = 6380
-        settings.redis.db = 1
-        settings.redis.password = None
-
-        with patch("bioetl.composition.factories.clients.aioredis.Redis") as mock_redis:
-            create_redis_client(settings)
-
-            mock_redis.assert_called_once_with(
-                host="redis.example.com",
-                port=6380,
-                password=None,
-                db=1,
-                decode_responses=True,
-            )
-
-
-@pytest.mark.unit
-class TestGetAwsCredentials:
-    """Tests for get_aws_credentials function."""
-
-    def test_get_aws_credentials_with_secret(self):
-        """Test extracting AWS credentials with secret key."""
-        from bioetl.composition.factories.clients import get_aws_credentials
-
-        settings = MagicMock()
-        settings.aws.access_key_id = "AKIAIOSFODNN7EXAMPLE"
-        settings.aws.secret_access_key = MagicMock()
-        settings.aws.secret_access_key.get_secret_value.return_value = (
-            "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-        )
-
-        access_key, secret_key = get_aws_credentials(settings)
-
-        assert access_key == "AKIAIOSFODNN7EXAMPLE"
-        assert secret_key == "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-
-    def test_get_aws_credentials_without_secret(self):
-        """Test extracting AWS credentials without secret key."""
-        from bioetl.composition.factories.clients import get_aws_credentials
-
-        settings = MagicMock()
-        settings.aws.access_key_id = "AKIAIOSFODNN7EXAMPLE"
-        settings.aws.secret_access_key = None
-
-        access_key, secret_key = get_aws_credentials(settings)
-
-        assert access_key == "AKIAIOSFODNN7EXAMPLE"
-        assert secret_key is None
-
-    def test_get_aws_credentials_all_none(self):
-        """Test extracting AWS credentials when all None."""
-        from bioetl.composition.factories.clients import get_aws_credentials
-
-        settings = MagicMock()
-        settings.aws.access_key_id = None
-        settings.aws.secret_access_key = None
-
-        access_key, secret_key = get_aws_credentials(settings)
-
-        assert access_key is None
-        assert secret_key is None
 
 
 @pytest.mark.unit
