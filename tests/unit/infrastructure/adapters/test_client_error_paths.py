@@ -91,7 +91,7 @@ class TestUniProtClientErrorPaths:
             results = [
                 r
                 async for r in client._fetch_proteins(
-                    query="test", watermark=None, limit=100
+                    query="test", limit=100
                 )
             ]
 
@@ -116,7 +116,7 @@ class TestUniProtClientErrorPaths:
             _ = [
                 r
                 async for r in client._fetch_proteins(
-                    query="test", watermark=None, limit=100
+                    query="test", limit=100
                 )
             ]
 
@@ -141,7 +141,7 @@ class TestUniProtClientErrorPaths:
             results = [
                 r
                 async for r in client._fetch_features(
-                    "P12345", watermark=None, limit=10
+                    "P12345", limit=10
                 )
             ]
 
@@ -166,7 +166,7 @@ class TestUniProtClientErrorPaths:
             _ = [
                 r
                 async for r in client._fetch_features(
-                    "P12345", watermark=None, limit=10
+                    "P12345", limit=10
                 )
             ]
 
@@ -197,7 +197,7 @@ class TestUniProtClientErrorPaths:
             results = [
                 r
                 async for r in client._fetch_sequences(
-                    "gene:TP53", watermark=None, limit=10
+                    "gene:TP53", limit=10
                 )
             ]
 
@@ -227,78 +227,7 @@ class TestUniProtClientErrorPaths:
             _ = [
                 r
                 async for r in client._fetch_sequences(
-                    "gene:TP53", watermark=None, limit=10
-                )
-            ]
-
-
-class TestPubChemClientErrorPaths:
-    """Tests for PubChem client error handling."""
-
-    @pytest.fixture
-    def mock_logger(self):
-        """Create a mock logger."""
-        return MagicMock()
-
-    @pytest.fixture
-    def mock_pubchempy(self):
-        """Mock pubchempy module."""
-        mock_pcp = MagicMock()
-        mock_pcp.get_compounds = MagicMock(return_value=[])
-        return mock_pcp
-
-    async def test_fetch_compounds_incremental_logs_error_on_failure(self, mock_logger):
-        """Test that _fetch_compounds_incremental logs error when fetch fails."""
-        from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
-
-        with patch.dict(
-            os.environ,
-            {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
-        ):
-            from bioetl.infrastructure.config import get_settings
-
-            get_settings.cache_clear()
-
-            client = PubChemClient(logger=mock_logger)
-
-            # Make circuit_breaker.call raise an exception then return empty
-            # Need 3 consecutive empty batches to break the loop (max_consecutive_empty=3)
-            client.circuit_breaker.call = AsyncMock(
-                side_effect=[
-                    ConnectionError("PubChem API error"),  # First: error → empty
-                    [],  # Second: empty
-                    [],  # Third: empty → breaks loop
-                ]
-            )
-
-            results = []
-            async for result in client._fetch_compounds_incremental(
-                watermark=1000, limit=50
-            ):
-                results.append(result)
-
-            # Should have logged the error via injected logger
-            mock_logger.error.assert_called()
-            # Verify the error message contains expected context
-            call_args = mock_logger.error.call_args
-            assert "batch fetch" in str(call_args).lower() or "pubchem" in str(call_args).lower()
-
-    async def test_fetch_compounds_incremental_raises_in_strict_mode(self, mock_logger):
-        """Test that _fetch_compounds_incremental raises exception in strict mode."""
-        from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
-
-        client = PubChemClient(logger=mock_logger, strict_error_handling=True)
-
-        # Make circuit_breaker.call raise an exception
-        client.circuit_breaker.call = AsyncMock(
-            side_effect=ConnectionError("PubChem API error")
-        )
-
-        with pytest.raises(ConnectionError, match="PubChem API error"):
-            _ = [
-                r
-                async for r in client._fetch_compounds_incremental(
-                    watermark=1000, limit=50
+                    "gene:TP53", limit=10
                 )
             ]
 

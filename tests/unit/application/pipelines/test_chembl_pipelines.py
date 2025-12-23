@@ -54,7 +54,6 @@ def create_pipeline_config(
         entity_type=entity_type,
         primary_keys=primary_keys,
         silver_table=silver_table,
-        watermark_field=f"{entity_type}_chembl_id",
     )
 
 
@@ -81,7 +80,6 @@ class TestChEMBLAssayPipeline:
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
-        assert pipeline._watermark_extractor is not None
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver(self, pipeline):
@@ -105,14 +103,6 @@ class TestChEMBLAssayPipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is None
-
-    def test_extract_watermark(self, pipeline):
-        """Test watermark extraction."""
-        record = {"assay_chembl_id": "CHEMBL123456"}
-
-        watermark = pipeline.extract_watermark(pipeline.context, record)
-
-        assert watermark.value == "CHEMBL123456"
 
 
 @pytest.mark.unit
@@ -138,7 +128,6 @@ class TestChEMBLDocumentPipeline:
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
-        assert pipeline._watermark_extractor is not None
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver(self, pipeline):
@@ -162,14 +151,6 @@ class TestChEMBLDocumentPipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is None
-
-    def test_extract_watermark(self, pipeline):
-        """Test watermark extraction."""
-        record = {"document_chembl_id": "CHEMBL789012"}
-
-        watermark = pipeline.extract_watermark(pipeline.context, record)
-
-        assert watermark.value == "CHEMBL789012"
 
 
 @pytest.mark.unit
@@ -195,7 +176,6 @@ class TestChEMBLMoleculePipeline:
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
-        assert pipeline._watermark_extractor is not None
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver(self, pipeline):
@@ -219,14 +199,6 @@ class TestChEMBLMoleculePipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is None
-
-    def test_extract_watermark(self, pipeline):
-        """Test watermark extraction."""
-        record = {"molecule_chembl_id": "CHEMBL25"}
-
-        watermark = pipeline.extract_watermark(pipeline.context, record)
-
-        assert watermark.value == "CHEMBL25"
 
 
 @pytest.mark.unit
@@ -252,7 +224,6 @@ class TestChEMBLTargetPipeline:
         """Test pipeline initializes correctly."""
         assert pipeline.provider == "chembl"
         assert pipeline._transformer is not None
-        assert pipeline._watermark_extractor is not None
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver(self, pipeline):
@@ -276,11 +247,3 @@ class TestChEMBLTargetPipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is None
-
-    def test_extract_watermark(self, pipeline):
-        """Test watermark extraction."""
-        record = {"target_chembl_id": "CHEMBL1862"}
-
-        watermark = pipeline.extract_watermark(pipeline.context, record)
-
-        assert watermark.value == "CHEMBL1862"

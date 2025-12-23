@@ -156,7 +156,6 @@ class TestYamlConfigToDomain:
         yaml_config.checkpoint_interval = 2000
         yaml_config.source = MagicMock()
         yaml_config.source.fields = []
-        yaml_config.source.watermark_field = None
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.05
         yaml_config.dq_rules.hard_fail_threshold = 0.20
@@ -194,7 +193,6 @@ class TestYamlConfigToDomain:
             {"name": "field2", "type": "int"},
             {"name": "field3", "type": "float"},
         ]
-        yaml_config.source.watermark_field = "updated_at"
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.05
         yaml_config.dq_rules.hard_fail_threshold = 0.20
@@ -202,7 +200,6 @@ class TestYamlConfigToDomain:
         result = yaml_config_to_domain(yaml_config)
 
         assert result.fields == ["field1", "field2", "field3"]
-        assert result.watermark_field == "updated_at"
 
     def test_dq_config_mapping(self) -> None:
         """Test DQ config mapping."""
@@ -221,7 +218,6 @@ class TestYamlConfigToDomain:
         yaml_config.checkpoint_interval = 1000
         yaml_config.source = MagicMock()
         yaml_config.source.fields = []
-        yaml_config.source.watermark_field = None
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.10
         yaml_config.dq_rules.hard_fail_threshold = 0.30

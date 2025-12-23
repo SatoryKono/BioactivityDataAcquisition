@@ -78,7 +78,7 @@ async def test_executor_initialization(executor):
 async def test_executor_execute_happy_path(executor, mock_services):
     """Test the execute method with a single record."""
     mock_services.data_source.fetch.return_value = AsyncIterator([{"id": 1}])
-    await executor.execute(watermark=None, limit=None)
+    await executor.execute(limit=None)
 
     assert executor.records_fetched == 1
     assert executor.records_bronze == 1
@@ -92,7 +92,7 @@ async def test_executor_execute_with_checkpoint(
     mock_services.data_source.fetch.return_value = AsyncIterator(
         [{"id": i} for i in range(1000)]
     )
-    await executor.execute(watermark=None, limit=None)
+    await executor.execute(limit=None)
 
     assert executor.records_fetched == 1000
     mock_checkpoint_manager.save_checkpoint.assert_called_once()
