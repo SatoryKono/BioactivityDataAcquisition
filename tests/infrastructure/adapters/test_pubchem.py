@@ -80,19 +80,16 @@ async def test_fetch_compound_by_query(pubchem_client, mock_pcp_compound):
         mock_get.assert_called_with("aspirin", "name")
 
 
-async def test_fetch_compound_incremental(pubchem_client, mock_pcp_compound):
-    """Test fetching compounds via watermark incremental load."""
+async def test_fetch_compound_with_limit(pubchem_client, mock_pcp_compound):
+    """Test fetching compounds with limit."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]) as mock_get:
         results = []
-        async for record in pubchem_client.fetch("compound", watermark=120, limit=1):
+        async for record in pubchem_client.fetch("compound", query="aspirin", limit=1):
             results.append(record)
 
         assert len(results) == 1
         assert results[0]["cid"] == 123
-        # Should be called with range starting from watermark
-        args, _ = mock_get.call_args
-        assert args[1] == "cid"
-        assert 120 in args[0]
+        mock_get.assert_called_with("aspirin", "name")
 
 
 async def test_fetch_substance(pubchem_client, mock_pcp_substance):
@@ -129,9 +126,9 @@ async def test_fetch_unsupported_entity(pubchem_client):
             pass
 
 
-async def test_fetch_compound_missing_query_watermark(pubchem_client):
-    """Test fetching compound without query or watermark raises ValueError."""
-    with pytest.raises(ValueError, match="Either query or watermark must be provided"):
+async def test_fetch_compound_missing_query(pubchem_client):
+    """Test fetching compound without query raises ValueError."""
+    with pytest.raises(ValueError, match="Query is required for compound fetch"):
         async for _ in pubchem_client.fetch("compound"):
             pass
 

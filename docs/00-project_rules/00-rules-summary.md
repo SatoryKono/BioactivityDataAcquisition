@@ -212,7 +212,6 @@
 | Gold    | PII исключается или агрегируется                  |
 
 - **PII fields MUST be salted.**
-- **Salt Rotation**: Dual-Salt Period (7 дней transition).
 
 ## 6. Управление Изменениями
 

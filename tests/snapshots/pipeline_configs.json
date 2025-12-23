@@ -71,7 +71,6 @@
     ],
     "provider": "chembl",
     "silver_table": "chembl_activity",
-    "watermark_field": "updated_on",
     "write_mode": "merge"
   },
   "chembl_document": {
@@ -107,7 +106,6 @@
     ],
     "provider": "chembl",
     "silver_table": "chembl_document",
-    "watermark_field": null,
     "write_mode": "merge"
   },
   "chembl_molecule": {
@@ -142,7 +140,6 @@
     ],
     "provider": "chembl",
     "silver_table": "chembl_molecule",
-    "watermark_field": null,
     "write_mode": "merge"
   },
   "chembl_target": {
@@ -178,7 +175,6 @@
     ],
     "provider": "chembl",
     "silver_table": "chembl_target",
-    "watermark_field": null,
     "write_mode": "merge"
   },
   "pubchem_compound": {
@@ -207,7 +203,6 @@
     ],
     "provider": "pubchem",
     "silver_table": "pubchem_compound",
-    "watermark_field": "cid",
     "write_mode": "merge"
   },
   "pubmed_publications": {
@@ -236,7 +231,6 @@
     ],
     "provider": "pubmed",
     "silver_table": "pubmed_publications",
-    "watermark_field": null,
     "write_mode": "merge"
   },
   "uniprot_protein": {
@@ -265,7 +259,6 @@
     ],
     "provider": "uniprot",
     "silver_table": "uniprot_protein",
-    "watermark_field": "accession",
     "write_mode": "merge"
   }
 }
