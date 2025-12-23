@@ -13,10 +13,6 @@ silver_table: "pubchem_compound"
 # Reference to shared source configuration
 source_file: ../../sources/pubchem.yaml
 
-# Source override
-source:
-  watermark_field: "cid"
-
 transform:
     version: "1.0.0"
     steps:

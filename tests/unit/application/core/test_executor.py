@@ -120,7 +120,7 @@ class TestPipelineExecutorExecute:
             bronze_count=3, silver_count=3, gold_count=3, quarantined_count=0
         )
 
-        await executor.execute(watermark=None, limit=None)
+        await executor.execute(limit=None)
 
         assert executor.records_fetched == 3
         assert executor.records_bronze == 3
@@ -139,7 +139,7 @@ class TestPipelineExecutorExecute:
 
         mock_services.data_source.fetch = mock_fetch
 
-        await executor.execute(watermark=None, limit=None)
+        await executor.execute(limit=None)
 
         # Should have called process_batch twice (batch of 10 + batch of 5)
         assert mock_record_processor.process_batch.call_count == 2
@@ -155,15 +155,15 @@ class TestPipelineExecutorExecute:
 
         mock_services.data_source.fetch = mock_fetch
 
-        await executor.execute(watermark=None, limit=None)
+        await executor.execute(limit=None)
 
         # With checkpoint_interval=5, should checkpoint at record 5 and 10
         assert mock_checkpoint_manager.save_checkpoint.call_count == 2
 
-    async def test_execute_handles_shutdown_with_last_record(
+    async def test_execute_handles_shutdown(
         self, executor, mock_services, mock_checkpoint_manager, shutdown_signal
     ):
-        """Test shutdown saves checkpoint with last record."""
+        """Test shutdown saves checkpoint."""
         records_yielded = 0
 
         async def mock_fetch(**kwargs):
@@ -178,17 +178,15 @@ class TestPipelineExecutorExecute:
         mock_services.data_source.fetch = mock_fetch
 
         with pytest.raises(PipelineShutdownError):
-            await executor.execute(watermark=None, limit=None)
+            await executor.execute(limit=None)
 
-        # Should have saved checkpoint with the last record before shutdown
+        # Should have saved checkpoint before shutdown
         mock_checkpoint_manager.save_checkpoint.assert_called()
-        last_call_args = mock_checkpoint_manager.save_checkpoint.call_args
-        assert last_call_args[0][0]["id"] == "2"  # Last record before shutdown
 
-    async def test_execute_shutdown_without_records(
+    async def test_execute_shutdown_early(
         self, executor, mock_services, mock_checkpoint_manager, shutdown_signal
     ):
-        """Test shutdown without any processed records."""
+        """Test shutdown at start of processing."""
 
         async def mock_fetch(**kwargs):
             shutdown_signal.request()
@@ -197,7 +195,7 @@ class TestPipelineExecutorExecute:
         mock_services.data_source.fetch = mock_fetch
 
         with pytest.raises(PipelineShutdownError):
-            await executor.execute(watermark=None, limit=None)
+            await executor.execute(limit=None)
 
     async def test_execute_empty_data(
         self, executor, mock_services, mock_record_processor
@@ -210,15 +208,13 @@ class TestPipelineExecutorExecute:
 
         mock_services.data_source.fetch = mock_fetch
 
-        await executor.execute(watermark=None, limit=None)
+        await executor.execute(limit=None)
 
         assert executor.records_fetched == 0
         mock_record_processor.process_batch.assert_not_called()
 
-    async def test_execute_passes_watermark_and_limit(self, executor, mock_services):
-        """Test that watermark and limit are passed to data source."""
-        watermark = "2024-01-01"  # Watermark is a TypeAlias for str | datetime | int
-
+    async def test_execute_passes_limit(self, executor, mock_services):
+        """Test that limit is passed to data source."""
         captured_kwargs = {}
 
         async def mock_fetch(**kwargs):
@@ -228,7 +224,6 @@ class TestPipelineExecutorExecute:
 
         mock_services.data_source.fetch = mock_fetch
 
-        await executor.execute(watermark=watermark, limit=100)
+        await executor.execute(limit=100)
 
-        assert captured_kwargs.get("watermark") == watermark
         assert captured_kwargs.get("limit") == 100

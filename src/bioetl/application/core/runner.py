@@ -104,9 +104,9 @@ class PipelineRunner:
                 # to avoid appending to stale data from previous runs
                 self._clear_exports()
 
-                watermark = await self._checkpoint_manager.load_checkpoint()
+                # Load checkpoint metadata (for logging purposes)
+                await self._checkpoint_manager.load_checkpoint()
                 await self._executor.execute(
-                    watermark=watermark,
                     limit=self._runtime.limit,
                     query=self._runtime.query,
                 )

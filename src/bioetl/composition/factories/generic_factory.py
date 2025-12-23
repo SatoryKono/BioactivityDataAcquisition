@@ -233,9 +233,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pipeline_name=pipeline.config.pipeline_name,
             run_id=run_id,
             resume=runtime.resume,
-            watermark_extractor=lambda record: pipeline.extract_watermark(
-                pipeline.context, record
-            ),
         )
 
         # Create Record Processor

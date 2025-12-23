@@ -149,8 +149,6 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         # Handle cases where fields are dicts like [{'name': 'col1'}, ...]
         source_fields = [field["name"] for field in source_fields if "name" in field]
 
-    watermark_field = yaml_config.source.watermark_field
-
     # Extract storage config
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
@@ -201,7 +199,6 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=source_fields,
-        watermark_field=watermark_field,
         dq=DomainDQConfig(
             soft_fail_threshold=yaml_config.dq_rules.soft_fail_threshold,
             hard_fail_threshold=yaml_config.dq_rules.hard_fail_threshold,

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.filter_config import FilterLoadResult, InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, InputFilterPort, MetricsPort
-    from bioetl.domain.types import HealthStatus, Watermark
+    from bioetl.domain.types import HealthStatus
 
 
 class FilteredDataSource:
@@ -136,7 +136,6 @@ class FilteredDataSource:
     async def fetch(
         self,
         entity_type: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: list[str] | None = None,
@@ -149,7 +148,6 @@ class FilteredDataSource:
 
         Args:
             entity_type: Type of entity to fetch.
-            watermark: Last checkpoint for incremental load.
             limit: Maximum number of records.
             query: Optional search query for providers that support it.
             filter_ids: External filter IDs (ignored - uses internal filter from CSV).
@@ -177,7 +175,6 @@ class FilteredDataSource:
                 entity_type=entity_type,
                 filter_ids=self._filter_ids,
                 filter_field=self._filter_config.filter_field,
-                watermark=watermark,
                 limit=limit,
             ):
                 yield record
@@ -185,7 +182,6 @@ class FilteredDataSource:
             # Standard fetch: no filtering
             async for record in self._data_source.fetch(
                 entity_type=entity_type,
-                watermark=watermark,
                 limit=limit,
                 query=query,
             ):

@@ -9,19 +9,16 @@ Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
-from bioetl.application.pipelines.chembl.document_watermark import (
-    DocumentWatermarkExtractor,
-)
 
 if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class ChEMBLDocumentPipeline(BasePipeline):
@@ -33,12 +30,9 @@ class ChEMBLDocumentPipeline(BasePipeline):
         runtime: RuntimeConfig,
         services: PipelineServices,
     ) -> None:
-        """Initialize pipeline with transformer and watermark extractor."""
+        """Initialize pipeline with transformer."""
         super().__init__(config, runtime, services)
         self._transformer = DocumentTransformer(provider=self.provider)
-        self._watermark_extractor = DocumentWatermarkExtractor(
-            watermark_field=self.config.watermark_field
-        )
 
     async def transform_bronze_to_silver(
         self,
@@ -49,9 +43,3 @@ class ChEMBLDocumentPipeline(BasePipeline):
         return await self._transformer.transform(context, record)
 
     # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-    def extract_watermark(
-        self, context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
-        """Extract watermark and return Watermark wrapper."""
-        return self._watermark_extractor.extract(context, record)
