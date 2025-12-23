@@ -208,6 +208,36 @@ class StoragePort(Protocol):
         """
         ...
 
+    def clear_silver(self, table_name: str) -> int:
+        """
+        Clear Silver layer data for a specific table.
+
+        Clears both Delta tables and CSV exports (if configured).
+        Should only be called for rebuild/backfill runs, NOT for incremental.
+
+        Args:
+            table_name: The name of the table to clear.
+
+        Returns:
+            Count of cleared items (tables + files).
+        """
+        ...
+
+    def clear_gold(self, table_name: str) -> int:
+        """
+        Clear Gold layer data for a specific table.
+
+        Clears both Delta tables and CSV exports (if configured).
+        Should only be called for rebuild/backfill runs, NOT for incremental.
+
+        Args:
+            table_name: The name of the table to clear.
+
+        Returns:
+            Count of cleared items (tables + files).
+        """
+        ...
+
     async def aclose(self) -> None:
         """Gracefully close the storage connection and release resources."""
         ...

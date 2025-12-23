@@ -100,53 +100,53 @@ class StorageAdapter:
             mode=mode,
         )
 
-    def clear_csv(self, table_name: str | None = None) -> int:
-        """Clear CSV export files for Silver and Gold layers.
+    def clear_silver(self, table_name: str) -> int:
+        """Clear Silver layer data for a specific table.
 
-        Should be called at the start of a pipeline run to ensure
-        fresh CSV exports without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Total number of files deleted.
-        """
-        deleted_count = 0
-
-        # Clear Silver CSV if exporter is configured
-        if self.silver.csv_exporter:
-            deleted = self.silver.csv_exporter.clear(table_name)
-            deleted_count += len(deleted)
-
-        # Clear Gold CSV if exporter is configured
-        if self.gold.csv_exporter:
-            deleted = self.gold.csv_exporter.clear(table_name)
-            deleted_count += len(deleted)
-
-        return deleted_count
-
-    def clear_delta(self, table_name: str | None = None) -> int:
-        """Clear Delta tables for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh data without duplicates from previous runs.
+        Implements StoragePort.clear_silver().
+        Clears both Delta tables and CSV exports (if configured).
+        Should only be called for rebuild/backfill runs, NOT for incremental.
 
         Args:
-            table_name: If provided, only clear Delta table for this table.
-                       If None, clear all Delta tables.
+            table_name: The name of the table to clear.
 
         Returns:
-            Total number of tables cleared.
+            Count of cleared items (tables + files).
         """
         cleared_count = 0
 
         # Clear Silver Delta table
         cleared_count += self.silver.clear(table_name)
 
+        # Clear Silver CSV if exporter is configured
+        if self.silver.csv_exporter:
+            deleted = self.silver.csv_exporter.clear(table_name)
+            cleared_count += len(deleted)
+
+        return cleared_count
+
+    def clear_gold(self, table_name: str) -> int:
+        """Clear Gold layer data for a specific table.
+
+        Implements StoragePort.clear_gold().
+        Clears both Delta tables and CSV exports (if configured).
+        Should only be called for rebuild/backfill runs, NOT for incremental.
+
+        Args:
+            table_name: The name of the table to clear.
+
+        Returns:
+            Count of cleared items (tables + files).
+        """
+        cleared_count = 0
+
         # Clear Gold Delta table
         cleared_count += self.gold.clear(table_name)
+
+        # Clear Gold CSV if exporter is configured
+        if self.gold.csv_exporter:
+            deleted = self.gold.csv_exporter.clear(table_name)
+            cleared_count += len(deleted)
 
         return cleared_count
 

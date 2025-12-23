@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Self
-from uuid import uuid4
 
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
@@ -37,6 +36,7 @@ class BasePipeline(ABC):
     @classmethod
     def create(
         cls,
+        run_id: RunID,
         runtime: RuntimeConfig,
         services: PipelineServices,
         config: PipelineConfig,
@@ -44,20 +44,35 @@ class BasePipeline(ABC):
         """Create pipeline instance.
 
         Default factory method. Subclasses can override if custom initialization is needed.
+
+        Args:
+            run_id: Unique identifier for this pipeline run (from CLI/orchestrator).
+            runtime: Runtime configuration.
+            services: Injected services (ports).
+            config: Pipeline configuration.
         """
-        return cls(config, runtime, services)
+        return cls(config, runtime, services, run_id)
 
     def __init__(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
         services: PipelineServices,
+        run_id: RunID,
     ) -> None:
-        """Initialize pipeline definition."""
+        """Initialize pipeline definition.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Injected services (ports).
+            run_id: Unique identifier for this pipeline run.
+                    MUST be passed from CLI/orchestrator to ensure consistency.
+        """
         self._config = config
         self._runtime = runtime
         self._services = services
-        self._run_id = RunID(uuid4())
+        self._run_id = run_id
         self._logger = services.logger.bind(
             run_id=str(self._run_id),
             pipeline=config.pipeline_name,

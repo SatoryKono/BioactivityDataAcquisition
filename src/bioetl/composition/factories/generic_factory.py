@@ -152,6 +152,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
     def create_with_services(
         self,
+        run_id: UUID,
         runtime: RuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
@@ -163,6 +164,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Loads config once and reuses it for both services and pipeline.
 
         Args:
+            run_id: Unique identifier for this pipeline run (from CLI/orchestrator)
             runtime: Pipeline runtime configuration
             settings: Application settings
             logger: Structured logger
@@ -172,6 +174,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Returns:
             Configured pipeline instance
         """
+        from bioetl.domain.types import RunID
+
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
         services = self.build_services(
@@ -184,6 +188,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         domain_config = yaml_config_to_domain(yaml_config)
 
         return self.pipeline_class.create(
+            run_id=RunID(run_id),
             runtime=runtime,
             services=services,
             config=domain_config,
@@ -220,7 +225,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
         # Create pipeline instance with services
+        # Pass run_id to ensure consistent identification across all components
         pipeline = self.create_with_services(
+            run_id=run_id,
             runtime=runtime,
             settings=settings,
             logger=logger,

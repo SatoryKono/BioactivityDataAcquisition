@@ -260,11 +260,12 @@ class TestChemblActivityFactory:
         mock_services,
         mock_pipeline_config,
     ):
-        """Test create_with_services creates pipeline."""
+        """Test create_with_services creates pipeline with run_id."""
         from bioetl.composition.factories.pipeline_factories import (
             chembl_activity_factory,
         )
         from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunID
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
@@ -284,13 +285,17 @@ class TestChemblActivityFactory:
 
         try:
             runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+            run_id = uuid4()
             result = chembl_activity_factory.create_with_services(
+                run_id=run_id,
                 runtime=runtime,
                 settings=mock_settings,
                 logger=mock_logger,
             )
 
+            # Verify run_id is passed to pipeline.create()
             mock_pipeline_class.create.assert_called_once_with(
+                run_id=RunID(run_id),
                 runtime=runtime,
                 services=mock_services,
                 config=mock_domain_config,
