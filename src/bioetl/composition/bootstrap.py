@@ -11,18 +11,14 @@ from typing import TYPE_CHECKING
 # Factories are imported to ensure registration happens
 import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.composition.factories.clients import (
-    create_redis_client,
-    get_aws_credentials,
-)
 from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
-from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
@@ -39,9 +35,9 @@ __all__ = [
     "ChemblAdapter",
     "DeltaWriter",
     "GoldWriter",
+    "LocalCheckpoint",
+    "MemoryLock",
     "PrometheusMetrics",
-    "RedisDistributedLock",
-    "S3Checkpoint",
     "StorageAdapter",
     "UnifiedHTTPClient",
     "UnifiedQuarantine",
@@ -49,8 +45,6 @@ __all__ = [
     "bootstrap_logger",
     "bootstrap_pipeline",
     "bootstrap_quarantine",
-    "create_redis_client",
-    "get_aws_credentials",
 ]
 
 if TYPE_CHECKING:
@@ -66,20 +60,16 @@ if TYPE_CHECKING:
 def bootstrap_quarantine() -> QuarantinePort:
     """Bootstrap the quarantine service for CLI inspection."""
     settings = get_settings()
-    base_path = f"s3://{settings.s3.bucket_silver}/common/quarantine"
-    return UnifiedQuarantine(
-        base_path=base_path,
-        storage_options=settings.storage_options,
-    )
+    base_path = str(settings.silver_path / "common" / "quarantine")
+    return UnifiedQuarantine(base_path=base_path)
 
 
 def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
     """Bootstrap the checkpoint service for CLI inspection."""
     settings = get_settings()
-    return S3Checkpoint(
-        bucket=settings.s3.bucket_checkpoints,
+    return LocalCheckpoint(
+        base_path=settings.checkpoint_path,
         pipeline_name=pipeline_name,
-        endpoint_url=settings.aws.endpoint_url,
     )
 
 

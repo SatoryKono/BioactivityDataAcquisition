@@ -46,8 +46,8 @@ class PipelineServices:
         >>> services = PipelineServices(
         ...     data_source=chembl_client,
         ...     storage=delta_storage,
-        ...     lock=redis_lock,
-        ...     checkpoint=s3_checkpoint,
+        ...     lock=memory_lock,
+        ...     checkpoint=local_checkpoint,
         ...     quarantine=unified_quarantine,
         ...     metrics=prometheus_metrics,
         ...     logger=logger,
