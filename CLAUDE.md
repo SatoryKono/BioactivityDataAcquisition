@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.1 (2025-12-22)*
+*Синхронизировано с RULES.md v5.2 (2025-12-23)*
 
 ---
 
@@ -365,11 +365,11 @@ git commit -m "..."
 
 | Документ | Описание |
 |----------|----------|
-| `docs/RULES.md` | Конституция проекта v5.1 |
+| `docs/RULES.md` | Конституция проекта v5.2 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-009) |
-| `AGENT.md` | Детальные инструкции для агента v2.1 |
+| `docs/02-architecture/decisions/` | ADR (001-010) |
+| `AGENT.md` | Детальные инструкции для агента v2.2 |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
 
 ---

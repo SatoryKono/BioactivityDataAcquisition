@@ -1,7 +1,7 @@
 """Unit tests for infrastructure factories."""
 
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pyarrow as pa

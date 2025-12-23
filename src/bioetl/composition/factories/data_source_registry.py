@@ -12,9 +12,8 @@ from typing import TYPE_CHECKING, ClassVar, Protocol
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
-
 from bioetl.domain.ports import LoggerPort
+from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
