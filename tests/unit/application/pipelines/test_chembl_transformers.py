@@ -301,11 +301,19 @@ class TestTargetTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_with_components(self, transformer, mock_context):
-        """Test transformation with target components."""
+        """Test transformation with target components containing xrefs."""
         record = {
             "target_chembl_id": "CHEMBL123",
-            "target_components": [{"component_type": "PROTEIN", "accession": "P12345"}],
-            "cross_references": [{"xref_src": "UniProt", "xref_id": "P12345"}],
+            "target_components": [
+                {
+                    "component_type": "PROTEIN",
+                    "accession": "P12345",
+                    "target_component_xrefs": [
+                        {"xref_id": "P12345", "xref_src_db": "UniProt"},
+                    ],
+                }
+            ],
+            "cross_references": [],  # API always returns empty at target level
             "species_group_flag": True,
         }
 
@@ -314,6 +322,82 @@ class TestTargetTransformer:
         assert result is not None
         assert isinstance(result.get("target_components"), str)
         assert isinstance(result.get("cross_references"), str)
+        # Verify xrefs are aggregated from components
+        import json
+
+        xrefs = json.loads(result["cross_references"])
+        assert len(xrefs) == 1
+        assert xrefs[0]["xref_id"] == "P12345"
+        assert xrefs[0]["xref_src_db"] == "UniProt"
+
+    @pytest.mark.asyncio
+    async def test_transform_aggregates_xrefs_from_multiple_components(
+        self, transformer, mock_context
+    ):
+        """Test that cross_references are aggregated from all target_component_xrefs."""
+        record = {
+            "target_chembl_id": "CHEMBL240",
+            "cross_references": [],  # API always returns empty
+            "target_components": [
+                {
+                    "accession": "Q12809",
+                    "component_type": "PROTEIN",
+                    "target_component_xrefs": [
+                        {"xref_id": "Q12809", "xref_src_db": "UniProt"},
+                        {"xref_id": "HGNC:6251", "xref_name": "KCNH2", "xref_src_db": "HGNC"},
+                    ],
+                },
+                {
+                    "accession": "P00533",
+                    "component_type": "PROTEIN",
+                    "target_component_xrefs": [
+                        {"xref_id": "P00533", "xref_src_db": "UniProt"},
+                    ],
+                },
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        import json
+
+        xrefs = json.loads(result["cross_references"])
+        assert len(xrefs) == 3  # Aggregated from both components
+        xref_ids = [x["xref_id"] for x in xrefs]
+        assert "Q12809" in xref_ids
+        assert "HGNC:6251" in xref_ids
+        assert "P00533" in xref_ids
+
+    @pytest.mark.asyncio
+    async def test_transform_handles_components_without_xrefs(
+        self, transformer, mock_context
+    ):
+        """Test handling of targets with components but no cross-references."""
+        record = {
+            "target_chembl_id": "CHEMBL456",
+            "target_components": [
+                {"accession": "P12345", "component_type": "PROTEIN"}  # No xrefs
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["cross_references"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_handles_empty_components(self, transformer, mock_context):
+        """Test handling of targets with no components."""
+        record = {
+            "target_chembl_id": "CHEMBL789",
+            "target_components": [],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["cross_references"] is None
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
