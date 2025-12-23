@@ -18,8 +18,13 @@ def mock_http_client():
 
 
 @pytest.fixture
-def adapter(mock_http_client):
-    return ChemblAdapter(http_client=mock_http_client)
+def mock_logger():
+    return MagicMock()
+
+
+@pytest.fixture
+def adapter(mock_http_client, mock_logger):
+    return ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
 
 
 @pytest.mark.asyncio

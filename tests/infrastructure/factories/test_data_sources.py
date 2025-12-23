@@ -15,7 +15,12 @@ def mock_http_client():
     return Mock(spec=UnifiedHTTPClient)
 
 
-def test_create_pubchem_adapter(mock_http_client):
+@pytest.fixture
+def mock_logger():
+    return Mock()
+
+
+def test_create_pubchem_adapter(mock_http_client, mock_logger):
     """Test creating PubChem adapter."""
     # PubChem doesn't use http_client, so it should be ignored by the factory logic
     # but we pass it anyway because the factory signature requires it (or allows it).
@@ -27,16 +32,16 @@ def test_create_pubchem_adapter(mock_http_client):
         MockPubChem.return_value = adapter_mock
 
         adapter = DataSourceFactory.create(
-            "pubchem", http_client=mock_http_client, rate=1.0
+            "pubchem", http_client=mock_http_client, logger=mock_logger, rate=1.0
         )
 
         assert adapter == adapter_mock
-        MockPubChem.assert_called_once_with(rate=1.0)
+        MockPubChem.assert_called_once_with(logger=mock_logger, rate=1.0)
 
 
-def test_create_uniprot_adapter(mock_http_client):
+def test_create_uniprot_adapter(mock_http_client, mock_logger):
     """Test creating UniProt adapter."""
-    # UniProt doesn't use http_client either.
+    # UniProt uses http_client.
     with patch(
         "bioetl.infrastructure.adapters.uniprot.client.UniProtClient"
     ) as MockUniProt:
@@ -44,11 +49,13 @@ def test_create_uniprot_adapter(mock_http_client):
         MockUniProt.return_value = adapter_mock
 
         adapter = DataSourceFactory.create(
-            "uniprot", http_client=mock_http_client, api_key="test_key"
+            "uniprot", http_client=mock_http_client, logger=mock_logger, api_key="test_key"
         )
 
         assert adapter == adapter_mock
-        MockUniProt.assert_called_once_with(api_key="test_key")
+        MockUniProt.assert_called_once_with(
+            http_client=mock_http_client, logger=mock_logger, api_key="test_key"
+        )
 
 
 def test_create_unknown_provider(mock_http_client):

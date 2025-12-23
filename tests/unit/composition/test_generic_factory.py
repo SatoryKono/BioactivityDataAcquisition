@@ -68,7 +68,7 @@ class TestDataSourceRegistry:
     def test_register_custom_provider(self):
         """Test registering a custom provider."""
 
-        def custom_creator(settings, config, filter_config=None):
+        def custom_creator(settings, config, logger, filter_config=None):
             return MagicMock()
 
         DataSourceRegistry.register("custom", custom_creator)
@@ -87,7 +87,12 @@ class TestDataSourceCreators:
     @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
     @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory")
     def test_create_chembl_data_source(
-        self, mock_ds_factory, mock_http_factory, mock_settings, mock_pipeline_config
+        self,
+        mock_ds_factory,
+        mock_http_factory,
+        mock_settings,
+        mock_pipeline_config,
+        mock_logger,
     ):
         """Test ChEMBL data source creation."""
         mock_http_client = MagicMock()
@@ -95,29 +100,34 @@ class TestDataSourceCreators:
         mock_adapter = MagicMock()
         mock_ds_factory.create.return_value = mock_adapter
 
-        result = create_chembl_data_source(mock_settings, mock_pipeline_config)
+        result = create_chembl_data_source(
+            mock_settings, mock_pipeline_config, mock_logger
+        )
 
         mock_http_factory.create_for_provider.assert_called_once_with(
             "chembl", mock_settings
         )
         mock_ds_factory.create.assert_called_once_with(
-            "chembl", http_client=mock_http_client
+            "chembl", http_client=mock_http_client, logger=mock_logger
         )
         assert result is mock_adapter
 
     @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory")
     def test_create_pubchem_data_source(
-        self, mock_ds_factory, mock_settings, mock_pipeline_config
+        self, mock_ds_factory, mock_settings, mock_pipeline_config, mock_logger
     ):
         """Test PubChem data source creation."""
         mock_adapter = MagicMock()
         mock_ds_factory.create.return_value = mock_adapter
 
-        result = create_pubchem_data_source(mock_settings, mock_pipeline_config)
+        result = create_pubchem_data_source(
+            mock_settings, mock_pipeline_config, mock_logger
+        )
 
         mock_ds_factory.create.assert_called_once_with(
             "pubchem",
             http_client=None,
+            logger=mock_logger,
             rate=5.0,
             strict_error_handling=mock_settings.strict_error_handling,
         )
@@ -156,7 +166,9 @@ class TestGenericPipelineFactory:
 
         assert factory._create_data_source is custom_creator
 
-    def test_create_data_source(self, mock_settings, mock_pipeline_config):
+    def test_create_data_source(
+        self, mock_settings, mock_pipeline_config, mock_logger
+    ):
         """Test data source creation through factory."""
         mock_pipeline_class = MagicMock()
         mock_data_source = MagicMock()
@@ -169,10 +181,12 @@ class TestGenericPipelineFactory:
             data_source_creator=custom_creator,
         )
 
-        result = factory.create_data_source(mock_settings, mock_pipeline_config)
+        result = factory.create_data_source(
+            mock_settings, mock_pipeline_config, mock_logger
+        )
 
         custom_creator.assert_called_once_with(
-            mock_settings, mock_pipeline_config, None
+            mock_settings, mock_pipeline_config, mock_logger, None
         )
         assert result is mock_data_source
 

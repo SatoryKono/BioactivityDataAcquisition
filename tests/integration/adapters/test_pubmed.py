@@ -1,4 +1,6 @@
 # tests/integration/adapters/test_pubmed.py
+from unittest.mock import MagicMock
+
 import pytest
 import respx
 from httpx import Response
@@ -15,7 +17,13 @@ from bioetl.infrastructure.config import get_settings  # Import get_settings
 
 
 @pytest.fixture
-def pubmed_adapter(monkeypatch) -> PubMedAdapter:
+def mock_logger() -> MagicMock:
+    """Create a mock logger for testing."""
+    return MagicMock()
+
+
+@pytest.fixture
+def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
     """Fixture to provide a PubMedAdapter instance for testing."""
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     get_settings.cache_clear()
@@ -34,6 +42,7 @@ def pubmed_adapter(monkeypatch) -> PubMedAdapter:
     )
     return PubMedAdapter(
         http_client=http_client,
+        logger=mock_logger,
         email="test@example.com",  # Use dummy email for tests
         api_key=None,  # Don't use API key for tests to avoid auth issues in replay or strict checks
     )
