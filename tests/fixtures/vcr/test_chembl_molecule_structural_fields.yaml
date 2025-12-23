@@ -1,0 +1,284 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/molecule.json?limit=1000&offset=0&format=json&molecule_chembl_id__in=CHEMBL10%2CCHEMBL1000%2CCHEMBL100056%2CCHEMBL100071%2CCHEMBL100082%2CCHEMBL100116%2CCHEMBL100136%2CCHEMBL1002%2CCHEMBL100219%2CCHEMBL100231%2CCHEMBL100239%2CCHEMBL100336%2CCHEMBL100352%2CCHEMBL100421%2CCHEMBL100445%2CCHEMBL100563%2CCHEMBL100570%2CCHEMBL100595%2CCHEMBL100617%2CCHEMBL100629%2CCHEMBL100702%2CCHEMBL100714%2CCHEMBL100729%2CCHEMBL100749%2CCHEMBL100763%2CCHEMBL1008%2CCHEMBL100833%2CCHEMBL100844%2CCHEMBL100849%2CCHEMBL100903%2CCHEMBL100934%2CCHEMBL100941%2CCHEMBL100951%2CCHEMBL100980%2CCHEMBL100981%2CCHEMBL101054%2CCHEMBL101083%2CCHEMBL101091%2CCHEMBL101147%2CCHEMBL101253%2CCHEMBL101300%2CCHEMBL101309%2CCHEMBL10134%2CCHEMBL101382%2CCHEMBL1014%2CCHEMBL101412%2CCHEMBL101454%2CCHEMBL101501%2CCHEMBL1016%2CCHEMBL10160%2CCHEMBL101607%2CCHEMBL101670%2CCHEMBL101690%2CCHEMBL1017%2CCHEMBL101771%2CCHEMBL101800%2CCHEMBL101807%2CCHEMBL101834%2CCHEMBL101845%2CCHEMBL10188%2CCHEMBL101917%2CCHEMBL101938%2CCHEMBL101944%2CCHEMBL101946%2CCHEMBL101979%2CCHEMBL101997%2CCHEMBL101998%2CCHEMBL102006%2CCHEMBL102034%2CCHEMBL102113%2CCHEMBL102163%2CCHEMBL102166%2CCHEMBL102192%2CCHEMBL1023%2CCHEMBL10231%2CCHEMBL102371%2CCHEMBL102372%2CCHEMBL10247%2CCHEMBL102664%2CCHEMBL1027%2CCHEMBL102714%2CCHEMBL10284%2CCHEMBL102860%2CCHEMBL1029%2CCHEMBL102960%2CCHEMBL103%2CCHEMBL103005%2CCHEMBL10309%2CCHEMBL103157%2CCHEMBL10316%2CCHEMBL103238%2CCHEMBL103268%2CCHEMBL103294%2CCHEMBL103305%2CCHEMBL10332%2CCHEMBL10333%2CCHEMBL103386%2CCHEMBL103399%2CCHEMBL1034%2CCHEMBL103437
+  response:
+    body:
+      string: "<!doctype html>\n<html lang=\"en\" class=\"vf-no-js\">\n  <head>\n
+        \   <script>\n// Detect if JS is on and swap vf-no-js for vf-js on the html
+        element\n(function(H){H.className=H.className.replace(/\\bvf-no-js\\b/,'vf-js')})(document.documentElement);\n</script>\n\n
+        \   <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width,
+        initial-scale=1.0\">\n    <!-- <link rel=\"stylesheet\" media=\"all\" href=\"/css/styles.css?\"
+        /> -->\n    <title>Error: 500 | EMBL\u2019s European Bionformatics Institute</title>\n\n\n\n
+        \   <link rel=\"icon\" type=\"image/x-icon\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/favicon.ico\"
+        />\n<link rel=\"icon\" type=\"image/png\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/favicon-32x32.png\"
+        />\n<link rel=\"icon\" type=\"image/png\" sizes=\"192\xD7192\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/android-chrome-192x192.png\"
+        />\n<!-- Android (192px) -->\n<link rel=\"apple-touch-icon-precomposed\" sizes=\"114x114\"\n
+        \ href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-114x114.png\"
+        />\n<!-- For iPhone 4 Retina display (114px) -->\n<link rel=\"apple-touch-icon-precomposed\"
+        sizes=\"72x72\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-72x72.png\"
+        />\n<!-- For iPad (72px) -->\n<link rel=\"apple-touch-icon-precomposed\" sizes=\"144x144\"\n
+        \ href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-144x144.png\"
+        />\n<!-- For iPad retinat (144px) -->\n<link rel=\"apple-touch-icon-precomposed\"\n
+        \ href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-57x57.png\"
+        />\n<!-- For iPhone (57px) -->\n<link rel=\"mask-icon\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/safari-pinned-tab.svg\"\n
+        \ color=\"#ffffff\" /> <!-- Safari icon for pinned tab -->\n<meta name=\"msapplication-TileColor\"
+        content=\"#2b5797\" /> <!-- MS Icons -->\n<meta name=\"msapplication-TileImage\"\n
+        \ content=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/mstile-144x144.png\"
+        />\n\n\n\n\n\n\n    <!-- Search indexing optimisations -->\n    <meta class=\"swiftype\"
+        name=\"what\" data-type=\"string\" content=\"none\" />\n    <meta class=\"swiftype\"
+        name=\"where\" data-type=\"string\" content=\"EMBL-EBI\" />\n\n\n    <!--
+        Descriptive meta -->\n    <meta name=\"title\" content=\"Error: 500\">\n    <meta
+        name=\"author\" content=\"European Bioinformatics Institute\">\n    <meta
+        name=\"robots\" content=\"index, follow\">\n    <meta name=\"keywords\" content=\"\">\n
+        \   <meta name=\"description\" content=\"\">\n\n    <!-- Open Graph / Facebook
+        -->\n    <meta property=\"og:type\" content=\"website\">\n    <meta property=\"og:url\"
+        content=\"https://www.ebi.ac.uk/info/error-pages/500-standalone/\">\n    <meta
+        property=\"og:title\" content=\"Error: 500\">\n    <meta property=\"og:description\"
+        content=\"\">\n\n\n    <!-- Twitter -->\n    <meta property=\"twitter:card\"
+        content=\"summary_large_image\">\n    <meta property=\"og:url\" content=\"https://www.ebi.ac.uk/info/error-pages/500-standalone/\">\n
+        \   <meta property=\"twitter:title\" content=\"Error: 500\">\n    <meta property=\"twitter:description\"
+        content=\"\">\n\n\n    <!-- Content descriptors -->\n    <meta name=\"embl:who\"
+        content=\"EMBL-EBI Web Dev\">\n    <meta name=\"embl:where\" content=\"EMBL-EBI\">\n
+        \   <meta name=\"embl:what\" content=\"none\">\n    <meta name=\"embl:active\"
+        content=\"where\">\n\n    <!-- Content role -->\n    <meta name=\"embl:utility\"
+        content=\"10\">\n    <meta name=\"embl:reach\" content=\"0\">\n\n    <!--
+        Page infromation -->\n    <meta name=\"embl:maintainer\" content=\"EMBL-EBI
+        Web Dev\">\n    <meta name=\"embl:last-review\" content=\"2021.04.01\">\n
+        \   <meta name=\"embl:review-cycle\" content=\"365\">\n    <meta name=\"embl:expiry\"
+        content=\"never\">\n\n    <!-- analytics -->\n    <meta name=\"vf:page-type\"
+        content=\"404;dimension1\">\n\n    <!-- CSS only -->\n<link rel=\"stylesheet\"
+        href=\"https://assets.emblstatic.net/vf/v2.5.7/css/styles.css\">\n<!-- JS
+        -->\n<script src=\"https://assets.emblstatic.net/vf/v2.5.7/scripts/scripts.js\"></script>\n<head>\n
+        \ <body class=\"vf-body vf-stack vf-stack--400\">\n    <style>head, title,
+        link, meta, style, script {--vf-stack-margin--custom: 0; }</style>\n\n    <!--
+        See the EBI Header Footer docs: https://stable.visual-framework.dev/components/ebi-header-footer
+        -->\n\n    <link rel=\"stylesheet\" href=\"https://assets.emblstatic.net/vf/v2.4.5/assets/ebi-header-footer/ebi-header-footer.css\"
+        type=\"text/css\" media=\"all\">\n    <header id=\"masthead-black-bar\" class=\"clearfix
+        masthead-black-bar | ebi-header-footer vf-content vf-u-fullbleed\"></header>\n\n\n\n\n<style>\n
+        \ .embl-grid {\n    margin-bottom: 48px;\n  }\n</style>\n\n<section class=\"vf-intro\"
+        id=\"500\">\n\n  <div><!-- empty --></div>\n\n  <div class=\"vf-stack\">\n\n
+        \ <h1 class=\"vf-intro__heading \">Error: 500</h1>\n<p class=\"vf-lede\">There
+        was a technical error.</p>\n\n\n<p class=\"vf-intro__text\">Something has
+        gone wrong with our web server when attempting to make this page.</p><p class=\"vf-intro__text\">Unfortunately,
+        the service you are trying to access is currently unavailable. <br>Please
+        try again later.</p>\n  </div>\n</section>\n\n\n<section class=\"embl-grid
+        embl-grid--has-centered-content\">\n  <div></div>\n <section>\n      <form
+        id=\"ebi_search\" action=\"/ebisearch/search.ebi\" class=\"vf-form vf-form--search
+        vf-form--search--mini | vf-sidebar vf-sidebar--end\">\n        <div class=\"vf-sidebar__inner\"
+        style=\"flex-wrap: nowrap;\">\n          <div class=\"vf-form__item\">\n            <label
+        class=\"vf-form__label vf-u-sr-only | vf-search__label\" for=\"searchitem\">Search</label>\n
+        \           <input name=\"query\" type=\"search\" placeholder=\"Find a gene,
+        protein or chemical\" id=\"searchitem\" class=\"vf-form__input\" required=\"\"
+        spellcheck=\"false\" data-ms-editor=\"true\">\n            <input name=\"requestFrom\"
+        id=\"requestFrom\" type=\"hidden\" class=\"vf-form__input\" value=\"ebi_index\">\n
+        \         </div>\n          <div class=\"vf-form__item\">\n            <select
+        name=\"db\" id=\"db\" tabindex=\"1\" class=\"vf-form__select\" style=\"max-width:
+        150px\">\n              <option value=\"allebi\">All</option>\n              <optgroup
+        label=\"Science search\">\n                <option value=\"genomes\">Genomes
+        &amp; metagenomes</option>\n                <option value=\"nucleotideSequences\">Nucleotide
+        sequences</option>\n                <option value=\"proteinSequences\">Protein
+        sequences</option>\n                <option value=\"smallMolecules\">Small
+        molecules</option>\n                <option value=\"geneExpression\">Gene
+        expression</option>\n                <option value=\"geneDiseaseAssociations\">Gene-Disease
+        Associations</option>\n                <option value=\"diseases\">Diseases</option>\n
+        \               <option value=\"molecularInteractions\">Molecular interactions</option>\n
+        \               <option value=\"reactionsPathways\">Reactions &amp; pathways</option>\n
+        \               <option value=\"proteinFamilies\">Protein families</option>\n
+        \               <option value=\"literature\">Literature</option>\n                <option
+        value=\"ontologies\">Samples &amp; ontologies</option>\n              </optgroup>\n
+        \             <optgroup label=\"Search web content\">\n                <option
+        value=\"ebiweb_people\">EMBL-EBI People</option>\n                <option
+        value=\"ebiweb\">EMBL-EBI web</option>\n                <!-- <option value=\"ebiweb\">EMBL
+        web</option> -->\n              </optgroup>\n            </select>\n          </div>\n\n\n
+        \         <button type=\"submit\" class=\"vf-search__button | vf-button vf-button--primary\">\n
+        \           <span class=\"vf-button__text\">Search</span>\n          </button>\n
+        \       </div>\n      </form>\n      <p class=\"vf-text-body--5 vf-u-margin__bottom--0\">\n
+        \       Example searches: <a class=\"vf-link\" href=\"/ebisearch/search.ebi?db=allebi&amp;requestFrom=ebi_index&amp;query=blast\">blast</a>\n
+        \       <a class=\"vf-link\" href=\"/ebisearch/search.ebi?db=allebi&amp;query=keratin&amp;requestFrom=ebi_index\">keratin</a>\n
+        \       <a class=\"vf-link\" href=\"/ebisearch/search.ebi?db=allebi&amp;query=bfl1&amp;requestFrom=ebi_index\">bfl1</a>\n
+        \       | <a class=\"vf-link\" href=\"https://www.ebi.ac.uk/ebisearch/overview.ebi/about\">About
+        EBI Search</a>\n      </p>\n    </section>\n</section>\n\n<section class=\"embl-grid\">\n
+        \ <div></div>\n  <div class=\"vf-content\">\n    <h3>Need assistance?</h3>\n
+        \   <a class=\"vf-button vf-button--primary\" href=\"https://www.ebi.ac.uk/support/error\">Contact
+        our support team</a>\n  </div>\n</section>\n\n    <!-- embl global footer
+        -->\n\n\n<!-- embl-ebi global footer -->\n<link rel=\"import\" href=\"https://www.embl.org/api/v1/pattern.html?filter-content-type=article&filter-id=106902&pattern=node-body&source=contenthub\"
+        data-target=\"self\" data-embl-js-content-hub-loader>\n\n    <script src=\"https://assets.emblstatic.net/vf/v2.4.9/scripts/scripts.js\"></script>\n<!--\n
+        \ When using legacy EBI 1.x JS, we disable the old cookie banner.\n  https://stable.visual-framework.dev/components/ebi-header-footer/\n
+        \ -->\n<div class=\"vf-u-display-none\" data-protection-message-disable=\"true\"></div>\n\n<!--
+        IE11 polyfill JS -->\n<script nomodule crossorigin=\"anonymous\" src=\"https://polyfill.io/v3/polyfill.min.js?flags=gated&features=default\"></script>\n<!--
+        <script src=\"/scripts/scripts.js?\"></script> -->\n<script defer=\"defer\"
+        src=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/js/script.js\"></script>\n<link
+        rel=\"stylesheet\" href=\"//ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css\"
+        type=\"text/css\" media=\"all\" />\n\n<!-- Google Analytics -->\n<script>\nwindow.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new
+        Date;\nga('create', 'UA-629242-1', 'auto');\n</script>\n<script async src='https://www.google-analytics.com/analytics.js'></script>\n<!--
+        End Google Analytics -->\n\n<script type=\"text/javascript\">\n  document.addEventListener(\"DOMContentLoaded\",
+        function(event) {\n\n        //- Code to execute when only the HTML document
+        is loaded.\n        //- This doesn't wait for stylesheets,\n        // images,
+        and subframes to finish loading.\n  });\n</script>\n\n  </body>\n</html>\n"
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '10135'
+      Content-Type:
+      - text/html
+      Date:
+      - Tue, 23 Dec 2025 15:28:34 GMT
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/molecule.json?limit=1000&offset=0&format=json&molecule_chembl_id__in=CHEMBL10%2CCHEMBL1000%2CCHEMBL100056%2CCHEMBL100071%2CCHEMBL100082%2CCHEMBL100116%2CCHEMBL100136%2CCHEMBL1002%2CCHEMBL100219%2CCHEMBL100231%2CCHEMBL100239%2CCHEMBL100336%2CCHEMBL100352%2CCHEMBL100421%2CCHEMBL100445%2CCHEMBL100563%2CCHEMBL100570%2CCHEMBL100595%2CCHEMBL100617%2CCHEMBL100629%2CCHEMBL100702%2CCHEMBL100714%2CCHEMBL100729%2CCHEMBL100749%2CCHEMBL100763%2CCHEMBL1008%2CCHEMBL100833%2CCHEMBL100844%2CCHEMBL100849%2CCHEMBL100903%2CCHEMBL100934%2CCHEMBL100941%2CCHEMBL100951%2CCHEMBL100980%2CCHEMBL100981%2CCHEMBL101054%2CCHEMBL101083%2CCHEMBL101091%2CCHEMBL101147%2CCHEMBL101253%2CCHEMBL101300%2CCHEMBL101309%2CCHEMBL10134%2CCHEMBL101382%2CCHEMBL1014%2CCHEMBL101412%2CCHEMBL101454%2CCHEMBL101501%2CCHEMBL1016%2CCHEMBL10160%2CCHEMBL101607%2CCHEMBL101670%2CCHEMBL101690%2CCHEMBL1017%2CCHEMBL101771%2CCHEMBL101800%2CCHEMBL101807%2CCHEMBL101834%2CCHEMBL101845%2CCHEMBL10188%2CCHEMBL101917%2CCHEMBL101938%2CCHEMBL101944%2CCHEMBL101946%2CCHEMBL101979%2CCHEMBL101997%2CCHEMBL101998%2CCHEMBL102006%2CCHEMBL102034%2CCHEMBL102113%2CCHEMBL102163%2CCHEMBL102166%2CCHEMBL102192%2CCHEMBL1023%2CCHEMBL10231%2CCHEMBL102371%2CCHEMBL102372%2CCHEMBL10247%2CCHEMBL102664%2CCHEMBL1027%2CCHEMBL102714%2CCHEMBL10284%2CCHEMBL102860%2CCHEMBL1029%2CCHEMBL102960%2CCHEMBL103%2CCHEMBL103005%2CCHEMBL10309%2CCHEMBL103157%2CCHEMBL10316%2CCHEMBL103238%2CCHEMBL103268%2CCHEMBL103294%2CCHEMBL103305%2CCHEMBL10332%2CCHEMBL10333%2CCHEMBL103386%2CCHEMBL103399%2CCHEMBL1034%2CCHEMBL103437
+  response:
+    body:
+      string: "<!doctype html>\n<html lang=\"en\" class=\"vf-no-js\">\n  <head>\n
+        \   <script>\n// Detect if JS is on and swap vf-no-js for vf-js on the html
+        element\n(function(H){H.className=H.className.replace(/\\bvf-no-js\\b/,'vf-js')})(document.documentElement);\n</script>\n\n
+        \   <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width,
+        initial-scale=1.0\">\n    <!-- <link rel=\"stylesheet\" media=\"all\" href=\"/css/styles.css?\"
+        /> -->\n    <title>Error: 500 | EMBL\u2019s European Bionformatics Institute</title>\n\n\n\n
+        \   <link rel=\"icon\" type=\"image/x-icon\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/favicon.ico\"
+        />\n<link rel=\"icon\" type=\"image/png\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/favicon-32x32.png\"
+        />\n<link rel=\"icon\" type=\"image/png\" sizes=\"192\xD7192\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/android-chrome-192x192.png\"
+        />\n<!-- Android (192px) -->\n<link rel=\"apple-touch-icon-precomposed\" sizes=\"114x114\"\n
+        \ href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-114x114.png\"
+        />\n<!-- For iPhone 4 Retina display (114px) -->\n<link rel=\"apple-touch-icon-precomposed\"
+        sizes=\"72x72\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-72x72.png\"
+        />\n<!-- For iPad (72px) -->\n<link rel=\"apple-touch-icon-precomposed\" sizes=\"144x144\"\n
+        \ href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-144x144.png\"
+        />\n<!-- For iPad retinat (144px) -->\n<link rel=\"apple-touch-icon-precomposed\"\n
+        \ href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/apple-icon-57x57.png\"
+        />\n<!-- For iPhone (57px) -->\n<link rel=\"mask-icon\"\n  href=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/safari-pinned-tab.svg\"\n
+        \ color=\"#ffffff\" /> <!-- Safari icon for pinned tab -->\n<meta name=\"msapplication-TileColor\"
+        content=\"#2b5797\" /> <!-- MS Icons -->\n<meta name=\"msapplication-TileImage\"\n
+        \ content=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/images/logos/EMBL-EBI/favicons/mstile-144x144.png\"
+        />\n\n\n\n\n\n\n    <!-- Search indexing optimisations -->\n    <meta class=\"swiftype\"
+        name=\"what\" data-type=\"string\" content=\"none\" />\n    <meta class=\"swiftype\"
+        name=\"where\" data-type=\"string\" content=\"EMBL-EBI\" />\n\n\n    <!--
+        Descriptive meta -->\n    <meta name=\"title\" content=\"Error: 500\">\n    <meta
+        name=\"author\" content=\"European Bioinformatics Institute\">\n    <meta
+        name=\"robots\" content=\"index, follow\">\n    <meta name=\"keywords\" content=\"\">\n
+        \   <meta name=\"description\" content=\"\">\n\n    <!-- Open Graph / Facebook
+        -->\n    <meta property=\"og:type\" content=\"website\">\n    <meta property=\"og:url\"
+        content=\"https://www.ebi.ac.uk/info/error-pages/500-standalone/\">\n    <meta
+        property=\"og:title\" content=\"Error: 500\">\n    <meta property=\"og:description\"
+        content=\"\">\n\n\n    <!-- Twitter -->\n    <meta property=\"twitter:card\"
+        content=\"summary_large_image\">\n    <meta property=\"og:url\" content=\"https://www.ebi.ac.uk/info/error-pages/500-standalone/\">\n
+        \   <meta property=\"twitter:title\" content=\"Error: 500\">\n    <meta property=\"twitter:description\"
+        content=\"\">\n\n\n    <!-- Content descriptors -->\n    <meta name=\"embl:who\"
+        content=\"EMBL-EBI Web Dev\">\n    <meta name=\"embl:where\" content=\"EMBL-EBI\">\n
+        \   <meta name=\"embl:what\" content=\"none\">\n    <meta name=\"embl:active\"
+        content=\"where\">\n\n    <!-- Content role -->\n    <meta name=\"embl:utility\"
+        content=\"10\">\n    <meta name=\"embl:reach\" content=\"0\">\n\n    <!--
+        Page infromation -->\n    <meta name=\"embl:maintainer\" content=\"EMBL-EBI
+        Web Dev\">\n    <meta name=\"embl:last-review\" content=\"2021.04.01\">\n
+        \   <meta name=\"embl:review-cycle\" content=\"365\">\n    <meta name=\"embl:expiry\"
+        content=\"never\">\n\n    <!-- analytics -->\n    <meta name=\"vf:page-type\"
+        content=\"404;dimension1\">\n\n    <!-- CSS only -->\n<link rel=\"stylesheet\"
+        href=\"https://assets.emblstatic.net/vf/v2.5.7/css/styles.css\">\n<!-- JS
+        -->\n<script src=\"https://assets.emblstatic.net/vf/v2.5.7/scripts/scripts.js\"></script>\n<head>\n
+        \ <body class=\"vf-body vf-stack vf-stack--400\">\n    <style>head, title,
+        link, meta, style, script {--vf-stack-margin--custom: 0; }</style>\n\n    <!--
+        See the EBI Header Footer docs: https://stable.visual-framework.dev/components/ebi-header-footer
+        -->\n\n    <link rel=\"stylesheet\" href=\"https://assets.emblstatic.net/vf/v2.4.5/assets/ebi-header-footer/ebi-header-footer.css\"
+        type=\"text/css\" media=\"all\">\n    <header id=\"masthead-black-bar\" class=\"clearfix
+        masthead-black-bar | ebi-header-footer vf-content vf-u-fullbleed\"></header>\n\n\n\n\n<style>\n
+        \ .embl-grid {\n    margin-bottom: 48px;\n  }\n</style>\n\n<section class=\"vf-intro\"
+        id=\"500\">\n\n  <div><!-- empty --></div>\n\n  <div class=\"vf-stack\">\n\n
+        \ <h1 class=\"vf-intro__heading \">Error: 500</h1>\n<p class=\"vf-lede\">There
+        was a technical error.</p>\n\n\n<p class=\"vf-intro__text\">Something has
+        gone wrong with our web server when attempting to make this page.</p><p class=\"vf-intro__text\">Unfortunately,
+        the service you are trying to access is currently unavailable. <br>Please
+        try again later.</p>\n  </div>\n</section>\n\n\n<section class=\"embl-grid
+        embl-grid--has-centered-content\">\n  <div></div>\n <section>\n      <form
+        id=\"ebi_search\" action=\"/ebisearch/search.ebi\" class=\"vf-form vf-form--search
+        vf-form--search--mini | vf-sidebar vf-sidebar--end\">\n        <div class=\"vf-sidebar__inner\"
+        style=\"flex-wrap: nowrap;\">\n          <div class=\"vf-form__item\">\n            <label
+        class=\"vf-form__label vf-u-sr-only | vf-search__label\" for=\"searchitem\">Search</label>\n
+        \           <input name=\"query\" type=\"search\" placeholder=\"Find a gene,
+        protein or chemical\" id=\"searchitem\" class=\"vf-form__input\" required=\"\"
+        spellcheck=\"false\" data-ms-editor=\"true\">\n            <input name=\"requestFrom\"
+        id=\"requestFrom\" type=\"hidden\" class=\"vf-form__input\" value=\"ebi_index\">\n
+        \         </div>\n          <div class=\"vf-form__item\">\n            <select
+        name=\"db\" id=\"db\" tabindex=\"1\" class=\"vf-form__select\" style=\"max-width:
+        150px\">\n              <option value=\"allebi\">All</option>\n              <optgroup
+        label=\"Science search\">\n                <option value=\"genomes\">Genomes
+        &amp; metagenomes</option>\n                <option value=\"nucleotideSequences\">Nucleotide
+        sequences</option>\n                <option value=\"proteinSequences\">Protein
+        sequences</option>\n                <option value=\"smallMolecules\">Small
+        molecules</option>\n                <option value=\"geneExpression\">Gene
+        expression</option>\n                <option value=\"geneDiseaseAssociations\">Gene-Disease
+        Associations</option>\n                <option value=\"diseases\">Diseases</option>\n
+        \               <option value=\"molecularInteractions\">Molecular interactions</option>\n
+        \               <option value=\"reactionsPathways\">Reactions &amp; pathways</option>\n
+        \               <option value=\"proteinFamilies\">Protein families</option>\n
+        \               <option value=\"literature\">Literature</option>\n                <option
+        value=\"ontologies\">Samples &amp; ontologies</option>\n              </optgroup>\n
+        \             <optgroup label=\"Search web content\">\n                <option
+        value=\"ebiweb_people\">EMBL-EBI People</option>\n                <option
+        value=\"ebiweb\">EMBL-EBI web</option>\n                <!-- <option value=\"ebiweb\">EMBL
+        web</option> -->\n              </optgroup>\n            </select>\n          </div>\n\n\n
+        \         <button type=\"submit\" class=\"vf-search__button | vf-button vf-button--primary\">\n
+        \           <span class=\"vf-button__text\">Search</span>\n          </button>\n
+        \       </div>\n      </form>\n      <p class=\"vf-text-body--5 vf-u-margin__bottom--0\">\n
+        \       Example searches: <a class=\"vf-link\" href=\"/ebisearch/search.ebi?db=allebi&amp;requestFrom=ebi_index&amp;query=blast\">blast</a>\n
+        \       <a class=\"vf-link\" href=\"/ebisearch/search.ebi?db=allebi&amp;query=keratin&amp;requestFrom=ebi_index\">keratin</a>\n
+        \       <a class=\"vf-link\" href=\"/ebisearch/search.ebi?db=allebi&amp;query=bfl1&amp;requestFrom=ebi_index\">bfl1</a>\n
+        \       | <a class=\"vf-link\" href=\"https://www.ebi.ac.uk/ebisearch/overview.ebi/about\">About
+        EBI Search</a>\n      </p>\n    </section>\n</section>\n\n<section class=\"embl-grid\">\n
+        \ <div></div>\n  <div class=\"vf-content\">\n    <h3>Need assistance?</h3>\n
+        \   <a class=\"vf-button vf-button--primary\" href=\"https://www.ebi.ac.uk/support/error\">Contact
+        our support team</a>\n  </div>\n</section>\n\n    <!-- embl global footer
+        -->\n\n\n<!-- embl-ebi global footer -->\n<link rel=\"import\" href=\"https://www.embl.org/api/v1/pattern.html?filter-content-type=article&filter-id=106902&pattern=node-body&source=contenthub\"
+        data-target=\"self\" data-embl-js-content-hub-loader>\n\n    <script src=\"https://assets.emblstatic.net/vf/v2.4.9/scripts/scripts.js\"></script>\n<!--\n
+        \ When using legacy EBI 1.x JS, we disable the old cookie banner.\n  https://stable.visual-framework.dev/components/ebi-header-footer/\n
+        \ -->\n<div class=\"vf-u-display-none\" data-protection-message-disable=\"true\"></div>\n\n<!--
+        IE11 polyfill JS -->\n<script nomodule crossorigin=\"anonymous\" src=\"https://polyfill.io/v3/polyfill.min.js?flags=gated&features=default\"></script>\n<!--
+        <script src=\"/scripts/scripts.js?\"></script> -->\n<script defer=\"defer\"
+        src=\"https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/js/script.js\"></script>\n<link
+        rel=\"stylesheet\" href=\"//ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css\"
+        type=\"text/css\" media=\"all\" />\n\n<!-- Google Analytics -->\n<script>\nwindow.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new
+        Date;\nga('create', 'UA-629242-1', 'auto');\n</script>\n<script async src='https://www.google-analytics.com/analytics.js'></script>\n<!--
+        End Google Analytics -->\n\n<script type=\"text/javascript\">\n  document.addEventListener(\"DOMContentLoaded\",
+        function(event) {\n\n        //- Code to execute when only the HTML document
+        is loaded.\n        //- This doesn't wait for stylesheets,\n        // images,
+        and subframes to finish loading.\n  });\n</script>\n\n  </body>\n</html>\n"
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '10135'
+      Content-Type:
+      - text/html
+      Date:
+      - Tue, 23 Dec 2025 15:28:38 GMT
+    status:
+      code: 500
+      message: Internal Server Error
+version: 1

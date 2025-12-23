@@ -1,0 +1,115 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=%2A&size=5&format=json&fields=accession%2Cid%2Cgene_names%2Corganism_name%2Corganism_id%2Cprotein_name%2Clength%2Csequence%2Ccc_function%2Cft_domain%2Cxref_pdb%2Cxref_chembl
+  response:
+    body:
+      string: '{"results":[{"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A0C5B5G6","uniProtkbId":"MOTSC_HUMAN","organism":{"scientificName":"Homo
+        sapiens","commonName":"Human","taxonId":9606,"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"AJM13597.1"}],"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"25738459"}],"value":"Mitochondrial-derived
+        peptide MOTS-c"}},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"25738459"}],"value":"Mitochondrial
+        open reading frame of the 12S rRNA-c"}}]},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:7470"}],"value":"MT-RNR1"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"25738459"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29886458"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29983246"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"30468456"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"31081069"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33468709"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"33554779"}],"value":"Regulates
+        insulin sensitivity and metabolic homeostasis (PubMed:25738459, PubMed:33468709).
+        Inhibits the folate cycle, thereby reducing de novo purine biosynthesis which
+        leads to the accumulation of the de novo purine synthesis intermediate 5-aminoimidazole-4-carboxamide
+        (AICAR) and the activation of the metabolic regulator 5''-AMP-activated protein
+        kinase (AMPK) (PubMed:25738459). Protects against age-dependent and diet-induced
+        insulin resistance as well as diet-induced obesity (PubMed:25738459). In response
+        to metabolic stress, translocates to the nucleus where it binds to antioxidant
+        response elements (ARE) present in the promoter regions of a number of genes
+        and plays a role in regulating nuclear gene expression in an NFE2L2-dependent
+        manner and increasing cellular resistance to metabolic stress (PubMed:29983246).
+        Increases mitochondrial respiration and levels of CPT1A and cytokines IL1B,
+        IL6, IL8, IL10 and TNF in senescent cells (PubMed:29886458). Increases activity
+        of the serine/threonine protein kinase complex mTORC2 and reduces activity
+        of the PTEN phosphatase, thus promoting phosphorylation of AKT (PubMed:33554779).
+        This promotes AKT-mediated phosphorylation of transcription factor FOXO1 which
+        reduces FOXO1 activity, leading to reduced levels of MSTN and promotion of
+        skeletal muscle growth (PubMed:33554779). Promotes osteogenic differentiation
+        of bone marrow mesenchymal stem cells via the TGFB/SMAD pathway (PubMed:30468456).
+        Promotes osteoblast proliferation and osteoblast synthesis of type I collagens
+        COL1A1 and COL1A2 via the TGFB/SMAD pathway (PubMed:31081069)"}],"commentType":"FUNCTION"}],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MRWQEMGYIFYPRKLR","length":16,"molWeight":2175,"crc64":"361DE748426DD505","md5":"AE72B6C4E87692429C0D558B92BD7B3D"},"extraAttributes":{"uniParcId":"UPI0005D734FE"}},
+
+        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A1B0GTW7","uniProtkbId":"CIROP_HUMAN","organism":{"scientificName":"Homo
+        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"34903892"}],"value":"Ciliated
+        left-right organizer metallopeptidase"},"ecNumbers":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"Q9VH19"}],"value":"3.4.24.-"}]},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"Leishmanolysin-like
+        peptidase 2"}}],"flag":"Precursor"},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:53647"}],"value":"CIROP"},"synonyms":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:53647"}],"value":"LMLN2"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"A0A1D5NSK0"}],"value":"Putative
+        metalloproteinase that plays a role in left-right patterning process"}],"commentType":"FUNCTION"}],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MLLLLLLLLLLPPLVLRVAASRCLHDETQKSVSLLRPPFSQLPSKSRSSSLTLPSSRDPQPLRIQSCYLGDHISDGAWDPEGEGMRGGSRALAAVREATQRIQAVLAVQGPLLLSRDPAQYCHAVWGDPDSPNYHRCSLLNPGYKGESCLGAKIPDTHLRGYALWPEQGPPQLVQPDGPGVQNTDFLLYVRVAHTSKCHQETVSLCCPGWSTAAQSQLTAALTSWAQRRGFVMLPRLCLKLLGSSNLPTLASQSIRITGPSVIAYAACCQLDSEDRPLAGTIVYCAQHLTSPSLSHSDIVMATLHELLHALGFSGQLFKKWRDCPSGFSVRENCSTRQLVTRQDEWGQLLLTTPAVSLSLAKHLGVSGASLGVPLEEEEGLLSSHWEARLLQGSLMTATFDGAQRTRLDPITLAAFKDSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDKGSCSSDPMLEGCRMYKPLANGSECWKKENGFPAGVDNPHGEIYHPQSRCFFANLTSQLLPGDKPRHPSLTPHLKEAELMGRCYLHQCTGRGAYKVQVEGSPWVPCLPGKVIQIPGYYGLLFCPRGRLCQTNEDINAVTSPPVSLSTPDPLFQLSLELAGPPGHSLGKEQQEGLAEAVLEALASKGGTGRCYFHGPSITTSLVFTVHMWKSPGCQGPSVATLHKALTLTLQKKPLEVYHGGANFTTQPSKLLVTSDHNPSMTHLRLSMGLCLMLLILVGVMGTTAYQKRATLPVRPSASYHSPELHSTRVPVRGIREV","length":788,"molWeight":85397,"crc64":"8051E168BBD3EAF8","md5":"968606C5A000BA3567548A567BD5CDAC"},"extraAttributes":{"uniParcId":"UPI0007E52C07"}},
+
+        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0JNW5","uniProtkbId":"BLT3B_HUMAN","organism":{"scientificName":"Homo
+        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:29102"}],"value":"Bridge-like
+        lipid transfer protein family member 3B"}},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"20163565"}],"value":"Syntaxin-6
+        Habc-interacting protein of 164 kDa"}},{"fullName":{"value":"UHRF1-binding
+        protein 1-like"}}]},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:29102"}],"value":"BLTP3B"},"synonyms":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"BAA31676.2"}],"value":"KIAA0701"},{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"20163565"}],"value":"SHIP164"},{"value":"UHRF1BP1L"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20163565"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"35499567"}],"value":"Tube-forming
+        lipid transport protein which mediates the transfer of lipids between membranes
+        at organelle contact sites (PubMed:35499567). Required for retrograde traffic
+        of vesicle clusters in the early endocytic pathway to the Golgi complex (PubMed:20163565,
+        PubMed:35499567)"}],"commentType":"FUNCTION"}],"features":[{"type":"Domain","location":{"start":{"value":3,"modifier":"EXACT"},"end":{"value":94,"modifier":"EXACT"}},"description":"Chorein
+        N-terminal","evidences":[{"evidenceCode":"ECO:0000255"}]}],"uniProtKBCrossReferences":[],"sequence":{"value":"MAGIIKKQILKHLSRFTKNLSPDKINLSTLKGEGELKNLELDEEVLQNMLDLPTWLAINKVFCNKASIRIPWTKLKTHPICLSLDKVIMEMSTCEEPRSPNGPSPIATASGQSEYGFAEKVVEGISVSVNSIVIRIGAKAFNASFELSQLRIYSVNAHWEHGDLRFTRIQDPQRGEVLTFKEINWQMIRIEADATQSSHLEIMCAPVRLITNQSKIRVTLKRRLKDCNVIATKLVLILDDLLWVLTDSQLKAMVQYAKSLSEAIEKSTEQRKSMAPEPTQSSTVVASAQQVKTTQTSNAPDVNDAIVKLFNDFDVKETSHHLVISHLDLHICDDIHAKEKESNRRITGGAMQLSFTQLTIDYYPYHKAGDSCNHWMYFSDATKTKNGWANELLHEFECNVEMLKQAVKDHNVGSPPKSPTHASPQHTQTEKDYPLKGTCRTPSVLSQQSKAKLMSSSVVVRLADFNIYQVSTAEQCRSSPKSMICCNKKSLYLPQEMSAVYIEFTEYYYPDGKDFPIPSPNLYSQLNALQFTVDERSILWLNQFLLDLKQSLNQFMAVYKLNDNSKSDEHVDVRVDGLMLKFVIPSEVKSECHQDQPRAISIQSSEMIATNTRHCPNCRHSDLEALFQDFKDCDFFSKTYTSFPKSCDNFNLLHPIFQRHAHEQDTKMHEIYKGNITPQLNKNTLKTSAATDVWAVYFSQFWIDYEGMKSGKGRPISFVDSFPLSIWICQPTRYAESQKEPQTCNQVSLNTSQSESSDLAGRLKRKKLLKEYYSTESEPLTNGGQKPSSSDTFFRFSPSSSEADIHLLVHVHKHVSMQINHYQYLLLLFLHESLILLSENLRKDVEAVTGSPASQTSICIGILLRSAELALLLHPVDQANTLKSPVSESVSPVVPDYLPTENGDFLSSKRKQISRDINRIRSVTVNHMSDNRSMSVDLSHIPLKDPLLFKSASDTNLQKGISFMDYLSDKHLGKISEDESSGLVYKSGSGEIGSETSDKKDSFYTDSSSILNYREDSNILSFDSDGNQNILSSTLTSKGNETIESIFKAEDLLPEAASLSENLDISKEETPPVRTLKSQSSLSGKPKERCPPNLAPLCVSYKNMKRSSSQMSLDTISLDSMILEEQLLESDGSDSHMFLEKGNKKNSTTNYRGTAESVNAGANLQNYGETSPDAISTNSEGAQENHDDLMSVVVFKITGVNGEIDIRGEDTEICLQVNQVTPDQLGNISLRHYLCNRPVGSDQKAVIHSKSSPEISLRFESGPGAVIHSLLAEKNGFLQCHIENFSTEFLTSSLMNIQHFLEDETVATVMPMKIQVSNTKINLKDDSPRSSTVSLEPAPVTVHIDHLVVERSDDGSFHIRDSHMLNTGNDLKENVKSDSVLLTSGKYDLKKQRSVTQATQTSPGVPWPSQSANFPEFSFDFTREQLMEENESLKQELAKAKMALAEAHLEKDALLHHIKKMTVE","length":1464,"molWeight":164199,"crc64":"5FBED173B50F16B9","md5":"5A9981A3B88B257702F4DF8E51691DFF"},"extraAttributes":{"uniParcId":"UPI0000160563"}},
+
+        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0JP26","uniProtkbId":"POTB3_HUMAN","organism":{"scientificName":"Homo
+        sapiens","commonName":"Human","taxonId":9606,"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"AAI27124.1"}],"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:51240"}],"value":"POTE
+        ankyrin domain family member B3"}}},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:51240"}],"value":"POTEB3"}}],"comments":[],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MVAEVCSMPAASAVKKPFDLRSKMGKWCHHRFPCCRGSGKSNMGTSGDHDDSFMKTLRSKMGKCCHHCFPCCRGSGTSNVGTSGDHDNSFMKTLRSKMGKWCCHCFPCCRGSGKSNVGTWGDYDDSAFMEPRYHVRREDLDKLHRAAWWGKVPRKDLIVMLRDTDMNKRDKQKRTALHLASANGNSEVVQLLLDRRCQLNVLDNKKRTALIKAVQCQEDECVLMLLEHGADGNIQDEYGNTALHYAIYNEDKLMAKALLLYGADIESKNKCGLTPLLLGVHEQKQQVVKFLIKKKANLNALDRYGRTALILAVCCGSASIVNLLLEQNVDVSSQDLSGQTAREYAVSSHHHVICELLSDYKEKQMLKISSENSNPEQDLKLTSEEESQRLKVSENSQPEKMSQEPEINKDCDREVEEEIKKHGSNPVGLPENLTNGASAGNGDDGLIPQRKSRKPENQQFPDTENEEYHSDEQNDTQKQLSEEQNTGISQDEILTNKQKQIEVAEKEMNSKLSLSHKKEEDLLRENSMLREEIAMLRLELDETKHQNQLRENKILEEIESVKEKLLKAIQLNEEALTKTSI","length":581,"molWeight":65710,"crc64":"86D1E88F98BD22DF","md5":"85C271D17796BC25D386048681AE7F0F"},"extraAttributes":{"uniParcId":"UPI0000197FCA"}},
+
+        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0PK11","uniProtkbId":"CLRN2_HUMAN","organism":{"scientificName":"Homo
+        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"value":"Clarin-2"}}},"genes":[{"geneName":{"evidences":[{"evidenceCode":"ECO:0000312","source":"HGNC","id":"HGNC:33939"}],"value":"CLRN2"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"B2RVW2"}],"value":"Plays
+        a key role to hearing function. Required for normal organization and maintenance
+        of the stereocilia bundle and for mechano-electrical transduction"}],"commentType":"FUNCTION"}],"features":[],"uniProtKBCrossReferences":[],"sequence":{"value":"MPGWFKKAWYGLASLLSFSSFILIIVALVVPHWLSGKILCQTGVDLVNATDRELVKFIGDIYYGLFRGCKVRQCGLGGRQSQFTIFPHLVKELNAGLHVMILLLLFLALALALVSMGFAILNMIQVPYRAVSGPGGICLWNVLAGGVVALAIASFVAAVKFHDLTERIANFQEKLFQFVVVEEQYEESFWICVASASAHAANLVVVAISQIPLPEIKTKIEEATVTAEDILY","length":232,"molWeight":25446,"crc64":"B6521162BA9B14A6","md5":"3B3263AF56F7EBFE3835748874613C91"},"extraAttributes":{"uniParcId":"UPI0000D6154A"}}]}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      Access-Control-Allow-Methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      Access-Control-Max-Age:
+      - '1728000'
+      Cache-Control:
+      - public, max-age=43200
+      Connection:
+      - Keep-Alive
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 23 Dec 2025 15:32:54 GMT
+      Link:
+      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl&query=%2A&cursor=8q347cwgp85m8pydjzpgj9ie5xsqk298jc&size=5>;
+        rel="next"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      X-API-Deployment-Date:
+      - 11-December-2025
+      X-Total-Results:
+      - '199579900'
+      X-UniProt-Release:
+      - '2025_04'
+      X-UniProt-Release-Date:
+      - 15-October-2025
+      content-length:
+      - '11941'
+      x-cache:
+      - hit cached
+    status:
+      code: 200
+      message: OK
+version: 1
