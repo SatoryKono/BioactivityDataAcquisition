@@ -28,6 +28,8 @@ Key fields include:
 | `description` | `string` | No | Text description of the assay |
 | `assay_organism` | `string` | No | Organism name (e.g., `Homo sapiens`) |
 | `confidence_score` | `int` | No | Quality score (0-9) |
+| `assay_pref_name` | `string` | No | Preferred assay name (if available) |
+| `score` | `float` | No | Assay score (distinct from confidence_score) |
 | `document_chembl_id` | `string` | No | Related publication ID |
 | `entity_id` | `string` | Auto | `chembl:{assay_chembl_id}` |
 | `content_hash` | `string` | Auto | SHA256 hash for versioning |
