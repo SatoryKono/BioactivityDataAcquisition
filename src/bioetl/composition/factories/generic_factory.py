@@ -8,9 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
+from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.executor import PipelineExecutor
+from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
@@ -289,7 +291,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         )
 
     def _create_record_processor(self, pipeline: TPipeline) -> RecordProcessor:
-        """Create configured RecordProcessor."""
+        """Create configured RecordProcessor with all dependencies injected."""
         error_classifier = ErrorClassifier()
         table_config = TableConfig(
             primary_keys=pipeline.config.primary_keys,
@@ -316,6 +318,19 @@ class GenericPipelineFactory(Generic[TPipeline]):
             else NoOpGoldValidator()
         )
 
+        # Create QuarantineManager (DI pattern - previously created inside RecordProcessor)
+        quarantine_manager = QuarantineManager(
+            quarantine_port=pipeline.services.quarantine,
+            pipeline_name=pipeline.config.pipeline_name,
+        )
+
+        # Create BatchMetricsRecorder (DI pattern - previously created inside RecordProcessor)
+        pipeline_label = f"{pipeline.config.provider}_{pipeline.config.entity_type}"
+        run_type_label = pipeline.context.run_type.value
+        batch_metrics = BatchMetricsRecorder(
+            pipeline.services.metrics, pipeline_label, run_type_label
+        )
+
         return RecordProcessor(
             services=pipeline.services,
             error_classifier=error_classifier,
@@ -324,6 +339,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
             transform_callback=pipeline.transform_bronze_to_silver,
             gold_filter_callback=pipeline.should_write_gold,
             gold_validator=gold_validator,
+            quarantine_manager=quarantine_manager,
+            batch_metrics=batch_metrics,
         )
 
 

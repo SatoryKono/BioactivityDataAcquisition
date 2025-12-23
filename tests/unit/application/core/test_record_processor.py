@@ -6,8 +6,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
@@ -15,6 +17,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.config import get_pipeline_config
+from bioetl.infrastructure.validation import NoOpGoldValidator
 
 
 def _write_temp_pipeline_config(
@@ -123,12 +126,36 @@ def gold_filter_callback():
 
 
 @pytest.fixture
+def mock_gold_validator():
+    """Create mock gold validator."""
+    return NoOpGoldValidator()
+
+
+@pytest.fixture
+def mock_quarantine_manager(mock_quarantine_port):
+    """Create mock quarantine manager."""
+    return QuarantineManager(
+        quarantine_port=mock_quarantine_port,
+        pipeline_name="test_pipeline",
+    )
+
+
+@pytest.fixture
+def mock_batch_metrics(mock_metrics):
+    """Create mock batch metrics recorder."""
+    return BatchMetricsRecorder(mock_metrics, "test_pipeline", "incremental")
+
+
+@pytest.fixture
 def record_processor(
     mock_services,
     mock_error_classifier,
     mock_context,
     transform_callback,
     gold_filter_callback,
+    mock_gold_validator,
+    mock_quarantine_manager,
+    mock_batch_metrics,
 ):
     """Create RecordProcessor instance."""
     config = RecordProcessorConfig(
@@ -145,6 +172,40 @@ def record_processor(
         config=config,
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
+        gold_validator=mock_gold_validator,
+        quarantine_manager=mock_quarantine_manager,
+        batch_metrics=mock_batch_metrics,
+    )
+
+
+def _create_test_processor(
+    mock_services,
+    mock_error_classifier,
+    mock_context,
+    config,
+    transform_callback,
+    gold_filter_callback,
+):
+    """Helper to create RecordProcessor with all required dependencies."""
+    quarantine_manager = QuarantineManager(
+        quarantine_port=mock_services.quarantine,
+        pipeline_name=config.pipeline_name,
+    )
+    batch_metrics = BatchMetricsRecorder(
+        mock_services.metrics,
+        f"{config.provider}_{config.entity_type}",
+        mock_context.run_type.value,
+    )
+    return RecordProcessor(
+        services=mock_services,
+        error_classifier=mock_error_classifier,
+        context=mock_context,
+        config=config,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_validator=NoOpGoldValidator(),
+        quarantine_manager=quarantine_manager,
+        batch_metrics=batch_metrics,
     )
 
 
@@ -235,10 +296,10 @@ class TestRecordProcessorProcessBatch:
             silver_schema=MagicMock(),
         )
 
-        processor = RecordProcessor(
-            services=mock_services,
-            error_classifier=mock_error_classifier,
-            context=mock_context,
+        processor = _create_test_processor(
+            mock_services=mock_services,
+            mock_error_classifier=mock_error_classifier,
+            mock_context=mock_context,
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
@@ -274,10 +335,10 @@ class TestRecordProcessorProcessBatch:
             silver_schema=MagicMock(),
         )
 
-        processor = RecordProcessor(
-            services=mock_services,
-            error_classifier=mock_error_classifier,
-            context=mock_context,
+        processor = _create_test_processor(
+            mock_services=mock_services,
+            mock_error_classifier=mock_error_classifier,
+            mock_context=mock_context,
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
@@ -332,10 +393,10 @@ class TestRecordProcessorProcessBatch:
             dq_config=config.dq,
         )
 
-        processor = RecordProcessor(
-            services=mock_services,
-            error_classifier=mock_error_classifier,
-            context=mock_context,
+        processor = _create_test_processor(
+            mock_services=mock_services,
+            mock_error_classifier=mock_error_classifier,
+            mock_context=mock_context,
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
@@ -381,10 +442,10 @@ class TestRecordProcessorProcessBatch:
             dq_config=config.dq,
         )
 
-        processor = RecordProcessor(
-            services=mock_services,
-            error_classifier=mock_error_classifier,
-            context=mock_context,
+        processor = _create_test_processor(
+            mock_services=mock_services,
+            mock_error_classifier=mock_error_classifier,
+            mock_context=mock_context,
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,

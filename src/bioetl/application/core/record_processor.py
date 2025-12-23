@@ -9,14 +9,14 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationError
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+    from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
+    from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort
@@ -48,18 +48,31 @@ class RecordProcessor:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         gold_validator: GoldValidatorPort,
+        quarantine_manager: QuarantineManager,
+        batch_metrics: BatchMetricsRecorder,
     ):
+        """Initialize RecordProcessor with injected dependencies.
+
+        Args:
+            services: Pipeline services (storage, etc.)
+            error_classifier: Classifies errors by type
+            context: Pipeline context with run_id, logger
+            config: Record processor configuration
+            transform_callback: Bronze → Silver transformation callback
+            gold_filter_callback: Gold layer filter callback
+            gold_validator: Gold record validator
+            quarantine_manager: Injected quarantine manager (DI pattern)
+            batch_metrics: Injected batch metrics recorder (DI pattern)
+        """
         self._storage = services.storage
-        self._quarantine_manager = QuarantineManager(
-            quarantine_port=services.quarantine,
-            pipeline_name=config.pipeline_name,
-        )
+        self._quarantine_manager = quarantine_manager
         self._error_classifier = error_classifier
         self._context = context
         self._config = config
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
         self._gold_validator = gold_validator
+        self._batch_metrics = batch_metrics
 
         # Convenience properties
         self._provider = config.provider
@@ -67,13 +80,6 @@ class RecordProcessor:
         self._silver_schema = config.silver_schema
         self._dq_config = config.dq_config
         self._table_config = config.table_config
-
-        # Instantiate Metrics Recorder
-        pipeline_label = f"{self._provider}_{self._entity_type}"
-        run_type_label = self._context.run_type.value
-        self._batch_metrics = BatchMetricsRecorder(
-            services.metrics, pipeline_label, run_type_label
-        )
 
     def _log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID

@@ -12,13 +12,40 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
+from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.validation import NoOpGoldValidator
+
+
+def _create_test_processor(mock_services, context, config, transform, gold_filter):
+    """Helper to create RecordProcessor with all required dependencies."""
+    quarantine_manager = QuarantineManager(
+        quarantine_port=mock_services.quarantine,
+        pipeline_name=config.pipeline_name,
+    )
+    batch_metrics = BatchMetricsRecorder(
+        mock_services.metrics,
+        f"{config.provider}_{config.entity_type}",
+        context.run_type.value,
+    )
+    return RecordProcessor(
+        services=mock_services,
+        error_classifier=ErrorClassifier(),
+        context=context,
+        config=config,
+        transform_callback=transform,
+        gold_filter_callback=gold_filter,
+        gold_validator=NoOpGoldValidator(),
+        quarantine_manager=quarantine_manager,
+        batch_metrics=batch_metrics,
+    )
 
 
 @pytest.fixture
@@ -119,13 +146,8 @@ class TestRunIdPropagation:
             table_config=TableConfig(primary_keys=["id"]),
         )
 
-        processor = RecordProcessor(
-            services=mock_services,
-            error_classifier=ErrorClassifier(),
-            context=pipeline_context,
-            config=config,
-            transform_callback=transform,
-            gold_filter_callback=gold_filter,
+        processor = _create_test_processor(
+            mock_services, pipeline_context, config, transform, gold_filter
         )
 
         # Process a batch
@@ -175,13 +197,8 @@ class TestRunIdPropagation:
             table_config=TableConfig(primary_keys=["id"]),
         )
 
-        processor = RecordProcessor(
-            services=mock_services,
-            error_classifier=ErrorClassifier(),
-            context=pipeline_context,
-            config=config,
-            transform_callback=transform,
-            gold_filter_callback=gold_filter,
+        processor = _create_test_processor(
+            mock_services, pipeline_context, config, transform, gold_filter
         )
 
         # Process multiple batches
@@ -238,13 +255,8 @@ class TestRunIdPropagation:
                 table_config=TableConfig(primary_keys=["id"]),
             )
 
-            processor = RecordProcessor(
-                services=mock_services,
-                error_classifier=ErrorClassifier(),
-                context=context,
-                config=config,
-                transform_callback=transform,
-                gold_filter_callback=gold_filter,
+            processor = _create_test_processor(
+                mock_services, context, config, transform, gold_filter
             )
 
             records = [{"id": 1, "value": "test"}]
