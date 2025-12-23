@@ -16,7 +16,11 @@ source_file: ../../sources/chembl.yaml
 # Gold filters: single proteins with name
 gold_filters:
     columns:
-        target_type: [SINGLE PROTEIN, PROTEIN COMPLEX]
+        target_type: [SINGLE PROTEIN]
+    list_lengths:
+        component_accessions:
+            min: 1
+            max: 1
     required_fields:
         - pref_name
 

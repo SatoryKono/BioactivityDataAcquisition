@@ -133,11 +133,18 @@ class GoldRangeFilterConfig(BaseModel):
     include_max: bool = True
 
 
+class GoldListLengthFilterConfig(BaseModel):
+    """Schema for list length filters in YAML."""
+    min: int | None = None
+    max: int | None = None
+
+
 class GoldFiltersConfig(BaseModel):
     """Schema for gold_filters in YAML."""
 
     columns: dict[str, list[str]] = Field(default_factory=dict)
     ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
+    list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
     required_fields: list[str] = Field(default_factory=list)
     exclude_if_present: list[str] = Field(default_factory=list)
 

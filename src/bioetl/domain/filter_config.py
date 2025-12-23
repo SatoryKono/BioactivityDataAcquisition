@@ -58,18 +58,44 @@ class GoldRangeFilter:
 
 
 @dataclass(frozen=True)
+class GoldListLengthFilter:
+    """Фильтр по длине списка в колонке.
+
+    Attributes:
+        column: Имя колонки (должна содержать список).
+        min_length: Минимальная длина.
+        max_length: Максимальная длина.
+    """
+
+    column: str
+    min_length: int | None = None
+    max_length: int | None = None
+
+    def __post_init__(self) -> None:
+        """Validate filter configuration."""
+        if not self.column:
+            raise ValueError("column name cannot be empty")
+        if self.min_length is None and self.max_length is None:
+            raise ValueError(
+                f"At least one of min_length or max_length must be provided for column '{self.column}'"
+            )
+
+
+@dataclass(frozen=True)
 class GoldFilterConfig:
     """Полная конфигурация Gold фильтров.
 
     Attributes:
         column_filters: Фильтры по колонкам (значение должно быть в списке).
         range_filters: Фильтры диапазонов значений.
+        list_length_filters: Фильтры по длине списков.
         required_fields: Обязательные поля (должны быть не null/пустые).
         exclude_if_present: Исключающие поля (если есть значение — запись исключается).
     """
 
     column_filters: tuple[GoldColumnFilter, ...] = ()
     range_filters: tuple[GoldRangeFilter, ...] = ()
+    list_length_filters: tuple[GoldListLengthFilter, ...] = ()
     required_fields: tuple[str, ...] = ()
     exclude_if_present: tuple[str, ...] = ()
 
@@ -87,6 +113,7 @@ class GoldFilterConfig:
             and self._check_exclude_if_present(record)
             and self._check_column_filters(record)
             and self._check_range_filters(record)
+            and self._check_list_length_filters(record)
         )
 
     def _check_required_fields(self, record: dict[str, Any]) -> bool:
@@ -104,6 +131,39 @@ class GoldFilterConfig:
     def _check_range_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет попадание значений в диапазоны."""
         return all(self._check_single_range(record, f) for f in self.range_filters)
+
+    def _check_list_length_filters(self, record: dict[str, Any]) -> bool:
+        """Проверяет длину списков в колонках."""
+        return all(
+            self._check_single_list_length(record, f) for f in self.list_length_filters
+        )
+
+    def _check_single_list_length(
+        self, record: dict[str, Any], f: GoldListLengthFilter
+    ) -> bool:
+        """Проверяет длину одного списка."""
+        length = self._get_list_length(record.get(f.column))
+        return self._length_in_bounds(length, f.min_length, f.max_length)
+
+    @staticmethod
+    def _get_list_length(val: Any) -> int:
+        """Вычисляет длину значения как списка."""
+        if val is None:
+            return 0
+        if isinstance(val, list):
+            return len(val)
+        return 1  # Одиночное значение = длина 1
+
+    @staticmethod
+    def _length_in_bounds(
+        length: int, min_len: int | None, max_len: int | None
+    ) -> bool:
+        """Проверяет, находится ли длина в допустимых границах."""
+        if min_len is not None and length < min_len:
+            return False
+        if max_len is not None and length > max_len:
+            return False
+        return True
 
     def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:
         """Проверяет одно значение на попадание в диапазон."""
@@ -147,6 +207,7 @@ class GoldFilterConfig:
         return (
             not self.column_filters
             and not self.range_filters
+            and not self.list_length_filters
             and not self.required_fields
             and not self.exclude_if_present
         )

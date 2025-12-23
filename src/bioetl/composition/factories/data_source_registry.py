@@ -41,7 +41,7 @@ class DataSourceCreator(Protocol):
             settings: Application settings
             pipeline_config: Pipeline configuration from YAML
             logger: LoggerPort instance for structured logging
-            filter_config: Optional input filter configuration
+            filter_config: Optional filter configuration
             metrics: Optional metrics port for recording filter statistics
             pipeline_name: Pipeline name for metrics labels
 
