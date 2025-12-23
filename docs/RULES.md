@@ -341,18 +341,7 @@ Lock key включает тип запуска:
 - **IAM**: Принцип Least Privilege. Разделение ролей `writer` (пайплайн) и `reader` (аналитик). 
 - **Bronze**: Хранить как есть (Internal). 
 - **Silver**: Хэшировать PII поля: `sha256(lowercase(value) + SALT)` (Restricted). **PII fields MUST be salted.**
-- **Gold**: PII исключается или агрегируется (Public/Internal). 
- 
-### 5.4.1. Advanced Salt Rotation 
-Стратегия ротации соли без даунтайма ("Dual-Salt Period"). 
-1. **New Salt Generation**: Генерация новой соли, добавление в Secrets Manager как `SALT_NEXT`. 
-2. **Transition (7 дней)**: 
-   - Писать новые данные с `SALT_NEXT`. 
-   - Читать/Джойнить, проверяя оба хэша (с `SALT_CURRENT` и `SALT_NEXT`). 
-3. **Finalization**: `SALT_CURRENT` = `SALT_NEXT`, удаление старой соли. 
-4. **Resalting**: Фоновый процесс (Lazy Migration). 
-   - При сбоях: Retry с backoff (Max Attempts: 3, Multiplier: 2.0).
-   - Мониторинг: Алерт если >1% записей не мигрировано после 14 дней.
+- **Gold**: PII исключается или агрегируется (Public/Internal).
 
 **Threat Model Scope**:
 - В фокусе: Утечка PII через логи, SQL-инъекции, несанкционированный доступ к S3.
@@ -586,7 +575,7 @@ fields:
 - **5.0** (2025-12-15): Production Ready. Final Governance Polish, Circuit Breaker half-open observability, Backfill lock timeouts, Generic Health Probes, Deprecation clarification.
 - **4.6** (2025-12-15): Governance & Stability. RFC 2119, Entity ID vs Content Hash, Bronze Lifecycle, Hard Limits, Threat Model. Added Log Schema, Provider Health Matrix, Circuit Breaker details, Backfill Locking, and Deprecation workflows.
 - **4.5** (2025-05-20): Final Polish & Governance. Medallion Paths, DQ Levels, Observability, Fencing Tokens, Security IAM. 
-- **4.4** (2025-05-20): Resilience & Operations. Circuit Breaker, DR Runbooks, Quarantine Ops, Env Isolation, Salt Rotation. 
+- **4.4** (2025-05-20): Resilience & Operations. Circuit Breaker, DR Runbooks, Quarantine Ops, Env Isolation. 
 - **4.3** (2025-05-20): Security & DR. Salted Hashes, RPO/RTO, Heartbeat Locks, Environments, Delta Infrastructure. 
 - **4.2** (2025-05-20): Delta Lake Strategy, Unified Quarantine Schema, Threshold adjustments. 
 - **4.1** (2025-05-20): [DEPRECATED] Storage Fixes. (Заменено версией 4.2). 

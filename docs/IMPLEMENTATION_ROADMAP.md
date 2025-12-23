@@ -28,7 +28,7 @@
   - Services: Health checks, volume persistence
 - **.env.example**: 100+ environment variables template
   - All providers API keys
-  - Security (PII salt, rotation)
+  - Security (PII salt)
   - Observability, DQ thresholds, Circuit breaker
 - **.gitignore**: Updated for secrets protection
 

@@ -25,7 +25,7 @@
 | §3.5       | Provider Health Monitoring                                 | `01-project-rules.md` §4.8; `00-rules-summary.md` §4.6                          
 | §5.2       | Secrets Policy                                             | `01-project-rules.md` §5.2; `00-rules-summary.md` §5.1; checklist §12           
 | §5.3       | Graceful Shutdown + Checkpoints                            | `01-project-rules.md` §5.3; `00-rules-summary.md` §5.4; checklist §13           
-| §5.4       | Sensitive Data Policy + Salt Rotation                      | `01-project-rules.md` §5.4; `00-rules-summary.md` §5.5; checklist §12           
+| §5.4       | Sensitive Data Policy                                      | `01-project-rules.md` §5.4; `00-rules-summary.md` §5.5; checklist §12           
 | §5.5       | DR (RPO/RTO, Runbook)                                      | `01-project-rules.md` §5.5; `00-rules-summary.md` §5.2                          
 | §5.6.1     | Environment Isolation                                      | `01-project-rules.md` §5.6; `00-rules-summary.md` §5.3                          
 | §7.1       | Data Contracts (Gold schemas, versions)                    | `01-project-rules.md` §6.1; `00-rules-summary.md` §6                            

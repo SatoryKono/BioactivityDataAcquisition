@@ -74,7 +74,6 @@ All documentation files correctly reference RULES.md v5.0 (2025-12-15):
 | §5.2 Secrets Management | `01-project-rules.md:347-353` | OK |
 | §5.3 Graceful Shutdown | `01-project-rules.md:354-370` | OK |
 | §5.4 Sensitive Data Policy | `01-project-rules.md:371-397` | OK |
-| §5.4.1 Salt Rotation | `01-project-rules.md:387-397`, `04-duplication-reduction.md:271-295` | OK |
 | §5.5 Disaster Recovery | `00-rules-summary.md:136-149`, `01-project-rules.md:398-413` | OK |
 | §5.6 Environments | `01-project-rules.md:414-429` | OK |
 | §6 Documentation | Implicit in structure | OK |
