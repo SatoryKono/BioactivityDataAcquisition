@@ -1,95 +1,38 @@
-"""Fixtures for E2E tests with real Docker infrastructure.
+"""Fixtures for E2E tests with Local-Only architecture.
 
-E2E тесты предполагают, что Docker-сервисы УЖЕ запущены через:
-    docker compose -f docker-compose.test.yml up -d
+E2E тесты используют локальное файловое хранилище и in-memory инфраструктуру:
+- LocalCheckpoint (файловая система)
+- MemoryLock (in-process)
+- DeltaWriter (локальный Delta Lake)
+- VCR cassettes для HTTP-запросов
 
-Или через Makefile:
-    make test-e2e       # Запускает Docker, тесты, останавливает Docker
-    make test-e2e-local # Использует уже запущенные сервисы
+Запуск:
+    make test-e2e       # Все E2E тесты
+    pytest tests/e2e/ -v -m e2e  # Прямой запуск
 """
 
 import os
-import socket
-import time
-import urllib.error
-import urllib.request
+from collections.abc import Generator
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 
-
-# Конфигурация E2E сервисов
-E2E_MINIO_ENDPOINT = os.environ.get("BIOETL_S3_ENDPOINT", "http://localhost:9000")
-E2E_MINIO_ACCESS_KEY = os.environ.get("BIOETL_S3_ACCESS_KEY", "minioadmin")
-E2E_MINIO_SECRET_KEY = os.environ.get("BIOETL_S3_SECRET_KEY", "minioadmin")
-E2E_REDIS_URL = os.environ.get("BIOETL_REDIS_URL", "redis://localhost:16379")
-
-
-def _wait_for_service(check_fn: callable, timeout: float = 30.0, pause: float = 0.5):
-    """Ожидание готовности сервиса."""
-    start = time.time()
-    while time.time() - start < timeout:
-        try:
-            if check_fn():
-                return True
-        except Exception:
-            pass
-        time.sleep(pause)
-    return False
-
-
-def _is_minio_ready() -> bool:
-    """Проверка доступности MinIO."""
-    try:
-        urllib.request.urlopen(f"{E2E_MINIO_ENDPOINT}/minio/health/live", timeout=2)
-        return True
-    except (urllib.error.URLError, ConnectionError, OSError):
-        return False
-
-
-def _is_redis_ready() -> bool:
-    """Проверка доступности Redis."""
-    try:
-        host = "localhost"
-        port = 16379
-        if "://" in E2E_REDIS_URL:
-            url_part = E2E_REDIS_URL.split("://")[1]
-            if ":" in url_part:
-                host, port_str = url_part.split(":")
-                port = int(port_str)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(1)
-        sock.connect((host, port))
-        sock.close()
-        return True
-    except (OSError, ConnectionError):
-        return False
+from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture(scope="session", autouse=True)
 def e2e_environment():
-    """Настройка окружения для E2E тестов."""
+    """Настройка окружения для E2E тестов (Local-Only)."""
     os.environ["BIOETL_ENV"] = "dev"
     os.environ["BIOETL_TEST_MODE"] = "true"
-    os.environ["BIOETL_S3_ENDPOINT"] = E2E_MINIO_ENDPOINT
-    os.environ["BIOETL_S3_ACCESS_KEY"] = E2E_MINIO_ACCESS_KEY
-    os.environ["BIOETL_S3_SECRET_KEY"] = E2E_MINIO_SECRET_KEY
-    os.environ["BIOETL_REDIS_URL"] = E2E_REDIS_URL
-
-    if not _wait_for_service(_is_minio_ready, timeout=30.0):
-        pytest.skip(
-            "MinIO недоступен. Запустите: docker compose -f docker-compose.test.yml up -d"
-        )
-
-    if not _wait_for_service(_is_redis_ready, timeout=30.0):
-        pytest.skip(
-            "Redis недоступен. Запустите: docker compose -f docker-compose.test.yml up -d"
-        )
 
     yield
 
     try:
         from bioetl.infrastructure.config import get_settings
+
         get_settings.cache_clear()
     except ImportError:
         pass
