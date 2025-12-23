@@ -336,6 +336,28 @@ class Molecule(BaseEntity):
     cross_references: str | None = None  # JSON string
     atc_classifications: str | None = None  # JSON string
 
+    # Flattened Hierarchy
+    hierarchy_parent_chembl_id: str | None = None
+    hierarchy_active_chembl_id: str | None = None
+
+    # Flattened Properties
+    property_alogp: float | None = None
+    property_mw_freebase: float | None = None
+    property_full_mwt: float | None = None
+    property_hba: int | None = None
+    property_hbd: int | None = None
+    property_psa: float | None = None
+    property_rtb: int | None = None
+    property_ro5_violations: int | None = None
+    property_heavy_atoms: int | None = None
+    property_aromatic_rings: int | None = None
+    property_qed_weighted: float | None = None
+
+    # Flattened Structures
+    structure_canonical_smiles: str | None = None
+    structure_standard_inchi: str | None = None
+    structure_standard_inchi_key: str | None = None
+
     def __post_init__(self) -> None:
         super().__post_init__()
         self._validate_invariants()
