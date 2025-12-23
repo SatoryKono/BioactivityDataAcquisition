@@ -85,7 +85,7 @@ circuit_breaker:
 # CLI options --input-csv, --filter-column, --filter-field override these
 input_filter:
     enabled: true
-    source_path: "data/input/publications.csv"
-    column_name: "pmid"
+    source_path: "data/input/pubmed.csv"
+    column_name: "pubmed_id"
     filter_field: "pmid"
     batch_size: 100

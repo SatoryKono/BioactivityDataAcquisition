@@ -73,7 +73,7 @@ circuit_breaker:
 # Input filter configuration (for CSV-based ID filtering)
 # CLI options --input-csv, --filter-column, --filter-field override these
 input_filter:
-    enabled: true
+    enabled: false
     source_path: "data/input/compounds.csv"
     column_name: "cid"
     filter_field: "cid"
