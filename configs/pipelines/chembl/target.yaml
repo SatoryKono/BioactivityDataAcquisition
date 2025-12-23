@@ -40,6 +40,8 @@ sink:
         mode: merge
         primary_key: [ "target_chembl_id" ]
         partition_by: [ "target_type" ]
+        classification: public
+        forensic_retention: true
         deterministic: true
         sort_by:
             columns: [ "target_chembl_id" ]

@@ -51,11 +51,13 @@ class TestCsvFilterReaderLoadFilterIds:
         """Test basic ID loading from CSV."""
         result = await csv_reader.load_filter_ids(sample_csv_file, "molecule_id")
 
-        assert isinstance(result, set)
+        assert isinstance(result, list)
         assert len(result) == 3  # Duplicates removed
         assert "CHEMBL25" in result
         assert "CHEMBL612545" in result
         assert "CHEMBL1201198" in result
+        # Verify sorted order
+        assert result == sorted(result)
 
     async def test_load_filter_ids_returns_unique(self, csv_reader, sample_csv_file):
         """Test that duplicates are removed."""

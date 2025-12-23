@@ -26,21 +26,23 @@ class CsvFilterReader:
         self,
         source_path: str,
         column_name: str,
-    ) -> set[str]:
+    ) -> list[str]:
         """Load unique IDs from a CSV file.
 
-        Reads the specified column from the CSV file and returns a set of
-        unique, non-empty string values. Handles common CSV issues:
+        Reads the specified column from the CSV file and returns a sorted list of
+        unique, non-empty string values for deterministic processing.
+        Handles common CSV issues:
         - Strips whitespace from values
         - Skips null/empty values
         - Removes duplicates
+        - Sorts alphabetically for deterministic order
 
         Args:
             source_path: Path to the CSV file.
             column_name: Name of the column containing filter IDs.
 
         Returns:
-            Set of unique ID strings.
+            Sorted list of unique ID strings.
 
         Raises:
             FileNotFoundError: If the CSV file does not exist.
@@ -63,14 +65,15 @@ class CsvFilterReader:
                 f"Column '{column_name}' not found in CSV. Available columns: {available}"
             )
 
-        # Extract unique, non-null, stripped IDs
+        # Extract unique, non-null, stripped IDs and sort for deterministic order
         ids = (
             df.select(pl.col(column_name).cast(pl.Utf8).str.strip_chars())
             .filter(pl.col(column_name).is_not_null())
             .filter(pl.col(column_name) != "")
             .unique()
+            .sort(column_name)
             .to_series()
             .to_list()
         )
 
-        return set(ids)
+        return ids
