@@ -139,6 +139,7 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     assert silver_record["pub_date"] == "2023-03-15"
     assert silver_record["accepted_date"] == "2023-02-15"
     assert silver_record["received_date"] == "2022-12-01"
+    assert silver_record["epub_date"] == "2023-03-10"
     # Journal fields
     assert silver_record["journal_abbrev"] == "Test J"
     assert silver_record["issn"] == "1234-5678"
