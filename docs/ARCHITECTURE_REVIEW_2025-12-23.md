@@ -133,7 +133,7 @@ src/bioetl/
 | `MetricsPort` | PrometheusMetrics, NoOpMetrics | ✅ |
 | `LoggerPort` | structlog BoundLogger | ✅ |
 | `TracingPort` | OpenTelemetryTracer, NoOpTracer | ✅ |
-| `OrchestrationPort` | (Не реализован — отложен) | ⚠️ |
+| `OrchestrationPort` | **УДАЛИТЬ** — мёртвый код | ❌ |
 | `InputFilterPort` | CSVFilterReader | ✅ |
 
 ### 3.4. Dependency Injection
@@ -219,7 +219,7 @@ class CircuitBreaker:
 | # | Проблема | Локация | Влияние | Приоритет |
 |---|----------|---------|---------|-----------|
 | M1 | **E2E тесты отсутствуют** | `tests/e2e/` | Нет сквозного тестирования полного цикла pipeline | P1 |
-| M2 | **OrchestrationPort не реализован** | `domain/ports.py` | Порт определён, но нет адаптера | P2 |
+| M2 | **OrchestrationPort — мёртвый код** | `domain/ports.py` | Порт определён, но не используется и не планируется. **MUST удалить.** | P2 |
 | M3 | **Недостаточно VCR кассет** | `tests/fixtures/vcr/` | 10 кассет для 8 пайплайнов = неполное покрытие | P2 |
 
 ### 4.3. Минорные (Minor) — 6 шт.
@@ -298,21 +298,23 @@ async def test_chembl_activity_full_cycle():
 
 **Оценка трудозатрат:** 1-2 дня
 
-#### 2.2. Реализовать OrchestrationPort (или удалить)
-**Решение:** Если Prefect не планируется — удалить порт. Иначе — добавить PrefectAdapter.
+#### 2.2. Удалить OrchestrationPort (MUST)
+**Решение:** Порт не используется и не планируется к реализации. Удалить мёртвый код.
+
+**Файлы для изменения:**
+1. `src/bioetl/domain/ports.py` — удалить класс `OrchestrationPort`
+2. `src/bioetl/domain/ports.py` — удалить из `__all__`
+3. Проверить отсутствие импортов в других модулях
 
 ```python
-# Option A: Удаление (если не нужен)
-# Удалить из domain/ports.py
-
-# Option B: Реализация
-class PrefectOrchestrationAdapter:
-    async def schedule(self, pipeline_name: str, params: dict | None) -> None:
-        from prefect import flow
-        # ...
+# Удалить из domain/ports.py:
+@runtime_checkable
+class OrchestrationPort(Protocol):
+    """Port for pipeline orchestration."""
+    ...
 ```
 
-**Оценка трудозатрат:** 0.5 дня (удаление) или 2 дня (реализация)
+**Оценка трудозатрат:** 0.5 дня
 
 ### Фаза 3: Консолидация и DRY (P3)
 
@@ -371,12 +373,12 @@ async def compute_compound_drug_properties() -> DataFrame:
 |------|--------|-----------|--------------|-----------|
 | 1 | E2E тесты | P1 | 2-3 дня | +E2E coverage |
 | 2.1 | Расширить VCR | P2 | 1-2 дня | +Integration coverage |
-| 2.2 | OrchestrationPort | P2 | 0.5-2 дня | Убрать мёртвый код |
+| 2.2 | **Удалить OrchestrationPort** | P2 (MUST) | 0.5 дня | -Мёртвый код |
 | 3.1 | DRY transformers | P3 | 1 день | -Дублирование |
 | 3.2 | Параметризация batch | P3 | 0.5 дня | +Гибкость |
 | 4.1 | Gold агрегации | P3 | 3-5 дней | +Business value |
 
-**Общая оценка:** 8-13 дней разработки
+**Общая оценка:** 7.5-12 дней разработки
 
 ---
 
