@@ -200,11 +200,12 @@ class BronzeWriter:
                 record_count += 1
 
                 if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
-                    writer.write(bytes(chunk_buffer))
+                    # zstandard stream writer accepts bytearray directly, avoid copy to bytes
+                    writer.write(chunk_buffer)
                     chunk_buffer.clear()
 
             if chunk_buffer:
-                writer.write(bytes(chunk_buffer))
+                writer.write(chunk_buffer)
 
             if record_count == 0:
                 raise ValueError("No records provided for compression")
