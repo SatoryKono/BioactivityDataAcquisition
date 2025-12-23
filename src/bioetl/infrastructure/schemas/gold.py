@@ -18,9 +18,9 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
     # Values
     standard_type: Series[str] = pa.Field(nullable=True)
-    standard_value: Series[float] = pa.Field(nullable=True)
+    standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_units: Series[str] = pa.Field(nullable=True)
-    pchembl_value: Series[float] = pa.Field(nullable=True, ge=0)
+    pchembl_value: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
@@ -48,7 +48,7 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
     protein_name: Series[str] = pa.Field(nullable=True)
-    sequence_length: Series[int] = pa.Field(nullable=True, ge=0)
+    sequence_length: Series[int] = pa.Field(nullable=True, ge=0, coerce=True)
 
     class Config:
         strict = False
@@ -115,11 +115,11 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     bao_label: Series[str] = pa.Field(nullable=True)
 
     # Quality indicators
-    confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9)
+    confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9, coerce=True)
 
     # Additional metadata
     assay_pref_name: Series[str] = pa.Field(nullable=True)
-    score: Series[float] = pa.Field(nullable=True)
+    score: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
