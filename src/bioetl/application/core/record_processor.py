@@ -276,7 +276,7 @@ class RecordProcessor:
             write_mode = "append"
         await self._storage.write_gold(
             table_name=table_name,
-            records=validated_records,
+            records=records,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )
