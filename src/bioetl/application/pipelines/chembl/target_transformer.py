@@ -58,6 +58,9 @@ class TargetTransformer(BaseTransformer):
                 "target_components": self.serialize_json(
                     record.get("target_components")
                 ),
+                "target_component_synonyms": self._aggregate_synonyms(
+                    record.get("target_components")
+                ),
                 "cross_references": self.serialize_json(record.get("cross_references")),
                 # Flattened components
                 **flattened_components,
@@ -130,3 +133,25 @@ class TargetTransformer(BaseTransformer):
             "component_relationships": relationships if relationships else None,
             "component_descriptions": descriptions if descriptions else None,
         }
+
+    def _aggregate_synonyms(
+        self, components: list[dict[str, Any]] | None
+    ) -> str | None:
+        """Aggregate synonyms from all components into a single JSON list.
+
+        Args:
+            components: List of component dicts from ChEMBL API.
+
+        Returns:
+            JSON string of list of synonyms, or None.
+        """
+        if not components or not isinstance(components, list):
+            return None
+
+        all_synonyms = []
+        for comp in components:
+            synonyms = comp.get("target_component_synonyms")
+            if synonyms and isinstance(synonyms, list):
+                all_synonyms.extend(synonyms)
+
+        return self.serialize_json(all_synonyms) if all_synonyms else None
