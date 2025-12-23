@@ -129,18 +129,11 @@ class RecordProcessor:
         """Process a batch of records through Bronze -> Silver -> Gold."""
         ingestion_ts = datetime.now(UTC)
 
-        # 1. Write to Bronze
-        try:
-            await self._write_bronze_batch(records, batch_id, ingestion_ts)
-        except Exception as e:
-            self._log_and_track_write_error("bronze", e, batch_id)
-            raise
+        records_bronze = await self._process_bronze_layer(
+            records, batch_id, ingestion_ts
+        )
 
-        records_bronze = len(records)
-        self._batch_metrics.track_batch_size("bronze", records_bronze)
-        self._batch_metrics.track_processed_records("bronze", records_bronze)
-
-        # 2. Transform and collect Silver/Gold
+        # Transform and collect Silver/Gold
         silver_records, gold_records, records_quarantined = (
             await self._transform_records_batch(records, batch_id)
         )
@@ -151,21 +144,13 @@ class RecordProcessor:
         self._batch_metrics.track_processed_records("silver", len(silver_records))
         self._batch_metrics.track_processed_records("gold", len(gold_records))
 
-        # 3. Write to Silver
         if silver_records:
-            try:
-                await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
-            except Exception as e:
-                self._log_and_track_write_error("silver", e, batch_id)
-                raise
+            await self._process_silver_layer(
+                silver_records, batch_id, ingestion_ts
+            )
 
-        # 4. Write to Gold
         if gold_records:
-            try:
-                await self._write_gold_batch(gold_records)
-            except Exception as e:
-                self._log_and_track_write_error("gold", e, batch_id)
-                raise
+            await self._process_gold_layer(gold_records, batch_id)
 
         return BatchResult(
             bronze_count=records_bronze,
@@ -173,6 +158,49 @@ class RecordProcessor:
             gold_count=len(gold_records),
             quarantined_count=records_quarantined,
         )
+
+    async def _process_bronze_layer(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+    ) -> int:
+        """Handle Bronze layer processing: write and track metrics."""
+        try:
+            await self._write_bronze_batch(records, batch_id, ingestion_ts)
+        except Exception as e:
+            self._log_and_track_write_error("bronze", e, batch_id)
+            raise
+
+        records_count = len(records)
+        self._batch_metrics.track_batch_size("bronze", records_count)
+        self._batch_metrics.track_processed_records("bronze", records_count)
+        return records_count
+
+    async def _process_silver_layer(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Handle Silver layer processing: write."""
+        try:
+            await self._write_silver_batch(records, batch_id, ingestion_ts)
+        except Exception as e:
+            self._log_and_track_write_error("silver", e, batch_id)
+            raise
+
+    async def _process_gold_layer(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+    ) -> None:
+        """Handle Gold layer processing: write."""
+        try:
+            await self._write_gold_batch(records)
+        except Exception as e:
+            self._log_and_track_write_error("gold", e, batch_id)
+            raise
 
     async def _transform_record(
         self, record_context: PipelineContext, raw_record: dict[str, Any]

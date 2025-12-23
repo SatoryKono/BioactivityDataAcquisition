@@ -252,6 +252,7 @@ select = [
     "TCH", # flake8-type-checking
     "PTH", # flake8-use-pathlib
     "RUF", # ruff-specific
+    "T20", # flake8-print
 ]
 ignore = [
     "E501",  # Line too long
