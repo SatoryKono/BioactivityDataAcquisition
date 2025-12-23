@@ -475,8 +475,8 @@ class OrchestrationPort(Protocol):
     """
     Port for pipeline orchestration.
 
-    Abstracts the workflow engine (e.g., Prefect, Airflow) to allow
-    triggering runs, checking status, and scheduling.
+    Abstracts the workflow engine to allow triggering runs,
+    checking status, and scheduling.
     """
 
     async def schedule(

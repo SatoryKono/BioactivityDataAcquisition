@@ -1,7 +1,7 @@
 """Checkpoint Manager for ETL Pipelines.
 
-This module is framework-agnostic. Prefect integration is provided by
-the orchestration layer (bioetl.orchestration.tasks).
+This module is framework-agnostic and handles checkpoint persistence
+for pipeline resume functionality.
 """
 
 from collections.abc import Callable
