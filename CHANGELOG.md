@@ -43,5 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### BREAKING CHANGES
 
-- Removed deprecated `BasePipeline.from_params()` method. Use the constructor `BasePipeline(config, runtime, services)`
-  instead.
+- **BasePipeline signature changed**: Constructor now requires `run_id` as 4th parameter:
+  `BasePipeline(config, runtime, services, run_id)`. This ensures consistent run identification
+  across all components (logs, metrics, checkpoints). See ADR-012.
+
+- **StoragePort extended**: Added `clear_silver(table_name)` and `clear_gold(table_name)` methods
+  to `StoragePort` protocol. Custom storage adapters MUST implement these methods.
+
+- **Medallion invariants enforced**: `PipelineRunner._clear_exports()` now only clears data for
+  `rebuild`/`backfill` runs. Incremental runs use merge/upsert without clearing existing data.
+
+- Removed deprecated `BasePipeline.from_params()` method. Use the constructor with 4 parameters.
