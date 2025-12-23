@@ -228,7 +228,29 @@ Lock key включает тип запуска:
 | dataset | SHOULD | `chembl.activity` |
 | record_count | SHOULD | 1000 |
 | error_type | При ошибках | `SCHEMA_VIOLATION` |
- 
+
+### 3.2.2. Prometheus Metrics
+
+**Endpoint:** `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default port: 8000)
+
+**Запуск метрик:**
+- Автоматически в `bootstrap_pipeline()` (Composition Root)
+- Идемпотентный: повторный вызов безопасен (Double-Check Locking)
+- Graceful degradation: ошибки метрик не блокируют пайплайн
+
+**Pipeline Metrics (prefix: `bioetl_`):**
+
+| Метрика | Тип | Labels | Описание |
+|---------|-----|--------|----------|
+| `pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type | Длительность выполнения этапов |
+| `records_processed_total` | Counter | pipeline, stage, run_type | Количество обработанных записей |
+| `errors_total` | Counter | pipeline, stage, error_code | Количество ошибок по типам |
+| `batch_size_records` | Histogram | pipeline, stage | Распределение размеров батчей |
+| `filter_ids_loaded_total` | Counter | pipeline | Загружено ID для фильтрации |
+| `filter_ids_duplicates_total` | Counter | pipeline | Дубликаты в файле фильтрации |
+
+**Реализация:** См. `src/bioetl/infrastructure/observability/metrics.py` и `prometheus_metrics.py`.
+
 ### 3.3. Конкурентность и Блокировки
 
 > **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
