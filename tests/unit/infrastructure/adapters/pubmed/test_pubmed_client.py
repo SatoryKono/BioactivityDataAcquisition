@@ -1,7 +1,7 @@
 # tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
 """Unit tests for PubMedAdapter."""
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -21,10 +21,17 @@ def mock_http_client():
 
 
 @pytest.fixture
-def adapter(mock_http_client):
+def mock_logger():
+    """Create a mock logger."""
+    return MagicMock()
+
+
+@pytest.fixture
+def adapter(mock_http_client, mock_logger):
     """Create a PubMedAdapter with mock http client."""
     return PubMedAdapter(
         http_client=mock_http_client,
+        logger=mock_logger,
         email="test@example.com",
         api_key=None,
     )
@@ -79,10 +86,11 @@ async def test_aclose_handles_none_client(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_aclose_with_none_http_client():
+async def test_aclose_with_none_http_client(mock_logger):
     """Test aclose() handles None http_client gracefully."""
     adapter = PubMedAdapter(
         http_client=None,  # type: ignore[arg-type]
+        logger=mock_logger,
         email="test@example.com",
     )
 

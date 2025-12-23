@@ -7,6 +7,7 @@ To record new cassettes: pytest --vcr-record=new_episodes
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -20,6 +21,11 @@ class TestUniProtClientIntegration:
     """
 
     @pytest.fixture
+    def mock_logger(self) -> MagicMock:
+        """Create a mock logger for testing."""
+        return MagicMock()
+
+    @pytest.fixture
     def uniprot_client_internal(self, token_bucket: Any, circuit_breaker: Any) -> Any:
         """Create UniProt HTTP client for testing."""
         from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -31,18 +37,18 @@ class TestUniProtClientIntegration:
         )
 
     @pytest.fixture
-    def uniprot_adapter(self, uniprot_client_internal: Any) -> Any:
+    def uniprot_adapter(self, uniprot_client_internal: Any, mock_logger: MagicMock) -> Any:
         """Create UniProtClient instance."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        return UniProtClient(http_client=uniprot_client_internal)
+        return UniProtClient(http_client=uniprot_client_internal, logger=mock_logger)
 
     def test_provider_name(self, uniprot_adapter: Any) -> None:
         """Adapter should have correct provider name."""
         assert uniprot_adapter.provider_name == "uniprot"
 
     @pytest.mark.vcr
-    async def test_health_check(self, uniprot_client_internal: Any) -> None:
+    async def test_health_check(self, uniprot_client_internal: Any, mock_logger: MagicMock) -> None:
         """Test UniProt health check probe.
 
         This test requires a VCR cassette.
@@ -52,7 +58,7 @@ class TestUniProtClientIntegration:
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         async with uniprot_client_internal:
-            adapter = UniProtClient(http_client=uniprot_client_internal)
+            adapter = UniProtClient(http_client=uniprot_client_internal, logger=mock_logger)
             status = await adapter.health_check()
 
             # Should return a valid health status
@@ -63,7 +69,7 @@ class TestUniProtClientIntegration:
             ]
 
     @pytest.mark.vcr
-    async def test_fetch_proteins(self, uniprot_client_internal: Any) -> None:
+    async def test_fetch_proteins(self, uniprot_client_internal: Any, mock_logger: MagicMock) -> None:
         """Test fetching proteins from UniProt.
 
         This test requires a VCR cassette.
@@ -72,7 +78,7 @@ class TestUniProtClientIntegration:
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         async with uniprot_client_internal:
-            adapter = UniProtClient(http_client=uniprot_client_internal)
+            adapter = UniProtClient(http_client=uniprot_client_internal, logger=mock_logger)
 
             records = []
             async for record in adapter.fetch("protein", query="gene:MYC", limit=2):
