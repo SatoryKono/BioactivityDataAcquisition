@@ -287,6 +287,7 @@ class Target(BaseEntity):
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
+    protein_classifications: list[str] | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -318,6 +319,7 @@ class TargetComponent(BaseEntity):
     # Complex fields (JSON serialized)
     target_component_synonyms: str | None = None  # JSON string of list
     target_component_xrefs: str | None = None  # JSON string of list
+    protein_classifications: str | None = None  # JSON string of list
 
     def __post_init__(self) -> None:
         super().__post_init__()

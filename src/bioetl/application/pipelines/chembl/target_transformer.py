@@ -110,6 +110,7 @@ class TargetTransformer(BaseTransformer):
                 "component_types": None,
                 "component_relationships": None,
                 "component_descriptions": None,
+                "protein_classifications": None,
             }
 
         accessions = [c.get("accession") for c in components if c.get("accession")]
@@ -128,12 +129,29 @@ class TargetTransformer(BaseTransformer):
             if c.get("component_description")
         ]
 
+        # Flatten protein classifications
+        classifications = []
+        for c in components:
+            # Check if protein_classifications exists and is a list
+            pcs = c.get("protein_classifications")
+            if pcs and isinstance(pcs, list):
+                for pc in pcs:
+                    # Extract short_name if available
+                    if isinstance(pc, dict):
+                        short_name = pc.get("short_name")
+                        if short_name:
+                            classifications.append(short_name)
+                        elif "protein_classification_id" in pc:
+                             # Fallback to ID if name not present but ID is
+                             classifications.append(str(pc["protein_classification_id"]))
+
         return {
             "component_accessions": accessions if accessions else None,
             "component_ids": ids if ids else None,
             "component_types": types if types else None,
             "component_relationships": relationships if relationships else None,
             "component_descriptions": descriptions if descriptions else None,
+            "protein_classifications": classifications if classifications else None,
         }
 
     def _aggregate_synonyms(
