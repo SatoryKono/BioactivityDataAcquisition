@@ -242,6 +242,36 @@ class StoragePort(Protocol):
         """Gracefully close the storage connection and release resources."""
         ...
 
+    def clear_csv(self, table_name: str | None = None) -> int:
+        """Clear CSV export files for Silver and Gold layers.
+
+        Should be called at the start of a pipeline run to ensure
+        fresh CSV exports without duplicates from previous runs.
+
+        Args:
+            table_name: If provided, only clear CSV for this table.
+                       If None, clear all CSV files.
+
+        Returns:
+            Total number of files deleted.
+        """
+        ...
+
+    def clear_delta(self, table_name: str | None = None) -> int:
+        """Clear Delta tables for Silver and Gold layers.
+
+        Should be called at the start of a pipeline run to ensure
+        fresh data without duplicates from previous runs.
+
+        Args:
+            table_name: If provided, only clear Delta table for this table.
+                       If None, clear all Delta tables.
+
+        Returns:
+            Total number of tables cleared.
+        """
+        ...
+
 
 @runtime_checkable
 class LockPort(Protocol):

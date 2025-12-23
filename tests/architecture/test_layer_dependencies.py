@@ -711,3 +711,91 @@ def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
         "Found mutable defaults in dataclasses (use field(default_factory=...) instead):\n"
         + "\n".join(f"  - {v}" for v in violations)
     )
+
+
+def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
+    """Application layer should not use hasattr for port method checks.
+
+    REQ-ARCH-017: The application layer should rely on explicit port contracts
+    (Protocols) instead of duck-typing with hasattr. Using hasattr to check
+    for port methods indicates missing contract definitions.
+
+    Allowed exceptions:
+    - TYPE_CHECKING blocks (static analysis only)
+    - Checking for dunder methods (__enter__, __aiter__, etc.)
+    - Checking for private attributes (_internal)
+    - fetch_filtered: Extension method for filterable adapters (ChEMBL-specific)
+      TODO: Create FilterableDataSourcePort Protocol to formalize this
+    """
+    import ast
+
+    application_path = src_dir / "bioetl" / "application"
+    if not application_path.exists():
+        pytest.skip("Application layer not found")
+
+    # Methods that indicate duck-typing on ports (suspicious patterns)
+    PORT_METHOD_PATTERNS = (
+        "clear_",
+        "write_",
+        # "fetch_" excluded: fetch_filtered is a documented extension pattern
+        "read_",
+        "load_",
+        "save_",
+        "delete_",
+        "health_",
+        "acquire",
+        "release",
+    )
+
+    # Explicitly allowed hasattr checks (documented extensions)
+    ALLOWED_HASATTR_CHECKS = {
+        "fetch_filtered",  # FilterableDataSourcePort extension (see filtered_data_source.py)
+    }
+
+    violations = []
+
+    for py_file in application_path.rglob("*.py"):
+        with py_file.open(encoding="utf-8") as f:
+            try:
+                tree = ast.parse(f.read(), filename=str(py_file))
+            except SyntaxError:
+                continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                # Check for hasattr(obj, "method_name") calls
+                if (
+                    isinstance(node.func, ast.Name)
+                    and node.func.id == "hasattr"
+                    and len(node.args) >= 2
+                ):
+                    # Get the attribute name being checked
+                    attr_arg = node.args[1]
+                    if isinstance(attr_arg, ast.Constant) and isinstance(
+                        attr_arg.value, str
+                    ):
+                        attr_name = attr_arg.value
+
+                        # Skip dunder methods and private attributes
+                        if attr_name.startswith("_"):
+                            continue
+
+                        # Skip explicitly allowed extensions
+                        if attr_name in ALLOWED_HASATTR_CHECKS:
+                            continue
+
+                        # Check if it matches port method patterns
+                        if any(
+                            attr_name.startswith(pattern)
+                            for pattern in PORT_METHOD_PATTERNS
+                        ):
+                            violations.append(
+                                f"{py_file.name}:{node.lineno} - "
+                                f"hasattr check for '{attr_name}' suggests missing port contract"
+                            )
+
+    assert not violations, (
+        "Found hasattr duck-typing in application layer. "
+        "Add missing methods to port contracts in domain/ports.py:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )
