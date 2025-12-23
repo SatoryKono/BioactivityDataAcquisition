@@ -80,6 +80,7 @@ class UnifiedHTTPClient:
         retry_config: RetryConfig for exponential backoff
         timeout: Request timeout in seconds (default: 30.0)
         run_id: Current run ID for correlation header
+        user_agent: User-Agent header value (default: BioETL/5.0.0)
 
     Example:
         >>> bucket = TokenBucket(rate=5.0, capacity=5)
@@ -94,13 +95,14 @@ class UnifiedHTTPClient:
     retry_config: RetryConfig = field(default_factory=RetryConfig)
     timeout: float = 30.0
     run_id: RunID | None = None
+    user_agent: str = "BioETL/5.0.0"
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
 
     async def __aenter__(self) -> UnifiedHTTPClient:
         """Enter async context manager."""
         headers: dict[str, str] = {
-            "User-Agent": "BioETL/0.1.0 (contact@example.com)",
+            "User-Agent": self.user_agent,
         }
         if self.run_id:
             headers["X-Correlation-ID"] = str(self.run_id)

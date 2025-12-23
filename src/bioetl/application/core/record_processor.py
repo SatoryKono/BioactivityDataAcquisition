@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports import GoldValidatorPort
     from bioetl.domain.types import BatchID
 
 
@@ -46,6 +47,7 @@ class RecordProcessor:
         config: RecordProcessorConfig,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
+        gold_validator: GoldValidatorPort | None = None,
     ):
         self._storage = services.storage
         self._quarantine_manager = QuarantineManager(
@@ -57,12 +59,12 @@ class RecordProcessor:
         self._config = config
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
+        self._gold_validator = gold_validator
 
         # Convenience properties
         self._provider = config.provider
         self._entity_type = config.entity_type
         self._silver_schema = config.silver_schema
-        self._gold_schema = config.gold_schema
         self._dq_config = config.dq_config
         self._table_config = config.table_config
 
@@ -254,18 +256,13 @@ class RecordProcessor:
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
-        # Validate Gold records if schema is present
-        if self._gold_schema:
-            import pandas as pd
+        # Validate Gold records if validator is present
+        validated_records = records
+        if self._gold_validator:
+            validated_records = self._gold_validator.validate(records)
 
-            df = pd.DataFrame(records)
-            try:
-                # Pandera validation
-                self._gold_schema.validate(df, lazy=True)
-            except Exception as e:
-                # Re-wrap in DQ error or let bubble up depending on strategy
-                # For now, we let it bubble up to be caught by the outer loop
-                raise e
+        if not validated_records:
+            return
 
         # Use configured table name or default
         table_name = (
@@ -278,7 +275,7 @@ class RecordProcessor:
             write_mode = "append"
         await self._storage.write_gold(
             table_name=table_name,
-            records=records,
+            records=validated_records,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )

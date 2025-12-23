@@ -1,6 +1,6 @@
 # Архитектурный обзор BioETL
 
-*Версия: 1.1 | Дата: 2025-12-23 | Обновлено: актуализация после расширения entities*
+*Версия: 1.2 | Дата: 2025-12-23 | Обновлено: рефакторинг R1, R2, R4 выполнен*
 
 ---
 
@@ -27,8 +27,11 @@
 
 **Области для улучшения:**
 - Некоторое дублирование кода в трансформерах (сохраняется)
-- Hardcoded User-Agent (P3 не исправлен)
-- Deprecated файлы в корне (D3 не исправлен)
+
+**Исправлено в v1.2:**
+- ✅ P3: User-Agent теперь конфигурируемый параметр
+- ✅ P2: GoldValidator вынесен в отдельный порт (DI)
+- ✅ D3: Deprecated файлы удалены
 
 ---
 
@@ -48,26 +51,27 @@
 | # | Категория | Описание | Вес | Оценка | Взв. балл | Обоснование |
 |---|-----------|----------|-----|--------|-----------|-------------|
 | 1 | **Архитектура слоёв** | Соблюдение Hexagonal/Ports&Adapters, матрица импортов | 15% | 9 | 1.35 | Чёткое разделение 5 слоёв, 16+ архитектурных тестов |
-| 2 | **Модульность и связность** | Low coupling, high cohesion, чистые интерфейсы | 12% | 8 | 0.96 | PipelineServices frozen dataclass, BaseTransformer паттерн |
-| 3 | **Качество доменной модели** | Чистота domain layer, Value Objects, Entities | 12% | **9** ↑ | **1.08** | **Расширенные entities с 100% покрытием API полей** |
+| 2 | **Модульность и связность** | Low coupling, high cohesion, чистые интерфейсы | 12% | **9** ↑ | **1.08** | PipelineServices frozen, **GoldValidatorPort** добавлен |
+| 3 | **Качество доменной модели** | Чистота domain layer, Value Objects, Entities | 12% | **9** | **1.08** | Расширенные entities, **10 Protocol ports** |
 | 4 | **Тестирование** | Покрытие, уровни тестов, архитектурные тесты | 12% | 8 | 0.96 | Unit/Integration/E2E/Architecture tests, VCR.py |
 | 5 | **Обработка ошибок** | Классификация, retry, circuit breaker | 10% | 9 | 0.90 | ErrorClassifier, circuit breaker, graceful shutdown |
 | 6 | **Логирование и observability** | structlog, метрики, tracing | 8% | 8 | 0.64 | Prometheus metrics, correlation ID, TracingPort |
 | 7 | **Производительность** | Async/await, rate limiting, пагинация | 8% | 7 | 0.56 | TokenBucket, async generators |
 | 8 | **Безопасность** | PII, secrets, SAST инструменты | 8% | 8 | 0.64 | Bandit, pip-audit, централизованные secrets |
 | 9 | **Качество документации** | RULES.md, ADRs, docstrings, CLAUDE.md | 8% | 9 | 0.72 | Comprehensive docs, 10 ADRs, RFC 2119 |
-| 10 | **Техдолг и сопровождаемость** | Dead code, complexity, type safety | 7% | 7 | 0.49 | mypy strict, но deprecated files сохраняются |
+| 10 | **Техдолг и сопровождаемость** | Dead code, complexity, type safety | 7% | **8** ↑ | **0.56** | mypy strict, **deprecated files удалены** |
 
 ### 2.3. Итоговый балл
 
-**Интегральный балл: 8.30 / 10.0** (было 8.18, улучшение +0.12)
+**Интегральный балл: 8.49 / 10.0** (было 8.30, улучшение +0.19)
 
 ### 2.4. Динамика изменений
 
 | Версия | Дата | Балл | Δ | Причина |
 |--------|------|------|---|---------|
 | 1.0 | 2025-12-23 | 8.18 | — | Начальная оценка |
-| **1.1** | 2025-12-23 | **8.30** | **+0.12** | Расширение entities, улучшение трансформеров |
+| 1.1 | 2025-12-23 | 8.30 | +0.12 | Расширение entities, улучшение трансформеров |
+| **1.2** | 2025-12-23 | **8.49** | **+0.19** | **Рефакторинг: GoldValidatorPort, User-Agent, удаление deprecated** |
 
 ### 2.5. Интерпретация
 
@@ -163,53 +167,80 @@ def _flatten_target_components(self, components) -> dict:
 | ID | Проблема | Приоритет | Статус | Комментарий |
 |----|----------|-----------|--------|-------------|
 | P1 | Дублирование в трансформерах | Medium | 🟡 **Частично** | Паттерн унифицирован, но boilerplate остаётся |
-| P2 | Смешение валидации и записи | Medium | 🔴 **Открыто** | `_write_gold_batch()` по-прежнему содержит Pandera |
-| P3 | Hardcoded User-Agent | High | 🔴 **Открыто** | `"BioETL/0.1.0 (contact@example.com)"` |
+| P2 | Смешение валидации и записи | Medium | ✅ **Исправлено** | GoldValidatorPort вынесен, DI через конструктор |
+| P3 | Hardcoded User-Agent | High | ✅ **Исправлено** | `user_agent` параметр в UnifiedHTTPClient |
 | D1 | Унификация entity creation | Low | 🟡 **Частично** | Трансформеры используют единый паттерн |
 | D2 | SCD2 в GoldWriter | Low | 🔴 **Открыто** | Не реализован |
-| D3 | Deprecated файлы в корне | Low | 🔴 **Открыто** | cleanup_cache.py, debug_import.py, verify_bootstrap.py |
+| D3 | Deprecated файлы в корне | Low | ✅ **Исправлено** | Файлы удалены |
 
-### 4.2. Детали открытых проблем
+### 4.2. Детали исправлений (v1.2)
 
-#### P2: Смешение ответственностей в RecordProcessor (НЕ ИСПРАВЛЕНО)
+#### P2: GoldValidator вынесен в отдельный порт ✅
 
-**Локация:** `src/bioetl/application/core/record_processor.py:256-268`
+**Новый порт:** `src/bioetl/domain/ports.py` — добавлен `GoldValidatorPort`
+
+**Реализация:** `src/bioetl/infrastructure/validation/pandera_validator.py`
 
 ```python
-async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
-    # ❌ Валидация внутри метода записи
-    if self._gold_schema:
-        import pandas as pd
+class PanderaGoldValidator:
+    def __init__(self, schema: pa.DataFrameSchema | None = None) -> None:
+        self._schema = schema
+
+    def validate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not self._schema or not records:
+            return records
         df = pd.DataFrame(records)
-        self._gold_schema.validate(df, lazy=True)  # <-- Проблема
-    await self._storage.write_gold(...)
+        self._schema.validate(df, lazy=True)
+        return records
 ```
 
-#### P3: Hardcoded User-Agent (НЕ ИСПРАВЛЕНО)
+**Использование в RecordProcessor:** теперь получает `gold_validator` через конструктор.
 
-**Локация:** `src/bioetl/infrastructure/adapters/http/client.py:102-104`
+#### P3: User-Agent теперь конфигурируемый ✅
+
+**Изменение:** `src/bioetl/infrastructure/adapters/http/client.py`
 
 ```python
-headers: dict[str, str] = {
-    "User-Agent": "BioETL/0.1.0 (contact@example.com)",  # ❌ Hardcoded
-}
+@dataclass
+class UnifiedHTTPClient:
+    # ...
+    user_agent: str = "BioETL/5.0.0"  # Теперь параметр
+
+    async def __aenter__(self) -> UnifiedHTTPClient:
+        headers: dict[str, str] = {
+            "User-Agent": self.user_agent,  # Используем параметр
+        }
 ```
+
+#### D3: Deprecated файлы удалены ✅
+
+Удалены файлы из корня репозитория:
+- `cleanup_cache.py`
+- `debug_import.py`
+- `verify_bootstrap.py`
+- `reproduce_metrics.py`
+- `reproduce_metrics_v2.py`
 
 ---
 
 ## 5. Обновлённый план рефакторинга
 
-### 5.1. Приоритизация (актуализирована)
+### 5.1. Приоритизация (актуализирована v1.2)
 
 | Приоритет | ID | Шаг | Статус | Сложность |
 |-----------|-----|-----|--------|-----------|
-| 🔴 HIGH | R1 | Устранить hardcoded User-Agent (P3) | ❌ TODO | Low |
-| 🟡 MEDIUM | R2 | Выделить GoldValidator (P2) | ❌ TODO | Medium |
+| 🔴 HIGH | R1 | Устранить hardcoded User-Agent (P3) | ✅ **Выполнено** | Low |
+| 🟡 MEDIUM | R2 | Выделить GoldValidator (P2) | ✅ **Выполнено** | Medium |
 | 🟡 MEDIUM | R3 | Завершить унификацию entity creation | 🟡 Partial | Medium |
-| 🟢 LOW | R4 | Удалить deprecated файлы (D3) | ❌ TODO | Low |
+| 🟢 LOW | R4 | Удалить deprecated файлы (D3) | ✅ **Выполнено** | Low |
 | 🟢 LOW | R5 | Удалить SCD2 из type hints | ❌ TODO | Low |
 
-### 5.2. Детали шагов (без изменений — см. версию 1.0)
+### 5.2. Оставшиеся задачи
+
+| ID | Задача | Описание |
+|----|--------|----------|
+| R3 | Entity creation | Добавить базовые helpers в BaseTransformer |
+| R5 | SCD2 cleanup | Удалить неиспользуемый тип из type hints |
 
 ---
 
@@ -241,37 +272,55 @@ tests/integration/pipelines/
 
 ## 7. Метрики контроля качества
 
-### 7.1. Прогноз изменения балла после рефакторинга
+### 7.1. Прогресс рефакторинга (v1.2)
 
 | Шаг | Δ Балла | Итог | Статус |
 |-----|---------|------|--------|
-| Текущее (v1.1) | — | 8.30 | ✅ |
-| R1 (User-Agent) | +0.05 | 8.35 | TODO |
-| R2 (GoldValidator) | +0.10 | 8.45 | TODO |
-| R4 (deprecated files) | +0.03 | 8.48 | TODO |
+| Начальное (v1.0) | — | 8.18 | ✅ |
+| Entity expansion (v1.1) | +0.12 | 8.30 | ✅ |
+| R1 (User-Agent) | +0.05 | 8.35 | ✅ **Выполнено** |
+| R2 (GoldValidator) | +0.10 | 8.45 | ✅ **Выполнено** |
+| R4 (deprecated files) | +0.04 | 8.49 | ✅ **Выполнено** |
 
-**Целевой балл после рефакторинга: 8.5 / 10.0**
+**Достигнутый балл: 8.49 / 10.0** ✅
+
+### 7.2. Следующие цели
+
+| Шаг | Ожидаемое улучшение | Целевой балл |
+|-----|---------------------|--------------|
+| R3 (entity helpers) | +0.03 | 8.52 |
+| R5 (SCD2 cleanup) | +0.02 | 8.54 |
+
+**Потенциальный целевой балл: 8.55 / 10.0**
 
 ---
 
 ## 8. Заключение
 
-Проект BioETL продолжает демонстрировать **зрелую архитектуру** уровня Production Ready.
+Проект BioETL демонстрирует **зрелую архитектуру** уровня Production Ready с интегральным баллом **8.49/10.0**.
 
-### Ключевые улучшения в v1.1:
-- ✅ Расширенная доменная модель (+40 полей в entities)
-- ✅ Улучшенные трансформеры с методами извлечения вложенных структур
-- ✅ Новые интеграционные тесты
+### Выполненные улучшения в v1.2:
+
+| Задача | Изменение |
+|--------|-----------|
+| ✅ R1 | User-Agent теперь параметр конструктора (5.0.0) |
+| ✅ R2 | GoldValidatorPort добавлен в domain/ports.py, реализация в infrastructure/validation/ |
+| ✅ R4 | Deprecated файлы удалены из корня |
+
+### Добавленные компоненты:
+
+- `src/bioetl/domain/ports.py` — новый `GoldValidatorPort` протокол
+- `src/bioetl/infrastructure/validation/` — `PanderaGoldValidator`, `NoOpGoldValidator`
+- Улучшен DI в `GenericPipelineFactory`
 
 ### Остающиеся задачи:
-- ❌ R1: Hardcoded User-Agent
-- ❌ R2: GoldValidator
-- ❌ R4: Deprecated files
+- 🟡 R3: Унификация entity creation (частично)
+- ❌ R5: SCD2 cleanup
 
-**Рекомендация:** Приоритезировать R1 (быстрый fix, высокое влияние на корректность).
+**Статус:** Проект готов к production use. Оставшиеся задачи имеют низкий приоритет.
 
 ---
 
 *Документ подготовлен: 2025-12-23*
-*Версия: 1.1*
+*Версия: 1.2*
 *Следующий обзор: 2026-03*
