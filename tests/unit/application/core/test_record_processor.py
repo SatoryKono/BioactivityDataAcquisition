@@ -6,8 +6,10 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
@@ -129,16 +131,20 @@ def record_processor(
     gold_filter_callback,
 ):
     """Create RecordProcessor instance."""
+    config = RecordProcessorConfig(
+        pipeline_name="test_provider_test_entity",
+        provider="test_provider",
+        entity_type="test_entity",
+        silver_schema=MagicMock(),
+        table_config=TableConfig(),
+    )
     return RecordProcessor(
         services=mock_services,
         error_classifier=mock_error_classifier,
         context=mock_context,
-        pipeline_name="test_provider_test_entity",
-        provider="test_provider",
-        entity_type="test_entity",
+        config=config,
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
-        silver_schema=MagicMock(),
     )
 
 
@@ -222,16 +228,20 @@ class TestRecordProcessorProcessBatch:
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+        )
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
+            config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
-            silver_schema=MagicMock(),
         )
 
         records = [
@@ -257,16 +267,20 @@ class TestRecordProcessorProcessBatch:
         async def failing_transform(ctx, record):
             raise LockLostError("resource_key", "test_run_id")
 
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+        )
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
+            config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
-            silver_schema=MagicMock(),
         )
 
         records = [{"id": "test", "value": 5}]
@@ -310,17 +324,21 @@ class TestRecordProcessorProcessBatch:
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
+        processor_config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            dq_config=config.dq,
+        )
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
+            config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
-            silver_schema=MagicMock(),
-            dq_config=config.dq,
         )
 
         records = [
@@ -355,17 +373,21 @@ class TestRecordProcessorProcessBatch:
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
+        processor_config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            dq_config=config.dq,
+        )
+
         processor = RecordProcessor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
+            config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
-            silver_schema=MagicMock(),
-            dq_config=config.dq,
         )
 
         records = [
