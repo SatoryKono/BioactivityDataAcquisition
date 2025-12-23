@@ -259,6 +259,115 @@ class TestMoleculeTransformer:
         assert isinstance(result.get("molecule_hierarchy"), str)
         assert isinstance(result.get("molecule_properties"), str)
 
+    @pytest.mark.asyncio
+    async def test_transform_with_new_core_fields(self, transformer, mock_context):
+        """Test transformation with chirality, availability_type, and other new fields."""
+        record = {
+            "molecule_chembl_id": "CHEMBL456",
+            "chirality": 1,  # racemic
+            "dosed_ingredient": 1,
+            "availability_type": 2,
+            "molecule_species": "NEUTRAL",
+            "helm_notation": "PEPTIDE1{A.G.K}$$$$",
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["chirality"] == 1
+        assert result["dosed_ingredient"] == 1
+        assert result["availability_type"] == 2
+        assert result["molecule_species"] == "NEUTRAL"
+        assert result["helm_notation"] == "PEPTIDE1{A.G.K}$$$$"
+
+    @pytest.mark.asyncio
+    async def test_transform_with_withdrawn_fields(self, transformer, mock_context):
+        """Test transformation with withdrawn metadata fields."""
+        record = {
+            "molecule_chembl_id": "CHEMBL789",
+            "withdrawn_flag": True,
+            "withdrawn_year": 2010,
+            "withdrawn_country": ["United States", "United Kingdom"],
+            "withdrawn_reason": ["Hepatotoxicity", "Cardiotoxicity"],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["withdrawn_flag"] is True
+        assert result["withdrawn_year"] == 2010
+        # JSON serialized fields
+        assert isinstance(result["withdrawn_country"], str)
+        assert isinstance(result["withdrawn_reason"], str)
+        assert "United States" in result["withdrawn_country"]
+        assert "Hepatotoxicity" in result["withdrawn_reason"]
+
+    @pytest.mark.asyncio
+    async def test_transform_with_usan_fields(self, transformer, mock_context):
+        """Test transformation with USAN naming fields."""
+        record = {
+            "molecule_chembl_id": "CHEMBL1234",
+            "usan_stem": "-mab",
+            "usan_stem_definition": "monoclonal antibody",
+            "usan_substem": "-xi-",
+            "usan_year": 2015,
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["usan_stem"] == "-mab"
+        assert result["usan_stem_definition"] == "monoclonal antibody"
+        assert result["usan_substem"] == "-xi-"
+        assert result["usan_year"] == 2015
+
+    @pytest.mark.asyncio
+    async def test_transform_with_new_properties(self, transformer, mock_context):
+        """Test transformation with new ACD and other property fields."""
+        record = {
+            "molecule_chembl_id": "CHEMBL5678",
+            "molecule_properties": {
+                "alogp": 2.5,
+                "mw_freebase": 300.5,
+                "acd_logd": 1.8,
+                "acd_logp": 2.3,
+                "acd_most_apka": 4.5,
+                "acd_most_bpka": 9.2,
+                "full_molformula": "C15H12O3",
+                "ro3_pass": "Y",
+            },
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["property_alogp"] == 2.5
+        assert result["property_acd_logd"] == 1.8
+        assert result["property_acd_logp"] == 2.3
+        assert result["property_acd_most_apka"] == 4.5
+        assert result["property_acd_most_bpka"] == 9.2
+        assert result["property_full_molformula"] == "C15H12O3"
+        assert result["property_ro3_pass"] == "Y"
+
+    @pytest.mark.asyncio
+    async def test_transform_with_hierarchy_child(self, transformer, mock_context):
+        """Test transformation extracts child_chembl_id from hierarchy."""
+        record = {
+            "molecule_chembl_id": "CHEMBL9999",
+            "molecule_hierarchy": {
+                "parent_chembl_id": "CHEMBL1000",
+                "active_chembl_id": "CHEMBL1001",
+                "molecule_chembl_id": "CHEMBL9999",
+            },
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["hierarchy_parent_chembl_id"] == "CHEMBL1000"
+        assert result["hierarchy_active_chembl_id"] == "CHEMBL1001"
+        assert result["hierarchy_child_chembl_id"] == "CHEMBL9999"
+
 
 @pytest.mark.unit
 class TestTargetTransformer:

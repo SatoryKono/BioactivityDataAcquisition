@@ -66,6 +66,21 @@ class MoleculeTransformer(BaseTransformer):
                 "withdrawn_flag": record.get("withdrawn_flag"),
                 "inorganic_flag": safe_int(record.get("inorganic_flag")),
                 "polymer_flag": safe_int(record.get("polymer_flag")),
+                "chirality": safe_int(record.get("chirality")),
+                "dosed_ingredient": safe_int(record.get("dosed_ingredient")),
+                "availability_type": safe_int(record.get("availability_type")),
+                # Withdrawn metadata
+                "withdrawn_year": safe_int(record.get("withdrawn_year")),
+                "withdrawn_country": self.serialize_json(record.get("withdrawn_country")),
+                "withdrawn_reason": self.serialize_json(record.get("withdrawn_reason")),
+                # USAN naming
+                "usan_stem": record.get("usan_stem"),
+                "usan_stem_definition": record.get("usan_stem_definition"),
+                "usan_substem": record.get("usan_substem"),
+                "usan_year": safe_int(record.get("usan_year")),
+                # Other metadata
+                "helm_notation": record.get("helm_notation"),
+                "molecule_species": record.get("molecule_species"),
                 # Complex fields (JSON serialized for history)
                 "molecule_hierarchy": self.serialize_json(
                     record.get("molecule_hierarchy")
@@ -118,10 +133,12 @@ class MoleculeTransformer(BaseTransformer):
             return {
                 "hierarchy_parent_chembl_id": None,
                 "hierarchy_active_chembl_id": None,
+                "hierarchy_child_chembl_id": None,
             }
         return {
             "hierarchy_parent_chembl_id": data.get("parent_chembl_id"),
             "hierarchy_active_chembl_id": data.get("active_chembl_id"),
+            "hierarchy_child_chembl_id": data.get("molecule_chembl_id"),
         }
 
     def _extract_properties(self, data: dict[str, Any] | None) -> dict[str, Any]:
@@ -138,6 +155,12 @@ class MoleculeTransformer(BaseTransformer):
                 "property_heavy_atoms": None,
                 "property_aromatic_rings": None,
                 "property_qed_weighted": None,
+                "property_acd_logd": None,
+                "property_acd_logp": None,
+                "property_acd_most_apka": None,
+                "property_acd_most_bpka": None,
+                "property_full_molformula": None,
+                "property_ro3_pass": None,
             }
         return {
             "property_alogp": safe_float(data.get("alogp")),
@@ -153,6 +176,12 @@ class MoleculeTransformer(BaseTransformer):
             "property_heavy_atoms": safe_int(data.get("heavy_atoms")),
             "property_aromatic_rings": safe_int(data.get("aromatic_rings")),
             "property_qed_weighted": safe_float(data.get("qed_weighted")),
+            "property_acd_logd": safe_float(data.get("acd_logd")),
+            "property_acd_logp": safe_float(data.get("acd_logp")),
+            "property_acd_most_apka": safe_float(data.get("acd_most_apka")),
+            "property_acd_most_bpka": safe_float(data.get("acd_most_bpka")),
+            "property_full_molformula": data.get("full_molformula"),
+            "property_ro3_pass": data.get("ro3_pass"),
         }
 
     def _extract_structures(self, data: dict[str, Any] | None) -> dict[str, Any]:
