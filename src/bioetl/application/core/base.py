@@ -14,7 +14,7 @@ from uuid import uuid4
 
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord, Watermark
+from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
 if TYPE_CHECKING:
     import structlog
@@ -29,7 +29,7 @@ class BasePipeline(ABC):
     Acts as a container for:
     - Configuration (Static & Runtime)
     - Services (Ports)
-    - Business Logic (Transformations, Filtering, Watermark Extraction)
+    - Business Logic (Transformations, Filtering)
 
     It does NOT orchestrate execution. See PipelineRunner for execution logic.
     """
@@ -166,13 +166,3 @@ class BasePipeline(ABC):
         if gold_filters is None or gold_filters.is_empty():
             return True
         return gold_filters.should_include(record)
-
-    @abstractmethod
-    def extract_watermark(
-        self, context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
-        """Extract watermark value from a record.
-
-        Each pipeline MUST implement its own watermark extraction strategy.
-        """
-        ...

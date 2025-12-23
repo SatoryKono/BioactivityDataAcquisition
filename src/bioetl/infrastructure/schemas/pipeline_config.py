@@ -89,7 +89,6 @@ class SourceConfig(BaseModel):
     search_term: str | None = None
     email: str | None = None
     api_key: str | None = None
-    watermark_field: str | None = None
     fields: list[dict[str, str]] = Field(default_factory=list)
     api: ApiConfig = Field(default_factory=ApiConfig)
 

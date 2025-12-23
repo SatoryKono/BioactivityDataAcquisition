@@ -285,59 +285,6 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record is not None
         assert silver_record["gene_names"] == []
 
-    async def test_extract_watermark(
-        self,
-        uniprot_config,
-        uniprot_runtime,
-        mock_uniprot_services,
-    ):
-        """Тест извлечения watermark из записи."""
-        from bioetl.domain.types import Watermark
-
-        pipeline = UniProtProteinPipeline(
-            config=uniprot_config,
-            runtime=uniprot_runtime,
-            services=mock_uniprot_services,
-        )
-
-        context = PipelineContext(
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            logger=mock_uniprot_services.logger,
-        )
-
-        record = {"primaryAccession": "P12345"}
-        watermark = pipeline.extract_watermark(context, record)
-
-        assert isinstance(watermark, Watermark)
-        assert watermark.value == "P12345"
-
-    async def test_extract_watermark_missing_accession(
-        self,
-        uniprot_config,
-        uniprot_runtime,
-        mock_uniprot_services,
-    ):
-        """Тест извлечения watermark при отсутствии accession."""
-        from bioetl.domain.types import Watermark
-
-        pipeline = UniProtProteinPipeline(
-            config=uniprot_config,
-            runtime=uniprot_runtime,
-            services=mock_uniprot_services,
-        )
-
-        context = PipelineContext(
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            logger=mock_uniprot_services.logger,
-        )
-
-        record = {}  # No primaryAccession
-        watermark = pipeline.extract_watermark(context, record)
-
-        assert isinstance(watermark, Watermark)
-        assert watermark.value == ""
 
 
 @pytest.mark.integration

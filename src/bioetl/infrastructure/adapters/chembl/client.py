@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
 if TYPE_CHECKING:
@@ -87,21 +87,13 @@ class ChemblAdapter(BaseHttpAdapter):
             raise ValueError(msg)
         return f"{CHEMBL_API_BASE}/{resource}.json"
 
-    def _build_params(
-        self, entity_type: str, watermark: Watermark | None, offset: int
-    ) -> dict[str, Any]:
+    def _build_params(self, offset: int) -> dict[str, Any]:
         """Build API request parameters."""
-        params: dict[str, Any] = {
+        return {
             "limit": self.batch_size,
             "offset": offset,
             "format": "json",
         }
-        if watermark is not None and entity_type == "activity":
-            if isinstance(watermark.value, datetime):
-                params["updated_on__gte"] = watermark.value.isoformat()
-            else:
-                params["activity_id__gt"] = str(watermark.value)
-        return params
 
     def _process_response(
         self, response: Response, entity_type: str
@@ -134,13 +126,13 @@ class ChemblAdapter(BaseHttpAdapter):
             return [], False
 
     async def _page_iterator(
-        self, entity_type: str, watermark: Watermark | None
+        self, entity_type: str
     ) -> AsyncIterator[list[dict[str, Any]]]:
         """Yield pages of records."""
         url = self._get_resource_url(entity_type)
         offset = 0
         while True:
-            params = self._build_params(entity_type, watermark, offset)
+            params = self._build_params(offset)
             records, has_next = await self._fetch_page(url, params, entity_type)
             if not records:
                 break
@@ -152,8 +144,6 @@ class ChemblAdapter(BaseHttpAdapter):
     async def _fetch_with_filter(
         self,
         entity_type: str,
-        watermark: Watermark | None,
-        limit: int | None,
         id_batch: list[str],
         filter_field: str,
     ) -> AsyncIterator[dict[str, Any]]:
@@ -162,7 +152,7 @@ class ChemblAdapter(BaseHttpAdapter):
         offset = 0
 
         while True:
-            params = self._build_params(entity_type, watermark, offset)
+            params = self._build_params(offset)
             params[f"{filter_field}__in"] = ",".join(id_batch)
 
             records, has_next = await self._fetch_page(url, params, entity_type)
@@ -191,7 +181,6 @@ class ChemblAdapter(BaseHttpAdapter):
     async def _fetch_filtered(
         self,
         entity_type: str,
-        watermark: Watermark | None,
         limit: int | None,
         filter_ids: list[str],
         filter_field: str,
@@ -200,7 +189,7 @@ class ChemblAdapter(BaseHttpAdapter):
         total_fetched = 0
         for id_batch in self._batch_ids(filter_ids, batch_size=100):
             async for record in self._fetch_with_filter(
-                entity_type, watermark, limit, id_batch, filter_field
+                entity_type, id_batch, filter_field
             ):
                 yield record
                 total_fetched += 1
@@ -210,12 +199,11 @@ class ChemblAdapter(BaseHttpAdapter):
     async def _fetch_standard(
         self,
         entity_type: str,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Perform standard paginated fetch."""
         total_fetched = 0
-        async for records in self._page_iterator(entity_type, watermark):
+        async for records in self._page_iterator(entity_type):
             for record in records:
                 yield record
                 total_fetched += 1
@@ -225,7 +213,6 @@ class ChemblAdapter(BaseHttpAdapter):
     async def fetch(
         self,
         entity_type: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
@@ -235,14 +222,13 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Args:
             entity_type: Type of entity to fetch (activity, assay, compound, etc.)
-            watermark: Resume point for incremental fetching
             limit: Maximum number of records to fetch
             query: Unused for ChEMBL (filtering done via fetch_filtered method)
 
         Yields:
             Dictionary records from ChEMBL API
         """
-        async for record in self._fetch_standard(entity_type, watermark, limit):
+        async for record in self._fetch_standard(entity_type, limit):
             yield record
 
     async def fetch_filtered(
@@ -250,7 +236,6 @@ class ChemblAdapter(BaseHttpAdapter):
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from ChEMBL with ID filtering.
@@ -261,14 +246,13 @@ class ChemblAdapter(BaseHttpAdapter):
             entity_type: Type of entity to fetch
             filter_ids: Sorted list of IDs to filter by (for deterministic batching)
             filter_field: Field name to filter on
-            watermark: Resume point for incremental fetching
             limit: Maximum number of records to fetch
 
         Yields:
             Dictionary records matching the filter criteria
         """
         async for record in self._fetch_filtered(
-            entity_type, watermark, limit, filter_ids, filter_field
+            entity_type, limit, filter_ids, filter_field
         ):
             yield record
 

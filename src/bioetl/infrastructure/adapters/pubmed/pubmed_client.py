@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import ApiError
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -119,14 +119,13 @@ class PubMedAdapter:
     async def fetch(
         self,
         entity_type: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: set[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records."""
-        _ = filter_ids, filter_field, watermark  # Mark as intentionally unused
+        _ = filter_ids, filter_field  # Mark as intentionally unused
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 

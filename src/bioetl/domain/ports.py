@@ -18,7 +18,6 @@ from bioetl.domain.types import (
     HealthStatus,
     RunID,
     RunType,
-    Watermark,
 )
 
 
@@ -65,7 +64,6 @@ class DataSourcePort(Protocol):
     def fetch(
         self,
         entity_type: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: set[str] | None = None,
@@ -80,8 +78,6 @@ class DataSourcePort(Protocol):
 
         Args:
             entity_type: The type of entity to fetch (e.g., 'activity', 'molecule').
-            watermark: The point from which to resume fetching data. If None,
-                       fetches from the beginning.
             limit: The maximum number of records to fetch.
             query: Optional search query for providers that support it (e.g., PubChem, UniProt).
             filter_ids: Optional set of IDs to filter by (for adapters that support filtering).
@@ -300,13 +296,12 @@ class CheckpointPort(Protocol):
     Port for pipeline checkpointing.
 
     This interface allows pipelines to save and load their state, enabling
-    resilience and incremental processing.
+    resilience and run tracking.
     """
 
     async def save(
         self,
         pipeline: str,
-        watermark: Watermark,
         run_id: RunID,
         metadata: dict[str, Any],
     ) -> None:
@@ -315,7 +310,6 @@ class CheckpointPort(Protocol):
 
         Args:
             pipeline: The name of the pipeline.
-            watermark: The watermark to save.
             run_id: The ID of the run creating the checkpoint.
             metadata: Additional metadata to store with the checkpoint.
         """
@@ -324,7 +318,7 @@ class CheckpointPort(Protocol):
     async def load(
         self,
         pipeline: str,
-    ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
+    ) -> tuple[RunID, dict[str, Any]] | None:
         """
         Load a checkpoint.
 
@@ -332,7 +326,7 @@ class CheckpointPort(Protocol):
             pipeline: The name of the pipeline.
 
         Returns:
-            A tuple containing the watermark, run ID, and metadata, or None
+            A tuple containing the run ID and metadata, or None
             if no checkpoint is found.
         """
         ...

@@ -296,16 +296,13 @@ class TestPipelineRunnerRun:
         runner._lock_manager.__aexit__.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_run_passes_watermark_to_executor(
+    async def test_run_calls_executor(
         self, runner, mock_checkpoint_manager, mock_executor
     ):
-        """Test run passes loaded watermark to executor."""
-        mock_checkpoint_manager.load_checkpoint.return_value = "2025-01-15T00:00:00Z"
-
+        """Test run calls executor with correct parameters."""
         await runner.run()
 
         mock_executor.execute.assert_called_once_with(
-            watermark="2025-01-15T00:00:00Z",
             limit=None,
             query=None,
         )
