@@ -13,10 +13,6 @@ silver_table: "uniprot_protein"
 # Reference to shared source configuration
 source_file: ../../sources/uniprot.yaml
 
-# Source override
-source:
-  watermark_field: "accession"
-
 transform:
     version: "1.0.0"
     steps:

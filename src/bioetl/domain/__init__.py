@@ -37,7 +37,6 @@ from bioetl.domain.types import (
     HealthStatus,
     RunID,
     RunType,
-    Watermark,
 )
 
 __all__ = [
@@ -77,5 +76,4 @@ __all__ = [
     "StorageError",
     "TableNotFoundError",
     "UploadError",
-    "Watermark",
 ]

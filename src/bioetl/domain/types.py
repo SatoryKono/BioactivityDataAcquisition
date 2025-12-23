@@ -4,10 +4,8 @@ Implements RULES.md §1 - Domain Layer with pure types and value objects.
 No I/O operations allowed (REQ-ARCH-003).
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, NewType, Self, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -51,54 +49,6 @@ class SilverRecord(TypedDict, total=False):
     # Other fields are dynamic based on entity type
 
 
-@dataclass(frozen=True)
-class Watermark:
-    """Value object for checkpoint watermarks.
-
-    Supports multiple representations:
-    - Timestamp (datetime) for time-based incremental
-    - Offset (int) for cursor-based pagination
-    - ID (str) for entity-based watermarks
-    """
-
-    _value: str | datetime | int
-
-    @classmethod
-    def from_timestamp(cls, ts: datetime) -> Self:
-        return cls(_value=ts)
-
-    @classmethod
-    def from_offset(cls, offset: int) -> Self:
-        return cls(_value=offset)
-
-    @classmethod
-    def from_id(cls, entity_id: str) -> Self:
-        return cls(_value=entity_id)
-
-    def to_api_param(self) -> str:
-        if isinstance(self._value, datetime):
-            return self._value.isoformat()
-        return str(self._value)
-
-    @property
-    def value(self) -> str | datetime | int:
-        return self._value
-
-    def __str__(self) -> str:
-        return self.to_api_param()
-
-    def __int__(self) -> int:
-        if isinstance(self._value, int):
-            return self._value
-        try:
-            return int(self._value)  # type: ignore
-        except (ValueError, TypeError) as err:
-            # This might be risky if we assume it works, but useful for PubChem
-            raise ValueError(
-                f"Cannot convert Watermark value '{self._value}' to int"
-            ) from err
-
-
 class RunType(str, Enum):
     """Type of pipeline run (RULES.md §2.4).
 
@@ -106,7 +56,7 @@ class RunType(str, Enum):
     """
 
     INCREMENTAL = "incremental"
-    """Incremental load from last watermark."""
+    """Incremental load."""
 
     BACKFILL = "backfill"
     """Historical data backfill for specific date range."""

@@ -28,17 +28,7 @@ def mock_logger():
 
 
 @pytest.fixture
-def watermark_extractor():
-    """Create a simple watermark extractor."""
-
-    def extract(record):
-        return record.get("timestamp", "2025-01-01")
-
-    return extract
-
-
-@pytest.fixture
-def checkpoint_manager(mock_checkpoint_port, mock_logger, watermark_extractor):
+def checkpoint_manager(mock_checkpoint_port, mock_logger):
     """Create CheckpointManager instance."""
     return CheckpointManager(
         checkpoint_port=mock_checkpoint_port,
@@ -46,7 +36,6 @@ def checkpoint_manager(mock_checkpoint_port, mock_logger, watermark_extractor):
         pipeline_name="test_pipeline",
         run_id=RunID(uuid4()),
         resume=True,
-        watermark_extractor=watermark_extractor,
     )
 
 
@@ -54,9 +43,7 @@ def checkpoint_manager(mock_checkpoint_port, mock_logger, watermark_extractor):
 class TestCheckpointManagerInit:
     """Tests for CheckpointManager initialization."""
 
-    def test_init_with_all_params(
-        self, mock_checkpoint_port, mock_logger, watermark_extractor
-    ):
+    def test_init_with_all_params(self, mock_checkpoint_port, mock_logger):
         """Test initialization with all parameters."""
         run_id = RunID(uuid4())
         manager = CheckpointManager(
@@ -65,7 +52,6 @@ class TestCheckpointManagerInit:
             pipeline_name="my_pipeline",
             run_id=run_id,
             resume=False,
-            watermark_extractor=watermark_extractor,
         )
 
         assert manager._pipeline_name == "my_pipeline"
@@ -78,11 +64,10 @@ class TestCheckpointManagerLoadCheckpoint:
     """Tests for CheckpointManager.load_checkpoint method."""
 
     async def test_load_checkpoint_when_resume_true_and_exists(
-        self, mock_checkpoint_port, mock_logger, watermark_extractor
+        self, mock_checkpoint_port, mock_logger
     ):
         """Test load_checkpoint when resuming and checkpoint exists."""
         mock_checkpoint_port.load.return_value = (
-            "2025-01-15T00:00:00Z",
             RunID(uuid4()),
             {"records_processed": 1000},
         )
@@ -93,17 +78,16 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=RunID(uuid4()),
             resume=True,
-            watermark_extractor=watermark_extractor,
         )
 
         result = await manager.load_checkpoint()
 
-        assert result == "2025-01-15T00:00:00Z"
+        assert result is not None
         mock_checkpoint_port.load.assert_called_once_with("test_pipeline")
         mock_logger.info.assert_called()
 
     async def test_load_checkpoint_when_resume_true_but_no_checkpoint(
-        self, mock_checkpoint_port, mock_logger, watermark_extractor
+        self, mock_checkpoint_port, mock_logger
     ):
         """Test load_checkpoint when resuming but no checkpoint exists."""
         mock_checkpoint_port.load.return_value = None
@@ -114,7 +98,6 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=RunID(uuid4()),
             resume=True,
-            watermark_extractor=watermark_extractor,
         )
 
         result = await manager.load_checkpoint()
@@ -123,7 +106,7 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.assert_called_once()
 
     async def test_load_checkpoint_when_resume_false(
-        self, mock_checkpoint_port, mock_logger, watermark_extractor
+        self, mock_checkpoint_port, mock_logger
     ):
         """Test load_checkpoint when not resuming."""
         manager = CheckpointManager(
@@ -132,7 +115,6 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=RunID(uuid4()),
             resume=False,
-            watermark_extractor=watermark_extractor,
         )
 
         result = await manager.load_checkpoint()
@@ -145,36 +127,16 @@ class TestCheckpointManagerLoadCheckpoint:
 class TestCheckpointManagerSaveCheckpoint:
     """Tests for CheckpointManager.save_checkpoint method."""
 
-    async def test_save_checkpoint_extracts_watermark(
+    async def test_save_checkpoint_saves_metadata(
         self, checkpoint_manager, mock_checkpoint_port
     ):
-        """Test save_checkpoint extracts watermark from record."""
-        last_record = {"id": 123, "timestamp": "2025-01-20T12:00:00Z"}
-
-        await checkpoint_manager.save_checkpoint(
-            last_record=last_record,
-            records_processed=500,
-        )
+        """Test save_checkpoint saves metadata correctly."""
+        await checkpoint_manager.save_checkpoint(records_processed=500)
 
         mock_checkpoint_port.save.assert_called_once()
         call_kwargs = mock_checkpoint_port.save.call_args.kwargs
         assert call_kwargs["pipeline"] == "test_pipeline"
-        assert call_kwargs["watermark"] == "2025-01-20T12:00:00Z"
         assert call_kwargs["metadata"] == {"records_processed": 500}
-
-    async def test_save_checkpoint_with_default_watermark(
-        self, checkpoint_manager, mock_checkpoint_port
-    ):
-        """Test save_checkpoint uses default when timestamp missing."""
-        last_record = {"id": 456}  # No timestamp
-
-        await checkpoint_manager.save_checkpoint(
-            last_record=last_record,
-            records_processed=100,
-        )
-
-        call_kwargs = mock_checkpoint_port.save.call_args.kwargs
-        assert call_kwargs["watermark"] == "2025-01-01"  # Default value
 
 
 @pytest.mark.unit

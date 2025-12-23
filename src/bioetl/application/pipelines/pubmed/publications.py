@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-from bioetl.domain.types import Watermark
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -26,10 +25,3 @@ class PubMedPublicationsPipeline(BasePipeline):
     ) -> SilverRecord | None:
         """Трансформирует сырую XML-запись в формат Silver."""
         return await self._transformer.transform(context, record)
-
-    def extract_watermark(
-        self, _context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
-        """Extract PMID as watermark."""
-        pmid = record.get("pmid", "")
-        return Watermark.from_id(str(pmid))

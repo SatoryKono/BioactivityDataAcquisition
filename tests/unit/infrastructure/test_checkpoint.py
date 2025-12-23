@@ -1,11 +1,11 @@
 """Unit tests for local checkpointing."""
 
-from datetime import UTC, datetime
+import json
 from uuid import UUID
 
 import pytest
 
-from bioetl.domain.types import RunID, Watermark
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 
 
@@ -23,18 +23,15 @@ class TestLocalCheckpoint:
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
-        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
-        await cp.save(pipeline, watermark, run_id, {"key": "value"})
+        await cp.save(pipeline, run_id, {"key": "value"})
 
         checkpoint_file = tmp_path / "checkpoints" / "test_pipeline" / "latest.json"
         assert checkpoint_file.exists()
 
     async def test_load_returns_correct_data(self, tmp_path):
         """Test that load returns the correct data."""
-        import json
-
         # Create checkpoint file
         checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
         checkpoint_dir.mkdir(parents=True)
@@ -43,9 +40,9 @@ class TestLocalCheckpoint:
             json.dumps(
                 {
                     "pipeline": "test_pipeline",
-                    "watermark": "2023-01-01T00:00:00+00:00",
                     "run_id": "12345678-1234-5678-1234-567812345678",
                     "metadata": {"key": "value"},
+                    "version": "2.0",
                 }
             )
         )
@@ -55,9 +52,7 @@ class TestLocalCheckpoint:
         result = await cp.load("test_pipeline")
 
         assert result is not None
-        watermark, run_id, metadata = result
-        assert isinstance(watermark, Watermark)
-        assert isinstance(watermark.value, datetime)
+        run_id, metadata = result
         assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
         assert metadata == {"key": "value"}
 
@@ -74,23 +69,19 @@ class TestLocalCheckpoint:
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
-        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         metadata = {"key": "value"}
 
-        await cp.save(pipeline, watermark, run_id, metadata)
+        await cp.save(pipeline, run_id, metadata)
         result = await cp.load(pipeline)
 
         assert result is not None
-        loaded_watermark, loaded_run_id, loaded_metadata = result
-        assert isinstance(loaded_watermark, Watermark)
+        loaded_run_id, loaded_metadata = result
         assert loaded_run_id == run_id
         assert loaded_metadata == metadata
 
     async def test_delete_removes_file(self, tmp_path):
         """Test delete removes checkpoint file."""
-        import json
-
         # Create checkpoint file
         checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
         checkpoint_dir.mkdir(parents=True)
@@ -154,38 +145,6 @@ class TestLocalCheckpoint:
 
         assert result == []
 
-    async def test_watermark_offset_roundtrip(self, tmp_path):
-        """Test save/load with offset-based watermark."""
-        cp = LocalCheckpoint(base_path=tmp_path)
-
-        pipeline = "test_pipeline"
-        watermark = Watermark.from_offset(12345)
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-
-        await cp.save(pipeline, watermark, run_id, {})
-        result = await cp.load(pipeline)
-
-        assert result is not None
-        loaded_watermark, _, _ = result
-        assert isinstance(loaded_watermark.value, int)
-        assert loaded_watermark.value == 12345
-
-    async def test_watermark_id_roundtrip(self, tmp_path):
-        """Test save/load with ID-based watermark."""
-        cp = LocalCheckpoint(base_path=tmp_path)
-
-        pipeline = "test_pipeline"
-        watermark = Watermark.from_id("CHEMBL12345")
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-
-        await cp.save(pipeline, watermark, run_id, {})
-        result = await cp.load(pipeline)
-
-        assert result is not None
-        loaded_watermark, _, _ = result
-        assert isinstance(loaded_watermark.value, str)
-        assert loaded_watermark.value == "CHEMBL12345"
-
     async def test_aclose(self, tmp_path):
         """Test aclose completes without error."""
         cp = LocalCheckpoint(base_path=tmp_path)
@@ -197,19 +156,17 @@ class TestLocalCheckpoint:
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
-        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
         # First save
-        await cp.save(pipeline, watermark, run_id, {"version": 1})
+        await cp.save(pipeline, run_id, {"version": 1})
 
         # Second save should overwrite atomically
-        watermark2 = Watermark.from_timestamp(datetime(2023, 6, 1, tzinfo=UTC))
-        await cp.save(pipeline, watermark2, run_id, {"version": 2})
+        await cp.save(pipeline, run_id, {"version": 2})
 
         result = await cp.load(pipeline)
         assert result is not None
-        _, _, metadata = result
+        _, metadata = result
         assert metadata == {"version": 2}
 
         # No temp files should remain

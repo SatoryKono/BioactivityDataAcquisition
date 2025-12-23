@@ -17,7 +17,7 @@ from typing import Any
 import pubchempy as pcp
 
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import HealthStatus, Watermark
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -79,7 +79,6 @@ class PubChemClient(BaseSyncAdapter):
     async def fetch(
         self,
         entity_type: str,
-        watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: set[str] | None = None,
@@ -100,82 +99,20 @@ class PubChemClient(BaseSyncAdapter):
             )
 
         # Pass arguments as keyword to avoid signature mismatch
-        async for record in strategy(query=query, watermark=watermark, limit=limit):
+        async for record in strategy(query=query, limit=limit):
             yield record
-
-    async def _fetch_batch_safe(self, cid_batch: list[int]) -> list[Any]:
-        """Fetch a batch of CIDs safely using circuit breaker."""
-        try:
-            return await self.circuit_breaker.call(
-                self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
-            )
-        except Exception:
-            self.logger.error(
-                "pubchem compound batch fetch failed",
-                provider="pubchem",
-                operation="compound batch fetch",
-                batch_start=cid_batch[0],
-                batch_end=cid_batch[-1],
-            )
-            if self.strict_error_handling:
-                raise
-            return []
-
-    async def _fetch_compounds_incremental(
-        self, watermark: Watermark, limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds incrementally using a watermark."""
-        fetched = 0
-        start_cid = int(watermark) if watermark else 1
-        batch_size = 100
-        current_cid = start_cid
-        consecutive_empty = 0
-        max_consecutive_empty = 3  # Stop after 3 consecutive empty batches
-
-        while not limit or fetched < limit:
-            await self.rate_limiter.acquire()
-            cid_batch = list(range(current_cid, current_cid + batch_size))
-
-            compounds = await self._fetch_batch_safe(cid_batch)
-            if not compounds:
-                # Track consecutive empty results (from errors or no data)
-                consecutive_empty += 1
-                if consecutive_empty >= max_consecutive_empty:
-                    self.logger.warning(
-                        "Stopping incremental fetch after consecutive empty batches",
-                        consecutive_empty=consecutive_empty,
-                        current_cid=current_cid,
-                    )
-                    break
-            else:
-                consecutive_empty = 0  # Reset counter on successful fetch
-
-            for compound in compounds:
-                if limit and fetched >= limit:
-                    break
-                yield self._compound_to_dict(compound)
-                fetched += 1
-
-            current_cid += batch_size
 
     async def _fetch_compounds(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds from PubChem."""
-        if not query and watermark is None:
-            raise ValueError(
-                "Either query or watermark must be provided for compound fetch"
-            )
+        if not query:
+            raise ValueError("Query is required for compound fetch")
 
-        if query:
-            async for record in self._fetch_by_query(query, limit):
-                yield record
-        else:
-            async for record in self._fetch_compounds_incremental(watermark, limit):
-                yield record
+        async for record in self._fetch_by_query(query, limit):
+            yield record
 
     async def _fetch_by_query(
         self, query: str, limit: int | None
@@ -193,14 +130,11 @@ class PubChemClient(BaseSyncAdapter):
     async def _fetch_substances(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch substances from PubChem."""
         if not query:
             raise ValueError("Query is required for substance search")
-
-        # Watermark ignored
 
         fetched = 0
         await self.rate_limiter.acquire()
@@ -221,14 +155,11 @@ class PubChemClient(BaseSyncAdapter):
     async def _fetch_assays(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch assays from PubChem."""
         if not query:
             raise ValueError("Query is required for assay search")
-
-        # Watermark ignored
 
         fetched = 0
         await self.rate_limiter.acquire()

@@ -13,7 +13,7 @@ from bioetl.domain.ports import (
     QuarantinePort,
     StoragePort,
 )
-from bioetl.domain.types import BatchID, RunID, Watermark
+from bioetl.domain.types import BatchID, RunID
 
 
 @pytest.mark.unit
@@ -32,7 +32,7 @@ class TestDataSourcePortProtocol:
             async def __aexit__(self, exc_type, exc_val, exc_tb):
                 pass
 
-            async def fetch(self, _entity_type, _watermark=None, _limit=None):
+            async def fetch(self, _entity_type, _limit=None, _query=None):
                 yield {}
 
             async def health_check(self):
@@ -48,7 +48,7 @@ class TestDataSourcePortProtocol:
 
         class InvalidDataSource:
             # Missing provider_name
-            async def fetch(self, _entity_type, _watermark=None, _limit=None):
+            async def fetch(self, _entity_type, _limit=None, _query=None):
                 yield {}
 
             async def health_check(self):
@@ -75,9 +75,9 @@ class TestDataSourcePortProtocol:
                 pass
 
             async def fetch(
-                self, entity_type: str, watermark: Any = None, limit: int | None = None
+                self, entity_type: str, limit: int | None = None, query: str | None = None
             ):
-                yield {"data": entity_type, "watermark": watermark, "limit": limit}
+                yield {"data": entity_type, "limit": limit, "query": query}
 
             async def health_check(self):
                 from bioetl.domain.types import HealthStatus
@@ -92,7 +92,7 @@ class TestDataSourcePortProtocol:
         class InvalidFetchSignature:
             provider_name = "test"
 
-            # Missing watermark and limit
+            # Missing limit and query
             async def fetch(self, entity_type: str):
                 yield {}
 
@@ -235,7 +235,6 @@ class TestCheckpointPortProtocol:
             async def save(
                 self,
                 pipeline: str,
-                watermark: Watermark,
                 run_id: RunID,
                 metadata: dict[str, Any],
             ) -> None:
@@ -244,7 +243,7 @@ class TestCheckpointPortProtocol:
             async def load(
                 self,
                 pipeline: str,
-            ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
+            ) -> tuple[RunID, dict[str, Any]] | None:
                 return None
 
             async def list_all(self) -> list[str]:

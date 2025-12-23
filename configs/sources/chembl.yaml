@@ -3,8 +3,7 @@
 
 source:
     type: api
-    load_strategy: incremental
-    watermark_field: updated_on
+    load_strategy: full
     batch_size: 20
     provider_config:
         provider: chembl

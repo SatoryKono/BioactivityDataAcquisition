@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.types import BatchID, Watermark
+from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -57,25 +57,21 @@ class PipelineExecutor:
 
     async def execute(
         self,
-        watermark: Watermark | None,
         limit: int | None,
         query: str | None = None,
     ) -> None:
         batch: list[dict[str, Any]] = []
-        last_record: dict[str, Any] | None = None
 
         try:
-            async for raw_record in self._extract(watermark, limit, query):
+            async for raw_record in self._extract(limit, query):
                 if self._shutdown_signal.is_requested:
                     # Graceful shutdown: save where we stopped
-                    if last_record:
-                        await self._checkpoint_manager.save_checkpoint(
-                            last_record, self.records_fetched
-                        )
+                    await self._checkpoint_manager.save_checkpoint(
+                        self.records_fetched
+                    )
                     raise PipelineShutdownError("Shutdown during extraction")
 
                 batch.append(raw_record)
-                last_record = raw_record
                 self.records_fetched += 1
 
                 if len(batch) >= self.batch_size:
@@ -84,7 +80,7 @@ class PipelineExecutor:
 
                 if self.records_fetched % self.checkpoint_interval == 0:
                     await self._checkpoint_manager.save_checkpoint(
-                        raw_record, self.records_fetched
+                        self.records_fetched
                     )
 
             if batch:
@@ -92,17 +88,13 @@ class PipelineExecutor:
 
         except PipelineShutdownError:
             # Re-raise explicit shutdown signal
-            # If shutdown came from external signal (LockManager heartbeats etc),
-            # we should attempt to save checkpoint if we have a last record.
-            if last_record:
-                try:
-                    await self._checkpoint_manager.save_checkpoint(
-                        last_record, self.records_fetched
-                    )
-                except Exception:
-                    # Ignore errors during emergency checkpoint save
-                    # Cannot use contextlib.suppress here due to async context
-                    pass
+            try:
+                await self._checkpoint_manager.save_checkpoint(
+                    self.records_fetched
+                )
+            except Exception:
+                # Ignore errors during emergency checkpoint save
+                pass
             raise
 
     async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:
@@ -115,11 +107,10 @@ class PipelineExecutor:
         self.records_quarantined += result.quarantined_count
 
     async def _extract(
-        self, watermark: Watermark | None, limit: int | None, query: str | None = None
+        self, limit: int | None, query: str | None = None
     ) -> AsyncIterator[dict[str, Any]]:
         async for record in self._data_source.fetch(
             entity_type=self._entity_type,
-            watermark=watermark,
             limit=limit,
             query=query,
         ):

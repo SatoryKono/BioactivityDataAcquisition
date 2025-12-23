@@ -103,7 +103,7 @@ class BatchLineage:
         layer: Data layer (bronze, silver, gold)
         record_count: Number of records in batch
         file_path: Storage path for batch
-        watermark: Watermark value after this batch
+        watermark: Optional position marker (deprecated, kept for lineage compatibility)
         metadata: Additional metadata
         timestamp: Batch ingestion timestamp
     """
@@ -179,7 +179,7 @@ class LineageTracker:
             entity_type: Entity type
             record_count: Number of records
             file_path: Storage location
-            watermark: Current watermark value
+            watermark: Optional position marker (deprecated)
             metadata: Additional metadata
         """
         batch = BatchLineage(

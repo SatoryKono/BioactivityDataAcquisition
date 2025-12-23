@@ -39,7 +39,6 @@ class TestPipelineConfig:
         assert config.batch_size == 100
         assert config.checkpoint_interval == 1000
         assert config.fields == []
-        assert config.watermark_field is None
         assert isinstance(config.dq, DQConfig)
 
     def test_custom_batch_size(self) -> None:
@@ -95,19 +94,6 @@ class TestPipelineConfig:
         )
 
         assert config.fields == ["field1", "field2", "field3"]
-
-    def test_watermark_field(self) -> None:
-        """Test watermark field configuration."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            watermark_field="updated_at",
-        )
-
-        assert config.watermark_field == "updated_at"
 
     def test_lock_key_property(self) -> None:
         """Test lock_key property generation."""
@@ -261,7 +247,6 @@ class TestPipelineConfig:
                 "standard_value",
                 "pchembl_value",
             ],
-            watermark_field="modified_on",
             dq=dq,
         )
 
@@ -274,7 +259,6 @@ class TestPipelineConfig:
         assert config.batch_size == 250
         assert config.checkpoint_interval == 2500
         assert len(config.fields) == 4
-        assert config.watermark_field == "modified_on"
         assert config.dq.soft_fail_threshold == 0.02
         assert config.lock_key == "pipeline:chembl_activity"
 
