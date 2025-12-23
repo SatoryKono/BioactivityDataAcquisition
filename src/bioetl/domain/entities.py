@@ -278,6 +278,7 @@ class Target(BaseEntity):
 
     # Complex fields (JSON serialized)
     target_components: str | None = None  # JSON string of array
+    target_component_synonyms: str | None = None  # JSON string of aggregated synonyms
     cross_references: str | None = None  # JSON string of array
 
     # Flattened component fields (aggregated lists)
