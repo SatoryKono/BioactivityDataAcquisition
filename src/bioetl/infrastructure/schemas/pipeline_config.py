@@ -51,11 +51,7 @@ class CsvExportConfig(BaseModel):
 
 
 class InputFilterConfig(BaseModel):
-    """Configuration for input ID filtering from CSV.
-
-    Allows filtering API requests by IDs loaded from a CSV file.
-    CLI options can override these defaults.
-    """
+    """Configuration for input ID filtering from CSV."""
 
     enabled: bool = False
     source_path: str | None = Field(
@@ -98,36 +94,39 @@ class SourceConfig(BaseModel):
     api: ApiConfig = Field(default_factory=ApiConfig)
 
 
+class SortByConfig(BaseModel):
+    """Configuration for deterministic sorting.
+
+    Example YAML:
+        sort_by:
+          columns: [target_chembl_id, pref_name]
+          ascending: true
+    """
+
+    columns: list[str] = Field(default_factory=list)
+    ascending: bool = True
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
 
     enabled: bool = True
     path: str | None = None
     format: Literal["jsonl", "delta", "parquet"] = "delta"
-    mode: str | None = None  # Validated by specific layer validators
-    save_json: bool = False  # For Bronze layer: save uncompressed JSON copy
+    mode: str | None = None
+    save_json: bool = False
     csv_export: CsvExportConfig = Field(default_factory=CsvExportConfig)
+    # Deterministic write settings
+    primary_key: list[str] = Field(default_factory=list)
+    partition_by: list[str] = Field(default_factory=list)
+    sort_by: SortByConfig = Field(default_factory=SortByConfig)
+    deterministic: bool = Field(
+        default=True, description="Enable deterministic write order"
+    )
 
 
 class GoldFiltersConfig(BaseModel):
-    """Schema для gold_filters в YAML.
-
-    Позволяет конфигурировать фильтры Gold слоя:
-    - columns: колонки с допустимыми значениями (оператор "in")
-    - required_fields: обязательные поля (не null)
-    - exclude_if_present: исключающие поля
-
-    Пример YAML:
-        gold_filters:
-          columns:
-            standard_type: [IC50, Ki]
-            assay_type: [B, F]
-          required_fields:
-            - standard_value
-            - target_chembl_id
-          exclude_if_present:
-            - data_validity_comment
-    """
+    """Schema for gold_filters in YAML."""
 
     columns: dict[str, list[str]] = Field(default_factory=dict)
     required_fields: list[str] = Field(default_factory=list)
@@ -135,10 +134,7 @@ class GoldFiltersConfig(BaseModel):
 
 
 class PipelineYamlConfig(BaseModel):
-    """Strict schema for pipeline YAML configuration.
-
-    Enforces rules from RULES.md.
-    """
+    """Strict schema for pipeline YAML configuration."""
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
@@ -147,11 +143,9 @@ class PipelineYamlConfig(BaseModel):
     entity_type: str
     version: str = "v1"
 
-    # Execution parameters
     batch_size: int = Field(default=100, ge=1, le=5000)
     checkpoint_interval: int = Field(default=1000, ge=100)
 
-    # DQ & Reliability
     dq_rules: DQConfig = Field(
         default_factory=DQConfig,
         validation_alias=AliasChoices("dq_rules", "dq"),
@@ -159,19 +153,13 @@ class PipelineYamlConfig(BaseModel):
     )
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
 
-    # Storage
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
-    # Medallion Layers
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
-
-    # Source Config
     source: SourceConfig = Field(default_factory=SourceConfig)
-
-    # Input Filter Config (for CSV-based ID filtering)
     input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
 
     @field_validator("batch_size")
