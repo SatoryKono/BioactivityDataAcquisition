@@ -298,6 +298,37 @@ class Target(BaseEntity):
 
 
 @dataclass(frozen=True, kw_only=True)
+class TargetComponent(BaseEntity):
+    """Represents a target component (ChEMBL Target Component).
+
+    Contains all fields from ChEMBL target_component API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/target_component
+    """
+
+    # Primary identifier
+    component_id: int
+
+    # Core metadata
+    accession: str | None = None
+    component_type: str | None = None
+    description: str | None = None
+    organism: str | None = None
+    tax_id: int | None = None
+
+    # Complex fields (JSON serialized)
+    target_component_synonyms: str | None = None  # JSON string of list
+    target_component_xrefs: str | None = None  # JSON string of list
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.component_id:
+            raise ValueError("Component ID is required")
+
+
+@dataclass(frozen=True, kw_only=True)
 class Molecule(BaseEntity):
     """Represents a chemical compound (ChEMBL Molecule).
 

@@ -213,6 +213,32 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Target Component
+# See: https://www.ebi.ac.uk/chembl/api/data/target_component
+CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("component_id", pa.int64()),
+        # Core metadata
+        pa.field("accession", pa.string()),
+        pa.field("component_type", pa.string()),
+        pa.field("description", pa.string()),
+        pa.field("organism", pa.string()),
+        pa.field("tax_id", pa.int64()),
+        # Complex fields (JSON strings)
+        pa.field("target_component_synonyms", pa.string()),
+        pa.field("target_component_xrefs", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+    ]
+)
+
 # Schema for ChEMBL Document
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 CHEMBL_DOCUMENT_SCHEMA = pa.schema(
