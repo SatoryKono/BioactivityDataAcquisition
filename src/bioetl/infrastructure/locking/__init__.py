@@ -1,9 +1,9 @@
-"""Distributed locking implementations.
+"""Locking implementations for local development.
 
 Provides:
-- RedisDistributedLock: Redis-based distributed lock with heartbeat
+- MemoryLock: In-memory lock for single-process local development
 """
 
-from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
-__all__ = ["RedisDistributedLock"]
+__all__ = ["MemoryLock"]

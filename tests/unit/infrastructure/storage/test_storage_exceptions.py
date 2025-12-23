@@ -1,31 +1,18 @@
 """Unit tests for the storage exception hierarchy."""
 
 import asyncio
-from datetime import datetime
 from unittest.mock import MagicMock, patch
-from uuid import UUID
 
 import pytest
-from botocore.exceptions import ClientError
 from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
 from bioetl.domain.exceptions import (
-    BucketNotFoundError,
     MergeConflictError,
     SchemaViolationError,
 )
 from bioetl.domain.exceptions import TableNotFoundError as CustomTableNotFoundError
-from bioetl.domain.exceptions import (
-    UploadError,
-)
-from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-
-# Default test run metadata
-TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
-TEST_RUN_TYPE = RunType.INCREMENTAL
 
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
@@ -35,84 +22,6 @@ def make_sync_executor(loop: asyncio.AbstractEventLoop):
         return fn(*args)
 
     return sync_executor
-
-
-@pytest.fixture
-def mock_s3_client():
-    """Fixture for a mocked boto3 S3 client."""
-    return MagicMock()
-
-
-@pytest.fixture
-def bronze_writer(mock_s3_client):
-    """Fixture for a BronzeWriter with a mocked S3 client."""
-    with patch(
-        "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
-    ) as mock_get_client:
-        mock_get_client.return_value = mock_s3_client
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        # Inject the mock client directly to ensure it's used during tests
-        writer.s3_client = mock_s3_client
-        yield writer
-
-
-class TestBronzeWriterExceptions:
-    """Tests for exception handling in BronzeWriter."""
-
-    @pytest.mark.asyncio
-    async def test_write_bronze_raises_bucket_not_found(
-        self, bronze_writer, mock_s3_client
-    ):
-        """Test that BucketNotFoundError is raised for 'NoSuchBucket' error."""
-        # Make run_in_executor execute synchronously for testing
-        bronze_writer.loop = asyncio.get_event_loop()
-        bronze_writer.loop.run_in_executor = make_sync_executor(bronze_writer.loop)
-
-        mock_s3_client.put_object.side_effect = ClientError(
-            {"Error": {"Code": "NoSuchBucket"}}, "PutObject"
-        )
-        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-        with pytest.raises(BucketNotFoundError):
-            await bronze_writer.write_bronze(
-                iter([b"{}"]),
-                "p",
-                "e",
-                datetime.now(),
-                batch_id,
-                run_id=run_id,
-                run_type=RunType.INCREMENTAL,
-            )
-
-    @pytest.mark.asyncio
-    async def test_write_bronze_raises_upload_error(
-        self, bronze_writer, mock_s3_client
-    ):
-        """Test that UploadError is raised for other client errors."""
-        # Make run_in_executor execute synchronously for testing
-        bronze_writer.loop = asyncio.get_event_loop()
-        bronze_writer.loop.run_in_executor = make_sync_executor(bronze_writer.loop)
-
-        mock_s3_client.put_object.side_effect = ClientError(
-            {"Error": {"Code": "AccessDenied"}}, "PutObject"
-        )
-        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-        with pytest.raises(UploadError):
-            await bronze_writer.write_bronze(
-                iter([b"{}"]),
-                "p",
-                "e",
-                datetime.now(),
-                batch_id,
-                run_id=run_id,
-                run_type=RunType.INCREMENTAL,
-            )
 
 
 @pytest.fixture

@@ -1,249 +1,26 @@
-"""Unit tests for checkpointing."""
+"""Unit tests for local checkpointing."""
 
-import asyncio
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
-from botocore.exceptions import ClientError
 
 from bioetl.domain.types import RunID, Watermark
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-
-
-def make_sync_executor(loop: asyncio.AbstractEventLoop):
-    """Create a run_in_executor replacement that returns awaitable sync results."""
-
-    async def sync_executor(_, fn, *args):
-        return fn(*args)
-
-    return sync_executor
-
-
-@pytest.fixture
-def mock_s3_client():
-    """Fixture for a mocked S3 client via S3ClientPool."""
-    mock_s3 = MagicMock()
-    with patch(
-        "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
-    ) as mock_get_client:
-        mock_get_client.return_value = mock_s3
-        yield mock_s3
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 
 
 @pytest.mark.unit
-class TestS3Checkpoint:
-    """Test S3Checkpoint functionality."""
+class TestLocalCheckpoint:
+    """Test LocalCheckpoint functionality."""
 
-    @pytest.mark.usefixtures("mock_s3_client")
-    def test_s3_checkpoint_initialization(self):
-        """Test S3Checkpoint can be initialized."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        assert cp.bucket == "test-bucket"
+    def test_local_checkpoint_initialization(self, tmp_path):
+        """Test LocalCheckpoint can be initialized."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+        assert cp.base_path == tmp_path
 
-    async def test_save_generates_correct_key_and_body(self, mock_s3_client):
-        """Test that save generates the correct S3 key and body."""
-        # Mock head_object to return no existing checkpoint
-        mock_s3_client.head_object.side_effect = ClientError(
-            {"Error": {"Code": "404"}}, "HeadObject"
-        )
-
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        # Inject the mock client
-        cp.s3_client = mock_s3_client
-        # Make run_in_executor execute synchronously for testing
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        pipeline = "test_pipeline"
-        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-        metadata = {"key": "value"}
-
-        await cp.save(pipeline, watermark, run_id, metadata)
-
-        expected_key = "checkpoints/test_pipeline/latest.json"
-        mock_s3_client.put_object.assert_called_once()
-        _args, kwargs = mock_s3_client.put_object.call_args
-        assert kwargs["Bucket"] == "test-bucket"
-        assert kwargs["Key"] == expected_key
-        # Body is a JSON string
-        body = kwargs["Body"].decode("utf-8")
-        assert "2023-01-01T00:00:00" in body
-        assert "12345678-1234-5678-1234-567812345678" in body
-
-    async def test_load_returns_correct_data(self, mock_s3_client):
-        """Test that load returns the correct data."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        # Inject the mock client
-        cp.s3_client = mock_s3_client
-        # Make run_in_executor execute synchronously for testing
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        pipeline = "test_pipeline"
-        json_body = b'{"watermark": "2023-01-01T00:00:00+00:00", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {}}'
-        mock_body = MagicMock()
-        mock_body.read.return_value = json_body
-        mock_s3_client.get_object.return_value = {"Body": mock_body}
-
-        result = await cp.load(pipeline)
-
-        assert result is not None
-        watermark, run_id, _metadata = result
-        # Watermark is returned as a proper Watermark type
-        assert isinstance(watermark, Watermark)
-        assert isinstance(watermark.value, datetime)
-        assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
-
-    async def test_load_nonexistent_checkpoint_returns_none(self, mock_s3_client):
-        """Test that loading a nonexistent checkpoint returns None."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        # Inject the mock client
-        cp.s3_client = mock_s3_client
-        # Make run_in_executor execute synchronously for testing
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        pipeline = "test_pipeline"
-        mock_s3_client.get_object.side_effect = ClientError(
-            {"Error": {"Code": "NoSuchKey"}}, "GetObject"
-        )
-
-        result = await cp.load(pipeline)
-
-        assert result is None
-
-    async def test_delete_calls_s3_delete_object(self, mock_s3_client):
-        """Test that delete calls s3:deleteObject."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        # Inject the mock client
-        cp.s3_client = mock_s3_client
-        # Make run_in_executor execute synchronously for testing
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        pipeline = "test_pipeline"
-
-        await cp.delete(pipeline)
-
-        expected_key = "checkpoints/test_pipeline/latest.json"
-        mock_s3_client.delete_object.assert_called_once_with(
-            Bucket="test-bucket", Key=expected_key
-        )
-
-    async def test_exists_returns_true(self, mock_s3_client):
-        """Test that exists returns True when checkpoint exists."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        cp.s3_client = mock_s3_client
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        # head_object succeeds = checkpoint exists
-        mock_s3_client.head_object.return_value = {"ETag": '"abc123"'}
-
-        result = await cp.exists("test_pipeline")
-
-        assert result is True
-
-    async def test_exists_returns_false(self, mock_s3_client):
-        """Test that exists returns False when checkpoint doesn't exist."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        cp.s3_client = mock_s3_client
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        mock_s3_client.head_object.side_effect = ClientError(
-            {"Error": {"Code": "NoSuchKey"}}, "HeadObject"
-        )
-
-        result = await cp.exists("test_pipeline")
-
-        assert result is False
-
-    async def test_save_with_existing_etag(self, mock_s3_client):
-        """Test that save uses If-Match when ETag exists."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        cp.s3_client = mock_s3_client
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
-
-        # head_object returns existing ETag
-        mock_s3_client.head_object.return_value = {"ETag": '"abc123"'}
-
-        pipeline = "test_pipeline"
-        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-
-        await cp.save(pipeline, watermark, run_id, {})
-
-        # Should have called put_object with IfMatch
-        mock_s3_client.put_object.assert_called_once()
-        call_kwargs = mock_s3_client.put_object.call_args[1]
-        assert call_kwargs.get("IfMatch") == "abc123"
-
-    async def test_aclose(self, mock_s3_client):
-        """Test aclose completes without error."""
-        cp = S3Checkpoint(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        await cp.aclose()
-        # Should complete without error
-
-
-@pytest.mark.unit
-class TestS3CheckpointLocal:
-    """Tests for S3Checkpoint in local mode."""
-
-    async def test_save_local_creates_file(self, tmp_path):
-        """Test save creates checkpoint file locally."""
-        cp = S3Checkpoint(bucket=str(tmp_path))
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
+    async def test_save_creates_file(self, tmp_path):
+        """Test save creates checkpoint file."""
+        cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
         watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
@@ -254,8 +31,8 @@ class TestS3CheckpointLocal:
         checkpoint_file = tmp_path / "checkpoints" / "test_pipeline" / "latest.json"
         assert checkpoint_file.exists()
 
-    async def test_load_local_reads_file(self, tmp_path):
-        """Test load reads checkpoint from local file."""
+    async def test_load_returns_correct_data(self, tmp_path):
+        """Test that load returns the correct data."""
         import json
 
         # Create checkpoint file
@@ -268,34 +45,50 @@ class TestS3CheckpointLocal:
                     "pipeline": "test_pipeline",
                     "watermark": "2023-01-01T00:00:00+00:00",
                     "run_id": "12345678-1234-5678-1234-567812345678",
-                    "metadata": {},
+                    "metadata": {"key": "value"},
                 }
             )
         )
 
-        cp = S3Checkpoint(bucket=str(tmp_path))
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
+        cp = LocalCheckpoint(base_path=tmp_path)
 
         result = await cp.load("test_pipeline")
 
         assert result is not None
-        watermark, _run_id, _ = result
+        watermark, run_id, metadata = result
         assert isinstance(watermark, Watermark)
         assert isinstance(watermark.value, datetime)
+        assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
+        assert metadata == {"key": "value"}
 
-    async def test_load_local_nonexistent_returns_none(self, tmp_path):
-        """Test load returns None for nonexistent local checkpoint."""
-        cp = S3Checkpoint(bucket=str(tmp_path))
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
+    async def test_load_nonexistent_returns_none(self, tmp_path):
+        """Test load returns None for nonexistent checkpoint."""
+        cp = LocalCheckpoint(base_path=tmp_path)
 
         result = await cp.load("nonexistent_pipeline")
 
         assert result is None
 
-    async def test_delete_local_removes_file(self, tmp_path):
-        """Test delete removes local checkpoint file."""
+    async def test_save_and_load_roundtrip(self, tmp_path):
+        """Test save and load roundtrip."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        pipeline = "test_pipeline"
+        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+        metadata = {"key": "value"}
+
+        await cp.save(pipeline, watermark, run_id, metadata)
+        result = await cp.load(pipeline)
+
+        assert result is not None
+        loaded_watermark, loaded_run_id, loaded_metadata = result
+        assert isinstance(loaded_watermark, Watermark)
+        assert loaded_run_id == run_id
+        assert loaded_metadata == metadata
+
+    async def test_delete_removes_file(self, tmp_path):
+        """Test delete removes checkpoint file."""
         import json
 
         # Create checkpoint file
@@ -304,36 +97,122 @@ class TestS3CheckpointLocal:
         checkpoint_file = checkpoint_dir / "latest.json"
         checkpoint_file.write_text(json.dumps({"pipeline": "test"}))
 
-        cp = S3Checkpoint(bucket=str(tmp_path))
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
+        cp = LocalCheckpoint(base_path=tmp_path)
 
         await cp.delete("test_pipeline")
 
         assert not checkpoint_file.exists()
 
-    async def test_exists_local_returns_true(self, tmp_path):
-        """Test exists returns True for local checkpoint."""
+    async def test_delete_nonexistent_no_error(self, tmp_path):
+        """Test delete doesn't raise error for nonexistent checkpoint."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        # Should not raise
+        await cp.delete("nonexistent_pipeline")
+
+    async def test_exists_returns_true(self, tmp_path):
+        """Test exists returns True for existing checkpoint."""
         # Create checkpoint file
         checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
         checkpoint_dir.mkdir(parents=True)
         checkpoint_file = checkpoint_dir / "latest.json"
         checkpoint_file.write_text("{}")
 
-        cp = S3Checkpoint(bucket=str(tmp_path))
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
+        cp = LocalCheckpoint(base_path=tmp_path)
 
         result = await cp.exists("test_pipeline")
 
         assert result is True
 
-    async def test_exists_local_returns_false(self, tmp_path):
-        """Test exists returns False for nonexistent local checkpoint."""
-        cp = S3Checkpoint(bucket=str(tmp_path))
-        cp.loop = asyncio.get_event_loop()
-        cp.loop.run_in_executor = make_sync_executor(cp.loop)
+    async def test_exists_returns_false(self, tmp_path):
+        """Test exists returns False for nonexistent checkpoint."""
+        cp = LocalCheckpoint(base_path=tmp_path)
 
         result = await cp.exists("nonexistent_pipeline")
 
         assert result is False
+
+    async def test_list_all_pipelines(self, tmp_path):
+        """Test list_all returns all pipelines with checkpoints."""
+        # Create checkpoint directories
+        for name in ["pipeline_a", "pipeline_b", "pipeline_c"]:
+            checkpoint_dir = tmp_path / "checkpoints" / name
+            checkpoint_dir.mkdir(parents=True)
+            (checkpoint_dir / "latest.json").write_text("{}")
+
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        result = await cp.list_all()
+
+        assert result == ["pipeline_a", "pipeline_b", "pipeline_c"]
+
+    async def test_list_all_empty(self, tmp_path):
+        """Test list_all returns empty list when no checkpoints."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        result = await cp.list_all()
+
+        assert result == []
+
+    async def test_watermark_offset_roundtrip(self, tmp_path):
+        """Test save/load with offset-based watermark."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        pipeline = "test_pipeline"
+        watermark = Watermark.from_offset(12345)
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+
+        await cp.save(pipeline, watermark, run_id, {})
+        result = await cp.load(pipeline)
+
+        assert result is not None
+        loaded_watermark, _, _ = result
+        assert isinstance(loaded_watermark.value, int)
+        assert loaded_watermark.value == 12345
+
+    async def test_watermark_id_roundtrip(self, tmp_path):
+        """Test save/load with ID-based watermark."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        pipeline = "test_pipeline"
+        watermark = Watermark.from_id("CHEMBL12345")
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+
+        await cp.save(pipeline, watermark, run_id, {})
+        result = await cp.load(pipeline)
+
+        assert result is not None
+        loaded_watermark, _, _ = result
+        assert isinstance(loaded_watermark.value, str)
+        assert loaded_watermark.value == "CHEMBL12345"
+
+    async def test_aclose(self, tmp_path):
+        """Test aclose completes without error."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+        await cp.aclose()
+        # Should complete without error
+
+    async def test_atomic_write(self, tmp_path):
+        """Test that writes are atomic (temp file + rename)."""
+        cp = LocalCheckpoint(base_path=tmp_path)
+
+        pipeline = "test_pipeline"
+        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+
+        # First save
+        await cp.save(pipeline, watermark, run_id, {"version": 1})
+
+        # Second save should overwrite atomically
+        watermark2 = Watermark.from_timestamp(datetime(2023, 6, 1, tzinfo=UTC))
+        await cp.save(pipeline, watermark2, run_id, {"version": 2})
+
+        result = await cp.load(pipeline)
+        assert result is not None
+        _, _, metadata = result
+        assert metadata == {"version": 2}
+
+        # No temp files should remain
+        checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
+        temp_files = list(checkpoint_dir.glob(".checkpoint_*.tmp"))
+        assert len(temp_files) == 0

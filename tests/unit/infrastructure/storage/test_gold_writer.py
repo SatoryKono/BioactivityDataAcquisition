@@ -57,16 +57,18 @@ class TestGoldWriterInit:
         writer = GoldWriter(base_path="s3://bucket/gold/")
         assert writer.base_path == "s3://bucket/gold"
 
-    def test_init_with_storage_options(self):
-        """Test initialization with storage options."""
-        opts = {"AWS_ENDPOINT_URL": "http://localhost:9000"}
-        writer = GoldWriter(base_path="s3://bucket", storage_options=opts)
-        assert writer.storage_options == opts
+    def test_init_with_csv_exporter(self):
+        """Test initialization with CSV exporter."""
+        from unittest.mock import MagicMock
 
-    def test_init_without_storage_options(self):
-        """Test initialization without storage options."""
-        writer = GoldWriter(base_path="s3://bucket")
-        assert writer.storage_options == {}
+        mock_exporter = MagicMock()
+        writer = GoldWriter(base_path="/tmp/gold", csv_exporter=mock_exporter)
+        assert writer.csv_exporter is mock_exporter
+
+    def test_init_without_csv_exporter(self):
+        """Test initialization without CSV exporter."""
+        writer = GoldWriter(base_path="/tmp/gold")
+        assert writer.csv_exporter is None
 
 
 @pytest.mark.unit

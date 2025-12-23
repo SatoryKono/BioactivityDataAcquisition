@@ -14,13 +14,8 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pytest
-
-if TYPE_CHECKING:
-    import boto3
-    import redis.asyncio as aioredis
 
 
 # Конфигурация E2E сервисов
@@ -149,17 +144,20 @@ def e2e_temp_storage(tmp_path: Path) -> dict[str, Path]:
     silver_path = tmp_path / "silver"
     gold_path = tmp_path / "gold"
     checkpoints_path = tmp_path / "checkpoints"
+    quarantine_path = tmp_path / "quarantine"
 
     bronze_path.mkdir()
     silver_path.mkdir()
     gold_path.mkdir()
     checkpoints_path.mkdir()
+    quarantine_path.mkdir()
 
     return {
         "bronze": bronze_path,
         "silver": silver_path,
         "gold": gold_path,
         "checkpoints": checkpoints_path,
+        "quarantine": quarantine_path,
     }
 
 
@@ -178,6 +176,42 @@ async def e2e_cleanup_infrastructure(e2e_redis_client):
     except ImportError:
         pass
 
+    try:
+        from bioetl.infrastructure.config import get_pipeline_config, get_settings
+        get_settings.cache_clear()
+        get_pipeline_config.cache_clear()
+    except ImportError:
+        pass
+
+
+@pytest.fixture
+def e2e_data_dir(tmp_path: Path, monkeypatch) -> Path:
+    """Создание временной директории данных с настройкой окружения."""
+    data_dir = tmp_path / "bioetl_data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create subdirectories
+    (data_dir / "bronze").mkdir()
+    (data_dir / "silver").mkdir()
+    (data_dir / "gold").mkdir()
+    (data_dir / "checkpoints").mkdir()
+    (data_dir / "quarantine").mkdir()
+
+    # Set environment variable
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+
+    # Clear settings cache
+    try:
+        from bioetl.infrastructure.config import get_pipeline_config, get_settings
+
+        get_settings.cache_clear()
+        get_pipeline_config.cache_clear()
+    except ImportError:
+        pass
+
+    yield data_dir
+
+    # Cleanup
     try:
         from bioetl.infrastructure.config import get_pipeline_config, get_settings
         get_settings.cache_clear()

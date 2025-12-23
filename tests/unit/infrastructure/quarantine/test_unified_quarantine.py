@@ -74,12 +74,9 @@ class TestQuoteLiteral:
 
 
 @pytest.fixture
-def quarantine():
+def quarantine(tmp_path):
     """Create a UnifiedQuarantine instance."""
-    return UnifiedQuarantine(
-        base_path="s3://test-bucket/quarantine",
-        storage_options={"AWS_REGION": "us-east-1"},
-    )
+    return UnifiedQuarantine(base_path=str(tmp_path / "quarantine"))
 
 
 @pytest.fixture
@@ -115,16 +112,10 @@ class TestUnifiedQuarantineInit:
         q = UnifiedQuarantine(base_path="s3://bucket/path/")
         assert q.base_path == "s3://bucket/path"
 
-    def test_init_with_storage_options(self):
-        """Test initialization with storage options."""
-        opts = {"AWS_ENDPOINT_URL": "http://localhost:9000"}
-        q = UnifiedQuarantine(base_path="s3://bucket", storage_options=opts)
-        assert q.storage_options == opts
-
-    def test_init_without_storage_options(self):
-        """Test initialization without storage options."""
-        q = UnifiedQuarantine(base_path="s3://bucket")
-        assert q.storage_options == {}
+    def test_init_stores_base_path(self):
+        """Test initialization stores base path."""
+        q = UnifiedQuarantine(base_path="/tmp/quarantine")
+        assert q.base_path == "/tmp/quarantine"
 
 
 @pytest.mark.unit

@@ -41,6 +41,7 @@ class UnifiedQuarantine:
 
     All pipelines write to the same `common.quarantine` table.
     Implements QuarantinePort interface from domain/ports.py.
+    Local filesystem storage only.
     """
 
     # Maximum payload size (64KB)
@@ -49,11 +50,9 @@ class UnifiedQuarantine:
     def __init__(
         self,
         base_path: str,
-        storage_options: dict[str, str] | None = None,
     ) -> None:
-        """Initialize unified quarantine."""
+        """Initialize unified quarantine for local filesystem."""
         self.base_path = base_path.rstrip("/")
-        self.storage_options = storage_options or {}
 
     async def write(
         self,
@@ -113,7 +112,6 @@ class UnifiedQuarantine:
                 table_or_uri=self.base_path,
                 data=arrow_reader,
                 mode="append",
-                storage_options=self.storage_options,
             )
         except TableNotFoundError:
             arrow_reader = pa.RecordBatchReader.from_batches(
@@ -124,7 +122,6 @@ class UnifiedQuarantine:
                 data=arrow_reader,
                 mode="append",
                 partition_by=["pipeline"],
-                storage_options=self.storage_options,
             )
 
     async def inspect(
@@ -136,7 +133,7 @@ class UnifiedQuarantine:
     ) -> list[dict[str, Any]]:
         """Inspect quarantine records."""
         return inspect_records(
-            self.base_path, self.storage_options, pipeline, limit, error_code, dq_status
+            self.base_path, None, pipeline, limit, error_code, dq_status
         )
 
     def replay(
@@ -147,19 +144,19 @@ class UnifiedQuarantine:
     ) -> Iterator[dict[str, Any]]:
         """Replay quarantine records for reprocessing."""
         return replay_records(
-            self.base_path, self.storage_options, pipeline, error_code, max_age_days
+            self.base_path, None, pipeline, error_code, max_age_days
         )
 
     def purge(self, pipeline: str, older_than_days: int = 30) -> int:
         """Purge old quarantine records."""
         return purge_records(
-            self.base_path, self.storage_options, pipeline, older_than_days
+            self.base_path, None, pipeline, older_than_days
         )
 
     def update_status(self, payload_hash: str, new_status: DQStatus) -> bool:
         """Update DQ status for a quarantined record."""
         try:
-            dt = DeltaTable(self.base_path, storage_options=self.storage_options)
+            dt = DeltaTable(self.base_path)
         except TableNotFoundError:
             return False
 
@@ -177,7 +174,7 @@ class UnifiedQuarantine:
 
     async def get_stats(self, pipeline: str) -> dict[str, Any]:
         """Get quarantine statistics for a pipeline."""
-        return get_statistics(self.base_path, self.storage_options, pipeline)
+        return get_statistics(self.base_path, None, pipeline)
 
     async def aclose(self) -> None:
         """Close resources."""
