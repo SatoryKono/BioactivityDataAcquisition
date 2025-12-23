@@ -8,17 +8,14 @@ Uses chembl_webresource_client library for API access.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import ChemblApiError
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
-
-logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
@@ -65,11 +62,13 @@ class ChemblAdapter(BaseHttpAdapter):
 
     Args:
         http_client: UnifiedHTTPClient instance
+        logger: LoggerPort instance for structured logging
         batch_size: Number of records per API request (default: 1000)
         thread_pool: ThreadPoolExecutor for sync operations
     """
 
     http_client: UnifiedHTTPClient
+    logger: LoggerPort
     batch_size: int = 1000
     thread_pool: ThreadPoolExecutor | None = None
 
@@ -181,8 +180,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """Handle fetch errors."""
         self._consecutive_errors += 1
         self._update_health()
-        log_adapter_error(
-            logger,
+        self.logger.error(
+            "chembl fetch failed",
             provider="chembl",
             operation="fetch",
             error=str(e),

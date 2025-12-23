@@ -6,7 +6,7 @@ Implements Abstract Factory pattern for data sources.
 import importlib
 from typing import TYPE_CHECKING, Any, ClassVar
 
-from bioetl.domain.ports import DataSourcePort
+from bioetl.domain.ports import DataSourcePort, LoggerPort
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -26,6 +26,7 @@ class DataSourceFactory:
         cls,
         provider: str,
         http_client: "UnifiedHTTPClient | None" = None,
+        logger: LoggerPort | None = None,
         **kwargs: Any,
     ) -> DataSourcePort:
         """Create a data source adapter.
@@ -33,6 +34,7 @@ class DataSourceFactory:
         Args:
             provider: The name of the data provider (e.g., 'chembl', 'pubchem').
             http_client: The shared HTTP client to use (only for adapters that support it).
+            logger: LoggerPort instance for structured logging.
             **kwargs: Additional keyword arguments to pass to the adapter constructor.
 
         Returns:
@@ -53,8 +55,10 @@ class DataSourceFactory:
         adapter_kwargs = {k: v for k, v in kwargs.items() if k != "filter_config"}
 
         if provider == "chembl":
-            return adapter_cls(http_client=http_client, **adapter_kwargs)
+            return adapter_cls(http_client=http_client, logger=logger, **adapter_kwargs)
 
-        # PubChem and UniProt manage their own clients or have different signatures
-        # so we don't pass http_client to them.
-        return adapter_cls(**adapter_kwargs)
+        if provider == "uniprot":
+            return adapter_cls(http_client=http_client, logger=logger, **adapter_kwargs)
+
+        # PubChem manages its own client, only needs logger
+        return adapter_cls(logger=logger, **adapter_kwargs)

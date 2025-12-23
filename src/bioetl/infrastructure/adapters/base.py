@@ -6,10 +6,9 @@ including lifecycle management (context manager) and health checks.
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.ports import DataSourcePort
+from bioetl.domain.ports import DataSourcePort, LoggerPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -18,20 +17,29 @@ from bioetl.infrastructure.adapters.http.health import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
-logger = logging.getLogger(__name__)
-
 
 class BaseHttpAdapter(DataSourcePort):
     """Base class for HTTP adapters.
 
     Enforces usage of UnifiedHTTPClient and standardizes lifecycle management.
+
+    Attributes:
+        http_client: UnifiedHTTPClient instance for making HTTP requests.
+        provider_name: Unique identifier for the data provider.
+        logger: LoggerPort instance for structured logging.
     """
 
     http_client: UnifiedHTTPClient
     provider_name: str
+    logger: LoggerPort
 
-    def __init__(self, http_client: UnifiedHTTPClient) -> None:
+    def __init__(
+        self, http_client: UnifiedHTTPClient, logger: LoggerPort | None = None
+    ) -> None:
         self.http_client = http_client
+        # Fallback to no-op logger if not provided (for backwards compatibility)
+        if logger is not None:
+            self.logger = logger
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.
