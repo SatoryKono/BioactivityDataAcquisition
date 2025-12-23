@@ -87,9 +87,8 @@ class ActivityTransformer(BaseTransformer):
                 "standard_flag": safe_int(record.get("standard_flag")),
                 # Derived metrics
                 "pchembl_value": safe_float(record.get("pchembl_value")),
-                "ligand_efficiency": self.serialize_json(
-                    record.get("ligand_efficiency")
-                ),
+                # Ligand efficiency metrics (flattened)
+                **self._extract_ligand_efficiency(record.get("ligand_efficiency")),
                 # Units ontology
                 "qudt_units": record.get("qudt_units"),
                 "uo_units": record.get("uo_units"),
@@ -131,3 +130,31 @@ class ActivityTransformer(BaseTransformer):
         silver_record = self.entity_to_silver_record(entity)
 
         return cast("SilverRecord", silver_record)
+
+    def _extract_ligand_efficiency(
+        self, le_data: dict[str, Any] | None
+    ) -> dict[str, float | None]:
+        """Extract and flatten ligand efficiency metrics from ChEMBL dict.
+
+        Args:
+            le_data: Ligand efficiency dict from ChEMBL API with keys:
+                     'bei', 'le', 'lle', 'sei' (all as strings)
+
+        Returns:
+            Dict with flattened keys: ligand_efficiency_{bei,le,lle,sei}
+            All values are converted to float or None
+        """
+        if not le_data or not isinstance(le_data, dict):
+            return {
+                "ligand_efficiency_bei": None,
+                "ligand_efficiency_le": None,
+                "ligand_efficiency_lle": None,
+                "ligand_efficiency_sei": None,
+            }
+
+        return {
+            "ligand_efficiency_bei": safe_float(le_data.get("bei")),
+            "ligand_efficiency_le": safe_float(le_data.get("le")),
+            "ligand_efficiency_lle": safe_float(le_data.get("lle")),
+            "ligand_efficiency_sei": safe_float(le_data.get("sei")),
+        }

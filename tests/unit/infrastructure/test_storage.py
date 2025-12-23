@@ -84,8 +84,9 @@ class TestBronzeWriter:
         )
 
         # Check path contains expected parts (path format: bronze/v1/{provider}/{entity}/{date}/batch_{id}.jsonl.zst)
+        # Normalize path separators for cross-platform compatibility
         expected_path = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
-        assert str(path) == expected_path
+        assert str(path).replace("\\", "/") == expected_path
 
     async def test_write_bronze_compresses_with_zstd(self, tmp_path):
         """REQ-DATA-001: Test that data is compressed with zstandard."""

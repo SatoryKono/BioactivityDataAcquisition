@@ -68,7 +68,7 @@ class LocalCheckpoint:
         }
         checkpoint_json = json.dumps(checkpoint_data, indent=2)
 
-        # Atomic write: write to temp file, then rename
+        # Atomic write: write to temp file, then replace
         fd, temp_path = tempfile.mkstemp(
             dir=full_path.parent,
             prefix=".checkpoint_",
@@ -77,7 +77,8 @@ class LocalCheckpoint:
         try:
             with os.fdopen(fd, "w") as f:
                 f.write(checkpoint_json)
-            os.rename(temp_path, full_path)
+            # Use os.replace for cross-platform atomic overwrite
+            os.replace(temp_path, full_path)
         except Exception:
             # Clean up temp file on error
             if os.path.exists(temp_path):
