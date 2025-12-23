@@ -48,7 +48,7 @@ src/bioetl/
 ├── domain/          # Чистая логика, Protocols (Ports), бизнес-модели. БЕЗ I/O.
 ├── application/     # Пайплайны, Use Cases, оркестрация
 ├── composition/     # Composition Root (DI-контейнер, factories, bootstrap)
-├── infrastructure/  # Адаптеры (HTTP, S3, Redis), реализация портов
+├── infrastructure/  # Адаптеры (HTTP, локальное хранилище), реализация портов
 └── interfaces/      # CLI, PipelineRunner
 ```
 
@@ -134,7 +134,7 @@ sha256(provider + canonical_json(record))
 При получении SIGTERM/SIGINT:
 1. Прекратить извлечение новых записей
 2. Дождаться завершения записи текущего батча
-3. Сохранить чекпоинт в S3
+3. Сохранить чекпоинт локально
 4. Выйти с кодом 0
 
 ---
@@ -143,13 +143,11 @@ sha256(provider + canonical_json(record))
 
 | Параметр | Значение |
 |----------|----------|
-| Механизм | Redis `SETNX` + `EXPIRE` |
-| TTL | 60 секунд |
-| Heartbeat | Каждые 20 секунд |
-| Max Duration | 4 часа |
-| Fencing Token | `owner_id` (run_id воркера) |
+| Механизм | In-memory (MemoryLock) |
+| Область | Локальный процесс |
 
-**Invariant**: Потеря блокировки = аварийное завершение ДО попытки записи данных.
+**Примечание**: Для локального развертывания используется in-memory блокировка.
+Распределённые блокировки не требуются, так как пайплайны запускаются локально.
 
 ### Lock Keys
 
@@ -197,10 +195,10 @@ make arch-lint            # import-linter contracts
 |-----------|------------|------------|
 | **HTTP** | httpx (async) | HTTP-клиент |
 | **Data** | Polars, Delta Lake | Обработка, хранение |
+| **Storage** | Локальная ФС | Bronze/Silver/Gold/Checkpoints |
 | **Validation** | Pandera | Валидация схем |
 | **Linting** | Ruff + mypy | Код и типы |
-| **Orchestration** | Prefect | Запуск пайплайнов |
-| **Locks** | Redis | Распределённые блокировки |
+| **CLI** | Click | Командный интерфейс |
 
 ### Legacy Wrappers (MUST)
 

@@ -1,7 +1,7 @@
 """Unified storage factory for Bronze/Silver/Gold layers.
 
 Contains StorageAdapter, StorageContext, and StorageFactory for creating
-configured storage infrastructure.
+configured local storage infrastructure.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
+    from pathlib import Path
 
     import structlog
 
@@ -162,14 +163,14 @@ class StorageContext:
     """Context object returned by StorageFactory containing adapter and paths."""
 
     adapter: StorageAdapter
-    bronze_path: str
-    silver_path: str
-    gold_path: str
-    checkpoints_path: str
+    bronze_path: Path
+    silver_path: Path
+    gold_path: Path
+    checkpoints_path: Path
 
 
 class StorageFactory:
-    """Factory for creating configured StorageAdapters."""
+    """Factory for creating configured StorageAdapters for local deployment."""
 
     @staticmethod
     def _create_csv_exporter_from_config(csv_cfg: Any) -> CsvExporter | None:
@@ -184,38 +185,25 @@ class StorageFactory:
         return None
 
     @staticmethod
-    def _get_local_paths() -> tuple[str, str, str, str]:
-        """Get storage paths for local runs."""
-        base_output_path = "data/output"
-        return (
-            f"{base_output_path}/bronze",
-            f"{base_output_path}/silver",
-            f"{base_output_path}/gold",
-            f"{base_output_path}/checkpoints",
-        )
-
-    @staticmethod
-    def _get_cloud_paths(s3_config: Any) -> tuple[str, str, str, str]:
-        """Get storage paths for cloud runs."""
-        return (
-            s3_config.bucket_bronze,
-            f"s3://{s3_config.bucket_silver}",
-            f"s3://{s3_config.bucket_gold}",
-            s3_config.bucket_checkpoints,
-        )
-
-    @staticmethod
     def create(
         settings: Settings,
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
     ) -> StorageContext:
-        """Create a StorageAdapter based on environment and pipeline configuration."""
-        from bioetl.composition.factories.clients import get_aws_credentials
+        """Create a StorageAdapter for local deployment.
 
-        is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
-        storage_options = settings.storage_options if not is_local_run else None
-        access_key, secret_key = get_aws_credentials(settings)
+        Args:
+            settings: Application settings with data_dir
+            config: Pipeline YAML configuration
+            logger: Structured logger
+
+        Returns:
+            StorageContext with adapter and paths
+        """
+        bronze_path = settings.bronze_path
+        silver_path = settings.silver_path
+        gold_path = settings.gold_path
+        checkpoints_path = settings.checkpoint_path
 
         bronze_config = config.sink.get("bronze")
         silver_config = config.sink.get("silver")
@@ -225,26 +213,23 @@ class StorageFactory:
         silver_csv_exporter: CsvExporter | None = None
         gold_csv_exporter: CsvExporter | None = None
 
-        if is_local_run:
-            logger.info(
-                "Local run detected. Overriding storage paths to 'data/output'."
+        logger.info(
+            "Using local storage",
+            bronze_path=str(bronze_path),
+            silver_path=str(silver_path),
+            gold_path=str(gold_path),
+        )
+
+        if bronze_config and bronze_config.save_json:
+            json_path = str(settings.data_dir / "json")
+
+        if silver_config:
+            silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+                silver_config.csv_export
             )
-            bronze_path, silver_base_path, gold_base_path, checkpoints_path = (
-                StorageFactory._get_local_paths()
-            )
-            if bronze_config and bronze_config.save_json:
-                json_path = "data/output/json"
-            if silver_config:
-                silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-                    silver_config.csv_export
-                )
-            if gold_config:
-                gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-                    gold_config.csv_export
-                )
-        else:
-            bronze_path, silver_base_path, gold_base_path, checkpoints_path = (
-                StorageFactory._get_cloud_paths(settings.s3)
+        if gold_config:
+            gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+                gold_config.csv_export
             )
 
         StorageFactory._log_export_status(
@@ -254,22 +239,17 @@ class StorageFactory:
 
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
-                bucket=bronze_path,
-                endpoint_url=settings.aws.endpoint_url if not is_local_run else None,
-                access_key=access_key,
-                secret_key=secret_key,
+                base_path=bronze_path,
                 save_json=save_json,
                 json_path=json_path,
                 logger=logger,
             ),
             silver_writer=DeltaWriter(
-                base_path=silver_base_path,
-                storage_options=storage_options,
+                base_path=silver_path,
                 csv_exporter=silver_csv_exporter,
             ),
             gold_writer=GoldWriter(
-                base_path=gold_base_path,
-                storage_options=storage_options,
+                base_path=gold_path,
                 csv_exporter=gold_csv_exporter,
             ),
         )
@@ -277,8 +257,8 @@ class StorageFactory:
         return StorageContext(
             adapter=adapter,
             bronze_path=bronze_path,
-            silver_path=silver_base_path,
-            gold_path=gold_base_path,
+            silver_path=silver_path,
+            gold_path=gold_path,
             checkpoints_path=checkpoints_path,
         )
 

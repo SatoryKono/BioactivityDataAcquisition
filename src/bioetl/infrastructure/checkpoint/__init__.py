@@ -1,4 +1,9 @@
-"""Checkpoint storage adapters.
+"""Checkpoint storage implementations.
 
-Implements RULES.md §5.3.1 - Checkpoint Recovery.
+Provides:
+- LocalCheckpoint: Local filesystem checkpoint storage
 """
+
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+
+__all__ = ["LocalCheckpoint"]

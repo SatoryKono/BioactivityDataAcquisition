@@ -1,6 +1,7 @@
 """Unit tests for storage writers."""
 
 import io
+import json
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import UUID
@@ -15,18 +16,6 @@ from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 # Default test run metadata
 TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
 TEST_RUN_TYPE = RunType.INCREMENTAL
-
-
-@pytest.fixture
-def mock_s3_client():
-    """Fixture for a mocked S3 client."""
-    # Patch S3ClientPool.get_client since BronzeWriter now uses the pool
-    with patch(
-        "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
-    ) as mock_get_client:
-        mock_s3 = MagicMock()
-        mock_get_client.return_value = mock_s3
-        yield mock_s3
 
 
 @pytest.fixture
@@ -45,204 +34,16 @@ def mock_delta_writer():
 
 @pytest.mark.unit
 class TestBronzeWriter:
-    """Test BronzeWriter functionality."""
+    """Test BronzeWriter functionality with local storage."""
 
-    @pytest.mark.usefixtures("mock_s3_client")
-    def test_bronze_writer_initialization(self):
+    def test_bronze_writer_initialization(self, tmp_path):
         """Test BronzeWriter can be initialized."""
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-        assert writer.bucket == "test-bucket"
+        writer = BronzeWriter(base_path=tmp_path)
+        assert writer.base_path == tmp_path
 
-    async def test_write_bronze_generates_correct_key(self, mock_s3_client):
-        """Test that write_bronze generates the correct S3 key."""
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-
-        records = [b'{"id": 1}\n']
-        provider = "test_provider"
-        entity = "test_entity"
-        date = datetime(2023, 1, 1)
-        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-
-        await writer.write_bronze(
-            records=iter(records),
-            provider=provider,
-            entity=entity,
-            date=date,
-            batch_id=batch_id,
-            run_id=TEST_RUN_ID,
-            run_type=TEST_RUN_TYPE,
-        )
-
-        mock_s3_client.put_object.assert_called_once()
-        _args, kwargs = mock_s3_client.put_object.call_args
-        assert kwargs["Bucket"] == "test-bucket"
-        # Check key contains expected parts (new path format: bronze/v1/{provider}/{entity}/{date}/batch_{id}.jsonl.zst)
-        expected_key = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
-        assert kwargs["Key"] == expected_key
-
-    async def test_write_bronze_compresses_with_zstd(self, mock_s3_client):
-        """REQ-DATA-001: Test that data is compressed with zstandard."""
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-
-        records = [b'{"id": 1, "data": "test"}\n']
-
-        await writer.write_bronze(
-            records=iter(records),
-            provider="test",
-            entity="test",
-            date=datetime.now(),
-            batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
-            run_id=TEST_RUN_ID,
-            run_type=TEST_RUN_TYPE,
-        )
-
-        mock_s3_client.put_object.assert_called_once()
-        _args, kwargs = mock_s3_client.put_object.call_args
-
-        # The Body should be zstd compressed data
-        compressed_data = kwargs["Body"]
-
-        # Zstandard frames start with magic bytes 0x28, 0xB5, 0x2F, 0xFD (little-endian)
-        assert compressed_data.startswith(b"\x28\xb5\x2f\xfd")
-
-        # Decompress to verify content using stream reader
-        decompressor = zstd.ZstdDecompressor()
-        with decompressor.stream_reader(io.BytesIO(compressed_data)) as reader:
-            decompressed_data = reader.read()
-
-        assert decompressed_data == b'{"id": 1, "data": "test"}\n'
-
-    async def test_write_bronze_with_no_records(self, mock_s3_client):
-        """Test that write_bronze raises error if there are no records."""
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-        )
-
-        records = []
-        provider = "test_provider"
-        entity = "test_entity"
-        date = datetime(2023, 1, 1)
-        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-
-        with pytest.raises(ValueError, match="No records"):
-            await writer.write_bronze(
-                records=iter(records),
-                provider=provider,
-                entity=entity,
-                date=date,
-                batch_id=batch_id,
-                run_id=TEST_RUN_ID,
-                run_type=TEST_RUN_TYPE,
-            )
-
-    async def test_write_bronze_save_json_copy(self, mock_s3_client):
-        """Test that write_bronze saves JSON copy if save_json is True."""
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-            save_json=True,
-        )
-
-        records = [b'{"id": 1}\n']
-        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-        date = datetime(2023, 1, 1)
-
-        await writer.write_bronze(
-            records=iter(records),
-            provider="test_provider",
-            entity="test_entity",
-            date=date,
-            batch_id=batch_id,
-            run_id=TEST_RUN_ID,
-            run_type=TEST_RUN_TYPE,
-        )
-
-        # Should call put_object twice: once for zstd, once for json
-        assert mock_s3_client.put_object.call_count == 2
-
-        calls = mock_s3_client.put_object.call_args_list
-
-        # Verify JSON call
-        json_call = next(c for c in calls if c[1]["Key"].endswith(".jsonl"))
-        _args, kwargs = json_call
-        assert kwargs["Bucket"] == "test-bucket"
-        assert kwargs["Bucket"] == "test-bucket"
-        assert (
-            kwargs["Key"]
-            == "json/test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
-        )
-        assert kwargs["Body"] == b'{"id": 1}\n'
-        assert kwargs["ContentType"] == "application/x-ndjson"
-
-    async def test_write_bronze_save_json_copy_failure_logs_warning(
-        self, mock_s3_client
-    ):
-        """Test that JSON copy failure logs warning but doesn't raise."""
-        from botocore.exceptions import ClientError
-
-        mock_logger = MagicMock()
-
-        writer = BronzeWriter(
-            bucket="test-bucket",
-            endpoint_url="http://localhost:9000",
-            access_key="test",
-            secret_key="test",
-            save_json=True,
-            logger=mock_logger,
-        )
-
-        # First call (compressed) succeeds, second call (json) fails
-        mock_s3_client.put_object.side_effect = [
-            None,
-            ClientError({"Error": {"Code": "AccessDenied"}}, "PutObject"),
-        ]
-
-        records = [b'{"id": 1}\n']
-        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-        date = datetime(2023, 1, 1)
-
-        await writer.write_bronze(
-            records=iter(records),
-            provider="test_provider",
-            entity="test_entity",
-            date=date,
-            batch_id=batch_id,
-            run_id=TEST_RUN_ID,
-            run_type=TEST_RUN_TYPE,
-        )
-
-        # Should log warning
-        mock_logger.warning.assert_called_once()
-        assert "json_copy_write_failed" in str(mock_logger.warning.call_args)
-
-
-@pytest.mark.unit
-class TestBronzeWriterLocal:
-    """Tests for BronzeWriter in local mode."""
-
-    async def test_write_bronze_local_creates_file(self, tmp_path):
-        """Test write_bronze creates file in local mode."""
-        writer = BronzeWriter(bucket=str(tmp_path))
+    async def test_write_bronze_creates_file(self, tmp_path):
+        """Test write_bronze creates file in local storage."""
+        writer = BronzeWriter(base_path=tmp_path)
 
         records = [b'{"id": 1, "data": "test"}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -261,9 +62,33 @@ class TestBronzeWriterLocal:
         expected_file = tmp_path / path
         assert expected_file.exists()
 
-    async def test_write_bronze_local_compresses_data(self, tmp_path):
-        """Test write_bronze compresses data in local mode."""
-        writer = BronzeWriter(bucket=str(tmp_path))
+    async def test_write_bronze_generates_correct_key(self, tmp_path):
+        """Test that write_bronze generates the correct path."""
+        writer = BronzeWriter(base_path=tmp_path)
+
+        records = [b'{"id": 1}\n']
+        provider = "test_provider"
+        entity = "test_entity"
+        date = datetime(2023, 1, 1)
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+
+        path = await writer.write_bronze(
+            records=iter(records),
+            provider=provider,
+            entity=entity,
+            date=date,
+            batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
+        )
+
+        # Check path contains expected parts (path format: bronze/v1/{provider}/{entity}/{date}/batch_{id}.jsonl.zst)
+        expected_path = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        assert str(path) == expected_path
+
+    async def test_write_bronze_compresses_with_zstd(self, tmp_path):
+        """REQ-DATA-001: Test that data is compressed with zstandard."""
+        writer = BronzeWriter(base_path=tmp_path)
 
         records = [b'{"id": 1, "data": "test"}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -271,8 +96,8 @@ class TestBronzeWriterLocal:
 
         path = await writer.write_bronze(
             records=iter(records),
-            provider="test_provider",
-            entity="test_entity",
+            provider="test",
+            entity="test",
             date=date,
             batch_id=batch_id,
             run_id=TEST_RUN_ID,
@@ -283,16 +108,69 @@ class TestBronzeWriterLocal:
         with open(file_path, "rb") as f:
             compressed_data = f.read()
 
-        # Verify zstd magic bytes
+        # Zstandard frames start with magic bytes 0x28, 0xB5, 0x2F, 0xFD (little-endian)
         assert compressed_data.startswith(b"\x28\xb5\x2f\xfd")
 
-    async def test_read_bronze_local(self, tmp_path):
-        """Test read_bronze reads file in local mode."""
+        # Decompress to verify content using stream reader
+        decompressor = zstd.ZstdDecompressor()
+        with decompressor.stream_reader(io.BytesIO(compressed_data)) as reader:
+            decompressed_data = reader.read()
+
+        assert decompressed_data == b'{"id": 1, "data": "test"}\n'
+
+    async def test_write_bronze_with_no_records(self, tmp_path):
+        """Test that write_bronze raises error if there are no records."""
+        writer = BronzeWriter(base_path=tmp_path)
+
+        records = []
+        provider = "test_provider"
+        entity = "test_entity"
+        date = datetime(2023, 1, 1)
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+
+        with pytest.raises(ValueError, match="No records"):
+            await writer.write_bronze(
+                records=iter(records),
+                provider=provider,
+                entity=entity,
+                date=date,
+                batch_id=batch_id,
+                run_id=TEST_RUN_ID,
+                run_type=TEST_RUN_TYPE,
+            )
+
+    async def test_write_bronze_save_json_copy(self, tmp_path):
+        """Test that write_bronze saves JSON copy if save_json is True."""
+        writer = BronzeWriter(base_path=tmp_path, save_json=True)
+
+        records = [b'{"id": 1}\n']
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        date = datetime(2023, 1, 1)
+
+        await writer.write_bronze(
+            records=iter(records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
+        )
+
+        # Check JSON file was created
+        json_path = (
+            tmp_path
+            / "json"
+            / "test_provider"
+            / "test_entity"
+            / "batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
+        )
+        assert json_path.exists()
+        assert json_path.read_bytes() == b'{"id": 1}\n'
+
+    async def test_read_bronze(self, tmp_path):
+        """Test read_bronze reads file."""
         # Create a compressed file manually for deterministic testing
-        import json
-
-        import zstandard as zstd
-
         records_data = [{"id": 1, "data": "test"}, {"id": 2, "data": "test2"}]
         jsonl_data = "\n".join(json.dumps(r) for r in records_data) + "\n"
 
@@ -300,27 +178,27 @@ class TestBronzeWriterLocal:
         compressor = zstd.ZstdCompressor(level=3)
         compressed = compressor.compress(jsonl_data.encode("utf-8"))
 
-        # Create directory structure (new path format: {provider}/{entity}/batch_*.jsonl.zst)
-        bronze_dir = tmp_path / "test_provider" / "test_entity"
+        # Create directory structure (path format: bronze/v1/{provider}/{entity}/{date}/)
+        bronze_dir = tmp_path / "bronze" / "v1" / "test_provider" / "test_entity" / "2023-01-01"
         bronze_dir.mkdir(parents=True)
         test_file = bronze_dir / "batch_test.jsonl.zst"
         test_file.write_bytes(compressed)
 
-        writer = BronzeWriter(bucket=str(tmp_path))
+        writer = BronzeWriter(base_path=tmp_path)
 
         # Read it back
         read_records = []
         async for record in writer.read_bronze(
-            "test_provider/test_entity/batch_test.jsonl.zst"
+            "bronze/v1/test_provider/test_entity/2023-01-01/batch_test.jsonl.zst"
         ):
             read_records.append(record)
 
         assert len(read_records) == 2
         assert read_records[0]["id"] == 1
 
-    async def test_list_batches_local(self, tmp_path):
-        """Test list_batches in local mode."""
-        writer = BronzeWriter(bucket=str(tmp_path))
+    async def test_list_batches(self, tmp_path):
+        """Test list_batches."""
+        writer = BronzeWriter(base_path=tmp_path)
 
         # Write two batches
         date = datetime(2023, 1, 1)
@@ -338,19 +216,45 @@ class TestBronzeWriterLocal:
 
         batches = await writer.list_batches("test_provider", "test_entity", date)
 
-        # In local mode, list_batches glob might need adjustment or the test should expect paths relative to bucket
-        # Current implementation returns str(p.relative_to(self.bucket))
-        # With new structure, we expect 2 files
         assert len(batches) == 2
         assert all(b.endswith(".jsonl.zst") for b in batches)
 
-    async def test_list_batches_local_nonexistent(self, tmp_path):
+    async def test_list_batches_nonexistent(self, tmp_path):
         """Test list_batches returns empty for nonexistent path."""
-        writer = BronzeWriter(bucket=str(tmp_path))
+        writer = BronzeWriter(base_path=tmp_path)
 
         batches = await writer.list_batches("nonexistent", "entity", datetime.now())
 
         assert batches == []
+
+    async def test_writes_metadata_file(self, tmp_path):
+        """Test that write_bronze creates metadata file."""
+        writer = BronzeWriter(base_path=tmp_path)
+
+        records = [b'{"id": 1}\n']
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        date = datetime(2023, 1, 1)
+
+        path = await writer.write_bronze(
+            records=iter(records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
+        )
+
+        # Check metadata file was created
+        meta_path = (tmp_path / path).with_suffix(".zst.meta.json")
+        assert meta_path.exists()
+
+        # Verify metadata content
+        meta_content = json.loads(meta_path.read_text())
+        assert meta_content["provider"] == "test_provider"
+        assert meta_content["entity"] == "test_entity"
+        assert meta_content["batch_id"] == "12345678-1234-5678-1234-567812345678"
+        assert meta_content["run_type"] == "incremental"
 
 
 @pytest.mark.unit

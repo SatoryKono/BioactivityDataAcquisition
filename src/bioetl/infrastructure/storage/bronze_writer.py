@@ -1,4 +1,4 @@
-"""Bronze layer writer (S3-compatible storage with JSONL + zstd compression).
+"""Bronze layer writer (local storage with JSONL + zstd compression).
 
 Implements RULES.md §2.1.1 - Bronze Layer specifications.
 
@@ -7,10 +7,9 @@ Requirements:
 - REQ-DATA-002: Path format bronze/v1/{provider}/{entity}/{date}/
 - REQ-DATA-003: Append-only writes
 - REQ-DATA-004: Atomic writes
-- REQ-DATA-005: 90-day retention (S3 lifecycle)
 
 Architecture:
-- Uses boto3 for S3 operations (MinIO compatible)
+- Local filesystem storage
 - Streams data to minimize memory usage
 - Generates checksums for data integrity
 """
@@ -25,12 +24,10 @@ from typing import TYPE_CHECKING, Any
 
 import structlog
 import zstandard as zstd
-from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
-from bioetl.domain.exceptions import BucketNotFoundError, UploadError
 from bioetl.domain.types import BatchID, RunID, RunType
 
 
@@ -46,11 +43,7 @@ class BronzeWriter:
 
     def __init__(
         self,
-        bucket: str,
-        endpoint_url: str | None = None,
-        region: str = "us-east-1",
-        access_key: str | None = None,
-        secret_key: str | None = None,
+        base_path: str | Path,
         save_json: bool = False,
         json_path: str | None = None,
         logger: "BoundLogger | None" = None,
@@ -58,33 +51,15 @@ class BronzeWriter:
         """Initialize Bronze writer.
 
         Args:
-            bucket: S3 bucket name or local path for compressed files
-            endpoint_url: S3 endpoint URL (None for local storage)
-            region: AWS region
-            access_key: AWS access key
-            secret_key: AWS secret key
+            base_path: Base path for Bronze layer storage
             save_json: If True, also save uncompressed JSON copy
-            json_path: Path for JSON files (defaults to bucket/json/)
+            json_path: Path for JSON files (defaults to base_path/json/)
             logger: Structured logger for observability
         """
-        self.bucket = bucket
-        self.endpoint_url = endpoint_url
-        self.is_local = not endpoint_url
+        self.base_path = Path(base_path)
         self.save_json = save_json
-        self.json_path = json_path or (
-            str(Path(bucket) / "json") if self.is_local else None
-        )
+        self.json_path = json_path or str(self.base_path / "json")
         self.logger = logger or structlog.get_logger(__name__)
-
-        if not self.is_local:
-            from bioetl.infrastructure.storage.s3_pool import S3ClientPool
-
-            self.s3_client = S3ClientPool.get_client(
-                endpoint_url=endpoint_url,
-                region=region,
-                access_key=access_key,
-                secret_key=secret_key,
-            )
 
     async def write_bronze(
         self,
@@ -110,7 +85,7 @@ class BronzeWriter:
             run_type: Type of run (incremental, backfill, rebuild).
 
         Returns:
-            Path to the written file (relative to bucket).
+            Path to the written file (relative to base_path).
         """
         from datetime import UTC
 
@@ -134,7 +109,7 @@ class BronzeWriter:
         loop = asyncio.get_running_loop()
 
         # Optimize memory usage: Only buffer if we need to write both formats.
-        # If save_json is False (default production), we stream directly to compression.
+        # If save_json is False (default), we stream directly to compression.
         if self.save_json:
             # Buffer records since iterator can only be consumed once
             # and we may need it for both compressed and JSON output
@@ -151,46 +126,21 @@ class BronzeWriter:
         if not compressed_data:
             raise ValueError("No records to write")
 
-        # Write compressed file
-        if self.is_local:
-            full_path = Path(self.bucket) / relative_path
-            full_path.parent.mkdir(parents=True, exist_ok=True)
+        # Write compressed file to local filesystem
+        full_path = self.base_path / relative_path
+        full_path.parent.mkdir(parents=True, exist_ok=True)
 
-            def _write_local(data: bytes, path: Path, meta: dict, meta_path: Path):
-                with open(path, "wb") as f:
-                    f.write(data)
-                with open(meta_path, "w") as f:
-                    json.dump(meta, f)
+        def _write_local(data: bytes, path: Path, meta: dict, meta_path: Path) -> None:
+            with open(path, "wb") as f:
+                f.write(data)
+            with open(meta_path, "w") as f:
+                json.dump(meta, f)
 
-            meta_path = full_path.with_suffix(".zst.meta.json")
-            await loop.run_in_executor(
-                None,
-                lambda: _write_local(compressed_data, full_path, metadata, meta_path),
-            )
-        else:
-            # Include run metadata in S3 object metadata for traceability
-            s3_metadata = {
-                "run_id": str(run_id),
-                "run_type": run_type.value,
-                "batch_id": str(batch_id),
-                "ingestion_ts": date.isoformat(),
-            }
-            try:
-                await loop.run_in_executor(
-                    None,
-                    lambda: self.s3_client.put_object(
-                        Bucket=self.bucket,
-                        Key=relative_path,
-                        Body=compressed_data,
-                        ContentType="application/zstd",
-                        Metadata=s3_metadata,
-                    ),
-                )
-            except ClientError as e:
-                error_code = e.response.get("Error", {}).get("Code", "")
-                if error_code == "NoSuchBucket":
-                    raise BucketNotFoundError(self.bucket) from e
-                raise UploadError(relative_path, str(e)) from e
+        meta_path = full_path.with_suffix(".zst.meta.json")
+        await loop.run_in_executor(
+            None,
+            lambda: _write_local(compressed_data, full_path, metadata, meta_path),
+        )
 
         # Log successful write with run_id for traceability
         self.logger.info(
@@ -225,35 +175,10 @@ class BronzeWriter:
         # Combine all records into single JSONL content
         jsonl_content = b"".join(records)
 
-        if self.is_local and self.json_path:
-            json_full_path = Path(self.json_path) / json_relative_path
-            json_full_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(json_full_path, "wb") as f:
-                f.write(jsonl_content)
-        elif not self.is_local:
-            # For S3, save JSON in a separate prefix
-            s3_json_key = f"json/{json_relative_path}"
-            loop = asyncio.get_running_loop()
-            try:
-                await loop.run_in_executor(
-                    None,
-                    lambda: self.s3_client.put_object(
-                        Bucket=self.bucket,
-                        Key=s3_json_key,
-                        Body=jsonl_content,
-                        ContentType="application/x-ndjson",
-                    ),
-                )
-            except ClientError as e:
-                # Log but don't fail the main write (JSON copy is optional)
-                error_code = e.response.get("Error", {}).get("Code", "Unknown")
-                self.logger.warning(
-                    "json_copy_write_failed",
-                    error_code=error_code,
-                    s3_key=s3_json_key,
-                    bucket=self.bucket,
-                    error=str(e),
-                )
+        json_full_path = Path(self.json_path) / json_relative_path
+        json_full_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(json_full_path, "wb") as f:
+            f.write(jsonl_content)
 
     def _compress_records(self, records: Iterator[bytes]) -> bytes:
         """Compress JSONL records using zstandard with streaming."""
@@ -288,16 +213,9 @@ class BronzeWriter:
 
     async def read_bronze(self, path: str) -> AsyncIterator[dict[str, Any]]:
         """Read and decompress Bronze file (for testing/debugging)."""
-        loop = asyncio.get_running_loop()
-        if self.is_local:
-            full_path = Path(self.bucket) / path
-            with open(full_path, "rb") as f:
-                compressed_data = f.read()
-        else:
-            response = await loop.run_in_executor(
-                None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=path)
-            )
-            compressed_data = response["Body"].read()
+        full_path = self.base_path / path
+        with open(full_path, "rb") as f:
+            compressed_data = f.read()
 
         decompressor = zstd.ZstdDecompressor()
         # Use streaming decompression since content size may not be in frame header
@@ -310,32 +228,13 @@ class BronzeWriter:
 
     def _list_batches_local(self, prefix: str, date: datetime | None) -> list[str]:
         """List batch files from local filesystem."""
-        base_path = Path(self.bucket) / prefix
-        if not base_path.exists():
+        search_path = self.base_path / prefix
+        if not search_path.exists():
             return []
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
-        files = list(base_path.glob(pattern))
-        return [str(p.relative_to(self.bucket)) for p in files]
-
-    async def _list_batches_s3(self, prefix: str, date: datetime | None) -> list[str]:
-        """List batch files from S3."""
-        loop = asyncio.get_running_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: self.s3_client.list_objects_v2(Bucket=self.bucket, Prefix=prefix),
-        )
-
-        all_files = [
-            obj["Key"]
-            for obj in response.get("Contents", [])
-            if obj["Key"].endswith(".jsonl.zst")
-        ]
-
-        if date:
-            date_str = date.strftime("%Y-%m-%d")
-            return [key for key in all_files if f"batch_{date_str}" in key]
-        return all_files
+        files = list(search_path.glob(pattern))
+        return [str(p.relative_to(self.base_path)) for p in files]
 
     async def list_batches(
         self,
@@ -348,6 +247,4 @@ class BronzeWriter:
         if date:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
-        if self.is_local:
-            return self._list_batches_local(prefix, date)
-        return await self._list_batches_s3(prefix, date)
+        return self._list_batches_local(prefix, date)

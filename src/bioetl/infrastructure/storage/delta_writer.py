@@ -13,6 +13,7 @@ Requirements:
 
 Architecture:
 - Uses deltalake (delta-rs) for Python
+- Local filesystem storage
 - Supports partitioning for query optimization
 - Implements merge/upsert based on primary keys
 - ACID guarantees for concurrent writes
@@ -23,6 +24,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
@@ -52,19 +54,16 @@ class DeltaWriter:
 
     def __init__(
         self,
-        base_path: str,
-        storage_options: dict[str, str] | None = None,
+        base_path: str | Path,
         csv_exporter: CsvExporter | None = None,
     ) -> None:
         """Initialize Delta writer.
 
         Args:
-            base_path: Base path for Delta tables
-            storage_options: Storage options for S3/MinIO
+            base_path: Base path for Delta tables (local filesystem)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
         """
-        self.base_path = base_path.rstrip("/")
-        self.storage_options = storage_options or {}
+        self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
 
     def _prepare_arrow_data(
@@ -111,7 +110,6 @@ class DeltaWriter:
                 mode="overwrite",
                 partition_by=partition_cols,
                 schema_mode="overwrite",
-                storage_options=self.storage_options,
             ),
         )
 
@@ -127,7 +125,6 @@ class DeltaWriter:
                 data=data,
                 mode="append",
                 partition_by=partition_cols,
-                storage_options=self.storage_options,
             ),
         )
 
@@ -143,7 +140,7 @@ class DeltaWriter:
         try:
             dt = await loop.run_in_executor(
                 None,
-                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+                lambda: DeltaTable(table_path),
             )
             await self._merge_records(dt, data, primary_keys)
         except DeltaTableNotFoundError:
@@ -272,7 +269,7 @@ class DeltaWriter:
         try:
             dt = await loop.run_in_executor(
                 None,
-                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+                lambda: DeltaTable(table_path),
             )
             return await loop.run_in_executor(
                 None,
@@ -291,7 +288,7 @@ class DeltaWriter:
         try:
             dt = await loop.run_in_executor(
                 None,
-                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+                lambda: DeltaTable(table_path),
             )
             return await loop.run_in_executor(
                 None, lambda: dt.optimize.compact(partition_filters=partition_filters)
@@ -305,7 +302,7 @@ class DeltaWriter:
         try:
             dt = await loop.run_in_executor(
                 None,
-                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+                lambda: DeltaTable(table_path),
             )
             return {
                 "version": dt.version(),
@@ -335,7 +332,6 @@ class DeltaWriter:
                     lambda: DeltaTable(
                         table_path,
                         version=version,
-                        storage_options=self.storage_options,
                     ),
                 )
             elif timestamp is not None:
@@ -345,7 +341,6 @@ class DeltaWriter:
                     lambda: DeltaTable(
                         table_path,
                         storage_options={
-                            **self.storage_options,
                             "time_travel": timestamp_str,
                         },
                     ),
