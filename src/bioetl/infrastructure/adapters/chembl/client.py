@@ -116,11 +116,10 @@ class ChemblAdapter(BaseHttpAdapter):
         has_next = page_meta.get("next") is not None
         return records, has_next
 
-    def _batch_ids(self, ids: set[str], batch_size: int) -> Iterator[list[str]]:
+    def _batch_ids(self, ids: list[str], batch_size: int) -> Iterator[list[str]]:
         """Split IDs into batches for API requests."""
-        id_list = list(ids)
-        for i in range(0, len(id_list), batch_size):
-            yield id_list[i : i + batch_size]
+        for i in range(0, len(ids), batch_size):
+            yield ids[i : i + batch_size]
 
     async def _fetch_page(
         self, url: str, params: dict[str, Any], entity_type: str
@@ -195,7 +194,7 @@ class ChemblAdapter(BaseHttpAdapter):
         entity_type: str,
         watermark: Watermark | None,
         limit: int | None,
-        filter_ids: set[str],
+        filter_ids: list[str],
         filter_field: str,
     ) -> AsyncIterator[dict[str, Any]]:
         """Perform filtered fetch using ID batches."""
@@ -250,7 +249,7 @@ class ChemblAdapter(BaseHttpAdapter):
     async def fetch_filtered(
         self,
         entity_type: str,
-        filter_ids: set[str],
+        filter_ids: list[str],
         filter_field: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
@@ -261,7 +260,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Args:
             entity_type: Type of entity to fetch
-            filter_ids: Set of IDs to filter by
+            filter_ids: Sorted list of IDs to filter by (for deterministic batching)
             filter_field: Field name to filter on
             watermark: Resume point for incremental fetching
             limit: Maximum number of records to fetch

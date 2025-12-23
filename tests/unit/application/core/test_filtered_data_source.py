@@ -54,7 +54,7 @@ def mock_data_source_with_filtered():
 def mock_filter_reader():
     """Create a mock filter reader."""
     reader = AsyncMock()
-    reader.load_filter_ids = AsyncMock(return_value={"CHEMBL1", "CHEMBL2", "CHEMBL3"})
+    reader.load_filter_ids = AsyncMock(return_value=["CHEMBL1", "CHEMBL2", "CHEMBL3"])
     return reader
 
 
@@ -143,7 +143,7 @@ class TestFilteredDataSourceContextManager:
             source_path="data/molecules.csv",
             column_name="molecule_chembl_id",
         )
-        assert filtered._filter_ids == {"CHEMBL1", "CHEMBL2", "CHEMBL3"}
+        assert filtered._filter_ids == ["CHEMBL1", "CHEMBL2", "CHEMBL3"]
 
     @pytest.mark.asyncio
     async def test_aexit_delegates_to_wrapped(

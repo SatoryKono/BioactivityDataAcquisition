@@ -51,7 +51,8 @@ class TestDeterministicCsvExport:
 
         # Skip header
         data_lines = lines[1:]
-        ids = [line.split(",")[0] for line in data_lines]
+        # Strip quotes and whitespace from id field
+        ids = [line.split(",")[0].strip().replace('"', '') for line in data_lines]
 
         assert ids == ["A", "B", "C"], "Records should be sorted by id column"
 
@@ -158,6 +159,50 @@ class TestDeterministicBronzeWrite:
 
         # Keys should be in alphabetical order
         assert json_str == '{"a_key": 2, "m_key": 3, "z_key": 1}'
+
+
+class TestDeterministicCsvFilterRead:
+    """Tests for deterministic CSV filter ID reading."""
+
+    async def test_csv_filter_reader_returns_sorted_list(self, tmp_path: Path):
+        """Test that CsvFilterReader returns sorted list for deterministic order."""
+        from bioetl.infrastructure.adapters.input.csv_filter_reader import (
+            CsvFilterReader,
+        )
+
+        # Create CSV with IDs in random order
+        csv_file = tmp_path / "filter_ids.csv"
+        csv_file.write_text("id\nC_ID\nA_ID\nB_ID\nZ_ID\nD_ID\n")
+
+        reader = CsvFilterReader()
+        result = await reader.load_filter_ids(str(csv_file), "id")
+
+        assert isinstance(result, list), "Should return list, not set"
+        assert result == ["A_ID", "B_ID", "C_ID", "D_ID", "Z_ID"], (
+            "IDs should be sorted alphabetically"
+        )
+
+    async def test_csv_filter_reader_deterministic_across_runs(self, tmp_path: Path):
+        """Test that multiple reads produce identical results."""
+        from bioetl.infrastructure.adapters.input.csv_filter_reader import (
+            CsvFilterReader,
+        )
+
+        csv_file = tmp_path / "filter_ids.csv"
+        csv_file.write_text("id\nID_3\nID_1\nID_2\n")
+
+        reader = CsvFilterReader()
+
+        results = []
+        for _ in range(5):
+            result = await reader.load_filter_ids(str(csv_file), "id")
+            results.append(result)
+
+        # All reads should produce identical results
+        assert all(r == results[0] for r in results), (
+            "Multiple reads should produce identical sorted results"
+        )
+        assert results[0] == ["ID_1", "ID_2", "ID_3"]
 
 
 class TestSortByConfig:

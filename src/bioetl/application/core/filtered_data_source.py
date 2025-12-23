@@ -60,7 +60,7 @@ class FilteredDataSource:
         self._data_source = data_source
         self._filter_reader = filter_reader
         self._filter_config = filter_config
-        self._filter_ids: set[str] | None = None
+        self._filter_ids: list[str] | None = None
 
     @property
     def provider_name(self) -> str:
@@ -100,7 +100,7 @@ class FilteredDataSource:
         watermark: Watermark | None = None,
         limit: int | None = None,
         query: str | None = None,
-        filter_ids: set[str] | None = None,
+        filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with optional filtering.

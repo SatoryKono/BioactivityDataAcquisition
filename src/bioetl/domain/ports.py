@@ -117,15 +117,17 @@ class InputFilterPort(Protocol):
         self,
         source_path: str,
         column_name: str,
-    ) -> set[str]:
+    ) -> list[str]:
         """Load unique IDs from an external source.
+
+        IDs are returned in sorted order for deterministic processing.
 
         Args:
             source_path: Path to the filter source (e.g., CSV file path).
             column_name: Name of the column containing filter IDs.
 
         Returns:
-            Set of unique ID strings to filter by.
+            Sorted list of unique ID strings to filter by.
 
         Raises:
             FileNotFoundError: If the source file does not exist.
