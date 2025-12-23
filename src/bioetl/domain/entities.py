@@ -360,6 +360,24 @@ class Molecule(BaseEntity):
     withdrawn_flag: bool | None = None
     inorganic_flag: int | None = None
     polymer_flag: int | None = None
+    chirality: int | None = None  # -1 (single), 0 (achiral), 1 (racemic), 2 (mixture)
+    dosed_ingredient: int | None = None
+    availability_type: int | None = None  # -2 to 2
+
+    # Withdrawn metadata
+    withdrawn_year: int | None = None
+    withdrawn_country: str | None = None  # JSON string for multiple countries
+    withdrawn_reason: str | None = None  # JSON string for multiple reasons
+
+    # USAN naming
+    usan_stem: str | None = None
+    usan_stem_definition: str | None = None
+    usan_substem: str | None = None
+    usan_year: int | None = None
+
+    # Other metadata
+    helm_notation: str | None = None
+    molecule_species: str | None = None  # ACID, BASE, NEUTRAL, ZWITTERION
 
     # Complex fields (JSON serialized)
     molecule_hierarchy: str | None = None  # JSON string
@@ -372,6 +390,7 @@ class Molecule(BaseEntity):
     # Flattened Hierarchy
     hierarchy_parent_chembl_id: str | None = None
     hierarchy_active_chembl_id: str | None = None
+    hierarchy_child_chembl_id: str | None = None  # For parent molecules
 
     # Flattened Properties
     property_alogp: float | None = None
@@ -385,6 +404,12 @@ class Molecule(BaseEntity):
     property_heavy_atoms: int | None = None
     property_aromatic_rings: int | None = None
     property_qed_weighted: float | None = None
+    property_acd_logd: float | None = None
+    property_acd_logp: float | None = None
+    property_acd_most_apka: float | None = None
+    property_acd_most_bpka: float | None = None
+    property_full_molformula: str | None = None
+    property_ro3_pass: str | None = None  # "Y" or "N"
 
     # Flattened Structures
     structure_canonical_smiles: str | None = None
