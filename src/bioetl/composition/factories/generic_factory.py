@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
@@ -72,6 +73,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_name: str,
         pipeline_class: type[TPipeline],
         provider: str,
+        transformer_class: type[BaseTransformer],
         silver_schema: pa.Schema | None = None,
         gold_schema: Any | None = None,
         data_source_creator: DataSourceCreator | None = None,
@@ -82,6 +84,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pipeline_name: Unique name for the pipeline (used for config lookup)
             pipeline_class: The pipeline class to instantiate
             provider: Provider name for data source creation
+            transformer_class: The transformer class to instantiate (DI pattern)
             silver_schema: Optional PyArrow schema for Silver layer
             gold_schema: Optional Pandera schema for Gold layer
             data_source_creator: Optional custom creator function. If not provided,
@@ -90,6 +93,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.pipeline_name = pipeline_name
         self.pipeline_class = pipeline_class
         self.provider = provider
+        self.transformer_class = transformer_class
         self.silver_schema = silver_schema
         self.gold_schema = gold_schema
 
@@ -161,6 +165,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         """Create pipeline instance.
 
         Loads config once and reuses it for both services and pipeline.
+        Creates transformer via DI and injects it into the pipeline.
 
         Args:
             runtime: Pipeline runtime configuration
@@ -183,10 +188,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
         domain_config = yaml_config_to_domain(yaml_config)
 
+        # Create transformer via DI (previously created inside pipeline)
+        transformer = self.transformer_class(provider=self.provider)
+
         return self.pipeline_class.create(
             runtime=runtime,
             services=services,
             config=domain_config,
+            transformer=transformer,
         )
 
     def create_runner(
@@ -322,6 +331,7 @@ def create_pipeline_factory(
     pipeline_name: str,
     pipeline_class: type[TPipeline],
     provider: str,
+    transformer_class: type[BaseTransformer],
     silver_schema: pa.Schema | None = None,
     gold_schema: Any | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
@@ -331,6 +341,7 @@ def create_pipeline_factory(
         pipeline_name: Unique pipeline name
         pipeline_class: Pipeline class to instantiate
         provider: Data source provider name
+        transformer_class: Transformer class to instantiate (DI pattern)
         silver_schema: Optional Silver layer schema
         gold_schema: Optional Gold layer schema
 
@@ -341,6 +352,7 @@ def create_pipeline_factory(
         >>> factory = create_pipeline_factory(
         ...     pipeline_name="chembl_activity",
         ...     pipeline_class=ChEMBLActivityPipeline,
+        ...     transformer_class=ActivityTransformer,
         ...     provider="chembl",
         ...     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
         ... )
@@ -349,6 +361,7 @@ def create_pipeline_factory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,
         provider=provider,
+        transformer_class=transformer_class,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
     )

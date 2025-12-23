@@ -8,7 +8,6 @@ Refactored per ADR-0005.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Self
 from uuid import uuid4
 
@@ -19,11 +18,12 @@ from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 if TYPE_CHECKING:
     import structlog
 
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 
-class BasePipeline(ABC):
+class BasePipeline:
     """Base class for ETL pipelines.
 
     Acts as a container for:
@@ -40,23 +40,39 @@ class BasePipeline(ABC):
         runtime: RuntimeConfig,
         services: PipelineServices,
         config: PipelineConfig,
+        transformer: BaseTransformer,
     ) -> Self:
         """Create pipeline instance.
 
         Default factory method. Subclasses can override if custom initialization is needed.
+
+        Args:
+            runtime: Runtime configuration.
+            services: Injected pipeline services.
+            config: Pipeline configuration.
+            transformer: Injected transformer for Bronze → Silver transformation.
         """
-        return cls(config, runtime, services)
+        return cls(config, runtime, services, transformer)
 
     def __init__(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
         services: PipelineServices,
+        transformer: BaseTransformer,
     ) -> None:
-        """Initialize pipeline definition."""
+        """Initialize pipeline definition.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Injected pipeline services.
+            transformer: Injected transformer for Bronze → Silver transformation.
+        """
         self._config = config
         self._runtime = runtime
         self._services = services
+        self._transformer = transformer
         self._run_id = RunID(uuid4())
         self._logger = services.logger.bind(
             run_id=str(self._run_id),
@@ -140,12 +156,21 @@ class BasePipeline(ABC):
 
     # --- Logic Methods (to be used by Executor) ---
 
-    @abstractmethod
     async def transform_bronze_to_silver(
         self, context: PipelineContext, record: BronzeRecord
     ) -> SilverRecord | None:
-        """Transform a raw record from Bronze to Silver format."""
-        pass
+        """Transform a raw record from Bronze to Silver format.
+
+        Delegates to the injected transformer.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record from data source.
+
+        Returns:
+            SilverRecord if transformation successful, None if record should be skipped.
+        """
+        return await self._transformer.transform(context, record)
 
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]

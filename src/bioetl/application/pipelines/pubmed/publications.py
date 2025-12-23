@@ -1,27 +1,20 @@
-# src/bioetl/application/pipelines/pubmed/publications.py
-from __future__ import annotations
+"""PubMed Publications Pipeline.
 
-from typing import TYPE_CHECKING, Any
+Fetches publication data from PubMed database and processes through
+Bronze → Silver → Gold layers.
+
+Entity: Scientific Publications
+Provider: PubMed (https://pubmed.ncbi.nlm.nih.gov/)
+"""
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-
-if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class PubMedPublicationsPipeline(BasePipeline):
-    """Пайплайн для данных о публикациях из PubMed."""
+    """Pipeline for PubMed publication data.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._transformer = PubMedPublicationTransformer(provider=self.provider)
+    Transformer is injected via GenericPipelineFactory (DI pattern).
+    transform_bronze_to_silver() and should_write_gold() are inherited from BasePipeline.
+    """
 
-    async def transform_bronze_to_silver(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Трансформирует сырую XML-запись в формат Silver."""
-        return await self._transformer.transform(context, record)
+    pass

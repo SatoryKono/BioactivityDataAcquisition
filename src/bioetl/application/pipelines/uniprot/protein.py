@@ -1,26 +1,20 @@
-"""UniProt Protein Pipeline Implementation."""
+"""UniProt Protein Pipeline.
 
-from __future__ import annotations
+Fetches protein data from UniProt database and processes through
+Bronze → Silver → Gold layers.
 
-from typing import TYPE_CHECKING, Any
+Entity: Proteins
+Provider: UniProt (https://www.uniprot.org/)
+"""
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.domain.types import BronzeRecord, SilverRecord
-
-if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
 
 
 class UniProtProteinPipeline(BasePipeline):
-    """Pipeline for processing UniProt proteins."""
+    """Pipeline for UniProt protein data.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._transformer = UniProtProteinTransformer(provider=self.provider)
+    Transformer is injected via GenericPipelineFactory (DI pattern).
+    transform_bronze_to_silver() and should_write_gold() are inherited from BasePipeline.
+    """
 
-    async def transform_bronze_to_silver(
-        self, context: PipelineContext, record: BronzeRecord
-    ) -> SilverRecord | None:
-        """Transform raw UniProt record to Silver format."""
-        return await self._transformer.transform(context, record)
+    pass

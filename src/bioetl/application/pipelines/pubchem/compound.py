@@ -1,26 +1,20 @@
-"""PubChem Compound Pipeline Implementation."""
+"""PubChem Compound Pipeline.
 
-from __future__ import annotations
+Fetches compound data from PubChem database and processes through
+Bronze → Silver → Gold layers.
 
-from typing import TYPE_CHECKING, Any
+Entity: Chemical Compounds
+Provider: PubChem (https://pubchem.ncbi.nlm.nih.gov/)
+"""
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.domain.types import BronzeRecord, SilverRecord
-
-if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
 
 
 class PubChemCompoundPipeline(BasePipeline):
-    """Pipeline for processing PubChem compounds."""
+    """Pipeline for PubChem compound data.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._transformer = PubChemCompoundTransformer(provider=self.provider)
+    Transformer is injected via GenericPipelineFactory (DI pattern).
+    transform_bronze_to_silver() and should_write_gold() are inherited from BasePipeline.
+    """
 
-    async def transform_bronze_to_silver(
-        self, context: PipelineContext, record: BronzeRecord
-    ) -> SilverRecord | None:
-        """Transform raw PubChem record to Silver format."""
-        return await self._transformer.transform(context, record)
+    pass
