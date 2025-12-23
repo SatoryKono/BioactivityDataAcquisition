@@ -299,10 +299,15 @@ Lock key включает тип запуска:
 **Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`).
 
 - **Unit**: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек.
-- **Integration**: 
-    - **VCR.py**: Запись ответов API в кассеты (`tests/fixtures/vcr/`). 
-    - **Санитизация**: Обязательная очистка секретов (`Authorization`, `X-API-Key`) и PII в хуке `before_record`. 
-    - **CI**: Падать, если кассета отсутствует (`pytest --vcr-record=none`), чтобы гарантировать отсутствие сетевых вызовов в CI. 
+- **Integration**:
+    - **VCR.py**: Запись ответов API в кассеты (`tests/fixtures/vcr/`).
+    - **Санитизация**: Обязательная очистка секретов (`Authorization`, `X-API-Key`) и PII в хуке `before_record`.
+    - **CI**: Падать, если кассета отсутствует (`pytest --vcr-record=none`), чтобы гарантировать отсутствие сетевых вызовов в CI.
+- **E2E (End-to-End)**: Полный цикл пайплайна от fetch до Gold (`tests/e2e/`).
+    - **Архитектура**: Local-Only (файловая система, MemoryLock, LocalCheckpoint).
+    - **Helpers**: `create_test_context()`, `assert_bronze_files_exist()`, `assert_silver_table_has_records()`.
+    - **Маркер**: `@pytest.mark.e2e` для селективного запуска.
+    - **Запуск**: `pytest tests/e2e/ -v -m e2e`.
 - **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов. 
  
 ## 5. Операции (Лимиты, Секреты, Shutdown) 

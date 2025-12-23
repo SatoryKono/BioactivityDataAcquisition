@@ -1,6 +1,6 @@
 # Rules Summary
 
-*Синхронизировано с RULES.md v5.0 (2025-12-15)*
+*Синхронизировано с RULES.md v5.2 (2025-12-23)*
 
 ## Уровни Требований (RFC 2119)
 
@@ -237,7 +237,8 @@
 
 - PEP8, Black, Ruff, Mypy (strict).
 - Логирование: `UnifiedLogger` (структурный JSON). **print() MUST NOT.**
-- Тесты: Unit (mock net), Integration (VCR.py), Golden. Coverage ≥80%.
+- Тесты: Unit (mock net), Integration (VCR.py), E2E (Local-Only), Golden. Coverage ≥80%.
+- E2E: `@pytest.mark.e2e`, полный цикл pipeline от fetch до Gold.
 - Zero-sum class count при дублировании.
 - Чек-лист ревью: `docs/templates/pipeline-review-checklist.md`.
 
