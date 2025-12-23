@@ -140,27 +140,32 @@ class TestGenericPipelineFactory:
     def test_init_with_provider(self):
         """Test factory initialization with provider name."""
         mock_pipeline_class = MagicMock()
+        mock_transformer_class = MagicMock()
 
         factory = GenericPipelineFactory(
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
+            transformer_class=mock_transformer_class,
         )
 
         assert factory.pipeline_name == "test_pipeline"
         assert factory.pipeline_class is mock_pipeline_class
         assert factory.provider == "chembl"
+        assert factory.transformer_class is mock_transformer_class
         assert factory.silver_schema is None
 
     def test_init_with_custom_creator(self):
         """Test factory initialization with custom data source creator."""
         mock_pipeline_class = MagicMock()
+        mock_transformer_class = MagicMock()
         custom_creator = MagicMock()
 
         factory = GenericPipelineFactory(
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            transformer_class=mock_transformer_class,
             data_source_creator=custom_creator,
         )
 
@@ -171,6 +176,7 @@ class TestGenericPipelineFactory:
     ):
         """Test data source creation through factory."""
         mock_pipeline_class = MagicMock()
+        mock_transformer_class = MagicMock()
         mock_data_source = MagicMock()
         custom_creator = MagicMock(return_value=mock_data_source)
 
@@ -178,6 +184,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            transformer_class=mock_transformer_class,
             data_source_creator=custom_creator,
         )
 
@@ -202,6 +209,7 @@ class TestGenericPipelineFactory:
     ):
         """Test services building."""
         mock_pipeline_class = MagicMock()
+        mock_transformer_class = MagicMock()
         mock_data_source = MagicMock()
         custom_creator = MagicMock(return_value=mock_data_source)
         mock_services = MagicMock()
@@ -212,6 +220,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            transformer_class=mock_transformer_class,
             data_source_creator=custom_creator,
         )
 
@@ -227,12 +236,14 @@ class TestCreatePipelineFactory:
     def test_creates_generic_factory(self):
         """Test that function creates GenericPipelineFactory."""
         mock_pipeline_class = MagicMock()
+        mock_transformer_class = MagicMock()
         mock_schema = MagicMock()
 
         factory = create_pipeline_factory(
             pipeline_name="test",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
+            transformer_class=mock_transformer_class,
             silver_schema=mock_schema,
         )
 
@@ -240,6 +251,7 @@ class TestCreatePipelineFactory:
         assert factory.pipeline_name == "test"
         assert factory.pipeline_class is mock_pipeline_class
         assert factory.provider == "chembl"
+        assert factory.transformer_class is mock_transformer_class
         assert factory.silver_schema is mock_schema
 
 
@@ -249,12 +261,14 @@ class TestPipelineRegistryIntegration:
     def test_register_factory_instance(self):
         """Test registering factory instance with registry."""
         mock_pipeline_class = MagicMock()
+        mock_transformer_class = MagicMock()
         mock_schema = MagicMock()
 
         factory = GenericPipelineFactory(
             pipeline_name="test_generic",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
+            transformer_class=mock_transformer_class,
             silver_schema=mock_schema,
             data_source_creator=MagicMock(),
         )

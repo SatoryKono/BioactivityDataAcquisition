@@ -5,7 +5,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 
 
@@ -31,8 +33,12 @@ class TestPubChemCompoundPipeline:
         # Arrange
         config = MagicMock()
         config.provider = "pubchem"
+        transformer = PubChemCompoundTransformer(provider="pubchem")
         pipeline = PubChemCompoundPipeline(
-            config=config, runtime=MagicMock(), services=MagicMock()
+            config=config,
+            runtime=MagicMock(),
+            services=MagicMock(),
+            transformer=transformer,
         )
 
         record = {
@@ -59,8 +65,12 @@ class TestPubChemCompoundPipeline:
         self, mock_context, mock_pipeline_base
     ):
         # Arrange
+        transformer = PubChemCompoundTransformer(provider="pubchem")
         pipeline = PubChemCompoundPipeline(
-            config=MagicMock(), runtime=MagicMock(), services=MagicMock()
+            config=MagicMock(),
+            runtime=MagicMock(),
+            services=MagicMock(),
+            transformer=transformer,
         )
         record = {"molecular_formula": "C6H6"}
 
@@ -79,8 +89,12 @@ class TestUniProtProteinPipeline:
         # Arrange
         config = MagicMock()
         config.provider = "uniprot"
+        transformer = UniProtProteinTransformer(provider="uniprot")
         pipeline = UniProtProteinPipeline(
-            config=config, runtime=MagicMock(), services=MagicMock()
+            config=config,
+            runtime=MagicMock(),
+            services=MagicMock(),
+            transformer=transformer,
         )
 
         record = {
@@ -111,8 +125,12 @@ class TestUniProtProteinPipeline:
         self, mock_context, mock_pipeline_base
     ):
         # Arrange
+        transformer = UniProtProteinTransformer(provider="uniprot")
         pipeline = UniProtProteinPipeline(
-            config=MagicMock(), runtime=MagicMock(), services=MagicMock()
+            config=MagicMock(),
+            runtime=MagicMock(),
+            services=MagicMock(),
+            transformer=transformer,
         )
         record = {"uniProtkbId": "TEST_ID"}
 

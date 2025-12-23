@@ -5,21 +5,36 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
 
-class ConcretePipeline(BasePipeline):
-    async def transform_bronze_to_silver(
-        self, _context: PipelineContext, record: dict
+class MockTransformer(BaseTransformer):
+    """Mock transformer for testing."""
+
+    async def transform(
+        self, context: PipelineContext, record: dict
     ) -> dict | None:
         return record
 
 
+class ConcretePipeline(BasePipeline):
+    """Concrete implementation for testing (uses injected transformer)."""
+
+    pass
+
+
 @pytest.fixture
-def mock_pipeline():
+def mock_transformer():
+    """Create mock transformer."""
+    return MockTransformer(provider="test_provider")
+
+
+@pytest.fixture
+def mock_pipeline(mock_transformer):
     """Fixture for a mocked BasePipeline."""
     config = PipelineConfig(
         pipeline_name="test_pipeline",
@@ -46,7 +61,7 @@ def mock_pipeline():
         tracing=MagicMock(),
         logger=mock_logger,
     )
-    pipeline = ConcretePipeline(config, runtime, services)
+    pipeline = ConcretePipeline(config, runtime, services, mock_transformer)
     return pipeline
 
 
@@ -61,8 +76,8 @@ async def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.context.logger is not None
 
 
-async def test_base_pipeline_accepts_three_params():
-    """Test that BasePipeline.__init__ accepts exactly 3 parameters."""
+async def test_base_pipeline_accepts_four_params():
+    """Test that BasePipeline.__init__ accepts exactly 4 parameters (with transformer)."""
     config = PipelineConfig(
         pipeline_name="test",
         provider="test",
@@ -83,12 +98,14 @@ async def test_base_pipeline_accepts_three_params():
         tracing=MagicMock(),
         logger=mock_logger,
     )
+    transformer = MockTransformer(provider="test")
 
-    # Should work with exactly 3 positional args
-    pipeline = ConcretePipeline(config, runtime, services)
+    # Should work with exactly 4 positional args (including transformer)
+    pipeline = ConcretePipeline(config, runtime, services, transformer)
     assert pipeline.config == config
     assert pipeline.runtime == runtime
     assert pipeline.services == services
+    assert pipeline._transformer == transformer
 
 
 @pytest.mark.skip(reason="Suspected .pyc cache issue - run with --cache-clear")

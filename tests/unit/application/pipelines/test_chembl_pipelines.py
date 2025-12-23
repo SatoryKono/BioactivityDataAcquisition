@@ -6,9 +6,13 @@ import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
+from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
+from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
+from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
@@ -70,10 +74,12 @@ class TestChEMBLAssayPipeline:
             silver_table="chembl.assay",
             primary_keys=["assay_chembl_id"],
         )
+        transformer = AssayTransformer(provider="chembl")
         return ChEMBLAssayPipeline(
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            transformer=transformer,
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -118,10 +124,12 @@ class TestChEMBLDocumentPipeline:
             silver_table="chembl.document",
             primary_keys=["document_chembl_id"],
         )
+        transformer = DocumentTransformer(provider="chembl")
         return ChEMBLDocumentPipeline(
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            transformer=transformer,
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -166,10 +174,12 @@ class TestChEMBLMoleculePipeline:
             silver_table="chembl.molecule",
             primary_keys=["molecule_chembl_id"],
         )
+        transformer = MoleculeTransformer(provider="chembl")
         return ChEMBLMoleculePipeline(
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            transformer=transformer,
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -214,10 +224,12 @@ class TestChEMBLTargetPipeline:
             silver_table="chembl.target",
             primary_keys=["target_chembl_id"],
         )
+        transformer = TargetTransformer(provider="chembl")
         return ChEMBLTargetPipeline(
             config=config,
             runtime=runtime_config,
             services=mock_services,
+            transformer=transformer,
         )
 
     def test_pipeline_initialization(self, pipeline):

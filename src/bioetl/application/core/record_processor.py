@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationError
+from bioetl.domain.exceptions import DataQualityThresholdError
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorder
@@ -263,9 +263,8 @@ class RecordProcessor:
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
         # Validate Gold records using dedicated validator (SRP)
-        result = self._gold_validator.validate(records)
-        if not result.valid:
-            raise SchemaViolationError("gold", result.errors)
+        # Raises pandera.SchemaError on validation failure
+        self._gold_validator.validate(records)
 
         # Use configured table name or default
         table_name = (

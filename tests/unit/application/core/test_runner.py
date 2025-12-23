@@ -1,6 +1,6 @@
 """Unit tests for the PipelineRunner class."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
@@ -103,13 +103,11 @@ def shutdown_signal():
 
 @pytest.fixture
 def mock_lock_manager():
-    """Mock LockManager class."""
-    with patch("bioetl.application.core.runner.LockManager") as mock:
-        lock_manager = MagicMock()
-        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
-        lock_manager.__aexit__ = AsyncMock(return_value=None)
-        mock.create.return_value = lock_manager
-        yield mock
+    """Mock LockManager instance (injected via DI)."""
+    lock_manager = MagicMock()
+    lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+    lock_manager.__aexit__ = AsyncMock(return_value=None)
+    return lock_manager
 
 
 @pytest.fixture
@@ -134,6 +132,7 @@ def runner(
         checkpoint_manager=mock_checkpoint_manager,
         shutdown_signal=shutdown_signal,
         logger=mock_logger,
+        lock_manager=mock_lock_manager,
     )
 
 
@@ -163,39 +162,13 @@ class TestPipelineRunnerInit:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lock_manager=mock_lock_manager,
         )
 
         assert runner._config == pipeline_config
         assert runner._runtime == runtime_config
         assert runner.shutdown_signal == shutdown_signal
-
-    def test_lock_manager_created_on_init(
-        self,
-        pipeline_config,
-        runtime_config,
-        mock_services,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test LockManager is created during initialization."""
-        PipelineRunner(
-            config=pipeline_config,
-            runtime=runtime_config,
-            services=mock_services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        mock_lock_manager.create.assert_called_once()
-        call_kwargs = mock_lock_manager.create.call_args.kwargs
-        assert call_kwargs["heartbeat_interval"] == runtime_config.heartbeat_interval
+        assert runner._lock_manager == mock_lock_manager
 
 
 @pytest.mark.unit
@@ -337,6 +310,7 @@ class TestPipelineRunnerRun:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lock_manager=mock_lock_manager,
             pipeline=None,
         )
 
@@ -380,6 +354,7 @@ class TestPipelineRunnerClearExports:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lock_manager=mock_lock_manager,
         )
 
         runner._clear_exports()
@@ -416,6 +391,7 @@ class TestPipelineRunnerClearExports:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lock_manager=mock_lock_manager,
         )
 
         runner._clear_exports()
@@ -455,6 +431,7 @@ class TestPipelineRunnerClearExports:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lock_manager=mock_lock_manager,
         )
 
         runner._clear_exports()
@@ -501,6 +478,7 @@ class TestPipelineRunnerClearExports:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lock_manager=mock_lock_manager,
         )
 
         runner._clear_exports()
