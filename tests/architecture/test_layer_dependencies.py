@@ -748,9 +748,8 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
     )
 
     # Explicitly allowed hasattr checks (documented extensions)
-    ALLOWED_HASATTR_CHECKS = {
-        "fetch_filtered",  # FilterableDataSourcePort extension (see filtered_data_source.py)
-    }
+    # Note: fetch_filtered is now formalized via FilterableDataSourcePort Protocol
+    ALLOWED_HASATTR_CHECKS: set[str] = set()
 
     violations = []
 
@@ -1178,4 +1177,78 @@ def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
     # Should have get_error_type() call for domain errors
     assert "get_error_type()" in content or "error_type" in content, (
         "ErrorClassifier should use error_type attribute for domain exceptions"
+    )
+
+
+def test_filterable_adapters_implement_protocol(src_dir: Path) -> None:
+    """Adapters with fetch_filtered MUST implement FilterableDataSourcePort.
+
+    REQ-ARCH-025: Replace duck-typing with explicit Protocol for adapters
+    that support filtering at API level. This ensures type safety and
+    enables isinstance() checks instead of hasattr().
+    """
+    adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
+    if not adapters_path.exists():
+        pytest.skip("Infrastructure adapters not found")
+
+    violations = []
+
+    for py_file in adapters_path.rglob("*.py"):
+        if py_file.name.startswith("_"):
+            continue
+
+        content = py_file.read_text(encoding="utf-8")
+
+        # Check if file defines fetch_filtered method
+        has_fetch_filtered = (
+            "def fetch_filtered" in content or "async def fetch_filtered" in content
+        )
+
+        if has_fetch_filtered:
+            # Should reference FilterableDataSourcePort in docstring
+            has_protocol_ref = "FilterableDataSourcePort" in content
+
+            if not has_protocol_ref:
+                relative_path = py_file.relative_to(src_dir)
+                violations.append(
+                    f"{relative_path}: defines fetch_filtered but doesn't "
+                    "reference FilterableDataSourcePort"
+                )
+
+    assert not violations, (
+        "Adapters with fetch_filtered must implement FilterableDataSourcePort.\n"
+        "Update class/method docstrings to reference the Protocol:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )
+
+
+def test_filtered_data_source_uses_isinstance(src_dir: Path) -> None:
+    """FilteredDataSource MUST use isinstance() for Protocol check.
+
+    REQ-ARCH-026: Replace hasattr() duck-typing with isinstance() check
+    for FilterableDataSourcePort. This enables proper type checking and
+    IDE support.
+    """
+    filtered_source = (
+        src_dir / "bioetl" / "application" / "core" / "filtered_data_source.py"
+    )
+    if not filtered_source.exists():
+        pytest.skip("FilteredDataSource not found")
+
+    content = filtered_source.read_text(encoding="utf-8")
+
+    # Should NOT use hasattr for fetch_filtered
+    uses_hasattr = 'hasattr' in content and 'fetch_filtered' in content
+    assert not uses_hasattr, (
+        "FilteredDataSource should not use hasattr() for fetch_filtered check. "
+        "Use isinstance(adapter, FilterableDataSourcePort) instead."
+    )
+
+    # Should use isinstance with FilterableDataSourcePort
+    uses_isinstance = (
+        "isinstance" in content and "FilterableDataSourcePort" in content
+    )
+    assert uses_isinstance, (
+        "FilteredDataSource must use isinstance(adapter, FilterableDataSourcePort) "
+        "for type-safe Protocol check."
     )
