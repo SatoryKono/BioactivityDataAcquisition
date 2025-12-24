@@ -80,6 +80,7 @@ from bioetl.domain.filter_config import (
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
+    FilterableDataSourcePort,
     GoldValidatorPort,
     InputFilterPort,
     LockPort,
@@ -176,6 +177,7 @@ __all__ = [
     # Ports
     "CheckpointPort",
     "DataSourcePort",
+    "FilterableDataSourcePort",
     "GoldValidatorPort",
     "InputFilterPort",
     "LockPort",

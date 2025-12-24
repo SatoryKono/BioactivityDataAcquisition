@@ -22,7 +22,7 @@ ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 class PubMedAdapter:
     """PubMed adapter using UnifiedHTTPClient.
 
-    Implements DataSourcePort for PubMed data extraction.
+    Implements DataSourcePort and FilterableDataSourcePort for PubMed data extraction.
 
     Args:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
@@ -30,6 +30,9 @@ class PubMedAdapter:
         email: Email address for NCBI API (required).
         api_key: Optional NCBI API key for higher rate limits.
         batch_size: Number of records to fetch per batch.
+
+    FilterableDataSourcePort:
+        Implements fetch_filtered() for direct PMID-based fetching without search.
     """
 
     http_client: UnifiedHTTPClient
@@ -137,10 +140,13 @@ class PubMedAdapter:
         self,
         entity_type: str,
         filter_ids: list[str],
-        filter_field: str | None = None,
+        filter_field: str = "pmid",
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubMed records by ID list (bypass search)."""
+        """Fetch PubMed records by ID list (bypass search).
+
+        Implements FilterableDataSourcePort.fetch_filtered() for direct PMID fetching.
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 

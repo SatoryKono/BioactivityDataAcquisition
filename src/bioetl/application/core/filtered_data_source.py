@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
+from bioetl.domain.ports import FilterableDataSourcePort
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
@@ -163,18 +165,20 @@ class FilteredDataSource:
         # Note: External filter_ids/filter_field are ignored -
         # this class manages its own filter state from InputFilterConfig
         _ = filter_ids, filter_field  # Mark as intentionally unused
-        if self._filter_config.enabled and self._filter_ids:
-            # Check if adapter supports filtering (ChEMBL-specific extension)
-            if not hasattr(self._data_source, "fetch_filtered"):
+        configured_filter_field = self._filter_config.filter_field
+        if self._filter_config.enabled and self._filter_ids and configured_filter_field:
+            # Check if adapter supports filtering via FilterableDataSourcePort
+            if not isinstance(self._data_source, FilterableDataSourcePort):
                 raise TypeError(
-                    f"Adapter {self._data_source.provider_name} does not support "
-                    "fetch_filtered(). Filtering requires an adapter with this method."
+                    f"Adapter {self._data_source.provider_name} does not implement "
+                    "FilterableDataSourcePort. Filtering requires an adapter "
+                    "with fetch_filtered() method."
                 )
             # Filtered fetch using adapter-specific method
             async for record in self._data_source.fetch_filtered(
                 entity_type=entity_type,
                 filter_ids=self._filter_ids,
-                filter_field=self._filter_config.filter_field,
+                filter_field=configured_filter_field,
                 limit=limit,
             ):
                 yield record

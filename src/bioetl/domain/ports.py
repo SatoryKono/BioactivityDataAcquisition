@@ -114,6 +114,51 @@ class DataSourcePort(Protocol):
 
 
 @runtime_checkable
+class FilterableDataSourcePort(DataSourcePort, Protocol):
+    """Extended DataSourcePort that supports filtering at API level.
+
+    This protocol formalizes the contract for data sources that can perform
+    filtering directly at the source level (e.g., ChEMBL's molecule_chembl_id__in).
+
+    Adapters implementing this protocol allow FilteredDataSource to delegate
+    filtering to the API instead of filtering records after retrieval.
+
+    Example:
+        >>> if isinstance(data_source, FilterableDataSourcePort):
+        ...     async for record in data_source.fetch_filtered(
+        ...         entity_type="activity",
+        ...         filter_ids=["CHEMBL25", "CHEMBL192"],
+        ...         filter_field="molecule_chembl_id",
+        ...     ):
+        ...         process(record)
+    """
+
+    def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by specific IDs at the source level.
+
+        Args:
+            entity_type: Type of entity to fetch (e.g., 'activity', 'molecule').
+            filter_ids: List of IDs to filter by (passed to API filter).
+            filter_field: Field name to filter on (e.g., 'molecule_chembl_id').
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+
+        Note:
+            This is NOT an async def because async generator functions
+            return AsyncIterator directly without needing to be awaited.
+        """
+        ...
+
+
+@runtime_checkable
 class InputFilterPort(Protocol):
     """Port for loading filter IDs from external sources.
 
@@ -642,6 +687,7 @@ class GoldValidatorPort(Protocol):
 __all__ = [
     "CheckpointPort",
     "DataSourcePort",
+    "FilterableDataSourcePort",
     "GoldValidatorPort",
     "InputFilterPort",
     "LockPort",
@@ -649,4 +695,5 @@ __all__ = [
     "MetricsPort",
     "QuarantinePort",
     "StoragePort",
+    "TracingPort",
 ]

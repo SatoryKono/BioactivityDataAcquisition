@@ -724,8 +724,9 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
     - TYPE_CHECKING blocks (static analysis only)
     - Checking for dunder methods (__enter__, __aiter__, etc.)
     - Checking for private attributes (_internal)
-    - fetch_filtered: Extension method for filterable adapters (ChEMBL-specific)
-      TODO: Create FilterableDataSourcePort Protocol to formalize this
+
+    Note: fetch_filtered is now formalized via FilterableDataSourcePort Protocol,
+    so isinstance() should be used instead of hasattr().
     """
     import ast
 
@@ -737,7 +738,7 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
     PORT_METHOD_PATTERNS = (
         "clear_",
         "write_",
-        # "fetch_" excluded: fetch_filtered is a documented extension pattern
+        "fetch_",
         "read_",
         "load_",
         "save_",
@@ -748,9 +749,8 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
     )
 
     # Explicitly allowed hasattr checks (documented extensions)
-    ALLOWED_HASATTR_CHECKS = {
-        "fetch_filtered",  # FilterableDataSourcePort extension (see filtered_data_source.py)
-    }
+    # Empty after FilterableDataSourcePort formalization
+    ALLOWED_HASATTR_CHECKS: set[str] = set()
 
     violations = []
 
@@ -1178,4 +1178,103 @@ def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
     # Should have get_error_type() call for domain errors
     assert "get_error_type()" in content or "error_type" in content, (
         "ErrorClassifier should use error_type attribute for domain exceptions"
+    )
+
+
+def test_filterable_adapters_implement_protocol(src_dir: Path) -> None:
+    """Adapters with fetch_filtered MUST be compatible with FilterableDataSourcePort.
+
+    REQ-ARCH-025: Adapters that support API-level filtering should implement
+    FilterableDataSourcePort Protocol for proper isinstance() checks.
+    """
+    adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
+    if not adapters_path.exists():
+        pytest.skip("Infrastructure adapters not found")
+
+    # Files that might contain filterable adapters
+    excluded_files = {
+        "__init__.py",
+        "base.py",
+        "types.py",
+        "exceptions.py",
+        "pagination.py",
+        "rate_limiter.py",
+        "circuit_breaker.py",
+        "logging_utils.py",
+        "sync_base.py",
+        "health.py",
+    }
+
+    adapters_with_fetch_filtered = []
+
+    for py_file in adapters_path.rglob("*.py"):
+        if py_file.name in excluded_files:
+            continue
+
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+
+        # Check if file defines fetch_filtered method
+        if "def fetch_filtered(" in content or "async def fetch_filtered(" in content:
+            relative_path = py_file.relative_to(src_dir)
+            adapters_with_fetch_filtered.append(str(relative_path))
+
+            # Verify the docstring mentions FilterableDataSourcePort
+            if "FilterableDataSourcePort" not in content:
+                pytest.fail(
+                    f"{relative_path} has fetch_filtered() but doesn't reference "
+                    "FilterableDataSourcePort in docstring. "
+                    "Add Protocol reference for documentation clarity."
+                )
+
+    # Verify at least one adapter implements the protocol (ChemblAdapter)
+    assert adapters_with_fetch_filtered, (
+        "No adapters found with fetch_filtered(). Expected ChemblAdapter."
+    )
+
+
+def test_filtered_data_source_uses_isinstance(src_dir: Path) -> None:
+    """FilteredDataSource MUST use isinstance() instead of hasattr().
+
+    REQ-ARCH-026: After FilterableDataSourcePort formalization,
+    FilteredDataSource should use isinstance() for protocol checks.
+    """
+    filtered_ds_file = (
+        src_dir / "bioetl" / "application" / "core" / "filtered_data_source.py"
+    )
+    if not filtered_ds_file.exists():
+        pytest.skip("FilteredDataSource not found")
+
+    with filtered_ds_file.open(encoding="utf-8") as f:
+        content = f.read()
+
+    # Should import FilterableDataSourcePort
+    assert "FilterableDataSourcePort" in content, (
+        "FilteredDataSource should import FilterableDataSourcePort from domain.ports"
+    )
+
+    # Should NOT use hasattr for fetch_filtered check
+    if "hasattr" in content and "fetch_filtered" in content:
+        # Check if hasattr is used with fetch_filtered (not just mentioned separately)
+        import ast
+
+        tree = ast.parse(content)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Name) and node.func.id == "hasattr":
+                    if len(node.args) >= 2:
+                        arg = node.args[1]
+                        if (
+                            isinstance(arg, ast.Constant)
+                            and arg.value == "fetch_filtered"
+                        ):
+                            pytest.fail(
+                                "FilteredDataSource still uses hasattr() for "
+                                "fetch_filtered check. Use isinstance(data_source, "
+                                "FilterableDataSourcePort) instead."
+                            )
+
+    # Should use isinstance with FilterableDataSourcePort
+    assert "isinstance" in content and "FilterableDataSourcePort" in content, (
+        "FilteredDataSource should use isinstance(data_source, FilterableDataSourcePort)"
     )

@@ -71,7 +71,8 @@ ENTITY_PLURAL = {
 class ChemblAdapter(BaseHttpAdapter):
     """ChEMBL data source adapter.
 
-    Implements DataSourcePort for fetching data from ChEMBL database.
+    Implements DataSourcePort and FilterableDataSourcePort for fetching data
+    from ChEMBL database with support for API-level filtering.
 
     Args:
         http_client: UnifiedHTTPClient instance
@@ -83,6 +84,10 @@ class ChemblAdapter(BaseHttpAdapter):
         - HEALTHY: Uses configured batch_size
         - DEGRADED: Uses batch_size ÷ 2 to reduce load
         - UNHEALTHY: Raises CriticalError to prevent futile requests
+
+    FilterableDataSourcePort:
+        Implements fetch_filtered() for efficient API-level filtering using
+        ChEMBL's filter query parameters (e.g., molecule_chembl_id__in).
     """
 
     http_client: UnifiedHTTPClient
@@ -333,7 +338,7 @@ class ChemblAdapter(BaseHttpAdapter):
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from ChEMBL with ID filtering.
 
-        This is a ChEMBL-specific extension not part of DataSourcePort.
+        Implements FilterableDataSourcePort.fetch_filtered() for API-level filtering.
 
         Args:
             entity_type: Type of entity to fetch
