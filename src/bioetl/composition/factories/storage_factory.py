@@ -203,6 +203,65 @@ class StorageAdapter:
 
         return cleared_count
 
+    def preview_cleanup(
+        self,
+        silver_table: str,
+        gold_table: str | None = None,
+    ) -> dict[str, Any]:
+        """Preview what would be cleared without actual deletion.
+
+        Implements StoragePort.preview_cleanup().
+        Used by CLI dry-run mode to show users what data would be affected.
+
+        Args:
+            silver_table: Silver table name (e.g., 'chembl.activity')
+            gold_table: Optional Gold table name
+
+        Returns:
+            Dict with layer info including paths and file counts.
+        """
+        result: dict[str, Any] = {
+            "silver": self._preview_layer(self.silver, silver_table),
+            "gold": None,
+            "total_files": 0,
+        }
+
+        if gold_table:
+            result["gold"] = self._preview_layer(self.gold, gold_table)
+
+        result["total_files"] = (
+            result["silver"]["file_count"]
+            + (result["gold"]["file_count"] if result["gold"] else 0)
+        )
+        return result
+
+    def _preview_layer(
+        self,
+        writer: DeltaWriter | GoldWriter,
+        table_name: str,
+    ) -> dict[str, Any]:
+        """Count files in a layer without deletion.
+
+        Args:
+            writer: Delta or Gold writer instance
+            table_name: Table name to preview
+
+        Returns:
+            Dict with path, file_count, and exists status.
+        """
+        path = writer.get_table_path(table_name)
+        file_count = 0
+        exists = path.exists()
+
+        if exists:
+            file_count = sum(1 for f in path.rglob("*") if f.is_file())
+
+        return {
+            "path": str(path),
+            "file_count": file_count,
+            "exists": exists,
+        }
+
     async def aclose(self) -> None:
         """Close resources.
 

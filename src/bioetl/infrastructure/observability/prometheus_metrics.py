@@ -37,6 +37,10 @@ class PrometheusMetrics(MetricsPort):
     Maps metric names to pre-defined Prometheus metrics and records observations.
     """
 
+    def __init__(self) -> None:
+        """Initialize Prometheus metrics adapter."""
+        self._closed = False
+
     def observe_histogram(
         self,
         name: str,
@@ -56,3 +60,46 @@ class PrometheusMetrics(MetricsPort):
         """Increment a Prometheus counter."""
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
+
+    def close(self) -> None:
+        """Cleanup Prometheus metrics. Idempotent.
+
+        Note: For the default global REGISTRY, this is a no-op since
+        metrics are shared across the process. For custom registries,
+        this could unregister collectors.
+        """
+        if self._closed:
+            return
+        # For default REGISTRY: no-op (shared across tests/process)
+        # If using custom registry, could call registry.unregister() here
+        self._closed = True
+
+
+class NoOpMetrics(MetricsPort):
+    """Null object pattern for metrics (used when Prometheus is disabled)."""
+
+    def __init__(self) -> None:
+        """Initialize no-op metrics."""
+        self._closed = False
+
+    def observe_histogram(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op histogram observation."""
+        pass
+
+    def increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op counter increment."""
+        pass
+
+    def close(self) -> None:
+        """No-op close. Idempotent."""
+        self._closed = True
