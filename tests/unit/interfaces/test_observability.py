@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # This module tests the observability interface.
 # The observability module starts a metrics server internally by setting `_SERVER_STARTED` to `True`.
 # Below are the test functions to ensure server initialization behaviour.

@@ -1,5 +1,7 @@
 """Unit tests for MemoryLock."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.infrastructure.locking.memory_lock import MemoryLock

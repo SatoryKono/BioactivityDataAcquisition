@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # tests/integration/adapters/test_pubmed.py
 from unittest.mock import MagicMock
 

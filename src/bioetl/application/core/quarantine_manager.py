@@ -3,6 +3,8 @@
 Refactored per ADR-0005 to accept explicit dependencies instead of full pipeline.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 

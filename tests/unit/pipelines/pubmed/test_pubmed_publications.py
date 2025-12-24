@@ -1,5 +1,7 @@
 """Unit tests for PubMed Publications Pipeline."""
 
+from __future__ import annotations
+
 from typing import cast
 from unittest.mock import MagicMock
 from uuid import UUID, uuid4

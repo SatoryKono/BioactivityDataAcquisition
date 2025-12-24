@@ -4,6 +4,8 @@ Tests adapter initialization, configuration, and basic functionality.
 Uses mocking for external API calls.
 """
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 import pytest

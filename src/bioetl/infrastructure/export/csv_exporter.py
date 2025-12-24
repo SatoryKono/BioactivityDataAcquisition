@@ -10,6 +10,8 @@ Architecture:
 - Deterministic output: sorted by specified columns
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 import logging

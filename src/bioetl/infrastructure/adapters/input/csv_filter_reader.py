@@ -4,6 +4,8 @@ Implements InputFilterPort for reading filter IDs from CSV files.
 Uses Polars for efficient CSV parsing.
 """
 
+from __future__ import annotations
+
 import logging
 from collections import Counter
 from pathlib import Path

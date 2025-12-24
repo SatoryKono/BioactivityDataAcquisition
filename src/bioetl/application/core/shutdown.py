@@ -4,6 +4,8 @@ This module provides a shared shutdown signal that can be passed to
 multiple pipeline components without creating circular dependencies.
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass, field
 

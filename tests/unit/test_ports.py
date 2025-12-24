@@ -1,5 +1,7 @@
 """Unit tests for domain ports (Protocols)."""
 
+from __future__ import annotations
+
 from typing import Any
 
 import pytest

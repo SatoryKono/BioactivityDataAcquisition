@@ -4,6 +4,8 @@ Tests the complete pipeline execution from fetch to Gold layer.
 Uses VCR cassettes for HTTP requests and local file storage.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest

@@ -1,5 +1,7 @@
 """Unit tests for ShutdownSignal."""
 
+from __future__ import annotations
+
 import asyncio
 
 import pytest

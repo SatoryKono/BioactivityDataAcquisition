@@ -11,6 +11,8 @@ Requirements:
 Documentation: https://www.uniprot.org/help/api
 """
 
+from __future__ import annotations
+
 import asyncio
 from collections.abc import AsyncIterator
 from typing import Any

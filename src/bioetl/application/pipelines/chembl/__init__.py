@@ -4,6 +4,8 @@ This package provides pipelines and transformers for extracting and
 processing data from the ChEMBL database.
 """
 
+from __future__ import annotations
+
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import (
     ActivityTransformer,

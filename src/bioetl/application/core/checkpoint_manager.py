@@ -4,6 +4,8 @@ This module is framework-agnostic and handles checkpoint persistence
 for pipeline run tracking.
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports import CheckpointPort

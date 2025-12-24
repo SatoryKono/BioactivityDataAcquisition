@@ -15,6 +15,8 @@ Requirements:
 - REQ-OBS-005: Log Schema with mandatory fields
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 from typing import Any

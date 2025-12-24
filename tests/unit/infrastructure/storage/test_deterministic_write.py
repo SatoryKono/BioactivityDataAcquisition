@@ -4,6 +4,8 @@ Verifies that records are written in a deterministic order regardless
 of input order, ensuring reproducible output files.
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 

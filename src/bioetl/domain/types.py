@@ -4,6 +4,8 @@ Implements RULES.md §1 - Domain Layer with pure types and value objects.
 No I/O operations allowed (REQ-ARCH-003).
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict

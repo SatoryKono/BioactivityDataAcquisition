@@ -11,6 +11,8 @@ Requirements:
 Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 """
 
+from __future__ import annotations
+
 from collections.abc import AsyncIterator
 from typing import Any
 

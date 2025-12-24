@@ -11,6 +11,8 @@ E2E тесты используют локальное файловое хран
     pytest tests/e2e/ -v -m e2e  # Прямой запуск
 """
 
+from __future__ import annotations
+
 import os
 from collections.abc import Generator
 from pathlib import Path

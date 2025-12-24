@@ -6,6 +6,8 @@ Tests that verify:
 - Pipeline dependencies and cross-references
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest

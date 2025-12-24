@@ -1,5 +1,7 @@
 """Unit tests for local checkpointing."""
 
+from __future__ import annotations
+
 import json
 from uuid import UUID
 

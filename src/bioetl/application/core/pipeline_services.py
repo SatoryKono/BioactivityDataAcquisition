@@ -6,6 +6,8 @@ Separates I/O port dependencies from pipeline logic.
 Logger and Metrics are formalized as ports (ADR-005).
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass
 from typing import Self

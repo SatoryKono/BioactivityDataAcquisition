@@ -1,5 +1,7 @@
 """Unit tests for BaseHttpAdapter observability fallback."""
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter

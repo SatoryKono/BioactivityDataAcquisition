@@ -9,6 +9,8 @@ Configuration consolidation (all in bioetl.domain.config):
 - RuntimeConfig: CLI/runtime parameters
 """
 
+from __future__ import annotations
+
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.checkpoint_manager import CheckpointManager

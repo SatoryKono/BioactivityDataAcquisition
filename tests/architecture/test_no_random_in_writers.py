@@ -4,6 +4,8 @@ REQ-ARCH-030: Deterministic writes for reproducibility.
 See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 """
 
+from __future__ import annotations
+
 import ast
 from pathlib import Path
 

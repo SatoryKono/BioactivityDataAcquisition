@@ -1,5 +1,7 @@
 """Unit tests for IQR and MAD anomaly detectors."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.infrastructure.observability.anomaly.detectors.iqr import IQRDetector

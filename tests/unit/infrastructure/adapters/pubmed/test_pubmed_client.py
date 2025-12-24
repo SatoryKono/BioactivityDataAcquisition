@@ -1,3 +1,4 @@
+from __future__ import annotations
 # tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
 """Unit tests for PubMedAdapter."""
 

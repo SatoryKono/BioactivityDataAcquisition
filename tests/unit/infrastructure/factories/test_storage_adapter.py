@@ -1,5 +1,7 @@
 """Unit tests for StorageAdapter."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st

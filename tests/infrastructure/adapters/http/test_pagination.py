@@ -1,5 +1,7 @@
 """Tests for PaginatedFetcherMixin."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin

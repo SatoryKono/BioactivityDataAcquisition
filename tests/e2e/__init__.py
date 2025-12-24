@@ -7,3 +7,5 @@ Requirements:
 - Python 3.11+
 - All dev dependencies installed
 """
+
+from __future__ import annotations

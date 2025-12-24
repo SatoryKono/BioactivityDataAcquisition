@@ -1,5 +1,7 @@
 """Unit tests for anomaly detection module."""
 
+from __future__ import annotations
+
 import statistics
 
 import pytest

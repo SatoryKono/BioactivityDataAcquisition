@@ -1,5 +1,7 @@
 """Prometheus Metrics for BioETL."""
 
+from __future__ import annotations
+
 from typing import Any
 
 from prometheus_client import Counter, Gauge, Histogram

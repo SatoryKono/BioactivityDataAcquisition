@@ -4,6 +4,8 @@ Provides concrete implementation of the MetricsPort interface using
 Prometheus client library.
 """
 
+from __future__ import annotations
+
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     BATCH_SIZE_RECORDS,

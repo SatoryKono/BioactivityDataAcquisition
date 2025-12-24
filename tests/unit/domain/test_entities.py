@@ -1,5 +1,7 @@
 """Unit tests for domain entities."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from uuid import uuid4
 

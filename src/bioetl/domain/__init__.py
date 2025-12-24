@@ -12,6 +12,8 @@ This module provides a clean public API for the domain layer, exposing:
 - Error classification (Pure domain logic for error categorization)
 """
 
+from __future__ import annotations
+
 # Configuration objects
 from bioetl.domain.config import (
     DQConfig,

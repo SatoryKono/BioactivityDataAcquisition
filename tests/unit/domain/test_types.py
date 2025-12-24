@@ -3,6 +3,8 @@
 Tests business logic within Enum classes.
 """
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus, RunType

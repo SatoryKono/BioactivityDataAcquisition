@@ -4,6 +4,8 @@ Tests that silent failures have been replaced with proper logging
 and configurable error handling based on BIOETL_STRICT_ERROR_HANDLING.
 """
 
+from __future__ import annotations
+
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
