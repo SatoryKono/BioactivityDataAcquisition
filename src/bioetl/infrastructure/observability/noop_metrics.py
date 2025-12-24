@@ -71,6 +71,19 @@ class NoOpMetrics(MetricsPort):
         """No-op counter increment."""
         pass
 
+    def set_gauge(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op gauge set."""
+        pass
+
+    def close(self) -> None:
+        """No-op close. Idempotent."""
+        pass
+
     @classmethod
     def reset_warning(cls) -> None:
         """Reset warning state (for testing)."""
