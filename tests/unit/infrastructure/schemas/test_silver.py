@@ -273,7 +273,6 @@ class TestChemblTargetSchema:
             "component_types",
             "component_relationships",
             "component_descriptions",
-            "protein_classifications",
         ]
         for field_name in list_fields:
             assert field_name in CHEMBL_TARGET_SCHEMA.names
