@@ -59,6 +59,9 @@ class TargetComponentTransformer(BaseTransformer):
             "target_component_xrefs": self.serialize_json(
                 record.get("target_component_xrefs")
             ),
+            "protein_classifications": self.serialize_json(
+                record.get("protein_classifications")
+            ),
         }
 
         content_hash = self.compute_content_hash(business_data, exclude_none=True)
