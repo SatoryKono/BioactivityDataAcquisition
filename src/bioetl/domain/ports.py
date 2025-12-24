@@ -209,7 +209,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """
         Clear Silver layer data for a specific table.
 
@@ -225,7 +225,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """
         Clear Gold layer data for a specific table.
 
@@ -245,7 +245,7 @@ class StoragePort(Protocol):
         """Gracefully close the storage connection and release resources."""
         ...
 
-    def clear_csv(self, table_name: str | None = None) -> int:
+    async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 
         Should be called at the start of a pipeline run to ensure
@@ -260,7 +260,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def clear_delta(self, table_name: str | None = None) -> int:
+    async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
 
         Should be called at the start of a pipeline run to ensure
