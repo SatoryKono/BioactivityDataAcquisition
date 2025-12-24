@@ -390,7 +390,7 @@ class GoldWriter:
             List of records as dictionaries.
 
         """
-        table_path = f"{self._gold_path}/{table_name.replace('.', '/')}"
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         # Delta Lake (Gold) -> Arrow -> Pydict
         dt = await self._run_in_executor(
             lambda: DeltaTable(table_path)
@@ -419,7 +419,7 @@ class GoldWriter:
             List of historical records.
 
         """
-        table_path = f"{self._gold_path}/{table_name.replace('.', '/')}"
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         dt = await self._run_in_executor(
             lambda: DeltaTable(table_path)
         )
