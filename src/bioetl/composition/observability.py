@@ -52,7 +52,7 @@ class ObservabilityBundle:
         """
         return cls(logger=logger, tracer=tracer, metrics=metrics)
 
-    def bind(self, **kwargs) -> ObservabilityBundle:
+    def bind(self, **kwargs: object) -> ObservabilityBundle:
         """Create new bundle with bound logger context.
 
         Creates a new bundle with additional context bound to the logger.
