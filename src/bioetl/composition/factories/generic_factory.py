@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, TracingPort
@@ -203,8 +204,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         run_id: RunID,
         runtime: RuntimeConfig,
         settings: Settings,
-        logger: structlog.BoundLogger,
-        tracer: TracingPort | None,
+        observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
     ) -> PipelineRunner:
@@ -217,8 +217,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             run_id: Unique identifier for this run
             runtime: Runtime configuration
             settings: Application settings
-            logger: Logger instance
-            tracer: Tracer instance
+            observability: Unified observability bundle (logger, tracer, metrics)
             filter_config: Optional filter configuration
             config: Pre-loaded pipeline config (optional)
 
@@ -233,16 +232,16 @@ class GenericPipelineFactory(Generic[TPipeline]):
             run_id=run_id,
             runtime=runtime,
             settings=settings,
-            logger=logger,
+            logger=observability.logger,
             config=yaml_config,
             filter_config=filter_config,
-            tracer=tracer,
+            tracer=observability.tracer,
         )
 
         # Create Helper Components
         checkpoint_manager = self._create_checkpoint_manager(
             pipeline=pipeline,
-            logger=logger,
+            logger=observability.logger,
             run_id=run_id,
             resume=runtime.resume,
         )
@@ -263,7 +262,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         # Create lifecycle service (M5)
         lifecycle_service = MedallionLifecycleService(
             storage=pipeline.services.storage,
-            logger=logger,
+            logger=observability.logger,
         )
 
         # Assemble Runner
@@ -275,9 +274,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             executor=executor,
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=pipeline.shutdown_signal,
-            logger=logger,
+            logger=observability.logger,
             pipeline=pipeline,
-            tracer=tracer,
+            tracer=observability.tracer,
             lifecycle_service=lifecycle_service,
         )
 
