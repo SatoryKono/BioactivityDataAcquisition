@@ -366,9 +366,9 @@ class StorageFactory:
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
                 base_path=bronze_path,
+                logger=logger,
                 save_json=save_json,
                 json_path=json_path,
-                logger=logger,
             ),
             silver_writer=DeltaWriter(
                 base_path=silver_path,

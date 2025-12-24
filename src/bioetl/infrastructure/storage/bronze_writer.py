@@ -23,11 +23,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import structlog
 import zstandard as zstd
 
 if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
+    from bioetl.domain.ports import LoggerPort
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
@@ -37,6 +36,9 @@ class BronzeWriter:
     """Writer for Bronze layer (raw data in JSONL + zstd).
 
     Optionally saves uncompressed JSON copy when save_json=True.
+
+    Note: LoggerPort is required per RULES.md DI requirements. All dependencies
+    MUST be injected through constructor without fallback defaults.
     """
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
@@ -46,23 +48,23 @@ class BronzeWriter:
     def __init__(
         self,
         base_path: str | Path,
+        logger: "LoggerPort",
         save_json: bool = False,
         json_path: str | None = None,
-        logger: "BoundLogger | None" = None,
     ) -> None:
         """Initialize Bronze writer.
 
         Args:
             base_path: Base path for Bronze layer storage
+            logger: Structured logger for observability (MUST be injected)
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
-            logger: Structured logger for observability
 
         """
         self.base_path = Path(base_path)
+        self.logger = logger
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
-        self.logger = logger or structlog.get_logger(__name__)
 
     async def write_bronze(
         self,
