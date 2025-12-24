@@ -148,12 +148,23 @@ class PipelineRunner:
         )
 
         # Clear Silver and Gold layers using StoragePort methods
-        silver_cleared = storage.clear_silver(silver_table)
-        gold_cleared = storage.clear_gold(gold_table)
+        silver_cleared = storage.clear_silver(silver_table, dry_run=self._runtime.dry_run)
+        gold_cleared = storage.clear_gold(gold_table, dry_run=self._runtime.dry_run)
 
         total_cleared = silver_cleared + gold_cleared
 
-        if total_cleared > 0:
+        if self._runtime.dry_run:
+            self._logger.info(
+                "DRY RUN: Would clear storage",
+                extra={
+                    "run_type": self._runtime.run_type.value,
+                    "silver_table": silver_table,
+                    "gold_table": gold_table,
+                    "silver_would_clear": silver_cleared,
+                    "gold_would_clear": gold_cleared,
+                },
+            )
+        elif total_cleared > 0:
             self._logger.info(
                 "Cleared storage for rebuild/backfill run",
                 extra={

@@ -165,6 +165,7 @@ class RuntimeConfig:
     lock_wait_timeout: int = 300
     lock_ttl: int | None = None
     query: str | None = None
+    dry_run: bool = False
 
     def __post_init__(self) -> None:
         """Validate runtime config."""

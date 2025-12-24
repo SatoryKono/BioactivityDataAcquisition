@@ -162,7 +162,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
-        **kwargs: Any,
     ) -> TPipeline:
         """Create pipeline instance.
 
@@ -176,7 +175,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
             tracer: Optional tracer (created via bootstrap_tracer())
-            **kwargs: Additional arguments for compatibility
 
         Returns:
             Configured pipeline instance
@@ -194,7 +192,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         domain_config = yaml_config_to_domain(yaml_config)
 
         return self.pipeline_class.create(
-            run_id=RunID(run_id),
+            run_id=run_id,
             runtime=runtime,
             services=services,
             config=domain_config,
@@ -284,13 +282,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         resume: bool,
     ) -> CheckpointManager:
         """Create configured CheckpointManager."""
-        from bioetl.domain.types import RunID
-
         return CheckpointManager(
             checkpoint_port=pipeline.services.checkpoint,
             logger=logger,
             pipeline_name=pipeline.config.pipeline_name,
-            run_id=RunID(run_id),
+            run_id=run_id,
             resume=resume,
         )
 

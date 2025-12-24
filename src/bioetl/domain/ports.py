@@ -209,7 +209,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def clear_silver(self, table_name: str) -> int:
+    def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """
         Clear Silver layer data for a specific table.
 
@@ -218,13 +218,14 @@ class StoragePort(Protocol):
 
         Args:
             table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Count of cleared items (tables + files).
         """
         ...
 
-    def clear_gold(self, table_name: str) -> int:
+    def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """
         Clear Gold layer data for a specific table.
 
@@ -233,6 +234,7 @@ class StoragePort(Protocol):
 
         Args:
             table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Count of cleared items (tables + files).
@@ -548,23 +550,23 @@ class LoggerPort(Protocol):
         """
         ...
 
-    def info(self, event: str, **kwargs: Any) -> Any:
+    def info(self, _event: str, **kwargs: Any) -> Any:
         """Log an informational message."""
         ...
 
-    def warning(self, event: str, **kwargs: Any) -> Any:
+    def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message."""
         ...
 
-    def error(self, event: str, **kwargs: Any) -> Any:
+    def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message."""
         ...
 
-    def debug(self, event: str, **kwargs: Any) -> Any:
+    def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message."""
         ...
 
-    def exception(self, event: str, **kwargs: Any) -> Any:
+    def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback."""
         ...
 

@@ -60,14 +60,12 @@ class BatchMetricsRecorder:
                 },
             )
 
-    def track_dq_quarantined(
-        self, count: int, error_type: str = "data_quality"
-    ) -> None:
-        """Record DQ quarantined records.
+    def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
+        """Record number of quarantined records.
 
         Args:
+            error_type: Type of error that caused quarantine
             count: Number of records quarantined
-            error_type: Type of DQ error (default: "data_quality")
         """
         if self._metrics:
             self._metrics.increment_counter(
@@ -75,7 +73,7 @@ class BatchMetricsRecorder:
                 count,
                 {
                     "pipeline": self._pipeline_label,
-                    "error_type": error_type,
+                    "error_type": error_type.value,
                     "run_type": self._run_type_label,
                 },
             )

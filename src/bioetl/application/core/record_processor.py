@@ -122,6 +122,7 @@ class RecordProcessor:
                     )
                     records_quarantined += 1
                     self._batch_metrics.track_error("transform", error_type)
+                    self._batch_metrics.track_quarantined_records(error_type, 1)
                 else:
                     raise
 
@@ -199,10 +200,6 @@ class RecordProcessor:
 
         total_count = len(records)
         error_rate = quarantined_count / total_count if total_count > 0 else 0.0
-
-        # Track DQ quarantine metrics
-        if quarantined_count > 0:
-            self._batch_metrics.track_dq_quarantined(quarantined_count)
 
         if not self._dq_config:
             return

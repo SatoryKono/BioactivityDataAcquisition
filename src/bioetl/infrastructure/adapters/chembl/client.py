@@ -4,6 +4,16 @@ Implements DataSourcePort for ChEMBL database.
 See RULES.md Appendix A for rate limits and retry strategy.
 
 Uses chembl_webresource_client library for API access.
+
+Error Handling (RULES.md §3.1):
+- Critical errors: Fail immediately (401, 403)
+- Recoverable errors: Handled by UnifiedHTTPClient retry
+- Data quality errors: Log and skip record
+
+Health-Aware Fetching:
+- HEALTHY: Normal batch_size
+- DEGRADED: batch_size ÷ 2 (per RULES.md §3.5)
+- UNHEALTHY: Fail fast with clear error
 """
 
 from __future__ import annotations
@@ -12,8 +22,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions import ChemblApiError
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.exceptions import ChemblApiError, CriticalError
+from bioetl.domain.types import ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
 if TYPE_CHECKING:
@@ -67,6 +78,11 @@ class ChemblAdapter(BaseHttpAdapter):
         logger: LoggerPort instance for structured logging
         batch_size: Number of records per API request (default: 1000)
         thread_pool: ThreadPoolExecutor for sync operations
+
+    Health-Aware Behavior:
+        - HEALTHY: Uses configured batch_size
+        - DEGRADED: Uses batch_size ÷ 2 to reduce load
+        - UNHEALTHY: Raises CriticalError to prevent futile requests
     """
 
     http_client: UnifiedHTTPClient
@@ -80,6 +96,11 @@ class ChemblAdapter(BaseHttpAdapter):
     _consecutive_errors: int = field(init=False, default=0)
     _last_health_check: datetime | None = field(init=False, default=None)
     _cached_health: HealthStatus = field(init=False, default=HealthStatus.HEALTHY)
+    _error_classifier: ErrorClassifier = field(
+        init=False, default_factory=ErrorClassifier
+    )
+    _total_errors: int = field(init=False, default=0)
+    _error_counts: dict[ErrorType, int] = field(init=False, default_factory=dict)
 
     def _get_resource_url(self, entity_type: str) -> str:
         """Get ChEMBL API URL for entity type."""
@@ -89,10 +110,37 @@ class ChemblAdapter(BaseHttpAdapter):
             raise ValueError(msg)
         return f"{CHEMBL_API_BASE}/{resource}.json"
 
+    def _get_effective_batch_size(self) -> int:
+        """Get batch size adjusted for current health status.
+
+        Returns:
+            - Normal batch_size when HEALTHY
+            - Half batch_size when DEGRADED (per RULES.md §3.5)
+
+        Raises:
+            CriticalError: When UNHEALTHY to prevent futile requests
+        """
+        if self._cached_health == HealthStatus.UNHEALTHY:
+            raise CriticalError(
+                f"ChEMBL adapter is UNHEALTHY after {self._consecutive_errors} "
+                f"consecutive errors. Total errors: {self._total_errors}"
+            )
+        if self._cached_health == HealthStatus.DEGRADED:
+            reduced = max(100, self.batch_size // 2)  # Minimum 100
+            self.logger.warning(
+                "chembl_degraded_mode",
+                provider="chembl",
+                original_batch_size=self.batch_size,
+                effective_batch_size=reduced,
+                consecutive_errors=self._consecutive_errors,
+            )
+            return reduced
+        return self.batch_size
+
     def _build_params(self, offset: int) -> dict[str, Any]:
-        """Build API request parameters."""
+        """Build API request parameters with health-aware batch size."""
         return {
-            "limit": self.batch_size,
+            "limit": self._get_effective_batch_size(),
             "offset": offset,
             "format": "json",
         }
@@ -168,16 +216,49 @@ class ChemblAdapter(BaseHttpAdapter):
                 break
             offset += self.batch_size
 
-    def _handle_error(self, e: Exception) -> None:
-        """Handle fetch errors."""
+    def _handle_error(self, e: Exception, context: str = "fetch") -> None:
+        """Handle fetch errors with classification and metrics.
+
+        Args:
+            e: The exception that occurred
+            context: Operation context for logging (e.g., "fetch", "health_check")
+
+        Raises:
+            CriticalError: For auth failures and other critical errors
+            ChemblApiError: For recoverable and other errors
+        """
+        # Classify the error
+        error_type = self._error_classifier.classify(e)
+
+        # Update error counters
         self._consecutive_errors += 1
+        self._total_errors += 1
+        self._error_counts[error_type] = self._error_counts.get(error_type, 0) + 1
+
+        # Update health status
         self._update_health()
+
+        # Log with full context
         self.logger.error(
-            "chembl fetch failed",
+            "chembl_error",
             provider="chembl",
-            operation="fetch",
+            operation=context,
             error=str(e),
+            error_type=error_type.value,
+            is_critical=error_type.is_critical(),
+            is_recoverable=error_type.is_recoverable(),
+            consecutive_errors=self._consecutive_errors,
+            total_errors=self._total_errors,
+            health_status=self._cached_health.value,
         )
+
+        # Critical errors should fail immediately
+        if error_type.is_critical():
+            raise CriticalError(
+                f"Critical ChEMBL error ({error_type.value}): {e}"
+            ) from e
+
+        # Wrap in ChemblApiError for consistent handling
         raise ChemblApiError(str(e)) from e
 
     async def _fetch_filtered(
@@ -296,12 +377,49 @@ class ChemblAdapter(BaseHttpAdapter):
 
     def _update_health(self) -> None:
         """Update health status based on error count."""
+        previous_health = self._cached_health
         if self._consecutive_errors >= 3:
             self._cached_health = HealthStatus.UNHEALTHY
         elif self._consecutive_errors >= 1:
             self._cached_health = HealthStatus.DEGRADED
         else:
             self._cached_health = HealthStatus.HEALTHY
+
+        # Log health transitions
+        if previous_health != self._cached_health:
+            self.logger.info(
+                "chembl_health_transition",
+                provider="chembl",
+                previous_status=previous_health.value,
+                current_status=self._cached_health.value,
+                consecutive_errors=self._consecutive_errors,
+            )
+
+    def get_error_stats(self) -> dict[str, Any]:
+        """Get error statistics for monitoring.
+
+        Returns:
+            Dictionary with error counts and health status.
+        """
+        return {
+            "consecutive_errors": self._consecutive_errors,
+            "total_errors": self._total_errors,
+            "health_status": self._cached_health.value,
+            "error_counts_by_type": {
+                k.value: v for k, v in self._error_counts.items()
+            },
+        }
+
+    def reset_error_counters(self) -> None:
+        """Reset error counters (e.g., after successful recovery)."""
+        self._consecutive_errors = 0
+        self._total_errors = 0
+        self._error_counts.clear()
+        self._cached_health = HealthStatus.HEALTHY
+        self.logger.info(
+            "chembl_error_counters_reset",
+            provider="chembl",
+        )
 
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities."""

@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.entities import Activity, Compound, Protein
-from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
+from bioetl.domain.types import ContentHash, EntityID, RunType
 
 
 @pytest.fixture

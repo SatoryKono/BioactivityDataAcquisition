@@ -161,18 +161,17 @@ def run(
     run_id = uuid4()
 
     try:
-        from bioetl.domain.types import RunID
-
         # Bootstrap returns a fully constructed runner
         ctx = PipelineRunContext(
             pipeline_name=pipeline,
-            run_id=RunID(run_id),
+            run_id=run_id,
             run_type=RunType(run_type),
             resume=resume,
             limit=limit,
             input_csv=input_csv,
             filter_column=filter_column,
             filter_field=filter_field,
+            dry_run=dry_run,
         )
         runner = bootstrap_pipeline(ctx)
     except (ValueError, FileNotFoundError) as e:
