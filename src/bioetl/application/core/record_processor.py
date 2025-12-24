@@ -16,7 +16,11 @@ from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationE
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
+    from bioetl.application.core.protocols import (
+        GoldFilterCallback,
+        GoldTransformCallback,
+        TransformCallback,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort
@@ -47,6 +51,7 @@ class RecordProcessor:
         config: RecordProcessorConfig,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
+        gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
     ):
         self._storage = services.storage
@@ -59,6 +64,7 @@ class RecordProcessor:
         self._config = config
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
+        self._gold_transform = gold_transform_callback
         self._gold_validator = gold_validator
 
         # Convenience properties
@@ -106,7 +112,8 @@ class RecordProcessor:
                 if transformed:
                     silver_records.append(transformed)
                     if self._gold_filter(record_context, transformed):
-                        gold_records.append(transformed)
+                        gold_record = self._gold_transform(record_context, transformed)
+                        gold_records.append(gold_record)
             except Exception as e:
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():

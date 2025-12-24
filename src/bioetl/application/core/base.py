@@ -9,7 +9,7 @@ Refactored per ADR-0005.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
@@ -162,6 +162,16 @@ class BasePipeline(ABC):
         """Transform a raw record from Bronze to Silver format."""
         pass
 
+    # Fields to exclude from Gold layer (JSON strings retained only in Silver)
+    GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        "molecule_hierarchy",
+        "molecule_properties",
+        "molecule_structures",
+        "molecule_synonyms",
+        "cross_references",
+        "atc_classifications",
+    })
+
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]
     ) -> bool:
@@ -181,3 +191,22 @@ class BasePipeline(ABC):
         if gold_filters is None or gold_filters.is_empty():
             return True
         return gold_filters.should_include(record)
+
+    def transform_for_gold(
+        self, _context: PipelineContext, silver_record: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Transform Silver record for Gold layer.
+
+        Removes JSON string fields that are retained only in Silver for forensic purposes.
+        Subclasses can override for custom Gold transformations.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            silver_record: Silver record to transform.
+
+        Returns:
+            Record suitable for Gold layer (flat fields only).
+        """
+        return {
+            k: v for k, v in silver_record.items() if k not in self.GOLD_EXCLUDE_FIELDS
+        }

@@ -541,7 +541,7 @@ class LoggerPort(Protocol):
     should be fast and non-blocking by design.
     """
 
-    def bind(self, **kwargs: Any) -> "LoggerPort":
+    def bind(self, **kwargs: Any) -> Self:
         """Bind additional context to the logger.
 
         Returns a new logger instance with the bound context.

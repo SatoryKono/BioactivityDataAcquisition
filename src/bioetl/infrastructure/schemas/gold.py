@@ -206,25 +206,59 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Molecule in Gold layer.
 
-    Validated fields for high-quality molecule data export.
+    Flat fields only - no JSON strings.
+    JSON fields (molecule_hierarchy, molecule_properties, molecule_structures,
+    molecule_synonyms, cross_references, atc_classifications) are excluded
+    from Gold and retained only in Silver for forensic purposes.
     """
 
     # Primary identifier
     molecule_chembl_id: Series[str] = pa.Field(nullable=False)
 
-    # Key metadata
+    # Core metadata
     pref_name: Series[str] = pa.Field(nullable=True)
     molecule_type: Series[str] = pa.Field(nullable=True)
+    structure_type: Series[str] = pa.Field(nullable=True)
     max_phase: Series[float] = pa.Field(nullable=True, ge=0, le=4, coerce=True)
+    first_approval: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Flags
+    # Administration flags
     oral: Series[bool] = pa.Field(nullable=True)
+    parenteral: Series[bool] = pa.Field(nullable=True)
+    topical: Series[bool] = pa.Field(nullable=True)
+
+    # Status flags
     therapeutic_flag: Series[bool] = pa.Field(nullable=True)
     withdrawn_flag: Series[bool] = pa.Field(nullable=True)
+    black_box_warning: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Hierarchy (flattened from molecule_hierarchy)
+    hierarchy_parent_chembl_id: Series[str] = pa.Field(nullable=True)
+    hierarchy_active_chembl_id: Series[str] = pa.Field(nullable=True)
+
+    # Physicochemical properties (flattened from molecule_properties)
+    property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_hba: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_psa: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_ro5_violations: Series[float] = pa.Field(
+        nullable=True, ge=0, le=4, coerce=True
+    )
+    property_qed_weighted: Series[float] = pa.Field(
+        nullable=True, ge=0, le=1, coerce=True
+    )
+    property_full_molformula: Series[str] = pa.Field(nullable=True)
+
+    # Structural identifiers (flattened from molecule_structures)
+    structure_canonical_smiles: Series[str] = pa.Field(nullable=True)
+    structure_standard_inchi: Series[str] = pa.Field(nullable=True)
+    structure_standard_inchi_key: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
-        strict = False  # Allow extra columns
+        strict = False  # Allow transition period
