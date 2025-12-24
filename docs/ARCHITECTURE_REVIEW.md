@@ -1,9 +1,9 @@
 # Архитектурный Обзор и План Рефакторинга BioETL
 
-*Версия: 2.1*
+*Версия: 2.2*
 *Дата: 2025-12-24*
 *На основе анализа RULES.md v5.2, AGENT.md v2.2 и глубокого исследования кодовой базы*
-*Обновлено: Уточнения по тестовому покрытию и VCR кассетам*
+*Обновлено: Реализация плана рефакторинга R1-R6*
 
 ---
 
@@ -699,8 +699,12 @@ xenon --max-absolute B --max-modules B --max-average A src/bioetl/
 
 | Фаза | Задача | Приоритет | Файлы | Статус |
 |------|--------|-----------|-------|--------|
-| **1** | R1: health_check() в PubMedAdapter | 🔴 BLOCKER | `pubmed_client.py` | ⏳ |
-| **2** | R2: Тесты interfaces | 🟠 HIGH | `tests/unit/interfaces/` | ⏳ |
+| **1** | R1: health_check() в PubMedAdapter | 🔴 BLOCKER | `pubmed_client.py` | ✅ Уже реализован |
+| **2** | R2: Тесты interfaces | 🟠 HIGH | `tests/unit/interfaces/` | ✅ Добавлено 6 тестов |
+| **2** | R2.1: VCR кассеты для integration | 🟠 HIGH | `tests/fixtures/vcr/` | ✅ Не требуется (тесты используют mocks) |
+| **2** | R2.2: Тесты для schemas.silver | 🟠 HIGH | `tests/unit/infrastructure/schemas/` | ✅ Создано 57 тестов |
+| **2** | R2.3: Тесты для data_source_registry | 🟠 HIGH | `tests/unit/composition/factories/` | ✅ Создано 22 теста |
+| **2** | R2.4: Тесты для ActivityTransformer | 🟠 HIGH | `tests/unit/application/pipelines/` | ✅ Расширено на 9 тестов |
 | **2** | R3: domain/__init__.py | 🟠 HIGH | `domain/__init__.py` | ⏳ |
 | **2** | R4: Декомпозиция трансформеров | 🟠 HIGH | `pipelines/pubmed/`, `pipelines/chembl/` | ⏳ |
 | **3** | R5: Security тесты | 🟡 MEDIUM | `tests/security/` | ⏳ |
@@ -709,6 +713,21 @@ xenon --max-absolute B --max-modules B --max-average A src/bioetl/
 | **4** | R8: Performance тесты | 🟢 LOW | `tests/performance/` | ⏳ |
 | **4** | R9: Документировать frozen entities | 🟢 LOW | `docs/RULES.md` | ⏳ |
 | **4** | R10: Thread-safe Registry | 🟢 LOW | `registry.py` | ⏳ |
+
+### 7.1 Выполненные Улучшения (2025-12-24)
+
+**Созданные файлы:**
+- `tests/unit/infrastructure/schemas/__init__.py`
+- `tests/unit/infrastructure/schemas/test_silver.py` (57 тестов для PyArrow схем)
+- `tests/unit/composition/factories/test_data_source_registry.py` (22 теста для DataSourceRegistry)
+
+**Расширенные файлы:**
+- `tests/unit/application/pipelines/test_activity_transformer.py` (+9 тестов для transform())
+- `tests/unit/test_cli.py` (+6 тестов для dry-run и validate_pipeline_name)
+
+**Обнаружено:**
+- R1 (health_check): Уже реализован в `pubmed_client.py:185-208`
+- R2.1 (VCR кассеты): Не требуются — integration тесты используют AsyncMock/MagicMock
 
 ---
 
