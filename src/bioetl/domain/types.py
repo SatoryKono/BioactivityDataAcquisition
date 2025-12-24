@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     import pyarrow
 
 # Type aliases for semantic clarity
-RunID = NewType("RunID", UUID)
+RunID: TypeAlias = UUID
 """Unique identifier for a pipeline run (correlation ID)."""
 
 EntityID = NewType("EntityID", str)

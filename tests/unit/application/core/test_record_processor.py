@@ -123,6 +123,17 @@ def gold_filter_callback():
 
 
 @pytest.fixture
+def gold_transform_callback():
+    """Create mock gold transform callback."""
+
+    def transform_gold(ctx, record):
+        # Simple pass-through for tests
+        return record
+
+    return transform_gold
+
+
+@pytest.fixture
 def mock_gold_validator():
     """Create mock gold validator."""
     validator = MagicMock()
@@ -137,6 +148,7 @@ def record_processor(
     mock_context,
     transform_callback,
     gold_filter_callback,
+    gold_transform_callback,
     mock_gold_validator,
 ):
     """Create RecordProcessor instance."""
@@ -154,6 +166,7 @@ def record_processor(
         config=config,
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
         gold_validator=mock_gold_validator,
     )
 
@@ -255,6 +268,7 @@ class TestRecordProcessorProcessBatch:
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            gold_transform_callback=lambda c, r: r,
             gold_validator=gold_validator,
         )
 
@@ -298,6 +312,7 @@ class TestRecordProcessorProcessBatch:
             config=config,
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            gold_transform_callback=lambda c, r: r,
             gold_validator=gold_validator,
         )
 
@@ -360,6 +375,7 @@ class TestRecordProcessorProcessBatch:
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
+            gold_transform_callback=lambda c, r: r,
             gold_validator=gold_validator,
         )
 
