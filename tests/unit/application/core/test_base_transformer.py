@@ -21,7 +21,7 @@ from bioetl.application.core.base_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Activity
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 class ConcreteTransformer(BaseTransformer):
@@ -40,7 +40,7 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )

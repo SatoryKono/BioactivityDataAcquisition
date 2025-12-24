@@ -6,7 +6,6 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.domain.types import RunID
 
 
 @pytest.fixture
@@ -34,7 +33,7 @@ def checkpoint_manager(mock_checkpoint_port, mock_logger):
         checkpoint_port=mock_checkpoint_port,
         logger=mock_logger,
         pipeline_name="test_pipeline",
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         resume=True,
     )
 
@@ -45,7 +44,7 @@ class TestCheckpointManagerInit:
 
     def test_init_with_all_params(self, mock_checkpoint_port, mock_logger):
         """Test initialization with all parameters."""
-        run_id = RunID(uuid4())
+        run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -68,7 +67,7 @@ class TestCheckpointManagerLoadCheckpoint:
     ):
         """Test load_checkpoint when resuming and checkpoint exists."""
         mock_checkpoint_port.load.return_value = (
-            RunID(uuid4()),
+            uuid4(),
             {"records_processed": 1000},
         )
 
@@ -76,7 +75,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=RunID(uuid4()),
+            run_id=uuid4(),
             resume=True,
         )
 
@@ -96,7 +95,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=RunID(uuid4()),
+            run_id=uuid4(),
             resume=True,
         )
 
@@ -113,7 +112,7 @@ class TestCheckpointManagerLoadCheckpoint:
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
-            run_id=RunID(uuid4()),
+            run_id=uuid4(),
             resume=False,
         )
 

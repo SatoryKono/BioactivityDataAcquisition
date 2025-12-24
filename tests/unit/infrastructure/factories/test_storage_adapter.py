@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.domain.ports import StoragePort
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, RunType
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ class TestStorageAdapterWriteBronze:
         records = iter([b'{"id": 1}\n', b'{"id": 2}\n'])
         date = datetime(2024, 1, 15)
         batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        run_id = uuid4()
         run_type = RunType.INCREMENTAL
 
         await storage_adapter.write_bronze(

@@ -46,7 +46,7 @@ def runtime_config():
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""
-    return RunID(uuid4())
+    return uuid4()
 
 
 def create_pipeline_config(

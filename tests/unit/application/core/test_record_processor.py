@@ -13,7 +13,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
-from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
+from bioetl.domain.types import BatchID, RunType, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
 
@@ -96,7 +96,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )

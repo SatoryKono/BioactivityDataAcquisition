@@ -176,9 +176,8 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
 @pytest.fixture
 def run_id() -> "RunID":
     """Generate a unique run ID for tests."""
-    from bioetl.domain.types import RunID
 
-    return RunID(uuid4())
+    return uuid4()
 
 
 @pytest.fixture(autouse=True)

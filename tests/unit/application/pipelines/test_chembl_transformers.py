@@ -13,7 +13,7 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def mock_context():
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
