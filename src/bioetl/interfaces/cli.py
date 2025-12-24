@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import click
@@ -26,6 +27,11 @@ from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
+
+if TYPE_CHECKING:
+    import structlog
+
+    from bioetl.application.core.runner import PipelineRunner
 
 
 async def _preview_cleanup_async(pipeline: str) -> None:
@@ -79,7 +85,9 @@ def _preview_cleanup(pipeline: str) -> None:
         click.echo(f"Error previewing cleanup: {e}", err=True)
 
 
-def validate_pipeline_name(_ctx, _param, value):
+def validate_pipeline_name(
+    _ctx: click.Context | None, _param: click.Parameter | None, value: str
+) -> str:
     """Validate pipeline name against the registry at runtime."""
     available = PipelineRegistry.list_pipelines()
     if value not in available:
@@ -119,7 +127,7 @@ def _handle_destructive_run_confirmation(
     return True
 
 
-def _get_runner_logger(runner):
+def _get_runner_logger(runner: PipelineRunner) -> structlog.BoundLogger | None:
     """Get logger from runner with fallback.
 
     Args:
