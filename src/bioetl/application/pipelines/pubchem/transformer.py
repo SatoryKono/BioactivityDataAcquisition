@@ -18,15 +18,14 @@ class PubChemCompoundTransformer(BaseTransformer):
     def __init__(self, provider: str = "pubchem"):
         super().__init__(provider)
 
-    async def transform(
+    async def _transform_impl(
         self,
         _context: PipelineContext,
         record: BronzeRecord,
     ) -> SilverRecord | None:
         """Transform raw PubChem record to Silver format."""
-        cid = record.get("cid")
-        if not cid:
-            return None
+        # Validate required field
+        cid = self._get_required_field(record, "cid")
 
         normalized = {
             "cid": str(cid),
