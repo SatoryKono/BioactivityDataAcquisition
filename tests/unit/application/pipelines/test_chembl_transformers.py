@@ -743,7 +743,7 @@ class TestTargetComponentTransformer:
     async def test_transform_with_protein_classifications(
         self, transformer, mock_context
     ):
-        """Test transformation extracts protein_classifications as JSON.
+        """Test transformation extracts protein_classifications as JSON and IDs list.
 
         Note: ChEMBL API only returns protein_classification_id in this endpoint.
         pref_name and short_name are available via /protein_classification/{id}.
@@ -760,6 +760,8 @@ class TestTargetComponentTransformer:
         result = await transformer.transform(mock_context, record)
 
         assert result is not None
+
+        # Check JSON forensic field is preserved
         assert isinstance(result.get("protein_classifications"), str)
         import json
 
@@ -767,3 +769,27 @@ class TestTargetComponentTransformer:
         assert len(classifications) == 2
         assert classifications[0]["protein_classification_id"] == 1015
         assert classifications[1]["protein_classification_id"] == 422
+
+        # Check flattened IDs list
+        assert result["protein_classification_ids"] == [1015, 422]
+
+    @pytest.mark.asyncio
+    async def test_transform_with_empty_protein_classifications(
+        self, transformer, mock_context
+    ):
+        """Test transformation handles empty/None protein_classifications."""
+        # Test with None
+        record_none = {"component_id": 789, "accession": "Q99999"}
+        result_none = await transformer.transform(mock_context, record_none)
+        assert result_none is not None
+        assert result_none.get("protein_classification_ids") is None
+
+        # Test with empty list
+        record_empty = {
+            "component_id": 790,
+            "accession": "Q99998",
+            "protein_classifications": [],
+        }
+        result_empty = await transformer.transform(mock_context, record_empty)
+        assert result_empty is not None
+        assert result_empty.get("protein_classification_ids") is None

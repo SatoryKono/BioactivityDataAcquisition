@@ -29,6 +29,8 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "__package__",
         "__path__",
         "__spec__",
+        # Special imports (from __future__ import annotations)
+        "annotations",
         # Submodules (imported but not re-exported individually)
         "config",
         "context",
