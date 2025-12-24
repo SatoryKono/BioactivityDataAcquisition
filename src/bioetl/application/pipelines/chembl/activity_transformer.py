@@ -25,6 +25,13 @@ _LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {
     "sei": safe_float,
 }
 
+# Mapping for action type fields extraction (from ChEMBL nested structure)
+_ACTION_TYPE_FIELDS: dict[str, Any] = {
+    "action_type": None,  # str, no converter needed
+    "description": None,
+    "parent_type": None,
+}
+
 
 class ActivityTransformer(BaseTransformer):
     """Transforms ChEMBL bronze records to silver."""
@@ -52,6 +59,25 @@ class ActivityTransformer(BaseTransformer):
 
         """
         return flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+
+    def _extract_action_type(
+        self,
+        action_data: dict[str, Any] | None,
+    ) -> dict[str, str | None]:
+        """Extract action type fields from nested data.
+
+        Args:
+            action_data: Nested action_type dictionary from ChEMBL API.
+                Expected structure: {"action_type": "INHIBITOR", "description": "...", "parent_type": "..."}
+
+        Returns:
+            Flattened dictionary with action_type_ prefixed keys:
+                - action_type_action_type: Type of action (INHIBITOR, AGONIST, etc.)
+                - action_type_description: Description of the action type
+                - action_type_parent_type: Higher-level grouping (nullable)
+
+        """
+        return flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
 
     async def _transform_impl(
         self,
@@ -131,8 +157,9 @@ class ActivityTransformer(BaseTransformer):
             "data_validity_comment": record.get("data_validity_comment"),
             "data_validity_description": record.get("data_validity_description"),
             "potential_duplicate": safe_int(record.get("potential_duplicate")),
-            # Action and properties
-            "action_type": self.serialize_json(record.get("action_type")),
+            # Action type (flattened from ChEMBL API nested structure)
+            **self._extract_action_type(record.get("action_type")),
+            # Activity properties
             "activity_properties": self.serialize_json(
                 record.get("activity_properties")
             ),
