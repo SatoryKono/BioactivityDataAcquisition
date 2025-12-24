@@ -4,15 +4,16 @@ Implements InputFilterPort for reading filter IDs from CSV files.
 Uses Polars for efficient CSV parsing.
 """
 
-import logging
 from collections import Counter
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import polars as pl
 
 from bioetl.domain.filter_config import FilterLoadResult
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 
 class CsvFilterReader:
@@ -22,7 +23,7 @@ class CsvFilterReader:
     unique IDs from CSV files to filter API requests.
 
     Example:
-        >>> reader = CsvFilterReader()
+        >>> reader = CsvFilterReader(logger)
         >>> result = await reader.load_filter_ids("data/input/molecules.csv", "molecule_chembl_id")
         >>> print(result.ids)
         ('CHEMBL1201198', 'CHEMBL25', 'CHEMBL612545')
@@ -30,6 +31,14 @@ class CsvFilterReader:
         0
 
     """
+
+    def __init__(self, logger: "LoggerPort") -> None:
+        """Initialize filter reader with logger.
+
+        Args:
+            logger: Structured logger instance.
+        """
+        self._logger = logger
 
     async def load_filter_ids(
         self,
@@ -99,16 +108,14 @@ class CsvFilterReader:
         # Log duplicates if found
         if duplicate_count > 0:
             sample_duplicates = list(duplicates)[:10]
-            logger.warning(
+            self._logger.warning(
                 "filter_ids_duplicates_found",
-                extra={
-                    "source_path": source_path,
-                    "column_name": column_name,
-                    "total_count": total_count,
-                    "unique_count": unique_count,
-                    "duplicate_count": duplicate_count,
-                    "sample_duplicates": sample_duplicates,
-                },
+                source_path=source_path,
+                column_name=column_name,
+                total_count=total_count,
+                unique_count=unique_count,
+                duplicate_count=duplicate_count,
+                sample_duplicates=sample_duplicates,
             )
 
         return FilterLoadResult(

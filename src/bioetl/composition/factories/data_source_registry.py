@@ -52,6 +52,7 @@ class DataSourceCreator(Protocol):
 def _wrap_with_filter(
     data_source: DataSourcePort,
     filter_config: InputFilterConfig | None,
+    logger: LoggerPort,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
@@ -60,6 +61,7 @@ def _wrap_with_filter(
     Args:
         data_source: Base data source to wrap
         filter_config: Optional filter configuration
+        logger: LoggerPort for the filter reader
         metrics: Optional metrics port for recording filter statistics
         pipeline_name: Pipeline name for metrics labels
 
@@ -69,7 +71,7 @@ def _wrap_with_filter(
     if filter_config and filter_config.enabled:
         return FilteredDataSource(
             data_source=data_source,
-            filter_reader=CsvFilterReader(),
+            filter_reader=CsvFilterReader(logger=logger),
             filter_config=filter_config,
             metrics=metrics,
             pipeline_name=pipeline_name,
@@ -86,11 +88,15 @@ def create_chembl_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering."""
-    http_client = HttpClientFactory.create_for_provider("chembl", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "chembl", settings, pipeline_config.source.api.dict()
+    )
     base_adapter = DataSourceFactory.create(
         "chembl", http_client=http_client, logger=logger
     )
-    return _wrap_with_filter(base_adapter, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(
+        base_adapter, filter_config, logger, metrics, pipeline_name
+    )
 
 
 def create_pubchem_data_source(
@@ -103,14 +109,27 @@ def create_pubchem_data_source(
 ) -> DataSourcePort:
     """Create PubChem data source."""
     # PubChem rate limit: 5 requests/second without API key
+    # Note: DataSourceFactory.create currently takes explicit 'rate' args for PubChem?
+    # No, we should prefer HttpClientFactory if possible, but PubChem might be using a wrapper.
+    # The existing code uses DataSourceFactory.create("pubchem", ... rate=5.0).
+    # We should update it to use HttpClient if possible OR pass config.
+    # However, existing code for pubchem passes `http_client=None`.
+    # Let's inspect `DataSourceFactory.create` logic for "pubchem".
+    # Assuming it uses PubChemPy which might have its own rate limiting or uses the passed rate.
+    # For now, let's respect the existing pattern but try to extract rate from config.
+    rate_limit = pipeline_config.source.api.rate_limit
+    rate = rate_limit.requests_per_second if rate_limit else 5.0
+
     data_source = DataSourceFactory.create(
         "pubchem",
         http_client=None,
         logger=logger,
-        rate=5.0,
+        rate=rate,
         strict_error_handling=settings.strict_error_handling,
     )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(
+        data_source, filter_config, logger, metrics, pipeline_name
+    )
 
 
 def create_uniprot_data_source(
@@ -122,7 +141,9 @@ def create_uniprot_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create UniProt data source."""
-    http_client = HttpClientFactory.create_for_provider("uniprot", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "uniprot", settings, pipeline_config.source.api.dict()
+    )
 
     data_source = DataSourceFactory.create(
         "uniprot",
@@ -131,7 +152,9 @@ def create_uniprot_data_source(
         base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
         strict_error_handling=settings.strict_error_handling,
     )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(
+        data_source, filter_config, logger, metrics, pipeline_name
+    )
 
 
 def create_pubmed_data_source(
@@ -145,7 +168,9 @@ def create_pubmed_data_source(
     """Create PubMed data source."""
     from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
 
-    http_client = HttpClientFactory.create_for_provider("pubmed", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "pubmed", settings, pipeline_config.source.api.dict()
+    )
 
     # Determine API key: config takes precedence over settings
     configured_api_key = pipeline_config.source.api_key
@@ -162,7 +187,9 @@ def create_pubmed_data_source(
         email=email,
         api_key=api_key,
     )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(
+        data_source, filter_config, logger, metrics, pipeline_name
+    )
 
 
 class DataSourceRegistry:

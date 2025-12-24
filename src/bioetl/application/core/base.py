@@ -9,7 +9,7 @@ Refactored per ADR-0005.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, Self
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, Self, Type, TypeVar
 
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
@@ -17,12 +17,15 @@ from bioetl.domain.context import PipelineContext
 if TYPE_CHECKING:
     import structlog
 
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
+TTransformer = TypeVar("TTransformer", bound="BaseTransformer")
 
-class BasePipeline(ABC):
+
+class BasePipeline(ABC, Generic[TTransformer]):
     """Base class for ETL pipelines.
 
     Acts as a container for:
@@ -85,6 +88,7 @@ class BasePipeline(ABC):
             logger=self._logger,
         )
         self._shutdown_signal = ShutdownSignal()
+        self._transformer = self.transformer_class(provider=self.provider)
 
     # --- Properties for accessing config (read-only) ---
 
@@ -157,12 +161,17 @@ class BasePipeline(ABC):
 
     # --- Logic Methods (to be used by Executor) ---
 
+    @property
     @abstractmethod
+    def transformer_class(self) -> Type[TTransformer]:
+        """Return the transformer class for this pipeline."""
+        pass
+
     async def transform_bronze_to_silver(
         self, context: PipelineContext, record: BronzeRecord
     ) -> SilverRecord | None:
         """Transform a raw record from Bronze to Silver format."""
-        pass
+        return await self._transformer.transform(context, record)
 
     # Fields to exclude from Gold layer (JSON strings retained only in Silver)
     GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset({

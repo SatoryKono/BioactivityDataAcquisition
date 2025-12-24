@@ -3,6 +3,7 @@
 MOVED to composition layer to fix dependency direction.
 """
 
+from threading import RLock
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Protocol, runtime_checkable
 
 import pyarrow as pa
@@ -72,6 +73,7 @@ class PipelineRegistry:
     """
 
     _registry: ClassVar[dict[str, PipelineDefinition]] = {}
+    _lock: ClassVar[RLock] = RLock()
 
     @classmethod
     def register_factory(
@@ -85,11 +87,12 @@ class PipelineRegistry:
         """
         gold_schema = getattr(factory, "gold_schema", None)
 
-        cls._registry[factory.pipeline_name] = PipelineDefinition(
-            factory=factory,
-            silver_schema=factory.silver_schema,
-            gold_schema=gold_schema,
-        )
+        with cls._lock:
+            cls._registry[factory.pipeline_name] = PipelineDefinition(
+                factory=factory,
+                silver_schema=factory.silver_schema,
+                gold_schema=gold_schema,
+            )
 
     @classmethod
     def get(cls, pipeline_name: str) -> PipelineDefinition:

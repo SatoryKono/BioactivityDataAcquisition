@@ -28,22 +28,31 @@ class HttpClientFactory:
 
     @classmethod
     def create_for_provider(
-        cls, provider: str, settings: Settings | None = None
+        cls,
+        provider: str,
+        settings: Settings | None = None,
+        config: dict[str, Any] | None = None,
     ) -> UnifiedHTTPClient:
         """Create a configured HTTP client for the given provider.
+
+        Prioritizes configuration sources:
+        1. Passed config dictionary (from YAML)
+        2. Settings (environment variables/secrets)
+        3. Hardcoded defaults
 
         Args:
             provider: Provider name (e.g., 'chembl', 'pubmed')
             settings: Optional settings to override defaults (e.g., API keys)
+            config: Optional configuration dictionary (e.g. from pipeline YAML)
 
         Returns:
             UnifiedHTTPClient
         """
-        config = cls.PROVIDER_CONFIGS.get(provider, {"rate": 5.0, "capacity": 10})
-        rate = config["rate"]
-        capacity = config["capacity"]
+        defaults = cls.PROVIDER_CONFIGS.get(provider, {"rate": 5.0, "capacity": 10})
+        rate = float(defaults["rate"])
+        capacity = int(defaults["capacity"])
 
-        # Specific overrides based on settings
+        # Override from settings (Env vars/Secrets)
         if provider == "pubmed" and settings and settings.pubmed_api_key:
             rate = 10.0
             capacity = 20
@@ -53,9 +62,16 @@ class HttpClientFactory:
             and settings
             and getattr(settings, "uniprot_api_key", None)
         ):
-            # Hypothetical override if uniprot key is in settings
             rate = 100.0
             capacity = 200
+
+        # Override from specific config (YAML) - Highest priority
+        if config:
+            rate_limit_config = config.get("rate_limit", {})
+            if "requests_per_second" in rate_limit_config:
+                rate = float(rate_limit_config["requests_per_second"])
+            if "burst" in rate_limit_config:
+                capacity = int(rate_limit_config["burst"])
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucket(rate=rate, capacity=capacity),
