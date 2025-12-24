@@ -182,11 +182,11 @@ class TestPipelineRunnerLifecycle:
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
             lock_manager = MagicMock()
 
-            async def lm_aenter():
+            async def lm_aenter(self):
                 call_recorder.record("lock_manager.__aenter__")
                 return lock_manager
 
-            async def lm_aexit(*args):
+            async def lm_aexit(self, *args):
                 call_recorder.record("lock_manager.__aexit__")
 
             lock_manager.__aenter__ = lm_aenter
@@ -308,11 +308,11 @@ class TestPipelineRunnerLifecycle:
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
             lock_manager = MagicMock()
 
-            async def lm_aenter():
+            async def lm_aenter(self):
                 call_recorder.record("lock_manager.__aenter__")
                 return lock_manager
 
-            async def lm_aexit(*args):
+            async def lm_aexit(self, *args):
                 call_recorder.record("lock_manager.__aexit__")
 
             lock_manager.__aenter__ = lm_aenter
