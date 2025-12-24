@@ -136,10 +136,13 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> None:
         func_name = None
+        is_bare_call = False
         if isinstance(node.func, ast.Name):
             func_name = node.func.id
+            is_bare_call = True
         elif isinstance(node.func, ast.Attribute):
             func_name = node.func.attr
+            is_bare_call = False
 
         if func_name:
             self.calls.append(
@@ -147,6 +150,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
                     "name": func_name,
                     "lineno": node.lineno,
                     "col_offset": node.col_offset,
+                    "is_bare_call": is_bare_call,
                 }
             )
         self.generic_visit(node)
@@ -491,7 +495,19 @@ def test_no_unsafe_functions(src_dir: Path):
 
         _, calls = analyze_python_file(py_file)
         for call in calls:
-            if call["name"] in PRINT_FUNCTIONS or call["name"] in UNSAFE_BUILTINS:
+            # For unsafe builtins (eval, exec, compile, __import__),
+            # only flag if it's a bare call (not re.compile, json.load, etc.)
+            if call["name"] in UNSAFE_BUILTINS:
+                if call.get("is_bare_call", True):
+                    violations.append(
+                        format_violation(
+                            py_file,
+                            call["lineno"],
+                            f"Unsafe/Print function '{call['name']}'",
+                            src_dir,
+                        )
+                    )
+            elif call["name"] in PRINT_FUNCTIONS:
                 violations.append(
                     format_violation(
                         py_file,
