@@ -116,6 +116,7 @@ class TestRunCommand:
                 "--resume",
                 "--limit",
                 "1000",
+                "-y",  # Skip confirmation prompt
             ],
         )
 
