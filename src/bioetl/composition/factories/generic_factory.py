@@ -162,7 +162,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
-        **kwargs: Any,
     ) -> TPipeline:
         """Create pipeline instance.
 
@@ -176,7 +175,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
             tracer: Optional tracer (created via bootstrap_tracer())
-            **kwargs: Additional arguments for compatibility
 
         Returns:
             Configured pipeline instance

@@ -113,6 +113,7 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         limit=ctx.limit,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         query=ctx.query,
+        dry_run=ctx.dry_run,
     )
 
     # Ensure metrics server is running (idempotent call)
