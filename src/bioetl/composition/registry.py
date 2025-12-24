@@ -21,6 +21,19 @@ class PipelineFactoryProtocol(Protocol):
         """Create pipeline with services."""
         ...
 
+    def create_runner(
+        self,
+        run_id: Any,
+        runtime: Any,
+        settings: Any,
+        logger: Any,
+        tracer: Any,
+        filter_config: Any | None = None,
+        config: Any | None = None,
+    ) -> Any:
+        """Create pipeline runner."""
+        ...
+
 
 class PipelineDefinition(NamedTuple):
     """Definition of a registered pipeline."""
