@@ -102,7 +102,7 @@ class PipelineRunner:
             async with self._services, self._lock_manager:
                 # Clear data exports at the start of the run
                 # to avoid appending to stale data from previous runs
-                self._clear_exports()
+                await self._clear_exports()
 
                 # Load checkpoint metadata (for logging purposes)
                 await self._checkpoint_manager.load_checkpoint()
@@ -118,7 +118,7 @@ class PipelineRunner:
                 extra={"records_fetched": self._executor.records_fetched},
             )
 
-    def _clear_exports(self) -> None:
+    async def _clear_exports(self) -> None:
         """Clear export files and Delta tables at the start of a pipeline run.
 
         Enforces Medallion architecture invariants:
