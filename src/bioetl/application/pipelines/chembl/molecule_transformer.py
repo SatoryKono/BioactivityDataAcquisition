@@ -8,12 +8,70 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
+
+
+# Field mappings for molecule nested structures
+_HIERARCHY_FIELDS: dict[str, Any] = {
+    "parent_chembl_id": None,
+    "active_chembl_id": None,
+    "molecule_chembl_id": None,
+}
+
+_PROPERTIES_FIELDS: dict[str, Any] = {
+    "alogp": safe_float,
+    "mw_freebase": safe_float,
+    "full_mwt": safe_float,
+    "hba": safe_int,
+    "hbd": safe_int,
+    "psa": safe_float,
+    "rtb": safe_int,
+    "num_lipinski_ro5_violations": safe_int,
+    "heavy_atoms": safe_int,
+    "aromatic_rings": safe_int,
+    "qed_weighted": safe_float,
+    "acd_logd": safe_float,
+    "acd_logp": safe_float,
+    "acd_most_apka": safe_float,
+    "acd_most_bpka": safe_float,
+    "full_molformula": None,
+    "ro3_pass": None,
+}
+
+_STRUCTURES_FIELDS: dict[str, Any] = {
+    "canonical_smiles": None,
+    "standard_inchi": None,
+    "standard_inchi_key": None,
+}
+
+
+def _extract_hierarchy(data: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract and rename hierarchy fields using flatten_nested_dict."""
+    result = flatten_nested_dict(data, "hierarchy_", _HIERARCHY_FIELDS)
+    # Rename molecule_chembl_id -> child_chembl_id for clarity
+    result["hierarchy_child_chembl_id"] = result.pop("hierarchy_molecule_chembl_id")
+    return result
+
+
+def _extract_properties(data: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract and rename properties fields using flatten_nested_dict."""
+    result = flatten_nested_dict(data, "property_", _PROPERTIES_FIELDS)
+    # Rename num_lipinski_ro5_violations -> ro5_violations
+    result["property_ro5_violations"] = result.pop(
+        "property_num_lipinski_ro5_violations"
+    )
+    return result
+
+
+def _extract_structures(data: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract structures fields using flatten_nested_dict."""
+    return flatten_nested_dict(data, "structure_", _STRUCTURES_FIELDS)
 
 
 class MoleculeTransformer(BaseTransformer):
@@ -43,10 +101,10 @@ class MoleculeTransformer(BaseTransformer):
             id_field="molecule_chembl_id",
         )
 
-        # Extract and flatten complex fields
-        hierarchy = self._extract_hierarchy(record.get("molecule_hierarchy"))
-        properties = self._extract_properties(record.get("molecule_properties"))
-        structures = self._extract_structures(record.get("molecule_structures"))
+        # Extract and flatten complex fields via module-level functions
+        hierarchy = _extract_hierarchy(record.get("molecule_hierarchy"))
+        properties = _extract_properties(record.get("molecule_properties"))
+        structures = _extract_structures(record.get("molecule_structures"))
 
         business_data: dict[str, Any] = {
             # Primary identifier
@@ -120,72 +178,3 @@ class MoleculeTransformer(BaseTransformer):
 
         # Convert Entity to SilverRecord for storage
         return cast("SilverRecord", self.entity_to_silver_record(entity))
-
-    def _extract_hierarchy(self, data: dict[str, Any] | None) -> dict[str, Any]:
-        if not data:
-            return {
-                "hierarchy_parent_chembl_id": None,
-                "hierarchy_active_chembl_id": None,
-                "hierarchy_child_chembl_id": None,
-            }
-        return {
-            "hierarchy_parent_chembl_id": data.get("parent_chembl_id"),
-            "hierarchy_active_chembl_id": data.get("active_chembl_id"),
-            "hierarchy_child_chembl_id": data.get("molecule_chembl_id"),
-        }
-
-    def _extract_properties(self, data: dict[str, Any] | None) -> dict[str, Any]:
-        if not data:
-            return {
-                "property_alogp": None,
-                "property_mw_freebase": None,
-                "property_full_mwt": None,
-                "property_hba": None,
-                "property_hbd": None,
-                "property_psa": None,
-                "property_rtb": None,
-                "property_ro5_violations": None,
-                "property_heavy_atoms": None,
-                "property_aromatic_rings": None,
-                "property_qed_weighted": None,
-                "property_acd_logd": None,
-                "property_acd_logp": None,
-                "property_acd_most_apka": None,
-                "property_acd_most_bpka": None,
-                "property_full_molformula": None,
-                "property_ro3_pass": None,
-            }
-        return {
-            "property_alogp": safe_float(data.get("alogp")),
-            "property_mw_freebase": safe_float(data.get("mw_freebase")),
-            "property_full_mwt": safe_float(data.get("full_mwt")),
-            "property_hba": safe_int(data.get("hba")),
-            "property_hbd": safe_int(data.get("hbd")),
-            "property_psa": safe_float(data.get("psa")),
-            "property_rtb": safe_int(data.get("rtb")),
-            "property_ro5_violations": safe_int(
-                data.get("num_lipinski_ro5_violations")
-            ),
-            "property_heavy_atoms": safe_int(data.get("heavy_atoms")),
-            "property_aromatic_rings": safe_int(data.get("aromatic_rings")),
-            "property_qed_weighted": safe_float(data.get("qed_weighted")),
-            "property_acd_logd": safe_float(data.get("acd_logd")),
-            "property_acd_logp": safe_float(data.get("acd_logp")),
-            "property_acd_most_apka": safe_float(data.get("acd_most_apka")),
-            "property_acd_most_bpka": safe_float(data.get("acd_most_bpka")),
-            "property_full_molformula": data.get("full_molformula"),
-            "property_ro3_pass": data.get("ro3_pass"),
-        }
-
-    def _extract_structures(self, data: dict[str, Any] | None) -> dict[str, Any]:
-        if not data:
-            return {
-                "structure_canonical_smiles": None,
-                "structure_standard_inchi": None,
-                "structure_standard_inchi_key": None,
-            }
-        return {
-            "structure_canonical_smiles": data.get("canonical_smiles"),
-            "structure_standard_inchi": data.get("standard_inchi"),
-            "structure_standard_inchi_key": data.get("standard_inchi_key"),
-        }

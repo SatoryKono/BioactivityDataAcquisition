@@ -8,6 +8,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import (
+    aggregate_nested_lists,
+    extract_list_field,
+)
 from bioetl.domain.entities import Target
 from bioetl.domain.transformations import generate_entity_id, safe_int
 
@@ -132,34 +136,18 @@ class TargetTransformer(BaseTransformer):
     def _extract_basic_component_fields(
         self, components: list[dict[str, Any]]
     ) -> dict[str, list[Any] | None]:
-        """Extract basic fields from component list."""
+        """Extract basic fields from component list via transform_utils."""
         return {
-            "component_accessions": self._extract_field(components, "accession"),
-            "component_ids": self._extract_int_field(components, "component_id"),
-            "component_types": self._extract_field(components, "component_type"),
-            "component_relationships": self._extract_field(components, "relationship"),
-            "component_descriptions": self._extract_field(
+            "component_accessions": extract_list_field(components, "accession"),
+            "component_ids": extract_list_field(components, "component_id", safe_int),
+            "component_types": extract_list_field(components, "component_type"),
+            "component_relationships": extract_list_field(components, "relationship"),
+            "component_descriptions": extract_list_field(
                 components, "component_description"
             ),
-            "component_organisms": self._extract_field(components, "organism"),
-            "component_tax_ids": self._extract_int_field(components, "tax_id"),
+            "component_organisms": extract_list_field(components, "organism"),
+            "component_tax_ids": extract_list_field(components, "tax_id", safe_int),
         }
-
-    def _extract_field(
-        self, components: list[dict[str, Any]], field: str
-    ) -> list[Any] | None:
-        """Extract a string field from all components."""
-        values = [c.get(field) for c in components if c.get(field)]
-        return values or None
-
-    def _extract_int_field(
-        self, components: list[dict[str, Any]], field: str
-    ) -> list[int] | None:
-        """Extract an integer field from all components."""
-        values = [
-            safe_int(c.get(field)) for c in components if c.get(field) is not None
-        ]
-        return values or None
 
     def _extract_protein_classifications(
         self, components: list[dict[str, Any]]
@@ -204,6 +192,8 @@ class TargetTransformer(BaseTransformer):
     ) -> str | None:
         """Aggregate synonyms from all components into a single JSON list.
 
+        Uses aggregate_nested_lists from transform_utils.
+
         Args:
             components: List of component dicts from ChEMBL API.
 
@@ -211,22 +201,15 @@ class TargetTransformer(BaseTransformer):
             JSON string of list of synonyms, or None.
 
         """
-        if not components or not isinstance(components, list):
-            return None
-
-        all_synonyms = []
-        for comp in components:
-            synonyms = comp.get("target_component_synonyms")
-            if synonyms and isinstance(synonyms, list):
-                all_synonyms.extend(synonyms)
-
-        return self.serialize_json(all_synonyms) if all_synonyms else None
+        synonyms = aggregate_nested_lists(components, "target_component_synonyms")
+        return self.serialize_json(synonyms) if synonyms else None
 
     def _aggregate_component_xrefs(
         self, components: list[dict[str, Any]] | None
     ) -> str | None:
         """Aggregate cross-references from all target components.
 
+        Uses aggregate_nested_lists from transform_utils.
         ChEMBL API stores cross-references inside each component's
         target_component_xrefs field, not at the target level.
 
@@ -237,13 +220,5 @@ class TargetTransformer(BaseTransformer):
             JSON string of aggregated xrefs, or None if empty.
 
         """
-        if not components or not isinstance(components, list):
-            return None
-
-        all_xrefs: list[dict[str, Any]] = []
-        for comp in components:
-            xrefs = comp.get("target_component_xrefs")
-            if xrefs and isinstance(xrefs, list):
-                all_xrefs.extend(xrefs)
-
-        return self.serialize_json(all_xrefs) if all_xrefs else None
+        xrefs = aggregate_nested_lists(components, "target_component_xrefs")
+        return self.serialize_json(xrefs) if xrefs else None
