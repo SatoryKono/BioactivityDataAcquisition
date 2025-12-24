@@ -22,7 +22,8 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import Field, SecretStr
+from pydantic import SecretStr
+from pydantic.fields import Field, FieldInfo
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -46,7 +47,9 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
     A settings source that loads variables from a YAML file.
     """
 
-    def get_field_value(self, field: Field, field_name: str) -> tuple[Any, str] | None:
+    def get_field_value(
+        self, field: FieldInfo, field_name: str
+    ) -> tuple[Any, str, bool]:
         """
         Get value of a field from YAML file.
         """
@@ -55,15 +58,17 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
             with Path("config.yaml").open(encoding=encoding) as f:
                 file_content = yaml.safe_load(f)
         except FileNotFoundError:
-            return None
+            return None, field_name, False
 
         if not isinstance(file_content, dict):
-            return None
+            return None, field_name, False
 
         field_value = file_content.get(field_name)
-        return field_value, field_name
+        return field_value, field_name, False
 
-    def prepare_field_value(self, field_name: str, field: Field, value: Any) -> Any:
+    def prepare_field_value(
+        self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
+    ) -> Any:
         """
         Prepare value of a field.
         """
@@ -73,13 +78,13 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         d: dict[str, Any] = {}
 
         for field_name, field in self.settings_cls.model_fields.items():
-            field_value_and_key = self.get_field_value(field, field_name)
-            if field_value_and_key is None:
-                continue
-
-            field_value, field_key = field_value_and_key
+            field_value, field_key, value_is_complex = self.get_field_value(
+                field, field_name
+            )
             if field_value is not None:
-                field_value = self.prepare_field_value(field_name, field, field_value)
+                field_value = self.prepare_field_value(
+                    field_name, field, field_value, value_is_complex
+                )
                 d[field_key] = field_value
 
         return d
@@ -287,6 +292,7 @@ class Settings(BaseSettings):
     env: Literal["dev", "staging", "prod"] = Field(default="dev")
     debug: bool = Field(default=False)
     test_mode: bool = Field(default=False)
+    metrics_enabled: bool = Field(default=True)
     metrics_port: int = Field(default=8000, ge=1, le=65535)
     """Port for Prometheus metrics HTTP server (default: 8000)."""
     strict_error_handling: bool = Field(

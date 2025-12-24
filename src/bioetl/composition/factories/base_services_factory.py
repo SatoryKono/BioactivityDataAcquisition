@@ -91,7 +91,7 @@ class BaseServicesFactory:
 
     @staticmethod
     def _create_metrics(settings: Settings) -> MetricsPort:
-        if getattr(settings, "metrics", None) and settings.metrics.enabled:
+        if settings.metrics_enabled:
             return PrometheusMetrics()
         return NoOpMetrics()
 

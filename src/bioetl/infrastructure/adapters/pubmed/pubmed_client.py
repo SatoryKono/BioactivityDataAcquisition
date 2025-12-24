@@ -129,7 +129,9 @@ class PubMedAdapter:
 
         if filter_field and filter_field != "pmid":
             self.logger.warning(
-                "Unsupported filter_field: %s. Assuming PMIDs.", filter_field
+                "unsupported_filter_field",
+                field=filter_field,
+                msg="Assuming PMIDs",
             )
 
         total_fetched = 0
@@ -154,11 +156,17 @@ class PubMedAdapter:
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
-        filter_ids: set[str] | None = None,
+        filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records."""
-        _ = filter_ids, filter_field  # Mark as intentionally unused
+        if filter_ids:
+            async for record in self.fetch_filtered(
+                entity_type, filter_ids, filter_field, limit
+            ):
+                yield record
+            return
+
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 

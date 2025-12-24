@@ -81,7 +81,7 @@ class PubChemClient(BaseSyncAdapter):
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
-        filter_ids: set[str] | None = None,
+        filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from PubChem."""
