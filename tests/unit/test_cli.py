@@ -215,3 +215,145 @@ class TestCliHelp:
 
         assert result.exit_code == 0
         assert "--pipeline" in result.output
+
+
+class TestPipelineValidation:
+    """Tests for pipeline name validation."""
+
+    def test_invalid_pipeline_name_raises_error(self, runner):
+        """Test that invalid pipeline name raises BadParameter."""
+        result = runner.invoke(cli, ["run", "--pipeline", "nonexistent_pipeline"])
+
+        assert result.exit_code == 2  # Click's error exit code for bad parameter
+        assert "Unknown pipeline" in result.output or "Error" in result.output
+
+    def test_valid_pipeline_names_listed_in_error(self, runner):
+        """Test that available pipelines are listed in error message."""
+        result = runner.invoke(cli, ["run", "--pipeline", "invalid_name"])
+
+        # The error should mention available pipelines
+        assert "chembl_activity" in result.output or "Available" in result.output
+
+
+class TestRunCommandAdvanced:
+    """Advanced tests for run command edge cases."""
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    def test_run_command_bootstrap_value_error(self, mock_bootstrap, runner):
+        """Test run command handles ValueError during bootstrap."""
+        mock_bootstrap.side_effect = ValueError("Invalid config")
+
+        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+
+        assert result.exit_code == 1
+        assert "Configuration error" in result.output
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    def test_run_command_bootstrap_file_not_found(self, mock_bootstrap, runner):
+        """Test run command handles FileNotFoundError during bootstrap."""
+        mock_bootstrap.side_effect = FileNotFoundError("Config not found")
+
+        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+
+        assert result.exit_code == 1
+        assert "Configuration error" in result.output
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    def test_run_command_bootstrap_generic_error(self, mock_bootstrap, runner):
+        """Test run command handles generic Exception during bootstrap."""
+        mock_bootstrap.side_effect = RuntimeError("Unexpected error")
+
+        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+
+        assert result.exit_code == 1
+        assert "Initialization failed" in result.output
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    def test_run_command_with_filter_options(
+        self,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_bootstrap,
+        runner,
+        tmp_path,
+    ):
+        """Test run command with CSV filter options."""
+        from bioetl.domain.context import PipelineRunContext
+
+        # Create a temporary CSV file
+        csv_file = tmp_path / "filter.csv"
+        csv_file.write_text("id\nCHEMBL123\nCHEMBL456")
+
+        mock_runner_instance = MagicMock()
+        mock_runner_instance.run = AsyncMock()
+        mock_bootstrap.return_value = mock_runner_instance
+
+        result = runner.invoke(
+            cli,
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--input-csv",
+                str(csv_file),
+                "--filter-column",
+                "id",
+                "--filter-field",
+                "molecule_chembl_id",
+            ],
+        )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        ctx = mock_bootstrap.call_args[0][0]
+        assert isinstance(ctx, PipelineRunContext)
+        assert ctx.input_csv == str(csv_file)
+        assert ctx.filter_column == "id"
+        assert ctx.filter_field == "molecule_chembl_id"
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    def test_run_command_missing_logger(self, mock_bootstrap, runner):
+        """Test run command handles missing logger gracefully."""
+        mock_runner_instance = MagicMock(spec=[])  # Empty spec, no logger attribute
+        mock_bootstrap.return_value = mock_runner_instance
+
+        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+
+        assert result.exit_code == 1
+        assert "Logger not initialized" in result.output
+
+
+class TestMetricsServerIntegration:
+    """Tests for metrics server integration in CLI."""
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.start_metrics_server")
+    @patch("bioetl.interfaces.cli.get_settings")
+    def test_metrics_server_failure_non_blocking(
+        self,
+        mock_get_settings,
+        mock_start_metrics,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_bootstrap,
+        runner,
+    ):
+        """Test that metrics server failure doesn't block pipeline run."""
+        mock_runner_instance = MagicMock()
+        mock_runner_instance.run = AsyncMock()
+        mock_bootstrap.return_value = mock_runner_instance
+
+        mock_settings = MagicMock()
+        mock_settings.metrics_port = 8000
+        mock_get_settings.return_value = mock_settings
+
+        mock_start_metrics.side_effect = Exception("Port already in use")
+
+        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+
+        # Pipeline should still succeed even if metrics server fails
+        assert result.exit_code == 0
+        mock_asyncio_run.assert_called_once()
