@@ -38,6 +38,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "error_classifier",
         "exceptions",
         "filter_config",
+        "medallion",
         "ports",
         "transformations",
         "types",

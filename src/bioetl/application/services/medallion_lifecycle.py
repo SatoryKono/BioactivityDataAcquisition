@@ -149,14 +149,14 @@ class MedallionLifecycleService:
                 },
             )
 
-    async def vacuum(self, table: str, retention_days: int = 7) -> int:
+    async def vacuum(self, table: str, _retention_days: int = 7) -> int:
         """Vacuum Delta table (remove old versions).
 
         Future implementation for ADR-011.
 
         Args:
             table: Table name to vacuum.
-            retention_days: Days to retain before vacuum.
+            _retention_days: Days to retain before vacuum.
 
         Returns:
             Number of files removed.
