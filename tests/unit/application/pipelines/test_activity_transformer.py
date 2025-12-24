@@ -192,16 +192,50 @@ class TestActivityTransformerTransform:
         record = {
             "activity_id": 12345,
             "molecule_chembl_id": "CHEMBL25",
-            "action_type": ["INHIBITOR"],
             "activity_properties": [{"type": "Ki", "value": 5.0}],
         }
 
         result = await transformer.transform(mock_context, record)
 
         assert result is not None
-        # JSON fields should be serialized as strings
-        assert isinstance(result.get("action_type"), str)
+        # activity_properties should be serialized as JSON string
         assert isinstance(result.get("activity_properties"), str)
+
+    @pytest.mark.asyncio
+    async def test_transform_with_action_type(self, transformer, mock_context):
+        """Test transformation with action type data (flattened structure)."""
+        record = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            "action_type": {
+                "action_type": "INHIBITOR",
+                "description": "Compound that inhibits target activity",
+                "parent_type": "NEGATIVE MODULATOR",
+            },
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["action_type_action_type"] == "INHIBITOR"
+        assert result["action_type_description"] == "Compound that inhibits target activity"
+        assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
+
+    @pytest.mark.asyncio
+    async def test_transform_with_action_type_null(self, transformer, mock_context):
+        """Test transformation with null action type."""
+        record = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            "action_type": None,
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["action_type_action_type"] is None
+        assert result["action_type_description"] is None
+        assert result["action_type_parent_type"] is None
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
@@ -343,3 +377,111 @@ def test_extract_ligand_efficiency_float_precision(transformer):
     assert result["ligand_efficiency_le"] == pytest.approx(0.987654321, rel=1e-9)
     assert result["ligand_efficiency_lle"] == pytest.approx(1.111111111, rel=1e-9)
     assert result["ligand_efficiency_sei"] == pytest.approx(5.999999999, rel=1e-9)
+
+
+@pytest.mark.unit
+class TestActivityTransformerActionType:
+    """Tests for ActivityTransformer action type extraction."""
+
+    def test_extract_action_type_valid_dict(self, transformer):
+        """Test extraction with valid action type dictionary."""
+        action_data = {
+            "action_type": "INHIBITOR",
+            "description": "Compound that inhibits target activity",
+            "parent_type": "NEGATIVE MODULATOR",
+        }
+
+        result = transformer._extract_action_type(action_data)
+
+        assert result["action_type_action_type"] == "INHIBITOR"
+        assert result["action_type_description"] == "Compound that inhibits target activity"
+        assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
+
+    def test_extract_action_type_none(self, transformer):
+        """Test extraction with None input."""
+        result = transformer._extract_action_type(None)
+
+        assert result["action_type_action_type"] is None
+        assert result["action_type_description"] is None
+        assert result["action_type_parent_type"] is None
+
+    def test_extract_action_type_empty_dict(self, transformer):
+        """Test extraction with empty dictionary."""
+        result = transformer._extract_action_type({})
+
+        assert result["action_type_action_type"] is None
+        assert result["action_type_description"] is None
+        assert result["action_type_parent_type"] is None
+
+    def test_extract_action_type_partial_dict(self, transformer):
+        """Test extraction with partial data (parent_type nullable)."""
+        action_data = {
+            "action_type": "AGONIST",
+            "description": "Activates receptor",
+            # parent_type missing
+        }
+
+        result = transformer._extract_action_type(action_data)
+
+        assert result["action_type_action_type"] == "AGONIST"
+        assert result["action_type_description"] == "Activates receptor"
+        assert result["action_type_parent_type"] is None
+
+    def test_extract_action_type_only_type(self, transformer):
+        """Test extraction with only action_type field."""
+        action_data = {
+            "action_type": "ANTAGONIST",
+        }
+
+        result = transformer._extract_action_type(action_data)
+
+        assert result["action_type_action_type"] == "ANTAGONIST"
+        assert result["action_type_description"] is None
+        assert result["action_type_parent_type"] is None
+
+    def test_extract_action_type_non_dict_input(self, transformer):
+        """Test extraction with non-dictionary input."""
+        # String input
+        result1 = transformer._extract_action_type("INHIBITOR")
+        assert all(v is None for v in result1.values())
+
+        # List input (old format like ["INHIBITOR"])
+        result2 = transformer._extract_action_type(["INHIBITOR"])
+        assert all(v is None for v in result2.values())
+
+        # Integer input
+        result3 = transformer._extract_action_type(123)
+        assert all(v is None for v in result3.values())
+
+    def test_extract_action_type_all_parent_types(self, transformer):
+        """Test extraction with different parent_type values."""
+        # POSITIVE MODULATOR parent type
+        action_data_positive = {
+            "action_type": "AGONIST",
+            "description": "Activates receptor",
+            "parent_type": "POSITIVE MODULATOR",
+        }
+        result = transformer._extract_action_type(action_data_positive)
+        assert result["action_type_parent_type"] == "POSITIVE MODULATOR"
+
+        # NEGATIVE MODULATOR parent type
+        action_data_negative = {
+            "action_type": "INHIBITOR",
+            "description": "Inhibits activity",
+            "parent_type": "NEGATIVE MODULATOR",
+        }
+        result = transformer._extract_action_type(action_data_negative)
+        assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
+
+    def test_extract_action_type_preserves_whitespace(self, transformer):
+        """Test extraction preserves whitespace in strings."""
+        action_data = {
+            "action_type": "PARTIAL AGONIST",
+            "description": "Compound with partial agonist activity",
+            "parent_type": "POSITIVE MODULATOR",
+        }
+
+        result = transformer._extract_action_type(action_data)
+
+        assert result["action_type_action_type"] == "PARTIAL AGONIST"
+        assert result["action_type_description"] == "Compound with partial agonist activity"

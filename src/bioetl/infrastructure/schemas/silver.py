@@ -71,8 +71,11 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("data_validity_comment", pa.string()),
         pa.field("data_validity_description", pa.string()),
         pa.field("potential_duplicate", pa.int64()),
-        # Action and properties
-        pa.field("action_type", pa.string()),
+        # Action type (flattened from ChEMBL API nested structure)
+        pa.field("action_type_action_type", pa.string()),
+        pa.field("action_type_description", pa.string()),
+        pa.field("action_type_parent_type", pa.string()),
+        # Activity properties
         pa.field("activity_properties", pa.string()),  # JSON string
         pa.field("toid", pa.int64()),
         # Lineage metadata
