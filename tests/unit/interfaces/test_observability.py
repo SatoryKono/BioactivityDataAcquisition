@@ -29,12 +29,15 @@ def test_start_metrics_server_success():
 
 
 def test_start_metrics_server_failure():
-    """Simulate server failure and verify"""
-    with (
-        mock.patch(
-            "bioetl.infrastructure.observability.server.start_http_server",
-            side_effect=Exception("Failed"),
-        ),
-        pytest.raises(Exception, match="Failed"),
+    """Simulate server failure and verify graceful handling.
+
+    The server is designed to catch exceptions and return False (fail_fast=False by default)
+    rather than raising exceptions, to allow pipelines to continue without metrics.
+    """
+    with mock.patch(
+        "bioetl.infrastructure.observability.server.start_http_server",
+        side_effect=Exception("Failed"),
     ):
-        observability.start_metrics_server()
+        # Server catches exceptions and returns False for graceful degradation
+        result = obs_server.start_metrics_server(port=8000, fail_fast=False)
+        assert result is False

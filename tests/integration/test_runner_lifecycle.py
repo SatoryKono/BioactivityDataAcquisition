@@ -80,12 +80,12 @@ def mock_services_with_recorder(call_recorder):
         side_effect=lambda *a, **kw: (call_recorder.record("storage.clear_gold"), 0)[1]
     )
 
-    # Context manager support
-    async def services_aenter():
+    # Context manager support (self is passed when called as a method)
+    async def services_aenter(self):
         call_recorder.record("services.__aenter__")
         return services
 
-    async def services_aexit(*args):
+    async def services_aexit(self, *args):
         call_recorder.record("services.__aexit__")
 
     services.__aenter__ = services_aenter
