@@ -45,6 +45,9 @@ from bioetl.domain.entities import (
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
 
+# Medallion policies
+from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
+
 # Exceptions
 from bioetl.domain.exceptions import (
     ApiError,
@@ -143,6 +146,9 @@ __all__ = [
     "TargetComponent",
     # Error classifier
     "ErrorClassifier",
+    # Medallion policies
+    "ClearPolicy",
+    "MedallionPolicy",
     # Exceptions - Base
     "ApiError",
     "BioETLError",
