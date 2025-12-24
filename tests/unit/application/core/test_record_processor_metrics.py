@@ -45,7 +45,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )

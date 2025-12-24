@@ -33,7 +33,7 @@ def mock_pipeline_base():
 @pytest.fixture
 def mock_run_id() -> RunID:
     """Create a test run ID."""
-    return RunID(uuid4())
+    return uuid4()
 
 
 class TestPubChemCompoundPipeline:
