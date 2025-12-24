@@ -137,6 +137,56 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     return PipelineYamlConfig.model_validate(config)
 
 
+def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
+    """Extract field names from source config."""
+    source_fields = yaml_config.source.fields
+    if source_fields and isinstance(source_fields[0], dict):
+        return [field["name"] for field in source_fields if "name" in field]
+    return source_fields  # type: ignore[return-value]
+
+
+def _extract_write_modes(yaml_config: PipelineYamlConfig) -> tuple[str, str]:
+    """Extract write modes from sink config."""
+    silver_config = yaml_config.sink.get("silver")
+    gold_config = yaml_config.sink.get("gold")
+
+    write_mode = silver_config.mode if silver_config and silver_config.mode else "merge"
+    gold_write_mode = gold_config.mode if gold_config and gold_config.mode else "append"
+
+    return write_mode, gold_write_mode
+
+
+def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
+    """Build GoldFilterConfig from YAML config."""
+    gf = yaml_config.gold_filters
+    return GoldFilterConfig(
+        column_filters=tuple(
+            GoldColumnFilter(column=col, values=frozenset(vals))
+            for col, vals in gf.columns.items()
+        ),
+        range_filters=tuple(
+            GoldRangeFilter(
+                column=col,
+                min_value=r.min,
+                max_value=r.max,
+                include_min=r.include_min,
+                include_max=r.include_max,
+            )
+            for col, r in gf.ranges.items()
+        ),
+        list_length_filters=tuple(
+            GoldListLengthFilter(column=col, min_length=r.min, max_length=r.max)
+            for col, r in gf.list_lengths.items()
+        ),
+        list_contains_filters=tuple(
+            GoldListContainsFilter(column=col, values=frozenset(r.values), mode=r.mode)
+            for col, r in gf.list_contains.items()
+        ),
+        required_fields=tuple(gf.required_fields),
+        exclude_if_present=tuple(gf.exclude_if_present),
+    )
+
+
 def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     """Map PipelineYamlConfig to domain PipelineConfig.
 
@@ -150,66 +200,9 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     Returns:
         PipelineConfig: Immutable domain configuration
     """
-    # Extract field names from source config
-    source_fields = yaml_config.source.fields
-    if source_fields and isinstance(source_fields[0], dict):
-        # Handle cases where fields are dicts like [{'name': 'col1'}, ...]
-        source_fields = [field["name"] for field in source_fields if "name" in field]
-
-    # Extract storage config
-    silver_config = yaml_config.sink.get("silver")
-    gold_config = yaml_config.sink.get("gold")
-
-    # Silver write mode (default: merge)
-    write_mode = "merge"
-    if silver_config and silver_config.mode:
-        write_mode = silver_config.mode
-
-    # Gold write mode (default: append)
-    gold_write_mode = "append"
-    if gold_config and gold_config.mode:
-        gold_write_mode = gold_config.mode
-
-    # Parse gold_filters from YAML
-    gf = yaml_config.gold_filters
-    column_filters = tuple(
-        GoldColumnFilter(column=col, values=frozenset(vals))
-        for col, vals in gf.columns.items()
-    )
-    range_filters = tuple(
-        GoldRangeFilter(
-            column=col,
-            min_value=r.min,
-            max_value=r.max,
-            include_min=r.include_min,
-            include_max=r.include_max,
-        )
-        for col, r in gf.ranges.items()
-    )
-    list_length_filters = tuple(
-        GoldListLengthFilter(
-            column=col,
-            min_length=r.min,
-            max_length=r.max,
-        )
-        for col, r in gf.list_lengths.items()
-    )
-    list_contains_filters = tuple(
-        GoldListContainsFilter(
-            column=col,
-            values=frozenset(r.values),
-            mode=r.mode,
-        )
-        for col, r in gf.list_contains.items()
-    )
-    gold_filters = GoldFilterConfig(
-        column_filters=column_filters,
-        range_filters=range_filters,
-        list_length_filters=list_length_filters,
-        list_contains_filters=list_contains_filters,
-        required_fields=tuple(gf.required_fields),
-        exclude_if_present=tuple(gf.exclude_if_present),
-    )
+    source_fields = _extract_source_fields(yaml_config)
+    write_mode, gold_write_mode = _extract_write_modes(yaml_config)
+    gold_filters = _build_gold_filters(yaml_config)
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,

@@ -223,11 +223,14 @@ known-first-party = ["bioetl", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
 # Tests may have unused arguments, ignore import order (handled by isort)
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001"]
+# C901: Architecture tests perform complex static analysis checks
+"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine
 "src/bioetl/infrastructure/**/*.py" = ["ARG001", "ARG002", "PTH123"]
+# config.py uses SecretStr at runtime for Pydantic models
+"src/bioetl/infrastructure/config.py" = ["ARG001", "ARG002", "PTH123", "TC002"]
 # Application core may have unused context args for future use
 "src/bioetl/application/**/*.py" = ["ARG001", "ARG002", "SIM105"]
 # Composition factories may have unused args for interface consistency
