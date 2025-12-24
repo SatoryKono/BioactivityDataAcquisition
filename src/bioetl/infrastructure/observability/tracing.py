@@ -31,22 +31,39 @@ class OpenTelemetryTracer:
                 "OpenTelemetry is not installed. Install with 'pip install opentelemetry-api opentelemetry-sdk'"
             )
 
-        provider = TracerProvider()
+        self._provider = TracerProvider()
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
         exporter = OTLPSpanExporter() if OTLPSpanExporter else ConsoleSpanExporter()
 
         processor = BatchSpanProcessor(exporter)
-        provider.add_span_processor(processor)
-        trace.set_tracer_provider(provider)
+        self._provider.add_span_processor(processor)
+        trace.set_tracer_provider(self._provider)
         self._tracer = trace.get_tracer(service_name)
+        self._closed = False
 
     def get_tracer(self, name: str) -> Any:
         return trace.get_tracer(name)
 
+    def close(self) -> None:
+        """Flush pending spans and shutdown provider. Idempotent."""
+        if self._closed:
+            return
+        try:
+            # Force flush with 5 second timeout
+            self._provider.force_flush(timeout_millis=5000)
+            self._provider.shutdown()
+        except Exception:
+            # Best effort - don't fail the pipeline on tracing cleanup
+            pass
+        self._closed = True
+
 
 class NoOpTracer:
     """Null object pattern for tracing."""
+
+    def __init__(self) -> None:
+        self._closed = False
 
     def get_tracer(self, name: str) -> Any:
         """Return a dummy object that swallows calls."""
@@ -72,3 +89,7 @@ class NoOpTracer:
                 return DummySpan()
 
         return DummyTracer()
+
+    def close(self) -> None:
+        """No-op close. Idempotent."""
+        self._closed = True

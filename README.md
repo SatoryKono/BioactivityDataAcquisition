@@ -17,7 +17,7 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
 * **Medallion Architecture**: Structured data flow (Bronze → Silver → Gold) ensuring data quality and traceability.
 * **Delta Lake Core**: ACID transactions, schema enforcement, and time travel capabilities.
 * **Resilience**: Built-in circuit breakers, exponential backoff retries, and dead-letter queues (Quarantine).
-* **Concurrency Control**: Distributed locking with Redis to prevent race conditions during backfills.
+* **Local-First Design**: In-memory locking, local file storage — no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
 * **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
 
 ## ⚡ Quick Start
@@ -25,8 +25,8 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
 ### Prerequisites
 
 * **Python**: Version 3.11 or higher.
-* **Docker**: Required for local infrastructure (Postgres, Redis, MinIO).
 * **Make**: For running automation commands.
+* **Docker**: *Optional* — only for legacy distributed mode (see [Legacy Setup](#legacy-distributed-mode-optional)).
 
 ### Installation
 
@@ -38,18 +38,20 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
    make install
    ```
 
-2. **Configure Environment**:
-   Copy the example configuration.
+2. **Configure Environment** *(optional)*:
+   Copy the example configuration if you need API keys for providers.
    ```bash
    cp .env.example .env
    ```
    *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`.*
 
-3. **Start Infrastructure**:
-   Launch local services (Postgres, Redis, MinIO) via Docker Compose.
+3. **Verify Installation**:
+   Run tests to ensure everything works.
    ```bash
-   make docker-up
+   make lint && make test
    ```
+
+> **Note**: BioETL uses local file storage by default (`data/` directory). No Docker or external services required. See [Local Storage Layout](docs/03-guides/local-storage-layout.md) and [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) for details.
 
 ### Running Pipelines
 
@@ -93,7 +95,7 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   ```bash
   make test-unit
   ```
-* **Run Integration Tests** (Uses Docker/VCR.py):
+* **Run Integration Tests** (Uses VCR.py cassettes, no network required):
   ```bash
   make test-integration
   ```
@@ -144,10 +146,10 @@ Access the docs at `http://localhost:8000`.
 │       │   └── pipelines/    # Concrete pipelines (ChEMBL, etc.)
 │       ├── composition/      # Composition Root (DI, bootstrap)
 │       │   └── factories/    # Pipeline factories
-│       ├── infrastructure/   # Adapters (API clients, Delta Lake, Redis)
+│       ├── infrastructure/   # Adapters (API clients, Delta Lake, Storage)
 │       │   ├── adapters/     # HTTP clients (ChEMBL, PubChem, UniProt)
-│       │   ├── storage/      # Bronze/Silver/Gold writers
-│       │   └── locking/      # Distributed locks
+│       │   ├── storage/      # Bronze/Silver/Gold writers (local filesystem)
+│       │   └── locking/      # In-memory locks (MemoryLock)
 │       └── interfaces/       # External interfaces
 │           ├── cli.py        # Click CLI entry point
 │           └── orchestration/ # Runner, signals, Prefect
@@ -157,6 +159,23 @@ Access the docs at `http://localhost:8000`.
 ├── pyproject.toml            # Dependencies & Tool configuration
 └── README.md                 # Project documentation
 ```
+
+## 🐳 Legacy Distributed Mode (Optional)
+
+For distributed deployments with Redis locking and S3-compatible storage, you can use Docker Compose:
+
+```bash
+# Start infrastructure services (Postgres, Redis, MinIO)
+make docker-up
+
+# Run E2E tests with Docker
+make test-e2e
+
+# Stop services
+make docker-down
+```
+
+> **Note**: This mode is deprecated for local development. See [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) for the rationale behind the Local-Only architecture.
 
 ## 🤝 Contributing
 

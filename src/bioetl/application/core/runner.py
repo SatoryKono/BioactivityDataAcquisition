@@ -147,9 +147,13 @@ class PipelineRunner:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        # Clear Silver and Gold layers using StoragePort methods
-        silver_cleared = storage.clear_silver(silver_table, dry_run=self._runtime.dry_run)
-        gold_cleared = storage.clear_gold(gold_table, dry_run=self._runtime.dry_run)
+        # Clear Silver and Gold layers using StoragePort methods (async)
+        silver_cleared = await storage.clear_silver(
+            silver_table, dry_run=self._runtime.dry_run
+        )
+        gold_cleared = await storage.clear_gold(
+            gold_table, dry_run=self._runtime.dry_run
+        )
 
         total_cleared = silver_cleared + gold_cleared
 

@@ -6,6 +6,7 @@ configured local storage infrastructure.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -100,7 +101,7 @@ class StorageAdapter:
             mode=mode,
         )
 
-    def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.
 
         Implements StoragePort.clear_silver().
@@ -114,21 +115,24 @@ class StorageAdapter:
         Returns:
             Count of cleared items (tables + files).
         """
+        loop = asyncio.get_running_loop()
         cleared_count = 0
 
-        # Clear Silver Delta table
-        cleared_count += self.silver.clear(table_name, dry_run=dry_run)
+        # Clear Silver Delta table (sync operation wrapped in executor)
+        cleared_count += await loop.run_in_executor(
+            None, lambda: self.silver.clear(table_name, dry_run=dry_run)
+        )
 
         # Clear Silver CSV if exporter is configured
-        if self.silver.csv_exporter:
-            # TODO: Add dry_run to CsvExporter.clear
-            if not dry_run:
-                deleted = self.silver.csv_exporter.clear(table_name)
-                cleared_count += len(deleted)
+        if self.silver.csv_exporter and not dry_run:
+            deleted = await loop.run_in_executor(
+                None, lambda: self.silver.csv_exporter.clear(table_name)
+            )
+            cleared_count += len(deleted)
 
         return cleared_count
 
-    def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table.
 
         Implements StoragePort.clear_gold().
@@ -142,21 +146,24 @@ class StorageAdapter:
         Returns:
             Count of cleared items (tables + files).
         """
+        loop = asyncio.get_running_loop()
         cleared_count = 0
 
-        # Clear Gold Delta table
-        cleared_count += self.gold.clear(table_name, dry_run=dry_run)
+        # Clear Gold Delta table (sync operation wrapped in executor)
+        cleared_count += await loop.run_in_executor(
+            None, lambda: self.gold.clear(table_name, dry_run=dry_run)
+        )
 
         # Clear Gold CSV if exporter is configured
-        if self.gold.csv_exporter:
-            # TODO: Add dry_run to CsvExporter.clear
-            if not dry_run:
-                deleted = self.gold.csv_exporter.clear(table_name)
-                cleared_count += len(deleted)
+        if self.gold.csv_exporter and not dry_run:
+            deleted = await loop.run_in_executor(
+                None, lambda: self.gold.csv_exporter.clear(table_name)
+            )
+            cleared_count += len(deleted)
 
         return cleared_count
 
-    def clear_csv(self, table_name: str | None = None) -> int:
+    async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 
         Implements StoragePort.clear_csv().
@@ -168,19 +175,24 @@ class StorageAdapter:
         Returns:
             Number of files cleared.
         """
+        loop = asyncio.get_running_loop()
         cleared_count = 0
 
         if self.silver.csv_exporter:
-            deleted = self.silver.csv_exporter.clear(table_name)
+            deleted = await loop.run_in_executor(
+                None, lambda: self.silver.csv_exporter.clear(table_name)
+            )
             cleared_count += len(deleted) if isinstance(deleted, list) else deleted
 
         if self.gold.csv_exporter:
-            deleted = self.gold.csv_exporter.clear(table_name)
+            deleted = await loop.run_in_executor(
+                None, lambda: self.gold.csv_exporter.clear(table_name)
+            )
             cleared_count += len(deleted) if isinstance(deleted, list) else deleted
 
         return cleared_count
 
-    def clear_delta(self, table_name: str | None = None) -> int:
+    async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
 
         Implements StoragePort.clear_delta().
@@ -192,16 +204,77 @@ class StorageAdapter:
         Returns:
             Number of tables cleared.
         """
+        loop = asyncio.get_running_loop()
         cleared_count = 0
 
         if table_name:
-            cleared_count += self.silver.clear(table_name)
-            cleared_count += self.gold.clear(table_name)
-        else:
-            # Clear all tables is not implemented for Delta
-            pass
+            cleared_count += await loop.run_in_executor(
+                None, lambda: self.silver.clear(table_name)
+            )
+            cleared_count += await loop.run_in_executor(
+                None, lambda: self.gold.clear(table_name)
+            )
 
         return cleared_count
+
+    def preview_cleanup(
+        self,
+        silver_table: str,
+        gold_table: str | None = None,
+    ) -> dict[str, Any]:
+        """Preview what would be cleared without actual deletion.
+
+        Implements StoragePort.preview_cleanup().
+        Used by CLI dry-run mode to show users what data would be affected.
+
+        Args:
+            silver_table: Silver table name (e.g., 'chembl.activity')
+            gold_table: Optional Gold table name
+
+        Returns:
+            Dict with layer info including paths and file counts.
+        """
+        result: dict[str, Any] = {
+            "silver": self._preview_layer(self.silver, silver_table),
+            "gold": None,
+            "total_files": 0,
+        }
+
+        if gold_table:
+            result["gold"] = self._preview_layer(self.gold, gold_table)
+
+        result["total_files"] = (
+            result["silver"]["file_count"]
+            + (result["gold"]["file_count"] if result["gold"] else 0)
+        )
+        return result
+
+    def _preview_layer(
+        self,
+        writer: DeltaWriter | GoldWriter,
+        table_name: str,
+    ) -> dict[str, Any]:
+        """Count files in a layer without deletion.
+
+        Args:
+            writer: Delta or Gold writer instance
+            table_name: Table name to preview
+
+        Returns:
+            Dict with path, file_count, and exists status.
+        """
+        path = writer.get_table_path(table_name)
+        file_count = 0
+        exists = path.exists()
+
+        if exists:
+            file_count = sum(1 for f in path.rglob("*") if f.is_file())
+
+        return {
+            "path": str(path),
+            "file_count": file_count,
+            "exists": exists,
+        }
 
     async def aclose(self) -> None:
         """Close resources.

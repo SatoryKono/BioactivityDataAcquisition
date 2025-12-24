@@ -1,9 +1,14 @@
 """Error Classifier for BioETL.
 
 Pure domain logic - classifies exceptions into error categories.
-Uses both isinstance checks for domain exceptions and keyword matching
-for backward compatibility with infrastructure exceptions.
+Primary classification uses the explicit error_type attribute on BioETLError subclasses.
+Falls back to keyword matching ONLY for non-domain exceptions with deprecation warning.
 """
+
+from __future__ import annotations
+
+import warnings
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -13,7 +18,10 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.types import ErrorType
 
-# Keyword to ErrorType mapping (reduces cyclomatic complexity)
+if TYPE_CHECKING:
+    pass
+
+# Keyword to ErrorType mapping for legacy/external exceptions
 # Maps (keywords_tuple, error_type) - first match wins
 _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
     # Critical errors (infrastructure failures)
@@ -45,7 +53,7 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
 
 
 def _match_error_type(error_name: str) -> ErrorType:
-    """Match error name against keyword patterns.
+    """Match error name against keyword patterns (legacy fallback).
 
     Args:
         error_name: The exception class name
@@ -63,16 +71,30 @@ class ErrorClassifier:
     """Classifies exceptions into ErrorType categories.
 
     This is a pure domain class that uses the centralized exception hierarchy.
-    Primary classification uses isinstance checks on domain exceptions.
-    Falls back to keyword matching for backward compatibility with non-domain exceptions.
+    Primary classification uses the explicit error_type attribute on BioETLError subclasses.
+    Falls back to keyword matching ONLY for non-domain exceptions with deprecation warning.
+
+    Attributes:
+        strict_mode: If True, raise ValueError for unknown non-domain exceptions.
+        fallback_usage_count: Counter for observability - tracks keyword fallback usage.
     """
+
+    def __init__(self, strict_mode: bool = False) -> None:
+        """Initialize the error classifier.
+
+        Args:
+            strict_mode: If True, raise ValueError for unknown non-domain exceptions
+                        instead of using fallback. Enable in tests for stricter validation.
+        """
+        self._strict_mode = strict_mode
+        self._fallback_count = 0
 
     def classify(self, error: Exception) -> ErrorType:
         """Classify an exception into a predefined ErrorType.
 
         Classification strategy:
-        1. Check if error is a BioETLError subclass and use specific mappings
-        2. Fall back to keyword matching on exception class name for backward compatibility
+        1. If BioETLError subclass: use error_type class attribute (deterministic)
+        2. For non-domain exceptions: fall back to keyword matching with warning
 
         Args:
             error: The exception to classify
@@ -80,44 +102,76 @@ class ErrorClassifier:
         Returns:
             ErrorType category for the exception
 
+        Raises:
+            ValueError: In strict_mode if non-domain exception cannot be classified
+
         Examples:
             >>> classifier = ErrorClassifier()
             >>> from bioetl.domain.exceptions import LockLostError, SchemaViolationError
             >>> classifier.classify(LockLostError("test", "run123"))
-            <ErrorType.LOCK_LOST: 'lock_lost'>
+            <ErrorType.LOCK_LOST: 'LOCK_LOST'>
             >>> classifier.classify(SchemaViolationError("users", ["error"]))
-            <ErrorType.SCHEMA_VIOLATION: 'schema_violation'>
+            <ErrorType.SCHEMA_VIOLATION: 'SCHEMA_VIOLATION'>
         """
-        # First, check if it's a BioETLError subclass
+        # Primary: Use explicit error_type attribute from BioETLError subclass
         if isinstance(error, BioETLError):
             return self._classify_domain_error(error)
 
-        # Fall back to keyword matching for non-domain exceptions
-        return _match_error_type(type(error).__name__)
+        # Fallback: Keyword matching for non-domain exceptions
+        return self._classify_external_error(error)
 
     def _classify_domain_error(self, error: BioETLError) -> ErrorType:
-        """Classify domain exceptions using keyword matching and hierarchy fallback.
+        """Classify domain exceptions using the explicit error_type attribute.
 
         Args:
             error: BioETLError instance
 
         Returns:
-            ErrorType category based on exception name or hierarchy
+            ErrorType from the exception's error_type class attribute
         """
-        # First try keyword-based classification
-        result = _match_error_type(type(error).__name__)
-        if result != ErrorType.INVALID_DATA:
-            return result
+        # Use the explicit error_type attribute (deterministic)
+        return error.get_error_type()
 
-        # Use hierarchy-based classification as fallback
-        return self._classify_by_hierarchy(error)
+    def _classify_external_error(self, error: Exception) -> ErrorType:
+        """Classify non-domain exceptions using keyword matching (with warning).
 
-    def _classify_by_hierarchy(self, error: BioETLError) -> ErrorType:
-        """Classify by exception hierarchy when keyword matching fails."""
-        if isinstance(error, DataQualityError):
-            return ErrorType.INVALID_DATA
-        if isinstance(error, CriticalError):
-            return ErrorType.DB_UNAVAILABLE
-        if isinstance(error, RecoverableError):
-            return ErrorType.NETWORK_ERROR
-        return ErrorType.INVALID_DATA
+        Args:
+            error: Non-BioETLError exception
+
+        Returns:
+            ErrorType based on keyword matching
+
+        Raises:
+            ValueError: In strict_mode if exception cannot be classified
+        """
+        self._fallback_count += 1
+        error_name = type(error).__name__
+        result = _match_error_type(error_name)
+
+        # Emit deprecation warning for observability
+        if result == ErrorType.INVALID_DATA:
+            msg = (
+                f"Unknown exception type: {error_name}. "
+                f"Consider wrapping in BioETLError subclass with explicit error_type."
+            )
+            if self._strict_mode:
+                raise ValueError(msg)
+            warnings.warn(msg, DeprecationWarning, stacklevel=3)
+        else:
+            warnings.warn(
+                f"Using keyword fallback for {error_name} -> {result.value}. "
+                f"Consider wrapping in BioETLError subclass.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+        return result
+
+    @property
+    def fallback_usage_count(self) -> int:
+        """Number of times keyword fallback was used (for metrics/observability)."""
+        return self._fallback_count
+
+    def reset_fallback_count(self) -> None:
+        """Reset the fallback counter (useful for testing)."""
+        self._fallback_count = 0
