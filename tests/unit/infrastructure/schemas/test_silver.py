@@ -268,12 +268,13 @@ class TestChemblTargetSchema:
 
     def test_has_list_fields(self):
         """Verify list fields have correct types."""
+        # Note: protein_classifications not available in /target endpoint
+        # It's only in /target_component endpoint (CHEMBL_TARGET_COMPONENT_SCHEMA)
         list_fields = [
             "component_accessions",
             "component_types",
             "component_relationships",
             "component_descriptions",
-            "protein_classifications",
         ]
         for field_name in list_fields:
             assert field_name in CHEMBL_TARGET_SCHEMA.names

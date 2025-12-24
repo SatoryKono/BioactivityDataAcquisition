@@ -287,7 +287,9 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
-        pa.field("protein_classifications", pa.string()),
+        pa.field("protein_classifications", pa.string()),  # Forensic JSON
+        # Flattened fields (extracted from protein_classifications)
+        pa.field("protein_classification_ids", pa.list_(pa.int64())),
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),

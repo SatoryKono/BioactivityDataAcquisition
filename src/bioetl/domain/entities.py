@@ -373,7 +373,10 @@ class TargetComponent(BaseEntity):
     # Complex fields (JSON serialized)
     target_component_synonyms: str | None = None  # JSON string of list
     target_component_xrefs: str | None = None  # JSON string of list
-    protein_classifications: str | None = None  # JSON string of list
+    protein_classifications: str | None = None  # JSON string of list (forensic)
+
+    # Flattened fields (extracted from protein_classifications)
+    protein_classification_ids: list[int] | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()

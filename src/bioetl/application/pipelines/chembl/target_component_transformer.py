@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import extract_list_field
 from bioetl.domain.entities import TargetComponent
 from bioetl.domain.transformations import generate_entity_id, safe_int
 
@@ -52,7 +53,7 @@ class TargetComponentTransformer(BaseTransformer):
             "description": record.get("description"),
             "organism": record.get("organism"),
             "tax_id": safe_int(record.get("tax_id")),
-            # Complex fields (JSON serialized)
+            # Complex fields (JSON serialized for forensic purposes)
             "target_component_synonyms": self.serialize_json(
                 record.get("target_component_synonyms")
             ),
@@ -61,6 +62,12 @@ class TargetComponentTransformer(BaseTransformer):
             ),
             "protein_classifications": self.serialize_json(
                 record.get("protein_classifications")
+            ),
+            # Flattened fields (extracted from protein_classifications)
+            "protein_classification_ids": extract_list_field(
+                record.get("protein_classifications"),
+                "protein_classification_id",
+                safe_int,
             ),
         }
 

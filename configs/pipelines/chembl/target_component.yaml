@@ -66,6 +66,6 @@ circuit_breaker:
 input_filter:
     enabled: true
     source_path: "data/input/target_component.csv"
-    column_name: "component_ids"
-    filter_field: "component_ids"
+    column_name: "component_id"
+    filter_field: "component_id"
     batch_size: 100

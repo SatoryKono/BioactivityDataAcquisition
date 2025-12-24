@@ -178,7 +178,10 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     component_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
-    protein_classifications: Series[str] = pa.Field(nullable=True)
+    protein_classifications: Series[str] = pa.Field(nullable=True)  # Forensic JSON
+
+    # Flattened fields (extracted from protein_classifications)
+    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
