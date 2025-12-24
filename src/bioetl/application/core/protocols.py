@@ -1,5 +1,4 @@
-"""
-Callback protocols for the pipeline.
+"""Callback protocols for the pipeline.
 
 Defines Protocol classes for pipeline callbacks and transformer ports.
 Implements RULES.md §1 (Domain Layer - Ports).
@@ -56,6 +55,7 @@ class TransformerPort(Protocol):
         ...     ) -> SilverRecord | None:
         ...         # Transform logic here
         ...         return silver_record
+
     """
 
     async def transform(
@@ -74,5 +74,6 @@ class TransformerPort(Protocol):
 
         Raises:
             ValueError: If record validation fails (handled by Template Method).
+
         """
         ...

@@ -50,6 +50,7 @@ class BasePipeline(ABC):
             runtime: Runtime configuration.
             services: Injected services (ports).
             config: Pipeline configuration.
+
         """
         return cls(config, runtime, services, run_id)
 
@@ -68,6 +69,7 @@ class BasePipeline(ABC):
             services: Injected services (ports).
             run_id: Unique identifier for this pipeline run.
                     MUST be passed from CLI/orchestrator to ensure consistency.
+
         """
         self._config = config
         self._runtime = runtime
@@ -186,6 +188,7 @@ class BasePipeline(ABC):
 
         Returns:
             True if record should be written to Gold layer.
+
         """
         gold_filters = self._config.gold_filters
         if gold_filters is None or gold_filters.is_empty():
@@ -206,6 +209,7 @@ class BasePipeline(ABC):
 
         Returns:
             Record suitable for Gold layer (flat fields only).
+
         """
         return {
             k: v for k, v in silver_record.items() if k not in self.GOLD_EXCLUDE_FIELDS

@@ -22,6 +22,7 @@ class GoldValidator:
 
     Attributes:
         _schema: Pandera-схема для валидации (опционально).
+
     """
 
     def __init__(self, schema: pa.DataFrameSchema | None) -> None:
@@ -29,6 +30,7 @@ class GoldValidator:
 
         Args:
             schema: Pandera-схема для валидации. Если None, валидация пропускается.
+
         """
         self._schema = schema
 
@@ -40,6 +42,7 @@ class GoldValidator:
 
         Returns:
             ValidationResult с результатом валидации.
+
         """
         if not self._schema or not records:
             return ValidationResult(valid=True)

@@ -1,5 +1,4 @@
-"""
-Pipeline Executor: orchestrates the data flow from extraction to processing.
+"""Pipeline Executor: orchestrates the data flow from extraction to processing.
 """
 
 from __future__ import annotations
@@ -19,8 +18,7 @@ if TYPE_CHECKING:
 
 
 class PipelineExecutor:
-    """
-    Orchestrates the data flow: extracts data, accumulates batches,
+    """Orchestrates the data flow: extracts data, accumulates batches,
     and delegates processing to a RecordProcessor.
     """
 
@@ -37,6 +35,17 @@ class PipelineExecutor:
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
     ):
+        """Initialize pipeline executor.
+
+        Args:
+            services: Common pipeline services (logging, metrics, etc.).
+            record_processor: Record processor instance.
+            checkpoint_manager: Checkpoint manager instance.
+            shutdown_signal: Signal to handle graceful shutdown.
+            entity_type: Type of entity to process.
+            batch_size: Number of records per batch.
+            checkpoint_interval: Number of records between checkpoints.
+        """
         self._data_source = services.data_source
         self._checkpoint_manager = checkpoint_manager
         self._shutdown_signal = shutdown_signal
@@ -60,6 +69,12 @@ class PipelineExecutor:
         limit: int | None,
         query: str | None = None,
     ) -> None:
+        """Execute the pipeline.
+
+        Args:
+            limit: Maximum number of records to process.
+            query: Optional query string for data source.
+        """
         batch: list[dict[str, Any]] = []
 
         try:

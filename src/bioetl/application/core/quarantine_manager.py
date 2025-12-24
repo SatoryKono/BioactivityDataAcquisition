@@ -26,6 +26,7 @@ class QuarantineManager:
         Args:
             quarantine_port: Port for writing to quarantine storage.
             pipeline_name: Name of the pipeline for identification.
+
         """
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
@@ -44,6 +45,7 @@ class QuarantineManager:
             error_type: Classification of the error.
             batch_id: ID of the batch containing this record.
             error_details: Human-readable error description.
+
         """
         await self._quarantine.write(
             pipeline=self._pipeline_name,

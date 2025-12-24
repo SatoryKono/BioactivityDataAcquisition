@@ -43,6 +43,7 @@ class FilteredDataSource:
         >>> async with wrapped:
         ...     async for record in wrapped.fetch("activity"):
         ...         process(record)
+
     """
 
     def __init__(
@@ -61,6 +62,7 @@ class FilteredDataSource:
             filter_config: Configuration for filtering behavior.
             metrics: Optional metrics port for recording filter statistics.
             pipeline_name: Pipeline name for metrics labels.
+
         """
         self._data_source = data_source
         self._filter_reader = filter_reader
@@ -159,6 +161,7 @@ class FilteredDataSource:
         Raises:
             TypeError: If filtering is enabled but the adapter doesn't support
                 fetch_filtered() method.
+
         """
         # Note: External filter_ids/filter_field are ignored -
         # this class manages its own filter state from InputFilterConfig
