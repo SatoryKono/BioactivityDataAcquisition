@@ -7,6 +7,10 @@ Prometheus client library.
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     BATCH_SIZE_RECORDS,
+    CIRCUIT_BREAKER_FAILURE_TOTAL,
+    CIRCUIT_BREAKER_STATE,
+    CIRCUIT_BREAKER_SUCCESS_TOTAL,
+    CIRCUIT_BREAKER_TRIPS_TOTAL,
     DQ_RECORDS_QUARANTINED_TOTAL,
     ERRORS_TOTAL,
     FILTER_IDS_DUPLICATES_TOTAL,
@@ -28,6 +32,14 @@ COUNTERS = {
     "filter_ids_loaded_total": FILTER_IDS_LOADED_TOTAL,
     "filter_ids_duplicates_total": FILTER_IDS_DUPLICATES_TOTAL,
     "dq_records_quarantined_total": DQ_RECORDS_QUARANTINED_TOTAL,
+    "circuit_breaker_trips_total": CIRCUIT_BREAKER_TRIPS_TOTAL,
+    "circuit_breaker_success_total": CIRCUIT_BREAKER_SUCCESS_TOTAL,
+    "circuit_breaker_failure_total": CIRCUIT_BREAKER_FAILURE_TOTAL,
+}
+
+# Registry of gauge metrics
+GAUGES = {
+    "circuit_breaker_state": CIRCUIT_BREAKER_STATE,
 }
 
 
@@ -60,6 +72,16 @@ class PrometheusMetrics(MetricsPort):
         """Increment a Prometheus counter."""
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
+
+    def set_gauge(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """Set a Prometheus gauge to a specific value."""
+        if name in GAUGES:
+            GAUGES[name].labels(**labels).set(value)
 
     def close(self) -> None:
         """Cleanup Prometheus metrics. Idempotent.
@@ -98,6 +120,15 @@ class NoOpMetrics(MetricsPort):
         labels: dict[str, str],
     ) -> None:
         """No-op counter increment."""
+        pass
+
+    def set_gauge(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op gauge set."""
         pass
 
     def close(self) -> None:

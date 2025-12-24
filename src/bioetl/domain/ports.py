@@ -611,6 +611,22 @@ class MetricsPort(Protocol):
         """
         ...
 
+    def set_gauge(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """
+        Set a gauge metric to a specific value.
+
+        Args:
+            name: The name of the gauge metric.
+            value: The value to set.
+            labels: A dictionary of label names to label values.
+        """
+        ...
+
     def close(self) -> None:
         """
         Cleanup metrics resources.
