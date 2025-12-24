@@ -316,6 +316,15 @@ class ObservabilitySettings(BaseSettings):
     metrics_server_enabled: bool = Field(default=True)
     """Enable Prometheus metrics HTTP server. Requires metrics_enabled=True."""
 
+    metrics_fail_fast: bool = Field(default=False)
+    """If True, exit with error when metrics server fails to start."""
+
+    metrics_retry_count: int = Field(default=3, ge=1, le=10)
+    """Number of retries for transient errors when starting metrics server."""
+
+    metrics_retry_delay: float = Field(default=1.0, ge=0.1, le=10.0)
+    """Delay between retries in seconds when starting metrics server."""
+
     tracing_enabled: bool = Field(default=False)
     """Enable OpenTelemetry tracing."""
 
