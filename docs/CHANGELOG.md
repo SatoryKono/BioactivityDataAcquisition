@@ -8,6 +8,7 @@ See the root CHANGELOG.md for the complete version history.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 5.3.0 | 2025-12-24 | Gold layer flattening, Unified transformers |
 | 5.2.1 | 2025-12-24 | Bug fixes: GoldValidator protocol, test run_id |
 | 5.2.0 | 2025-12-23 | Local-Only Deployment (ADR-010), E2E tests |
 | 5.0.0 | 2025-12-16 | Production Ready, Phase 4 complete |

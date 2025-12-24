@@ -86,10 +86,12 @@ def run(
     run_id = uuid4()
 
     try:
+        from bioetl.domain.types import RunID
+
         # Bootstrap returns a fully constructed runner
         ctx = PipelineRunContext(
             pipeline_name=pipeline,
-            run_id=run_id,
+            run_id=RunID(run_id),
             run_type=RunType(run_type),
             resume=resume,
             limit=limit,

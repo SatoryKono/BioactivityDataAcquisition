@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Gold Layer Transformation**: Реализована трансформация Silver → Gold с исключением JSON полей
+  - Добавлен `GoldTransformCallback` protocol в `application/core/protocols.py`
+  - Добавлен метод `transform_for_gold()` в `BasePipeline` с константой `GOLD_EXCLUDE_FIELDS`
+  - `RecordProcessor` теперь применяет Gold-трансформацию перед записью
+  - `ChEMBLMoleculeGoldSchema` расширена 27 плоскими полями (hierarchy_*, property_*, structure_*)
+
+- **Unified Transformers**: Унифицированы трансформеры всех пайплайнов
+  - Добавлен `TransformerPort` protocol в `application/core/protocols.py`
+  - Добавлен `BaseTransformer` с Template Method паттерном
+  - Все трансформеры ChEMBL/PubChem/PubMed/UniProt унифицированы
+
 - **E2E Tests**: Добавлен полный набор E2E-тестов для Local-Only архитектуры (`tests/e2e/`)
   - `test_chembl_activity_full_cycle` - полный цикл ChEMBL Activity pipeline
   - `test_chembl_target_full_cycle` - полный цикл ChEMBL Target pipeline
@@ -47,6 +58,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **interfaces/factories/**: Удалён неиспользуемый пакет `src/bioetl/interfaces/factories/`
 
 ### BREAKING CHANGES
+
+- **ChEMBL Molecule Gold Schema**: JSON поля исключены из Gold слоя:
+  - Удалены: `molecule_hierarchy`, `molecule_properties`, `molecule_structures`,
+    `molecule_synonyms`, `cross_references`, `atc_classifications`
+  - Добавлены плоские поля: `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id`,
+    `property_mw_freebase`, `property_alogp`, `property_hba`, `property_hbd`,
+    `property_psa`, `property_rtb`, `property_ro5_violations`, `property_qed_weighted`,
+    `property_full_molformula`, `structure_canonical_smiles`, `structure_standard_inchi`,
+    `structure_standard_inchi_key`
+  - Silver слой сохраняет JSON для forensic целей
+  - **Migration**: Выполнить `--run-type=rebuild` для chembl_molecule
 
 - **BasePipeline signature changed**: Constructor now requires `run_id` as 4th parameter:
   `BasePipeline(config, runtime, services, run_id)`. This ensures consistent run identification
