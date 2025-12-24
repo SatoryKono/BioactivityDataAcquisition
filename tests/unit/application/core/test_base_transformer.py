@@ -40,7 +40,7 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
