@@ -8,8 +8,8 @@ import pytest
 
 from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
 
 @pytest.fixture
@@ -26,11 +26,11 @@ def test_create_pubchem_adapter(mock_http_client, mock_logger):
     """Test creating PubChem adapter."""
     # PubChem doesn't use http_client, so it should be ignored by the factory logic
     # but we pass it anyway because the factory signature requires it (or allows it).
-    # We also mock PubChemClient to avoid creating threads/ratelimits during test
+    # We also mock PubChemAdapter to avoid creating threads/ratelimits during test
     with patch(
-        "bioetl.infrastructure.adapters.pubchem.client.PubChemClient"
+        "bioetl.infrastructure.adapters.pubchem.client.PubChemAdapter"
     ) as MockPubChem:
-        adapter_mock = Mock(spec=PubChemClient)
+        adapter_mock = Mock(spec=PubChemAdapter)
         MockPubChem.return_value = adapter_mock
 
         adapter = DataSourceFactory.create(
@@ -45,9 +45,9 @@ def test_create_uniprot_adapter(mock_http_client, mock_logger):
     """Test creating UniProt adapter."""
     # UniProt uses http_client.
     with patch(
-        "bioetl.infrastructure.adapters.uniprot.client.UniProtClient"
+        "bioetl.infrastructure.adapters.uniprot.client.UniProtAdapter"
     ) as MockUniProt:
-        adapter_mock = Mock(spec=UniProtClient)
+        adapter_mock = Mock(spec=UniProtAdapter)
         MockUniProt.return_value = adapter_mock
 
         adapter = DataSourceFactory.create(

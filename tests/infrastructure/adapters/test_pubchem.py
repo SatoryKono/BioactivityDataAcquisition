@@ -1,4 +1,4 @@
-"""Tests for PubChem Client."""
+"""Tests for PubChem Adapter."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerOpenError
-from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
+from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
 
 
 @pytest.fixture
@@ -18,11 +18,11 @@ def mock_logger():
 
 
 @pytest.fixture
-def pubchem_client(mock_logger):
-    client = PubChemClient(logger=mock_logger, rate=100)  # High rate to avoid delays
-    yield client
+def pubchem_adapter(mock_logger):
+    adapter = PubChemAdapter(logger=mock_logger, rate=100)  # High rate to avoid delays
+    yield adapter
     # Cleanup logic if necessary (though close() calls shutdown on threadpool)
-    client.thread_pool.shutdown(wait=False)
+    adapter.thread_pool.shutdown(wait=False)
 
 
 @pytest.fixture
@@ -69,11 +69,11 @@ def mock_pcp_assay():
     }
 
 
-async def test_fetch_compound_by_query(pubchem_client, mock_pcp_compound):
+async def test_fetch_compound_by_query(pubchem_adapter, mock_pcp_compound):
     """Test fetching compounds by query."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]) as mock_get:
         results = []
-        async for record in pubchem_client.fetch("compound", query="aspirin"):
+        async for record in pubchem_adapter.fetch("compound", query="aspirin"):
             results.append(record)
 
         assert len(results) == 1
@@ -82,11 +82,11 @@ async def test_fetch_compound_by_query(pubchem_client, mock_pcp_compound):
         mock_get.assert_called_with("aspirin", "name")
 
 
-async def test_fetch_compound_with_limit(pubchem_client, mock_pcp_compound):
+async def test_fetch_compound_with_limit(pubchem_adapter, mock_pcp_compound):
     """Test fetching compounds with limit."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]) as mock_get:
         results = []
-        async for record in pubchem_client.fetch("compound", query="aspirin", limit=1):
+        async for record in pubchem_adapter.fetch("compound", query="aspirin", limit=1):
             results.append(record)
 
         assert len(results) == 1
@@ -94,13 +94,13 @@ async def test_fetch_compound_with_limit(pubchem_client, mock_pcp_compound):
         mock_get.assert_called_with("aspirin", "name")
 
 
-async def test_fetch_substance(pubchem_client, mock_pcp_substance):
+async def test_fetch_substance(pubchem_adapter, mock_pcp_substance):
     """Test fetching substances."""
     with patch(
         "pubchempy.get_substances", return_value=[mock_pcp_substance]
     ) as mock_get:
         results = []
-        async for record in pubchem_client.fetch("substance", query="aspirin"):
+        async for record in pubchem_adapter.fetch("substance", query="aspirin"):
             results.append(record)
 
         assert len(results) == 1
@@ -109,11 +109,11 @@ async def test_fetch_substance(pubchem_client, mock_pcp_substance):
         mock_get.assert_called_with("aspirin", "name")
 
 
-async def test_fetch_assay(pubchem_client, mock_pcp_assay):
+async def test_fetch_assay(pubchem_adapter, mock_pcp_assay):
     """Test fetching assays."""
     with patch("pubchempy.get_assays", return_value=[mock_pcp_assay]) as mock_get:
         results = []
-        async for record in pubchem_client.fetch("assay", query="12345"):
+        async for record in pubchem_adapter.fetch("assay", query="12345"):
             results.append(record)
 
         assert len(results) == 1
@@ -121,62 +121,62 @@ async def test_fetch_assay(pubchem_client, mock_pcp_assay):
         mock_get.assert_called_with("12345")
 
 
-async def test_fetch_unsupported_entity(pubchem_client):
+async def test_fetch_unsupported_entity(pubchem_adapter):
     """Test fetching unsupported entity raises ValueError."""
     with pytest.raises(ValueError, match="Unsupported entity type"):
-        async for _ in pubchem_client.fetch("invalid_entity"):
+        async for _ in pubchem_adapter.fetch("invalid_entity"):
             pass
 
 
-async def test_fetch_compound_missing_query(pubchem_client):
+async def test_fetch_compound_missing_query(pubchem_adapter):
     """Test fetching compound without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required for compound fetch"):
-        async for _ in pubchem_client.fetch("compound"):
+        async for _ in pubchem_adapter.fetch("compound"):
             pass
 
 
-async def test_fetch_substance_missing_query(pubchem_client):
+async def test_fetch_substance_missing_query(pubchem_adapter):
     """Test fetching substance without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
-        async for _ in pubchem_client.fetch("substance"):
+        async for _ in pubchem_adapter.fetch("substance"):
             pass
 
 
-async def test_fetch_assay_missing_query(pubchem_client):
+async def test_fetch_assay_missing_query(pubchem_adapter):
     """Test fetching assay without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
-        async for _ in pubchem_client.fetch("assay"):
+        async for _ in pubchem_adapter.fetch("assay"):
             pass
 
 
-async def test_health_check_healthy(pubchem_client, mock_pcp_compound):
+async def test_health_check_healthy(pubchem_adapter, mock_pcp_compound):
     """Test health check returns HEALTHY."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]):
-        status = await pubchem_client.health_check()
+        status = await pubchem_adapter.health_check()
         assert status == HealthStatus.HEALTHY
 
 
-async def test_health_check_unhealthy(pubchem_client):
+async def test_health_check_unhealthy(pubchem_adapter):
     """Test health check returns UNHEALTHY on exception."""
     with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
-        status = await pubchem_client.health_check()
+        status = await pubchem_adapter.health_check()
         assert status == HealthStatus.UNHEALTHY
 
 
-async def test_circuit_breaker(pubchem_client):
+async def test_circuit_breaker(pubchem_adapter):
     """Test circuit breaker opens after failures."""
     # Set low threshold
-    pubchem_client.circuit_breaker.failure_threshold = 1
+    pubchem_adapter.circuit_breaker.failure_threshold = 1
 
     with patch("pubchempy.get_compounds", side_effect=Exception("API Error")):
         # First call fails and increments failure count
         try:
-            async for _ in pubchem_client.fetch("compound", query="fail"):
+            async for _ in pubchem_adapter.fetch("compound", query="fail"):
                 pass
         except Exception:
             pass
 
         # Second call should raise CircuitBreakerOpenError
         with pytest.raises(CircuitBreakerOpenError):
-            async for _ in pubchem_client.fetch("compound", query="fail"):
+            async for _ in pubchem_adapter.fetch("compound", query="fail"):
                 pass

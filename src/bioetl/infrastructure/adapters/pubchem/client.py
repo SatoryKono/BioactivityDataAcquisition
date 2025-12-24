@@ -26,19 +26,19 @@ from bioetl.infrastructure.adapters.http.health import (
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 
-class PubChemClient(BaseSyncAdapter):
-    """PubChem API client implementing DataSourcePort.
+class PubChemAdapter(BaseSyncAdapter):
+    """PubChem API adapter implementing DataSourcePort.
 
     Provides access to chemical compound data from PubChem database.
     Uses pubchempy library which is synchronous, so runs in ThreadPoolExecutor.
 
     Example:
-        >>> client = PubChemClient()
+        >>> adapter = PubChemAdapter()
         >>> # Search compounds by name
-        >>> async for compound in client.fetch("compound", query="aspirin", limit=10):
+        >>> async for compound in adapter.fetch("compound", query="aspirin", limit=10):
         ...     print(f"Compound: {compound['cid']}")
         >>> # Check health
-        >>> status = await client.health_check()
+        >>> status = await adapter.health_check()
         >>> print(f"PubChem is {status}")
 
     """
@@ -254,8 +254,8 @@ class PubChemClient(BaseSyncAdapter):
             HealthStatus enum value
 
         Example:
-            >>> client = PubChemClient()
-            >>> status = await client.health_check()
+            >>> adapter = PubChemAdapter()
+            >>> status = await adapter.health_check()
             >>> print(f"PubChem is {status.value}")
 
         """
@@ -280,4 +280,4 @@ class PubChemClient(BaseSyncAdapter):
 
     def __repr__(self) -> str:
         """Return string representation."""
-        return f"PubChemClient(rate={self.rate_limiter.rate})"
+        return f"PubChemAdapter(rate={self.rate_limiter.rate})"
