@@ -8,12 +8,22 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.domain.entities import Activity
 from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
+
+
+# Mapping for ligand efficiency fields extraction
+_LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {
+    "bei": safe_float,
+    "le": safe_float,
+    "lle": safe_float,
+    "sei": safe_float,
+}
 
 
 class ActivityTransformer(BaseTransformer):
@@ -89,8 +99,12 @@ class ActivityTransformer(BaseTransformer):
             "standard_flag": safe_int(record.get("standard_flag")),
             # Derived metrics
             "pchembl_value": safe_float(record.get("pchembl_value")),
-            # Ligand efficiency metrics (flattened)
-            **self._extract_ligand_efficiency(record.get("ligand_efficiency")),
+            # Ligand efficiency metrics (flattened via transform_utils)
+            **flatten_nested_dict(
+                record.get("ligand_efficiency"),
+                "ligand_efficiency_",
+                _LIGAND_EFFICIENCY_FIELDS,
+            ),
             # Units ontology
             "qudt_units": record.get("qudt_units"),
             "uo_units": record.get("uo_units"),
@@ -124,32 +138,3 @@ class ActivityTransformer(BaseTransformer):
 
         # Convert Entity to SilverRecord for storage
         return cast("SilverRecord", self.entity_to_silver_record(entity))
-
-    def _extract_ligand_efficiency(
-        self, le_data: dict[str, Any] | None
-    ) -> dict[str, float | None]:
-        """Extract and flatten ligand efficiency metrics from ChEMBL dict.
-
-        Args:
-            le_data: Ligand efficiency dict from ChEMBL API with keys:
-                     'bei', 'le', 'lle', 'sei' (all as strings)
-
-        Returns:
-            Dict with flattened keys: ligand_efficiency_{bei,le,lle,sei}
-            All values are converted to float or None
-
-        """
-        if not le_data or not isinstance(le_data, dict):
-            return {
-                "ligand_efficiency_bei": None,
-                "ligand_efficiency_le": None,
-                "ligand_efficiency_lle": None,
-                "ligand_efficiency_sei": None,
-            }
-
-        return {
-            "ligand_efficiency_bei": safe_float(le_data.get("bei")),
-            "ligand_efficiency_le": safe_float(le_data.get("le")),
-            "ligand_efficiency_lle": safe_float(le_data.get("lle")),
-            "ligand_efficiency_sei": safe_float(le_data.get("sei")),
-        }

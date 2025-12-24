@@ -16,6 +16,15 @@ from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.transform_utils import (
+    aggregate_nested_lists,
+    extract_list_field,
+    flatten_nested_dict,
+    normalize_string,
+    parse_date_field,
+    safe_extract,
+    validate_smiles,
+)
 
 # Re-exports from consolidated domain location
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -35,4 +44,12 @@ __all__ = [
     "RuntimeConfig",
     # Shutdown coordination (ADR-0005)
     "ShutdownSignal",
+    # Transform utilities
+    "aggregate_nested_lists",
+    "extract_list_field",
+    "flatten_nested_dict",
+    "normalize_string",
+    "parse_date_field",
+    "safe_extract",
+    "validate_smiles",
 ]
