@@ -107,16 +107,17 @@ class TargetTransformer(BaseTransformer):
 
         Returns:
             Dict with aggregated lists for accessions, IDs, types, relationships,
-            descriptions, organisms, tax_ids, and protein classifications.
+            descriptions, organisms, and tax_ids.
+
+        Note:
+            protein_classifications are NOT available in /target endpoint.
+            They are only available via /target_component endpoint.
 
         """
         if not components or not isinstance(components, list):
             return self._empty_component_result()
 
-        basic_fields = self._extract_basic_component_fields(components)
-        classifications = self._extract_protein_classifications(components)
-
-        return {**basic_fields, **classifications}
+        return self._extract_basic_component_fields(components)
 
     def _empty_component_result(self) -> dict[str, None]:
         """Return empty result dict for missing components."""
@@ -128,9 +129,6 @@ class TargetTransformer(BaseTransformer):
             "component_descriptions": None,
             "component_organisms": None,
             "component_tax_ids": None,
-            "protein_classifications": None,
-            "protein_classification_ids": None,
-            "protein_classification_names": None,
         }
 
     def _extract_basic_component_fields(
@@ -148,44 +146,6 @@ class TargetTransformer(BaseTransformer):
             "component_organisms": extract_list_field(components, "organism"),
             "component_tax_ids": extract_list_field(components, "tax_id", safe_int),
         }
-
-    def _extract_protein_classifications(
-        self, components: list[dict[str, Any]]
-    ) -> dict[str, list[Any] | None]:
-        """Extract protein classification details from components."""
-        short_names: list[str] = []
-        ids: list[int] = []
-        pref_names: list[str] = []
-
-        for c in components:
-            pcs = c.get("protein_classifications")
-            if not pcs or not isinstance(pcs, list):
-                continue
-            for pc in pcs:
-                if not isinstance(pc, dict):
-                    continue
-                self._collect_classification_fields(pc, short_names, ids, pref_names)
-
-        return {
-            "protein_classifications": short_names or None,
-            "protein_classification_ids": ids or None,
-            "protein_classification_names": pref_names or None,
-        }
-
-    def _collect_classification_fields(
-        self,
-        pc: dict[str, Any],
-        short_names: list[str],
-        ids: list[int],
-        pref_names: list[str],
-    ) -> None:
-        """Collect fields from a single protein classification dict."""
-        if short_name := pc.get("short_name"):
-            short_names.append(short_name)
-        if (pc_id := safe_int(pc.get("protein_classification_id"))) is not None:
-            ids.append(pc_id)
-        if pref_name := pc.get("pref_name"):
-            pref_names.append(pref_name)
 
     def _aggregate_synonyms(
         self, components: list[dict[str, Any]] | None
