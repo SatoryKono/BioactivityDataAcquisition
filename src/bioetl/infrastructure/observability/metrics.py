@@ -43,6 +43,13 @@ FILTER_IDS_DUPLICATES_TOTAL = Counter(
     ["pipeline", "source_file"],
 )
 
+# Data Quality metrics
+DQ_RECORDS_QUARANTINED_TOTAL = Counter(
+    "bioetl_dq_records_quarantined_total",
+    "Total number of records quarantined due to data quality issues",
+    ["pipeline", "error_type", "run_type"],
+)
+
 
 class MetricsCollector:
     """
