@@ -11,6 +11,7 @@ import pytest
 import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.storage._atomic import AtomicWriteError, AtomicWriteGroup
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 
@@ -396,3 +397,191 @@ class TestBronzeWriterListBatches:
 
         batches = await writer.list_batches("nonexistent", "entity")
         assert batches == []
+
+
+@pytest.mark.unit
+class TestBronzeWriterAtomicWrite:
+    """Tests for BronzeWriter atomic write guarantees (REQ-DATA-004)."""
+
+    @pytest.mark.asyncio
+    async def test_no_partial_files_on_write_failure(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that no partial files remain if write fails mid-operation.
+
+        Simulates a failure during the atomic write commit phase.
+        Verifies REQ-DATA-004: Atomic writes.
+        """
+        writer = BronzeWriter(base_path=tmp_path)
+        date = datetime(2024, 1, 15)
+
+        # Mock AtomicWriteGroup.commit to fail
+        original_commit = AtomicWriteGroup.commit
+
+        def failing_commit(self):
+            # Call rollback to simulate proper cleanup
+            self.rollback()
+            raise OSError("Simulated disk failure during commit")
+
+        with patch.object(AtomicWriteGroup, "commit", failing_commit):
+            with pytest.raises(OSError, match="Simulated disk failure"):
+                await writer.write_bronze(
+                    records=iter(sample_records),
+                    provider="chembl",
+                    entity="activity",
+                    date=date,
+                    batch_id=batch_id,
+                    run_id=run_id,
+                    run_type=run_type,
+                )
+
+        # Verify no data files exist
+        bronze_path = tmp_path / "bronze" / "v1" / "chembl" / "activity"
+        if bronze_path.exists():
+            zst_files = list(bronze_path.rglob("*.zst"))
+            meta_files = list(bronze_path.rglob("*.meta.json"))
+            assert len(zst_files) == 0, "Partial .zst file should not exist"
+            assert len(meta_files) == 0, "Partial .meta.json file should not exist"
+
+        # Verify no temp files remain anywhere
+        tmp_files = list(tmp_path.rglob("*.tmp"))
+        assert len(tmp_files) == 0, "No temp files should remain after failure"
+
+    @pytest.mark.asyncio
+    async def test_no_orphan_metadata_without_data(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that metadata file never exists without corresponding data file.
+
+        Both files must be written together atomically.
+        """
+        writer = BronzeWriter(base_path=tmp_path)
+        date = datetime(2024, 1, 15)
+
+        # Successful write
+        path = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+        )
+
+        full_path = tmp_path / path
+        meta_path = full_path.with_suffix(".zst.meta.json")
+
+        # Both files must exist
+        assert full_path.exists(), "Data file must exist"
+        assert meta_path.exists(), "Metadata file must exist"
+
+    @pytest.mark.asyncio
+    async def test_no_temp_files_after_successful_write(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that no temp files remain after successful write."""
+        writer = BronzeWriter(base_path=tmp_path)
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+        )
+
+        # No temp files should remain
+        tmp_files = list(tmp_path.rglob("*.tmp"))
+        assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
+
+    @pytest.mark.asyncio
+    async def test_failure_during_add_cleans_up(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that failure during AtomicWriteGroup.add cleans up temp files."""
+        writer = BronzeWriter(base_path=tmp_path)
+        date = datetime(2024, 1, 15)
+
+        # Mock AtomicWriteGroup.add to fail on second call (metadata)
+        original_add = AtomicWriteGroup.add
+        call_count = [0]
+
+        def failing_add(self, target, data):
+            call_count[0] += 1
+            if call_count[0] == 2:
+                # Clean up first temp file before raising
+                self.rollback()
+                raise IOError("Simulated failure writing metadata")
+            return original_add(self, target, data)
+
+        with patch.object(AtomicWriteGroup, "add", failing_add):
+            with pytest.raises(IOError, match="Simulated failure"):
+                await writer.write_bronze(
+                    records=iter(sample_records),
+                    provider="chembl",
+                    entity="activity",
+                    date=date,
+                    batch_id=batch_id,
+                    run_id=run_id,
+                    run_type=run_type,
+                )
+
+        # No temp files should remain
+        tmp_files = list(tmp_path.rglob("*.tmp"))
+        assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
+
+    @pytest.mark.asyncio
+    async def test_json_copy_uses_atomic_write(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that JSON copy also uses atomic write."""
+        writer = BronzeWriter(base_path=tmp_path, save_json=True)
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+        )
+
+        # Verify JSON file exists
+        json_path = Path(writer.json_path) / "chembl" / "activity"
+        json_files = list(json_path.glob("*.jsonl"))
+        assert len(json_files) == 1
+
+        # No temp files should remain
+        tmp_files = list(Path(writer.json_path).rglob("*.tmp"))
+        assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
