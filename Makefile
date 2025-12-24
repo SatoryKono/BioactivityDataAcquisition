@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install test lint run-local docker-up docker-down docker-reset seed-local clean
+.PHONY: help install test lint run-local docker-up docker-down docker-reset seed-local clean clean-all
 .DEFAULT_GOAL := help
 
 # Python
@@ -119,16 +119,24 @@ run-local: ## Run sample pipeline on local fixtures
 	@echo "$(BLUE)Running sample pipeline...$(NC)"
 	$(VENV_PYTHON) -m bioetl.interfaces.cli.runner --pipeline sample --env local
 
-clean: ## Clean up generated files
-	@echo "$(YELLOW)Cleaning up...$(NC)"
+clean: ## Clean up generated files (Python artifacts, caches, build outputs)
+	@echo "$(YELLOW)Cleaning Python artifacts...$(NC)"
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete
-	rm -rf htmlcov/ .coverage
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	find . -type f -name "*.pyo" -delete 2>/dev/null || true
+	rm -rf build/ dist/ htmlcov/ .coverage .coverage.* coverage.xml 2>/dev/null || true
 	@echo "$(GREEN)Cleanup complete!$(NC)"
+
+clean-all: clean ## Clean all (artifacts + logs + temp files)
+	@echo "$(YELLOW)Cleaning logs and temporary files...$(NC)"
+	find . -type f -name "*.log" -delete 2>/dev/null || true
+	find . -type f -name "*.tmp" -delete 2>/dev/null || true
+	rm -f full_log.txt final_report*.txt project_rules_failures.txt 2>/dev/null || true
+	@echo "$(GREEN)Full cleanup complete!$(NC)"
 
 # Quarantine management (RULES.md §2.6)
 quarantine-inspect: ## Inspect quarantine errors (PIPELINE=...)
