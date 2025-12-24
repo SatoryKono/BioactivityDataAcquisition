@@ -92,8 +92,22 @@ class BronzeWriter:
         Returns:
             Path to the written file (relative to base_path).
 
+        Raises:
+            ValueError: If provider or entity names are invalid.
         """
         from datetime import UTC
+
+        # Validate provider/entity format (alphanumeric + underscores only)
+        if not provider or not provider.replace("_", "").replace("-", "").isalnum():
+            raise ValueError(
+                f"Invalid provider name: '{provider}'. "
+                "Use alphanumeric characters, underscores, or hyphens only."
+            )
+        if not entity or not entity.replace("_", "").replace("-", "").isalnum():
+            raise ValueError(
+                f"Invalid entity name: '{entity}'. "
+                "Use alphanumeric characters, underscores, or hyphens only."
+            )
 
         date_str = date.strftime("%Y-%m-%d")
         # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
