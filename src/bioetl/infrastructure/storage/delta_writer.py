@@ -24,7 +24,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING, Any, Literal
+from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
@@ -44,6 +45,20 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+
+class SilverWriteMode(str, Enum):
+    """Allowed write modes for Silver layer.
+
+    Values:
+        MERGE: Upsert records based on primary keys (default)
+        APPEND: Add records without deduplication
+        OVERWRITE: Replace all data in the table
+    """
+
+    MERGE = "merge"
+    APPEND = "append"
+    OVERWRITE = "overwrite"
 
 
 class DeltaWriter:
@@ -157,13 +172,35 @@ class DeltaWriter:
         records: list[dict[str, Any]],
         primary_keys: list[str],
         schema: pa.Schema,
-        mode: Literal["merge", "append", "delete"] = "merge",
+        mode: str = "merge",
         partition_cols: list[str] | None = None,
     ) -> None:
-        """Write normalized records to Silver layer (Delta Lake merge/upsert)."""
+        """Write normalized records to Silver layer (Delta Lake merge/upsert).
+
+        Args:
+            table_name: Target table name
+            records: List of records to write
+            primary_keys: Primary key columns for merge
+            schema: PyArrow schema for the table
+            mode: Write mode - 'merge', 'append', or 'overwrite'
+            partition_cols: Optional partition columns
+
+        Raises:
+            ValueError: If mode is invalid or records are missing required fields
+        """
+        # Validate write mode
+        try:
+            validated_mode = SilverWriteMode(mode)
+        except ValueError:
+            valid_modes = [m.value for m in SilverWriteMode]
+            raise ValueError(
+                f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
+            ) from None
+
         if not records:
             raise ValueError("No records to write")
 
+        # Validate required metadata fields
         required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
         if missing_fields := required_fields - set(records[0].keys()):
             raise ValueError(
@@ -185,11 +222,11 @@ class DeltaWriter:
         arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
 
         try:
-            if mode == "overwrite":
+            if validated_mode == SilverWriteMode.OVERWRITE:
                 await self._write_overwrite(table_path, arrow_data, partition_cols)
-            elif mode == "append":
+            elif validated_mode == SilverWriteMode.APPEND:
                 await self._write_append(table_path, arrow_data, partition_cols)
-            else:
+            else:  # SilverWriteMode.MERGE
                 await self._write_merge(
                     table_path, arrow_data, primary_keys, partition_cols
                 )

@@ -18,9 +18,9 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-import random
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Literal
+from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 import pandera as pandera_pa
 import pyarrow as pa
@@ -33,6 +33,20 @@ if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+
+class GoldWriteMode(str, Enum):
+    """Allowed write modes for Gold layer.
+
+    Values:
+        OVERWRITE: Replace all data in the table
+        APPEND: Add records without deduplication
+        SCD2: Slowly Changing Dimension Type 2 (history tracking)
+    """
+
+    OVERWRITE = "overwrite"
+    APPEND = "append"
+    SCD2 = "scd2"
 
 
 class GoldWriter:
@@ -64,13 +78,39 @@ class GoldWriter:
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
         schema: DataFrameSchema | None = None,
-        mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+        mode: str = "overwrite",
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
     ) -> None:
-        """Write validated records to Gold layer."""
+        """Write validated records to Gold layer.
+
+        Args:
+            table_name: Target table name
+            records: List of records to write
+            primary_keys: Primary key columns for deterministic sorting
+            schema: Optional Pandera schema (must have strict=True)
+            mode: Write mode - 'overwrite', 'append', or 'scd2'
+            partition_cols: Optional partition columns
+            scd_config: Required config for SCD2 mode
+
+        Raises:
+            ValueError: If mode is invalid, records empty, or schema not strict
+        """
+        # Validate write mode
+        try:
+            validated_mode = GoldWriteMode(mode)
+        except ValueError:
+            valid_modes = [m.value for m in GoldWriteMode]
+            raise ValueError(
+                f"Invalid Gold write mode '{mode}'. Allowed: {valid_modes}"
+            ) from None
+
         if not records:
             raise ValueError("No records to write")
+
+        # SCD2 requires scd_config
+        if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
+            raise ValueError("scd_config required for SCD Type 2 mode")
 
         if schema is not None:
             if not schema.strict:
@@ -85,23 +125,17 @@ class GoldWriter:
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
-        if mode == "scd2":
-            if scd_config is None:
-                raise ValueError("scd_config required for SCD Type 2 mode")
+        if validated_mode == GoldWriteMode.SCD2:
             await self._write_scd2(table_path, records, scd_config, partition_cols)
-        elif mode in ("overwrite", "append"):
+        else:  # OVERWRITE or APPEND
             await self._write_simple(
                 table_path,
                 table_name,
                 records,
-                mode,
+                validated_mode.value,
                 partition_cols,
                 primary_keys,
                 schema,
-            )
-        else:
-            raise ValueError(
-                f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'"
             )
 
     async def _run_in_executor(self, func, *args):
@@ -215,8 +249,9 @@ class GoldWriter:
                 # Retry on potential concurrency/protocol errors
                 if attempt == 2:
                     raise e
-                # Exponential backoff with jitter (Base 0.5s, Multiplier 2, Jitter 0.1s)
-                delay = 0.5 * (2**attempt) + random.uniform(0, 0.1)
+                # Exponential backoff with fixed jitter (Base 0.5s, Multiplier 2)
+                # Fixed 0.05s jitter for deterministic behavior (see ADR-014)
+                delay = 0.5 * (2**attempt) + 0.05
                 await asyncio.sleep(delay)
 
         # Delegate CSV export to CsvExporter if configured
@@ -275,8 +310,8 @@ class GoldWriter:
             except Exception as e:
                 if attempt == 2:
                     raise e
-                # Exponential backoff with jitter
-                delay = 0.5 * (2**attempt) + random.uniform(0, 0.1)
+                # Exponential backoff with fixed jitter (see ADR-014)
+                delay = 0.5 * (2**attempt) + 0.05
                 await asyncio.sleep(delay)
 
     async def _merge_scd2(

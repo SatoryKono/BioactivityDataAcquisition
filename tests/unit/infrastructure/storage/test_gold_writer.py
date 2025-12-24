@@ -98,7 +98,7 @@ class TestGoldWriterValidation:
 
     async def test_write_gold_invalid_mode_raises(self, gold_writer, valid_records):
         """Test write_gold raises ValueError for invalid mode."""
-        with pytest.raises(ValueError, match="Invalid mode"):
+        with pytest.raises(ValueError, match="Invalid Gold write mode"):
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,

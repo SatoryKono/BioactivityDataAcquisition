@@ -75,6 +75,7 @@ class BronzeWriter:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime | None = None,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
 
@@ -88,25 +89,40 @@ class BronzeWriter:
             batch_id: Unique batch identifier.
             run_id: Pipeline run ID for traceability.
             run_type: Type of run (incremental, backfill, rebuild).
+            ingestion_ts: Ingestion timestamp from application layer.
+                         If None, uses date parameter (backward compat).
 
         Returns:
             Path to the written file (relative to base_path).
 
+        Raises:
+            ValueError: If provider or entity names are invalid.
         """
-        from datetime import UTC
+        # Validate provider/entity format (alphanumeric + underscores only)
+        if not provider or not provider.replace("_", "").replace("-", "").isalnum():
+            raise ValueError(
+                f"Invalid provider name: '{provider}'. "
+                "Use alphanumeric characters, underscores, or hyphens only."
+            )
+        if not entity or not entity.replace("_", "").replace("-", "").isalnum():
+            raise ValueError(
+                f"Invalid entity name: '{entity}'. "
+                "Use alphanumeric characters, underscores, or hyphens only."
+            )
 
         date_str = date.strftime("%Y-%m-%d")
         # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
         relative_path = (
             f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
         )
-        ingestion_ts = datetime.now(UTC)
+        # Use provided ingestion_ts or fall back to date (backward compat)
+        effective_ts = ingestion_ts or date
 
         # Build metadata for lineage tracking
         metadata = {
             "run_id": str(run_id),
             "run_type": run_type.value,
-            "ingestion_ts": ingestion_ts.isoformat(),
+            "ingestion_ts": effective_ts.isoformat(),
             "provider": provider,
             "entity": entity,
             "batch_id": str(batch_id),
