@@ -19,9 +19,9 @@ def test_cli_rebuild_requires_confirmation(cli_runner):
 
         result = cli_runner.invoke(cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild"])
 
-        # Should prompt for confirmation
-        assert "WARNING: REBUILD will delete existing data" in result.output
-        assert result.exit_code == 1  # Aborted
+        # Should prompt for confirmation (message format from merged CLI)
+        assert "WARNING: rebuild will clear existing data" in result.output
+        assert result.exit_code == 1  # Click aborts when no input provided
         mock_bootstrap.assert_not_called()
 
 
@@ -42,17 +42,17 @@ def test_cli_rebuild_with_yes(cli_runner):
 
 
 def test_cli_dry_run_flag(cli_runner):
-    """Test that --dry-run flag is accepted and skips confirmation."""
+    """Test that --dry-run flag shows preview and does NOT execute pipeline."""
     with patch("bioetl.interfaces.cli.bootstrap_pipeline") as mock_bootstrap, \
+         patch("bioetl.interfaces.cli._preview_cleanup") as mock_preview, \
          patch("bioetl.composition.registry.PipelineRegistry.list_pipelines", return_value=["test_pipe"]):
-
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock()  # Make run awaitable
-        mock_runner.logger = MagicMock()  # Satisfy logger check
-        mock_bootstrap.return_value = mock_runner
 
         result = cli_runner.invoke(cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild", "--dry-run"])
 
         assert result.exit_code == 0
-        assert "WARNING" not in result.output
-        mock_bootstrap.assert_called_once()
+        # Dry-run outputs preview info, not warning
+        assert "[DRY-RUN]" in result.output
+        # Dry-run should NOT call bootstrap_pipeline (returns early)
+        mock_bootstrap.assert_not_called()
+        # But should call preview
+        mock_preview.assert_called_once()
