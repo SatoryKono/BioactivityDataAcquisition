@@ -79,8 +79,10 @@ class PipelineServices:
         await self.aclose()
 
     async def aclose(self) -> None:
-        """Gracefully close all I/O resources."""
+        """Gracefully close all I/O resources and observability."""
         self.logger.info("Closing pipeline services...")
+
+        # Close async I/O services
         results = await asyncio.gather(
             self.data_source.aclose(),
             self.storage.aclose(),
@@ -93,7 +95,23 @@ class PipelineServices:
         for result in results:
             if isinstance(result, Exception):
                 self.logger.error("Error during service shutdown", error=result)
+
+        # Close observability (sync, best-effort)
+        self._close_observability()
+
         self.logger.info("Pipeline services closed.")
+
+    def _close_observability(self) -> None:
+        """Close metrics and tracing resources (sync, idempotent)."""
+        try:
+            self.metrics.close()
+        except Exception as e:
+            self.logger.warning("Error closing metrics", error=str(e))
+
+        try:
+            self.tracing.close()
+        except Exception as e:
+            self.logger.warning("Error closing tracing", error=str(e))
 
 
 __all__ = ["PipelineServices"]
