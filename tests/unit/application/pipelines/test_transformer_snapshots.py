@@ -5,6 +5,8 @@ This helps detect unintended regressions in transformation logic.
 
 Run with: pytest tests/unit/application/pipelines/test_transformer_snapshots.py -v
 Update snapshots: pytest tests/unit/application/pipelines/test_transformer_snapshots.py --snapshot-update
+
+Requires: pip install syrupy
 """
 
 from __future__ import annotations
@@ -14,6 +16,9 @@ from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
+
+# Skip entire module if syrupy is not installed
+pytest.importorskip("syrupy", reason="syrupy package required for snapshot tests")
 
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
