@@ -11,7 +11,7 @@ import pytest
 import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage._atomic import AtomicWriteError, AtomicWriteGroup
+from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 
@@ -535,7 +535,7 @@ class TestBronzeWriterAtomicWrite:
             if call_count[0] == 2:
                 # Clean up first temp file before raising
                 self.rollback()
-                raise IOError("Simulated failure writing metadata")
+                raise OSError("Simulated failure writing metadata")
             return original_add(self, target, data)
 
         with patch.object(AtomicWriteGroup, "add", failing_add):

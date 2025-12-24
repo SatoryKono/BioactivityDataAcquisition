@@ -8,18 +8,11 @@ Falls back to keyword matching ONLY for non-domain exceptions with deprecation w
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import (
     BioETLError,
-    CriticalError,
-    DataQualityError,
-    RecoverableError,
 )
 from bioetl.domain.types import ErrorType
-
-if TYPE_CHECKING:
-    pass
 
 # Keyword to ErrorType mapping for legacy/external exceptions
 # Maps (keywords_tuple, error_type) - first match wins

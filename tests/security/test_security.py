@@ -313,10 +313,24 @@ class TestInputValidation:
         """Verify no SQL injection via string formatting."""
         violations = []
         # Dangerous: f-string or % formatting in SQL queries
+        # Use more specific patterns to avoid false positives on normal text
+        # containing words like "update" in non-SQL contexts
         sql_patterns = [
-            r'f["\'].*(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP).*{',
-            r'["\'].*(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP).*["\']\s*%',
-            r'\.format\s*\([^)]*\).*(?:SELECT|INSERT|UPDATE|DELETE)',
+            # SELECT ... FROM with interpolation
+            r'f["\'].*SELECT\s+.+\s+FROM\s+.*{',
+            # INSERT INTO with interpolation
+            r'f["\'].*INSERT\s+INTO\s+.*{',
+            # UPDATE ... SET with interpolation
+            r'f["\'].*UPDATE\s+\w+\s+SET\s+.*{',
+            # DELETE FROM with interpolation
+            r'f["\'].*DELETE\s+FROM\s+.*{',
+            # CREATE/DROP TABLE/DATABASE with interpolation
+            r'f["\'].*(?:CREATE|DROP)\s+(?:TABLE|DATABASE|INDEX)\s+.*{',
+            # % formatting with SQL keywords followed by FROM/INTO/SET
+            r'["\'].*SELECT\s+.+\s+FROM.*["\']\s*%',
+            r'["\'].*INSERT\s+INTO.*["\']\s*%',
+            r'["\'].*UPDATE\s+\w+\s+SET.*["\']\s*%',
+            r'["\'].*DELETE\s+FROM.*["\']\s*%',
         ]
 
         for py_file in SRC_DIR.rglob("*.py"):

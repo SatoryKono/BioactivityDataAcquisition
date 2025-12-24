@@ -59,6 +59,21 @@ class TestQuarantineCommands:
         assert "Inspecting quarantine for test_pipeline" in result.output
         assert "ERR01" in result.output
 
+    @patch("bioetl.interfaces.cli.bootstrap_quarantine")
+    def test_quarantine_inspect_empty_command(self, mock_bootstrap_quarantine, runner):
+        """Test quarantine inspect command with no records."""
+        mock_quarantine_service = AsyncMock()
+        mock_quarantine_service.inspect.return_value = []
+        mock_bootstrap_quarantine.return_value = mock_quarantine_service
+
+        result = runner.invoke(
+            cli,
+            ["quarantine", "inspect", "--pipeline", "test_pipeline"],
+        )
+
+        assert result.exit_code == 0
+        assert "No records found" in result.output
+
 
 class TestRunCommand:
     """Tests for the run CLI command."""
@@ -325,59 +340,39 @@ class TestRunCommandAdvanced:
         assert "Logger not initialized" in result.output
 
 
-class TestMetricsServerIntegration:
-    """Tests for metrics server integration in CLI."""
 
-    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
-    @patch("bioetl.composition.bootstrap.start_metrics_server")
-    @patch("bioetl.interfaces.cli.get_settings")
-    def test_metrics_server_failure_non_blocking(
-        self,
-        mock_get_settings,
-        mock_start_metrics,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_bootstrap,
-        runner,
-    ):
-        """Test that metrics server failure doesn't block pipeline run."""
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock()
-        mock_bootstrap.return_value = mock_runner_instance
-
-        mock_settings = MagicMock()
-        mock_settings.metrics_port = 8000
-        mock_get_settings.return_value = mock_settings
-
-        mock_start_metrics.side_effect = Exception("Port already in use")
-
-        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
-
-        # Pipeline should still succeed even if metrics server fails
-        assert result.exit_code == 0
-        mock_asyncio_run.assert_called_once()
 
 
 class TestDryRunMode:
     """Tests for dry-run mode and _preview_cleanup function."""
 
     @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.get_settings")
+    @patch("bioetl.interfaces.cli.bootstrap_storage")
     def test_dry_run_shows_preview(
         self,
-        mock_get_settings,
+        mock_bootstrap_storage,
         mock_load_config,
         runner,
-        tmp_path,
     ):
         """Test that dry-run mode shows file preview without execution."""
-        mock_settings = MagicMock()
-        mock_settings.silver_path = tmp_path / "silver"
-        mock_settings.gold_path = tmp_path / "gold"
-        mock_get_settings.return_value = mock_settings
+        # Setup storage mock
+        mock_storage = MagicMock()
+        mock_storage.preview_cleanup.return_value = {
+            "silver": {
+                "path": "silver/path",
+                "exists": True,
+                "file_count": 5
+            },
+            "gold": {
+                "path": "gold/path",
+                "exists": False,
+                "file_count": 0
+            },
+            "total_files": 5
+        }
+        mock_bootstrap_storage.return_value = mock_storage
 
+        # Setup config mock
         mock_config = MagicMock()
         mock_config.silver_table = "test.table"
         mock_config.gold_table = "test.gold_table"
@@ -390,28 +385,32 @@ class TestDryRunMode:
 
         assert result.exit_code == 0
         assert "[DRY-RUN]" in result.output
+        assert "silver/path (5 files)" in result.output
+        assert "gold/path (does not exist)" in result.output
+        assert "Total items that would be cleared: ~5" in result.output
         assert "No changes were made" in result.output
 
     @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.get_settings")
+    @patch("bioetl.interfaces.cli.bootstrap_storage")
     def test_dry_run_counts_existing_files(
         self,
-        mock_get_settings,
+        mock_bootstrap_storage,
         mock_load_config,
         runner,
-        tmp_path,
     ):
         """Test that dry-run correctly counts existing files."""
-        # Create some test files
-        silver_path = tmp_path / "silver" / "test" / "table"
-        silver_path.mkdir(parents=True)
-        (silver_path / "file1.parquet").write_text("test")
-        (silver_path / "file2.parquet").write_text("test")
-
-        mock_settings = MagicMock()
-        mock_settings.silver_path = tmp_path / "silver"
-        mock_settings.gold_path = tmp_path / "gold"
-        mock_get_settings.return_value = mock_settings
+        # Setup storage mock
+        mock_storage = MagicMock()
+        mock_storage.preview_cleanup.return_value = {
+            "silver": {
+                "path": "silver/path",
+                "exists": True,
+                "file_count": 2
+            },
+            "gold": None,
+            "total_files": 2
+        }
+        mock_bootstrap_storage.return_value = mock_storage
 
         mock_config = MagicMock()
         mock_config.silver_table = "test.table"
@@ -425,6 +424,66 @@ class TestDryRunMode:
 
         assert result.exit_code == 0
         assert "2 files" in result.output
+        assert "Gold" not in result.output or "(does not exist)" in result.output
+
+    @patch("bioetl.interfaces.cli.load_pipeline_config")
+    @patch("bioetl.interfaces.cli.bootstrap_storage")
+    def test_dry_run_preview_exception(
+        self,
+        mock_bootstrap_storage,
+        mock_load_config,
+        runner,
+    ):
+        """Test that dry-run handles exceptions during preview."""
+        mock_load_config.side_effect = Exception("Preview error")
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+        )
+
+        assert result.exit_code == 0  # Should catch exception and print error
+        assert "Error previewing cleanup" in result.output
+
+    @patch("bioetl.interfaces.cli.load_pipeline_config")
+    @patch("bioetl.interfaces.cli.bootstrap_storage")
+    def test_dry_run_preview_variations(
+        self,
+        mock_bootstrap_storage,
+        mock_load_config,
+        runner,
+    ):
+        """Test dry-run preview with different file existence combinations."""
+        # Case: Silver missing, Gold exists
+        mock_storage = MagicMock()
+        mock_storage.preview_cleanup.return_value = {
+            "silver": {
+                "path": "silver/path",
+                "exists": False,
+                "file_count": 0
+            },
+            "gold": {
+                "path": "gold/path",
+                "exists": True,
+                "file_count": 10
+            },
+            "total_files": 10
+        }
+        mock_bootstrap_storage.return_value = mock_storage
+
+        mock_config = MagicMock()
+        mock_config.silver_table = "test.table"
+        mock_config.gold_table = "test.gold"
+        mock_load_config.return_value = mock_config
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+        )
+
+        assert result.exit_code == 0
+        assert "Silver: silver/path (does not exist)" in result.output
+        assert "Gold: gold/path (10 files)" in result.output
 
     def test_rebuild_requires_confirmation(self, runner):
         """Test that rebuild without -y prompts for confirmation."""

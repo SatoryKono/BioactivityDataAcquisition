@@ -3,7 +3,7 @@
 Verifies data source creator registration and retrieval.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 

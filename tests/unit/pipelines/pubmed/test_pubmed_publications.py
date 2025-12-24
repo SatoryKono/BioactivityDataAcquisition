@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import BronzeRecord, RunID, RunType
+from bioetl.domain.types import BronzeRecord, RunType
 
 
 @pytest.fixture

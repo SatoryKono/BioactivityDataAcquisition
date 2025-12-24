@@ -952,11 +952,21 @@ def test_adapters_have_health_check(src_dir: Path) -> None:
         pytest.skip("Infrastructure adapters not found")
 
     # Files that define adapter classes (not __init__.py or base classes)
+    # Exclude HTTP infrastructure utilities that are not DataSourcePort adapters
+    excluded_files = {
+        "base.py",
+        "types.py",
+        "exceptions.py",
+        "client.py",  # HTTP client utility, not a DataSourcePort adapter
+        "pagination.py",  # Pagination mixin, not a DataSourcePort adapter
+        "rate_limiter.py",  # Rate limiting utility
+        "circuit_breaker.py",  # Circuit breaker utility
+    }
     adapter_files = []
     for py_file in adapters_path.rglob("*.py"):
         if py_file.name.startswith("_"):
             continue
-        if py_file.name in ("base.py", "types.py", "exceptions.py"):
+        if py_file.name in excluded_files:
             continue
         adapter_files.append(py_file)
 
