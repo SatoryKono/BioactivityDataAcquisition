@@ -14,7 +14,12 @@ from bioetl.domain.types import RunID
 # Mock context object for tests
 @pytest.fixture
 def mock_context() -> PipelineContext:
-    return MagicMock(spec=PipelineContext)
+    mock = MagicMock(spec=PipelineContext)
+    # Add logger mock for Template Method error handling
+    mock.logger = MagicMock()
+    mock.logger.bind = MagicMock(return_value=mock.logger)
+    mock.logger.warning = MagicMock()
+    return mock
 
 
 # Mock pipeline base for instantiation

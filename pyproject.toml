@@ -68,6 +68,8 @@ dev = [
     "import-linter>=2.0",
     # Architecture testing
     "pytest-archon>=0.0.6",
+    # Snapshot testing for transformers
+    "syrupy>=4.0",
     # Code complexity analysis (RULES.md)
     "xenon>=0.9",
     "radon>=6.0",
