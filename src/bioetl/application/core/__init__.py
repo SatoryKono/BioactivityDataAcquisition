@@ -14,6 +14,12 @@ from __future__ import annotations
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.cleanup_service import (
+    CleanupPreview,
+    CleanupResult,
+    CleanupService,
+    LayerInfo,
+)
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -37,6 +43,10 @@ __all__ = [
     "BaseTransformer",
     # Components
     "CheckpointManager",
+    "CleanupPreview",
+    "CleanupResult",
+    "CleanupService",
+    "LayerInfo",
     "LockManager",
     # Decomposed config (ADR-0005) - consolidated in domain.config
     "PipelineConfig",
