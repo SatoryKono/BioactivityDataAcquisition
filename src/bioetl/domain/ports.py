@@ -302,6 +302,21 @@ class StoragePort(Protocol):
         """Gracefully close the storage connection and release resources."""
         ...
 
+    async def health_check(self) -> HealthStatus:
+        """Check storage accessibility and basic write capability.
+
+        Validates:
+        - Bronze, Silver, Gold directories exist or can be created
+        - Directories are writable
+
+        Returns:
+            HealthStatus indicating storage health:
+            - HEALTHY: All layers accessible and writable
+            - DEGRADED: Partial access (some layers unavailable)
+            - UNHEALTHY: Storage completely unavailable
+        """
+        ...
+
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 

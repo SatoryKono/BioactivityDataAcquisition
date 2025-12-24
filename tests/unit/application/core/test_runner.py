@@ -48,9 +48,14 @@ def runtime_config():
     )
 
 
-@pytest.fixture
-def mock_services():
-    """Create mock pipeline services."""
+def create_mock_services():
+    """Create mock pipeline services with all required attributes.
+
+    This is a factory function used by both fixtures and tests
+    that need to create custom service mocks.
+    """
+    from bioetl.domain.types import HealthStatus
+
     services = MagicMock(spec=PipelineServices)
     services.lock = AsyncMock()
     services.lock.acquire = AsyncMock(return_value=True)
@@ -59,11 +64,27 @@ def mock_services():
     services.metrics = MagicMock()
     services.metrics.observe_histogram = MagicMock()
     services.metrics.increment_counter = MagicMock()
-    # Storage with clear methods (part of StoragePort contract)
+    services.metrics.set_gauge = MagicMock()
+    # Storage with clear methods and health_check (part of StoragePort contract)
     services.storage = MagicMock()
     services.storage.clear_silver = AsyncMock(return_value=0)
     services.storage.clear_gold = AsyncMock(return_value=0)
+    services.storage.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+    # Data source with health_check (part of DataSourcePort contract)
+    services.data_source = MagicMock()
+    services.data_source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+    # Logger for health aggregator
+    services.logger = MagicMock()
+    services.logger.info = MagicMock()
+    services.logger.warning = MagicMock()
+    services.logger.error = MagicMock()
     return services
+
+
+@pytest.fixture
+def mock_services():
+    """Create mock pipeline services."""
+    return create_mock_services()
 
 
 @pytest.fixture
@@ -258,9 +279,15 @@ class TestPipelineRunnerRun:
         """Test metrics are recorded on successful run."""
         await runner.run()
 
-        mock_services.metrics.observe_histogram.assert_called_once()
-        call_args = mock_services.metrics.observe_histogram.call_args
-        assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
+        # Should have health check metrics + pipeline duration metric
+        assert mock_services.metrics.observe_histogram.call_count >= 1
+        # Find the pipeline duration metric call
+        pipeline_calls = [
+            call
+            for call in mock_services.metrics.observe_histogram.call_args_list
+            if call[0][0] == "bioetl_pipeline_duration_seconds"
+        ]
+        assert len(pipeline_calls) == 1
 
     @pytest.mark.asyncio
     async def test_run_records_metrics_on_failure(
@@ -272,9 +299,16 @@ class TestPipelineRunnerRun:
         with pytest.raises(RuntimeError):
             await runner.run()
 
-        mock_services.metrics.observe_histogram.assert_called_once()
-        call_args = mock_services.metrics.observe_histogram.call_args
-        labels = call_args[1].get("labels") or call_args[0][2]
+        # Should have health check metrics + pipeline duration metric
+        assert mock_services.metrics.observe_histogram.call_count >= 1
+        # Find the pipeline duration metric call with failed status
+        pipeline_calls = [
+            call
+            for call in mock_services.metrics.observe_histogram.call_args_list
+            if call[0][0] == "bioetl_pipeline_duration_seconds"
+        ]
+        assert len(pipeline_calls) == 1
+        labels = pipeline_calls[0][1].get("labels") or pipeline_calls[0][0][2]
         assert labels["status"] == "failed"
 
     @pytest.mark.asyncio
@@ -372,10 +406,7 @@ class TestPipelineRunnerClearViaLifecycle:
 
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
 
         # Mock lifecycle service
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
@@ -418,9 +449,7 @@ class TestPipelineRunnerClearViaLifecycle:
 
         incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
+        services = create_mock_services()
 
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
 
@@ -455,10 +484,7 @@ class TestPipelineRunnerClearViaLifecycle:
         """Test _clear_via_lifecycle falls back to legacy when no service."""
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=5)
         services.storage.clear_gold = AsyncMock(return_value=3)
 
@@ -502,10 +528,7 @@ class TestPipelineRunnerClearExportsLegacy:
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
         # Create services with storage that has clear methods
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=5)
         services.storage.clear_gold = AsyncMock(return_value=1)
 
@@ -541,10 +564,7 @@ class TestPipelineRunnerClearExportsLegacy:
         # Use REBUILD run type to trigger clearing
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=3)
         services.storage.clear_gold = AsyncMock(return_value=2)
 
@@ -580,10 +600,7 @@ class TestPipelineRunnerClearExportsLegacy:
         # Use REBUILD run type to trigger clearing logic
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=0)
         services.storage.clear_gold = AsyncMock(return_value=0)
 
@@ -630,10 +647,7 @@ class TestPipelineRunnerClearExportsLegacy:
             gold_table=None,  # No explicit gold table
         )
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=0)
         services.storage.clear_gold = AsyncMock(return_value=0)
 
@@ -673,10 +687,7 @@ class TestPipelineRunnerClearExportsLegacy:
         # Use INCREMENTAL run type - should skip clearing
         incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=0)
         services.storage.clear_gold = AsyncMock(return_value=0)
 
@@ -714,10 +725,7 @@ class TestPipelineRunnerClearExportsLegacy:
             run_type=RunType.REBUILD, limit=None, dry_run=True
         )
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=5)
         services.storage.clear_gold = AsyncMock(return_value=2)
 
@@ -761,10 +769,7 @@ class TestPipelineRunnerClearViaCleanupService:
 
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
 
         # Mock cleanup service
         cleanup_service = MagicMock(spec=CleanupService)
@@ -805,10 +810,7 @@ class TestPipelineRunnerClearViaCleanupService:
 
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
-        services.storage = MagicMock()
+        services = create_mock_services()
         services.storage.clear_silver = AsyncMock(return_value=0)
         services.storage.clear_gold = AsyncMock(return_value=0)
 
@@ -858,9 +860,7 @@ class TestPipelineRunnerClearViaCleanupService:
 
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
+        services = create_mock_services()
 
         # Mock both services
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
@@ -908,9 +908,7 @@ class TestPipelineRunnerClearViaCleanupService:
 
         incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
+        services = create_mock_services()
 
         cleanup_service = MagicMock(spec=CleanupService)
 
@@ -949,9 +947,7 @@ class TestPipelineRunnerClearViaCleanupService:
             run_type=RunType.REBUILD, limit=None, dry_run=True
         )
 
-        services = MagicMock(spec=PipelineServices)
-        services.lock = AsyncMock()
-        services.metrics = MagicMock()
+        services = create_mock_services()
 
         cleanup_service = MagicMock(spec=CleanupService)
         cleanup_service.execute = AsyncMock(
