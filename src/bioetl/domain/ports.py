@@ -114,6 +114,49 @@ class DataSourcePort(Protocol):
 
 
 @runtime_checkable
+class FilterableDataSourcePort(DataSourcePort, Protocol):
+    """Extended DataSourcePort that supports filtering at API level.
+
+    This Protocol extends DataSourcePort for adapters that can perform
+    server-side filtering by IDs (e.g., ChEMBL, PubMed).
+
+    Use isinstance() check to detect if an adapter supports filtering:
+        if isinstance(adapter, FilterableDataSourcePort):
+            async for record in adapter.fetch_filtered(...):
+                ...
+
+    Note:
+        Adapters that implement this Protocol MUST also implement DataSourcePort.
+        The fetch_filtered() method should delegate to the provider's native
+        filtering capabilities for efficient server-side filtering.
+    """
+
+    def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by specific IDs at the source level.
+
+        This method enables efficient server-side filtering by passing
+        filter criteria directly to the data source API.
+
+        Args:
+            entity_type: The type of entity to fetch (e.g., 'activity', 'publication').
+            filter_ids: Sorted list of IDs to filter by (for deterministic batching).
+            filter_field: Field name to filter on (e.g., 'molecule_chembl_id', 'pmid').
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+
+        """
+        ...
+
+
+@runtime_checkable
 class InputFilterPort(Protocol):
     """Port for loading filter IDs from external sources.
 
@@ -642,6 +685,7 @@ class GoldValidatorPort(Protocol):
 __all__ = [
     "CheckpointPort",
     "DataSourcePort",
+    "FilterableDataSourcePort",
     "GoldValidatorPort",
     "InputFilterPort",
     "LockPort",
