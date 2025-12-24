@@ -13,6 +13,7 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -38,8 +39,7 @@ class BaseHttpAdapter(DataSourcePort):
     ) -> None:
         self.http_client = http_client
         # Fallback to no-op logger if not provided (for backwards compatibility)
-        if logger is not None:
-            self.logger = logger
+        self.logger = logger if logger is not None else NoOpLogger()
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.

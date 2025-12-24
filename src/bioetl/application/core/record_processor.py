@@ -189,11 +189,25 @@ class RecordProcessor:
     def _collect_dq_stats(
         self, records: list[dict[str, Any]], quarantined_count: int
     ) -> None:
-        """Collect DQ stats and check thresholds."""
-        if not self._dq_config or not records:
+        """Collect DQ stats and check thresholds.
+
+        Tracks quarantined records via metrics and checks against
+        configured soft/hard thresholds.
+        """
+        if not records:
             return
 
-        error_rate = quarantined_count / len(records)
+        total_count = len(records)
+        error_rate = quarantined_count / total_count if total_count > 0 else 0.0
+
+        # Track DQ quarantine metrics
+        if quarantined_count > 0:
+            self._batch_metrics.track_dq_quarantined(quarantined_count)
+
+        if not self._dq_config:
+            return
+
+        # Hard fail check
         if (
             self._dq_config.hard_fail_threshold
             and error_rate >= self._dq_config.hard_fail_threshold
@@ -201,12 +215,20 @@ class RecordProcessor:
             raise DataQualityThresholdError(
                 error_rate, self._dq_config.hard_fail_threshold
             )
+
+        # Soft fail check with detailed logging
         if (
             self._dq_config.soft_fail_threshold
             and error_rate >= self._dq_config.soft_fail_threshold
         ):
             self._context.logger.warning(
-                "DQ Soft Threshold exceeded", error_rate=error_rate
+                "DQ Soft Threshold exceeded",
+                error_rate=round(error_rate, 4),
+                threshold=self._dq_config.soft_fail_threshold,
+                quarantined_count=quarantined_count,
+                total_count=total_count,
+                hard_threshold=self._dq_config.hard_fail_threshold,
+                pipeline=self._config.pipeline_name,
             )
 
     async def _write_bronze_batch(
