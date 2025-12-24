@@ -6,12 +6,13 @@ to provide a ready-to-use PipelineRunner for execution.
 
 from __future__ import annotations
 
+import contextlib
 from typing import TYPE_CHECKING
 
-# Factories are imported to ensure registration happens
-import bioetl.composition.factories.pipeline_factories  # noqa: F401
 from bioetl.composition.builders import FilterConfigBuilder
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -38,12 +39,15 @@ __all__ = [
     "GoldWriter",
     "LocalCheckpoint",
     "MemoryLock",
+    "ObservabilityBundle",
     "PrometheusMetrics",
     "StorageAdapter",
     "UnifiedHTTPClient",
     "UnifiedQuarantine",
     "bootstrap_checkpoint",
     "bootstrap_logger",
+    "bootstrap_metrics",
+    "bootstrap_observability",
     "bootstrap_pipeline",
     "bootstrap_quarantine",
     "bootstrap_storage",
@@ -56,7 +60,13 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import CheckpointPort, QuarantinePort
+    from bioetl.domain.ports import (
+        CheckpointPort,
+        MetricsPort,
+        QuarantinePort,
+        TracingPort,
+    )
+    from bioetl.infrastructure.config import Settings
 
 
 def bootstrap_quarantine() -> QuarantinePort:
@@ -116,7 +126,7 @@ def bootstrap_logger(
     )
 
 
-def bootstrap_tracer(service_name: str = "bioetl"):
+def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
     """Bootstrap distributed tracing."""
     settings = get_settings()
     if settings.observability.tracing_enabled:
@@ -128,15 +138,71 @@ def bootstrap_tracer(service_name: str = "bioetl"):
     return NoOpTracer()
 
 
+def bootstrap_metrics(settings: Settings) -> MetricsPort | None:
+    """Bootstrap metrics with optional server start.
+
+    Server is started only if explicitly enabled in settings.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        MetricsPort instance or None if metrics are disabled.
+    """
+    if not settings.observability.metrics_enabled:
+        return None
+
+    metrics = PrometheusMetrics()
+
+    if settings.observability.metrics_server_enabled:
+        # Log but don't fail - metrics collection still works
+        with contextlib.suppress(Exception):
+            start_metrics_server(settings.metrics_port)
+
+    return metrics
+
+
+def bootstrap_observability(
+    pipeline: str,
+    run_id: UUID,
+    settings: Settings,
+) -> ObservabilityBundle:
+    """Bootstrap all observability components.
+
+    Creates a unified observability bundle containing logger, tracer, and metrics.
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier.
+        settings: Application settings.
+
+    Returns:
+        Configured ObservabilityBundle instance.
+    """
+    logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
+    tracer = bootstrap_tracer()
+    metrics = bootstrap_metrics(settings)
+
+    return ObservabilityBundle(logger=logger, tracer=tracer, metrics=metrics)
+
+
 def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
     """Composition Root: Assembles and returns a fully configured PipelineRunner.
 
     Args:
         ctx: Pipeline run context containing launch parameters
     """
+    # Explicit registration (idempotent)
+    register_all_pipelines()
+
     settings = get_settings()
-    logger = bootstrap_logger(pipeline=ctx.pipeline_name, run_id=ctx.run_id)
-    tracer = bootstrap_tracer()
+
+    # Bootstrap unified observability (includes metrics server start if enabled)
+    observability = bootstrap_observability(
+        pipeline=ctx.pipeline_name,
+        run_id=ctx.run_id,
+        settings=settings,
+    )
 
     # Load validated YAML config
     yaml_config = load_pipeline_config(ctx.pipeline_name)
@@ -150,14 +216,6 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         dry_run=ctx.dry_run,
     )
 
-    # Ensure metrics server is running (idempotent call)
-    # This guarantees observability even if pipeline is run programmatically (outside CLI)
-    try:
-        start_metrics_server(settings.metrics_port)
-    except Exception as e:
-        # Don't block pipeline startup if metrics fail, but log it
-        logger.warning("failed_to_start_metrics_server", error=str(e))
-
     # Build filter config using the dedicated builder
     filter_config = FilterConfigBuilder.build(
         yaml_filter=yaml_config.input_filter,
@@ -167,7 +225,7 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
     )
 
     if filter_config:
-        logger.info(
+        observability.logger.info(
             "input_filter_enabled",
             csv_path=filter_config.source_path,
             column=filter_config.column_name,
@@ -183,8 +241,7 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         run_id=ctx.run_id,
         runtime=runtime_config,
         settings=settings,
-        logger=logger,
-        tracer=tracer,
+        observability=observability,
         filter_config=filter_config,
         config=yaml_config,
     )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -15,8 +15,10 @@ from bioetl.composition.factories.generic_factory import GenericPipelineFactory
 
 # Import factories to ensure they are registered/available
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
+from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.observability.tracing import NoOpTracer
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -154,6 +156,13 @@ class IntegrationPipelineTestCase:
             # config is a Pydantic model. We can use `model_copy(update=...)`
             pipeline_config = pipeline_config.model_copy(update=config_overrides)
 
+        # Create observability bundle for testing
+        observability = ObservabilityBundle(
+            logger=structlog.get_logger(),
+            tracer=NoOpTracer(),
+            metrics=None,
+        )
+
         # Create runner
         # Note: GenericPipelineFactory.create_runner uses BaseServicesFactory,
         # which calls StorageFactory.create, which we patched.
@@ -161,8 +170,7 @@ class IntegrationPipelineTestCase:
             run_id=run_id,
             runtime=runtime_config,
             settings=settings,
-            logger=structlog.get_logger(),
-            tracer=MagicMock(),  # NoOpTracing
+            observability=observability,
             config=pipeline_config,
         )
 
