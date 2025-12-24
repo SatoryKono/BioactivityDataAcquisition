@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.cleanup_service import CleanupService
     from bioetl.application.core.executor import PipelineExecutor
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.shutdown import ShutdownSignal
@@ -43,6 +44,7 @@ class PipelineRunner:
         logger: structlog.BoundLogger,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
+        cleanup_service: CleanupService | None = None,
     ) -> None:
         """Initialize pipeline runner.
 
@@ -57,6 +59,7 @@ class PipelineRunner:
             logger: Structured logger.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
+            cleanup_service: Optional cleanup service for unified cleanup operations.
 
         """
         self._config = config
@@ -69,6 +72,7 @@ class PipelineRunner:
         self._logger = logger
         self.pipeline = pipeline
         self._tracer = tracer
+        self._cleanup_service = cleanup_service
 
         # The runner is responsible for creating application services
         self._lock_manager = LockManager.create(
@@ -142,6 +146,9 @@ class PipelineRunner:
         - Incremental runs use merge/upsert and should NOT clear existing data
 
         This ensures data integrity and prevents accidental data loss.
+
+        Uses CleanupService for unified cleanup operations if available,
+        otherwise falls back to direct storage operations.
         """
         from bioetl.domain.types import RunType
 
@@ -155,7 +162,6 @@ class PipelineRunner:
             )
             return
 
-        storage = self._services.storage
         silver_table = self._config.silver_table
         # Gold table defaults to {provider}.{entity_type} if not specified
         gold_table = (
@@ -163,7 +169,35 @@ class PipelineRunner:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        # Clear Silver and Gold layers using StoragePort methods (async)
+        # Use CleanupService if available (unified approach)
+        if self._cleanup_service is not None:
+            result = await self._cleanup_service.execute(
+                silver_table=silver_table,
+                gold_table=gold_table,
+                dry_run=self._runtime.dry_run,
+            )
+
+            # Add run_type to logging context for consistency
+            if self._runtime.dry_run:
+                self._logger.debug(
+                    "Cleanup preview completed",
+                    extra={
+                        "run_type": self._runtime.run_type.value,
+                        "total_would_clear": result.total_cleared,
+                    },
+                )
+            elif result.total_cleared > 0:
+                self._logger.debug(
+                    "Cleanup completed via CleanupService",
+                    extra={
+                        "run_type": self._runtime.run_type.value,
+                        "total_cleared": result.total_cleared,
+                    },
+                )
+            return
+
+        # Fallback: direct storage operations (backward compatibility)
+        storage = self._services.storage
         silver_cleared = await storage.clear_silver(
             silver_table, dry_run=self._runtime.dry_run
         )

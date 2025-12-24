@@ -45,6 +45,7 @@ __all__ = [
     "UnifiedHTTPClient",
     "UnifiedQuarantine",
     "bootstrap_checkpoint",
+    "bootstrap_cleanup",
     "bootstrap_logger",
     "bootstrap_metrics",
     "bootstrap_observability",
@@ -58,6 +59,7 @@ if TYPE_CHECKING:
 
     import structlog
 
+    from bioetl.application.core.cleanup_service import CleanupService
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
@@ -115,6 +117,23 @@ def bootstrap_storage() -> StorageAdapter:
             csv_exporter=None,
         ),
     )
+
+
+def bootstrap_cleanup() -> CleanupService:
+    """Bootstrap the cleanup service for CLI and Runner operations.
+
+    Creates a CleanupService with storage adapter and logger.
+    Used for both preview and actual cleanup operations.
+
+    Returns:
+        CleanupService configured for the current environment.
+    """
+    from bioetl.application.core.cleanup_service import CleanupService
+
+    storage = bootstrap_storage()
+    logger = NoOpLogger()
+
+    return CleanupService(storage=storage, logger=logger)
 
 
 def bootstrap_logger(

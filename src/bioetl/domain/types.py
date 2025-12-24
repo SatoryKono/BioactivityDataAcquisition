@@ -259,3 +259,50 @@ class ValidationResult:
 
     valid: bool
     errors: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True, slots=True)
+class LayerPreview:
+    """Предпросмотр слоя для очистки.
+
+    Attributes:
+        path: Путь к директории слоя.
+        file_count: Количество файлов в директории.
+        exists: Существует ли директория.
+    """
+
+    path: str
+    file_count: int
+    exists: bool
+
+
+@dataclass(frozen=True, slots=True)
+class CleanupPreview:
+    """Предпросмотр операции очистки (RULES.md §2.3).
+
+    Attributes:
+        silver: Информация о Silver слое.
+        gold: Информация о Gold слое (опционально).
+        total_files: Общее количество файлов для очистки.
+    """
+
+    silver: LayerPreview
+    gold: LayerPreview | None
+    total_files: int
+
+
+@dataclass(frozen=True, slots=True)
+class CleanupResult:
+    """Результат операции очистки (RULES.md §2.3).
+
+    Attributes:
+        silver_cleared: Количество очищенных элементов в Silver.
+        gold_cleared: Количество очищенных элементов в Gold.
+        total_cleared: Общее количество очищенных элементов.
+        dry_run: True если это был пробный запуск.
+    """
+
+    silver_cleared: int
+    gold_cleared: int
+    total_cleared: int
+    dry_run: bool

@@ -258,6 +258,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_interval=pipeline.config.checkpoint_interval,
         )
 
+        # Create CleanupService using pipeline's services
+        from bioetl.application.core.cleanup_service import CleanupService
+
+        cleanup_service = CleanupService(
+            storage=pipeline.services.storage,
+            logger=observability.logger,
+        )
+
         # Assemble Runner
         return PipelineRunner(
             config=pipeline.config,
@@ -270,6 +278,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=observability.logger,
             pipeline=pipeline,
             tracer=observability.tracer,
+            cleanup_service=cleanup_service,
         )
 
     def _create_checkpoint_manager(
