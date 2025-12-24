@@ -739,3 +739,240 @@ class TestPipelineRunnerClearExportsLegacy:
             pipeline_config.silver_table, dry_run=True
         )
         services.storage.clear_gold.assert_called_once()
+
+
+@pytest.mark.unit
+class TestPipelineRunnerClearViaCleanupService:
+    """Tests for PipelineRunner._clear_via_cleanup_service method."""
+
+    @pytest.mark.asyncio
+    async def test_clear_via_cleanup_service_uses_service(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_via_lifecycle uses cleanup service when injected."""
+        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
+
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+
+        # Mock cleanup service
+        cleanup_service = MagicMock(spec=CleanupService)
+        cleanup_service.execute = AsyncMock(
+            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=False)
+        )
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=rebuild_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            cleanup_service=cleanup_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        # Should use cleanup service
+        cleanup_service.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_service_priority_over_legacy(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test cleanup service is used over legacy when no lifecycle service."""
+        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
+
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_silver = AsyncMock(return_value=0)
+        services.storage.clear_gold = AsyncMock(return_value=0)
+
+        # Mock cleanup service (no lifecycle service)
+        cleanup_service = MagicMock(spec=CleanupService)
+        cleanup_service.execute = AsyncMock(
+            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=False)
+        )
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=rebuild_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=None,  # No lifecycle service
+            cleanup_service=cleanup_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        # Should use cleanup service, not storage directly
+        cleanup_service.execute.assert_called_once()
+        services.storage.clear_silver.assert_not_called()
+        services.storage.clear_gold.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_lifecycle_service_priority_over_cleanup(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test lifecycle service is used over cleanup service when both present."""
+        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+            MedallionLifecycleService,
+        )
+
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+
+        # Mock both services
+        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=10, gold_cleared=5, dry_run=False)
+        )
+
+        cleanup_service = MagicMock(spec=CleanupService)
+        cleanup_service.execute = AsyncMock(
+            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=False)
+        )
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=rebuild_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=lifecycle_service,
+            cleanup_service=cleanup_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        # Should use lifecycle service (higher priority)
+        lifecycle_service.clear.assert_called_once()
+        cleanup_service.execute.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_service_skips_for_incremental(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test cleanup service is not called for incremental runs."""
+        from bioetl.application.core.cleanup_service import CleanupService
+
+        incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+
+        cleanup_service = MagicMock(spec=CleanupService)
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=incremental_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            cleanup_service=cleanup_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        # Should not call cleanup service for incremental
+        cleanup_service.execute.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_service_passes_dry_run(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test cleanup service receives dry_run flag."""
+        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
+
+        dry_run_runtime = RuntimeConfig(
+            run_type=RunType.REBUILD, limit=None, dry_run=True
+        )
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+
+        cleanup_service = MagicMock(spec=CleanupService)
+        cleanup_service.execute = AsyncMock(
+            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=True)
+        )
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=dry_run_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            cleanup_service=cleanup_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        # Should pass dry_run=True
+        cleanup_service.execute.assert_called_once()
+        call_kwargs = cleanup_service.execute.call_args.kwargs
+        assert call_kwargs["dry_run"] is True

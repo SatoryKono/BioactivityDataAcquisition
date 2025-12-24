@@ -16,9 +16,9 @@ import click
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
+    bootstrap_cleanup,
     bootstrap_pipeline,
     bootstrap_quarantine,
-    bootstrap_storage,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
@@ -28,43 +28,53 @@ from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 
-def _preview_cleanup(pipeline: str, run_type: str) -> None:
+async def _preview_cleanup_async(pipeline: str) -> None:
     """Preview what data would be cleared in dry-run mode.
 
-    Delegates to StoragePort.preview_cleanup() for clean architecture.
+    Delegates to CleanupService.preview() for clean architecture.
 
     Args:
         pipeline: Pipeline name
-        run_type: Type of run (rebuild or backfill)
+    """
+    config = load_pipeline_config(pipeline)
+    cleanup_service = bootstrap_cleanup()
+
+    preview = await cleanup_service.preview(
+        silver_table=config.silver_table,
+        gold_table=config.gold_table,
+    )
+
+    click.echo("\nFiles/directories that would be cleared:")
+
+    # Display Silver info
+    if preview.silver.exists:
+        click.echo(
+            f"  Silver: {preview.silver.path} ({preview.silver.file_count} files)"
+        )
+    else:
+        click.echo(f"  Silver: {preview.silver.path} (does not exist)")
+
+    # Display Gold info
+    if preview.gold:
+        if preview.gold.exists:
+            click.echo(f"  Gold: {preview.gold.path} ({preview.gold.file_count} files)")
+        else:
+            click.echo(f"  Gold: {preview.gold.path} (does not exist)")
+
+    click.echo(f"\nTotal items that would be cleared: ~{preview.total_files}")
+    click.echo("\nNo changes were made (dry-run mode).")
+
+
+def _preview_cleanup(pipeline: str) -> None:
+    """Preview what data would be cleared in dry-run mode.
+
+    Sync wrapper for CLI that calls async CleanupService.preview().
+
+    Args:
+        pipeline: Pipeline name
     """
     try:
-        config = load_pipeline_config(pipeline)
-        storage = bootstrap_storage()
-
-        preview = storage.preview_cleanup(
-            silver_table=config.silver_table,
-            gold_table=config.gold_table,
-        )
-
-        click.echo("\nFiles/directories that would be cleared:")
-
-        # Display Silver info
-        silver_info = preview["silver"]
-        if silver_info["exists"]:
-            click.echo(f"  Silver: {silver_info['path']} ({silver_info['file_count']} files)")
-        else:
-            click.echo(f"  Silver: {silver_info['path']} (does not exist)")
-
-        # Display Gold info
-        if preview["gold"]:
-            gold_info = preview["gold"]
-            if gold_info["exists"]:
-                click.echo(f"  Gold: {gold_info['path']} ({gold_info['file_count']} files)")
-            else:
-                click.echo(f"  Gold: {gold_info['path']} (does not exist)")
-
-        click.echo(f"\nTotal items that would be cleared: ~{preview['total_files']}")
-        click.echo("\nNo changes were made (dry-run mode).")
+        asyncio.run(_preview_cleanup_async(pipeline))
     except Exception as e:
         click.echo(f"Error previewing cleanup: {e}", err=True)
 
@@ -142,7 +152,7 @@ def run(
         if dry_run:
             click.echo(f"[DRY-RUN] Would clear data for pipeline: {pipeline}")
             click.echo(f"[DRY-RUN] Run type: {run_type}")
-            _preview_cleanup(pipeline, run_type)
+            _preview_cleanup(pipeline)
             return
 
         if not yes:
