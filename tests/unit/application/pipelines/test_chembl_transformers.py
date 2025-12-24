@@ -659,40 +659,6 @@ class TestTargetTransformer:
         assert result["component_tax_ids"] == [9606, 10090]
 
     @pytest.mark.asyncio
-    async def test_transform_extracts_protein_classification_details(
-        self, transformer, mock_context
-    ):
-        """Test transformation extracts full protein classification details."""
-        record = {
-            "target_chembl_id": "CHEMBL1862",
-            "target_components": [
-                {
-                    "accession": "P35354",
-                    "component_id": 200,
-                    "protein_classifications": [
-                        {
-                            "protein_classification_id": 597,
-                            "pref_name": "Enzyme",
-                            "short_name": "Oxidoreductase",
-                        },
-                        {
-                            "protein_classification_id": 598,
-                            "pref_name": "Cyclooxygenase",
-                            "short_name": "COX",
-                        },
-                    ],
-                }
-            ],
-        }
-
-        result = await transformer.transform(mock_context, record)
-
-        assert result is not None
-        assert result["protein_classifications"] == ["Oxidoreductase", "COX"]
-        assert result["protein_classification_ids"] == [597, 598]
-        assert result["protein_classification_names"] == ["Enzyme", "Cyclooxygenase"]
-
-    @pytest.mark.asyncio
     async def test_transform_handles_missing_new_fields_gracefully(
         self, transformer, mock_context
     ):
@@ -770,3 +736,32 @@ class TestTargetComponentTransformer:
         assert result is not None
         assert isinstance(result.get("target_component_synonyms"), str)
         assert isinstance(result.get("target_component_xrefs"), str)
+
+    @pytest.mark.asyncio
+    async def test_transform_with_protein_classifications(
+        self, transformer, mock_context
+    ):
+        """Test transformation extracts protein_classifications as JSON.
+
+        Note: ChEMBL API only returns protein_classification_id in this endpoint.
+        pref_name and short_name are available via /protein_classification/{id}.
+        """
+        record = {
+            "component_id": 456,
+            "accession": "P12345",
+            "protein_classifications": [
+                {"protein_classification_id": 1015},
+                {"protein_classification_id": 422},
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert isinstance(result.get("protein_classifications"), str)
+        import json
+
+        classifications = json.loads(result["protein_classifications"])
+        assert len(classifications) == 2
+        assert classifications[0]["protein_classification_id"] == 1015
+        assert classifications[1]["protein_classification_id"] == 422
