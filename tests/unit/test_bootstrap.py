@@ -134,6 +134,11 @@ class TestBootstrapPipeline:
         test_settings.metrics_port = 8000
         test_settings.pipeline = MagicMock()
         test_settings.pipeline.heartbeat_interval = 30
+        # Add observability settings for bootstrap_metrics()
+        test_settings.observability = MagicMock()
+        test_settings.observability.metrics_enabled = True
+        test_settings.observability.metrics_server_enabled = True
+        test_settings.observability.tracing_enabled = False
 
         mock_get_settings.return_value = test_settings
         mock_bootstrap_logger.return_value = mock_logger
@@ -160,13 +165,11 @@ class TestBootstrapPipeline:
         )
 
         # Should not raise, should return runner despite metrics failure
+        # (error is suppressed via contextlib.suppress in bootstrap_metrics)
         result = bootstrap_pipeline(ctx)
 
         assert result is mock_runner
         mock_start_metrics.assert_called_once_with(test_settings.metrics_port)
-        mock_logger.warning.assert_called_with(
-            "failed_to_start_metrics_server", error="Port already in use"
-        )
 
     @pytest.mark.skip(
         reason="Requires full integration setup - covered by integration tests"
