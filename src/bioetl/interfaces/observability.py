@@ -5,25 +5,41 @@ Handles the exposure of metrics and other observability signals to external syst
 
 from __future__ import annotations
 
-# We import from infrastructure to avoid direct dependency on prometheus_client here
-# if we want to be strict, but start_http_server is the standard way.
-# However, to satisfy the architecture test "Forbidden import 'prometheus_client' outside observability",
-# we should probably move this function to infrastructure/observability/server.py
-# and import it here. But since this IS the interface layer for observability,
-# maybe we can just exempt it in the test or move the implementation.
-
-# Let's move the implementation to infrastructure/observability/server.py
-# and call it from here.
-
+from bioetl.infrastructure.observability.server import MetricsServerError
 from bioetl.infrastructure.observability.server import (
     start_metrics_server as _start_server,
 )
 
+__all__ = [
+    "MetricsServerError",
+    "start_metrics_server",
+]
 
-def start_metrics_server(port: int = 8000) -> None:
+
+def start_metrics_server(
+    port: int = 8000,
+    *,
+    fail_fast: bool = False,
+    retry_count: int = 3,
+    retry_delay: float = 1.0,
+) -> bool:
     """Start Prometheus metrics HTTP server in a daemon thread.
 
     Args:
         port: Port to bind the HTTP server (default: 8000)
+        fail_fast: If True, raise MetricsServerError on failure
+        retry_count: Number of retries for transient errors (default: 3)
+        retry_delay: Delay between retries in seconds (default: 1.0)
+
+    Returns:
+        True if server started successfully, False otherwise
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server cannot start
     """
-    _start_server(port)
+    return _start_server(
+        port=port,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+    )
