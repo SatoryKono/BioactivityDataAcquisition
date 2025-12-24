@@ -405,31 +405,36 @@ class GoldWriter:
     async def get_history(
         self,
         table_name: str,
+        business_key_values: dict[str, Any] | None = None,
         limit: int = 10,
     ) -> list[dict[str, Any]]:
-        """Get history of operations on Gold table.
+        """Get history of records in Gold table (for SCD2 tracking).
 
         Args:
             table_name: Table name.
+            business_key_values: Optional dict of business key column -> value to filter by.
             limit: Maximum number of history entries.
 
         Returns:
-            List of history entries.
+            List of historical records.
 
         """
-        # Read Delta log history
+        table_path = f"{self._gold_path}/{table_name.replace('.', '/')}"
         dt = await self._run_in_executor(
             lambda: DeltaTable(table_path)
         )
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
-        import pyarrow.compute as pc
 
-        mask = None
-        for key, value in business_key_values.items():
-            condition = pc.equal(arrow_table[key], value)
-            mask = condition if mask is None else pc.and_(mask, condition)
-        if mask is not None:
-            arrow_table = arrow_table.filter(mask)
+        if business_key_values:
+            import pyarrow.compute as pc
+
+            mask = None
+            for key, value in business_key_values.items():
+                condition = pc.equal(arrow_table[key], value)
+                mask = condition if mask is None else pc.and_(mask, condition)
+            if mask is not None:
+                arrow_table = arrow_table.filter(mask)
+
         if "valid_from" in arrow_table.column_names:
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
         return arrow_table.to_pylist()
