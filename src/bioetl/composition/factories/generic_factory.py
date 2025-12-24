@@ -321,6 +321,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config=processor_config,
             transform_callback=pipeline.transform_bronze_to_silver,
             gold_filter_callback=pipeline.should_write_gold,
+            gold_transform_callback=pipeline.transform_for_gold,
             gold_validator=gold_validator,
         )
 

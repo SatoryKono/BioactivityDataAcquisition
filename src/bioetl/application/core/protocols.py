@@ -13,10 +13,25 @@ if TYPE_CHECKING:
 
 
 class TransformCallback(Protocol):
+    """Bronze to Silver transformation callback."""
+
     def __call__(
         self, context: PipelineContext, record: dict[str, Any]
     ) -> Awaitable[dict[str, Any] | None]: ...
 
 
 class GoldFilterCallback(Protocol):
+    """Filter callback to determine if Silver record should go to Gold."""
+
     def __call__(self, context: PipelineContext, record: dict[str, Any]) -> bool: ...
+
+
+class GoldTransformCallback(Protocol):
+    """Silver to Gold transformation callback.
+
+    Removes JSON string fields and prepares record for Gold layer.
+    """
+
+    def __call__(
+        self, context: PipelineContext, record: dict[str, Any]
+    ) -> dict[str, Any]: ...
