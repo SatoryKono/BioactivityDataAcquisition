@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Port Contract Tests**: Добавлено 51 контрактный тест для проверки портов (`tests/architecture/test_port_contracts.py`)
+  - Проверка lifecycle методов (`aclose()` для async портов, `close()` для observability)
+  - Проверка `@runtime_checkable` для всех портов
+  - Проверка полноты экспорта в `__all__`
+  - Контрактные тесты для Storage, Lock, Checkpoint, Quarantine портов
+  - **Итого architecture тестов**: 97 (было 46)
+
+- **Unified Error Context**: Добавлен унифицированный контекст ошибок в `BioETLError`
+  - Свойство `context` автоматически собирает все публичные атрибуты исключения
+  - Метод `with_context(**extra)` для добавления контекста к существующему исключению
+  - 11 новых unit-тестов для context API
+
+- **ADR-015**: Документация lifecycle management для PipelineServices
+  - Описаны контракты lifecycle для всех типов портов
+  - Интеграция с graceful shutdown (ADR-008)
+  - Примеры architecture тестов
+
 - **Gold Layer Transformation**: Реализована трансформация Silver → Gold с исключением JSON полей
   - Добавлен `GoldTransformCallback` protocol в `application/core/protocols.py`
   - Добавлен метод `transform_for_gold()` в `BasePipeline` с константой `GOLD_EXCLUDE_FIELDS`
@@ -36,6 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **TracingPort Export**: Добавлен `TracingPort` в `__all__` экспорт `domain/ports.py`
+  (ранее отсутствовал, несмотря на наличие в модуле)
 - **Atomic Write Encoding**: `atomic_write()` теперь поддерживает параметр `encoding` для
   корректной записи UTF-8 на Windows (ранее использовалась системная кодировка cp1251)
 - **DQ Metrics**: `BatchMetricsRecorder.track_quarantined_records()` теперь включает `run_type`

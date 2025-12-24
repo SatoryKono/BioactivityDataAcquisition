@@ -165,15 +165,29 @@ sha256(provider + canonical_json(record))
 
 ## 6. Тестирование
 
-| Уровень | Директория | Правила |
-|---------|------------|---------|
-| **Unit** | `tests/unit/` | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
-| **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
-| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, Local-Only архитектура |
-| **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
+| Уровень | Директория | Тестов | Правила |
+|---------|------------|--------|---------|
+| **Unit** | `tests/unit/` | ~1294 | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
+| **Integration** | `tests/integration/` | ~80 | VCR.py для HTTP. Очистка секретов из кассет. |
+| **E2E** | `tests/e2e/` | - | `@pytest.mark.e2e`, Local-Only архитектура |
+| **Architecture** | `tests/architecture/` | 97 | Проверка слоёв, imports, контракты портов |
+
+**Всего тестов:** ~1471+
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
 **Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`)
+
+### Контрактные тесты портов
+
+Файл `tests/architecture/test_port_contracts.py` (51 тест) проверяет:
+
+| Категория | Проверка |
+|-----------|----------|
+| **Lifecycle** | Все async I/O порты имеют `aclose()` |
+| **Observability** | MetricsPort/TracingPort имеют `close()` |
+| **Runtime** | Все порты `@runtime_checkable` для isinstance() |
+| **Completeness** | Все порты экспортированы в `__all__` |
+| **Contracts** | StoragePort, LockPort, CheckpointPort, QuarantinePort методы |
 
 ### Команды
 
