@@ -45,9 +45,6 @@ from bioetl.domain.entities import (
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
 
-# Medallion policies
-from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
-
 # Exceptions
 from bioetl.domain.exceptions import (
     ApiError,
@@ -82,6 +79,11 @@ from bioetl.domain.filter_config import (
     GoldRangeFilter,
     InputFilterConfig,
 )
+
+# Medallion policies
+from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
+
+# Ports
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -146,9 +148,6 @@ __all__ = [
     "TargetComponent",
     # Error classifier
     "ErrorClassifier",
-    # Medallion policies
-    "ClearPolicy",
-    "MedallionPolicy",
     # Exceptions - Base
     "ApiError",
     "BioETLError",
@@ -181,6 +180,9 @@ __all__ = [
     "GoldListLengthFilter",
     "GoldRangeFilter",
     "InputFilterConfig",
+    # Medallion policies
+    "ClearPolicy",
+    "MedallionPolicy",
     # Ports
     "CheckpointPort",
     "DataSourcePort",
