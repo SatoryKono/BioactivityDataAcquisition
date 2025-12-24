@@ -236,11 +236,14 @@ class BronzeWriter:
                 record_count += 1
 
                 if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
-                    writer.write(bytes(chunk_buffer))
+                    # Bolt Optimization: Pass bytearray directly to writer
+                    # to avoid creating an unnecessary bytes copy
+                    writer.write(chunk_buffer)
                     chunk_buffer.clear()
 
             if chunk_buffer:
-                writer.write(bytes(chunk_buffer))
+                # Bolt Optimization: Pass bytearray directly
+                writer.write(chunk_buffer)
 
             if record_count == 0:
                 raise ValueError("No records provided for compression")
