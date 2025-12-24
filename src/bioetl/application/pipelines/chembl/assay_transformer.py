@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.domain.entities import Assay
 from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
 
