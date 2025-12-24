@@ -1,7 +1,6 @@
 """Unit tests for DQ mechanisms in Silver."""
 
-from unittest.mock import MagicMock, patch
-import pytest
+from unittest.mock import MagicMock
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.domain.types import ErrorType

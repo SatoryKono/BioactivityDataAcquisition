@@ -4,7 +4,7 @@ import pytest
 from click.testing import CliRunner
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from bioetl.interfaces.cli import cli, run
+from bioetl.interfaces.cli import cli
 
 
 @pytest.fixture

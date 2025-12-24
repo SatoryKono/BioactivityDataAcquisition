@@ -137,6 +137,7 @@ class TestStoragePortProtocol:
                 primary_keys: list[str],
                 schema: Any,
                 mode: Literal["merge", "append", "delete"] = "merge",
+                partition_cols: list[str] | None = None,
             ) -> None:
                 pass
 
@@ -144,6 +145,7 @@ class TestStoragePortProtocol:
                 self,
                 table_name: str,
                 records: list[dict[str, Any]],
+                primary_keys: list[str] | None = None,
                 mode: Literal["overwrite", "append", "scd2"] = "overwrite",
             ) -> None:
                 pass
@@ -151,17 +153,28 @@ class TestStoragePortProtocol:
             async def aclose(self) -> None:
                 pass
 
-            def clear_silver(self, table_name: str) -> int:
+            async def clear_silver(
+                self, table_name: str, dry_run: bool = False
+            ) -> int:
                 return 0
 
-            def clear_gold(self, table_name: str) -> int:
+            async def clear_gold(
+                self, table_name: str, dry_run: bool = False
+            ) -> int:
                 return 0
 
-            def clear_csv(self, table_name: str | None = None) -> int:
+            async def clear_csv(self, table_name: str | None = None) -> int:
                 return 0
 
-            def clear_delta(self, table_name: str | None = None) -> int:
+            async def clear_delta(self, table_name: str | None = None) -> int:
                 return 0
+
+            def preview_cleanup(
+                self,
+                silver_table: str,
+                gold_table: str | None = None,
+            ) -> dict[str, Any]:
+                return {}
 
         assert isinstance(ValidStorage(), StoragePort)
 
@@ -368,6 +381,9 @@ class TestMetricsPortProtocol:
                 value: int,
                 labels: dict[str, str],
             ) -> None:
+                pass
+
+            def close(self) -> None:
                 pass
 
         assert isinstance(ValidMetrics(), MetricsPort)
