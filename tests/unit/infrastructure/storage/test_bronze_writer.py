@@ -4,15 +4,22 @@ import asyncio
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
 import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+
+@pytest.fixture
+def noop_logger() -> NoOpLogger:
+    """Provide a NoOpLogger for BronzeWriter tests."""
+    return NoOpLogger()
 
 
 @pytest.fixture
@@ -48,39 +55,48 @@ def sample_records() -> list[bytes]:
 class TestBronzeWriterInit:
     """Tests for BronzeWriter initialization."""
 
-    def test_init_local_storage(self, tmp_path) -> None:
+    def test_init_local_storage(self, tmp_path, noop_logger) -> None:
         """Test initialization for local storage."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         assert writer.base_path == tmp_path
         assert writer.save_json is False
+        assert writer.logger is noop_logger
 
-    def test_init_with_save_json(self, tmp_path) -> None:
+    def test_init_with_save_json(self, tmp_path, noop_logger) -> None:
         """Test initialization with JSON saving enabled."""
-        writer = BronzeWriter(base_path=tmp_path, save_json=True)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
 
         assert writer.save_json is True
         assert writer.json_path is not None
 
-    def test_init_with_custom_json_path(self, tmp_path) -> None:
+    def test_init_with_custom_json_path(self, tmp_path, noop_logger) -> None:
         """Test initialization with custom JSON path."""
         custom_path = str(tmp_path / "custom_json")
         writer = BronzeWriter(
             base_path=tmp_path,
+            logger=noop_logger,
             save_json=True,
             json_path=custom_path,
         )
 
         assert writer.json_path == custom_path
 
+    def test_init_requires_logger(self, tmp_path) -> None:
+        """Test that logger is required (no fallback)."""
+        with pytest.raises(TypeError, match="logger"):
+            BronzeWriter(base_path=tmp_path)  # type: ignore[call-arg]
+
 
 @pytest.mark.unit
 class TestBronzeWriterCompress:
     """Tests for BronzeWriter compression."""
 
-    def test_compress_records(self, tmp_path, sample_records: list[bytes]) -> None:
+    def test_compress_records(
+        self, tmp_path, noop_logger, sample_records: list[bytes]
+    ) -> None:
         """Test record compression."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         compressed = writer._compress_records(iter(sample_records))
 
@@ -94,16 +110,16 @@ class TestBronzeWriterCompress:
         expected = b"".join(sample_records)
         assert decompressed == expected
 
-    def test_compress_empty_records_raises(self, tmp_path) -> None:
+    def test_compress_empty_records_raises(self, tmp_path, noop_logger) -> None:
         """Test that empty records raise ValueError."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         with pytest.raises(ValueError, match="No records provided"):
             writer._compress_records(iter([]))
 
-    def test_compress_large_records(self, tmp_path) -> None:
+    def test_compress_large_records(self, tmp_path, noop_logger) -> None:
         """Test compression with records larger than chunk size."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         # Create large records
         large_record = {"data": "x" * 500_000}
@@ -124,13 +140,14 @@ class TestBronzeWriterWriteLocal:
     async def test_write_bronze_local(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test writing Bronze data to local storage."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         path = await writer.write_bronze(
@@ -180,13 +197,14 @@ class TestBronzeWriterWriteLocal:
     async def test_write_bronze_local_async(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test that local write is performed asynchronously."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
         # We patch run_in_executor to verify it's called for file I/O
@@ -217,13 +235,14 @@ class TestBronzeWriterWriteLocal:
     async def test_write_bronze_with_json_copy(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test writing Bronze data with JSON copy."""
-        writer = BronzeWriter(base_path=tmp_path, save_json=True)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
         date = datetime(2024, 1, 15)
 
         await writer.write_bronze(
@@ -251,12 +270,13 @@ class TestBronzeWriterWriteLocal:
     async def test_write_bronze_empty_records_raises(
         self,
         tmp_path,
+        noop_logger,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test that empty records raise ValueError."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         with pytest.raises(ValueError, match="No records"):
@@ -279,13 +299,14 @@ class TestBronzeWriterReadLocal:
     async def test_read_bronze_local(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test reading Bronze data from local storage."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         # Write first
@@ -318,12 +339,13 @@ class TestBronzeWriterListBatches:
     async def test_list_batches_local(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test listing batches from local storage."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         # Write multiple batches
         date1 = datetime(2024, 1, 15)
@@ -356,12 +378,13 @@ class TestBronzeWriterListBatches:
     async def test_list_batches_with_date_filter(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test listing batches with date filter."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         date1 = datetime(2024, 1, 15)
         date2 = datetime(2024, 1, 16)
@@ -391,9 +414,9 @@ class TestBronzeWriterListBatches:
         assert "2024-01-15" in batches[0]
 
     @pytest.mark.asyncio
-    async def test_list_batches_empty(self, tmp_path) -> None:
+    async def test_list_batches_empty(self, tmp_path, noop_logger) -> None:
         """Test listing batches when none exist."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
         batches = await writer.list_batches("nonexistent", "entity")
         assert batches == []
@@ -407,6 +430,7 @@ class TestBronzeWriterAtomicWrite:
     async def test_no_partial_files_on_write_failure(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -417,7 +441,7 @@ class TestBronzeWriterAtomicWrite:
         Simulates a failure during the atomic write commit phase.
         Verifies REQ-DATA-004: Atomic writes.
         """
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         # Mock AtomicWriteGroup.commit to fail
@@ -456,6 +480,7 @@ class TestBronzeWriterAtomicWrite:
     async def test_no_orphan_metadata_without_data(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -465,7 +490,7 @@ class TestBronzeWriterAtomicWrite:
 
         Both files must be written together atomically.
         """
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         # Successful write
@@ -490,13 +515,14 @@ class TestBronzeWriterAtomicWrite:
     async def test_no_temp_files_after_successful_write(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test that no temp files remain after successful write."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         await writer.write_bronze(
@@ -517,13 +543,14 @@ class TestBronzeWriterAtomicWrite:
     async def test_failure_during_add_cleans_up(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test that failure during AtomicWriteGroup.add cleans up temp files."""
-        writer = BronzeWriter(base_path=tmp_path)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
         date = datetime(2024, 1, 15)
 
         # Mock AtomicWriteGroup.add to fail on second call (metadata)
@@ -558,13 +585,14 @@ class TestBronzeWriterAtomicWrite:
     async def test_json_copy_uses_atomic_write(
         self,
         tmp_path,
+        noop_logger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
     ) -> None:
         """Test that JSON copy also uses atomic write."""
-        writer = BronzeWriter(base_path=tmp_path, save_json=True)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
         date = datetime(2024, 1, 15)
 
         await writer.write_bronze(
@@ -585,3 +613,48 @@ class TestBronzeWriterAtomicWrite:
         # No temp files should remain
         tmp_files = list(Path(writer.json_path).rglob("*.tmp"))
         assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
+
+
+@pytest.mark.unit
+class TestBronzeWriterLoggerInjection:
+    """Tests verifying logger is properly injected and used."""
+
+    @pytest.mark.asyncio
+    async def test_logger_called_on_write(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test that injected logger is called during write operations."""
+        mock_logger = MagicMock()
+        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+        )
+
+        # Verify logger.info was called with bronze_write_complete
+        mock_logger.info.assert_called_once()
+        call_args = mock_logger.info.call_args
+        assert call_args[0][0] == "bronze_write_complete"
+        assert call_args[1]["provider"] == "chembl"
+        assert call_args[1]["entity"] == "activity"
+        assert call_args[1]["batch_id"] == str(batch_id)
+        assert call_args[1]["run_id"] == str(run_id)
+
+    def test_logger_is_stored_as_attribute(self, tmp_path) -> None:
+        """Test that injected logger is stored and accessible."""
+        mock_logger = MagicMock()
+        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
+
+        assert writer.logger is mock_logger
