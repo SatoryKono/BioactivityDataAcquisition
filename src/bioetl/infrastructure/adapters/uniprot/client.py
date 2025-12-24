@@ -149,7 +149,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
                 self._handle_fetch_error("protein", query, cursor)
                 return [], None
 
-        async for item in self.paginated_fetch(fetch_page, limit=limit):
+        async for item in self.paginated_fetch(_pagination_callback, limit=limit):
             yield item
 
     def _handle_fetch_error(
