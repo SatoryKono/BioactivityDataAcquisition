@@ -144,7 +144,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
                 response = await self.http_client.get(
                     f"{self.base_url}/uniprotkb/search", params=params
                 )
-                return await self._process_protein_response(response)
+                return self._parse_response(response)
             except Exception:
                 self._handle_fetch_error("protein", query, cursor)
                 return [], None
