@@ -6,12 +6,13 @@ Requirements:
 - REQ-DATA-001: JSONL + zstd format
 - REQ-DATA-002: Path format bronze/v1/{provider}/{entity}/{date}/
 - REQ-DATA-003: Append-only writes
-- REQ-DATA-004: Atomic writes
+- REQ-DATA-004: Atomic writes (via temp file + rename)
 
 Architecture:
 - Local filesystem storage
 - Streams data to minimize memory usage
 - Generates checksums for data integrity
+- Atomic writes using AtomicWriteGroup for data + metadata consistency
 """
 
 import asyncio
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 
 
 class BronzeWriter:
@@ -126,20 +128,26 @@ class BronzeWriter:
         if not compressed_data:
             raise ValueError("No records to write")
 
-        # Write compressed file to local filesystem
+        # Write compressed file to local filesystem using atomic write
         full_path = self.base_path / relative_path
-        full_path.parent.mkdir(parents=True, exist_ok=True)
-
-        def _write_local(data: bytes, path: Path, meta: dict, meta_path: Path) -> None:
-            with open(path, "wb") as f:
-                f.write(data)
-            with open(meta_path, "w") as f:
-                json.dump(meta, f)
-
         meta_path = full_path.with_suffix(".zst.meta.json")
+
+        def _write_local_atomic(
+            data: bytes, path: Path, meta: dict, m_path: Path
+        ) -> None:
+            """Write data and metadata atomically using temp files + rename.
+
+            Both files are written to temp locations first, then atomically
+            replaced together. If any step fails, both temp files are cleaned up.
+            """
+            with AtomicWriteGroup() as group:
+                group.add(path, data)
+                group.add(m_path, json.dumps(meta).encode("utf-8"))
+                group.commit()
+
         await loop.run_in_executor(
             None,
-            lambda: _write_local(compressed_data, full_path, metadata, meta_path),
+            lambda: _write_local_atomic(compressed_data, full_path, metadata, meta_path),
         )
 
         # Log successful write with run_id for traceability
@@ -169,7 +177,9 @@ class BronzeWriter:
         date_str: str,
         batch_id: BatchID,
     ) -> None:
-        """Write uncompressed JSONL copy of records."""
+        """Write uncompressed JSONL copy of records atomically."""
+        from bioetl.infrastructure.storage._atomic import atomic_write_bytes
+
         json_relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl"
 
         # Combine all records into single JSONL content
@@ -177,8 +187,12 @@ class BronzeWriter:
 
         json_full_path = Path(self.json_path) / json_relative_path
         json_full_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(json_full_path, "wb") as f:
-            f.write(jsonl_content)
+
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: atomic_write_bytes(json_full_path, jsonl_content),
+        )
 
     def _compress_records(self, records: Iterator[bytes]) -> bytes:
         """Compress JSONL records using zstandard with streaming."""
