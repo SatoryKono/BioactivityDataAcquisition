@@ -35,6 +35,7 @@ def atomic_write(
     mode: str = "wb",
     suffix: str = ".tmp",
     prefix: str = ".",
+    encoding: str | None = None,
 ) -> Iterator[IO]:
     """Context manager for atomic file writes.
 
@@ -46,6 +47,7 @@ def atomic_write(
         mode: File open mode ('wb' for binary, 'w' for text)
         suffix: Suffix for temp file (default: '.tmp')
         prefix: Prefix for temp file (default: '.')
+        encoding: Text encoding for text mode (ignored in binary mode)
 
     Yields:
         File handle for writing
@@ -71,7 +73,8 @@ def atomic_write(
 
     try:
         # Open with os.fdopen to use the file descriptor
-        with os.fdopen(fd, mode) as f:
+        # Pass encoding for text mode (ignored in binary mode)
+        with os.fdopen(fd, mode, encoding=encoding) as f:
             yield f
 
         # Atomic replace (works on both Unix and Windows)
@@ -115,7 +118,7 @@ def atomic_write_text(target: Path, text: str, encoding: str = "utf-8") -> None:
     Raises:
         AtomicWriteError: If write fails
     """
-    with atomic_write(target, mode="w") as f:
+    with atomic_write(target, mode="w", encoding=encoding) as f:
         f.write(text)
 
 
