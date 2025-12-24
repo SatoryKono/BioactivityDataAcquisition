@@ -79,7 +79,8 @@ class BasePipeline(ABC):
             run_id=str(self._run_id),
             pipeline=config.pipeline_name,
         )
-        self._context = PipelineContext(
+        # Use factory method to ensure started_at is set (single source of time)
+        self._context = PipelineContext.create(
             run_id=self._run_id,
             run_type=runtime.run_type,
             logger=self._logger,
