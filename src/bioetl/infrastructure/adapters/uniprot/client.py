@@ -270,7 +270,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         """Check UniProt API health status using a lightweight search query."""
         try:
             # Lightweight search probe: Ubiquitin (P62988)
-            params = {"query": "accession:P622988", "size": 1, "format": "json"}
+            params = {"query": "accession:P62988", "size": 1, "format": "json"}
             resp = await self.http_client.get(
                 f"{self.base_url}/uniprotkb/search", params=params
             )
