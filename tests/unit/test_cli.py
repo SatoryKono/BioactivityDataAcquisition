@@ -473,6 +473,7 @@ class TestValidatePipelineName:
 
     def test_invalid_pipeline_raises_bad_parameter(self):
         """Test that invalid pipeline raises BadParameter."""
+        import click
         from bioetl.interfaces.cli import validate_pipeline_name
 
         with pytest.raises(click.BadParameter) as exc_info:

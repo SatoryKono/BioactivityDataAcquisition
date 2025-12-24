@@ -287,7 +287,7 @@ class TestCreatePubmedDataSource:
     """Tests for create_pubmed_data_source function."""
 
     @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.PubMedAdapter")
+    @patch("bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter")
     def test_creates_pubmed_adapter_with_config_api_key(
         self, mock_adapter_class, mock_http_factory
     ):
@@ -317,7 +317,7 @@ class TestCreatePubmedDataSource:
         assert call_kwargs["email"] == "config@example.com"
 
     @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.PubMedAdapter")
+    @patch("bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter")
     def test_falls_back_to_settings_api_key(
         self, mock_adapter_class, mock_http_factory
     ):
@@ -346,7 +346,7 @@ class TestCreatePubmedDataSource:
         assert call_kwargs["email"] == "default@example.com"
 
     @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.PubMedAdapter")
+    @patch("bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter")
     def test_handles_no_api_key(self, mock_adapter_class, mock_http_factory):
         """Verify PubMed adapter works without API key."""
         mock_settings = MagicMock()
