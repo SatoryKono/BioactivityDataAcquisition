@@ -358,3 +358,125 @@ class TestMetricsServerIntegration:
         # Pipeline should still succeed even if metrics server fails
         assert result.exit_code == 0
         mock_asyncio_run.assert_called_once()
+
+
+class TestDryRunMode:
+    """Tests for dry-run mode and _preview_cleanup function."""
+
+    @patch("bioetl.interfaces.cli.load_pipeline_config")
+    @patch("bioetl.interfaces.cli.get_settings")
+    def test_dry_run_shows_preview(
+        self,
+        mock_get_settings,
+        mock_load_config,
+        runner,
+        tmp_path,
+    ):
+        """Test that dry-run mode shows file preview without execution."""
+        mock_settings = MagicMock()
+        mock_settings.silver_path = tmp_path / "silver"
+        mock_settings.gold_path = tmp_path / "gold"
+        mock_get_settings.return_value = mock_settings
+
+        mock_config = MagicMock()
+        mock_config.silver_table = "test.table"
+        mock_config.gold_table = "test.gold_table"
+        mock_load_config.return_value = mock_config
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+        )
+
+        assert result.exit_code == 0
+        assert "[DRY-RUN]" in result.output
+        assert "No changes were made" in result.output
+
+    @patch("bioetl.interfaces.cli.load_pipeline_config")
+    @patch("bioetl.interfaces.cli.get_settings")
+    def test_dry_run_counts_existing_files(
+        self,
+        mock_get_settings,
+        mock_load_config,
+        runner,
+        tmp_path,
+    ):
+        """Test that dry-run correctly counts existing files."""
+        # Create some test files
+        silver_path = tmp_path / "silver" / "test" / "table"
+        silver_path.mkdir(parents=True)
+        (silver_path / "file1.parquet").write_text("test")
+        (silver_path / "file2.parquet").write_text("test")
+
+        mock_settings = MagicMock()
+        mock_settings.silver_path = tmp_path / "silver"
+        mock_settings.gold_path = tmp_path / "gold"
+        mock_get_settings.return_value = mock_settings
+
+        mock_config = MagicMock()
+        mock_config.silver_table = "test.table"
+        mock_config.gold_table = None
+        mock_load_config.return_value = mock_config
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+        )
+
+        assert result.exit_code == 0
+        assert "2 files" in result.output
+
+    def test_rebuild_requires_confirmation(self, runner):
+        """Test that rebuild without -y prompts for confirmation."""
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild"],
+            input="n\n",  # Answer 'no' to confirmation
+        )
+
+        assert result.exit_code == 0
+        assert "cancelled" in result.output.lower()
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    def test_rebuild_with_yes_skips_confirmation(
+        self,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_bootstrap,
+        runner,
+    ):
+        """Test that rebuild with -y skips confirmation."""
+        mock_runner_instance = MagicMock()
+        mock_runner_instance.run = AsyncMock()
+        mock_bootstrap.return_value = mock_runner_instance
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "-y"],
+        )
+
+        assert result.exit_code == 0
+        mock_bootstrap.assert_called_once()
+
+
+class TestValidatePipelineName:
+    """Tests for validate_pipeline_name callback."""
+
+    def test_valid_pipeline_returns_value(self):
+        """Test that valid pipeline name is returned unchanged."""
+        from bioetl.interfaces.cli import validate_pipeline_name
+
+        result = validate_pipeline_name(None, None, "chembl_activity")
+        assert result == "chembl_activity"
+
+    def test_invalid_pipeline_raises_bad_parameter(self):
+        """Test that invalid pipeline raises BadParameter."""
+        from bioetl.interfaces.cli import validate_pipeline_name
+
+        with pytest.raises(click.BadParameter) as exc_info:
+            validate_pipeline_name(None, None, "definitely_not_a_real_pipeline")
+
+        assert "Unknown pipeline" in str(exc_info.value)
+        assert "Available" in str(exc_info.value)
