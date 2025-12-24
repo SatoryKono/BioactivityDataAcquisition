@@ -79,6 +79,11 @@ from bioetl.domain.filter_config import (
     GoldRangeFilter,
     InputFilterConfig,
 )
+
+# Medallion policies
+from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
+
+# Ports
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -175,6 +180,9 @@ __all__ = [
     "GoldListLengthFilter",
     "GoldRangeFilter",
     "InputFilterConfig",
+    # Medallion policies
+    "ClearPolicy",
+    "MedallionPolicy",
     # Ports
     "CheckpointPort",
     "DataSourcePort",
