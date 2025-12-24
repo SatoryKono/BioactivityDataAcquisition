@@ -65,7 +65,7 @@ dq_rules:
 
 **Файл:** `src/bioetl/domain/entities.py`
 
-Сущность `Assay` содержит **31 поле**, сгруппированных по категориям:
+Сущность `Assay` содержит **39 полей**, сгруппированных по категориям:
 
 #### Идентификаторы
 
@@ -118,11 +118,28 @@ dq_rules:
 | `relationship_type` | `str` | Тип связи с мишенью |
 | `relationship_description` | `str` | Описание связи |
 
-#### Вариантная информация
+#### Дополнительные метаданные
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `variant_sequence` | `str` | Последовательность варианта (JSON) |
+| `assay_pref_name` | `str` | Предпочтительное название анализа (если доступно) |
+| `score` | `float` | Оценка анализа (отличается от confidence_score) |
+
+#### Вариантная информация (Variant Sequence)
+
+Поля развёрнуты из вложенного словаря ChEMBL API (`variant_sequence`):
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `variant_accession` | `str` | UniProt accession варианта |
+| `variant_isoform` | `str` | Идентификатор изоформы |
+| `variant_mutation` | `str` | Описание мутации (например, V600E) |
+| `variant_organism` | `str` | Организм варианта |
+| `variant_sequence` | `str` | Аминокислотная последовательность |
+| `variant_tax_id` | `int` | NCBI Taxonomy ID |
+| `variant_sequence_json` | `str` | Оригинальный JSON (для forensic-анализа) |
+
+> **Примечание**: Поля `variant_*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Поле `variant_sequence_json` сохраняет оригинальную структуру для аудита.
 
 #### Комплексные поля
 
@@ -265,7 +282,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema([
     pa.field("_run_id", pa.string()),
     pa.field("_run_type", pa.string()),
     pa.field("_ingestion_ts", pa.string()),
-    # ... всего 39 полей (31 бизнес + 8 системных)
+    # ... всего 43 поля (39 бизнес + 4 системных)
 ])
 ```
 
@@ -339,7 +356,7 @@ ChEMBL API (/assay.json)
 │  ─────────────────────────────────────  │
 │  • Формат: Delta Lake                   │
 │  • Merge by: assay_chembl_id            │
-│  • Schema: 37 полей (PyArrow)           │
+│  • Schema: 43 поля (PyArrow)            │
 │  • Партиции: assay_type                 │
 └─────────────────────────────────────────┘
          │
@@ -421,4 +438,4 @@ bioetl run --pipeline chembl_assay --input-csv data/input/assay.csv
 
 ---
 
-*Последнее обновление: 2025-12-22*
+*Последнее обновление: 2025-12-24*

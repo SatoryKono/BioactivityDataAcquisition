@@ -19,7 +19,7 @@ This pipeline extracts bioactivity data from the ChEMBL database. Each record re
 
 ## Data Schema (Silver Layer)
 
-The Activity entity contains **52 fields**. Key fields:
+The Activity entity contains **55 fields**. Key fields:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -31,6 +31,9 @@ The Activity entity contains **52 fields**. Key fields:
 | `standard_units` | `string` | No | Units: nM, uM, etc. |
 | `pchembl_value` | `float` | No | -log10(IC50 in molar) |
 | `canonical_smiles` | `string` | No | SMILES structure |
+| `action_type_action_type` | `string` | No | Action type: INHIBITOR, AGONIST, etc. |
+| `action_type_description` | `string` | No | Description of action type |
+| `action_type_parent_type` | `string` | No | Parent grouping (nullable) |
 | `entity_id` | `string` | Auto | `chembl:{activity_id}` |
 | `content_hash` | `string` | Auto | SHA256 hash for versioning |
 
