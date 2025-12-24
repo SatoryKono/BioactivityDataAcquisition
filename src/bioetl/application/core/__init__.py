@@ -20,6 +20,7 @@ from bioetl.application.core.cleanup_service import (
     CleanupService,
     LayerInfo,
 )
+from bioetl.application.core.health_aggregator import HealthAggregator
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -46,6 +47,7 @@ __all__ = [
     "CleanupPreview",
     "CleanupResult",
     "CleanupService",
+    "HealthAggregator",
     "LayerInfo",
     "LockManager",
     # Decomposed config (ADR-0005) - consolidated in domain.config

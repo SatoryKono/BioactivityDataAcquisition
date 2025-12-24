@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.health_aggregator import HealthAggregator
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.observability.observer import PipelineObserver
 
@@ -96,6 +97,12 @@ class PipelineRunner:
             checkpoint_manager=self._checkpoint_manager,  # Inject dependency
         )
 
+        # Health aggregator for pre-flight infrastructure validation
+        self._health_aggregator = HealthAggregator(
+            metrics=self._services.metrics,
+            logger=self._services.logger,
+        )
+
     @property
     def logger(self) -> structlog.BoundLogger:
         """Get the logger instance."""
@@ -126,6 +133,9 @@ class PipelineRunner:
         with observer:
             # Observer handles ShutdownSignal suppression and status recording
             async with self._services, self._lock_manager:
+                # Pre-flight health check: validate infrastructure before execution
+                await self._validate_infrastructure()
+
                 # Clear data exports at the start of the run
                 # to avoid appending to stale data from previous runs
                 await self._clear_via_lifecycle()
@@ -143,6 +153,33 @@ class PipelineRunner:
                 "Pipeline execution finished",
                 extra={"records_fetched": self._executor.records_fetched},
             )
+
+    async def _validate_infrastructure(self) -> None:
+        """Validate infrastructure health before pipeline execution.
+
+        Performs health checks on storage and data source components.
+        Raises InfrastructureError if critical components are unhealthy.
+        """
+        self._logger.info(
+            "Validating infrastructure health",
+            extra={"stage": "health_check"},
+        )
+
+        report = await self._health_aggregator.check_all(self._services)
+
+        # Log overall health status
+        self._logger.info(
+            "Infrastructure health check completed",
+            extra={
+                "stage": "health_check",
+                "overall_status": report.overall_status.value,
+                "is_healthy": report.is_healthy,
+                "components_checked": len(report.results),
+            },
+        )
+
+        # Fail-fast if any critical component is unhealthy
+        self._health_aggregator.assert_healthy(report)
 
     async def _clear_via_lifecycle(self) -> None:
         """Clear exports using lifecycle or cleanup service.

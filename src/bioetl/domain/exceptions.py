@@ -432,3 +432,24 @@ class NetworkError(RecoverableError):
     def __init__(self, message: str, cause: Exception | None = None) -> None:
         self.cause = cause
         super().__init__(message)
+
+
+# ============================================================================
+# Infrastructure Errors
+# ============================================================================
+
+
+class InfrastructureError(CriticalError):
+    """Raised when infrastructure health check fails.
+
+    This is a CRITICAL error - pipeline should not start if infrastructure
+    is unavailable (storage or data source unreachable).
+    """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(self, message: str, failed_components: list[str] | None = None) -> None:
+        self.failed_components = failed_components or []
+        super().__init__(message)

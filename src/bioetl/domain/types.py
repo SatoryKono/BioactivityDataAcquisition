@@ -7,6 +7,7 @@ No I/O operations allowed (REQ-ARCH-003).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
 from uuid import UUID
@@ -259,3 +260,55 @@ class ValidationResult:
 
     valid: bool
     errors: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True, slots=True)
+class ComponentHealthResult:
+    """Result of a single component health check.
+
+    Attributes:
+        component: Name of the component (e.g., 'storage', 'data_source').
+        status: Health status of the component.
+        duration_seconds: Time taken to perform the health check.
+        error_message: Optional error message if check failed.
+    """
+
+    component: str
+    status: HealthStatus
+    duration_seconds: float
+    error_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class HealthReport:
+    """Aggregated health check report.
+
+    Attributes:
+        results: List of individual component health results.
+        checked_at: Timestamp when checks were performed.
+    """
+
+    results: list[ComponentHealthResult]
+    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+
+    @property
+    def is_healthy(self) -> bool:
+        """Return True if all critical components are healthy."""
+        return all(r.status != HealthStatus.UNHEALTHY for r in self.results)
+
+    @property
+    def overall_status(self) -> HealthStatus:
+        """Return worst status among all components."""
+        if not self.results:
+            return HealthStatus.HEALTHY
+
+        statuses = [r.status for r in self.results]
+        if HealthStatus.UNHEALTHY in statuses:
+            return HealthStatus.UNHEALTHY
+        if HealthStatus.DEGRADED in statuses:
+            return HealthStatus.DEGRADED
+        return HealthStatus.HEALTHY
+
+    def get_failures(self) -> list[ComponentHealthResult]:
+        """Return list of components with UNHEALTHY status."""
+        return [r for r in self.results if r.status == HealthStatus.UNHEALTHY]
