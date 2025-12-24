@@ -351,7 +351,8 @@ class TestPipelineRunnerRun:
 class TestPipelineRunnerClearExports:
     """Tests for PipelineRunner._clear_exports method."""
 
-    def test_clear_exports_calls_storage_methods(
+    @pytest.mark.asyncio
+    async def test_clear_exports_calls_storage_methods(
         self,
         pipeline_config,
         mock_context,
@@ -370,8 +371,8 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_silver = MagicMock(return_value=5)
-        services.storage.clear_gold = MagicMock(return_value=1)
+        services.storage.clear_silver = AsyncMock(return_value=5)
+        services.storage.clear_gold = AsyncMock(return_value=1)
 
         runner = PipelineRunner(
             config=pipeline_config,
@@ -384,13 +385,14 @@ class TestPipelineRunnerClearExports:
             logger=mock_logger,
         )
 
-        runner._clear_exports()
+        await runner._clear_exports()
 
         # Should clear both silver and gold tables
         services.storage.clear_silver.assert_called_once()
         services.storage.clear_gold.assert_called_once()
 
-    def test_clear_exports_logs_when_files_cleared(
+    @pytest.mark.asyncio
+    async def test_clear_exports_logs_when_files_cleared(
         self,
         pipeline_config,
         mock_context,
@@ -408,8 +410,8 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_silver = MagicMock(return_value=3)
-        services.storage.clear_gold = MagicMock(return_value=2)
+        services.storage.clear_silver = AsyncMock(return_value=3)
+        services.storage.clear_gold = AsyncMock(return_value=2)
 
         runner = PipelineRunner(
             config=pipeline_config,
@@ -422,13 +424,14 @@ class TestPipelineRunnerClearExports:
             logger=mock_logger,
         )
 
-        runner._clear_exports()
+        await runner._clear_exports()
 
         # Should log when files are cleared
         info_calls = [str(call) for call in mock_logger.info.call_args_list]
         assert any("Cleared storage" in call for call in info_calls)
 
-    def test_clear_exports_no_log_when_nothing_cleared(
+    @pytest.mark.asyncio
+    async def test_clear_exports_no_log_when_nothing_cleared(
         self,
         pipeline_config,
         mock_context,
@@ -446,8 +449,8 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_silver = MagicMock(return_value=0)
-        services.storage.clear_gold = MagicMock(return_value=0)
+        services.storage.clear_silver = AsyncMock(return_value=0)
+        services.storage.clear_gold = AsyncMock(return_value=0)
 
         mock_logger.reset_mock()
 
@@ -462,13 +465,14 @@ class TestPipelineRunnerClearExports:
             logger=mock_logger,
         )
 
-        runner._clear_exports()
+        await runner._clear_exports()
 
         # Should not log about cleared files when nothing was cleared
         info_calls = [str(call) for call in mock_logger.info.call_args_list]
         assert not any("Cleared storage" in call for call in info_calls)
 
-    def test_clear_exports_uses_default_gold_table(
+    @pytest.mark.asyncio
+    async def test_clear_exports_uses_default_gold_table(
         self,
         mock_context,
         mock_executor,
@@ -495,8 +499,8 @@ class TestPipelineRunnerClearExports:
         services.lock = AsyncMock()
         services.metrics = MagicMock()
         services.storage = MagicMock()
-        services.storage.clear_silver = MagicMock(return_value=0)
-        services.storage.clear_gold = MagicMock(return_value=0)
+        services.storage.clear_silver = AsyncMock(return_value=0)
+        services.storage.clear_gold = AsyncMock(return_value=0)
 
         runner = PipelineRunner(
             config=config,
@@ -509,7 +513,7 @@ class TestPipelineRunnerClearExports:
             logger=mock_logger,
         )
 
-        runner._clear_exports()
+        await runner._clear_exports()
 
         # Should use default gold table: provider.entity_type
         services.storage.clear_silver.assert_called_once_with(
