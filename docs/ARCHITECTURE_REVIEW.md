@@ -1,8 +1,9 @@
 # Архитектурный Обзор и План Рефакторинга BioETL
 
-*Версия: 2.0*
+*Версия: 2.1*
 *Дата: 2025-12-24*
 *На основе анализа RULES.md v5.2, AGENT.md v2.2 и глубокого исследования кодовой базы*
+*Обновлено: Уточнения по тестовому покрытию и VCR кассетам*
 
 ---
 
@@ -227,6 +228,47 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
 **Риск**: Graceful shutdown не тестируется, регрессии в CLI не обнаруживаются.
 
 **Решение**: Добавить 10+ тестов для interfaces слоя.
+
+---
+
+#### P2.1: 37.5% Integration тестов без VCR кассет
+
+**Статистика**:
+| Тестовый файл | Тесты | VCR |
+|---------------|-------|-----|
+| `test_chembl.py` | 3 | ✅ |
+| `test_pubmed.py` | 1 | ✅ |
+| `test_uniprot.py` | 2 | ✅ |
+| `test_chembl_activity.py` | 2 | ✅ |
+| `test_chembl_target_component.py` | 1 | ✅ |
+| `test_pubchem_pipeline.py` | 4 | ❌ |
+| `test_uniprot_pipeline.py` | 8 | ❌ |
+| `test_delta_writer.py` | 4 | ❌ (не требует) |
+
+**Риск**: CI может падать из-за реальных HTTP запросов, rate limits, сетевых ошибок.
+
+**Решение**: Записать VCR кассеты для `test_pubchem_pipeline.py` и `test_uniprot_pipeline.py`.
+
+---
+
+#### P2.2: 27 модулей без тестов (26.7%)
+
+**Критические модули без покрытия**:
+| Модуль | LOC | Риск |
+|--------|-----|------|
+| `infrastructure.schemas.silver` | 363 | 🔴 Критический - генерация схем |
+| `composition.factories.data_source_registry` | 219 | 🔴 Центральный реестр |
+| `application.pipelines.chembl.molecule_transformer` | 186 | 🟠 Бизнес-логика |
+| `application.pipelines.chembl.target_transformer` | 241 | 🟠 Бизнес-логика |
+| `infrastructure.checkpoint.local_checkpoint` | 135 | 🟠 Resume функциональность |
+
+**Полный список** (27 модулей, ~2100 LOC):
+- 5 ChEMBL трансформеров (674 LOC)
+- 5 Composition factories (410 LOC)
+- 14 Infrastructure модулей (1016 LOC)
+- 3 Application core модуля (216 LOC)
+
+**Решение**: Приоритизировать покрытие критических модулей (schemas, registry, transformers).
 
 ---
 
