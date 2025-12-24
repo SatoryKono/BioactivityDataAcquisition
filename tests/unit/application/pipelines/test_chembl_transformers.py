@@ -349,26 +349,21 @@ class TestMoleculeTransformer:
         assert result["helm_notation"] == "PEPTIDE1{A.G.K}$$$$"
 
     @pytest.mark.asyncio
-    async def test_transform_with_withdrawn_fields(self, transformer, mock_context):
-        """Test transformation with withdrawn metadata fields."""
+    async def test_transform_with_withdrawn_flag(self, transformer, mock_context):
+        """Test transformation with withdrawn_flag field.
+
+        Note: withdrawn_year, withdrawn_country, withdrawn_reason are not available
+        in the /molecule endpoint. Use /drug_warning endpoint for detailed info.
+        """
         record = {
             "molecule_chembl_id": "CHEMBL789",
             "withdrawn_flag": True,
-            "withdrawn_year": 2010,
-            "withdrawn_country": ["United States", "United Kingdom"],
-            "withdrawn_reason": ["Hepatotoxicity", "Cardiotoxicity"],
         }
 
         result = await transformer.transform(mock_context, record)
 
         assert result is not None
         assert result["withdrawn_flag"] is True
-        assert result["withdrawn_year"] == 2010
-        # JSON serialized fields
-        assert isinstance(result["withdrawn_country"], str)
-        assert isinstance(result["withdrawn_reason"], str)
-        assert "United States" in result["withdrawn_country"]
-        assert "Hepatotoxicity" in result["withdrawn_reason"]
 
     @pytest.mark.asyncio
     async def test_transform_with_usan_fields(self, transformer, mock_context):
@@ -390,17 +385,18 @@ class TestMoleculeTransformer:
         assert result["usan_year"] == 2015
 
     @pytest.mark.asyncio
-    async def test_transform_with_new_properties(self, transformer, mock_context):
-        """Test transformation with new ACD and other property fields."""
+    async def test_transform_with_extended_properties(self, transformer, mock_context):
+        """Test transformation with extended property fields.
+
+        Note: acd_logd, acd_logp, acd_most_apka, acd_most_bpka are not available
+        in the public ChEMBL API.
+        """
         record = {
             "molecule_chembl_id": "CHEMBL5678",
             "molecule_properties": {
                 "alogp": 2.5,
                 "mw_freebase": 300.5,
-                "acd_logd": 1.8,
-                "acd_logp": 2.3,
-                "acd_most_apka": 4.5,
-                "acd_most_bpka": 9.2,
+                "num_ro5_violations": 1,
                 "full_molformula": "C15H12O3",
                 "ro3_pass": "Y",
             },
@@ -410,10 +406,8 @@ class TestMoleculeTransformer:
 
         assert result is not None
         assert result["property_alogp"] == 2.5
-        assert result["property_acd_logd"] == 1.8
-        assert result["property_acd_logp"] == 2.3
-        assert result["property_acd_most_apka"] == 4.5
-        assert result["property_acd_most_bpka"] == 9.2
+        assert result["property_mw_freebase"] == 300.5
+        assert result["property_ro5_violations"] == 1
         assert result["property_full_molformula"] == "C15H12O3"
         assert result["property_ro3_pass"] == "Y"
 

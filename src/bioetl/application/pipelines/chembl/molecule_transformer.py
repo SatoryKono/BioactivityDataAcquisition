@@ -32,16 +32,14 @@ _PROPERTIES_FIELDS: dict[str, Any] = {
     "hbd": safe_int,
     "psa": safe_float,
     "rtb": safe_int,
-    "num_lipinski_ro5_violations": safe_int,
+    "num_ro5_violations": safe_int,  # ChEMBL API field name (not num_lipinski_ro5_violations)
     "heavy_atoms": safe_int,
     "aromatic_rings": safe_int,
     "qed_weighted": safe_float,
-    "acd_logd": safe_float,
-    "acd_logp": safe_float,
-    "acd_most_apka": safe_float,
-    "acd_most_bpka": safe_float,
     "full_molformula": None,
     "ro3_pass": None,
+    # Note: acd_logd, acd_logp, acd_most_apka, acd_most_bpka were removed
+    # as they are not available in the public ChEMBL API
 }
 
 _STRUCTURES_FIELDS: dict[str, Any] = {
@@ -62,10 +60,8 @@ def _extract_hierarchy(data: dict[str, Any] | None) -> dict[str, Any]:
 def _extract_properties(data: dict[str, Any] | None) -> dict[str, Any]:
     """Extract and rename properties fields using flatten_nested_dict."""
     result = flatten_nested_dict(data, "property_", _PROPERTIES_FIELDS)
-    # Rename num_lipinski_ro5_violations -> ro5_violations
-    result["property_ro5_violations"] = result.pop(
-        "property_num_lipinski_ro5_violations"
-    )
+    # Rename num_ro5_violations -> ro5_violations for consistency
+    result["property_ro5_violations"] = result.pop("property_num_ro5_violations")
     return result
 
 
@@ -130,10 +126,8 @@ class MoleculeTransformer(BaseTransformer):
             "chirality": safe_int(record.get("chirality")),
             "dosed_ingredient": safe_int(record.get("dosed_ingredient")),
             "availability_type": safe_int(record.get("availability_type")),
-            # Withdrawn metadata
-            "withdrawn_year": safe_int(record.get("withdrawn_year")),
-            "withdrawn_country": self.serialize_json(record.get("withdrawn_country")),
-            "withdrawn_reason": self.serialize_json(record.get("withdrawn_reason")),
+            # Note: withdrawn_year, withdrawn_country, withdrawn_reason are not available
+            # in the /molecule endpoint. Use /drug_warning endpoint for detailed info.
             # USAN naming
             "usan_stem": record.get("usan_stem"),
             "usan_stem_definition": record.get("usan_stem_definition"),

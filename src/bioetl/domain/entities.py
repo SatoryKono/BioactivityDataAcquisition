@@ -418,10 +418,8 @@ class Molecule(BaseEntity):
     dosed_ingredient: int | None = None
     availability_type: int | None = None  # -2 to 2
 
-    # Withdrawn metadata
-    withdrawn_year: int | None = None
-    withdrawn_country: str | None = None  # JSON string for multiple countries
-    withdrawn_reason: str | None = None  # JSON string for multiple reasons
+    # Note: withdrawn_year, withdrawn_country, withdrawn_reason are not available
+    # in the /molecule endpoint. Use /drug_warning endpoint for detailed info.
 
     # USAN naming
     usan_stem: str | None = None
@@ -458,10 +456,8 @@ class Molecule(BaseEntity):
     property_heavy_atoms: int | None = None
     property_aromatic_rings: int | None = None
     property_qed_weighted: float | None = None
-    property_acd_logd: float | None = None
-    property_acd_logp: float | None = None
-    property_acd_most_apka: float | None = None
-    property_acd_most_bpka: float | None = None
+    # Note: property_acd_logd, property_acd_logp, property_acd_most_apka,
+    # property_acd_most_bpka are not available in the public ChEMBL API
     property_full_molformula: str | None = None
     property_ro3_pass: str | None = None  # "Y" or "N"
 
