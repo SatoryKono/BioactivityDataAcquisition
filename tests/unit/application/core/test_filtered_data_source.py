@@ -272,7 +272,7 @@ class TestFilteredDataSourceFetch:
         # Simulate entering context to load filter IDs
         await filtered.__aenter__()
 
-        with pytest.raises(TypeError, match="does not support fetch_filtered"):
+        with pytest.raises(TypeError, match="does not implement FilterableDataSourcePort"):
             async for _ in filtered.fetch("activity"):
                 pass
 
