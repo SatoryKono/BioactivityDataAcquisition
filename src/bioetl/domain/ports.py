@@ -33,6 +33,16 @@ class TracingPort(Protocol):
         """Get a tracer instance for instrumentation."""
         ...
 
+    def close(self) -> None:
+        """
+        Flush pending spans and cleanup tracing resources.
+
+        This method should be called when the pipeline is shutting down
+        to ensure all spans are exported before the process exits.
+        The implementation MUST be idempotent (safe to call multiple times).
+        """
+        ...
+
 
 @runtime_checkable
 class DataSourcePort(Protocol):
@@ -272,6 +282,30 @@ class StoragePort(Protocol):
 
         Returns:
             Total number of tables cleared.
+        """
+        ...
+
+    def preview_cleanup(
+        self,
+        silver_table: str,
+        gold_table: str | None = None,
+    ) -> dict[str, Any]:
+        """Preview what would be cleared without actual deletion.
+
+        Used by CLI dry-run mode to show users what data would be affected
+        before performing a rebuild or backfill operation.
+
+        Args:
+            silver_table: Silver table name (e.g., 'chembl.activity')
+            gold_table: Optional Gold table name
+
+        Returns:
+            Dict with structure:
+            {
+                "silver": {"path": str, "file_count": int, "exists": bool},
+                "gold": {"path": str, "file_count": int, "exists": bool} | None,
+                "total_files": int
+            }
         """
         ...
 
@@ -527,6 +561,16 @@ class MetricsPort(Protocol):
             name: The name of the counter metric.
             value: The amount to increment by.
             labels: A dictionary of label names to label values.
+        """
+        ...
+
+    def close(self) -> None:
+        """
+        Cleanup metrics resources.
+
+        This method should be called when the pipeline is shutting down
+        to properly release any resources held by the metrics implementation.
+        The implementation MUST be idempotent (safe to call multiple times).
         """
         ...
 

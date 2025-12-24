@@ -18,59 +18,52 @@ from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
     bootstrap_pipeline,
     bootstrap_quarantine,
+    bootstrap_storage,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 
 def _preview_cleanup(pipeline: str, run_type: str) -> None:
     """Preview what data would be cleared in dry-run mode.
 
+    Delegates to StoragePort.preview_cleanup() for clean architecture.
+
     Args:
         pipeline: Pipeline name
         run_type: Type of run (rebuild or backfill)
     """
-    settings = get_settings()
     try:
         config = load_pipeline_config(pipeline)
-        silver_table = config.silver_table
-        gold_table = config.gold_table
+        storage = bootstrap_storage()
 
-        # Calculate paths that would be affected
-        silver_path = settings.silver_path / silver_table.replace(".", "/")
-        gold_path = (
-            settings.gold_path / gold_table.replace(".", "/") if gold_table else None
+        preview = storage.preview_cleanup(
+            silver_table=config.silver_table,
+            gold_table=config.gold_table,
         )
 
         click.echo("\nFiles/directories that would be cleared:")
 
-        # Count Silver files
-        silver_count = 0
-        if silver_path.exists():
-            for item in silver_path.rglob("*"):
-                if item.is_file():
-                    silver_count += 1
-            click.echo(f"  Silver: {silver_path} ({silver_count} files)")
+        # Display Silver info
+        silver_info = preview["silver"]
+        if silver_info["exists"]:
+            click.echo(f"  Silver: {silver_info['path']} ({silver_info['file_count']} files)")
         else:
-            click.echo(f"  Silver: {silver_path} (does not exist)")
+            click.echo(f"  Silver: {silver_info['path']} (does not exist)")
 
-        # Count Gold files
-        gold_count = 0
-        if gold_path:
-            if gold_path.exists():
-                for item in gold_path.rglob("*"):
-                    if item.is_file():
-                        gold_count += 1
-                click.echo(f"  Gold: {gold_path} ({gold_count} files)")
+        # Display Gold info
+        if preview["gold"]:
+            gold_info = preview["gold"]
+            if gold_info["exists"]:
+                click.echo(f"  Gold: {gold_info['path']} ({gold_info['file_count']} files)")
             else:
-                click.echo(f"  Gold: {gold_path} (does not exist)")
+                click.echo(f"  Gold: {gold_info['path']} (does not exist)")
 
-        total_cleared = silver_count + gold_count
-        click.echo(f"\nTotal items that would be cleared: ~{total_cleared}")
+        click.echo(f"\nTotal items that would be cleared: ~{preview['total_files']}")
         click.echo("\nNo changes were made (dry-run mode).")
     except Exception as e:
         click.echo(f"Error previewing cleanup: {e}", err=True)
