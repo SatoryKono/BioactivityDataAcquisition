@@ -43,14 +43,12 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class YamlSettingsSource(PydanticBaseSettingsSource):
-    """A settings source that loads variables from a YAML file.
-    """
+    """A settings source that loads variables from a YAML file."""
 
     def get_field_value(
         self, field: FieldInfo, field_name: str
     ) -> tuple[Any, str, bool]:
-        """Get value of a field from YAML file.
-        """
+        """Get value of a field from YAML file."""
         encoding = self.config.get("env_file_encoding")
         try:
             with Path("config.yaml").open(encoding=encoding) as f:
@@ -67,8 +65,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
     def prepare_field_value(
         self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
     ) -> Any:
-        """Prepare value of a field.
-        """
+        """Prepare value of a field."""
         return value
 
     def __call__(self) -> dict[str, Any]:
