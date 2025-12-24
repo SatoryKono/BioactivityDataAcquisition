@@ -276,6 +276,8 @@ class TestTargetTransformerSnapshot:
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
+        # Note: protein_classifications are NOT available in /target endpoint.
+        # They are only available via /target_component endpoint.
         return {
             "target_chembl_id": "CHEMBL1862",
             "pref_name": "Cyclooxygenase-2",
@@ -292,13 +294,6 @@ class TestTargetTransformerSnapshot:
                     "tax_id": 9606,
                     "target_component_xrefs": [
                         {"xref_id": "P35354", "xref_src_db": "UniProt"},
-                    ],
-                    "protein_classifications": [
-                        {
-                            "protein_classification_id": 597,
-                            "pref_name": "Enzyme",
-                            "short_name": "Oxidoreductase",
-                        },
                     ],
                 }
             ],

@@ -151,7 +151,8 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     target_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
-    protein_classifications: Series[str] = pa.Field(nullable=True)
+    # Note: protein_classifications not available in /target endpoint
+    # Use ChEMBLTargetComponentGoldSchema for protein classification data
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)

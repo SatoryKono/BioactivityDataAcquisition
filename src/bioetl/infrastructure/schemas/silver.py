@@ -259,7 +259,8 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("component_types", pa.list_(pa.string())),
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("protein_classifications", pa.list_(pa.string())),
+        # Note: protein_classifications not available in /target endpoint
+        # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),

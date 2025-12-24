@@ -340,10 +340,8 @@ class Target(BaseEntity):
     component_organisms: list[str] | None = None  # Organisms from components
     component_tax_ids: list[int] | None = None  # Tax IDs from components
 
-    # Protein classification fields (aggregated from components)
-    protein_classifications: list[str] | None = None  # short_name values
-    protein_classification_ids: list[int] | None = None  # protein_classification_id
-    protein_classification_names: list[str] | None = None  # pref_name (class names)
+    # Note: protein_classifications are NOT available in /target endpoint.
+    # They are only available via /target_component endpoint (TargetComponent entity).
 
     def __post_init__(self) -> None:
         super().__post_init__()
