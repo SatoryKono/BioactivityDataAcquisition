@@ -41,6 +41,7 @@ class LocalCheckpoint:
         Args:
             base_path: Base path for checkpoint storage
             pipeline_name: Optional pipeline name (for interface compatibility)
+
         """
         self.base_path = Path(base_path)
         self.pipeline_name = pipeline_name

@@ -83,6 +83,7 @@ class ChemblAdapter(BaseHttpAdapter):
         - HEALTHY: Uses configured batch_size
         - DEGRADED: Uses batch_size ÷ 2 to reduce load
         - UNHEALTHY: Raises CriticalError to prevent futile requests
+
     """
 
     http_client: UnifiedHTTPClient
@@ -119,6 +120,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Raises:
             CriticalError: When UNHEALTHY to prevent futile requests
+
         """
         if self._cached_health == HealthStatus.UNHEALTHY:
             raise CriticalError(
@@ -226,6 +228,7 @@ class ChemblAdapter(BaseHttpAdapter):
         Raises:
             CriticalError: For auth failures and other critical errors
             ChemblApiError: For recoverable and other errors
+
         """
         # Classify the error
         error_type = self._error_classifier.classify(e)
@@ -314,6 +317,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Yields:
             Dictionary records from ChEMBL API
+
         """
         if filter_ids and filter_field:
             async for record in self._fetch_filtered(
@@ -343,6 +347,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Yields:
             Dictionary records matching the filter criteria
+
         """
         async for record in self._fetch_filtered(
             entity_type, limit, filter_ids, filter_field
@@ -400,6 +405,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Returns:
             Dictionary with error counts and health status.
+
         """
         return {
             "consecutive_errors": self._consecutive_errors,

@@ -32,6 +32,7 @@ class AnomalyDetector:
         threshold: Detection threshold (interpretation depends on strategy)
         min_baseline_samples: Minimum samples required for detection
         strategy: Detection algorithm (default: ZScoreDetector)
+
     """
 
     def __init__(

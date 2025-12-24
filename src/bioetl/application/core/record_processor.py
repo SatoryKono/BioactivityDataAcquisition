@@ -52,6 +52,18 @@ class RecordProcessor:
         gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
     ):
+        """Initialize record processor.
+
+        Args:
+            services: Common pipeline services.
+            error_classifier: Service for error classification.
+            context: Pipeline execution context.
+            config: Record processor configuration.
+            transform_callback: Callback for Bronze -> Silver transformation.
+            gold_filter_callback: Callback for filtering Silver records.
+            gold_transform_callback: Callback for Silver -> Gold transformation.
+            gold_validator: Validator for Gold layer records.
+        """
         self._storage = services.storage
         self._quarantine_manager = QuarantineManager(
             quarantine_port=services.quarantine,

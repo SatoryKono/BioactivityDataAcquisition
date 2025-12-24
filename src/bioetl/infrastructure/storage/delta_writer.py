@@ -65,6 +65,7 @@ class DeltaWriter:
             base_path: Base path for Delta tables (local filesystem)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
             logger: Optional logger for debug output
+
         """
         self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
@@ -248,6 +249,7 @@ class DeltaWriter:
 
         Returns:
             Path to the table directory.
+
         """
         from pathlib import Path
 
@@ -263,6 +265,7 @@ class DeltaWriter:
 
         Returns:
             Number of tables cleared (or would be cleared).
+
         """
         import shutil
         from pathlib import Path

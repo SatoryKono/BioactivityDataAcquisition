@@ -28,6 +28,7 @@ class CsvFilterReader:
         ('CHEMBL1201198', 'CHEMBL25', 'CHEMBL612545')
         >>> print(result.duplicate_count)
         0
+
     """
 
     async def load_filter_ids(
@@ -56,6 +57,7 @@ class CsvFilterReader:
         Raises:
             FileNotFoundError: If the CSV file does not exist.
             ValueError: If the specified column is not found in the CSV.
+
         """
         path = Path(source_path)
         if not path.exists():

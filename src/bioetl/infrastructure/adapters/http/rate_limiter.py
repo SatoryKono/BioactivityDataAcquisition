@@ -34,6 +34,7 @@ class TokenBucket:
         - Crossref: 50 req/sec (polite)
         - Semantic Scholar: 100 req/5min = ~0.33 req/sec
         - PubMed: 3 req/sec (10 with API key)
+
     """
 
     rate: float
@@ -63,6 +64,7 @@ class TokenBucket:
 
         Raises:
             ValueError: If tokens > capacity
+
         """
         if tokens > self.capacity:
             msg = f"Cannot acquire {tokens} tokens, capacity is {self.capacity}"
@@ -94,6 +96,7 @@ class TokenBucket:
 
         Returns:
             True if acquired, False otherwise
+
         """
         self._refill()
 
@@ -114,6 +117,7 @@ def create_uniprot_bucket(with_api_key: bool = False) -> TokenBucket:
 
     Args:
         with_api_key: True if using API key (100 req/sec vs default)
+
     """
     rate = 100.0 if with_api_key else 10.0
     return TokenBucket(rate=rate, capacity=int(rate))
@@ -140,6 +144,7 @@ def create_pubmed_bucket(with_api_key: bool = False) -> TokenBucket:
 
     Args:
         with_api_key: True if using API key (10 req/sec vs 3 req/sec)
+
     """
     rate = 10.0 if with_api_key else 3.0
     return TokenBucket(rate=rate, capacity=int(rate))

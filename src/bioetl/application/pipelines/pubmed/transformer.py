@@ -32,6 +32,11 @@ class PubMedPublicationTransformer(BaseTransformer):
     """
 
     def __init__(self, provider: str = "pubmed"):
+        """Initialize PubMed publication transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
         self._parser = PubMedXMLParser()
 

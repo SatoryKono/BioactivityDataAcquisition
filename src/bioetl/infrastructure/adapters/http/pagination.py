@@ -25,6 +25,7 @@ class PageFetcher(Protocol[T]):
             A tuple containing:
                 - List of items fetched.
                 - Next cursor (or None if no more pages).
+
         """
         ...
 
@@ -55,6 +56,7 @@ class PaginatedFetcherMixin:
 
         Yields:
             Items from the pages as they are fetched.
+
         """
         fetched = 0
         cursor = initial_cursor

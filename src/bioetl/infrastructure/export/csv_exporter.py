@@ -48,6 +48,7 @@ class CsvExporter:
             encoding: File encoding (default: "utf-8")
             sort_by: Columns to sort by for deterministic output
             sort_ascending: Sort direction (default: ascending)
+
         """
         self.base_path = Path(base_path)
         self.delimiter = delimiter
@@ -135,6 +136,7 @@ class CsvExporter:
 
         Returns:
             Sorted table, or original if columns don't exist
+
         """
         if not sort_columns:
             return table
@@ -207,6 +209,7 @@ class CsvExporter:
 
         Returns:
             Path to the written CSV file
+
         """
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)

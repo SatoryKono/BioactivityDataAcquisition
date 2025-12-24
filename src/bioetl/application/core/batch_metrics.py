@@ -18,15 +18,19 @@ class BatchMetricsRecorder:
     def __init__(
         self,
         metrics: MetricsPort | None,
-        pipeline_name: str,
+        pipeline_label: str,
+        run_type_label: str,
     ) -> None:
         """Initialize batch metrics recorder.
 
         Args:
             metrics: Metrics port instance.
-            pipeline_name: Name of the pipeline.
+            pipeline_label: Label identifying the pipeline (e.g., 'chembl_activity').
+            run_type_label: Label for the run type (e.g., 'incremental', 'rebuild').
         """
-        self.metrics = metrics
+        self._metrics = metrics
+        self._pipeline_label = pipeline_label
+        self._run_type_label = run_type_label
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record the size of a batch at a specific stage."""

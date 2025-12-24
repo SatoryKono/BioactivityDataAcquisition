@@ -27,6 +27,7 @@ def log_adapter_error(
         operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
         exc_info: Include exception traceback (default: True)
         **context: Additional context fields to include in log
+
     """
     message = f"{provider} {operation} failed"
 

@@ -43,6 +43,20 @@ class PipelineRunner:
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
     ) -> None:
+        """Initialize pipeline runner.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Common pipeline services.
+            context: Pipeline execution context.
+            executor: Pipeline executor instance.
+            checkpoint_manager: Checkpoint manager.
+            shutdown_signal: Shutdown signal for graceful termination.
+            logger: Structured logger.
+            pipeline: Optional pipeline instance.
+            tracer: Optional tracing port.
+        """
         self._config = config
         self._runtime = runtime
         self._services = services
@@ -72,6 +86,7 @@ class PipelineRunner:
 
     @property
     def logger(self) -> structlog.BoundLogger:
+        """Get the logger instance."""
         return self._logger
 
     @property

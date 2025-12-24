@@ -59,6 +59,7 @@ def atomic_write(
         >>> with atomic_write(Path("/data/file.json")) as f:
         ...     f.write(b'{"key": "value"}')
         # File is only visible at target after successful completion
+
     """
     # Ensure parent directory exists
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -102,6 +103,7 @@ def atomic_write_bytes(target: Path, data: bytes) -> None:
 
     Raises:
         AtomicWriteError: If write fails
+
     """
     with atomic_write(target, mode="wb") as f:
         f.write(data)
@@ -117,6 +119,7 @@ def atomic_write_text(target: Path, text: str, encoding: str = "utf-8") -> None:
 
     Raises:
         AtomicWriteError: If write fails
+
     """
     with atomic_write(target, mode="w", encoding=encoding) as f:
         f.write(text)
@@ -133,6 +136,7 @@ class AtomicWriteGroup:
         >>> group.add(data_path, compressed_data)
         >>> group.add(meta_path, metadata_json.encode())
         >>> group.commit()  # Both files appear atomically
+
     """
 
     def __init__(self) -> None:
@@ -144,6 +148,7 @@ class AtomicWriteGroup:
         Args:
             target: Path to the final destination file
             data: Bytes to write
+
         """
         target.parent.mkdir(parents=True, exist_ok=True)
 
@@ -172,6 +177,7 @@ class AtomicWriteGroup:
 
         Raises:
             AtomicWriteError: If commit fails
+
         """
         committed: list[tuple[Path, Path]] = []
 

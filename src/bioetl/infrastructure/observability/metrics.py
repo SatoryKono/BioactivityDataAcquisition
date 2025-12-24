@@ -52,8 +52,7 @@ DQ_RECORDS_QUARANTINED_TOTAL = Counter(
 
 
 class MetricsCollector:
-    """
-    Collector for pipeline metrics.
+    """Collector for pipeline metrics.
 
     Wraps Prometheus metrics with pipeline context.
     """
@@ -64,6 +63,7 @@ class MetricsCollector:
         Args:
             pipeline_name: Name of the pipeline.
             registry: Optional Prometheus registry (unused as metrics are global).
+
         """
         self.pipeline_name = pipeline_name
         self.registry = registry
@@ -80,6 +80,7 @@ class MetricsCollector:
             layer: Processing layer (bronze, silver, gold).
             count: Number of records processed.
             run_type: Type of run (incremental, backfill).
+
         """
         RECORDS_PROCESSED_TOTAL.labels(
             pipeline=self.pipeline_name,
@@ -93,6 +94,7 @@ class MetricsCollector:
         Args:
             error_code: Error code identifier.
             stage: Stage where error occurred.
+
         """
         ERRORS_TOTAL.labels(
             pipeline=self.pipeline_name,

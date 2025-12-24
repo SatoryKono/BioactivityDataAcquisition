@@ -21,6 +21,7 @@ class PanderaGoldValidator:
 
     Args:
         schema: Pandera DataFrameSchema for validation. If None, validation is skipped.
+
     """
 
     def __init__(self, schema: pa.DataFrameSchema | None = None) -> None:
@@ -34,6 +35,7 @@ class PanderaGoldValidator:
 
         Returns:
             ValidationResult with valid flag and any error messages.
+
         """
         if not self._schema or not records:
             return ValidationResult(valid=True)
@@ -63,5 +65,6 @@ class NoOpGoldValidator:
 
         Returns:
             ValidationResult indicating valid (always True for no-op).
+
         """
         return ValidationResult(valid=True)

@@ -72,6 +72,7 @@ class UnifiedQuarantine:
             bronze_batch_id: The ID of the bronze batch containing the record.
             run_id: Optional ID of the pipeline run for traceability.
             metadata: Optional additional metadata (e.g., error_details, bronze_file_uri).
+
         """
         payload_json = json.dumps(payload, ensure_ascii=True)
 

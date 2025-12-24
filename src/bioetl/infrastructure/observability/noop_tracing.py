@@ -12,6 +12,7 @@ class NoOpTracer:
     """No-op tracer that does nothing."""
 
     def __enter__(self) -> Self:
+        """Context manager entry."""
         return self
 
     def __exit__(
@@ -20,18 +21,23 @@ class NoOpTracer:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """Context manager exit."""
         pass
 
     def start_as_current_span(self, name: str) -> Self:
+        """Start a new span (no-op)."""
         return self
 
     def set_attribute(self, key: str, value: Any) -> None:
+        """Set span attribute (no-op)."""
         pass
 
     def set_status(self, status: Any) -> None:
+        """Set span status (no-op)."""
         pass
 
     def record_exception(self, exception: Exception) -> None:
+        """Record exception (no-op)."""
         pass
 
 
@@ -39,4 +45,5 @@ class NoOpTracing:
     """No-op implementation of TracingPort."""
 
     def get_tracer(self, name: str) -> NoOpTracer:
+        """Get a no-op tracer."""
         return NoOpTracer()

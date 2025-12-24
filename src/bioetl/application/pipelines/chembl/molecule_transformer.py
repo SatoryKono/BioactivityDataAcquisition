@@ -20,6 +20,11 @@ class MoleculeTransformer(BaseTransformer):
     """Transforms ChEMBL bronze molecule records to silver."""
 
     def __init__(self, provider: str = "chembl"):
+        """Initialize ChEMBL molecule transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
 
     async def _transform_impl(

@@ -16,6 +16,11 @@ class UniProtProteinTransformer(BaseTransformer):
     """Transformer for UniProt protein records."""
 
     def __init__(self, provider: str = "uniprot"):
+        """Initialize UniProt protein transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
 
     async def _transform_impl(

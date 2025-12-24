@@ -13,6 +13,7 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
 
     Returns:
         HealthStatus based on state and failure count.
+
     """
     cb_state = circuit_breaker.get_state()
     failure_count = circuit_breaker.get_failure_count()

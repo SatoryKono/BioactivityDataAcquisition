@@ -16,6 +16,7 @@ class PubChemCompoundPipeline(BasePipeline):
     """Pipeline for processing PubChem compounds."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize PubChem compound pipeline."""
         super().__init__(*args, **kwargs)
         self._transformer = PubChemCompoundTransformer(provider=self.provider)
 

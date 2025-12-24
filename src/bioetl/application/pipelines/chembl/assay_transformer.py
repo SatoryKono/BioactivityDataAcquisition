@@ -20,6 +20,11 @@ class AssayTransformer(BaseTransformer):
     """Transforms ChEMBL assay bronze records to silver."""
 
     def __init__(self, provider: str = "chembl"):
+        """Initialize ChEMBL assay transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
 
     async def _transform_impl(

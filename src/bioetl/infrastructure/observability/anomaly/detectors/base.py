@@ -45,6 +45,7 @@ class DetectorStrategy(ABC):
 
         Returns:
             Anomaly if detected, None otherwise
+
         """
 
     @abstractmethod
@@ -56,4 +57,5 @@ class DetectorStrategy(ABC):
 
         Returns:
             Severity level based on score
+
         """

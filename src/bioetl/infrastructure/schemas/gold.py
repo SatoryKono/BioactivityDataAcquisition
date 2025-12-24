@@ -27,6 +27,8 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow extra columns
 
 
@@ -39,6 +41,8 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     canonical_smiles: Series[str] = pa.Field(nullable=True)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False
 
 
@@ -51,6 +55,8 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     sequence_length: Series[int] = pa.Field(nullable=True, ge=0, coerce=True)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False
 
 
@@ -92,6 +98,8 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     country: Series[str] = pa.Field(nullable=True)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow extra columns (authors, keywords, mesh_terms, etc.)
 
 
@@ -126,6 +134,8 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow extra columns
 
 
@@ -150,6 +160,8 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow extra columns
 
 
@@ -174,6 +186,8 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow extra columns
 
 
@@ -200,6 +214,8 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow extra columns
 
 
@@ -261,4 +277,6 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
+        """Pandera configuration."""
+
         strict = False  # Allow transition period

@@ -31,6 +31,7 @@ class BaseSyncAdapter(DataSourcePort):
         rate_limiter: Token bucket rate limiter.
         circuit_breaker: Circuit breaker for fault tolerance.
         thread_pool: Thread pool for executing sync code.
+
     """
 
     provider_name: str
@@ -57,6 +58,7 @@ class BaseSyncAdapter(DataSourcePort):
             circuit_breaker_timeout: Recovery timeout in seconds.
             max_workers: Thread pool size.
             strict_error_handling: Whether to raise exceptions or log warnings.
+
         """
         self.logger = logger
         self.strict_error_handling = strict_error_handling

@@ -16,6 +16,11 @@ class PubChemCompoundTransformer(BaseTransformer):
     """Transformer for PubChem compound records."""
 
     def __init__(self, provider: str = "pubchem"):
+        """Initialize PubChem compound transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
 
     async def _transform_impl(
