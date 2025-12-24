@@ -125,10 +125,6 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     # Quality indicators
     confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9, coerce=True)
 
-    # Additional metadata
-    assay_pref_name: Series[str] = pa.Field(nullable=True)
-    score: Series[float] = pa.Field(nullable=True, coerce=True)
-
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
