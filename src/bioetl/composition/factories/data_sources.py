@@ -19,8 +19,8 @@ class DataSourceFactory:
 
     _adapters: ClassVar[dict[str, tuple[str, str]]] = {
         "chembl": ("bioetl.infrastructure.adapters.chembl.client", "ChemblAdapter"),
-        "pubchem": ("bioetl.infrastructure.adapters.pubchem.client", "PubChemClient"),
-        "uniprot": ("bioetl.infrastructure.adapters.uniprot.client", "UniProtClient"),
+        "pubchem": ("bioetl.infrastructure.adapters.pubchem.client", "PubChemAdapter"),
+        "uniprot": ("bioetl.infrastructure.adapters.uniprot.client", "UniProtAdapter"),
     }
 
     @classmethod

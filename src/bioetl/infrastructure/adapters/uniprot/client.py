@@ -27,8 +27,8 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 
-class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
-    """UniProt API client implementing DataSourcePort.
+class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
+    """UniProt API adapter implementing DataSourcePort.
 
     Provides access to protein sequence and functional information from UniProt database.
     """
@@ -287,4 +287,4 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
     def __repr__(self) -> str:
         """Return string representation."""
         has_key = "with API key" if self.api_key else "without API key"
-        return f"UniProtClient(base_url='{self.base_url}', {has_key})"
+        return f"UniProtAdapter(base_url='{self.base_url}', {has_key})"

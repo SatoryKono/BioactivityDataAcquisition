@@ -635,8 +635,8 @@ def test_adapters_implement_protocols(src_dir: Path):
     try:
         from bioetl.composition.factories.storage_factory import StorageAdapter
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-        from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+        from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
         from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
         from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
@@ -652,8 +652,8 @@ def test_adapters_implement_protocols(src_dir: Path):
     # Define Expectations
     expectations = [
         (ChemblAdapter, DataSourcePort),
-        (PubChemClient, DataSourcePort),
-        (UniProtClient, DataSourcePort),
+        (PubChemAdapter, DataSourcePort),
+        (UniProtAdapter, DataSourcePort),
         (LocalCheckpoint, CheckpointPort),
         (MemoryLock, LockPort),
         (UnifiedQuarantine, QuarantinePort),
@@ -716,16 +716,16 @@ def test_http_adapters_inherit_base(src_dir: Path):
 
     try:
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
     except ImportError as e:
         pytest.fail(f"Could not import adapters: {e}")
 
     # List of adapters that are considered "HTTP Adapters"
-    # PubChemClient is excluded as it uses a sync library (pubchempy)
+    # PubChemAdapter is excluded as it uses a sync library (pubchempy)
     # and manages its own thread pool / connection logic.
     http_adapters = [
         ChemblAdapter,
-        UniProtClient,
+        UniProtAdapter,
     ]
 
     violations = []
