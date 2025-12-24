@@ -158,10 +158,6 @@
     'polymer_flag': None,
     'pref_name': 'ASPIRIN',
     'prodrug': None,
-    'property_acd_logd': None,
-    'property_acd_logp': None,
-    'property_acd_most_apka': None,
-    'property_acd_most_bpka': None,
     'property_alogp': 1.19,
     'property_aromatic_rings': None,
     'property_full_molformula': None,
@@ -185,10 +181,7 @@
     'usan_stem_definition': None,
     'usan_substem': None,
     'usan_year': None,
-    'withdrawn_country': None,
     'withdrawn_flag': None,
-    'withdrawn_reason': None,
-    'withdrawn_year': None,
   })
 # ---
 # name: TestPubChemCompoundTransformerSnapshot.test_transform_snapshot
