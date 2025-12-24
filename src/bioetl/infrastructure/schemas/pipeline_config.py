@@ -19,10 +19,21 @@ from bioetl.domain.config import DQConfig as DomainDQConfig
 
 
 class DQConfig(BaseModel):
-    """Data Quality configuration."""
+    """Data Quality configuration.
+
+    Attributes:
+        soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
+        hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
+        strict_validation: If True, apply stricter validation rules.
+            Use with caution as it may reject more records.
+    """
 
     soft_fail_threshold: float = Field(default=0.05)
     hard_fail_threshold: float = Field(default=0.20)
+    strict_validation: bool = Field(
+        default=False,
+        description="Apply stricter validation rules (feature flag)",
+    )
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> "DQConfig":
