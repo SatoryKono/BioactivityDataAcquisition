@@ -32,6 +32,7 @@ class CheckpointManager:
             pipeline_name: Name of the pipeline.
             run_id: Unique identifier for the pipeline run.
             resume: Whether to resume from previous checkpoint.
+
         """
         self._checkpoint = checkpoint_port
         self._logger = logger
