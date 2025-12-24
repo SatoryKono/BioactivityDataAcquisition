@@ -59,3 +59,15 @@ class BatchMetricsRecorder:
                     "error_code": error_type.value,
                 },
             )
+
+    def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
+        """Record number of quarantined records."""
+        if self._metrics:
+            self._metrics.increment_counter(
+                "dq_records_quarantined_total",
+                count,
+                {
+                    "pipeline": self._pipeline_label,
+                    "error_type": error_type.value,
+                },
+            )

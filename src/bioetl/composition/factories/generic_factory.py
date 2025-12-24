@@ -126,6 +126,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
+        tracing: Any | None = None,
     ) -> PipelineServices:
         """Build PipelineServices from settings.
 
@@ -134,6 +135,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger: Structured logger
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
+            tracing: Optional TracerPort
 
         Returns:
             Configured PipelineServices instance
@@ -148,6 +150,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             data_source=data_source,
             pipeline_config=pipeline_config,
+            tracing=tracing,
         )
 
     def create_with_services(
@@ -158,6 +161,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
+        tracing: Any | None = None,
     ) -> TPipeline:
         """Create pipeline instance.
 
@@ -170,6 +174,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger: Structured logger
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
+            tracing: Optional TracerPort
 
         Returns:
             Configured pipeline instance
@@ -183,6 +188,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             config=yaml_config,
             filter_config=filter_config,
+            tracing=tracing,
         )
 
         domain_config = yaml_config_to_domain(yaml_config)
@@ -233,6 +239,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             config=yaml_config,
             filter_config=filter_config,
+            tracing=tracer,
         )
 
         # Create Helper Components
