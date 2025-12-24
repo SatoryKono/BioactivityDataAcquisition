@@ -23,9 +23,57 @@ from bioetl.composition.factories.pipeline_factories import register_all_pipelin
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import get_settings
-from bioetl.interfaces.observability import start_metrics_server
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
+
+
+def _preview_cleanup(pipeline: str, run_type: str) -> None:
+    """Preview what data would be cleared in dry-run mode.
+
+    Args:
+        pipeline: Pipeline name
+        run_type: Type of run (rebuild or backfill)
+    """
+    settings = get_settings()
+    try:
+        config = load_pipeline_config(pipeline)
+        silver_table = config.silver_table
+        gold_table = config.gold_table
+
+        # Calculate paths that would be affected
+        silver_path = settings.silver_path / silver_table.replace(".", "/")
+        gold_path = (
+            settings.gold_path / gold_table.replace(".", "/") if gold_table else None
+        )
+
+        click.echo("\nFiles/directories that would be cleared:")
+
+        # Count Silver files
+        silver_count = 0
+        if silver_path.exists():
+            for item in silver_path.rglob("*"):
+                if item.is_file():
+                    silver_count += 1
+            click.echo(f"  Silver: {silver_path} ({silver_count} files)")
+        else:
+            click.echo(f"  Silver: {silver_path} (does not exist)")
+
+        # Count Gold files
+        gold_count = 0
+        if gold_path:
+            if gold_path.exists():
+                for item in gold_path.rglob("*"):
+                    if item.is_file():
+                        gold_count += 1
+                click.echo(f"  Gold: {gold_path} ({gold_count} files)")
+            else:
+                click.echo(f"  Gold: {gold_path} (does not exist)")
+
+        total_cleared = silver_count + gold_count
+        click.echo(f"\nTotal items that would be cleared: ~{total_cleared}")
+        click.echo("\nNo changes were made (dry-run mode).")
+    except Exception as e:
+        click.echo(f"Error previewing cleanup: {e}", err=True)
 
 
 def validate_pipeline_name(_ctx, _param, value):
@@ -73,6 +121,17 @@ def cli() -> None:
     type=str,
     help="API field name to filter by (default: 'molecule_chembl_id')",
 )
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview cleanup without execution (for rebuild/backfill)",
+)
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Skip confirmation prompt for rebuild/backfill",
+)
 def run(
     pipeline: str,
     run_type: str,
@@ -81,8 +140,24 @@ def run(
     input_csv: str | None,
     filter_column: str | None,
     filter_field: str | None,
+    dry_run: bool,
+    yes: bool,
 ) -> None:
     """Run an ETL pipeline."""
+    # Handle rebuild/backfill confirmation before any heavy initialization
+    if run_type in ("rebuild", "backfill"):
+        if dry_run:
+            click.echo(f"[DRY-RUN] Would clear data for pipeline: {pipeline}")
+            click.echo(f"[DRY-RUN] Run type: {run_type}")
+            _preview_cleanup(pipeline, run_type)
+            return
+
+        if not yes:
+            click.echo(f"WARNING: {run_type} will clear existing data for {pipeline}.")
+            if not click.confirm("Do you want to continue?"):
+                click.echo("Operation cancelled.")
+                sys.exit(0)
+
     run_id = uuid4()
 
     try:
@@ -105,7 +180,7 @@ def run(
         click.echo(f"Initialization failed: {e}", err=True)
         sys.exit(1)
 
-    # Use explicit logger if available, otherwise fallback is necessary but unlikely if bootstrap succeeded
+    # Use explicit logger if available, otherwise fallback is required
     logger = getattr(runner, "logger", None)
     if logger is None:
         # Fallback for old runner versions or if runner structure changed
@@ -118,12 +193,8 @@ def run(
     # Set up OS signal handlers to gracefully trigger the shutdown signal
     setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
 
-    # Start Prometheus metrics server
-    try:
-        settings = get_settings()
-        start_metrics_server(settings.metrics_port)
-    except Exception as e:
-        logger.warning("Failed to start metrics server", error=str(e))
+    # Note: Metrics server is started in bootstrap_pipeline() (idempotent)
+    # No need to start it again here
 
     logger.info("Starting pipeline run")
     try:

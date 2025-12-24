@@ -22,10 +22,18 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class DQConfig:
-    """Configuration for Data Quality thresholds."""
+    """Configuration for Data Quality thresholds.
+
+    Attributes:
+        soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
+        hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
+        strict_validation: If True, apply stricter validation rules that may
+            reject more records. Use with caution in production. Default: False.
+    """
 
     soft_fail_threshold: float = 0.05
     hard_fail_threshold: float = 0.20
+    strict_validation: bool = False
 
     def __post_init__(self) -> None:
         """Validate threshold invariants on creation."""

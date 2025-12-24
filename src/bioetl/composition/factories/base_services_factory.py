@@ -13,7 +13,6 @@ from bioetl.composition.factories.storage_factory import StorageContext, Storage
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
@@ -48,15 +47,33 @@ class BaseServicesFactory:
         logger: BoundLogger,
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
+        tracer: TracingPort | None = None,
     ) -> PipelineServices:
-        """Create services with injected data source."""
+        """Create services with injected data source.
+
+        Args:
+            settings: Application settings
+            logger: Structured logger
+            data_source: Data source port implementation
+            pipeline_config: Pipeline YAML configuration
+            tracer: Optional tracer (defaults to NoOpTracing if not provided)
+
+        Returns:
+            PipelineServices with all dependencies configured
+        """
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
 
         lock = cls._create_lock()
         checkpoint = cls._create_checkpoint(storage_ctx)
         quarantine = cls._create_quarantine(storage_ctx)
         metrics = cls._create_metrics(settings)
-        tracing = cls._create_tracing()
+
+        # Use provided tracer or fallback to NoOpTracing
+        # Tracer should be created via bootstrap_tracer() for consistent configuration
+        if tracer is None:
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+            tracer = NoOpTracing()
 
         return PipelineServices(
             data_source=data_source,
@@ -65,7 +82,7 @@ class BaseServicesFactory:
             checkpoint=checkpoint,
             quarantine=quarantine,
             metrics=metrics,
-            tracing=tracing,
+            tracing=tracer,
             logger=logger,
         )
 
@@ -94,8 +111,3 @@ class BaseServicesFactory:
         if settings.metrics_enabled:
             return PrometheusMetrics()
         return NoOpMetrics()
-
-    @staticmethod
-    def _create_tracing() -> TracingPort:
-        # Placeholder for real OTel implementation
-        return NoOpTracing()
