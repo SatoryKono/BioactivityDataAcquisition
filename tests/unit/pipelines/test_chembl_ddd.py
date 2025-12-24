@@ -35,7 +35,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         tracing=MagicMock(),
         logger=logger,
     )
-    run_id = RunID(uuid4())
+    run_id: RunID = uuid4()
     return ChEMBLActivityPipeline(
         config=config, runtime=runtime, services=services, run_id=run_id
     )
@@ -44,7 +44,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
 @pytest.fixture
 def context(chembl_pipeline) -> PipelineContext:
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=chembl_pipeline.logger,
     )
