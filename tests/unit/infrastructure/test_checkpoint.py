@@ -5,7 +5,6 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 
 
@@ -23,7 +22,7 @@ class TestLocalCheckpoint:
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+        run_id = UUID("12345678-1234-5678-1234-567812345678")
 
         await cp.save(pipeline, run_id, {"key": "value"})
 
@@ -53,7 +52,7 @@ class TestLocalCheckpoint:
 
         assert result is not None
         run_id, metadata = result
-        assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
+        assert run_id == UUID("12345678-1234-5678-1234-567812345678")
         assert metadata == {"key": "value"}
 
     async def test_load_nonexistent_returns_none(self, tmp_path):
@@ -69,7 +68,7 @@ class TestLocalCheckpoint:
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+        run_id = UUID("12345678-1234-5678-1234-567812345678")
         metadata = {"key": "value"}
 
         await cp.save(pipeline, run_id, metadata)
@@ -156,7 +155,7 @@ class TestLocalCheckpoint:
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
-        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+        run_id = UUID("12345678-1234-5678-1234-567812345678")
 
         # First save
         await cp.save(pipeline, run_id, {"version": 1})

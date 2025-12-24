@@ -23,7 +23,7 @@ class TestPipelineContext:
     @pytest.fixture
     def run_id(self) -> RunID:
         """Create a test RunID."""
-        return RunID(uuid4())
+        return uuid4()
 
     @pytest.fixture
     def context(self, run_id: RunID, mock_logger: MagicMock) -> PipelineContext:
@@ -100,7 +100,7 @@ class TestPipelineContextEquality:
 
     def test_contexts_with_same_values_are_equal(self) -> None:
         """Contexts with same values should be equal."""
-        run_id = RunID(uuid4())
+        run_id: RunID = uuid4()
         logger = MagicMock()
 
         ctx1 = PipelineContext(
@@ -117,17 +117,17 @@ class TestPipelineContextEquality:
         logger = MagicMock()
 
         ctx1 = PipelineContext(
-            run_id=RunID(uuid4()), run_type=RunType.INCREMENTAL, logger=logger
+            run_id=uuid4(), run_type=RunType.INCREMENTAL, logger=logger
         )
         ctx2 = PipelineContext(
-            run_id=RunID(uuid4()), run_type=RunType.INCREMENTAL, logger=logger
+            run_id=uuid4(), run_type=RunType.INCREMENTAL, logger=logger
         )
 
         assert ctx1 != ctx2
 
     def test_contexts_with_different_run_type_not_equal(self) -> None:
         """Contexts with different run_type should not be equal."""
-        run_id = RunID(uuid4())
+        run_id: RunID = uuid4()
         logger = MagicMock()
 
         ctx1 = PipelineContext(

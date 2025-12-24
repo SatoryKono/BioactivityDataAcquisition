@@ -15,9 +15,9 @@ def base_entity_kwargs():
     return {
         "entity_id": EntityID("TEST123"),
         "content_hash": ContentHash("abc123hash"),
-        "run_id": RunID(uuid4()),
+        "run_id": uuid4(),
         "run_type": RunType.INCREMENTAL,
-        "source_batch_id": BatchID(uuid4()),
+        "source_batch_id": uuid4(),
     }
 
 
