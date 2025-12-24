@@ -270,3 +270,189 @@ class TestPIIHandling:
         # if they're excluded from Silver layer
         if files_with_pii:
             pytest.skip("Review PII handling:\n" + "\n".join(files_with_pii))
+
+
+class TestInputValidation:
+    """Tests for input validation and injection prevention."""
+
+    def test_no_eval_or_exec_in_source(self) -> None:
+        """Verify no dangerous eval/exec calls in source code."""
+        violations = []
+        dangerous_patterns = [
+            (r"\beval\s*\(", "eval()"),
+            (r"\bexec\s*\(", "exec()"),
+            (r"\bcompile\s*\([^)]*\bexec\b", "compile() with exec mode"),
+        ]
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for pattern, desc in dangerous_patterns:
+                if re.search(pattern, content):
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}: {desc}")
+
+        assert not violations, "Dangerous code execution found:\n" + "\n".join(
+            violations
+        )
+
+    def test_no_shell_injection_patterns(self) -> None:
+        """Verify no shell injection vulnerabilities in subprocess calls."""
+        violations = []
+        # Dangerous: shell=True with variable input
+        dangerous_pattern = r"subprocess\.(?:run|call|Popen)\s*\([^)]*shell\s*=\s*True"
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            if re.search(dangerous_pattern, content):
+                rel_path = py_file.relative_to(PROJECT_ROOT)
+                violations.append(f"{rel_path}: subprocess with shell=True")
+
+        assert not violations, "Shell injection risks found:\n" + "\n".join(violations)
+
+    def test_no_sql_string_formatting(self) -> None:
+        """Verify no SQL injection via string formatting."""
+        violations = []
+        # Dangerous: f-string or % formatting in SQL queries
+        sql_patterns = [
+            r'f["\'].*(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP).*{',
+            r'["\'].*(?:SELECT|INSERT|UPDATE|DELETE|CREATE|DROP).*["\']\s*%',
+            r'\.format\s*\([^)]*\).*(?:SELECT|INSERT|UPDATE|DELETE)',
+        ]
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for pattern in sql_patterns:
+                if re.search(pattern, content, re.IGNORECASE):
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}: Potential SQL injection")
+                    break
+
+        assert not violations, "SQL injection risks found:\n" + "\n".join(violations)
+
+    def test_no_pickle_with_untrusted_data(self) -> None:
+        """Verify no pickle.loads on untrusted data."""
+        violations = []
+        # Check for pickle usage (which should be reviewed for untrusted input)
+        pickle_pattern = r"pickle\.(?:loads?|Unpickler)"
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            if re.search(pickle_pattern, content):
+                # Check if it's in a context that might be dangerous
+                # (loading from network, user input, etc.)
+                rel_path = py_file.relative_to(PROJECT_ROOT)
+                violations.append(f"{rel_path}: Uses pickle (review for untrusted input)")
+
+        # Informational - pickle may be OK for internal serialization
+        if violations:
+            pytest.skip("Review pickle usage:\n" + "\n".join(violations))
+
+
+class TestPathTraversal:
+    """Tests for path traversal vulnerabilities."""
+
+    def test_no_unsanitized_path_joins(self) -> None:
+        """Verify path handling uses safe patterns."""
+        violations = []
+        # Looking for patterns where user input might be joined to paths
+        # without proper sanitization
+        dangerous_patterns = [
+            r'os\.path\.join\s*\([^)]*request\.',
+            r'Path\s*\([^)]*request\.',
+            r'open\s*\([^)]*\+',  # String concatenation in open()
+        ]
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for pattern in dangerous_patterns:
+                if re.search(pattern, content):
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}: Potential path traversal")
+
+        assert not violations, "Path traversal risks:\n" + "\n".join(violations)
+
+    def test_config_files_use_safe_paths(self) -> None:
+        """Verify configuration files don't allow arbitrary path access."""
+        config_dir = PROJECT_ROOT / "configs"
+        if not config_dir.exists():
+            pytest.skip("No configs directory")
+
+        violations = []
+        for config_file in config_dir.rglob("*.yaml"):
+            content = config_file.read_text(encoding="utf-8")
+            # Check for absolute paths that might be manipulated
+            if re.search(r'path:\s*["\']?/', content):
+                # Verify it's not a user-controllable path
+                if "user" in content.lower() or "input" in content.lower():
+                    violations.append(f"{config_file.name}: User-controllable path")
+
+        assert not violations, "Path issues in configs:\n" + "\n".join(violations)
+
+
+class TestSecurityHeaders:
+    """Tests for security-related header handling."""
+
+    def test_sensitive_headers_sanitized_in_logs(self) -> None:
+        """Verify sensitive headers are not logged."""
+        violations = []
+        sensitive_headers = [
+            "Authorization",
+            "X-API-Key",
+            "Cookie",
+            "Set-Cookie",
+            "X-Auth-Token",
+        ]
+
+        log_pattern = r'(?:logger?\.(?:info|debug|warning|error)|print)\s*\('
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            if re.search(log_pattern, content):
+                for header in sensitive_headers:
+                    # Check if header name appears near logging statements
+                    combined_pattern = (
+                        rf'(?:logger?\.(?:info|debug|warning|error)|print)\s*\([^)]*'
+                        rf'{header}[^)]*(?:request\.headers|response\.headers)'
+                    )
+                    if re.search(combined_pattern, content, re.IGNORECASE):
+                        rel_path = py_file.relative_to(PROJECT_ROOT)
+                        violations.append(f"{rel_path}: Logs {header} header")
+
+        assert not violations, "Sensitive headers in logs:\n" + "\n".join(violations)
+
+
+class TestCryptographyUsage:
+    """Tests for proper cryptography usage."""
+
+    def test_uses_secure_hash_algorithms(self) -> None:
+        """Verify secure hash algorithms are used."""
+        weak_hashes = ["md5", "sha1"]
+        violations = []
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for weak_hash in weak_hashes:
+                # Check for hashlib usage of weak algorithms
+                if re.search(rf'hashlib\.{weak_hash}\s*\(', content):
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}: Uses weak hash {weak_hash}")
+
+        assert not violations, "Weak hash algorithms:\n" + "\n".join(violations)
+
+    def test_random_uses_secrets_module(self) -> None:
+        """Verify security-sensitive randomness uses secrets module."""
+        # For tokens, keys, etc. - random module is not cryptographically secure
+        violations = []
+        random_pattern = r'random\.(?:choice|randint|random|sample)\s*\('
+
+        for py_file in SRC_DIR.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            if re.search(random_pattern, content):
+                # Check if it's for security-sensitive purposes
+                if re.search(r'(?:token|key|secret|password|salt)', content, re.IGNORECASE):
+                    rel_path = py_file.relative_to(PROJECT_ROOT)
+                    violations.append(f"{rel_path}: random module for security purpose")
+
+        # Informational - random may be OK for non-security uses
+        if violations:
+            pytest.skip("Review random usage:\n" + "\n".join(violations))
