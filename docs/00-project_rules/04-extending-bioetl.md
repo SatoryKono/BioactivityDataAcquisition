@@ -1,5 +1,5 @@
 # Руководство: Добавление нового провайдера данных
-*Версия 2.0 (Детальное руководство) | Синхронизировано с RULES.md v5.0*
+*Версия 2.1 (Детальное руководство) | Синхронизировано с RULES.md v5.2, ADR-010*
 
 Это руководство проведет вас через весь процесс добавления нового источника данных (провайдера) в BioETL. В качестве примера мы добавим гипотетический провайдер `OpenTargets`.
 
@@ -284,6 +284,69 @@ class DataSourceFactory:
             return OpenTargetsAdapter(http_client=http_client)
         # ...
 ```
+
+---
+
+### Шаг 4.5: Понимание Composition Root (bootstrap_pipeline)
+
+Функция `bootstrap_pipeline` в `src/bioetl/composition/bootstrap.py` — это единственная точка входа для создания полностью сконфигурированного пайплайна. Она собирает все зависимости и возвращает готовый к запуску `PipelineRunner`.
+
+**Пример использования:**
+
+```python
+from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.domain.context import PipelineContext
+
+# 1. Создаём контекст пайплайна
+ctx = PipelineContext(
+    pipeline_name="open_targets_associations",
+    run_type="incremental",
+    limit=100,  # Опционально: ограничить количество записей
+)
+
+# 2. Собираем пайплайн через Composition Root
+runner = bootstrap_pipeline(ctx)
+
+# 3. Запускаем
+await runner.run()
+```
+
+**Что происходит внутри `bootstrap_pipeline`:**
+
+1. Загружает конфигурацию из `configs/pipelines/{provider}/{entity}.yaml`
+2. Создаёт HTTP-клиент с настроенным Rate Limiter и Circuit Breaker
+3. Создаёт DataSource (адаптер) через `DataSourceFactory`
+4. Создаёт Storage Writers (Bronze, Silver, Gold)
+5. Инициализирует метрики (если включены)
+6. Собирает `PipelineServices` со всеми зависимостями
+7. Возвращает готовый `PipelineRunner`
+
+**Диаграмма зависимостей:**
+
+```
+bootstrap_pipeline(ctx)
+    │
+    ├── PipelineConfig.load(pipeline_name)
+    │
+    ├── DataSourceFactory.create(provider)
+    │       └── OpenTargetsAdapter(http_client)
+    │
+    ├── StorageFactory.create_writers()
+    │       ├── BronzeWriter(base_path)
+    │       ├── SilverWriter(base_path)
+    │       └── GoldWriter(base_path)
+    │
+    └── PipelineRunner(
+            pipeline=OpenTargetsAssociationsPipeline,
+            data_source=adapter,
+            writers=writers,
+            lock=MemoryLock(),  # Local-Only (ADR-010)
+        )
+```
+
+**См. также:**
+- [ADR-005: Composition Layer Separation](../02-architecture/decisions/ADR-005-composition-layer-separation.md)
+- [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md)
 
 ---
 
