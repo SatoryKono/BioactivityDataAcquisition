@@ -1,5 +1,7 @@
 """End-to-end tests for CLI dry-run and safety features."""
 
+from __future__ import annotations
+
 import pytest
 from click.testing import CliRunner
 from unittest.mock import AsyncMock, MagicMock, patch

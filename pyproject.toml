@@ -203,6 +203,7 @@ select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
     "F", # pyflakes
+    "FA", # flake8-future-annotations (enforce `from __future__ import annotations`)
     "I", # isort
     "B", # flake8-bugbear
     "C4", # flake8-comprehensions

@@ -1,5 +1,7 @@
 """Unit tests for GoldWriter."""
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import pyarrow as pa

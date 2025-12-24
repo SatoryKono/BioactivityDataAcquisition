@@ -1,5 +1,7 @@
 """Hypothesis strategies for property-based testing."""
 
+from __future__ import annotations
+
 from typing import Any
 
 from hypothesis import strategies as st

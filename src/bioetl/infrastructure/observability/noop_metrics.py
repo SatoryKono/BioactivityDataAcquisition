@@ -7,6 +7,8 @@ This implementation is in infrastructure layer (not domain) because
 it's a concrete implementation detail, even though it does nothing.
 """
 
+from __future__ import annotations
+
 import warnings
 
 from bioetl.domain.ports import MetricsPort

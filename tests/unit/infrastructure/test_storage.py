@@ -1,5 +1,7 @@
 """Unit tests for storage writers."""
 
+from __future__ import annotations
+
 import io
 import json
 from datetime import datetime

@@ -3,6 +3,8 @@
 Tests that pipeline factory instances are properly exported and configured.
 """
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import pytest

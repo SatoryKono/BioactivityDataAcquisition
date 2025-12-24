@@ -3,6 +3,8 @@
 Тестирует E2E трансформации и интеграцию с инфраструктурой.
 """
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 

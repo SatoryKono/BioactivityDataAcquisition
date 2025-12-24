@@ -8,3 +8,5 @@ This package contains implementations of observability ports:
 
 Implements RULES.md §3 (Observability).
 """
+
+from __future__ import annotations

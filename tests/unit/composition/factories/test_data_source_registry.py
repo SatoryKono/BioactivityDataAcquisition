@@ -3,6 +3,8 @@
 Verifies data source creator registration and retrieval.
 """
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import pytest

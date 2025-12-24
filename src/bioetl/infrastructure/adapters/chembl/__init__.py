@@ -4,6 +4,8 @@ Implements DataSourcePort for ChEMBL database.
 See RULES.md Appendix A for rate limits and retry strategy.
 """
 
+from __future__ import annotations
+
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
 __all__ = ["ChemblAdapter"]

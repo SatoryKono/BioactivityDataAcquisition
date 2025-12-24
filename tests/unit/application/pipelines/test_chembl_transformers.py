@@ -1,5 +1,7 @@
 """Unit tests for ChEMBL transformers (Assay, Document, Molecule, Target)."""
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 from uuid import uuid4
 

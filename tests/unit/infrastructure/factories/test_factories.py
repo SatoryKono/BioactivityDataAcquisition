@@ -1,5 +1,7 @@
 """Unit tests for infrastructure factories."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 from uuid import uuid4

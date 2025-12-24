@@ -6,6 +6,8 @@ Verifies that run_id is consistently propagated:
 - Through logs
 """
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 

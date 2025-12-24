@@ -3,6 +3,8 @@
 Tests both the main transform method and ligand efficiency extraction.
 """
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 from uuid import uuid4
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 # src/bioetl/composition/factories/pipeline_factories.py
 """Consolidated pipeline factory definitions.
 

@@ -1,5 +1,7 @@
 """Tests for PipelineContext."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 from uuid import uuid4

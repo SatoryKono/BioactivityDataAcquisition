@@ -3,6 +3,8 @@
 This lock is not distributed and only works within a single process.
 """
 
+from __future__ import annotations
+
 import asyncio
 import time
 

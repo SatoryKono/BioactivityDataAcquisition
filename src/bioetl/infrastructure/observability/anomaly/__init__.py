@@ -20,6 +20,8 @@ Usage:
         logger.warning(f"Anomaly detected: {anomaly}")
 """
 
+from __future__ import annotations
+
 from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
 from bioetl.infrastructure.observability.anomaly.detectors import (
     DetectorStrategy,

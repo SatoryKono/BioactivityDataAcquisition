@@ -7,6 +7,8 @@ Validates:
 4. PII handling follows security guidelines
 """
 
+from __future__ import annotations
+
 import re
 from pathlib import Path
 

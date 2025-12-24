@@ -3,6 +3,8 @@
 Implements Strategy pattern for different detection algorithms.
 """
 
+from __future__ import annotations
+
 from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
 from bioetl.infrastructure.observability.anomaly.detectors.iqr import IQRDetector
 from bioetl.infrastructure.observability.anomaly.detectors.mad import MADDetector

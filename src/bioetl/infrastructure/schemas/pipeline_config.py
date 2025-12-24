@@ -4,6 +4,8 @@ Implements strict validation for pipeline YAML configurations using Pydantic.
 Enforces Medallion Architecture constraints and operational limits.
 """
 
+from __future__ import annotations
+
 from typing import Literal
 
 from pydantic import (

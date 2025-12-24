@@ -5,6 +5,8 @@ Defines the configuration for:
 - Gold filtering: Configurable column-based filters for Gold layer records
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 

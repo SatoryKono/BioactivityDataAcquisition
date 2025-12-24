@@ -3,6 +3,8 @@
 Verifies schema definitions for all entities in the Silver layer.
 """
 
+from __future__ import annotations
+
 import pyarrow as pa
 import pytest
 

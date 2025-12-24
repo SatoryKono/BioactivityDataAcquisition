@@ -15,6 +15,8 @@ Usage:
     UPDATE_SNAPSHOTS=1 pytest tests/architecture/test_config_golden_master.py
 """
 
+from __future__ import annotations
+
 import json
 import os
 from dataclasses import asdict

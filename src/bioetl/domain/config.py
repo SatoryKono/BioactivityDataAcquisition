@@ -11,6 +11,8 @@ Consolidated configuration classes (post-refactoring):
 - RuntimeConfig: CLI/runtime parameters (Value Object)
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 

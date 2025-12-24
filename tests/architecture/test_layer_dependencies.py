@@ -8,6 +8,8 @@ These tests verify that the clean architecture layer boundaries are respected:
 Uses both static analysis and import-linter for comprehensive checks.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import subprocess

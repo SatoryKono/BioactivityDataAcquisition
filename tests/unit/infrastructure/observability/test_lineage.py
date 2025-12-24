@@ -1,5 +1,7 @@
 """Unit tests for the LineageTracker class."""
 
+from __future__ import annotations
+
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path

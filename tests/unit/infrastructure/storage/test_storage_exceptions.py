@@ -1,5 +1,7 @@
 """Unit tests for the storage exception hierarchy."""
 
+from __future__ import annotations
+
 import asyncio
 from unittest.mock import MagicMock, patch
 

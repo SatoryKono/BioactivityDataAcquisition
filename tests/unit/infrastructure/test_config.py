@@ -1,5 +1,7 @@
 """Unit tests for configuration mapping."""
 
+from __future__ import annotations
+
 from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import DQConfig as YamlDQConfig

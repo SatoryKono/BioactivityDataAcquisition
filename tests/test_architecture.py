@@ -8,6 +8,8 @@ Combines standard pytest checks and AST-based enforcement to ensure:
 - Clean configuration and dependency management.
 """
 
+from __future__ import annotations
+
 import ast
 import inspect
 import tomllib

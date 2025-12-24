@@ -7,6 +7,8 @@ Protocol, allowing for structural subtyping (duck typing) and clear
 separation of concerns between the domain and infrastructure layers.
 """
 
+from __future__ import annotations
+
 from collections.abc import AsyncIterator, Iterator
 from datetime import datetime
 from typing import Any, Literal, Protocol, Self, runtime_checkable

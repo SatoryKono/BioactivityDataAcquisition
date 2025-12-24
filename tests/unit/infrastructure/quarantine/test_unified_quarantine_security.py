@@ -1,5 +1,7 @@
 """Security tests for the UnifiedQuarantine component."""
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import pytest

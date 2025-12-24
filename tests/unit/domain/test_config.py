@@ -1,5 +1,7 @@
 """Unit tests for domain configuration objects."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.config import DQConfig, TableConfig

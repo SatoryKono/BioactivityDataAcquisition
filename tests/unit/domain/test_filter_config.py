@@ -1,5 +1,7 @@
 """Unit tests for filter configuration classes."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.filter_config import (

@@ -1,5 +1,7 @@
 """Unit tests for the ErrorClassifier class."""
 
+from __future__ import annotations
+
 import pytest
 
 from bioetl.domain.error_classifier import ErrorClassifier

@@ -10,6 +10,8 @@ Requirements:
 All functions are pure (deterministic, side-effect free).
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import math

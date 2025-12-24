@@ -1,5 +1,7 @@
 """Unit tests for Metrics adapters."""
 
+from __future__ import annotations
+
 import warnings
 
 import pytest

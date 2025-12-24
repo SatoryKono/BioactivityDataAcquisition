@@ -6,6 +6,8 @@ Provides:
 - UnifiedHTTPClient: Async HTTP client with rate limiting and circuit breaker
 """
 
+from __future__ import annotations
+
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket

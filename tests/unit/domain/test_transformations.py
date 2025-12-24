@@ -9,6 +9,8 @@ Requirements tested:
 - REQ-THRESHOLD-001, REQ-THRESHOLD-002: DQ thresholds
 """
 
+from __future__ import annotations
+
 import math
 from datetime import date, datetime
 

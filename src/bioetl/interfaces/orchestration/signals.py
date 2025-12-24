@@ -5,6 +5,8 @@ This module provides a concrete implementation for listening to OS signals
 ShutdownSignal request.
 """
 
+from __future__ import annotations
+
 import signal
 from typing import Any
 

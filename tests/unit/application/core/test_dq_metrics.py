@@ -1,5 +1,7 @@
 """Unit tests for DQ mechanisms in Silver."""
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder

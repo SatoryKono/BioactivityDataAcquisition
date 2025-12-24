@@ -8,6 +8,8 @@ These tests verify the order of operations in PipelineRunner.run() to ensure:
 5. Lock is released in finally (even on error)
 """
 
+from __future__ import annotations
+
 from collections import deque
 from dataclasses import dataclass, field
 from unittest.mock import AsyncMock, MagicMock, patch

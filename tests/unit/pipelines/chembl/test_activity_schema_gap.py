@@ -1,5 +1,7 @@
 """Unit tests for ChEMBL Activity Entity schema gap fix."""
 
+from __future__ import annotations
+
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 

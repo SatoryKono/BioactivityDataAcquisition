@@ -1,5 +1,7 @@
 """Integration tests for ChEMBL Activity Pipeline."""
 
+from __future__ import annotations
+
 import pytest
 import structlog
 

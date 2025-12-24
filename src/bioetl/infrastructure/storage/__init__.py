@@ -3,6 +3,8 @@
 Implements RULES.md §2.1 - Medallion Architecture.
 """
 
+from __future__ import annotations
+
 from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,

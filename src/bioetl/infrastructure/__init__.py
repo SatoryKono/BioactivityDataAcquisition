@@ -8,3 +8,5 @@ Contains concrete implementations for domain ports:
 
 See RULES.md Section 1.1 for architecture details.
 """
+
+from __future__ import annotations

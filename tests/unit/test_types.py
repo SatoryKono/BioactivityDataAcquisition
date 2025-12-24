@@ -1,5 +1,7 @@
 """Tests for domain types."""
 
+from __future__ import annotations
+
 from bioetl.domain.types import (
     CircuitBreakerState,
     DataClassification,

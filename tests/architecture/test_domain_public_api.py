@@ -4,6 +4,8 @@ REQ-ARCH-027: Domain layer __all__ must be complete and tested.
 All public symbols exported from domain submodules should be listed in __all__.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 

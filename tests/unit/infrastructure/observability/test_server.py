@@ -1,5 +1,7 @@
 """Unit tests for Prometheus metrics server."""
 
+from __future__ import annotations
+
 import errno
 from unittest.mock import MagicMock, patch
 

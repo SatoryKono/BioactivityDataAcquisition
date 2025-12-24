@@ -3,6 +3,8 @@
 Defines the PyArrow schemas for various entities in the Silver layer.
 """
 
+from __future__ import annotations
+
 import pyarrow as pa
 
 # Schema for ChEMBL Activity (all fields from ChEMBL API)

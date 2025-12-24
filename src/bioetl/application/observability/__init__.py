@@ -8,3 +8,5 @@ Architecture:
 - Application layer defines WHAT to observe (Events)
 - Infrastructure layer defines HOW to observe (Prometheus, Logs)
 """
+
+from __future__ import annotations
