@@ -194,7 +194,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         domain_config = yaml_config_to_domain(yaml_config)
 
         return self.pipeline_class.create(
-            run_id=RunID(run_id),
+            run_id=run_id,
             runtime=runtime,
             services=services,
             config=domain_config,
@@ -290,7 +290,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_port=pipeline.services.checkpoint,
             logger=logger,
             pipeline_name=pipeline.config.pipeline_name,
-            run_id=RunID(run_id),
+            run_id=run_id,
             resume=resume,
         )
 
