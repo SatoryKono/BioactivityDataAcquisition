@@ -60,8 +60,8 @@ class TestStorageAdapter:
 
     async def test_write_bronze_delegates(self, storage_adapter, mock_bronze_writer):
         """Test write_bronze delegates to bronze writer."""
-        batch_id = BatchID(uuid4())
-        run_id = RunID(uuid4())
+        batch_id: BatchID = uuid4()
+        run_id: RunID = uuid4()
         run_type = RunType.INCREMENTAL
         records = iter([b"record1", b"record2"])
 

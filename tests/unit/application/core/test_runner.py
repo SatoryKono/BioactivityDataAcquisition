@@ -68,7 +68,7 @@ def mock_services():
 def mock_context(mock_logger):
     """Create a mock pipeline context."""
     return PipelineContext(
-        run_id=RunID(uuid4()),
+        run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
