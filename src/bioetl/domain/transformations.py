@@ -230,3 +230,24 @@ def safe_int(value: Any, default: int | None = None) -> int | None:
         return int(value)
     except (ValueError, TypeError):
         return default
+
+
+def safe_str(value: Any, default: str | None = None) -> str | None:
+    """Safely convert value to string.
+
+    Useful for fields that may come as int/float from API but need to be
+    stored as strings in the schema.
+
+    Args:
+        value: Input value to convert
+        default: Default value if conversion fails (default: None)
+
+    Returns:
+        Converted string or default value
+    """
+    if value is None:
+        return default
+    try:
+        return str(value)
+    except (ValueError, TypeError):
+        return default

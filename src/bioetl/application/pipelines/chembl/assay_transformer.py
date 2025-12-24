@@ -10,7 +10,12 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.domain.entities import Assay
-from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
+from bioetl.domain.transformations import (
+    generate_entity_id,
+    safe_float,
+    safe_int,
+    safe_str,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -18,13 +23,14 @@ if TYPE_CHECKING:
 
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
+# Use safe_str for fields that might come as int from API but need string in schema
 _VARIANT_FIELDS: dict[str, Any] = {
-    "accession": None,  # str, no converter needed
-    "isoform": None,
-    "mutation": None,
-    "organism": None,
-    "sequence": None,
-    "tax_id": safe_int,
+    "accession": safe_str,  # UniProt accession, always string
+    "isoform": safe_str,  # May come as int (e.g., 1, 2) from API
+    "mutation": safe_str,  # Mutation description
+    "organism": safe_str,  # Organism name
+    "sequence": safe_str,  # Amino acid sequence
+    "tax_id": safe_int,  # NCBI Taxonomy ID, always int
 }
 
 
