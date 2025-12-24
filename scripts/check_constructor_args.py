@@ -70,7 +70,7 @@ def main() -> None:
 
         if warn_only:
             print(f"\n[WARN MODE] {len(all_violations)} violation(s) found but not blocking CI")
-            print("TODO: Remove --warn-only after refactoring")
+            print("TODO (#refactor): Remove --warn-only after refactoring")
             sys.exit(0)
         else:
             print(f"\n❌ {len(all_violations)} violation(s) found")

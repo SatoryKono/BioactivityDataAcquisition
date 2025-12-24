@@ -20,7 +20,7 @@ ALLOWED_FILES: set[str] = {
     # Unified quarantine has fallback for backward compatibility
     "unified.py",
     # Gold writer uses datetime.now() for SCD2 valid_from/valid_to columns
-    # TODO: Consider passing timestamp for SCD2 as well
+    # TODO (#arch-review): Consider passing timestamp for SCD2 as well
     "gold_writer.py",
     # Lineage tracking needs real-time timestamps for provenance
     "lineage.py",
