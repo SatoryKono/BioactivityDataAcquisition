@@ -7,6 +7,7 @@ Prometheus client library.
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     BATCH_SIZE_RECORDS,
+    DQ_RECORDS_QUARANTINED_TOTAL,
     ERRORS_TOTAL,
     FILTER_IDS_DUPLICATES_TOTAL,
     FILTER_IDS_LOADED_TOTAL,
@@ -26,6 +27,7 @@ COUNTERS = {
     "errors_total": ERRORS_TOTAL,
     "filter_ids_loaded_total": FILTER_IDS_LOADED_TOTAL,
     "filter_ids_duplicates_total": FILTER_IDS_DUPLICATES_TOTAL,
+    "dq_records_quarantined_total": DQ_RECORDS_QUARANTINED_TOTAL,
 }
 
 

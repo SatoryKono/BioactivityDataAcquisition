@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.ports import DataSourcePort, TracingPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -126,6 +126,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
+        tracer: TracingPort | None = None,
     ) -> PipelineServices:
         """Build PipelineServices from settings.
 
@@ -134,6 +135,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger: Structured logger
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
+            tracer: Optional tracer (created via bootstrap_tracer())
 
         Returns:
             Configured PipelineServices instance
@@ -148,6 +150,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             data_source=data_source,
             pipeline_config=pipeline_config,
+            tracer=tracer,
         )
 
     def create_with_services(
@@ -158,6 +161,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
+        tracer: TracingPort | None = None,
         **kwargs: Any,
     ) -> TPipeline:
         """Create pipeline instance.
@@ -171,13 +175,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger: Structured logger
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
+            tracer: Optional tracer (created via bootstrap_tracer())
             **kwargs: Additional arguments for compatibility
 
         Returns:
             Configured pipeline instance
         """
-        from bioetl.domain.types import RunID
-
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
         services = self.build_services(
@@ -185,6 +188,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             config=yaml_config,
             filter_config=filter_config,
+            tracer=tracer,
         )
 
         domain_config = yaml_config_to_domain(yaml_config)
@@ -226,8 +230,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         # Load config once if not provided
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
-        # Create pipeline instance with services
-        # Pass run_id to ensure consistent identification across all components
+        # Create pipeline instance with services and tracer
         pipeline = self.create_with_services(
             run_id=run_id,
             runtime=runtime,
@@ -235,6 +238,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             config=yaml_config,
             filter_config=filter_config,
+            tracer=tracer,
         )
 
         # Create Helper Components
