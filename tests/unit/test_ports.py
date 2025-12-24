@@ -383,6 +383,14 @@ class TestMetricsPortProtocol:
             ) -> None:
                 pass
 
+            def set_gauge(
+                self,
+                name: str,
+                value: float,
+                labels: dict[str, str],
+            ) -> None:
+                pass
+
             def close(self) -> None:
                 pass
 
