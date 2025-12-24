@@ -64,7 +64,7 @@ dq_rules:
 
 **Файл:** `src/bioetl/domain/entities.py`
 
-Сущность `Activity` содержит **52 поля**, сгруппированных по категориям:
+Сущность `Activity` содержит **55 полей**, сгруппированных по категориям:
 
 #### Идентификаторы
 
@@ -151,6 +151,18 @@ dq_rules:
 | `data_validity_comment` | `str` | Комментарий о валидности |
 | `data_validity_description` | `str` | Описание проблемы с данными |
 | `potential_duplicate` | `int` | Флаг потенциального дубликата |
+
+#### Тип действия (Action Type)
+
+Поля развёрнуты из вложенного словаря ChEMBL API (`action_type`):
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `action_type_action_type` | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др. |
+| `action_type_description` | `str` | Описание типа действия |
+| `action_type_parent_type` | `str` | Родительская группа типа действия (может быть null) |
+
+> **Примечание**: Поля `action_type_*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Если запись не содержит информации о типе действия, все поля будут `None`.
 
 #### Системные поля (добавляются при обработке)
 
@@ -331,7 +343,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema([
     pa.field("_run_id", pa.string()),
     pa.field("_run_type", pa.string()),
     pa.field("_ingestion_ts", pa.string()),
-    # ... всего 52 поля
+    # ... всего 55 полей (включая action_type_*)
 ])
 ```
 
@@ -416,7 +428,7 @@ ChEMBL API (/activity.json)
 │  ─────────────────────────────────────  │
 │  • Формат: Delta Lake                   │
 │  • Merge by: activity_id                │
-│  • Schema: 52 поля (PyArrow)            │
+│  • Schema: 55 полей (PyArrow)           │
 │  • Партиции: year/month                 │
 └─────────────────────────────────────────┘
          │
@@ -500,4 +512,4 @@ bioetl run chembl_activity --run-type rebuild
 
 ---
 
-*Последнее обновление: 2025-12-19*
+*Последнее обновление: 2025-12-24*
