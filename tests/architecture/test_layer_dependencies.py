@@ -939,3 +939,50 @@ def test_atomic_write_used_in_writers(src_dir: Path) -> None:
         "Storage writers should use atomic write patterns (temp file + rename).\n"
         "Files missing atomic patterns:\n" + "\n".join(f"  - {f}" for f in findings)
     )
+
+
+def test_adapters_have_health_check(src_dir: Path) -> None:
+    """All adapters MUST implement health_check() method.
+
+    REQ-OBS-001: Adapters must provide health check for provider monitoring.
+    See docs/05-operations/runbooks/observability-checklist.md.
+    """
+    adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
+    if not adapters_path.exists():
+        pytest.skip("Infrastructure adapters not found")
+
+    # Files that define adapter classes (not __init__.py or base classes)
+    adapter_files = []
+    for py_file in adapters_path.rglob("*.py"):
+        if py_file.name.startswith("_"):
+            continue
+        if py_file.name in ("base.py", "types.py", "exceptions.py"):
+            continue
+        adapter_files.append(py_file)
+
+    missing_health_check = []
+
+    for py_file in adapter_files:
+        content = py_file.read_text(encoding="utf-8")
+
+        # Check if file defines a class (likely an adapter)
+        if "class " not in content:
+            continue
+
+        # Check for health_check method definition
+        has_health_check = (
+            "def health_check" in content or "async def health_check" in content
+        )
+
+        if not has_health_check:
+            # Only flag if it looks like an adapter class
+            if "Adapter" in content or "Client" in content or "Fetcher" in content:
+                relative_path = py_file.relative_to(src_dir)
+                missing_health_check.append(str(relative_path))
+
+    assert not missing_health_check, (
+        "Adapters must implement health_check() method (REQ-OBS-001).\n"
+        "Files missing health_check:\n"
+        + "\n".join(f"  - {f}" for f in missing_health_check)
+        + "\n\nSee: docs/05-operations/runbooks/observability-checklist.md"
+    )
