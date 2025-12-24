@@ -17,6 +17,37 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
+# Mapping for variant sequence fields extraction (from ChEMBL nested structure)
+_VARIANT_FIELDS: dict[str, Any] = {
+    "accession": None,  # str, no converter needed
+    "isoform": None,
+    "mutation": None,
+    "organism": None,
+    "sequence": None,
+    "tax_id": safe_int,
+}
+
+
+def _extract_variant(data: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract variant sequence fields using flatten_nested_dict.
+
+    Args:
+        data: Nested variant_sequence dictionary from ChEMBL API.
+            Expected structure: {"accession": "P12345", "mutation": "V600E", ...}
+
+    Returns:
+        Flattened dictionary with variant_ prefixed keys:
+            - variant_accession
+            - variant_isoform
+            - variant_mutation
+            - variant_organism
+            - variant_sequence
+            - variant_tax_id
+
+    """
+    return flatten_nested_dict(data, "variant_", _VARIANT_FIELDS)
+
+
 class AssayTransformer(BaseTransformer):
     """Transforms ChEMBL assay bronze records to silver."""
 
@@ -81,8 +112,10 @@ class AssayTransformer(BaseTransformer):
             # Additional metadata
             "assay_pref_name": record.get("assay_pref_name"),
             "score": safe_float(record.get("score")),
-            # Variant information
-            "variant_sequence": self.serialize_json(record.get("variant_sequence")),
+            # Variant information (flattened from ChEMBL API nested structure)
+            **_extract_variant(record.get("variant_sequence")),
+            # Forensic: original JSON for variant_sequence
+            "variant_sequence_json": self.serialize_json(record.get("variant_sequence")),
             # Complex fields (stored as JSON strings)
             "assay_classifications": self.serialize_json(
                 record.get("assay_classifications")
