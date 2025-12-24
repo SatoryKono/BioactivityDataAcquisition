@@ -49,6 +49,7 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
             api_key: UniProt API key (optional)
             base_url: UniProt REST API base URL
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
+
         """
         super().__init__(http_client, logger)
         self.base_url = base_url.rstrip("/")

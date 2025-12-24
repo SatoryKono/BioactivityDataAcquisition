@@ -35,6 +35,7 @@ class RetryConfig:
         max_delay: Maximum delay in seconds (default: 60.0)
         multiplier: Delay multiplier per attempt (default: 2.0)
         jitter: Random jitter factor 0-1 (default: 0.1)
+
     """
 
     max_attempts: int = 3
@@ -89,6 +90,7 @@ class UnifiedHTTPClient:
         >>> client = UnifiedHTTPClient(rate_limiter=bucket, circuit_breaker=cb)
         >>> async with client:
         ...     response = await client.get("https://api.example.com/data")
+
     """
 
     rate_limiter: TokenBucket
@@ -207,6 +209,7 @@ class UnifiedHTTPClient:
             CircuitBreakerOpenError: If circuit is open
             RetryExhaustedError: If all retries exhausted
             httpx.HTTPStatusError: For non-retryable status codes
+
         """
         return await self._request_with_retry(
             "GET", url, params=params, headers=headers
@@ -229,6 +232,7 @@ class UnifiedHTTPClient:
 
         Returns:
             httpx.Response
+
         """
         return await self._request_with_retry(
             "POST", url, json=json, data=data, headers=headers
@@ -247,5 +251,6 @@ class UnifiedHTTPClient:
 
         Returns:
             httpx.Response
+
         """
         return await self._request_with_retry("HEAD", url, headers=headers)

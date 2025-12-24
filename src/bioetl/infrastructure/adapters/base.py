@@ -28,6 +28,7 @@ class BaseHttpAdapter(DataSourcePort):
         http_client: UnifiedHTTPClient instance for making HTTP requests.
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
+
     """
 
     http_client: UnifiedHTTPClient
@@ -37,6 +38,12 @@ class BaseHttpAdapter(DataSourcePort):
     def __init__(
         self, http_client: UnifiedHTTPClient, logger: LoggerPort | None = None
     ) -> None:
+        """Initialize BaseAdapter.
+
+        Args:
+            http_client: HTTP client for requests.
+            logger: Optional logger instance.
+        """
         self.http_client = http_client
         # Fallback to no-op logger if not provided (for backwards compatibility)
         self.logger = logger if logger is not None else NoOpLogger()

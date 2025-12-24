@@ -20,6 +20,11 @@ class DocumentTransformer(BaseTransformer):
     """Transforms ChEMBL bronze document records to silver."""
 
     def __init__(self, provider: str = "chembl"):
+        """Initialize ChEMBL document transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
 
     async def _transform_impl(

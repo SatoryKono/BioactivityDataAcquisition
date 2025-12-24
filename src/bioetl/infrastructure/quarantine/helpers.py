@@ -15,6 +15,7 @@ def quote_literal(value: Any) -> str:
 
     Returns:
         Quoted string safe for Delta Lake predicates
+
     """
     if isinstance(value, str):
         escaped = value.replace("'", "''")
@@ -34,6 +35,7 @@ def calculate_hash(payload_json: str) -> str:
 
     Returns:
         Hex digest of SHA256 hash
+
     """
     return hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
 

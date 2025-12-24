@@ -67,6 +67,7 @@ class LineageRecord:
         failure_count: Number of failed transformations
         metadata: Additional metadata (JSON-serializable)
         timestamp: When transformation occurred
+
     """
 
     lineage_id: str
@@ -106,6 +107,7 @@ class BatchLineage:
         watermark: Optional position marker (deprecated, kept for lineage compatibility)
         metadata: Additional metadata
         timestamp: Batch ingestion timestamp
+
     """
 
     batch_id: str
@@ -137,6 +139,7 @@ class LineageTracker:
     Attributes:
         delta_path: Base path for Delta Lake tables
         pipeline_name: Pipeline name for filtering
+
     """
 
     def __init__(
@@ -149,6 +152,7 @@ class LineageTracker:
         Args:
             delta_path: Base path for lineage Delta tables
             pipeline_name: Pipeline identifier
+
         """
         from pathlib import Path
 
@@ -181,6 +185,7 @@ class LineageTracker:
             file_path: Storage location
             watermark: Optional position marker (deprecated)
             metadata: Additional metadata
+
         """
         batch = BatchLineage(
             batch_id=batch_id,
@@ -224,6 +229,7 @@ class LineageTracker:
             success_count: Successful transformations
             failure_count: Failed transformations
             metadata: Additional metadata
+
         """
         lineage = LineageRecord(
             lineage_id=str(uuid4()),
@@ -248,6 +254,7 @@ class LineageTracker:
 
         Args:
             batch: Batch lineage record
+
         """
         df = pl.DataFrame([batch.to_dict()])
 
@@ -268,6 +275,7 @@ class LineageTracker:
 
         Args:
             lineage: Transformation lineage record
+
         """
         # Convert list of entity_ids to string for storage
         record_dict = lineage.to_dict()
@@ -302,6 +310,7 @@ class LineageTracker:
 
         Returns:
             DataFrame with batch lineage records
+
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
@@ -342,6 +351,7 @@ class LineageTracker:
 
         Returns:
             DataFrame with transformation lineage records
+
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
@@ -380,6 +390,7 @@ class LineageTracker:
 
         Returns:
             DataFrame with lineage chain for entity
+
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
@@ -411,6 +422,7 @@ class LineageTracker:
 
         Returns:
             Dictionary with statistics (total_batches, total_records, avg_batch_size)
+
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))

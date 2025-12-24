@@ -46,6 +46,7 @@ class CircuitBreaker:
     Metrics emitted:
         - circuit_breaker_state{provider}: 0=Closed, 1=Half-Open, 2=Open
         - circuit_breaker_trips_total{provider}: Counter of OPEN transitions
+
     """
 
     provider: str
@@ -135,6 +136,7 @@ class CircuitBreaker:
         Raises:
             CircuitBreakerOpenError: If circuit is open
             Exception: Re-raises exceptions from func
+
         """
         async with self._lock:
             if not self._should_attempt():

@@ -20,6 +20,11 @@ class TargetComponentTransformer(BaseTransformer):
     """Transforms ChEMBL bronze target component records to silver."""
 
     def __init__(self, provider: str = "chembl"):
+        """Initialize ChEMBL target component transformer.
+
+        Args:
+            provider: Data provider identifier.
+        """
         super().__init__(provider)
 
     async def _transform_impl(

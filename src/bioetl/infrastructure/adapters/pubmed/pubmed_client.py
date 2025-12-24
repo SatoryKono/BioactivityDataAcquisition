@@ -30,6 +30,7 @@ class PubMedAdapter:
         email: Email address for NCBI API (required).
         api_key: Optional NCBI API key for higher rate limits.
         batch_size: Number of records to fetch per batch.
+
     """
 
     http_client: UnifiedHTTPClient
@@ -192,6 +193,7 @@ class PubMedAdapter:
             HealthStatus.HEALTHY — API доступен
             HealthStatus.DEGRADED — медленный отклик (>5 сек)
             HealthStatus.UNHEALTHY — ошибка или timeout
+
         """
         try:
             # Use esearch for a lightweight check

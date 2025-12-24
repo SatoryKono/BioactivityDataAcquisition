@@ -15,6 +15,7 @@ class PubMedPublicationsPipeline(BasePipeline):
     """Пайплайн для данных о публикациях из PubMed."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize PubMed publications pipeline."""
         super().__init__(*args, **kwargs)
         self._transformer = PubMedPublicationTransformer(provider=self.provider)
 

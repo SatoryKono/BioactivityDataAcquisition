@@ -28,6 +28,7 @@ class NoOpLogger:
         >>> # Bound context is also a no-op
         >>> bound_logger = logger.bind(run_id="123")
         >>> bound_logger.warning("Also ignored")
+
     """
 
     def bind(self, **_kwargs: Any) -> Self:

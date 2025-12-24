@@ -26,6 +26,14 @@ class OpenTelemetryTracer:
     """Real OpenTelemetry tracer implementation."""
 
     def __init__(self, service_name: str = "bioetl"):
+        """Initialize OpenTelemetry tracer.
+
+        Args:
+            service_name: Name of the service.
+
+        Raises:
+            ImportError: If opentelemetry is not installed.
+        """
         if not OTEL_AVAILABLE:
             raise ImportError(
                 "OpenTelemetry is not installed. Install with 'pip install opentelemetry-api opentelemetry-sdk'"
@@ -43,6 +51,14 @@ class OpenTelemetryTracer:
         self._closed = False
 
     def get_tracer(self, name: str) -> Any:
+        """Get an OpenTelemetry tracer.
+
+        Args:
+            name: Name of the tracer.
+
+        Returns:
+            OpenTelemetry tracer instance.
+        """
         return trace.get_tracer(name)
 
     def close(self) -> None:
@@ -63,6 +79,7 @@ class NoOpTracer:
     """Null object pattern for tracing."""
 
     def __init__(self) -> None:
+        """Initialize no-op tracer."""
         self._closed = False
 
     def get_tracer(self, name: str) -> Any:

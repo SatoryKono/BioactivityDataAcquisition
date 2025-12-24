@@ -16,6 +16,7 @@ class UniProtProteinPipeline(BasePipeline):
     """Pipeline for processing UniProt proteins."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize UniProt protein pipeline."""
         super().__init__(*args, **kwargs)
         self._transformer = UniProtProteinTransformer(provider=self.provider)
 

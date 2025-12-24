@@ -43,15 +43,13 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class YamlSettingsSource(PydanticBaseSettingsSource):
-    """
-    A settings source that loads variables from a YAML file.
+    """A settings source that loads variables from a YAML file.
     """
 
     def get_field_value(
         self, field: FieldInfo, field_name: str
     ) -> tuple[Any, str, bool]:
-        """
-        Get value of a field from YAML file.
+        """Get value of a field from YAML file.
         """
         encoding = self.config.get("env_file_encoding")
         try:
@@ -69,8 +67,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
     def prepare_field_value(
         self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
     ) -> Any:
-        """
-        Prepare value of a field.
+        """Prepare value of a field.
         """
         return value
 
@@ -108,6 +105,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     Raises:
         ValueError: If config file is missing or validation fails
+
     """
     # 1. Try dynamic resolution: {provider}_{entity}
     try:
@@ -199,6 +197,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
 
     Returns:
         PipelineConfig: Immutable domain configuration
+
     """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
@@ -239,6 +238,7 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
 
     Raises:
         ValueError: If pipeline configuration not found
+
     """
     yaml_config = load_pipeline_config(pipeline_name)
     return yaml_config_to_domain(yaml_config)
@@ -345,11 +345,23 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
+        """Customise Pydantic settings sources to include YAML.
+
+        Args:
+            settings_cls: Settings class.
+            init_settings: Init settings source.
+            env_settings: Env settings source.
+            dotenv_settings: Dotenv settings source.
+            file_secret_settings: File secret settings source.
+
+        Returns:
+            Tuple of settings sources with YamlSettingsSource prepended.
+        """
         return (
+            YamlSettingsSource(settings_cls),
             init_settings,
             env_settings,
             dotenv_settings,
-            YamlSettingsSource(settings_cls),
             file_secret_settings,
         )
 

@@ -38,6 +38,7 @@ class PubChemClient(BaseSyncAdapter):
         >>> # Check health
         >>> status = await client.health_check()
         >>> print(f"PubChem is {status}")
+
     """
 
     provider_name: str = "pubchem"
@@ -60,6 +61,7 @@ class PubChemClient(BaseSyncAdapter):
             circuit_breaker_timeout: Recovery timeout in seconds.
             max_workers: Thread pool size.
             strict_error_handling: Whether to raise exceptions or log warnings.
+
         """
         super().__init__(
             rate=rate,
@@ -184,6 +186,7 @@ class PubChemClient(BaseSyncAdapter):
 
         Returns:
             Dictionary with compound data
+
         """
         return {
             "cid": compound.cid,
@@ -210,6 +213,7 @@ class PubChemClient(BaseSyncAdapter):
 
         Returns:
             Dictionary with substance data
+
         """
         return {
             "sid": substance.sid,
@@ -227,6 +231,7 @@ class PubChemClient(BaseSyncAdapter):
 
         Returns:
             Dictionary with assay data
+
         """
         return {
             "aid": assay.get("aid"),
@@ -250,6 +255,7 @@ class PubChemClient(BaseSyncAdapter):
             >>> client = PubChemClient()
             >>> status = await client.health_check()
             >>> print(f"PubChem is {status.value}")
+
         """
         try:
             # Lightweight query: fetch water (CID 962)

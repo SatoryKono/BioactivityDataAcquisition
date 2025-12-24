@@ -53,6 +53,7 @@ class GoldWriter:
         Args:
             base_path: Base path for Gold tables (local filesystem)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
+
         """
         self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
@@ -329,6 +330,7 @@ class GoldWriter:
 
         Returns:
             Path to the table directory.
+
         """
         from pathlib import Path
 
@@ -344,6 +346,7 @@ class GoldWriter:
 
         Returns:
             Number of tables cleared.
+
         """
         import shutil
         from pathlib import Path

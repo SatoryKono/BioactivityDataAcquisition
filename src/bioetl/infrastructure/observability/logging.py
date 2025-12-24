@@ -24,12 +24,11 @@ import structlog
 
 
 def create_logger(
-    pipeline: str,
-    run_id: UUID,
+    pipeline_name: str,
     log_level: str = "INFO",
     json_format: bool = True,
 ) -> Any:
-    """Factory function to create a structured logger."""
+    """Create a structured logger factory."""
     processors = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,

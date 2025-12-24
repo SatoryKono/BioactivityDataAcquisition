@@ -31,6 +31,7 @@ class NoOpMetrics(MetricsPort):
 
         >>> # Default (warning in non-test environments)
         >>> metrics = NoOpMetrics()
+
     """
 
     _warned: bool = False
@@ -40,6 +41,7 @@ class NoOpMetrics(MetricsPort):
 
         Args:
             warn_on_use: Whether to warn about disabled metrics.
+
         """
         if warn_on_use and not NoOpMetrics._warned:
             warnings.warn(

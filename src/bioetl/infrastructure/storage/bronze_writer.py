@@ -57,6 +57,7 @@ class BronzeWriter:
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
             logger: Structured logger for observability
+
         """
         self.base_path = Path(base_path)
         self.save_json = save_json
@@ -88,6 +89,7 @@ class BronzeWriter:
 
         Returns:
             Path to the written file (relative to base_path).
+
         """
         from datetime import UTC
 

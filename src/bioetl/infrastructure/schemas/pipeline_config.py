@@ -26,6 +26,7 @@ class DQConfig(BaseModel):
         hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
         strict_validation: If True, apply stricter validation rules.
             Use with caution as it may reject more records.
+
     """
 
     soft_fail_threshold: float = Field(default=0.05)
@@ -37,6 +38,7 @@ class DQConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> "DQConfig":
+        """Validate that thresholds are between 0 and 1."""
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -137,6 +139,7 @@ class SinkLayerConfig(BaseModel):
 
 class GoldRangeFilterConfig(BaseModel):
     """Schema for range filters in YAML."""
+
     min: float | None = None
     max: float | None = None
     include_min: bool = True
@@ -145,12 +148,14 @@ class GoldRangeFilterConfig(BaseModel):
 
 class GoldListLengthFilterConfig(BaseModel):
     """Schema for list length filters in YAML."""
+
     min: int | None = None
     max: int | None = None
 
 
 class GoldListContainsFilterConfig(BaseModel):
     """Schema for list contains filters in YAML."""
+
     values: list[str]
     mode: Literal["all", "any"] = "all"
 
@@ -198,6 +203,7 @@ class PipelineYamlConfig(BaseModel):
     @field_validator("batch_size")
     @classmethod
     def validate_batch_size(cls, v: int) -> int:
+        """Validate batch size limit."""
         if v > 5000:
             raise ValueError("batch_size cannot exceed 5000 records")
         return v

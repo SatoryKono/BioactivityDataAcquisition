@@ -1,5 +1,4 @@
-"""
-A simple in-memory lock for local development and testing.
+"""A simple in-memory lock for local development and testing.
 This lock is not distributed and only works within a single process.
 """
 
@@ -14,6 +13,7 @@ class MemoryLock(LockPort):
     """A simple in-memory lock for local development and testing."""
 
     def __init__(self) -> None:
+        """Initialize memory lock."""
         self._locks: dict[str, tuple[str, asyncio.Lock]] = {}
         self._global_lock = asyncio.Lock()
 
@@ -32,6 +32,7 @@ class MemoryLock(LockPort):
 
         Returns:
             True if lock was acquired, False otherwise.
+
         """
         async with self._global_lock:
             if key in self._locks:
@@ -77,6 +78,7 @@ class MemoryLock(LockPort):
 
         Returns:
             True if lock was acquired, False otherwise.
+
         """
         # Try to acquire immediately
         if await self._try_acquire(key, owner_id, ttl):

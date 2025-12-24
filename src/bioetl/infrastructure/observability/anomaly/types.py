@@ -45,6 +45,7 @@ class Anomaly:
         z_score: Number of standard deviations from mean
         timestamp: When anomaly was detected
         message: Human-readable description
+
     """
 
     metric_name: str
