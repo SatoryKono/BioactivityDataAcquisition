@@ -87,6 +87,53 @@ def validate_pipeline_name(_ctx, _param, value):
     return value
 
 
+def _handle_destructive_run_confirmation(
+    pipeline: str, run_type: str, dry_run: bool, yes: bool
+) -> bool:
+    """Handle confirmation for rebuild/backfill runs.
+
+    Args:
+        pipeline: Pipeline name.
+        run_type: Type of run.
+        dry_run: Whether this is a dry run.
+        yes: Whether to skip confirmation.
+
+    Returns:
+        True if should continue with pipeline execution, False if should exit early.
+    """
+    if run_type not in ("rebuild", "backfill"):
+        return True
+
+    if dry_run:
+        click.echo(f"[DRY-RUN] Would clear data for pipeline: {pipeline}")
+        click.echo(f"[DRY-RUN] Run type: {run_type}")
+        _preview_cleanup(pipeline)
+        return False
+
+    if not yes:
+        click.echo(f"WARNING: {run_type} will clear existing data for {pipeline}.")
+        if not click.confirm("Do you want to continue?"):
+            click.echo("Operation cancelled.")
+            sys.exit(0)
+
+    return True
+
+
+def _get_runner_logger(runner):
+    """Get logger from runner with fallback.
+
+    Args:
+        runner: PipelineRunner instance.
+
+    Returns:
+        Logger instance or None if not found.
+    """
+    logger = getattr(runner, "logger", None)
+    if logger is None:
+        logger = getattr(runner, "_logger", None)
+    return logger
+
+
 @click.group()
 @click.version_option(version="0.1.0")
 def cli() -> None:
@@ -148,23 +195,12 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     # Handle rebuild/backfill confirmation before any heavy initialization
-    if run_type in ("rebuild", "backfill"):
-        if dry_run:
-            click.echo(f"[DRY-RUN] Would clear data for pipeline: {pipeline}")
-            click.echo(f"[DRY-RUN] Run type: {run_type}")
-            _preview_cleanup(pipeline)
-            return
-
-        if not yes:
-            click.echo(f"WARNING: {run_type} will clear existing data for {pipeline}.")
-            if not click.confirm("Do you want to continue?"):
-                click.echo("Operation cancelled.")
-                sys.exit(0)
+    if not _handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
+        return
 
     run_id = uuid4()
 
     try:
-        # Bootstrap returns a fully constructed runner
         ctx = PipelineRunContext(
             pipeline_name=pipeline,
             run_id=run_id,
@@ -184,21 +220,12 @@ def run(
         click.echo(f"Initialization failed: {e}", err=True)
         sys.exit(1)
 
-    # Use explicit logger if available, otherwise fallback is required
-    logger = getattr(runner, "logger", None)
-    if logger is None:
-        # Fallback for old runner versions or if runner structure changed
-        logger = getattr(runner, "_logger", None)
-
+    logger = _get_runner_logger(runner)
     if logger is None:
         click.echo("Critical: Logger not initialized.", err=True)
         sys.exit(1)
 
-    # Set up OS signal handlers to gracefully trigger the shutdown signal
     setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
-
-    # Note: Metrics server is started in bootstrap_pipeline() (idempotent)
-    # No need to start it again here
 
     logger.info("Starting pipeline run")
     try:
@@ -206,7 +233,7 @@ def run(
         logger.info("Pipeline completed successfully")
     except PipelineShutdownError:
         logger.warning("Pipeline run was gracefully shut down.")
-        sys.exit(130)  # Exit code for command-line interrupt
+        sys.exit(130)
     except Exception:
         logger.exception("Pipeline failed with an unhandled exception.")
         sys.exit(1)
