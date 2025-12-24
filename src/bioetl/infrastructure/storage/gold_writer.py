@@ -18,7 +18,6 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-import random
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -215,8 +214,9 @@ class GoldWriter:
                 # Retry on potential concurrency/protocol errors
                 if attempt == 2:
                     raise e
-                # Exponential backoff with jitter (Base 0.5s, Multiplier 2, Jitter 0.1s)
-                delay = 0.5 * (2**attempt) + random.uniform(0, 0.1)
+                # Exponential backoff with fixed jitter (Base 0.5s, Multiplier 2)
+                # Fixed 0.05s jitter for deterministic behavior (see ADR-014)
+                delay = 0.5 * (2**attempt) + 0.05
                 await asyncio.sleep(delay)
 
         # Delegate CSV export to CsvExporter if configured
@@ -275,8 +275,8 @@ class GoldWriter:
             except Exception as e:
                 if attempt == 2:
                     raise e
-                # Exponential backoff with jitter
-                delay = 0.5 * (2**attempt) + random.uniform(0, 0.1)
+                # Exponential backoff with fixed jitter (see ADR-014)
+                delay = 0.5 * (2**attempt) + 0.05
                 await asyncio.sleep(delay)
 
     async def _merge_scd2(
