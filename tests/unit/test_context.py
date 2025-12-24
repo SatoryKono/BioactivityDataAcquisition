@@ -1,5 +1,6 @@
 """Tests for PipelineContext."""
 
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -102,12 +103,13 @@ class TestPipelineContextEquality:
         """Contexts with same values should be equal."""
         run_id = uuid4()
         logger = MagicMock()
+        started_at = datetime.now(UTC)
 
         ctx1 = PipelineContext(
-            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger
+            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger, started_at=started_at
         )
         ctx2 = PipelineContext(
-            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger
+            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger, started_at=started_at
         )
 
         assert ctx1 == ctx2

@@ -58,7 +58,7 @@ async def test_write_gold_schema_validation_failure(gold_writer, strict_schema):
 
 async def test_write_gold_invalid_mode(gold_writer, valid_records):
     """Test invalid write mode raises ValueError."""
-    with pytest.raises(ValueError, match="Invalid mode"):
+    with pytest.raises(ValueError, match="Invalid Gold write mode"):
         await gold_writer.write_gold("test_table", valid_records, mode="invalid")
 
 
