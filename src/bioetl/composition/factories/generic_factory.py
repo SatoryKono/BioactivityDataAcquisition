@@ -13,6 +13,7 @@ from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
@@ -259,6 +260,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_interval=pipeline.config.checkpoint_interval,
         )
 
+        # Create lifecycle service (M5)
+        lifecycle_service = MedallionLifecycleService(
+            storage=pipeline.services.storage,
+            logger=logger,
+        )
+
         # Assemble Runner
         return PipelineRunner(
             config=pipeline.config,
@@ -271,6 +278,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=logger,
             pipeline=pipeline,
             tracer=tracer,
+            lifecycle_service=lifecycle_service,
         )
 
     def _create_checkpoint_manager(

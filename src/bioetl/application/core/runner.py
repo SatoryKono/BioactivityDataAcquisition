@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.executor import PipelineExecutor
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.shutdown import ShutdownSignal
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
@@ -43,6 +46,7 @@ class PipelineRunner:
         logger: structlog.BoundLogger,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
+        lifecycle_service: MedallionLifecycleService | None = None,
     ) -> None:
         """Initialize pipeline runner.
 
@@ -57,6 +61,7 @@ class PipelineRunner:
             logger: Structured logger.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
+            lifecycle_service: Optional medallion lifecycle service (M5).
 
         """
         self._config = config
@@ -69,6 +74,7 @@ class PipelineRunner:
         self._logger = logger
         self.pipeline = pipeline
         self._tracer = tracer
+        self._lifecycle_service = lifecycle_service
 
         # The runner is responsible for creating application services
         self._lock_manager = LockManager.create(
@@ -118,7 +124,7 @@ class PipelineRunner:
             async with self._services, self._lock_manager:
                 # Clear data exports at the start of the run
                 # to avoid appending to stale data from previous runs
-                await self._clear_exports()
+                await self._clear_via_lifecycle()
 
                 # Load checkpoint metadata (for logging purposes)
                 await self._checkpoint_manager.load_checkpoint()
@@ -134,14 +140,50 @@ class PipelineRunner:
                 extra={"records_fetched": self._executor.records_fetched},
             )
 
-    async def _clear_exports(self) -> None:
-        """Clear export files and Delta tables at the start of a pipeline run.
+    async def _clear_via_lifecycle(self) -> None:
+        """Clear exports using lifecycle service (M5).
+
+        Uses injected MedallionLifecycleService for policy-based clearing.
+        Falls back to legacy inline logic for backward compatibility.
+        """
+        if self._lifecycle_service is None:
+            # Fallback to inline logic for backward compatibility
+            await self._clear_exports_legacy()
+            return
+
+        from bioetl.domain.medallion import MedallionPolicy
+
+        policy = MedallionPolicy.for_run_type(self._runtime.run_type)
+
+        # Skip if no clearing needed
+        if not policy.should_clear_silver and not policy.should_clear_gold:
+            self._logger.debug(
+                "Skipping clear for incremental run",
+                extra={"run_type": self._runtime.run_type.value},
+            )
+            return
+
+        gold_table = (
+            self._config.gold_table
+            or f"{self._config.provider}.{self._config.entity_type}"
+        )
+
+        await self._lifecycle_service.clear(
+            policy=policy,
+            silver_table=self._config.silver_table,
+            gold_table=gold_table,
+            dry_run=self._runtime.dry_run,
+        )
+
+    async def _clear_exports_legacy(self) -> None:
+        """Clear export files and Delta tables (legacy fallback).
+
+        This method is kept for backward compatibility when lifecycle service
+        is not injected. Will be deprecated in future versions.
 
         Enforces Medallion architecture invariants:
         - Only clears data for rebuild/backfill runs
         - Incremental runs use merge/upsert and should NOT clear existing data
-
-        This ensures data integrity and prevents accidental data loss.
         """
         from bioetl.domain.types import RunType
 
