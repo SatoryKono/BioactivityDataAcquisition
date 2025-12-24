@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
 
 class TestAdapterProviderNames:
@@ -19,15 +19,15 @@ class TestAdapterProviderNames:
         return MagicMock()
 
     def test_pubchem_provider_name(self, mock_logger):
-        """Test PubChemClient provider name."""
-        client = PubChemClient(logger=mock_logger)
-        assert client.provider_name == "pubchem"
-        assert PubChemClient.provider_name == "pubchem"
-        client.close()
+        """Test PubChemAdapter provider name."""
+        adapter = PubChemAdapter(logger=mock_logger)
+        assert adapter.provider_name == "pubchem"
+        assert PubChemAdapter.provider_name == "pubchem"
+        adapter.close()
 
     def test_uniprot_provider_name(self, mock_logger):
-        """Test UniProtClient provider name."""
+        """Test UniProtAdapter provider name."""
         mock_http_client = MagicMock()
-        client = UniProtClient(http_client=mock_http_client, logger=mock_logger)
-        assert client.provider_name == "uniprot"
-        assert UniProtClient.provider_name == "uniprot"
+        adapter = UniProtAdapter(http_client=mock_http_client, logger=mock_logger)
+        assert adapter.provider_name == "uniprot"
+        assert UniProtAdapter.provider_name == "uniprot"

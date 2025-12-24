@@ -14,8 +14,8 @@ from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
 
 @pytest.mark.unit
@@ -70,37 +70,37 @@ class TestChemblAdapter:
 
 
 @pytest.mark.unit
-class TestPubChemClient:
-    """Test PubChem client initialization and configuration."""
+class TestPubChemAdapter:
+    """Test PubChem adapter initialization and configuration."""
 
     @pytest.fixture
     def mock_logger(self):
         """Create a mock logger."""
         return MagicMock()
 
-    def test_client_creation(self, mock_logger):
-        """Test PubChem client can be created."""
-        client = PubChemClient(logger=mock_logger)
+    def test_adapter_creation(self, mock_logger):
+        """Test PubChem adapter can be created."""
+        adapter = PubChemAdapter(logger=mock_logger)
 
-        assert client.provider_name == "pubchem"
-        assert client.rate_limiter.rate == 5.0  # 5 req/sec per RULES.md
+        assert adapter.provider_name == "pubchem"
+        assert adapter.rate_limiter.rate == 5.0  # 5 req/sec per RULES.md
 
-    def test_client_with_custom_rate(self, mock_logger):
-        """Test PubChem client with custom rate limit."""
-        client = PubChemClient(rate=10.0, logger=mock_logger)
+    def test_adapter_with_custom_rate(self, mock_logger):
+        """Test PubChem adapter with custom rate limit."""
+        adapter = PubChemAdapter(rate=10.0, logger=mock_logger)
 
-        assert client.rate_limiter.rate == 10.0
+        assert adapter.rate_limiter.rate == 10.0
 
     def test_thread_pool_created(self, mock_logger):
         """Test thread pool is created for sync operations."""
-        client = PubChemClient(max_workers=2, logger=mock_logger)
+        adapter = PubChemAdapter(max_workers=2, logger=mock_logger)
 
-        assert client.thread_pool is not None
-        assert client.thread_pool._max_workers == 2
+        assert adapter.thread_pool is not None
+        assert adapter.thread_pool._max_workers == 2
 
     async def test_compound_to_dict(self, mock_logger):
         """Test compound conversion to dictionary."""
-        client = PubChemClient(logger=mock_logger)
+        adapter = PubChemAdapter(logger=mock_logger)
 
         # Mock compound object
         class MockCompound:
@@ -121,7 +121,7 @@ class TestPubChemClient:
             rotatable_bond_count = 3
             fingerprint = "00000000"
 
-        result = client._compound_to_dict(MockCompound())
+        result = adapter._compound_to_dict(MockCompound())
 
         assert result["cid"] == 2244
         assert result["molecular_formula"] == "C9H8O4"
@@ -129,8 +129,8 @@ class TestPubChemClient:
 
 
 @pytest.mark.unit
-class TestUniProtClient:
-    """Test UniProt client initialization and configuration."""
+class TestUniProtAdapter:
+    """Test UniProt adapter initialization and configuration."""
 
     @pytest.fixture
     def http_client(self):
@@ -144,37 +144,37 @@ class TestUniProtClient:
         """Create a mock logger."""
         return MagicMock()
 
-    def test_client_creation_without_api_key(self, http_client, mock_logger):
-        """Test UniProt client without API key."""
-        client = UniProtClient(http_client=http_client, logger=mock_logger)
+    def test_adapter_creation_without_api_key(self, http_client, mock_logger):
+        """Test UniProt adapter without API key."""
+        adapter = UniProtAdapter(http_client=http_client, logger=mock_logger)
 
-        assert client.provider_name == "uniprot"
-        assert client.api_key is None
+        assert adapter.provider_name == "uniprot"
+        assert adapter.api_key is None
 
-    def test_client_creation_with_api_key(self, http_client, mock_logger):
-        """Test UniProt client with API key."""
-        client = UniProtClient(http_client=http_client, logger=mock_logger, api_key="test_key")
+    def test_adapter_creation_with_api_key(self, http_client, mock_logger):
+        """Test UniProt adapter with API key."""
+        adapter = UniProtAdapter(http_client=http_client, logger=mock_logger, api_key="test_key")
 
-        assert client.api_key == "test_key"
+        assert adapter.api_key == "test_key"
 
-    def test_client_with_custom_base_url(self, http_client, mock_logger):
-        """Test UniProt client with custom base URL."""
+    def test_adapter_with_custom_base_url(self, http_client, mock_logger):
+        """Test UniProt adapter with custom base URL."""
         mock_http = MagicMock()
         custom_url = "https://custom.uniprot.org"
-        client = UniProtClient(http_client=mock_http, logger=mock_logger, base_url=custom_url)
+        adapter = UniProtAdapter(http_client=mock_http, logger=mock_logger, base_url=custom_url)
 
-        assert client.base_url == custom_url
+        assert adapter.base_url == custom_url
 
     def test_fasta_parsing(self, http_client, mock_logger):
         """Test FASTA format parsing."""
-        client = UniProtClient(http_client=http_client, logger=mock_logger)
+        adapter = UniProtAdapter(http_client=http_client, logger=mock_logger)
 
         fasta_text = """>sp|P04637|P53_HUMAN Cellular tumor antigen p53
 MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP
 >sp|Q9Y6K9|NF2L2_HUMAN Nuclear factor erythroid 2-related factor 2
 MDPGQQPPPQPAPQGQGQPPSQPPQGQGPPSGPGQPAPAGTQGQPQ"""
 
-        records = client._parse_fasta(fasta_text)
+        records = adapter._parse_fasta(fasta_text)
 
         assert len(records) == 2
         assert "P04637" in records[0]["header"]
