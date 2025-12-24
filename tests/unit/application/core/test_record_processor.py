@@ -429,6 +429,7 @@ class TestRecordProcessorProcessBatch:
             config=processor_config,
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
+            gold_transform_callback=lambda c, r: r,
             gold_validator=gold_validator,
         )
 
