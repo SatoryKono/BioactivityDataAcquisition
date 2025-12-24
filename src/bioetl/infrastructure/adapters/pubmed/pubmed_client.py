@@ -22,7 +22,8 @@ ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 class PubMedAdapter:
     """PubMed adapter using UnifiedHTTPClient.
 
-    Implements DataSourcePort for PubMed data extraction.
+    Implements DataSourcePort and FilterableDataSourcePort for PubMed data extraction
+    with optional server-side filtering by PMID lists.
 
     Args:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
@@ -138,14 +139,30 @@ class PubMedAdapter:
         self,
         entity_type: str,
         filter_ids: list[str],
-        filter_field: str | None = None,
+        filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubMed records by ID list (bypass search)."""
+        """Fetch PubMed records by ID list (bypass search).
+
+        Implements FilterableDataSourcePort.fetch_filtered().
+
+        Args:
+            entity_type: Must be 'publication'.
+            filter_ids: List of PMIDs to fetch.
+            filter_field: Field name (expected 'pmid', others logged as warning).
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for each article.
+
+        Raises:
+            ValueError: If entity_type is not 'publication'.
+
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
-        if filter_field and filter_field != "pmid":
+        if filter_field != "pmid":
             self.logger.warning(
                 "unsupported_filter_field",
                 field=filter_field,
@@ -166,8 +183,10 @@ class PubMedAdapter:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records."""
         if filter_ids:
+            # Default to 'pmid' if filter_field not specified
+            effective_filter_field = filter_field or "pmid"
             async for record in self.fetch_filtered(
-                entity_type, filter_ids, filter_field, limit
+                entity_type, filter_ids, effective_filter_field, limit
             ):
                 yield record
             return
