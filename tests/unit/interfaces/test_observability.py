@@ -43,3 +43,31 @@ def test_start_metrics_server_failure():
         # Server catches exceptions and returns False for graceful degradation
         result = obs_server.start_metrics_server(port=8000, fail_fast=False)
         assert result is False
+
+
+def test_interface_passes_config_params():
+    """Verify interface layer passes all config params to server."""
+    # Patch at the module level where it's imported as _start_server
+    with mock.patch(
+        "bioetl.interfaces.observability._start_server"
+    ) as mock_server:
+        mock_server.return_value = True
+        result = observability.start_metrics_server(
+            port=9090,
+            fail_fast=True,
+            retry_count=5,
+            retry_delay=2.0,
+        )
+
+        mock_server.assert_called_once_with(
+            port=9090,
+            fail_fast=True,
+            retry_count=5,
+            retry_delay=2.0,
+        )
+        assert result is True
+
+
+def test_interface_exposes_metrics_server_error():
+    """Verify MetricsServerError is exported from interface."""
+    assert observability.MetricsServerError is obs_server.MetricsServerError

@@ -25,7 +25,10 @@ from bioetl.infrastructure.observability.logging import (
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.server import start_metrics_server
+from bioetl.infrastructure.observability.server import (
+    MetricsServerError,
+    start_metrics_server,
+)
 from bioetl.infrastructure.observability.tracing import NoOpTracer, OpenTelemetryTracer
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -39,6 +42,7 @@ __all__ = [
     "GoldWriter",
     "LocalCheckpoint",
     "MemoryLock",
+    "MetricsServerError",
     "ObservabilityBundle",
     "PrometheusMetrics",
     "StorageAdapter",
@@ -217,12 +221,16 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort | None:
     """Bootstrap metrics with optional server start.
 
     Server is started only if explicitly enabled in settings.
+    Supports fail_fast mode for strict startup validation.
 
     Args:
         settings: Application settings.
 
     Returns:
         MetricsPort instance or None if metrics are disabled.
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
     """
     if not settings.observability.metrics_enabled:
         return None
@@ -230,9 +238,25 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort | None:
     metrics = PrometheusMetrics()
 
     if settings.observability.metrics_server_enabled:
-        # Log but don't fail - metrics collection still works
-        with contextlib.suppress(Exception):
-            start_metrics_server(settings.metrics_port)
+        obs = settings.observability
+
+        if obs.metrics_fail_fast:
+            # In fail_fast mode, let MetricsServerError propagate
+            start_metrics_server(
+                port=settings.metrics_port,
+                fail_fast=True,
+                retry_count=obs.metrics_retry_count,
+                retry_delay=obs.metrics_retry_delay,
+            )
+        else:
+            # Lenient mode: log but don't fail - metrics collection still works
+            with contextlib.suppress(Exception):
+                start_metrics_server(
+                    port=settings.metrics_port,
+                    fail_fast=False,
+                    retry_count=obs.metrics_retry_count,
+                    retry_delay=obs.metrics_retry_delay,
+                )
 
     return metrics
 
