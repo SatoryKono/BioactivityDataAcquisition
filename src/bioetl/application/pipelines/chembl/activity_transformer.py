@@ -38,6 +38,21 @@ class ActivityTransformer(BaseTransformer):
         """
         super().__init__(provider)
 
+    def _extract_ligand_efficiency(
+        self,
+        le_data: dict[str, Any] | None,
+    ) -> dict[str, float | None]:
+        """Extract ligand efficiency metrics from nested data.
+
+        Args:
+            le_data: Nested ligand efficiency dictionary from ChEMBL API.
+
+        Returns:
+            Flattened dictionary with ligand_efficiency_ prefixed keys.
+
+        """
+        return flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+
     async def _transform_impl(
         self,
         context: PipelineContext,
