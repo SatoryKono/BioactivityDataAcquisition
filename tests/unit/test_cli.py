@@ -330,7 +330,7 @@ class TestMetricsServerIntegration:
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
     @patch("bioetl.interfaces.cli.asyncio.run")
-    @patch("bioetl.interfaces.cli.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.start_metrics_server")
     @patch("bioetl.interfaces.cli.get_settings")
     def test_metrics_server_failure_non_blocking(
         self,
