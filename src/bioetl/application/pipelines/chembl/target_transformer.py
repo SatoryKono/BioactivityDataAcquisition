@@ -8,12 +8,33 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import (
+    aggregate_nested_list,
+    build_empty_field_dict,
+    extract_list_field,
+    extract_nested_field_values,
+    safe_int,
+)
 from bioetl.domain.entities import Target
-from bioetl.domain.transformations import generate_entity_id, safe_int
+from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
+
+# Field names for empty component result
+_COMPONENT_FIELDS = [
+    "component_accessions",
+    "component_ids",
+    "component_types",
+    "component_relationships",
+    "component_descriptions",
+    "component_organisms",
+    "component_tax_ids",
+    "protein_classifications",
+    "protein_classification_ids",
+    "protein_classification_names",
+]
 
 
 class TargetTransformer(BaseTransformer):
@@ -92,6 +113,8 @@ class TargetTransformer(BaseTransformer):
     ) -> dict[str, list[Any] | None]:
         """Flatten target components into aggregated lists.
 
+        Uses transform_utils for extraction to reduce code duplication.
+
         Args:
             components: List of component dicts from ChEMBL API.
 
@@ -100,141 +123,51 @@ class TargetTransformer(BaseTransformer):
             descriptions, organisms, tax_ids, and protein classifications.
         """
         if not components or not isinstance(components, list):
-            return self._empty_component_result()
+            return cast("dict[str, list[Any] | None]", build_empty_field_dict(_COMPONENT_FIELDS))
 
-        basic_fields = self._extract_basic_component_fields(components)
-        classifications = self._extract_protein_classifications(components)
-
-        return {**basic_fields, **classifications}
-
-    def _empty_component_result(self) -> dict[str, None]:
-        """Return empty result dict for missing components."""
-        return {
-            "component_accessions": None,
-            "component_ids": None,
-            "component_types": None,
-            "component_relationships": None,
-            "component_descriptions": None,
-            "component_organisms": None,
-            "component_tax_ids": None,
-            "protein_classifications": None,
-            "protein_classification_ids": None,
-            "protein_classification_names": None,
-        }
-
-    def _extract_basic_component_fields(
-        self, components: list[dict[str, Any]]
-    ) -> dict[str, list[Any] | None]:
-        """Extract basic fields from component list."""
-        return {
-            "component_accessions": self._extract_field(components, "accession"),
-            "component_ids": self._extract_int_field(components, "component_id"),
-            "component_types": self._extract_field(components, "component_type"),
-            "component_relationships": self._extract_field(components, "relationship"),
-            "component_descriptions": self._extract_field(
+        # Extract basic fields using utility
+        basic_fields = {
+            "component_accessions": extract_list_field(components, "accession"),
+            "component_ids": extract_list_field(
+                components, "component_id", converter=safe_int
+            ),
+            "component_types": extract_list_field(components, "component_type"),
+            "component_relationships": extract_list_field(components, "relationship"),
+            "component_descriptions": extract_list_field(
                 components, "component_description"
             ),
-            "component_organisms": self._extract_field(components, "organism"),
-            "component_tax_ids": self._extract_int_field(components, "tax_id"),
+            "component_organisms": extract_list_field(components, "organism"),
+            "component_tax_ids": extract_list_field(
+                components, "tax_id", converter=safe_int
+            ),
         }
 
-    def _extract_field(
-        self, components: list[dict[str, Any]], field: str
-    ) -> list[Any] | None:
-        """Extract a string field from all components."""
-        values = [c.get(field) for c in components if c.get(field)]
-        return values or None
-
-    def _extract_int_field(
-        self, components: list[dict[str, Any]], field: str
-    ) -> list[int] | None:
-        """Extract an integer field from all components."""
-        values = [
-            safe_int(c.get(field)) for c in components if c.get(field) is not None
-        ]
-        return values or None
-
-    def _extract_protein_classifications(
-        self, components: list[dict[str, Any]]
-    ) -> dict[str, list[Any] | None]:
-        """Extract protein classification details from components."""
-        short_names: list[str] = []
-        ids: list[int] = []
-        pref_names: list[str] = []
-
-        for c in components:
-            pcs = c.get("protein_classifications")
-            if not pcs or not isinstance(pcs, list):
-                continue
-            for pc in pcs:
-                if not isinstance(pc, dict):
-                    continue
-                self._collect_classification_fields(pc, short_names, ids, pref_names)
-
-        return {
-            "protein_classifications": short_names or None,
-            "protein_classification_ids": ids or None,
-            "protein_classification_names": pref_names or None,
+        # Extract protein classifications using nested field utility
+        classifications = {
+            "protein_classifications": extract_nested_field_values(
+                components, "protein_classifications", "short_name"
+            ),
+            "protein_classification_ids": extract_nested_field_values(
+                components, "protein_classifications", "protein_classification_id",
+                converter=safe_int
+            ),
+            "protein_classification_names": extract_nested_field_values(
+                components, "protein_classifications", "pref_name"
+            ),
         }
 
-    def _collect_classification_fields(
-        self,
-        pc: dict[str, Any],
-        short_names: list[str],
-        ids: list[int],
-        pref_names: list[str],
-    ) -> None:
-        """Collect fields from a single protein classification dict."""
-        if short_name := pc.get("short_name"):
-            short_names.append(short_name)
-        if (pc_id := safe_int(pc.get("protein_classification_id"))) is not None:
-            ids.append(pc_id)
-        if pref_name := pc.get("pref_name"):
-            pref_names.append(pref_name)
+        return {**basic_fields, **classifications}
 
     def _aggregate_synonyms(
         self, components: list[dict[str, Any]] | None
     ) -> str | None:
-        """Aggregate synonyms from all components into a single JSON list.
-
-        Args:
-            components: List of component dicts from ChEMBL API.
-
-        Returns:
-            JSON string of list of synonyms, or None.
-        """
-        if not components or not isinstance(components, list):
-            return None
-
-        all_synonyms = []
-        for comp in components:
-            synonyms = comp.get("target_component_synonyms")
-            if synonyms and isinstance(synonyms, list):
-                all_synonyms.extend(synonyms)
-
-        return self.serialize_json(all_synonyms) if all_synonyms else None
+        """Aggregate synonyms from all components into a single JSON list."""
+        aggregated = aggregate_nested_list(components, "target_component_synonyms")
+        return self.serialize_json(aggregated) if aggregated else None
 
     def _aggregate_component_xrefs(
         self, components: list[dict[str, Any]] | None
     ) -> str | None:
-        """Aggregate cross-references from all target components.
-
-        ChEMBL API stores cross-references inside each component's
-        target_component_xrefs field, not at the target level.
-
-        Args:
-            components: List of component dicts from ChEMBL API.
-
-        Returns:
-            JSON string of aggregated xrefs, or None if empty.
-        """
-        if not components or not isinstance(components, list):
-            return None
-
-        all_xrefs: list[dict[str, Any]] = []
-        for comp in components:
-            xrefs = comp.get("target_component_xrefs")
-            if xrefs and isinstance(xrefs, list):
-                all_xrefs.extend(xrefs)
-
-        return self.serialize_json(all_xrefs) if all_xrefs else None
+        """Aggregate cross-references from all target components."""
+        aggregated = aggregate_nested_list(components, "target_component_xrefs")
+        return self.serialize_json(aggregated) if aggregated else None

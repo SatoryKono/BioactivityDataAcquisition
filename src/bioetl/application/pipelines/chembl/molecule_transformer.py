@@ -8,12 +8,51 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.transform_utils import (
+    extract_and_flatten_fields,
+    safe_float,
+    safe_int,
+)
 from bioetl.domain.entities import Molecule
-from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
+from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
+
+# Field mappings for nested structure flattening
+_HIERARCHY_MAPPINGS = {
+    "hierarchy_parent_chembl_id": ("parent_chembl_id", None),
+    "hierarchy_active_chembl_id": ("active_chembl_id", None),
+    "hierarchy_child_chembl_id": ("molecule_chembl_id", None),
+}
+
+_STRUCTURE_MAPPINGS = {
+    "structure_canonical_smiles": ("canonical_smiles", None),
+    "structure_standard_inchi": ("standard_inchi", None),
+    "structure_standard_inchi_key": ("standard_inchi_key", None),
+}
+
+# Property mappings with type converters
+_PROPERTY_MAPPINGS = {
+    "property_alogp": ("alogp", safe_float),
+    "property_mw_freebase": ("mw_freebase", safe_float),
+    "property_full_mwt": ("full_mwt", safe_float),
+    "property_hba": ("hba", safe_int),
+    "property_hbd": ("hbd", safe_int),
+    "property_psa": ("psa", safe_float),
+    "property_rtb": ("rtb", safe_int),
+    "property_ro5_violations": ("num_lipinski_ro5_violations", safe_int),
+    "property_heavy_atoms": ("heavy_atoms", safe_int),
+    "property_aromatic_rings": ("aromatic_rings", safe_int),
+    "property_qed_weighted": ("qed_weighted", safe_float),
+    "property_acd_logd": ("acd_logd", safe_float),
+    "property_acd_logp": ("acd_logp", safe_float),
+    "property_acd_most_apka": ("acd_most_apka", safe_float),
+    "property_acd_most_bpka": ("acd_most_bpka", safe_float),
+    "property_full_molformula": ("full_molformula", None),
+    "property_ro3_pass": ("ro3_pass", None),
+}
 
 
 class MoleculeTransformer(BaseTransformer):
@@ -37,10 +76,16 @@ class MoleculeTransformer(BaseTransformer):
             id_field="molecule_chembl_id",
         )
 
-        # Extract and flatten complex fields
-        hierarchy = self._extract_hierarchy(record.get("molecule_hierarchy"))
-        properties = self._extract_properties(record.get("molecule_properties"))
-        structures = self._extract_structures(record.get("molecule_structures"))
+        # Extract and flatten complex fields using utility
+        hierarchy = extract_and_flatten_fields(
+            record.get("molecule_hierarchy"), _HIERARCHY_MAPPINGS
+        )
+        properties = extract_and_flatten_fields(
+            record.get("molecule_properties"), _PROPERTY_MAPPINGS
+        )
+        structures = extract_and_flatten_fields(
+            record.get("molecule_structures"), _STRUCTURE_MAPPINGS
+        )
 
         business_data: dict[str, Any] = {
             # Primary identifier
@@ -114,72 +159,3 @@ class MoleculeTransformer(BaseTransformer):
 
         # Convert Entity to SilverRecord for storage
         return cast("SilverRecord", self.entity_to_silver_record(entity))
-
-    def _extract_hierarchy(self, data: dict[str, Any] | None) -> dict[str, Any]:
-        if not data:
-            return {
-                "hierarchy_parent_chembl_id": None,
-                "hierarchy_active_chembl_id": None,
-                "hierarchy_child_chembl_id": None,
-            }
-        return {
-            "hierarchy_parent_chembl_id": data.get("parent_chembl_id"),
-            "hierarchy_active_chembl_id": data.get("active_chembl_id"),
-            "hierarchy_child_chembl_id": data.get("molecule_chembl_id"),
-        }
-
-    def _extract_properties(self, data: dict[str, Any] | None) -> dict[str, Any]:
-        if not data:
-            return {
-                "property_alogp": None,
-                "property_mw_freebase": None,
-                "property_full_mwt": None,
-                "property_hba": None,
-                "property_hbd": None,
-                "property_psa": None,
-                "property_rtb": None,
-                "property_ro5_violations": None,
-                "property_heavy_atoms": None,
-                "property_aromatic_rings": None,
-                "property_qed_weighted": None,
-                "property_acd_logd": None,
-                "property_acd_logp": None,
-                "property_acd_most_apka": None,
-                "property_acd_most_bpka": None,
-                "property_full_molformula": None,
-                "property_ro3_pass": None,
-            }
-        return {
-            "property_alogp": safe_float(data.get("alogp")),
-            "property_mw_freebase": safe_float(data.get("mw_freebase")),
-            "property_full_mwt": safe_float(data.get("full_mwt")),
-            "property_hba": safe_int(data.get("hba")),
-            "property_hbd": safe_int(data.get("hbd")),
-            "property_psa": safe_float(data.get("psa")),
-            "property_rtb": safe_int(data.get("rtb")),
-            "property_ro5_violations": safe_int(
-                data.get("num_lipinski_ro5_violations")
-            ),
-            "property_heavy_atoms": safe_int(data.get("heavy_atoms")),
-            "property_aromatic_rings": safe_int(data.get("aromatic_rings")),
-            "property_qed_weighted": safe_float(data.get("qed_weighted")),
-            "property_acd_logd": safe_float(data.get("acd_logd")),
-            "property_acd_logp": safe_float(data.get("acd_logp")),
-            "property_acd_most_apka": safe_float(data.get("acd_most_apka")),
-            "property_acd_most_bpka": safe_float(data.get("acd_most_bpka")),
-            "property_full_molformula": data.get("full_molformula"),
-            "property_ro3_pass": data.get("ro3_pass"),
-        }
-
-    def _extract_structures(self, data: dict[str, Any] | None) -> dict[str, Any]:
-        if not data:
-            return {
-                "structure_canonical_smiles": None,
-                "structure_standard_inchi": None,
-                "structure_standard_inchi_key": None,
-            }
-        return {
-            "structure_canonical_smiles": data.get("canonical_smiles"),
-            "structure_standard_inchi": data.get("standard_inchi"),
-            "structure_standard_inchi_key": data.get("standard_inchi_key"),
-        }
