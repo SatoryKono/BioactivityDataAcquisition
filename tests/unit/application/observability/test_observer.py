@@ -7,7 +7,7 @@ import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import PipelineObserver
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture

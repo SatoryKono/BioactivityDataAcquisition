@@ -10,7 +10,7 @@ from uuid import uuid4
 
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_pipeline_config
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
@@ -37,7 +37,7 @@ def chembl_pipeline():
         logger=mock_logger,
     )
     config = get_pipeline_config("chembl_activity")
-    run_id: RunID = uuid4()
+    run_id = uuid4()
     pipeline = ChEMBLActivityPipeline.create(
         run_id=run_id, runtime=runtime, services=services, config=config
     )

@@ -323,30 +323,32 @@ class PubMedPublicationTransformer(BaseTransformer):
         if article is None:
             return {"pmid": pmid}
 
-        # Journal info
-        journal_node = article.find(".//Journal")
-        journal_issue = journal_node.find("JournalIssue") if journal_node else None
+        result: dict[str, Any] = {"pmid": pmid}
+        result.update(self._extract_basic_info(root, article))
+        result.update(self._extract_journal_info(article))
+        result.update(self._extract_all_dates(article, pubmed_data))
+        result.update(self._extract_classification(article, medline))
+        result.update(self._extract_metadata(root, article, medline))
+        return result
 
-        # Dates
-        pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        pub_date, pub_year = self._extract_date(pub_date_node)
-
-        # History dates
-        history = pubmed_data.find("History") if pubmed_data else None
-        accepted_date = self._extract_history_date(history, "accepted")
-        received_date = self._extract_history_date(history, "received")
-        revised_date = self._extract_history_date(history, "revised")
-        epub_date = self._extract_article_date(article, "Electronic")
-
-        # Pagination
-        pagination = article.find(".//Pagination/MedlinePgn")
-
+    def _extract_basic_info(
+        self, root: ET.Element, article: ET.Element
+    ) -> dict[str, Any]:
+        """Extract basic article info."""
         return {
-            "pmid": pmid,
             "doi": self._extract_doi(root),
             "title": self._get_text(article.find(".//ArticleTitle")),
             "abstract": self._extract_abstract(article),
-            # Journal
+            "authors": self._parse_authors(article),
+        }
+
+    def _extract_journal_info(self, article: ET.Element) -> dict[str, Any]:
+        """Extract journal-related fields."""
+        journal_node = article.find(".//Journal")
+        journal_issue = journal_node.find("JournalIssue") if journal_node else None
+        pagination = article.find(".//Pagination/MedlinePgn")
+
+        return {
             "journal": self._get_text(journal_node.find("Title")) if journal_node else None,
             "journal_abbrev": (
                 self._get_text(journal_node.find("ISOAbbreviation")) if journal_node else None
@@ -355,21 +357,44 @@ class PubMedPublicationTransformer(BaseTransformer):
             "volume": self._get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": self._get_text(journal_issue.find("Issue")) if journal_issue else None,
             "pages": self._get_text(pagination),
-            # Authors
-            "authors": self._parse_authors(article),
-            # Dates
+        }
+
+    def _extract_all_dates(
+        self, article: ET.Element, pubmed_data: ET.Element | None
+    ) -> dict[str, Any]:
+        """Extract all date fields."""
+        journal_node = article.find(".//Journal")
+        journal_issue = journal_node.find("JournalIssue") if journal_node else None
+        pub_date_node = journal_issue.find("PubDate") if journal_issue else None
+        pub_date, pub_year = self._extract_date(pub_date_node)
+
+        history = pubmed_data.find("History") if pubmed_data else None
+
+        return {
             "pub_date": pub_date,
             "pub_year": pub_year,
-            "publication_year": pub_year,  # Legacy alias
-            "accepted_date": accepted_date,
-            "received_date": received_date,
-            "revised_date": revised_date,
-            "epub_date": epub_date,
-            # Classification
+            "publication_year": pub_year,
+            "accepted_date": self._extract_history_date(history, "accepted"),
+            "received_date": self._extract_history_date(history, "received"),
+            "revised_date": self._extract_history_date(history, "revised"),
+            "epub_date": self._extract_article_date(article, "Electronic"),
+        }
+
+    def _extract_classification(
+        self, article: ET.Element, medline: ET.Element | None
+    ) -> dict[str, Any]:
+        """Extract classification fields."""
+        return {
             "publication_types": self._parse_publication_types(article),
             "keywords": self._parse_keywords(medline),
             "mesh_terms": self._parse_mesh_terms(medline),
-            # Metadata
+        }
+
+    def _extract_metadata(
+        self, root: ET.Element, article: ET.Element, medline: ET.Element | None
+    ) -> dict[str, Any]:
+        """Extract metadata fields."""
+        return {
             "language": self._get_text(article.find(".//Language")),
             "country": (
                 self._get_text(medline.find(".//MedlineJournalInfo/Country"))

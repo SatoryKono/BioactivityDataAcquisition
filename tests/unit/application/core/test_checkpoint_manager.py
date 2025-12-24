@@ -6,7 +6,6 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.domain.types import RunID
 
 
 @pytest.fixture
@@ -30,7 +29,7 @@ def mock_logger():
 @pytest.fixture
 def checkpoint_manager(mock_checkpoint_port, mock_logger):
     """Create CheckpointManager instance."""
-    run_id: RunID = uuid4()
+    run_id = uuid4()
     return CheckpointManager(
         checkpoint_port=mock_checkpoint_port,
         logger=mock_logger,
@@ -46,7 +45,7 @@ class TestCheckpointManagerInit:
 
     def test_init_with_all_params(self, mock_checkpoint_port, mock_logger):
         """Test initialization with all parameters."""
-        run_id: RunID = uuid4()
+        run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -68,13 +67,13 @@ class TestCheckpointManagerLoadCheckpoint:
         self, mock_checkpoint_port, mock_logger
     ):
         """Test load_checkpoint when resuming and checkpoint exists."""
-        saved_run_id: RunID = uuid4()
+        saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
             {"records_processed": 1000},
         )
 
-        run_id: RunID = uuid4()
+        run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -95,7 +94,7 @@ class TestCheckpointManagerLoadCheckpoint:
         """Test load_checkpoint when resuming but no checkpoint exists."""
         mock_checkpoint_port.load.return_value = None
 
-        run_id: RunID = uuid4()
+        run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -113,7 +112,7 @@ class TestCheckpointManagerLoadCheckpoint:
         self, mock_checkpoint_port, mock_logger
     ):
         """Test load_checkpoint when not resuming."""
-        run_id: RunID = uuid4()
+        run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
