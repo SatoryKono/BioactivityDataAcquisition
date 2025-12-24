@@ -46,7 +46,7 @@ flowchart LR
 
   Sources -->|REST API| Bronze
   Bronze -->|Transform + Validate| Silver
-  Silver -->|Aggregate| Gold
+  Silver -->|Transform + Filter| Gold
   Silver -.->|DQ errors| Q
   Bronze -.->|batch_id FK| L
 ```
@@ -125,7 +125,8 @@ flowchart TB
   subgraph Load
     E1["Safety Guard<br/>(validate lock)"]
     E2["Delta Lake Write<br/>(Silver)"]
-    E3["Aggregate to Gold"]
+    E3["Gold Transform<br/>(exclude JSON fields)"]
+    E4["Delta Lake Write<br/>(Gold)"]
   end
 
   subgraph Finalize
@@ -138,7 +139,7 @@ flowchart TB
   B1 --> B2 --> B3 --> C1
   C1 --> C2 --> C3 --> D1
   D1 --> D2 --> D3 --> E1
-  E1 --> E2 --> E3 --> F1
+  E1 --> E2 --> E3 --> E4 --> F1
   F1 --> F2 --> F3
 ```
 
@@ -154,6 +155,20 @@ flowchart TB
 | `_ingestion_ts`    | Timestamp | UTC ingestion time                     |
 | `_content_hash`    | String    | SHA256 for deduplication               |
 | `_dq_warn`         | Boolean   | Data quality warning flag              |
+
+---
+
+## Silver → Gold Transformation
+
+При записи в Gold слой выполняется трансформация:
+
+1. **Фильтрация записей**: `should_write_gold()` определяет, какие записи попадают в Gold
+2. **Исключение JSON полей**: `transform_for_gold()` удаляет поля из `GOLD_EXCLUDE_FIELDS`:
+   - `molecule_hierarchy`, `molecule_properties`, `molecule_structures`
+   - `molecule_synonyms`, `cross_references`, `atc_classifications`
+3. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
+
+**Code Reference**: `src/bioetl/application/core/base.py` → `transform_for_gold()`
 
 ---
 

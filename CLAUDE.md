@@ -80,13 +80,20 @@ src/bioetl/
 | **Silver** | Delta Lake | Permanent | Merge/Upsert по `content_hash`. ACID обязателен. |
 | **Gold** | Delta/Parquet | Permanent | SCD Type 2 или партиции по дате |
 
-### 3.1. Delta Lake (MUST)
+### 3.1. Silver → Gold Transformation
+
+- **Исключение JSON полей**: `GOLD_EXCLUDE_FIELDS` в `BasePipeline`
+- **Плоская структура**: Gold содержит только scalar поля
+- **Forensic**: Silver сохраняет JSON для расследований
+- **Метод**: `BasePipeline.transform_for_gold(context, silver_record)`
+
+### 3.2. Delta Lake (MUST)
 
 - **Engine**: `delta-rs` (Rust core)
 - **VACUUM**: Еженедельно, `retention_period=7 days`
 - **Forensic Retention**: 7d default, 30d для critical таблиц
 
-### 3.2. Content Hash
+### 3.3. Content Hash
 
 ```
 sha256(provider + canonical_json(record))

@@ -97,14 +97,35 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 Слой Gold содержит агрегированные данные, подготовленные для бизнес-аналитики и ML-моделей. Данные моделируются в виде схем "Звезда" или широких витрин.
 
-### 3.1. Формат и Оптимизация
+### 3.1. Silver → Gold Transformation
+
+При переходе из Silver в Gold выполняется трансформация данных:
+
+*   **Исключение JSON полей**: Вложенные JSON-строки, сохранённые в Silver для forensic целей, исключаются из Gold.
+*   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
+*   **Реализация**: `BasePipeline.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS`.
+
+#### Пример: ChEMBL Molecule
+
+| Silver (JSON) | Gold (Flat) |
+|---------------|-------------|
+| `molecule_hierarchy` (JSON string) | `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id` |
+| `molecule_properties` (JSON string) | `property_mw_freebase`, `property_alogp`, `property_hba`, `property_hbd`, `property_psa`, `property_rtb`, `property_ro5_violations`, `property_qed_weighted`, `property_full_molformula` |
+| `molecule_structures` (JSON string) | `structure_canonical_smiles`, `structure_standard_inchi`, `structure_standard_inchi_key` |
+| `molecule_synonyms` (JSON string) | *Excluded* |
+| `cross_references` (JSON string) | *Excluded* |
+| `atc_classifications` (JSON string) | *Excluded* |
+
+**Примечание**: Silver сохраняет полные JSON-данные для возможности восстановления и расследования (forensic retention).
+
+### 3.2. Формат и Оптимизация
 *   **Формат**: Delta Lake.
 *   **Путь**: `gold/{domain}/{mart_name}/` (например, `gold/discovery/target_affinity`).
 *   **Оптимизация чтения**:
     *   **Z-ORDER Clustering**: Обязательно применяется по часто используемым предикатам фильтрации (например, `target_id`, `assay_type`).
     *   **Compaction**: Регулярная (еженедельная) компрессия мелких файлов через `OPTIMIZE`.
 
-### 3.2. Контракты Данных (Data Contracts)
+### 3.3. Контракты Данных (Data Contracts)
 Gold слой имеет строгие публичные контракты.
 *   **Реестр**: JSON Schema файлы в `docs/contracts/gold/`.
 *   **Стабильность**: Любое изменение схемы в Gold требует:
@@ -112,12 +133,12 @@ Gold слой имеет строгие публичные контракты.
     2.  Создания миграции или новой версии витрины (v2).
     3.  Уведомления потребителей (Breaking Change Policy).
 
-### 3.3. Агрегация и Бизнес-логика
+### 3.4. Агрегация и Бизнес-логика
 *   Джойны между разными сущностями (например, Activity + Molecule + Target).
 *   Вычисление производных метрик (AVG, SUM).
 *   Применение бизнес-фильтров (исключение отозванных статей, невалидных экспериментов).
 
-### 3.4. Управление жизненным циклом (Lifecycle)
+### 3.5. Управление жизненным циклом (Lifecycle)
 *   Данные в Gold часто перезаписываются полностью (`mode="overwrite"`) для партиций или всей таблицы при пересчете витрин.
 *   Retention: Постоянное хранение, пока актуальна бизнес-задача.
 
