@@ -111,3 +111,4 @@ puppeteer-config.json
 nul
 profile.svg
 /data/json
+data/input/chembl_target_component.csv
