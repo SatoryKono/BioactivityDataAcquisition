@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Atomic Write Encoding**: `atomic_write()` теперь поддерживает параметр `encoding` для
+  корректной записи UTF-8 на Windows (ранее использовалась системная кодировка cp1251)
+- **DQ Metrics**: `BatchMetricsRecorder.track_quarantined_records()` теперь включает `run_type`
+  в метки метрик для лучшей observability
+- **CLI Safety**: Исправлена логика `--dry-run` для rebuild/backfill — теперь показывает preview
+  без вызова bootstrap (раннее завершение)
 - **GoldValidator Protocol Compliance**: Исправлен возврат `ValidationResult` вместо `list[dict]`
   в `PanderaGoldValidator` и `NoOpGoldValidator` для соответствия `GoldValidatorPort` протоколу.
   Ранее вызывало `AttributeError: 'list' object has no attribute 'valid'` в E2E тестах.
