@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.2 (Local-Only Deployment), 2025-12-23* 
+*Версия: 5.3 (Determinism & Reproducibility), 2025-12-24* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -330,8 +330,49 @@ Lock key включает тип запуска:
     - **Helpers**: `create_test_context()`, `assert_bronze_files_exist()`, `assert_silver_table_has_records()`.
     - **Маркер**: `@pytest.mark.e2e` для селективного запуска.
     - **Запуск**: `pytest tests/e2e/ -v -m e2e`.
-- **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов. 
- 
+- **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов.
+
+### 4.3. Детерминизм и Воспроизводимость
+См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md).
+
+#### MUST (Обязательно)
+1. Storage writers **MUST NOT** использовать модуль `random`
+2. Timestamps **MUST** передаваться из application слоя, не создаваться в infrastructure
+3. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
+4. `PipelineContext.started_at` — единственный источник времени для batch
+
+#### Архитектурные Тесты
+| Тест | Цель | Файл |
+|------|------|------|
+| `test_no_random_in_writers` | Блокирует `random` в storage | `tests/architecture/` |
+| `test_no_datetime_now_in_infrastructure` | Блокирует `datetime.now()` в infra | `tests/architecture/` |
+
+#### Детерминистичный Jitter
+```python
+# RetryConfig (src/bioetl/infrastructure/adapters/http/client.py)
+RetryConfig(
+    deterministic=True,  # Hash-based jitter
+    jitter_seed=42,      # Reproducible seed
+)
+```
+
+При `deterministic=True` jitter вычисляется как:
+```python
+hash_input = f"{attempt}:{url}:{seed}"
+jitter_factor = (hash(hash_input) % 1000) / 1000.0
+```
+
+#### Единый Источник Времени
+```python
+# Application layer создаёт timestamp
+context = PipelineContext.create(run_id, run_type, logger)
+# context.started_at используется во всех компонентах
+
+# Infrastructure получает timestamp как параметр
+await bronze_writer.write_bronze(..., ingestion_ts=context.started_at)
+await quarantine.write(..., ingestion_ts=context.started_at)
+```
+
 ## 5. Операции (Лимиты, Секреты, Shutdown) 
  
 ### 5.1. Ограничение скорости (Rate Limiting) 
@@ -595,8 +636,10 @@ fields:
 | [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy | Accepted | 2025-12-22 |
 | [ADR-009](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin Design | Accepted | 2025-12-22 |
 | [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment | Accepted | 2025-12-23 |
+| [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) | Deterministic Writes and Retries | Accepted | 2025-12-24 |
 
 ## История Изменений (Changelog)
+- **5.3** (2025-12-24): Determinism and Reproducibility (ADR-014). Добавлен §4.3 с правилами детерминизма. Архитектурные тесты для random и datetime.now().
 - **5.2** (2025-12-23): Local-Only Deployment (ADR-010). Обновлены §3.3 и §8.2 для MemoryLock. ADR-003 superseded.
 - **5.1** (2025-12-22): ADR additions (007-009), ADR index appendix.
 - **5.0** (2025-12-15): Production Ready. Final Governance Polish, Circuit Breaker half-open observability, Backfill lock timeouts, Generic Health Probes, Deprecation clarification.
