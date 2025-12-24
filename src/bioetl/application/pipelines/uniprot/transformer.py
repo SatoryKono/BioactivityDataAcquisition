@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.transformations import generate_entity_id
@@ -18,27 +18,22 @@ class UniProtProteinTransformer(BaseTransformer):
     def __init__(self, provider: str = "uniprot"):
         super().__init__(provider)
 
-    async def transform(
+    async def _transform_impl(
         self,
         _context: PipelineContext,
         record: BronzeRecord,
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
-        accession = record.get("primaryAccession")
-        if not accession:
-            return None
-
-        # Helper variables for safe access (handle explicit None values)
-        organism = cast("dict[str, Any]", record.get("organism") or {})
-        sequence = cast("dict[str, Any]", record.get("sequence") or {})
+        # Validate required field
+        accession = self._get_required_field(record, "primaryAccession")
 
         normalized = {
             "accession": accession,
             "entry_name": record.get("uniProtkbId"),
             "protein_name": self._extract_protein_name(record),
             "gene_names": self._extract_gene_names(record),
-            "organism_id": organism.get("taxonId"),
-            "sequence_length": sequence.get("length"),
+            "organism_id": self._extract_nested(record, "organism.taxonId"),
+            "sequence_length": self._extract_nested(record, "sequence.length"),
         }
 
         # Генерация entity_id согласно RULES.md §2.8
@@ -56,22 +51,25 @@ class UniProtProteinTransformer(BaseTransformer):
         return cast("SilverRecord", normalized)
 
     def _extract_protein_name(self, record: BronzeRecord) -> str | None:
-        try:
-            desc = cast("dict[str, Any]", record.get("proteinDescription", {}))
-            rec_name = desc.get("recommendedName", {})
-            full_name = rec_name.get("fullName", {})
-            return cast("str | None", full_name.get("value"))
-        except (AttributeError, TypeError):
-            return None
+        """Extract protein name using nested path extraction."""
+        return self._extract_nested(
+            record,
+            "proteinDescription.recommendedName.fullName.value",
+        )
 
     def _extract_gene_names(self, record: BronzeRecord) -> list[str]:
+        """Extract gene names from genes list."""
         names = []
-        try:
-            genes = cast("list[dict[str, Any]]", record.get("genes", []))
-            for gene in genes:
-                gene_name = gene.get("geneName", {})
-                if name := gene_name.get("value"):
+        genes = record.get("genes")
+        if not genes or not isinstance(genes, list):
+            return names
+
+        for gene in genes:
+            if not isinstance(gene, dict):
+                continue
+            gene_name = gene.get("geneName", {})
+            if isinstance(gene_name, dict):
+                name = gene_name.get("value")
+                if name:
                     names.append(name)
-        except (AttributeError, TypeError):
-            pass
         return names

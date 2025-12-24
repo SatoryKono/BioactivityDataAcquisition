@@ -22,111 +22,98 @@ class MoleculeTransformer(BaseTransformer):
     def __init__(self, provider: str = "chembl"):
         super().__init__(provider)
 
-    async def transform(
+    async def _transform_impl(
         self,
         context: PipelineContext,
         record: BronzeRecord,
     ) -> SilverRecord | None:
         """Transform raw ChEMBL molecule to normalized format using Domain Entity."""
-        molecule_chembl_id = record.get("molecule_chembl_id")
+        # Validate required field
+        molecule_chembl_id = self._get_required_field(record, "molecule_chembl_id")
 
-        if not molecule_chembl_id:
-            return None
+        entity_id = generate_entity_id(
+            record={"molecule_chembl_id": str(molecule_chembl_id)},
+            provider=self.provider,
+            id_field="molecule_chembl_id",
+        )
 
-        try:
-            entity_id = generate_entity_id(
-                record={"molecule_chembl_id": str(molecule_chembl_id)},
-                provider=self.provider,
-                id_field="molecule_chembl_id",
-            )
+        # Extract and flatten complex fields
+        hierarchy = self._extract_hierarchy(record.get("molecule_hierarchy"))
+        properties = self._extract_properties(record.get("molecule_properties"))
+        structures = self._extract_structures(record.get("molecule_structures"))
 
-            # Extract and flatten complex fields
-            hierarchy = self._extract_hierarchy(record.get("molecule_hierarchy"))
-            properties = self._extract_properties(record.get("molecule_properties"))
-            structures = self._extract_structures(record.get("molecule_structures"))
+        business_data: dict[str, Any] = {
+            # Primary identifier
+            "molecule_chembl_id": str(molecule_chembl_id),
+            # Core metadata
+            "pref_name": record.get("pref_name"),
+            "molecule_type": record.get("molecule_type"),
+            "structure_type": record.get("structure_type"),
+            "max_phase": safe_int(record.get("max_phase")),
+            "first_approval": safe_int(record.get("first_approval")),
+            # Flags
+            "oral": record.get("oral"),
+            "parenteral": record.get("parenteral"),
+            "topical": record.get("topical"),
+            "black_box_warning": safe_int(record.get("black_box_warning")),
+            "natural_product": safe_int(record.get("natural_product")),
+            "first_in_class": safe_int(record.get("first_in_class")),
+            "prodrug": safe_int(record.get("prodrug")),
+            "therapeutic_flag": record.get("therapeutic_flag"),
+            "withdrawn_flag": record.get("withdrawn_flag"),
+            "inorganic_flag": safe_int(record.get("inorganic_flag")),
+            "polymer_flag": safe_int(record.get("polymer_flag")),
+            "chirality": safe_int(record.get("chirality")),
+            "dosed_ingredient": safe_int(record.get("dosed_ingredient")),
+            "availability_type": safe_int(record.get("availability_type")),
+            # Withdrawn metadata
+            "withdrawn_year": safe_int(record.get("withdrawn_year")),
+            "withdrawn_country": self.serialize_json(record.get("withdrawn_country")),
+            "withdrawn_reason": self.serialize_json(record.get("withdrawn_reason")),
+            # USAN naming
+            "usan_stem": record.get("usan_stem"),
+            "usan_stem_definition": record.get("usan_stem_definition"),
+            "usan_substem": record.get("usan_substem"),
+            "usan_year": safe_int(record.get("usan_year")),
+            # Other metadata
+            "helm_notation": record.get("helm_notation"),
+            "molecule_species": record.get("molecule_species"),
+            # Complex fields (JSON serialized for history)
+            "molecule_hierarchy": self.serialize_json(
+                record.get("molecule_hierarchy")
+            ),
+            "molecule_properties": self.serialize_json(
+                record.get("molecule_properties")
+            ),
+            "molecule_structures": self.serialize_json(
+                record.get("molecule_structures")
+            ),
+            "molecule_synonyms": self.serialize_json(
+                record.get("molecule_synonyms")
+            ),
+            "cross_references": self.serialize_json(record.get("cross_references")),
+            "atc_classifications": self.serialize_json(
+                record.get("atc_classifications")
+            ),
+            # Flattened fields
+            **hierarchy,
+            **properties,
+            **structures,
+        }
 
-            business_data: dict[str, Any] = {
-                # Primary identifier
-                "molecule_chembl_id": str(molecule_chembl_id),
-                # Core metadata
-                "pref_name": record.get("pref_name"),
-                "molecule_type": record.get("molecule_type"),
-                "structure_type": record.get("structure_type"),
-                "max_phase": safe_int(record.get("max_phase")),
-                "first_approval": safe_int(record.get("first_approval")),
-                # Flags
-                "oral": record.get("oral"),
-                "parenteral": record.get("parenteral"),
-                "topical": record.get("topical"),
-                "black_box_warning": safe_int(record.get("black_box_warning")),
-                "natural_product": safe_int(record.get("natural_product")),
-                "first_in_class": safe_int(record.get("first_in_class")),
-                "prodrug": safe_int(record.get("prodrug")),
-                "therapeutic_flag": record.get("therapeutic_flag"),
-                "withdrawn_flag": record.get("withdrawn_flag"),
-                "inorganic_flag": safe_int(record.get("inorganic_flag")),
-                "polymer_flag": safe_int(record.get("polymer_flag")),
-                "chirality": safe_int(record.get("chirality")),
-                "dosed_ingredient": safe_int(record.get("dosed_ingredient")),
-                "availability_type": safe_int(record.get("availability_type")),
-                # Withdrawn metadata
-                "withdrawn_year": safe_int(record.get("withdrawn_year")),
-                "withdrawn_country": self.serialize_json(record.get("withdrawn_country")),
-                "withdrawn_reason": self.serialize_json(record.get("withdrawn_reason")),
-                # USAN naming
-                "usan_stem": record.get("usan_stem"),
-                "usan_stem_definition": record.get("usan_stem_definition"),
-                "usan_substem": record.get("usan_substem"),
-                "usan_year": safe_int(record.get("usan_year")),
-                # Other metadata
-                "helm_notation": record.get("helm_notation"),
-                "molecule_species": record.get("molecule_species"),
-                # Complex fields (JSON serialized for history)
-                "molecule_hierarchy": self.serialize_json(
-                    record.get("molecule_hierarchy")
-                ),
-                "molecule_properties": self.serialize_json(
-                    record.get("molecule_properties")
-                ),
-                "molecule_structures": self.serialize_json(
-                    record.get("molecule_structures")
-                ),
-                "molecule_synonyms": self.serialize_json(
-                    record.get("molecule_synonyms")
-                ),
-                "cross_references": self.serialize_json(record.get("cross_references")),
-                "atc_classifications": self.serialize_json(
-                    record.get("atc_classifications")
-                ),
-                # Flattened fields
-                **hierarchy,
-                **properties,
-                **structures,
-            }
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
-            content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-            entity = Molecule(
-                entity_id=entity_id,
-                content_hash=content_hash,
-                run_id=context.run_id,
-                run_type=context.run_type,
-                source_batch_id=None,
-                **business_data,
-            )
-
-        except ValueError as e:
-            context.logger.warning(
-                "entity_validation_failed",
-                error=str(e),
-                molecule_chembl_id=molecule_chembl_id,
-            )
-            return None
+        # Create entity using helper method
+        entity = self._create_entity(
+            Molecule,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            **business_data,
+        )
 
         # Convert Entity to SilverRecord for storage
-        silver_record = self.entity_to_silver_record(entity)
-
-        return cast("SilverRecord", silver_record)
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _extract_hierarchy(self, data: dict[str, Any] | None) -> dict[str, Any]:
         if not data:
