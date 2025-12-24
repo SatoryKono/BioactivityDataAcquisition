@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.types import ValidationResult
+
 if TYPE_CHECKING:
     import pandera as pa
 
@@ -24,26 +26,26 @@ class PanderaGoldValidator:
     def __init__(self, schema: pa.DataFrameSchema | None = None) -> None:
         self._schema = schema
 
-    def validate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
         """Validate records using Pandera schema.
 
         Args:
             records: List of record dictionaries to validate.
 
         Returns:
-            List of validated records (unchanged if valid).
-
-        Raises:
-            pandera.errors.SchemaError: If validation fails.
+            ValidationResult with valid flag and any error messages.
         """
         if not self._schema or not records:
-            return records
+            return ValidationResult(valid=True)
 
         import pandas as pd
 
         df = pd.DataFrame(records)
-        self._schema.validate(df, lazy=True)
-        return records
+        try:
+            self._schema.validate(df, lazy=True)
+            return ValidationResult(valid=True)
+        except Exception as e:
+            return ValidationResult(valid=False, errors=[str(e)])
 
 
 class NoOpGoldValidator:
@@ -53,13 +55,13 @@ class NoOpGoldValidator:
     Used when Gold validation is not required.
     """
 
-    def validate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
         """Pass through records without validation.
 
         Args:
             records: List of record dictionaries.
 
         Returns:
-            Same list of records unchanged.
+            ValidationResult indicating valid (always True for no-op).
         """
-        return records
+        return ValidationResult(valid=True)

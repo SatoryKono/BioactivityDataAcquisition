@@ -109,10 +109,12 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест трансформации полной записи Bronze → Silver."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -157,10 +159,12 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест трансформации минимальной записи."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -196,10 +200,12 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест: запись без primaryAccession возвращает None."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -223,10 +229,12 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест трансформации записи без proteinDescription."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -260,10 +268,12 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест трансформации записи с пустым списком генов."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -298,7 +308,9 @@ class TestUniProtProteinPipelineCreate:
         mock_uniprot_services,
     ):
         """Тест создания пайплайна через factory method."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline.create(
+            run_id=run_id,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             config=uniprot_config,
@@ -320,10 +332,12 @@ class TestUniProtProteinPipelineEdgeCases:
         mock_uniprot_services,
     ):
         """Тест трансформации с некорректной структурой genes."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -357,10 +371,12 @@ class TestUniProtProteinPipelineEdgeCases:
         mock_uniprot_services,
     ):
         """Тест трансформации с None organism."""
+        run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(

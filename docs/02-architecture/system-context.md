@@ -1,13 +1,15 @@
 # System Context
-*Aligned with RULES.md v5.0*
+*Aligned with RULES.md v5.2 (Local-Only Deployment)*
 
 ## Overview
 
 C4 System Context diagram показывает BioETL как центральную систему и её взаимодействие с внешними системами.
 
+> **Note**: Текущая реализация — **Local-Only** (ADR-010). Redis и S3 отложены для будущего распределённого развёртывания.
+
 ---
 
-## System Context Diagram
+## System Context Diagram (Local-Only)
 
 ```mermaid
 flowchart TB
@@ -20,11 +22,12 @@ flowchart TB
 
     subgraph BioETL System
         BIOETL["BioETL<br/>━━━━━━━━━━━━━<br/>Bioactivity Data<br/>Acquisition Platform"]
+        LOCK["MemoryLock<br/>(In-Process)"]
     end
 
     subgraph Storage Layer
-        S3[("S3 / MinIO<br/>━━━━━━━━━━<br/>Bronze, Silver, Gold")]
-        REDIS[("Redis<br/>━━━━━━━━<br/>Distributed Locks")]
+        FS[("Local File System<br/>━━━━━━━━━━<br/>data/bronze<br/>data/silver<br/>data/gold")]
+        CP[("Checkpoints<br/>━━━━━━━━<br/>data/checkpoints")]
     end
 
     subgraph Consumers
@@ -39,14 +42,18 @@ flowchart TB
     UNIPROT -->|REST API| BIOETL
     PUBMED -->|REST API| BIOETL
 
+    %% Internal locking
+    BIOETL <-->|acquire/release| LOCK
+
     %% BioETL to storage
-    BIOETL -->|JSONL+zstd| S3
-    BIOETL <-->|SETNX/Heartbeat| REDIS
+    BIOETL -->|JSONL+zstd| FS
+    BIOETL -->|Delta Lake| FS
+    BIOETL -->|JSON| CP
 
     %% Storage to consumers
-    S3 -->|Delta Lake| ANALYTICS
-    S3 -->|Parquet| ML
-    S3 -->|Delta Lake| API
+    FS -->|Delta Lake| ANALYTICS
+    FS -->|Parquet| ML
+    FS -->|Delta Lake| API
 ```
 
 ---
@@ -64,30 +71,31 @@ flowchart TB
 
 ### External Systems
 
-| System | Role | Protocol |
-|--------|------|----------|
-| **ChEMBL** | Bioactivity data source | REST API (EBI) |
-| **PubChem** | Chemical compound data | REST API (NCBI) |
-| **UniProt** | Protein/target data | REST API |
-| **PubMed** | Publication metadata | REST API (NCBI) |
-| **S3/MinIO** | Object storage (Medallion layers) | S3 API |
-| **Redis** | Distributed locking | Redis protocol |
+| System | Role | Protocol | Status |
+|--------|------|----------|--------|
+| **ChEMBL** | Bioactivity data source | REST API (EBI) | Active |
+| **PubChem** | Chemical compound data | REST API (NCBI) | Active |
+| **UniProt** | Protein/target data | REST API | Active |
+| **PubMed** | Publication metadata | REST API (NCBI) | Active |
+| **Local FS** | Medallion layers storage | File I/O | Active (Local-Only) |
+| **S3/MinIO** | Object storage | S3 API | Future (Distributed) |
+| **Redis** | Distributed locking | Redis protocol | Future (Distributed) |
 
 ---
 
-## Data Flow Summary
+## Data Flow Summary (Local-Only)
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │  Data Sources   │────►│     BioETL      │────►│   Consumers     │
 │  (ChEMBL, etc.) │     │  ETL Platform   │     │  (BI, ML, API)  │
 └─────────────────┘     └────────┬────────┘     └─────────────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │  Storage Layer  │
-                        │  (S3 + Redis)   │
-                        └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │  Storage Layer  │
+                       │  (Local FS)     │
+                       └─────────────────┘
 ```
 
 ---
@@ -96,13 +104,16 @@ flowchart TB
 
 BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 
-- **Ports**: Protocol interfaces в Domain layer (`DataSourcePort`, `SinkPort`, `LockPort`)
-- **Adapters**: Infrastructure implementations (`ChemblClient`, `DeltaLakeWriter`, `RedisLock`)
+- **Ports**: Protocol interfaces в Domain layer (`DataSourcePort`, `StoragePort`, `LockPort`)
+- **Adapters**: Infrastructure implementations
+  - **Local-Only**: `ChemblClient`, `LocalDeltaWriter`, `MemoryLock`
+  - **Distributed (Future)**: `S3Writer`, `RedisLock`
 
 Это обеспечивает:
 - Независимость Domain от I/O
 - Тестируемость через mock-адаптеры
 - Расширяемость для новых провайдеров
+- Лёгкий переход между Local-Only и Distributed deployment
 
 ---
 
@@ -110,3 +121,4 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 
 - **Data Flow**: [data-flow.md](data-flow.md)
 - **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
+- **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)

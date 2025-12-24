@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **GoldValidator Protocol Compliance**: Исправлен возврат `ValidationResult` вместо `list[dict]`
+  в `PanderaGoldValidator` и `NoOpGoldValidator` для соответствия `GoldValidatorPort` протоколу.
+  Ранее вызывало `AttributeError: 'list' object has no attribute 'valid'` в E2E тестах.
+- **Integration Tests**: Добавлен обязательный параметр `run_id` в тесты пайплайнов
+  `test_pubchem_pipeline.py` и `test_uniprot_pipeline.py` (требуется после изменения сигнатуры BasePipeline).
 - **Target Pipeline**: Исправлено извлечение `cross_references` - теперь агрегируется из
   `target_components[].target_component_xrefs[]` вместо пустого поля на уровне target
 - **PubChem Tests**: Исправлены тесты PubChemClient (удалён неиспользуемый параметр `watermark`)

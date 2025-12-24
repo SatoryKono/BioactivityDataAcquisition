@@ -111,10 +111,12 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест трансформации полной записи Bronze → Silver."""
+        run_id = uuid4()
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -155,10 +157,12 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест трансформации неполной записи."""
+        run_id = uuid4()
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -192,10 +196,12 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест: запись без CID возвращает None."""
+        run_id = uuid4()
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
+            run_id=run_id,
         )
 
         context = PipelineContext(
@@ -225,7 +231,9 @@ class TestPubChemCompoundPipelineCreate:
         mock_pubchem_services,
     ):
         """Тест создания пайплайна через factory method."""
+        run_id = uuid4()
         pipeline = PubChemCompoundPipeline.create(
+            run_id=run_id,
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             config=pubchem_config,

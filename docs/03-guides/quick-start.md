@@ -2,21 +2,21 @@
 
 TL;DR for setting up and running BioETL locally.
 
-## Setup (5 minutes)
+> **Note**: BioETL использует **Local-Only** deployment (ADR-010).
+> Docker и внешние сервисы (Redis, MinIO) не требуются.
+
+## Setup (3 minutes)
 
 ```bash
 # Clone and enter directory
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
 cd BioactivityDataAcquisition
 
-# Install dependencies
+# Install dependencies (creates venv, installs packages)
 make install
 
-# Configure environment
+# Optional: Configure environment
 cp .env.example .env
-
-# Start infrastructure (Redis, MinIO)
-make docker-up
 ```
 
 ## Run Your First Pipeline
@@ -28,6 +28,11 @@ source .venv/bin/activate  # Linux/macOS
 
 # Run ChEMBL activity pipeline (limited to 100 records)
 python -m bioetl.main run --pipeline chembl_activity --limit 100
+
+# Data will be stored in:
+# - data/bronze/v1/chembl/activity/
+# - data/silver/chembl.activity/
+# - data/gold/chembl.activity_gold/
 ```
 
 ## Verify
@@ -44,12 +49,24 @@ make lint
 
 | Task | Command |
 |------|---------|
+| Install dependencies | `make install` |
 | Run all tests | `make test` |
 | Run linting | `make lint` |
-| Start infrastructure | `make docker-up` |
-| Stop infrastructure | `make docker-down` |
+| Run on fixtures | `make run-local` |
 | List pipelines | `python -m bioetl.main list` |
 | Full rebuild | `python -m bioetl.main run --pipeline <name> --full-rebuild` |
+| Resume from checkpoint | `python -m bioetl.main run --pipeline <name> --resume` |
+
+## Project Structure (Data)
+
+```
+data/
+├── bronze/          # Raw API responses (JSONL + zstd)
+├── silver/          # Cleaned Delta Lake tables
+├── gold/            # Aggregated/enriched tables
+├── checkpoints/     # Pipeline state for resume
+└── quarantine/      # Failed records for review
+```
 
 ## Next Steps
 
