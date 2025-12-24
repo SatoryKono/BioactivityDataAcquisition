@@ -71,3 +71,14 @@ class CheckpointManager:
     async def delete_checkpoint(self) -> None:
         """Delete checkpoint after successful run."""
         await self._checkpoint.delete(self._pipeline_name)
+
+    async def list_all(self) -> list[str]:
+        """List all pipelines that have checkpoints.
+
+        Delegates to CheckpointPort.list_all() for CLI inspection.
+
+        Returns:
+            List of pipeline names with existing checkpoints.
+
+        """
+        return await self._checkpoint.list_all()
