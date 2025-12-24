@@ -799,3 +799,143 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
         "Add missing methods to port contracts in domain/ports.py:\n"
         + "\n".join(f"  - {v}" for v in violations)
     )
+
+
+def test_metrics_server_only_in_composition(src_dir: Path) -> None:
+    """Verify start_metrics_server is only called from composition layer.
+
+    REQ-ARCH-OBS-001: Observability initialization should only happen
+    in the composition root to ensure single point of responsibility.
+    """
+    forbidden_layers = ["interfaces", "application", "domain"]
+    allowed_patterns = [
+        r"def start_metrics_server",  # Definition is allowed
+        r"from.*import.*start_metrics_server",  # Import is allowed
+        r"#.*start_metrics_server",  # Comments are allowed
+        r"\"\"\".*start_metrics_server",  # Docstrings are allowed
+    ]
+
+    violations = []
+
+    for layer in forbidden_layers:
+        layer_path = src_dir / "bioetl" / layer
+        if not layer_path.exists():
+            continue
+
+        for py_file in layer_path.rglob("*.py"):
+            with py_file.open(encoding="utf-8") as f:
+                content = f.read()
+                lines = content.splitlines()
+
+            for i, line in enumerate(lines, 1):
+                # Check if line contains actual call to start_metrics_server
+                if "start_metrics_server(" in line:
+                    # Skip if matches allowed patterns
+                    if any(re.search(p, line) for p in allowed_patterns):
+                        continue
+
+                    relative_path = py_file.relative_to(src_dir)
+                    violations.append(f"{relative_path}:{i} - {line.strip()}")
+
+    assert not violations, (
+        "start_metrics_server() should only be called from composition layer.\n"
+        "Found calls in forbidden layers:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )
+
+
+def test_no_direct_io_in_domain(src_dir: Path) -> None:
+    """Verify domain layer has no direct I/O operations.
+
+    REQ-ARCH-003: Domain layer should be pure business logic without I/O.
+    """
+    domain_path = src_dir / "bioetl" / "domain"
+    if not domain_path.exists():
+        pytest.skip("Domain layer not found")
+
+    # Patterns that indicate direct I/O
+    io_patterns = [
+        (r"\bopen\s*\(", "open() file access"),
+        (r"Path\s*\([^)]+\)\s*\.\s*(read|write|mkdir|unlink)", "Path I/O methods"),
+        (r"os\.(read|write|mkdir|remove|rename)", "os module I/O"),
+        (r"shutil\.(copy|move|rmtree)", "shutil I/O operations"),
+    ]
+
+    # Excluded files (test files, __init__.py)
+    excluded_files = {"__init__.py"}
+
+    violations = []
+
+    for py_file in domain_path.rglob("*.py"):
+        if py_file.name in excluded_files:
+            continue
+
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+            lines = content.splitlines()
+
+        for i, line in enumerate(lines, 1):
+            # Skip comments and docstrings
+            stripped = line.strip()
+            if stripped.startswith("#") or stripped.startswith('"""'):
+                continue
+
+            for pattern, description in io_patterns:
+                if re.search(pattern, line):
+                    relative_path = py_file.relative_to(src_dir)
+                    violations.append(
+                        f"{relative_path}:{i} - {description}: {stripped[:60]}..."
+                    )
+
+    assert not violations, (
+        "Domain layer should not have direct I/O operations.\n"
+        "Found violations:\n" + "\n".join(f"  - {v}" for v in violations)
+    )
+
+
+def test_atomic_write_used_in_writers(src_dir: Path) -> None:
+    """Verify that storage writers use atomic write patterns.
+
+    REQ-DATA-004: All file writes should be atomic to prevent data corruption.
+    """
+    storage_path = src_dir / "bioetl" / "infrastructure" / "storage"
+    if not storage_path.exists():
+        pytest.skip("Storage layer not found")
+
+    # Writers that should use atomic patterns
+    writer_files = ["bronze_writer.py", "gold_writer.py"]
+
+    # Patterns indicating non-atomic writes
+    non_atomic_patterns = [
+        r'with\s+open\s*\([^)]+,\s*["\']w',  # with open(path, 'w')
+        r'\.write\s*\([^)]+\)\s*$',  # .write() at end of line (might be in context)
+    ]
+
+    # Patterns indicating atomic writes (should be present)
+    atomic_indicators = [
+        r"atomic_write",
+        r"AtomicWriteGroup",
+        r"\.replace\s*\(",
+        r"tempfile\.mkstemp",
+    ]
+
+    findings = []
+
+    for writer_file in writer_files:
+        file_path = storage_path / writer_file
+        if not file_path.exists():
+            continue
+
+        with file_path.open(encoding="utf-8") as f:
+            content = f.read()
+
+        # Check for atomic indicators
+        has_atomic = any(re.search(p, content) for p in atomic_indicators)
+
+        if not has_atomic:
+            findings.append(f"{writer_file} - No atomic write patterns detected")
+
+    assert not findings, (
+        "Storage writers should use atomic write patterns (temp file + rename).\n"
+        "Files missing atomic patterns:\n" + "\n".join(f"  - {f}" for f in findings)
+    )
