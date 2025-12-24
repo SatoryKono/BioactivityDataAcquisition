@@ -48,6 +48,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 # Exceptions
 from bioetl.domain.exceptions import (
     ApiError,
+    AuthFailureError,
     BioETLError,
     BucketNotFoundError,
     CheckpointConflictError,
@@ -55,11 +56,14 @@ from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
     CriticalError,
     DataQualityError,
+    DataQualityThresholdError,
+    InfrastructureError,
     InvalidDataFormatError,
     LockAcquisitionError,
     LockLostError,
     MergeConflictError,
     MissingRequiredFieldError,
+    NetworkError,
     RateLimitError,
     RecoverableError,
     RetryExhaustedError,
@@ -87,6 +91,7 @@ from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
+    FilterableDataSourcePort,
     GoldValidatorPort,
     InputFilterPort,
     LockPort,
@@ -99,6 +104,7 @@ from bioetl.domain.ports import (
 
 # Pure domain transformations
 from bioetl.domain.transformations import (
+    META_FIELDS,
     calculate_dq_score,
     canonical_json_dumps,
     detect_hash_collision,
@@ -109,21 +115,28 @@ from bioetl.domain.transformations import (
     normalize_for_hash,
     safe_float,
     safe_int,
+    safe_str,
 )
 
 # Types
 from bioetl.domain.types import (
+    ArrowSchema,
     BatchID,
+    BronzeRecord,
     CircuitBreakerState,
+    ComponentHealthResult,
     ContentHash,
     DataClassification,
     DQStatus,
     DriftLevel,
     EntityID,
     ErrorType,
+    HealthReport,
     HealthStatus,
     RunID,
     RunType,
+    SilverRecord,
+    ValidationResult,
 )
 
 __all__ = [
@@ -150,6 +163,7 @@ __all__ = [
     "ErrorClassifier",
     # Exceptions - Base
     "ApiError",
+    "AuthFailureError",
     "BioETLError",
     "CriticalError",
     "DataQualityError",
@@ -157,18 +171,21 @@ __all__ = [
     # Exceptions - Critical
     "BucketNotFoundError",
     "CheckpointConflictError",
+    "InfrastructureError",
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
     # Exceptions - Recoverable
     "ChemblApiError",
     "CircuitBreakerOpenError",
+    "NetworkError",
     "RateLimitError",
     "RetryExhaustedError",
     "StorageError",
     "TableNotFoundError",
     "UploadError",
     # Exceptions - Data Quality
+    "DataQualityThresholdError",
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
@@ -186,6 +203,7 @@ __all__ = [
     # Ports
     "CheckpointPort",
     "DataSourcePort",
+    "FilterableDataSourcePort",
     "GoldValidatorPort",
     "InputFilterPort",
     "LockPort",
@@ -195,6 +213,7 @@ __all__ = [
     "StoragePort",
     "TracingPort",
     # Transformations (pure functions)
+    "META_FIELDS",
     "calculate_dq_score",
     "canonical_json_dumps",
     "detect_hash_collision",
@@ -205,16 +224,23 @@ __all__ = [
     "normalize_for_hash",
     "safe_float",
     "safe_int",
+    "safe_str",
     # Types
+    "ArrowSchema",
     "BatchID",
+    "BronzeRecord",
     "CircuitBreakerState",
+    "ComponentHealthResult",
     "ContentHash",
     "DataClassification",
     "DQStatus",
     "DriftLevel",
     "EntityID",
     "ErrorType",
+    "HealthReport",
     "HealthStatus",
     "RunID",
     "RunType",
+    "SilverRecord",
+    "ValidationResult",
 ]
