@@ -12,9 +12,10 @@ import pyarrow as pa
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -43,8 +44,7 @@ class PipelineFactoryProtocol(Protocol):
         run_id: "RunID",
         runtime: "RuntimeConfig",
         settings: "Settings",
-        logger: "LoggerPort",
-        tracer: "TracingPort | None",
+        observability: "ObservabilityBundle",
         filter_config: "InputFilterConfig | None" = None,
         config: "PipelineYamlConfig | None" = None,
     ) -> "PipelineRunner":
