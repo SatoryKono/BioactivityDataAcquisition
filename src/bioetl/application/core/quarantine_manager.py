@@ -3,6 +3,7 @@
 Refactored per ADR-0005 to accept explicit dependencies instead of full pipeline.
 """
 
+from datetime import datetime
 from typing import Any
 
 from bioetl.domain.ports import QuarantinePort
@@ -37,6 +38,7 @@ class QuarantineManager:
         error_type: ErrorType,
         batch_id: BatchID,
         error_details: str,
+        ingestion_ts: datetime | None = None,
     ) -> None:
         """Write a record to the quarantine.
 
@@ -45,6 +47,7 @@ class QuarantineManager:
             error_type: Classification of the error.
             batch_id: ID of the batch containing this record.
             error_details: Human-readable error description.
+            ingestion_ts: Ingestion timestamp from context (single source of time).
 
         """
         await self._quarantine.write(
@@ -53,4 +56,5 @@ class QuarantineManager:
             payload=record,
             bronze_batch_id=batch_id,
             metadata={"error_details": {"message": error_details}},
+            ingestion_ts=ingestion_ts,
         )
