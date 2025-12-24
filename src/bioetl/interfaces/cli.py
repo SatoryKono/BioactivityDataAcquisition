@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import click
@@ -16,9 +17,9 @@ import click
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
+    bootstrap_cleanup,
     bootstrap_pipeline,
     bootstrap_quarantine,
-    bootstrap_storage,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
@@ -27,54 +28,118 @@ from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
+if TYPE_CHECKING:
+    import structlog
 
-def _preview_cleanup(pipeline: str, run_type: str) -> None:
+    from bioetl.application.core.runner import PipelineRunner
+
+
+async def _preview_cleanup_async(pipeline: str) -> None:
     """Preview what data would be cleared in dry-run mode.
 
-    Delegates to StoragePort.preview_cleanup() for clean architecture.
+    Delegates to CleanupService.preview() for clean architecture.
 
     Args:
         pipeline: Pipeline name
-        run_type: Type of run (rebuild or backfill)
+    """
+    config = load_pipeline_config(pipeline)
+    cleanup_service = bootstrap_cleanup()
+
+    preview = await cleanup_service.preview(
+        silver_table=config.silver_table,
+        gold_table=config.gold_table,
+    )
+
+    click.echo("\nFiles/directories that would be cleared:")
+
+    # Display Silver info
+    if preview.silver.exists:
+        click.echo(
+            f"  Silver: {preview.silver.path} ({preview.silver.file_count} files)"
+        )
+    else:
+        click.echo(f"  Silver: {preview.silver.path} (does not exist)")
+
+    # Display Gold info
+    if preview.gold:
+        if preview.gold.exists:
+            click.echo(f"  Gold: {preview.gold.path} ({preview.gold.file_count} files)")
+        else:
+            click.echo(f"  Gold: {preview.gold.path} (does not exist)")
+
+    click.echo(f"\nTotal items that would be cleared: ~{preview.total_files}")
+    click.echo("\nNo changes were made (dry-run mode).")
+
+
+def _preview_cleanup(pipeline: str) -> None:
+    """Preview what data would be cleared in dry-run mode.
+
+    Sync wrapper for CLI that calls async CleanupService.preview().
+
+    Args:
+        pipeline: Pipeline name
     """
     try:
-        config = load_pipeline_config(pipeline)
-        storage = bootstrap_storage()
-
-        preview = storage.preview_cleanup(
-            silver_table=config.silver_table,
-            gold_table=config.gold_table,
-        )
-
-        click.echo("\nFiles/directories that would be cleared:")
-
-        # Display Silver info
-        silver_info = preview["silver"]
-        if silver_info["exists"]:
-            click.echo(f"  Silver: {silver_info['path']} ({silver_info['file_count']} files)")
-        else:
-            click.echo(f"  Silver: {silver_info['path']} (does not exist)")
-
-        # Display Gold info
-        if preview["gold"]:
-            gold_info = preview["gold"]
-            if gold_info["exists"]:
-                click.echo(f"  Gold: {gold_info['path']} ({gold_info['file_count']} files)")
-            else:
-                click.echo(f"  Gold: {gold_info['path']} (does not exist)")
-
-        click.echo(f"\nTotal items that would be cleared: ~{preview['total_files']}")
-        click.echo("\nNo changes were made (dry-run mode).")
+        asyncio.run(_preview_cleanup_async(pipeline))
     except Exception as e:
         click.echo(f"Error previewing cleanup: {e}", err=True)
 
 
-def validate_pipeline_name(_ctx, _param, value):
+def validate_pipeline_name(
+    _ctx: click.Context | None, _param: click.Parameter | None, value: str
+) -> str:
     """Validate pipeline name against the registry at runtime."""
     available = PipelineRegistry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")
     return value
+
+
+def _handle_destructive_run_confirmation(
+    pipeline: str, run_type: str, dry_run: bool, yes: bool
+) -> bool:
+    """Handle confirmation for rebuild/backfill runs.
+
+    Args:
+        pipeline: Pipeline name.
+        run_type: Type of run.
+        dry_run: Whether this is a dry run.
+        yes: Whether to skip confirmation.
+
+    Returns:
+        True if should continue with pipeline execution, False if should exit early.
+    """
+    if run_type not in ("rebuild", "backfill"):
+        return True
+
+    if dry_run:
+        click.echo(f"[DRY-RUN] Would clear data for pipeline: {pipeline}")
+        click.echo(f"[DRY-RUN] Run type: {run_type}")
+        _preview_cleanup(pipeline)
+        return False
+
+    if not yes:
+        click.echo(f"WARNING: {run_type} will clear existing data for {pipeline}.")
+        if not click.confirm("Do you want to continue?"):
+            click.echo("Operation cancelled.")
+            sys.exit(0)
+
+    return True
+
+
+def _get_runner_logger(runner: PipelineRunner) -> structlog.BoundLogger | None:
+    """Get logger from runner with fallback.
+
+    Args:
+        runner: PipelineRunner instance.
+
+    Returns:
+        Logger instance or None if not found.
+    """
+    logger = getattr(runner, "logger", None)
+    if logger is None:
+        logger = getattr(runner, "_logger", None)
+    return logger
 
 
 @click.group()
@@ -138,23 +203,12 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     # Handle rebuild/backfill confirmation before any heavy initialization
-    if run_type in ("rebuild", "backfill"):
-        if dry_run:
-            click.echo(f"[DRY-RUN] Would clear data for pipeline: {pipeline}")
-            click.echo(f"[DRY-RUN] Run type: {run_type}")
-            _preview_cleanup(pipeline, run_type)
-            return
-
-        if not yes:
-            click.echo(f"WARNING: {run_type} will clear existing data for {pipeline}.")
-            if not click.confirm("Do you want to continue?"):
-                click.echo("Operation cancelled.")
-                sys.exit(0)
+    if not _handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
+        return
 
     run_id = uuid4()
 
     try:
-        # Bootstrap returns a fully constructed runner
         ctx = PipelineRunContext(
             pipeline_name=pipeline,
             run_id=run_id,
@@ -174,21 +228,12 @@ def run(
         click.echo(f"Initialization failed: {e}", err=True)
         sys.exit(1)
 
-    # Use explicit logger if available, otherwise fallback is required
-    logger = getattr(runner, "logger", None)
-    if logger is None:
-        # Fallback for old runner versions or if runner structure changed
-        logger = getattr(runner, "_logger", None)
-
+    logger = _get_runner_logger(runner)
     if logger is None:
         click.echo("Critical: Logger not initialized.", err=True)
         sys.exit(1)
 
-    # Set up OS signal handlers to gracefully trigger the shutdown signal
     setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
-
-    # Note: Metrics server is started in bootstrap_pipeline() (idempotent)
-    # No need to start it again here
 
     logger.info("Starting pipeline run")
     try:
@@ -196,7 +241,7 @@ def run(
         logger.info("Pipeline completed successfully")
     except PipelineShutdownError:
         logger.warning("Pipeline run was gracefully shut down.")
-        sys.exit(130)  # Exit code for command-line interrupt
+        sys.exit(130)
     except Exception:
         logger.exception("Pipeline failed with an unhandled exception.")
         sys.exit(1)
