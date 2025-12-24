@@ -67,7 +67,25 @@ class LockManager:
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
     ) -> LockManager:
-        """Factory method for creating LockManager."""
+        """Create a LockManager instance.
+
+        Args:
+            lock_port: Port for lock operations.
+            run_id: Unique identifier for the run.
+            provider: Name of the data provider.
+            entity_type: Type of entity being processed.
+            run_type: Type of run (e.g., incremental, backfill).
+            lock_ttl: Time-to-live for the lock in seconds.
+            wait_for_lock: Whether to wait for lock acquisition.
+            wait_timeout: Maximum time to wait for lock in seconds.
+            heartbeat_interval: Interval for sending heartbeats in seconds.
+            logger: Logger instance.
+            shutdown_signal: Signal for graceful shutdown.
+            checkpoint_manager: Optional checkpoint manager.
+
+        Returns:
+            A configured LockManager instance.
+        """
         exclusive = run_type in (RunType.BACKFILL, RunType.REBUILD)
         lock_key = f"lock:{provider}_{entity_type}"
         if exclusive:
@@ -88,6 +106,11 @@ class LockManager:
         )
 
     async def acquire(self) -> bool:
+        """Acquire the distributed lock.
+
+        Returns:
+            True if lock was acquired, False otherwise.
+        """
         acquired = await self._lock.acquire(
             key=self._lock_key,
             owner_id=self._run_id,
@@ -103,6 +126,7 @@ class LockManager:
         return acquired
 
     async def release(self) -> None:
+        """Release the distributed lock and stop heartbeat."""
         if self._heartbeat_task:
             self._heartbeat_task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
@@ -113,6 +137,11 @@ class LockManager:
         self._logger.info("Lock released", extra={"stage": "cleanup"})
 
     async def start_heartbeat(self) -> None:
+        """Start the background heartbeat task.
+
+        Raises:
+            PipelineShutdownError: If initial heartbeat fails.
+        """
         initial_success = await self._lock.heartbeat(
             self._lock_key, self._run_id, exclusive=self._exclusive
         )
@@ -160,6 +189,14 @@ class LockManager:
                 raise PipelineShutdownError("Lock lost")
 
     async def __aenter__(self) -> LockManager:
+        """Context manager entry: acquire lock.
+
+        Returns:
+            Self instance if lock acquired.
+
+        Raises:
+            PipelineShutdownError: If lock acquisition fails.
+        """
         acquired = await self.acquire()
         if not acquired:
             raise PipelineShutdownError(f"Failed to acquire lock for {self._lock_key}")
@@ -172,4 +209,5 @@ class LockManager:
         exc_val: BaseException | None,
         exc_tb: object,
     ) -> None:
+        """Context manager exit: release lock."""
         await self.release()

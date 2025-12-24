@@ -20,13 +20,17 @@ class TransformCallback(Protocol):
 
     def __call__(
         self, context: PipelineContext, record: dict[str, Any]
-    ) -> Awaitable[dict[str, Any] | None]: ...
+    ) -> Awaitable[dict[str, Any] | None]:
+        """Execute transformation."""
+        ...
 
 
 class GoldFilterCallback(Protocol):
     """Filter callback to determine if Silver record should go to Gold."""
 
-    def __call__(self, context: PipelineContext, record: dict[str, Any]) -> bool: ...
+    def __call__(self, context: PipelineContext, record: dict[str, Any]) -> bool:
+        """Evaluate if record should be included in Gold layer."""
+        ...
 
 
 class GoldTransformCallback(Protocol):
@@ -37,7 +41,9 @@ class GoldTransformCallback(Protocol):
 
     def __call__(
         self, context: PipelineContext, record: dict[str, Any]
-    ) -> dict[str, Any]: ...
+    ) -> dict[str, Any]:
+        """Execute transformation."""
+        ...
 
 
 class TransformerPort(Protocol):
