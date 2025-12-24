@@ -3,9 +3,19 @@
 MOVED to composition layer to fix dependency direction.
 """
 
-from typing import Any, ClassVar, NamedTuple, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Protocol, runtime_checkable
 
 import pyarrow as pa
+
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.types import RunID
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @runtime_checkable
@@ -16,21 +26,26 @@ class PipelineFactoryProtocol(Protocol):
     silver_schema: pa.Schema | None
 
     def create_with_services(
-        self, run_id: Any, runtime: Any, settings: Any, logger: Any, **kwargs: Any
-    ) -> Any:
+        self,
+        run_id: "RunID",
+        runtime: "RuntimeConfig",
+        settings: "Settings",
+        logger: "LoggerPort",
+        **kwargs: Any,
+    ) -> "BasePipeline":
         """Create pipeline with services."""
         ...
 
     def create_runner(
         self,
-        run_id: Any,
-        runtime: Any,
-        settings: Any,
-        logger: Any,
-        tracer: Any,
-        filter_config: Any | None = None,
-        config: Any | None = None,
-    ) -> Any:
+        run_id: "RunID",
+        runtime: "RuntimeConfig",
+        settings: "Settings",
+        logger: "LoggerPort",
+        tracer: "TracingPort | None",
+        filter_config: "InputFilterConfig | None" = None,
+        config: "PipelineYamlConfig | None" = None,
+    ) -> "PipelineRunner":
         """Create pipeline runner."""
         ...
 
