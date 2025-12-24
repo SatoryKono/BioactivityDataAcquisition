@@ -60,7 +60,12 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import CheckpointPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import (
+        CheckpointPort,
+        MetricsPort,
+        QuarantinePort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config import Settings
 
 
@@ -121,7 +126,7 @@ def bootstrap_logger(
     )
 
 
-def bootstrap_tracer(service_name: str = "bioetl"):
+def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
     """Bootstrap distributed tracing."""
     settings = get_settings()
     if settings.observability.tracing_enabled:
