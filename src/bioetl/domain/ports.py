@@ -730,4 +730,5 @@ __all__ = [
     "MetricsPort",
     "QuarantinePort",
     "StoragePort",
+    "TracingPort",
 ]

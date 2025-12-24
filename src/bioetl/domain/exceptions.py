@@ -24,9 +24,18 @@ class BioETLError(Exception):
     Attributes:
         error_type: Explicit ErrorType for deterministic classification.
                    Subclasses MUST override this attribute.
+
+    The `context` property automatically collects all public instance attributes
+    for unified error diagnostics and logging.
     """
 
     error_type: ClassVar[ErrorType]
+
+    # Private attributes that should be excluded from context
+    _CONTEXT_EXCLUDE: ClassVar[frozenset[str]] = frozenset({
+        "args",
+        "with_traceback",
+    })
 
     @classmethod
     def get_error_type(cls) -> ErrorType:
@@ -42,6 +51,55 @@ class BioETLError(Exception):
         from bioetl.domain.types import ErrorType
 
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)
+
+    @property
+    def context(self) -> dict[str, object]:
+        """Get unified error context from instance attributes.
+
+        Automatically collects all public instance attributes set on the exception,
+        enabling consistent logging and diagnostics across all BioETL errors.
+
+        Returns:
+            Dictionary of attribute names to values, excluding private attributes
+            and standard Exception attributes.
+
+        Example:
+            >>> err = RateLimitError(provider="chembl", retry_after=60.0)
+            >>> err.context
+            {'provider': 'chembl', 'retry_after': 60.0}
+        """
+        result: dict[str, object] = {}
+        for key, value in vars(self).items():
+            # Skip private attributes
+            if key.startswith("_"):
+                continue
+            # Skip excluded attributes
+            if key in self._CONTEXT_EXCLUDE:
+                continue
+            result[key] = value
+        return result
+
+    def with_context(self, **extra: object) -> BioETLError:
+        """Return self with additional context attributes.
+
+        Allows adding extra context to an existing exception without
+        creating a new instance.
+
+        Args:
+            **extra: Additional context key-value pairs to attach.
+
+        Returns:
+            Self with additional attributes set.
+
+        Example:
+            >>> err = ApiError("Connection failed", status_code=500)
+            >>> err = err.with_context(endpoint="/api/v1/data", attempt=3)
+            >>> err.context
+            {'message': 'Connection failed', 'status_code': 500, 'endpoint': '/api/v1/data', 'attempt': 3}
+        """
+        for key, value in extra.items():
+            setattr(self, key, value)
+        return self
 
 
 class CriticalError(BioETLError):
