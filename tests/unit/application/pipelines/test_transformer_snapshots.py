@@ -37,7 +37,7 @@ def mock_context() -> PipelineContext:
     mock_logger.warning = MagicMock()
 
     # Use a deterministic run_id for snapshot reproducibility
-    run_id = RunID(uuid4())
+    run_id: RunID = uuid4()
     return PipelineContext(
         run_id=run_id,
         run_type=RunType.INCREMENTAL,

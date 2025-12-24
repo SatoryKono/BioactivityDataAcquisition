@@ -295,7 +295,7 @@ class TestChemblActivityFactory:
 
             # Verify run_id is passed to pipeline.create()
             mock_pipeline_class.create.assert_called_once_with(
-                run_id=RunID(run_id),
+                run_id=run_id,
                 runtime=runtime,
                 services=mock_services,
                 config=mock_domain_config,

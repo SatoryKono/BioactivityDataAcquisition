@@ -1,4 +1,5 @@
 from unittest.mock import AsyncMock, Mock, patch
+from uuid import UUID
 
 import pytest
 
@@ -6,6 +7,9 @@ from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
+
+# Test UUID constant for consistent assertions
+TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 
 
 @pytest.fixture
@@ -25,7 +29,7 @@ def mock_shutdown_signal() -> Mock:
 def lock_manager(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> LockManager:
     return LockManager(
         lock_port=mock_lock_port,
-        run_id=RunID("run_123"),
+        run_id=TEST_RUN_ID,
         lock_key="lock:test_pipeline",
         exclusive=False,
         lock_ttl=60,
@@ -48,7 +52,7 @@ class TestLockManager:
 
         mock_lock_port.acquire.assert_called_once_with(
             key="lock:test_pipeline",
-            owner_id="run_123",
+            owner_id=str(TEST_RUN_ID),
             ttl=60,
             wait=False,
             wait_timeout=300,
@@ -74,7 +78,7 @@ class TestLockManager:
         await lock_manager.release()
 
         mock_lock_port.release.assert_called_once_with(
-            "lock:test_pipeline", "run_123", exclusive=False
+            "lock:test_pipeline", str(TEST_RUN_ID), exclusive=False
         )
 
     async def test_heartbeat_loop_loss(
@@ -151,7 +155,7 @@ def test_lock_key_format_incremental(
 ) -> None:
     manager = LockManager.create(
         lock_port=mock_lock_port,
-        run_id=RunID("run_123"),
+        run_id=TEST_RUN_ID,
         provider="chembl",
         entity_type="activity",
         run_type=RunType.INCREMENTAL,
@@ -172,7 +176,7 @@ def test_lock_key_format_exclusive(
 ) -> None:
     manager = LockManager.create(
         lock_port=mock_lock_port,
-        run_id=RunID("run_123"),
+        run_id=TEST_RUN_ID,
         provider="chembl",
         entity_type="activity",
         run_type=RunType.BACKFILL,
