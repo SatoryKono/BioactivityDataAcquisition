@@ -79,7 +79,7 @@ def _wrap_with_filter(
 
 def create_chembl_data_source(
     settings: Settings,
-    _pipeline_config: PipelineYamlConfig,
+    pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
@@ -95,7 +95,7 @@ def create_chembl_data_source(
 
 def create_pubchem_data_source(
     settings: Settings,
-    _pipeline_config: PipelineYamlConfig,
+    pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
@@ -178,10 +178,10 @@ class DataSourceRegistry:
     """
 
     _creators: ClassVar[dict[str, DataSourceCreator]] = {
-        "chembl": create_chembl_data_source,  # type: ignore[dict-item]
-        "pubchem": create_pubchem_data_source,  # type: ignore[dict-item]
-        "uniprot": create_uniprot_data_source,  # type: ignore[dict-item]
-        "pubmed": create_pubmed_data_source,  # type: ignore[dict-item]
+        "chembl": create_chembl_data_source,
+        "pubchem": create_pubchem_data_source,
+        "uniprot": create_uniprot_data_source,
+        "pubmed": create_pubmed_data_source,
     }
 
     @classmethod

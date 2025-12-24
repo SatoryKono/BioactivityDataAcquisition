@@ -80,6 +80,7 @@ def record_processor(
         config=config,
         transform_callback=AsyncMock(return_value={"id": 1}),
         gold_filter_callback=MagicMock(return_value=True),
+        gold_transform_callback=MagicMock(side_effect=lambda c, r: r),
         gold_validator=mock_gold_validator,
     )
 

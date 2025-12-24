@@ -135,6 +135,7 @@ class TestRunIdPropagation:
             config=config,
             transform_callback=transform,
             gold_filter_callback=gold_filter,
+            gold_transform_callback=lambda c, r: r,
             gold_validator=mock_gold_validator,
         )
 
@@ -193,6 +194,7 @@ class TestRunIdPropagation:
             config=config,
             transform_callback=transform,
             gold_filter_callback=gold_filter,
+            gold_transform_callback=lambda c, r: r,
             gold_validator=mock_gold_validator,
         )
 
@@ -258,6 +260,7 @@ class TestRunIdPropagation:
                 config=config,
                 transform_callback=transform,
                 gold_filter_callback=gold_filter,
+                gold_transform_callback=lambda c, r: r,
                 gold_validator=mock_gold_validator,
             )
 

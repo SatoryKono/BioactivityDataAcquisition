@@ -217,6 +217,8 @@ class ChemblAdapter(BaseHttpAdapter):
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from ChEMBL.
 
@@ -225,13 +227,21 @@ class ChemblAdapter(BaseHttpAdapter):
         Args:
             entity_type: Type of entity to fetch (activity, assay, compound, etc.)
             limit: Maximum number of records to fetch
-            query: Unused for ChEMBL (filtering done via fetch_filtered method)
+            query: Unused for ChEMBL
+            filter_ids: List of IDs to filter by (for deterministic batching)
+            filter_field: Field name to filter on
 
         Yields:
             Dictionary records from ChEMBL API
         """
-        async for record in self._fetch_standard(entity_type, limit):
-            yield record
+        if filter_ids and filter_field:
+            async for record in self._fetch_filtered(
+                entity_type, limit, filter_ids, filter_field
+            ):
+                yield record
+        else:
+            async for record in self._fetch_standard(entity_type, limit):
+                yield record
 
     async def fetch_filtered(
         self,

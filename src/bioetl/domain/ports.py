@@ -67,7 +67,7 @@ class DataSourcePort(Protocol):
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
-        filter_ids: set[str] | None = None,
+        filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
@@ -548,23 +548,23 @@ class LoggerPort(Protocol):
         """
         ...
 
-    def info(self, msg: str, **kwargs: Any) -> None:
+    def info(self, event: str, **kwargs: Any) -> Any:
         """Log an informational message."""
         ...
 
-    def warning(self, msg: str, **kwargs: Any) -> None:
+    def warning(self, event: str, **kwargs: Any) -> Any:
         """Log a warning message."""
         ...
 
-    def error(self, msg: str, **kwargs: Any) -> None:
+    def error(self, event: str, **kwargs: Any) -> Any:
         """Log an error message."""
         ...
 
-    def debug(self, msg: str, **kwargs: Any) -> None:
+    def debug(self, event: str, **kwargs: Any) -> Any:
         """Log a debug message."""
         ...
 
-    def exception(self, msg: str, **kwargs: Any) -> None:
+    def exception(self, event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback."""
         ...
 
