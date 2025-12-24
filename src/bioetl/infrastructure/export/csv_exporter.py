@@ -173,20 +173,18 @@ class CsvExporter:
             os.close(fd)
             pv.write_csv(data, temp_path, write_options=write_options)
 
-            if os.name == "nt" and target_path.exists():
-                try:
-                    target_path.unlink()
-                except PermissionError:
-                    # File is locked by another process - use backup filename
-                    timestamp = int(time.time())
-                    backup_path = target_path.with_suffix(f".{timestamp}.csv")
-                    temp_path.rename(backup_path)
-                    logger.warning(
-                        "Target CSV locked, wrote to backup: %s", backup_path
-                    )
-                    return
-
-            temp_path.rename(target_path)
+            # Use os.replace for atomic overwrite (works on Windows and Unix)
+            try:
+                os.replace(temp_path, target_path)
+            except PermissionError:
+                # File is locked by another process - use backup filename
+                timestamp = int(time.time())
+                backup_path = target_path.with_suffix(f".{timestamp}.csv")
+                os.replace(temp_path, backup_path)
+                logger.warning(
+                    "Target CSV locked, wrote to backup: %s", backup_path
+                )
+                return
         except Exception:
             if temp_path.exists():
                 temp_path.unlink()
