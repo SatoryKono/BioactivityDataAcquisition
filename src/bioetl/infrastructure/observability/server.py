@@ -25,8 +25,12 @@ class MetricsServerError(Exception):
             port: Port that failed.
             reason: Reason for failure.
             original_error: Underlying exception.
+
         """
         super().__init__(f"Failed to start metrics server on port {port}: {reason}")
+        self.port = port
+        self.reason = reason
+        self.original_error = original_error
 
 
 def start_metrics_server(

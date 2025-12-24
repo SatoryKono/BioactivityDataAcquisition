@@ -1,4 +1,5 @@
 """A simple in-memory lock for local development and testing.
+
 This lock is not distributed and only works within a single process.
 """
 

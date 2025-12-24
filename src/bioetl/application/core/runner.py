@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 class PipelineRunner:
     """Manages the execution lifecycle of a pipeline.
+
     It coordinates application services like locking and checkpointing,
     but remains decoupled from the core business logic of the pipeline itself.
     """
@@ -56,6 +57,7 @@ class PipelineRunner:
             logger: Structured logger.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
+
         """
         self._config = config
         self._runtime = runtime

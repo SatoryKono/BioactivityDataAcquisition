@@ -25,6 +25,12 @@ class PanderaGoldValidator:
     """
 
     def __init__(self, schema: pa.DataFrameSchema | None = None) -> None:
+        """Initialize Pandera validator.
+
+        Args:
+            schema: Pandera schema to validate against.
+
+        """
         self._schema = schema
 
     def validate(self, records: list[dict[str, Any]]) -> ValidationResult:

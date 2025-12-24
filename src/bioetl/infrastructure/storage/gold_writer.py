@@ -376,9 +376,22 @@ class GoldWriter:
     async def read_gold(
         self,
         table_name: str,
+        columns: list[str] | None = None,
         current_only: bool = True,
     ) -> list[dict[str, Any]]:
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        """Read data from Gold table.
+
+        Args:
+            table_name: Table name.
+            columns: Optional list of columns to read.
+            current_only: If True, filter to current records only (for SCD2 tables).
+
+        Returns:
+            List of records as dictionaries.
+
+        """
+        table_path = f"{self._gold_path}/{table_name.replace('.', '/')}"
+        # Delta Lake (Gold) -> Arrow -> Pydict
         dt = await self._run_in_executor(
             lambda: DeltaTable(table_path)
         )
@@ -392,9 +405,19 @@ class GoldWriter:
     async def get_history(
         self,
         table_name: str,
-        business_key_values: dict[str, Any],
+        limit: int = 10,
     ) -> list[dict[str, Any]]:
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        """Get history of operations on Gold table.
+
+        Args:
+            table_name: Table name.
+            limit: Maximum number of history entries.
+
+        Returns:
+            List of history entries.
+
+        """
+        # Read Delta log history
         dt = await self._run_in_executor(
             lambda: DeltaTable(table_path)
         )

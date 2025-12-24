@@ -36,6 +36,7 @@ class PubMedPublicationTransformer(BaseTransformer):
 
         Args:
             provider: Data provider identifier.
+
         """
         super().__init__(provider)
         self._parser = PubMedXMLParser()
