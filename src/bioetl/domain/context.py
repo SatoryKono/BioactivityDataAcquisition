@@ -50,3 +50,4 @@ class PipelineRunContext:
     filter_column: str | None = None
     filter_field: str | None = None
     query: str | None = None
+    dry_run: bool = False

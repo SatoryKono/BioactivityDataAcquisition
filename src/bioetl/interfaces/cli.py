@@ -73,6 +73,8 @@ def cli() -> None:
     type=str,
     help="API field name to filter by (default: 'molecule_chembl_id')",
 )
+@click.option("--dry-run", is_flag=True, help="Preview cleanup without execution")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt")
 def run(
     pipeline: str,
     run_type: str,
@@ -81,8 +83,16 @@ def run(
     input_csv: str | None,
     filter_column: str | None,
     filter_field: str | None,
+    dry_run: bool,
+    yes: bool,
 ) -> None:
     """Run an ETL pipeline."""
+    if run_type in ["rebuild", "backfill"] and not yes and not dry_run:
+        click.confirm(
+            f"WARNING: {run_type.upper()} will delete existing data. Continue?",
+            abort=True,
+        )
+
     run_id = uuid4()
 
     try:
@@ -96,6 +106,7 @@ def run(
             input_csv=input_csv,
             filter_column=filter_column,
             filter_field=filter_field,
+            dry_run=dry_run,
         )
         runner = bootstrap_pipeline(ctx)
     except (ValueError, FileNotFoundError) as e:
@@ -118,12 +129,6 @@ def run(
     # Set up OS signal handlers to gracefully trigger the shutdown signal
     setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
 
-    # Start Prometheus metrics server
-    try:
-        settings = get_settings()
-        start_metrics_server(settings.metrics_port)
-    except Exception as e:
-        logger.warning("Failed to start metrics server", error=str(e))
 
     logger.info("Starting pipeline run")
     try:

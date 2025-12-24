@@ -100,7 +100,7 @@ class StorageAdapter:
             mode=mode,
         )
 
-    def clear_silver(self, table_name: str) -> int:
+    def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.
 
         Implements StoragePort.clear_silver().
@@ -109,6 +109,7 @@ class StorageAdapter:
 
         Args:
             table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Count of cleared items (tables + files).
@@ -116,16 +117,18 @@ class StorageAdapter:
         cleared_count = 0
 
         # Clear Silver Delta table
-        cleared_count += self.silver.clear(table_name)
+        cleared_count += self.silver.clear(table_name, dry_run=dry_run)
 
         # Clear Silver CSV if exporter is configured
         if self.silver.csv_exporter:
-            deleted = self.silver.csv_exporter.clear(table_name)
-            cleared_count += len(deleted)
+            # TODO: Add dry_run to CsvExporter.clear
+            if not dry_run:
+                deleted = self.silver.csv_exporter.clear(table_name)
+                cleared_count += len(deleted)
 
         return cleared_count
 
-    def clear_gold(self, table_name: str) -> int:
+    def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table.
 
         Implements StoragePort.clear_gold().
@@ -134,6 +137,7 @@ class StorageAdapter:
 
         Args:
             table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Count of cleared items (tables + files).
@@ -141,12 +145,14 @@ class StorageAdapter:
         cleared_count = 0
 
         # Clear Gold Delta table
-        cleared_count += self.gold.clear(table_name)
+        cleared_count += self.gold.clear(table_name, dry_run=dry_run)
 
         # Clear Gold CSV if exporter is configured
         if self.gold.csv_exporter:
-            deleted = self.gold.csv_exporter.clear(table_name)
-            cleared_count += len(deleted)
+            # TODO: Add dry_run to CsvExporter.clear
+            if not dry_run:
+                deleted = self.gold.csv_exporter.clear(table_name)
+                cleared_count += len(deleted)
 
         return cleared_count
 
@@ -294,6 +300,7 @@ class StorageFactory:
             silver_writer=DeltaWriter(
                 base_path=silver_path,
                 csv_exporter=silver_csv_exporter,
+                logger=logger,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,

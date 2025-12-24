@@ -48,6 +48,7 @@ class BaseServicesFactory:
         logger: BoundLogger,
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
+        tracing: TracingPort | None = None,
     ) -> PipelineServices:
         """Create services with injected data source."""
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
@@ -56,7 +57,9 @@ class BaseServicesFactory:
         checkpoint = cls._create_checkpoint(storage_ctx)
         quarantine = cls._create_quarantine(storage_ctx)
         metrics = cls._create_metrics(settings)
-        tracing = cls._create_tracing()
+
+        if tracing is None:
+            tracing = NoOpTracing()
 
         return PipelineServices(
             data_source=data_source,
@@ -95,7 +98,3 @@ class BaseServicesFactory:
             return PrometheusMetrics()
         return NoOpMetrics()
 
-    @staticmethod
-    def _create_tracing() -> TracingPort:
-        # Placeholder for real OTel implementation
-        return NoOpTracing()

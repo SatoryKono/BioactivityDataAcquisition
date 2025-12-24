@@ -122,6 +122,7 @@ class RecordProcessor:
                     )
                     records_quarantined += 1
                     self._batch_metrics.track_error("transform", error_type)
+                    self._batch_metrics.track_quarantined_records(error_type, 1)
                 else:
                     raise
 
@@ -193,7 +194,8 @@ class RecordProcessor:
         if not self._dq_config or not records:
             return
 
-        error_rate = quarantined_count / len(records)
+        total_count = len(records)
+        error_rate = quarantined_count / total_count
         if (
             self._dq_config.hard_fail_threshold
             and error_rate >= self._dq_config.hard_fail_threshold
@@ -206,7 +208,11 @@ class RecordProcessor:
             and error_rate >= self._dq_config.soft_fail_threshold
         ):
             self._context.logger.warning(
-                "DQ Soft Threshold exceeded", error_rate=error_rate
+                "DQ Soft Threshold exceeded",
+                error_rate=error_rate,
+                threshold=self._dq_config.soft_fail_threshold,
+                quarantined_count=quarantined_count,
+                total_count=total_count,
             )
 
     async def _write_bronze_batch(

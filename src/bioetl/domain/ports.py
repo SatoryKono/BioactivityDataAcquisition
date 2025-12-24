@@ -209,7 +209,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def clear_silver(self, table_name: str) -> int:
+    def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """
         Clear Silver layer data for a specific table.
 
@@ -218,13 +218,14 @@ class StoragePort(Protocol):
 
         Args:
             table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Count of cleared items (tables + files).
         """
         ...
 
-    def clear_gold(self, table_name: str) -> int:
+    def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """
         Clear Gold layer data for a specific table.
 
@@ -233,6 +234,7 @@ class StoragePort(Protocol):
 
         Args:
             table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Count of cleared items (tables + files).
