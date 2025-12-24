@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
+from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
 
@@ -349,30 +350,24 @@ class TestDryRunMode:
     """Tests for dry-run mode and _preview_cleanup function."""
 
     @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_storage")
+    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
     def test_dry_run_shows_preview(
         self,
-        mock_bootstrap_storage,
+        mock_bootstrap_cleanup,
         mock_load_config,
         runner,
     ):
         """Test that dry-run mode shows file preview without execution."""
-        # Setup storage mock
-        mock_storage = MagicMock()
-        mock_storage.preview_cleanup.return_value = {
-            "silver": {
-                "path": "silver/path",
-                "exists": True,
-                "file_count": 5
-            },
-            "gold": {
-                "path": "gold/path",
-                "exists": False,
-                "file_count": 0
-            },
-            "total_files": 5
-        }
-        mock_bootstrap_storage.return_value = mock_storage
+        # Setup cleanup service mock
+        mock_cleanup_service = MagicMock()
+        mock_cleanup_service.preview = AsyncMock(
+            return_value=CleanupPreview(
+                silver=LayerInfo(path="silver/path", file_count=5, exists=True),
+                gold=LayerInfo(path="gold/path", file_count=0, exists=False),
+                total_files=5,
+            )
+        )
+        mock_bootstrap_cleanup.return_value = mock_cleanup_service
 
         # Setup config mock
         mock_config = MagicMock()
@@ -393,26 +388,24 @@ class TestDryRunMode:
         assert "No changes were made" in result.output
 
     @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_storage")
+    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
     def test_dry_run_counts_existing_files(
         self,
-        mock_bootstrap_storage,
+        mock_bootstrap_cleanup,
         mock_load_config,
         runner,
     ):
         """Test that dry-run correctly counts existing files."""
-        # Setup storage mock
-        mock_storage = MagicMock()
-        mock_storage.preview_cleanup.return_value = {
-            "silver": {
-                "path": "silver/path",
-                "exists": True,
-                "file_count": 2
-            },
-            "gold": None,
-            "total_files": 2
-        }
-        mock_bootstrap_storage.return_value = mock_storage
+        # Setup cleanup service mock
+        mock_cleanup_service = MagicMock()
+        mock_cleanup_service.preview = AsyncMock(
+            return_value=CleanupPreview(
+                silver=LayerInfo(path="silver/path", file_count=2, exists=True),
+                gold=None,
+                total_files=2,
+            )
+        )
+        mock_bootstrap_cleanup.return_value = mock_cleanup_service
 
         mock_config = MagicMock()
         mock_config.silver_table = "test.table"
@@ -429,10 +422,10 @@ class TestDryRunMode:
         assert "Gold" not in result.output or "(does not exist)" in result.output
 
     @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_storage")
+    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
     def test_dry_run_preview_exception(
         self,
-        mock_bootstrap_storage,
+        mock_bootstrap_cleanup,
         mock_load_config,
         runner,
     ):
@@ -448,30 +441,24 @@ class TestDryRunMode:
         assert "Error previewing cleanup" in result.output
 
     @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_storage")
+    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
     def test_dry_run_preview_variations(
         self,
-        mock_bootstrap_storage,
+        mock_bootstrap_cleanup,
         mock_load_config,
         runner,
     ):
         """Test dry-run preview with different file existence combinations."""
         # Case: Silver missing, Gold exists
-        mock_storage = MagicMock()
-        mock_storage.preview_cleanup.return_value = {
-            "silver": {
-                "path": "silver/path",
-                "exists": False,
-                "file_count": 0
-            },
-            "gold": {
-                "path": "gold/path",
-                "exists": True,
-                "file_count": 10
-            },
-            "total_files": 10
-        }
-        mock_bootstrap_storage.return_value = mock_storage
+        mock_cleanup_service = MagicMock()
+        mock_cleanup_service.preview = AsyncMock(
+            return_value=CleanupPreview(
+                silver=LayerInfo(path="silver/path", file_count=0, exists=False),
+                gold=LayerInfo(path="gold/path", file_count=10, exists=True),
+                total_files=10,
+            )
+        )
+        mock_bootstrap_cleanup.return_value = mock_cleanup_service
 
         mock_config = MagicMock()
         mock_config.silver_table = "test.table"
