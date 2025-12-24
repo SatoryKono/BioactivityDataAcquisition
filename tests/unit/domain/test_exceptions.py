@@ -20,6 +20,7 @@ from bioetl.domain.exceptions import (
     LockLostError,
     MergeConflictError,
     MissingRequiredFieldError,
+    NetworkError,
     RateLimitError,
     RecoverableError,
     RetryExhaustedError,
@@ -232,3 +233,102 @@ class TestErrorClassifier:
         # Check against exposed internal keyword list
         if not any(k in "ValueError" for ks, _ in _ERROR_KEYWORDS for k in ks):
             assert classifier.classify(e) == ErrorType.INVALID_DATA
+
+
+class TestErrorContext:
+    """Tests for unified error context API (BioETLError.context)."""
+
+    def test_context_collects_public_attributes(self) -> None:
+        """The context property should collect all public instance attributes."""
+        err = RateLimitError(provider="chembl", retry_after=60.0)
+        ctx = err.context
+
+        assert ctx["provider"] == "chembl"
+        assert ctx["retry_after"] == 60.0
+        assert len(ctx) == 2
+
+    def test_context_excludes_private_attributes(self) -> None:
+        """The context property should exclude private attributes."""
+        err = ApiError("test", status_code=500)
+        # Manually add a private attribute
+        err._internal = "should not appear"  # type: ignore[attr-defined]
+
+        ctx = err.context
+        assert "_internal" not in ctx
+        assert "message" in ctx
+        assert "status_code" in ctx
+
+    def test_context_with_none_values(self) -> None:
+        """The context should include None values if they are set."""
+        err = LockAcquisitionError("my_key", current_owner=None)
+        ctx = err.context
+
+        assert ctx["key"] == "my_key"
+        assert ctx["current_owner"] is None
+
+    def test_context_on_base_error(self) -> None:
+        """Base BioETLError should have empty context if no attrs set."""
+        # Create a simple subclass without custom __init__
+        class SimpleError(BioETLError):
+            pass
+
+        err = SimpleError("test message")
+        assert err.context == {}
+
+    def test_with_context_adds_attributes(self) -> None:
+        """with_context should add extra attributes to the exception."""
+        err = ApiError("Connection failed", status_code=500)
+        err = err.with_context(endpoint="/api/v1/data", attempt=3)
+
+        ctx = err.context
+        assert ctx["endpoint"] == "/api/v1/data"
+        assert ctx["attempt"] == 3
+        assert ctx["status_code"] == 500
+
+    def test_with_context_returns_self(self) -> None:
+        """with_context should return the same exception instance."""
+        err = StorageError("test")
+        result = err.with_context(key="value")
+
+        assert result is err
+
+    def test_with_context_chainable(self) -> None:
+        """with_context should be chainable."""
+        err = (
+            NetworkError("Connection refused")
+            .with_context(host="localhost", port=8080)
+            .with_context(retry_count=3)
+        )
+
+        ctx = err.context
+        assert ctx["host"] == "localhost"
+        assert ctx["port"] == 8080
+        assert ctx["retry_count"] == 3
+
+    def test_context_inheritance(self) -> None:
+        """Subclass context should include parent class attributes."""
+        err = ChemblApiError("Service unavailable", status_code=503)
+        ctx = err.context
+
+        # ChemblApiError inherits from ApiError which sets message and status_code
+        assert ctx["message"] == "Service unavailable"
+        assert ctx["status_code"] == 503
+
+    @pytest.mark.parametrize(
+        "error_cls,args,expected_keys",
+        [
+            (LockLostError, ("key1", "run1"), {"key", "run_id"}),
+            (RateLimitError, ("provider1", 30.0), {"provider", "retry_after"}),
+            (SchemaViolationError, ("table1", ["e1"]), {"table", "errors"}),
+            (BucketNotFoundError, ("bucket1",), {"bucket"}),
+            (RetryExhaustedError, ("url1", 3, None), {"url", "attempts", "last_error"}),
+        ],
+    )
+    def test_context_for_various_errors(
+        self, error_cls: type, args: tuple, expected_keys: set[str]
+    ) -> None:
+        """Verify context extraction for various error types."""
+        err = error_cls(*args)
+        ctx = err.context
+
+        assert set(ctx.keys()) == expected_keys
