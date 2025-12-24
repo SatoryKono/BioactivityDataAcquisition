@@ -176,8 +176,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Returns:
             Configured pipeline instance
         """
-        from bioetl.domain.types import RunID
-
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
         services = self.build_services(

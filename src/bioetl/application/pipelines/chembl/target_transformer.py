@@ -100,86 +100,97 @@ class TargetTransformer(BaseTransformer):
             descriptions, organisms, tax_ids, and protein classifications.
         """
         if not components or not isinstance(components, list):
-            return {
-                "component_accessions": None,
-                "component_ids": None,
-                "component_types": None,
-                "component_relationships": None,
-                "component_descriptions": None,
-                "component_organisms": None,
-                "component_tax_ids": None,
-                "protein_classifications": None,
-                "protein_classification_ids": None,
-                "protein_classification_names": None,
-            }
+            return self._empty_component_result()
 
-        accessions = [c.get("accession") for c in components if c.get("accession")]
-        ids = [
-            safe_int(c.get("component_id"))
-            for c in components
-            if c.get("component_id") is not None
-        ]
-        types = [c.get("component_type") for c in components if c.get("component_type")]
-        relationships = [
-            c.get("relationship") for c in components if c.get("relationship")
-        ]
-        descriptions = [
-            c.get("component_description")
-            for c in components
-            if c.get("component_description")
-        ]
+        basic_fields = self._extract_basic_component_fields(components)
+        classifications = self._extract_protein_classifications(components)
 
-        # Extract organisms and tax_ids from components
-        organisms = [c.get("organism") for c in components if c.get("organism")]
-        tax_ids = [
-            safe_int(c.get("tax_id"))
-            for c in components
-            if c.get("tax_id") is not None
-        ]
+        return {**basic_fields, **classifications}
 
-        # Flatten protein classifications with full details
-        classification_short_names: list[str] = []
-        classification_ids: list[int] = []
-        classification_pref_names: list[str] = []
+    def _empty_component_result(self) -> dict[str, None]:
+        """Return empty result dict for missing components."""
+        return {
+            "component_accessions": None,
+            "component_ids": None,
+            "component_types": None,
+            "component_relationships": None,
+            "component_descriptions": None,
+            "component_organisms": None,
+            "component_tax_ids": None,
+            "protein_classifications": None,
+            "protein_classification_ids": None,
+            "protein_classification_names": None,
+        }
+
+    def _extract_basic_component_fields(
+        self, components: list[dict[str, Any]]
+    ) -> dict[str, list[Any] | None]:
+        """Extract basic fields from component list."""
+        return {
+            "component_accessions": self._extract_field(components, "accession"),
+            "component_ids": self._extract_int_field(components, "component_id"),
+            "component_types": self._extract_field(components, "component_type"),
+            "component_relationships": self._extract_field(components, "relationship"),
+            "component_descriptions": self._extract_field(
+                components, "component_description"
+            ),
+            "component_organisms": self._extract_field(components, "organism"),
+            "component_tax_ids": self._extract_int_field(components, "tax_id"),
+        }
+
+    def _extract_field(
+        self, components: list[dict[str, Any]], field: str
+    ) -> list[Any] | None:
+        """Extract a string field from all components."""
+        values = [c.get(field) for c in components if c.get(field)]
+        return values or None
+
+    def _extract_int_field(
+        self, components: list[dict[str, Any]], field: str
+    ) -> list[int] | None:
+        """Extract an integer field from all components."""
+        values = [
+            safe_int(c.get(field)) for c in components if c.get(field) is not None
+        ]
+        return values or None
+
+    def _extract_protein_classifications(
+        self, components: list[dict[str, Any]]
+    ) -> dict[str, list[Any] | None]:
+        """Extract protein classification details from components."""
+        short_names: list[str] = []
+        ids: list[int] = []
+        pref_names: list[str] = []
 
         for c in components:
             pcs = c.get("protein_classifications")
-            if pcs and isinstance(pcs, list):
-                for pc in pcs:
-                    if isinstance(pc, dict):
-                        # Extract short_name
-                        short_name = pc.get("short_name")
-                        if short_name:
-                            classification_short_names.append(short_name)
-
-                        # Extract protein_classification_id
-                        pc_id = safe_int(pc.get("protein_classification_id"))
-                        if pc_id is not None:
-                            classification_ids.append(pc_id)
-
-                        # Extract pref_name (class name)
-                        pref_name = pc.get("pref_name")
-                        if pref_name:
-                            classification_pref_names.append(pref_name)
+            if not pcs or not isinstance(pcs, list):
+                continue
+            for pc in pcs:
+                if not isinstance(pc, dict):
+                    continue
+                self._collect_classification_fields(pc, short_names, ids, pref_names)
 
         return {
-            "component_accessions": accessions if accessions else None,
-            "component_ids": ids if ids else None,
-            "component_types": types if types else None,
-            "component_relationships": relationships if relationships else None,
-            "component_descriptions": descriptions if descriptions else None,
-            "component_organisms": organisms if organisms else None,
-            "component_tax_ids": tax_ids if tax_ids else None,
-            "protein_classifications": (
-                classification_short_names if classification_short_names else None
-            ),
-            "protein_classification_ids": (
-                classification_ids if classification_ids else None
-            ),
-            "protein_classification_names": (
-                classification_pref_names if classification_pref_names else None
-            ),
+            "protein_classifications": short_names or None,
+            "protein_classification_ids": ids or None,
+            "protein_classification_names": pref_names or None,
         }
+
+    def _collect_classification_fields(
+        self,
+        pc: dict[str, Any],
+        short_names: list[str],
+        ids: list[int],
+        pref_names: list[str],
+    ) -> None:
+        """Collect fields from a single protein classification dict."""
+        if short_name := pc.get("short_name"):
+            short_names.append(short_name)
+        if (pc_id := safe_int(pc.get("protein_classification_id"))) is not None:
+            ids.append(pc_id)
+        if pref_name := pc.get("pref_name"):
+            pref_names.append(pref_name)
 
     def _aggregate_synonyms(
         self, components: list[dict[str, Any]] | None
