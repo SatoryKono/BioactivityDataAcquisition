@@ -226,6 +226,8 @@ known-first-party = ["bioetl", "tests"]
 # Tests may have unused arguments, ignore import order (handled by isort)
 # C901: Architecture tests perform complex static analysis checks
 "tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901"]
+# Domain __init__.py uses semantic grouping with comments in __all__ (not alphabetical)
+"src/bioetl/domain/__init__.py" = ["RUF022"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine
