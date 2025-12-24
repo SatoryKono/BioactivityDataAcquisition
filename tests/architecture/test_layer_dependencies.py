@@ -986,3 +986,186 @@ def test_adapters_have_health_check(src_dir: Path) -> None:
         + "\n".join(f"  - {f}" for f in missing_health_check)
         + "\n\nSee: docs/05-operations/runbooks/observability-checklist.md"
     )
+
+
+# ============================================================================
+# Refactoring Tests (added for architecture cleanup)
+# ============================================================================
+
+
+def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
+    """All BioETLError subclasses MUST have explicit error_type attribute.
+
+    REQ-ARCH-020: Deterministic error classification requires explicit mapping.
+    This ensures ErrorClassifier uses the error_type attribute instead of
+    keyword matching for domain exceptions.
+    """
+    import ast
+
+    exceptions_file = src_dir / "bioetl" / "domain" / "exceptions.py"
+    if not exceptions_file.exists():
+        pytest.skip("Domain exceptions file not found")
+
+    with exceptions_file.open(encoding="utf-8") as f:
+        content = f.read()
+        tree = ast.parse(content)
+
+    # Base classes that don't need error_type (they provide defaults)
+    base_classes = {"BioETLError", "CriticalError", "RecoverableError", "DataQualityError"}
+
+    # Classes that inherit from BioETL exception hierarchy
+    exception_bases = {
+        "BioETLError",
+        "CriticalError",
+        "RecoverableError",
+        "DataQualityError",
+        "StorageError",
+        "ApiError",
+    }
+
+    missing_error_type = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            # Skip base classes
+            if node.name in base_classes:
+                continue
+
+            # Check if inherits from exception hierarchy
+            bases = []
+            for base in node.bases:
+                if isinstance(base, ast.Name):
+                    bases.append(base.id)
+                elif isinstance(base, ast.Attribute):
+                    bases.append(base.attr)
+
+            if not any(b in exception_bases for b in bases):
+                continue
+
+            # Check for error_type class attribute
+            has_error_type = False
+            for stmt in node.body:
+                # Check for error_type assignment
+                if isinstance(stmt, ast.Assign):
+                    for target in stmt.targets:
+                        if isinstance(target, ast.Name) and target.id == "error_type":
+                            has_error_type = True
+                            break
+                # Check for annotated assignment
+                if isinstance(stmt, ast.AnnAssign):
+                    if isinstance(stmt.target, ast.Name) and stmt.target.id == "error_type":
+                        has_error_type = True
+                # Check for Import statement (class-level import for error_type)
+                if isinstance(stmt, ast.ImportFrom):
+                    for alias in stmt.names:
+                        if alias.name == "ErrorType":
+                            # Next statement should be error_type assignment
+                            pass
+
+            if not has_error_type:
+                missing_error_type.append(node.name)
+
+    assert not missing_error_type, (
+        "BioETLError subclasses must have explicit error_type attribute.\n"
+        "Missing error_type:\n" + "\n".join(f"  - {c}" for c in missing_error_type)
+    )
+
+
+def test_observability_ports_have_close_method(src_dir: Path) -> None:
+    """MetricsPort and TracingPort MUST define close() method.
+
+    REQ-ARCH-021: Proper lifecycle management for observability resources.
+    """
+    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
+    if not ports_file.exists():
+        pytest.skip("Domain ports file not found")
+
+    with ports_file.open(encoding="utf-8") as f:
+        content = f.read()
+
+    import ast
+
+    tree = ast.parse(content)
+
+    required_ports = {"MetricsPort", "TracingPort"}
+    found_close: set[str] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name in required_ports:
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef) and item.name == "close":
+                    found_close.add(node.name)
+
+    missing = required_ports - found_close
+    assert not missing, f"Observability ports missing close() method: {missing}"
+
+
+def test_storage_port_has_preview_cleanup(src_dir: Path) -> None:
+    """StoragePort MUST define preview_cleanup() for CLI dry-run.
+
+    REQ-ARCH-022: CLI delegates all storage operations to port.
+    """
+    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
+    if not ports_file.exists():
+        pytest.skip("Domain ports file not found")
+
+    with ports_file.open(encoding="utf-8") as f:
+        content = f.read()
+
+    assert "def preview_cleanup(" in content, (
+        "StoragePort must define preview_cleanup() method for CLI dry-run support"
+    )
+
+
+def test_interfaces_no_direct_filesystem_traversal(src_dir: Path) -> None:
+    """Interfaces layer MUST NOT use direct filesystem traversal.
+
+    REQ-ARCH-023: CLI delegates to StoragePort, not Path.rglob.
+    """
+    interfaces_path = src_dir / "bioetl" / "interfaces"
+    if not interfaces_path.exists():
+        pytest.skip("Interfaces layer not found")
+
+    forbidden_patterns = [
+        r"\.rglob\(",
+        r"\.glob\(",
+        r"os\.walk\(",
+        r"os\.listdir\(",
+    ]
+
+    errors = []
+    for py_file in interfaces_path.rglob("*.py"):
+        if py_file.name.startswith("_"):
+            continue
+
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+
+        for pattern in forbidden_patterns:
+            if re.search(pattern, content):
+                relative_path = py_file.relative_to(src_dir)
+                errors.append(f"{relative_path}: contains '{pattern}'")
+
+    assert not errors, (
+        "Interfaces layer must not use direct filesystem traversal.\n"
+        "Delegate to StoragePort instead.\n"
+        "Violations:\n" + "\n".join(f"  - {e}" for e in errors)
+    )
+
+
+def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
+    """ErrorClassifier SHOULD use error_type attribute for BioETLError.
+
+    REQ-ARCH-024: Deterministic error classification.
+    """
+    classifier_file = src_dir / "bioetl" / "domain" / "error_classifier.py"
+    if not classifier_file.exists():
+        pytest.skip("Error classifier not found")
+
+    with classifier_file.open(encoding="utf-8") as f:
+        content = f.read()
+
+    # Should have get_error_type() call for domain errors
+    assert "get_error_type()" in content or "error_type" in content, (
+        "ErrorClassifier should use error_type attribute for domain exceptions"
+    )

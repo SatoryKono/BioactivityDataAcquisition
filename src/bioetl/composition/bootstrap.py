@@ -45,6 +45,7 @@ __all__ = [
     "bootstrap_logger",
     "bootstrap_pipeline",
     "bootstrap_quarantine",
+    "bootstrap_storage",
 ]
 
 if TYPE_CHECKING:
@@ -70,6 +71,36 @@ def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
     return LocalCheckpoint(
         base_path=settings.checkpoint_path,
         pipeline_name=pipeline_name,
+    )
+
+
+def bootstrap_storage() -> StorageAdapter:
+    """Bootstrap a read-only storage adapter for CLI operations.
+
+    Creates a minimal StorageAdapter suitable for preview operations.
+    No CSV export is configured since this is for read-only inspection.
+
+    Returns:
+        StorageAdapter configured for the current environment.
+    """
+    settings = get_settings()
+
+    return StorageAdapter(
+        bronze_writer=BronzeWriter(
+            base_path=settings.bronze_path,
+            save_json=False,
+            json_path=None,
+            logger=None,
+        ),
+        silver_writer=DeltaWriter(
+            base_path=settings.silver_path,
+            csv_exporter=None,
+            logger=None,
+        ),
+        gold_writer=GoldWriter(
+            base_path=settings.gold_path,
+            csv_exporter=None,
+        ),
     )
 
 

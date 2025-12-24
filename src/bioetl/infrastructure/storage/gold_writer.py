@@ -321,6 +321,19 @@ class GoldWriter:
             )
         )
 
+    def get_table_path(self, table_name: str) -> Path:
+        """Get the filesystem path for a table.
+
+        Args:
+            table_name: Table name (e.g., 'chembl.activity')
+
+        Returns:
+            Path to the table directory.
+        """
+        from pathlib import Path
+
+        return Path(self.base_path) / table_name.replace(".", "/")
+
     def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear Gold Delta table(s) at the start of a pipeline run.
 
@@ -342,7 +355,7 @@ class GoldWriter:
         cleared = 0
         if table_name:
             # Clear specific table
-            table_path = base / table_name.replace(".", "/")
+            table_path = self.get_table_path(table_name)
             if table_path.exists():
                 if not dry_run:
                     shutil.rmtree(table_path)

@@ -2,7 +2,17 @@
 
 Implements centralized exception hierarchy for all BioETL errors.
 All exceptions should inherit from BioETLError to enable consistent error handling.
+
+Each exception class defines an explicit `error_type` attribute for deterministic
+error classification (see ErrorClassifier).
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, ClassVar
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import ErrorType
 
 
 class BioETLError(Exception):
@@ -10,9 +20,28 @@ class BioETLError(Exception):
 
     All exceptions in the system should inherit from this class to enable
     consistent error handling and classification.
+
+    Attributes:
+        error_type: Explicit ErrorType for deterministic classification.
+                   Subclasses MUST override this attribute.
     """
 
-    pass
+    error_type: ClassVar[ErrorType]
+
+    @classmethod
+    def get_error_type(cls) -> ErrorType:
+        """Get the error type for this exception class.
+
+        Returns:
+            ErrorType for this exception.
+
+        Raises:
+            AttributeError: If error_type is not defined (should not happen).
+        """
+        # Import here to avoid circular import at module load time
+        from bioetl.domain.types import ErrorType
+
+        return getattr(cls, "error_type", ErrorType.INVALID_DATA)
 
 
 class CriticalError(BioETLError):
@@ -23,7 +52,12 @@ class CriticalError(BioETLError):
     system resource exhaustion.
     """
 
-    pass
+    # Default for CriticalError subclasses that don't override
+    @classmethod
+    def get_error_type(cls) -> ErrorType:
+        from bioetl.domain.types import ErrorType
+
+        return getattr(cls, "error_type", ErrorType.DB_UNAVAILABLE)
 
 
 class RecoverableError(BioETLError):
@@ -33,7 +67,11 @@ class RecoverableError(BioETLError):
     Examples: network timeouts, rate limits, temporary service unavailability.
     """
 
-    pass
+    @classmethod
+    def get_error_type(cls) -> ErrorType:
+        from bioetl.domain.types import ErrorType
+
+        return getattr(cls, "error_type", ErrorType.NETWORK_ERROR)
 
 
 class DataQualityError(BioETLError):
@@ -44,7 +82,11 @@ class DataQualityError(BioETLError):
     Examples: schema violations, missing required fields, invalid data formats.
     """
 
-    pass
+    @classmethod
+    def get_error_type(cls) -> ErrorType:
+        from bioetl.domain.types import ErrorType
+
+        return getattr(cls, "error_type", ErrorType.INVALID_DATA)
 
 
 # ============================================================================
@@ -58,6 +100,10 @@ class LockLostError(CriticalError):
     This is a CRITICAL error - worker MUST terminate before any commit.
     Losing the lock means another worker may have acquired it.
     """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.LOCK_LOST
 
     def __init__(self, key: str, run_id: str | None = None) -> None:
         self.key = key
@@ -73,6 +119,10 @@ class LockAcquisitionError(CriticalError):
 
     This prevents the pipeline from starting if the lock is held by another worker.
     """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.LOCK_LOST
 
     def __init__(self, key: str, current_owner: str | None = None) -> None:
         self.key = key
@@ -90,6 +140,10 @@ class CheckpointConflictError(CriticalError):
     which could lead to data inconsistency.
     """
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
     def __init__(self, pipeline: str, message: str) -> None:
         self.pipeline = pipeline
         super().__init__(f"Checkpoint conflict in '{pipeline}': {message}")
@@ -101,6 +155,10 @@ class MergeConflictError(CriticalError):
     This indicates that the data merge operation has unresolved conflicts
     that require manual intervention.
     """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.DB_UNAVAILABLE
 
     def __init__(self, table: str, conflicts: int) -> None:
         self.table = table
@@ -119,6 +177,10 @@ class RateLimitError(RecoverableError):
     The request should be retried after the specified delay.
     """
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.RATE_LIMIT
+
     def __init__(self, provider: str, retry_after: float) -> None:
         self.provider = provider
         self.retry_after = retry_after
@@ -132,6 +194,10 @@ class RetryExhaustedError(RecoverableError):
 
     This indicates that a transient error persisted across all retry attempts.
     """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.NETWORK_ERROR
 
     def __init__(
         self, url: str, attempts: int, last_error: Exception | None = None
@@ -152,6 +218,10 @@ class CircuitBreakerOpenError(RecoverableError):
     has opened to prevent further requests.
     """
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.TIMEOUT
+
     def __init__(self, provider: str, retry_after: float) -> None:
         self.provider = provider
         self.retry_after = retry_after
@@ -166,6 +236,10 @@ class ApiError(RecoverableError):
     This is a generic API error that may be retryable depending on the status code.
     """
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.NETWORK_ERROR
+
     def __init__(self, message: str, status_code: int | None = None) -> None:
         self.message = message
         self.status_code = status_code
@@ -178,7 +252,9 @@ class ApiError(RecoverableError):
 class ChemblApiError(ApiError):
     """Raised when ChEMBL API returns an error."""
 
-    pass
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.NETWORK_ERROR
 
 
 class StorageError(RecoverableError):
@@ -187,11 +263,17 @@ class StorageError(RecoverableError):
     These errors typically involve I/O operations and may be transient.
     """
 
-    pass
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.NETWORK_ERROR
 
 
 class BucketNotFoundError(StorageError):
     """Raised when S3 bucket does not exist."""
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.DB_UNAVAILABLE
 
     def __init__(self, bucket: str) -> None:
         self.bucket = bucket
@@ -201,6 +283,10 @@ class BucketNotFoundError(StorageError):
 class UploadError(StorageError):
     """Raised when upload to S3 fails."""
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.NETWORK_ERROR
+
     def __init__(self, key: str, reason: str) -> None:
         self.key = key
         self.reason = reason
@@ -209,6 +295,10 @@ class UploadError(StorageError):
 
 class TableNotFoundError(StorageError):
     """Raised when Delta table does not exist."""
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.DB_UNAVAILABLE
 
     def __init__(self, table_path: str) -> None:
         self.table_path = table_path
@@ -226,6 +316,10 @@ class SchemaViolationError(DataQualityError):
     This indicates that a data record has schema validation errors and should be skipped.
     """
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.SCHEMA_VIOLATION
+
     def __init__(self, table: str, errors: list[str]) -> None:
         self.table = table
         self.errors = errors
@@ -234,6 +328,10 @@ class SchemaViolationError(DataQualityError):
 
 class MissingRequiredFieldError(DataQualityError):
     """Raised when required field is missing from data record."""
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.MISSING_REQUIRED_FIELD
 
     def __init__(self, field: str, record_id: str | None = None) -> None:
         self.field = field
@@ -246,6 +344,10 @@ class MissingRequiredFieldError(DataQualityError):
 
 class InvalidDataFormatError(DataQualityError):
     """Raised when data format is invalid."""
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.INVALID_DATA
 
     def __init__(self, field: str, value: str, expected_format: str) -> None:
         self.field = field
@@ -263,9 +365,70 @@ class DataQualityThresholdError(BioETLError):
     requiring the pipeline or batch to stop.
     """
 
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.DATA_QUALITY
+
     def __init__(self, error_rate: float, threshold: float) -> None:
         self.error_rate = error_rate
         self.threshold = threshold
         super().__init__(
             f"DQ Hard Threshold exceeded: {error_rate:.2%} errors (limit: {threshold:.2%})"
         )
+
+
+# ============================================================================
+# Authentication Errors
+# ============================================================================
+
+
+class AuthFailureError(CriticalError):
+    """Raised when API authentication fails (401, 403).
+
+    This is a CRITICAL error - pipeline should not continue without valid auth.
+    """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.AUTH_FAILURE
+
+    def __init__(self, provider: str, status_code: int | None = None) -> None:
+        self.provider = provider
+        self.status_code = status_code
+        msg = f"Authentication failed for {provider}"
+        if status_code:
+            msg += f" (HTTP {status_code})"
+        super().__init__(msg)
+
+
+class TimeoutError(RecoverableError):
+    """Raised when request times out (502, 504, gateway errors).
+
+    The request may be retried after a delay.
+    """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.TIMEOUT
+
+    def __init__(self, message: str, timeout_seconds: float | None = None) -> None:
+        self.timeout_seconds = timeout_seconds
+        msg = message
+        if timeout_seconds:
+            msg += f" (timeout: {timeout_seconds}s)"
+        super().__init__(msg)
+
+
+class NetworkError(RecoverableError):
+    """Raised when network connectivity issues occur.
+
+    This is a generic network error that may be retried.
+    """
+
+    from bioetl.domain.types import ErrorType
+
+    error_type = ErrorType.NETWORK_ERROR
+
+    def __init__(self, message: str, cause: Exception | None = None) -> None:
+        self.cause = cause
+        super().__init__(message)
