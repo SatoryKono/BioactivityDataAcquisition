@@ -31,7 +31,7 @@ from bioetl.application.pipelines.chembl.target_transformer import TargetTransfo
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def mock_context() -> PipelineContext:
     mock_logger.warning = MagicMock()
 
     # Use a deterministic run_id for snapshot reproducibility
-    run_id: RunID = uuid4()
+    run_id = uuid4()
     return PipelineContext(
         run_id=run_id,
         run_type=RunType.INCREMENTAL,

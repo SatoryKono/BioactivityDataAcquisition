@@ -7,7 +7,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, RunType
 
 
 @pytest.mark.unit
@@ -60,8 +60,8 @@ class TestStorageAdapter:
 
     async def test_write_bronze_delegates(self, storage_adapter, mock_bronze_writer):
         """Test write_bronze delegates to bronze writer."""
-        batch_id: BatchID = uuid4()
-        run_id: RunID = uuid4()
+        batch_id = uuid4()
+        run_id = uuid4()
         run_type = RunType.INCREMENTAL
         records = iter([b"record1", b"record2"])
 

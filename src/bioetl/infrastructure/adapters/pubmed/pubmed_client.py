@@ -116,6 +116,22 @@ class PubMedAdapter:
             self.logger.error("Batch fetch failed", error=str(e))
             raise ApiError(f"PubMed fetch failed: {e}") from e
 
+    async def _yield_articles_from_pmids(
+        self, pmids: list[str], limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Yield article records from a list of PMIDs."""
+        total_fetched = 0
+        for i in range(0, len(pmids), self.batch_size):
+            root = await self._fetch_batch(pmids[i : i + self.batch_size])
+            if root is None:
+                continue
+
+            for article_node in root.findall(".//PubmedArticle"):
+                yield self._extract_record_from_article(article_node)
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
+
     async def fetch_filtered(
         self,
         entity_type: str,
@@ -134,22 +150,9 @@ class PubMedAdapter:
                 msg="Assuming PMIDs",
             )
 
-        total_fetched = 0
-        # If limit is set, we can restrict the list of IDs upfront
-        # assuming 1 ID -> 1 Record (which is true for PubMed efetch)
         pmids = filter_ids[:limit] if limit else filter_ids
-
-        for i in range(0, len(pmids), self.batch_size):
-            batch_ids = pmids[i : i + self.batch_size]
-            root = await self._fetch_batch(batch_ids)
-            if root is None:
-                continue
-
-            for article_node in root.findall(".//PubmedArticle"):
-                yield self._extract_record_from_article(article_node)
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+        async for record in self._yield_articles_from_pmids(pmids, limit):
+            yield record
 
     async def fetch(
         self,
@@ -176,17 +179,8 @@ class PubMedAdapter:
         if not pmids:
             return
 
-        total_fetched = 0
-        for i in range(0, len(pmids), self.batch_size):
-            root = await self._fetch_batch(pmids[i : i + self.batch_size])
-            if root is None:
-                continue
-
-            for article_node in root.findall(".//PubmedArticle"):
-                yield self._extract_record_from_article(article_node)
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+        async for record in self._yield_articles_from_pmids(pmids, limit):
+            yield record
 
     async def health_check(self) -> HealthStatus:
         """Check PubMed API availability."""
