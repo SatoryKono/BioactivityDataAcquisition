@@ -24,8 +24,6 @@ from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_do
 from bioetl.infrastructure.validation import NoOpGoldValidator, PanderaGoldValidator
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     import pyarrow as pa
     import structlog
 
@@ -34,6 +32,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, TracingPort
+    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -155,7 +154,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
     def create_with_services(
         self,
-        run_id: UUID,
+        run_id: RunID,
         runtime: RuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
@@ -200,11 +199,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
     def create_runner(
         self,
-        run_id: UUID,
+        run_id: RunID,
         runtime: RuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
-        tracer: Any,
+        tracer: TracingPort | None,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
     ) -> PipelineRunner:
@@ -278,7 +277,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         pipeline: TPipeline,
         logger: structlog.BoundLogger,
-        run_id: UUID,
+        run_id: RunID,
         resume: bool,
     ) -> CheckpointManager:
         """Create configured CheckpointManager."""
