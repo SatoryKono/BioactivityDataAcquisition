@@ -213,8 +213,15 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         # Additional metadata
         pa.field("assay_pref_name", pa.string()),
         pa.field("score", pa.float64()),
-        # Variant information
+        # Variant information (flattened from ChEMBL API nested structure)
+        pa.field("variant_accession", pa.string()),
+        pa.field("variant_isoform", pa.string()),
+        pa.field("variant_mutation", pa.string()),
+        pa.field("variant_organism", pa.string()),
         pa.field("variant_sequence", pa.string()),
+        pa.field("variant_tax_id", pa.int64()),
+        # Forensic: original JSON
+        pa.field("variant_sequence_json", pa.string()),
         # Complex fields (stored as JSON strings)
         pa.field("assay_classifications", pa.string()),  # JSON string
         pa.field("assay_parameters", pa.string()),  # JSON string

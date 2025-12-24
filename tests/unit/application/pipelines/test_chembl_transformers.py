@@ -80,7 +80,6 @@ class TestAssayTransformer:
             "assay_chembl_id": "CHEMBL1234567",
             "assay_classifications": [{"class": "Pharmacology"}],
             "assay_parameters": [{"param": "IC50"}],
-            "variant_sequence": {"sequence": "ATCG"},
         }
 
         result = await transformer.transform(mock_context, record)
@@ -89,6 +88,75 @@ class TestAssayTransformer:
         # JSON fields should be serialized as strings
         assert isinstance(result.get("assay_classifications"), str)
         assert isinstance(result.get("assay_parameters"), str)
+
+    @pytest.mark.asyncio
+    async def test_transform_with_variant_sequence(self, transformer, mock_context):
+        """Test transformation with variant_sequence data (flattened structure)."""
+        record = {
+            "assay_chembl_id": "CHEMBL1234567",
+            "variant_sequence": {
+                "accession": "P12345",
+                "isoform": "1",
+                "mutation": "V600E",
+                "organism": "Homo sapiens",
+                "sequence": "MTEYKLVVVGAGGVGKSALT...",
+                "tax_id": 9606,
+            },
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        # Flattened variant fields
+        assert result["variant_accession"] == "P12345"
+        assert result["variant_isoform"] == "1"
+        assert result["variant_mutation"] == "V600E"
+        assert result["variant_organism"] == "Homo sapiens"
+        assert result["variant_sequence"] == "MTEYKLVVVGAGGVGKSALT..."
+        assert result["variant_tax_id"] == 9606
+        # Forensic JSON should also be present
+        assert isinstance(result.get("variant_sequence_json"), str)
+
+    @pytest.mark.asyncio
+    async def test_transform_with_null_variant(self, transformer, mock_context):
+        """Test transformation handles null variant_sequence."""
+        record = {
+            "assay_chembl_id": "CHEMBL1234567",
+            "variant_sequence": None,
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["variant_accession"] is None
+        assert result["variant_isoform"] is None
+        assert result["variant_mutation"] is None
+        assert result["variant_organism"] is None
+        assert result["variant_sequence"] is None
+        assert result["variant_tax_id"] is None
+        assert result["variant_sequence_json"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_with_partial_variant(self, transformer, mock_context):
+        """Test transformation with partial variant_sequence data."""
+        record = {
+            "assay_chembl_id": "CHEMBL1234567",
+            "variant_sequence": {
+                "accession": "P12345",
+                "mutation": "L858R",
+                # Other fields missing
+            },
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        assert result["variant_accession"] == "P12345"
+        assert result["variant_mutation"] == "L858R"
+        assert result["variant_isoform"] is None
+        assert result["variant_organism"] is None
+        assert result["variant_sequence"] is None
+        assert result["variant_tax_id"] is None
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):

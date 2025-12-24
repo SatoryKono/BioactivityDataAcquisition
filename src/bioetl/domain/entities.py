@@ -531,8 +531,15 @@ class Assay(BaseEntity):
     assay_pref_name: str | None = None  # Preferred assay name (if available)
     score: float | None = None  # Assay score (distinct from confidence_score)
 
-    # Variant information
-    variant_sequence: str | None = None
+    # Variant information (flattened from ChEMBL API nested structure)
+    variant_accession: str | None = None  # UniProt accession
+    variant_isoform: str | None = None  # Isoform identifier
+    variant_mutation: str | None = None  # Mutation description (e.g., V600E)
+    variant_organism: str | None = None  # Organism name
+    variant_sequence: str | None = None  # Amino acid sequence
+    variant_tax_id: int | None = None  # NCBI Taxonomy ID
+    # Forensic: original JSON
+    variant_sequence_json: str | None = None
 
     # Complex fields (stored as JSON strings)
     assay_classifications: str | None = None  # JSON string of list
