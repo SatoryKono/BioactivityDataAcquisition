@@ -310,6 +310,12 @@ class ObservabilitySettings(BaseSettings):
 
     model_config = SettingsConfigDict(frozen=True)
 
+    metrics_enabled: bool = Field(default=True)
+    """Enable metrics collection."""
+
+    metrics_server_enabled: bool = Field(default=True)
+    """Enable Prometheus metrics HTTP server. Requires metrics_enabled=True."""
+
     tracing_enabled: bool = Field(default=False)
     """Enable OpenTelemetry tracing."""
 
