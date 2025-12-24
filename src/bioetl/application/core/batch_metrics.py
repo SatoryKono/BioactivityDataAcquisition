@@ -27,6 +27,7 @@ class BatchMetricsRecorder:
             metrics: Metrics port instance.
             pipeline_label: Label identifying the pipeline (e.g., 'chembl_activity').
             run_type_label: Label for the run type (e.g., 'incremental', 'rebuild').
+
         """
         self._metrics = metrics
         self._pipeline_label = pipeline_label

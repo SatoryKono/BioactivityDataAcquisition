@@ -113,10 +113,10 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
             params["cursor"] = cursor
         return params
 
-    async def _process_protein_response(
+    def _parse_response(
         self, response: httpx.Response
     ) -> tuple[list, str | None]:
-        """Processes the HTTP response from a protein fetch request."""
+        """Process the HTTP response from a protein fetch request."""
         if response.status_code != 200:
             return [], None
         data = response.json()
@@ -133,10 +133,10 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         query = query or "*"
         size = 500
 
-        async def fetch_page(
+        async def _pagination_callback(
             cursor: str | None, fetched: int
         ) -> tuple[list[dict[str, Any]], str | None]:
-            """Callback for pagination."""
+            """Execute pagination callback."""
             params = self._build_protein_fetch_params(
                 query, size, fetched, limit, cursor
             )
@@ -283,6 +283,6 @@ class UniProtClient(BaseHttpAdapter, PaginatedFetcherMixin):
         return await super().health_check()
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Return string representation."""
         has_key = "with API key" if self.api_key else "without API key"
         return f"UniProtClient(base_url='{self.base_url}', {has_key})"

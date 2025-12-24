@@ -1,5 +1,4 @@
-"""Processes a batch of records through the Bronze, Silver, and Gold layers.
-"""
+"""Processes a batch of records through the Bronze, Silver, and Gold layers."""
 
 from __future__ import annotations
 
@@ -38,6 +37,7 @@ class BatchResult:
 
 class RecordProcessor:
     """Handles the transformation and writing of a single batch of records.
+
     This class contains the core ETL logic for a batch.
     """
 
@@ -63,6 +63,7 @@ class RecordProcessor:
             gold_filter_callback: Callback for filtering Silver records.
             gold_transform_callback: Callback for Silver -> Gold transformation.
             gold_validator: Validator for Gold layer records.
+
         """
         self._storage = services.storage
         self._quarantine_manager = QuarantineManager(

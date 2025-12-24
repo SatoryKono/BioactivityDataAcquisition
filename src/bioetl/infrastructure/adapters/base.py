@@ -43,6 +43,7 @@ class BaseHttpAdapter(DataSourcePort):
         Args:
             http_client: HTTP client for requests.
             logger: Optional logger instance.
+
         """
         self.http_client = http_client
         # Fallback to no-op logger if not provided (for backwards compatibility)

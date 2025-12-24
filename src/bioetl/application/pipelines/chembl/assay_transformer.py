@@ -24,6 +24,7 @@ class AssayTransformer(BaseTransformer):
 
         Args:
             provider: Data provider identifier.
+
         """
         super().__init__(provider)
 

@@ -295,9 +295,20 @@ class DeltaWriter:
     async def vacuum(
         self,
         table_name: str,
-        retention_hours: int = 168,  # 7 days default
+        retention_hours: int | None = None,
         dry_run: bool = False,
     ) -> list[str]:
+        """Remove old files that are no longer referenced by the Delta log.
+
+        Args:
+            table_name: Table name.
+            retention_hours: Hours of retention.
+            dry_run: If True, only list files to be deleted.
+
+        Returns:
+            List of files deleted (or to be deleted).
+
+        """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         loop = asyncio.get_running_loop()
         try:
@@ -315,22 +326,46 @@ class DeltaWriter:
     async def optimize(
         self,
         table_name: str,
+        target_size: int | None = None,
         partition_filters: list[tuple[str, str, Any]] | None = None,
     ) -> dict[str, Any]:
+        """Optimize table layout (compaction).
+
+        Args:
+            table_name: Table name.
+            target_size: Target file size in bytes (currently unused, reserved for future).
+            partition_filters: Optional filters to limit optimization to specific partitions.
+
+        Returns:
+            Optimization metrics.
+
+        """
+        # Note: target_size reserved for future delta-rs API support
+        _ = target_size  # Suppress unused variable warning
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         loop = asyncio.get_running_loop()
+        filters = partition_filters  # Capture for lambda closure
         try:
             dt = await loop.run_in_executor(
                 None,
                 lambda: DeltaTable(table_path),
             )
             return await loop.run_in_executor(
-                None, lambda: dt.optimize.compact(partition_filters=partition_filters)
+                None, lambda: dt.optimize.compact(partition_filters=filters)
             )
         except DeltaTableNotFoundError as e:
             raise TableNotFoundError(table_path) from e
 
     async def get_table_info(self, table_name: str) -> dict[str, Any]:
+        """Get metadata about a Delta table.
+
+        Args:
+            table_name: Table name.
+
+        Returns:
+            Dictionary with table metadata (version, files, history).
+
+        """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         loop = asyncio.get_running_loop()
         try:
@@ -353,6 +388,17 @@ class DeltaWriter:
         version: int | None = None,
         timestamp: datetime | None = None,
     ) -> DeltaTable:
+        """Read a previous version of the table.
+
+        Args:
+            table_name: Table name.
+            version: Version number.
+            timestamp: Timestamp string.
+
+        Returns:
+            PyArrow table or equivalent of the snapshot.
+
+        """
         if version is not None and timestamp is not None:
             raise ValueError("Specify either version or timestamp, not both")
 

@@ -85,6 +85,7 @@ class LockManager:
 
         Returns:
             A configured LockManager instance.
+
         """
         exclusive = run_type in (RunType.BACKFILL, RunType.REBUILD)
         lock_key = f"lock:{provider}_{entity_type}"
@@ -110,6 +111,7 @@ class LockManager:
 
         Returns:
             True if lock was acquired, False otherwise.
+
         """
         acquired = await self._lock.acquire(
             key=self._lock_key,
@@ -141,6 +143,7 @@ class LockManager:
 
         Raises:
             PipelineShutdownError: If initial heartbeat fails.
+
         """
         initial_success = await self._lock.heartbeat(
             self._lock_key, self._run_id, exclusive=self._exclusive
@@ -196,6 +199,7 @@ class LockManager:
 
         Raises:
             PipelineShutdownError: If lock acquisition fails.
+
         """
         acquired = await self.acquire()
         if not acquired:

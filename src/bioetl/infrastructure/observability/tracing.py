@@ -33,6 +33,7 @@ class OpenTelemetryTracer:
 
         Raises:
             ImportError: If opentelemetry is not installed.
+
         """
         if not OTEL_AVAILABLE:
             raise ImportError(
@@ -58,6 +59,7 @@ class OpenTelemetryTracer:
 
         Returns:
             OpenTelemetry tracer instance.
+
         """
         return trace.get_tracer(name)
 

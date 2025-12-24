@@ -211,6 +211,7 @@ class PipelineYamlConfig(BaseModel):
     @field_validator("provider")
     @classmethod
     def validate_provider(cls, v: str) -> str:
+        """Validate provider name format."""
         if not v.islower():
             raise ValueError("provider must be lowercase")
         return v

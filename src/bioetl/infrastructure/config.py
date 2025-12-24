@@ -356,6 +356,7 @@ class Settings(BaseSettings):
 
         Returns:
             Tuple of settings sources with YamlSettingsSource prepended.
+
         """
         return (
             YamlSettingsSource(settings_cls),

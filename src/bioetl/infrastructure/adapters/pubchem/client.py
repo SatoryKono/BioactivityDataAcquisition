@@ -277,5 +277,5 @@ class PubChemClient(BaseSyncAdapter):
             return HealthStatus.UNHEALTHY
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Return string representation."""
         return f"PubChemClient(rate={self.rate_limiter.rate})"

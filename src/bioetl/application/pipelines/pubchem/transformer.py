@@ -20,6 +20,7 @@ class PubChemCompoundTransformer(BaseTransformer):
 
         Args:
             provider: Data provider identifier.
+
         """
         super().__init__(provider)
 

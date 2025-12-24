@@ -97,7 +97,7 @@ class BaseSyncAdapter(DataSourcePort):
         return await loop.run_in_executor(self.thread_pool, func, *args)
 
     async def health_check(self) -> HealthStatus:
-        """Default health check based on Circuit Breaker state."""
+        """Perform health check based on Circuit Breaker state."""
         try:
             return assess_health_from_circuit_breaker(self.circuit_breaker)
         except Exception:

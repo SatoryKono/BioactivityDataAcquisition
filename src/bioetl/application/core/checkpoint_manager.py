@@ -30,6 +30,7 @@ class CheckpointManager:
             checkpoint_port: Port for checkpoint operations.
             pipeline_name: Name of the pipeline.
             run_id: Unique identifier for the pipeline run.
+
         """
         self._checkpoint = checkpoint_port
         self._logger = logger
