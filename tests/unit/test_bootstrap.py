@@ -106,6 +106,66 @@ class TestBootstrapPipeline:
         with pytest.raises(ValueError, match="Configuration file not found"):
             bootstrap_pipeline(ctx)
 
+    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
+    @patch("bioetl.composition.bootstrap.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
+    @patch("bioetl.composition.bootstrap.bootstrap_logger")
+    @patch("bioetl.composition.bootstrap.get_settings")
+    def test_bootstrap_pipeline_metrics_server_failure_non_blocking(
+        self,
+        mock_get_settings: MagicMock,
+        mock_bootstrap_logger: MagicMock,
+        mock_bootstrap_tracer: MagicMock,
+        mock_start_metrics: MagicMock,
+        mock_load_config: MagicMock,
+        mock_filter_builder: MagicMock,
+        mock_registry: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test that metrics server failure doesn't block pipeline bootstrap."""
+        from bioetl.composition.bootstrap import bootstrap_pipeline
+
+        # Create proper mock settings with required attributes
+        test_settings = MagicMock()
+        test_settings.metrics_port = 8000
+        test_settings.pipeline = MagicMock()
+        test_settings.pipeline.heartbeat_interval = 30
+
+        mock_get_settings.return_value = test_settings
+        mock_bootstrap_logger.return_value = mock_logger
+        mock_bootstrap_tracer.return_value = MagicMock()
+        mock_filter_builder.build.return_value = None
+
+        # Simulate metrics server failure
+        mock_start_metrics.side_effect = Exception("Port already in use")
+
+        # Setup pipeline registry mock
+        mock_config = MagicMock()
+        mock_load_config.return_value = mock_config
+        mock_factory = MagicMock()
+        mock_runner = MagicMock()
+        mock_factory.create_runner.return_value = mock_runner
+        mock_registry.get.return_value.factory = mock_factory
+
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            resume=False,
+            limit=None,
+        )
+
+        # Should not raise, should return runner despite metrics failure
+        result = bootstrap_pipeline(ctx)
+
+        assert result is mock_runner
+        mock_start_metrics.assert_called_once_with(test_settings.metrics_port)
+        mock_logger.warning.assert_called_with(
+            "failed_to_start_metrics_server", error="Port already in use"
+        )
+
     @pytest.mark.skip(
         reason="Requires full integration setup - covered by integration tests"
     )
@@ -265,7 +325,6 @@ class TestChemblActivityFactory:
             chembl_activity_factory,
         )
         from bioetl.domain.config import RuntimeConfig
-        from bioetl.domain.types import RunID
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services

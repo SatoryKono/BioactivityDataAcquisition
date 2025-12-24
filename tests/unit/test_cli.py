@@ -324,36 +324,3 @@ class TestRunCommandAdvanced:
         assert "Logger not initialized" in result.output
 
 
-class TestMetricsServerIntegration:
-    """Tests for metrics server integration in CLI."""
-
-    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
-    @patch("bioetl.interfaces.cli.start_metrics_server")
-    @patch("bioetl.interfaces.cli.get_settings")
-    def test_metrics_server_failure_non_blocking(
-        self,
-        mock_get_settings,
-        mock_start_metrics,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_bootstrap,
-        runner,
-    ):
-        """Test that metrics server failure doesn't block pipeline run."""
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock()
-        mock_bootstrap.return_value = mock_runner_instance
-
-        mock_settings = MagicMock()
-        mock_settings.metrics_port = 8000
-        mock_get_settings.return_value = mock_settings
-
-        mock_start_metrics.side_effect = Exception("Port already in use")
-
-        result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
-
-        # Pipeline should still succeed even if metrics server fails
-        assert result.exit_code == 0
-        mock_asyncio_run.assert_called_once()
