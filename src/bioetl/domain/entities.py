@@ -523,10 +523,6 @@ class Assay(BaseEntity):
     relationship_type: str | None = None
     relationship_description: str | None = None
 
-    # Additional metadata
-    assay_pref_name: str | None = None  # Preferred assay name (if available)
-    score: float | None = None  # Assay score (distinct from confidence_score)
-
     # Variant information
     variant_sequence: str | None = None
 
