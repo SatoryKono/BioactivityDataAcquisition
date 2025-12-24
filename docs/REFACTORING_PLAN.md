@@ -1,12 +1,45 @@
 # План Рефакторинга BioETL
 
-*Версия: 2.0 | Дата: 2024-12-24*
+*Версия: 3.0 | Дата: 2024-12-24*
 
 ---
 
 ## Обзор
 
 Этот документ описывает план рефакторинга для улучшения архитектурной чистоты, наблюдаемости и тестируемости BioETL. Каждая задача включает конкретные изменения файлов, критерии приёмки и оценку рисков.
+
+**ВАЖНО:** Секция "КРИТИЧЕСКИЕ ЗАДАЧИ" (K1-K4) в конце документа содержит блокирующие задачи, которые MUST быть выполнены в первую очередь.
+
+### Порядок выполнения
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  КРИТИЧЕСКИЕ (БЛОКЕРЫ)                      │
+├─────────────────────────────────────────────────────────────┤
+│  K1: Синтаксическая ошибка _clear_exports  ──────────────┐  │
+│      (runner.py:121 — await в sync функции)              │  │
+│                                                          │  │
+│  K2: Видимость сбоев метрик ──────────────────────────┐  │  │
+│      (server.py — fail_fast + structured logs)        │  │  │
+│                                                       │  │  │
+│  K3: Тесты жизненного цикла ──────────────────────────┴──┘  │
+│      (CallRecorder для проверки порядка вызовов)            │
+│                                                             │
+│  K4: Документация ────────────────────────────────────────┘ │
+│      (ADR-013, pipeline-lifecycle.md)                       │
+└─────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    ОСНОВНЫЕ ЗАДАЧИ                          │
+├─────────────────────────────────────────────────────────────┤
+│  Задача 2: Классификация ошибок ─────┐                      │
+│                                      ├──▶ Задача 4: Метрики │
+│  Задача 3: Lifecycle портов ─────────┘                      │
+│                                                             │
+│  Задача 1: CLI/Storage ──────────────────▶ Задача 5: Тесты  │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -967,6 +1000,859 @@ forbidden_modules =
 | 3. Lifecycle | 4-6 | 4 | Средняя |
 | 4. Observability | 3-4 | 3 | Средняя |
 | 5. Arch Tests | 2-3 | 4 | Низкая |
+
+---
+
+## КРИТИЧЕСКИЕ ЗАДАЧИ (Блокеры запуска пайплайнов)
+
+Эти задачи MUST быть выполнены в первую очередь, так как они блокируют работу системы.
+
+### Сводная таблица
+
+| ID | Задача | Файлы | Статус | Зависимости |
+|----|--------|-------|--------|-------------|
+| K1 | Синтаксис _clear_exports | `runner.py`, `test_runner.py` | 🔴 БЛОКЕР | — |
+| K2 | fail_fast метрики | `server.py`, `bootstrap.py` | 🟡 ВАЖНО | — |
+| K3 | Тесты жизненного цикла | `test_runner_lifecycle.py` (новый) | 🟡 ВАЖНО | K1 |
+| K4 | Документация | `ADR-013`, `pipeline-lifecycle.md` | 🟢 ОБЫЧНЫЙ | K1, K2 |
+
+### Зависимости между задачами
+
+```
+K1 ──────────────────────┬──▶ K3 ──▶ K4
+                         │
+K2 ──────────────────────┴──────────▶ K4
+```
+
+**K1 блокирует K3**: Тесты порядка вызовов используют async _clear_exports.
+**K1, K2 блокируют K4**: Документация описывает исправленное поведение.
+
+---
+
+### Задача K1: Исправить синтаксическую ошибку в _clear_exports
+
+**Статус:** 🔴 БЛОКЕР
+
+**Проблема:**
+
+Метод `_clear_exports()` в `src/bioetl/application/core/runner.py:121-182` определён как синхронный (`def`), но использует `await` для вызова асинхронных методов `StoragePort`:
+
+```python
+# runner.py:121 — синхронный метод
+def _clear_exports(self) -> None:
+    ...
+    # runner.py:151-156 — await в синхронной функции = SyntaxError
+    silver_cleared = await storage.clear_silver(...)
+    gold_cleared = await storage.clear_gold(...)
+```
+
+При этом вызов на строке 105 без `await`:
+```python
+self._clear_exports()  # Должно быть: await self._clear_exports()
+```
+
+**Целевое состояние:**
+
+Модуль парсится без ошибок. Асинхронная очистка корректно интегрирована в жизненный цикл runner.
+
+**Конкретные изменения:**
+
+#### K1.1 Сделать _clear_exports асинхронным (`runner.py:121`)
+
+```python
+# ДО:
+def _clear_exports(self) -> None:
+
+# ПОСЛЕ:
+async def _clear_exports(self) -> None:
+```
+
+#### K1.2 Вызывать с await (`runner.py:105`)
+
+```python
+# ДО:
+self._clear_exports()
+
+# ПОСЛЕ:
+await self._clear_exports()
+```
+
+#### K1.3 Обновить тесты (`tests/unit/application/core/test_runner.py`)
+
+Тесты класса `TestPipelineRunnerClearExports` (строки 350-520) вызывают `_clear_exports()` напрямую:
+
+**Изменить все тесты:**
+
+```python
+# ДО (строки 387, 425, 465, 512):
+runner._clear_exports()
+
+# ПОСЛЕ:
+await runner._clear_exports()
+```
+
+**Изменить декоратор класса:**
+
+```python
+# ДО (строка 350):
+@pytest.mark.unit
+class TestPipelineRunnerClearExports:
+
+# ПОСЛЕ:
+@pytest.mark.unit
+@pytest.mark.asyncio
+class TestPipelineRunnerClearExports:
+```
+
+**Изменить каждый тест:**
+
+```python
+# ДО:
+def test_clear_exports_calls_storage_methods(...):
+
+# ПОСЛЕ:
+async def test_clear_exports_calls_storage_methods(...):
+```
+
+**Обновить моки storage:**
+
+```python
+# ДО (строки 373-374, и аналогично в других тестах):
+services.storage.clear_silver = MagicMock(return_value=5)
+services.storage.clear_gold = MagicMock(return_value=1)
+
+# ПОСЛЕ:
+services.storage.clear_silver = AsyncMock(return_value=5)
+services.storage.clear_gold = AsyncMock(return_value=1)
+```
+
+**Тесты:**
+
+| Файл | Тест | Проверяемое поведение |
+|------|------|----------------------|
+| `tests/unit/application/core/test_runner.py` | `test_clear_exports_skips_for_incremental` | Incremental run НЕ вызывает clear_* |
+| `tests/unit/application/core/test_runner.py` | `test_clear_exports_clears_for_rebuild` | Rebuild run вызывает clear_silver + clear_gold |
+| `tests/unit/application/core/test_runner.py` | `test_clear_exports_dry_run_mode` | dry_run=True передаётся в storage методы |
+| `tests/unit/application/core/test_runner.py` | `test_run_awaits_clear_exports` | run() корректно ожидает _clear_exports |
+
+**Критерии приёмки:**
+
+- [ ] `python -c "import bioetl.application.core.runner"` проходит без ошибок
+- [ ] Все тесты `test_clear_exports_*` являются async и используют AsyncMock
+- [ ] `make test-unit` проходит для модуля runner
+- [ ] Тест покрывает incremental (skip) и rebuild (cleanup) сценарии
+
+**Риски и митигация:**
+
+| Риск | Вероятность | Митигация |
+|------|-------------|-----------|
+| Пропущенные вызовы в тестах | Средняя | Grep по `runner._clear_exports` |
+| Регрессия в integration тестах | Низкая | VCR кассеты сохраняют поведение |
+
+---
+
+### Задача K2: Гарантировать видимость сбоев наблюдаемости
+
+**Статус:** 🟡 ВАЖНО
+
+**Проблема:**
+
+`start_metrics_server()` в `src/bioetl/infrastructure/observability/server.py:38-51` имеет две проблемы:
+
+1. **Маскирование ошибки при занятом порте** (строки 40-46):
+   ```python
+   if e.errno == errno.EADDRINUSE:
+       logger.warning(...)
+       _SERVER_STARTED = True  # ← Ложный успех!
+   ```
+   Другой процесс уже занял порт, но мы помечаем сервер как запущенный. Метрики не будут экспортироваться, но пайплайн об этом не узнает.
+
+2. **Недостаточный контекст в логах** (строки 47-51):
+   ```python
+   logger.error(f"Failed to start metrics server on port {port}: {e}")
+   ```
+   Нет информации о run_id, pipeline_name, hostname для диагностики в production.
+
+**Целевое состояние:**
+
+Сбои при запуске метрик-сервера явно видны. Настройка `fail_fast` позволяет контролировать поведение.
+
+**Конкретные изменения:**
+
+#### K2.1 Добавить fail_fast параметр (`server.py`)
+
+```python
+from dataclasses import dataclass
+from typing import Callable
+
+@dataclass
+class MetricsServerConfig:
+    """Configuration for Prometheus metrics server."""
+    port: int = 8000
+    fail_fast: bool = False
+    on_port_conflict: Callable[[int], None] | None = None
+
+
+class MetricsServerError(Exception):
+    """Raised when metrics server fails to start with fail_fast=True."""
+    def __init__(self, port: int, reason: str, original_error: Exception | None = None):
+        super().__init__(f"Metrics server failed on port {port}: {reason}")
+        self.port = port
+        self.reason = reason
+        self.original_error = original_error
+
+
+def start_metrics_server(
+    port: int = 8000,
+    *,
+    fail_fast: bool = False,
+    retry_count: int = 3,
+    retry_delay: float = 1.0,
+) -> bool:
+    """Start Prometheus metrics HTTP server.
+
+    Args:
+        port: Port to bind the HTTP server (default: 8000)
+        fail_fast: If True, raise MetricsServerError on failure
+        retry_count: Number of retries for transient errors (default: 3)
+        retry_delay: Delay between retries in seconds (default: 1.0)
+
+    Returns:
+        True if server started successfully, False otherwise
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server cannot start
+    """
+    global _SERVER_STARTED
+
+    if _SERVER_STARTED:
+        logger.debug("Metrics server already started")
+        return True
+
+    with _SERVER_LOCK:
+        if _SERVER_STARTED:
+            return True
+
+        last_error: Exception | None = None
+        for attempt in range(retry_count):
+            try:
+                start_http_server(port)
+                _SERVER_STARTED = True
+                logger.info(
+                    "Prometheus metrics server started",
+                    extra={
+                        "port": port,
+                        "attempt": attempt + 1,
+                    },
+                )
+                return True
+            except OSError as e:
+                last_error = e
+                if e.errno == errno.EADDRINUSE:
+                    # Port conflict — no retry will help
+                    logger.warning(
+                        "Metrics port already in use",
+                        extra={
+                            "port": port,
+                            "errno": e.errno,
+                            "action": "metrics_disabled" if not fail_fast else "failing",
+                        },
+                    )
+                    if fail_fast:
+                        raise MetricsServerError(
+                            port=port,
+                            reason="port_in_use",
+                            original_error=e,
+                        ) from e
+                    # Mark as "attempted" to prevent retries, but don't pretend success
+                    _SERVER_STARTED = True
+                    return False
+                else:
+                    # Transient error — retry with backoff
+                    if attempt < retry_count - 1:
+                        import time
+                        time.sleep(retry_delay * (2 ** attempt))
+                        continue
+                    logger.error(
+                        "Failed to start metrics server",
+                        extra={
+                            "port": port,
+                            "errno": e.errno,
+                            "attempts": retry_count,
+                        },
+                    )
+                    if fail_fast:
+                        raise MetricsServerError(
+                            port=port,
+                            reason="os_error",
+                            original_error=e,
+                        ) from e
+                    return False
+            except Exception as e:
+                last_error = e
+                logger.error(
+                    "Unexpected error starting metrics server",
+                    extra={
+                        "port": port,
+                        "error_type": type(e).__name__,
+                    },
+                    exc_info=True,
+                )
+                if fail_fast:
+                    raise MetricsServerError(
+                        port=port,
+                        reason="unexpected",
+                        original_error=e,
+                    ) from e
+                return False
+
+        return False  # All retries exhausted
+```
+
+#### K2.2 Интеграция с bootstrap (`composition/bootstrap.py`)
+
+```python
+def bootstrap_observability(
+    settings: Settings,
+    *,
+    fail_fast_metrics: bool | None = None,
+) -> tuple[MetricsPort, TracingPort]:
+    """Bootstrap observability components.
+
+    Args:
+        settings: Application settings
+        fail_fast_metrics: Override settings.fail_fast_metrics
+
+    Returns:
+        Tuple of (metrics, tracer) ports
+    """
+    from bioetl.infrastructure.observability.server import (
+        start_metrics_server,
+        MetricsServerError,
+    )
+
+    fail_fast = fail_fast_metrics if fail_fast_metrics is not None else settings.fail_fast_metrics
+
+    try:
+        server_started = start_metrics_server(
+            port=settings.metrics_port,
+            fail_fast=fail_fast,
+        )
+        if not server_started:
+            logger.warning(
+                "Metrics server not running — metrics will be no-op",
+                extra={"port": settings.metrics_port},
+            )
+    except MetricsServerError as e:
+        # fail_fast=True and server failed
+        raise
+
+    # Continue with metrics/tracer setup...
+```
+
+#### K2.3 Добавить настройку в Settings
+
+```python
+# src/bioetl/domain/config.py или settings.py
+class Settings:
+    ...
+    metrics_port: int = 8000
+    fail_fast_metrics: bool = False  # Default: lenient, set True for strict environments
+```
+
+**Тесты:**
+
+| Файл | Тест | Проверяемое поведение |
+|------|------|----------------------|
+| `tests/unit/infrastructure/observability/test_server.py` | `test_fail_fast_raises_on_port_conflict` | fail_fast=True поднимает MetricsServerError |
+| `tests/unit/infrastructure/observability/test_server.py` | `test_lenient_mode_returns_false_on_conflict` | fail_fast=False возвращает False, не исключение |
+| `tests/unit/infrastructure/observability/test_server.py` | `test_retry_on_transient_error` | OSError (не EADDRINUSE) ретраится 3 раза |
+| `tests/unit/infrastructure/observability/test_server.py` | `test_logs_contain_diagnostic_context` | extra содержит port, errno, attempt |
+
+**Критерии приёмки:**
+
+- [ ] `start_metrics_server()` возвращает `bool`, а не `None`
+- [ ] `MetricsServerError` определён и экспортируется
+- [ ] fail_fast=True вызывает исключение при ошибке
+- [ ] Логи содержат structured extra (port, errno, attempt)
+- [ ] `make lint && make test` проходят
+
+**Риски и митигация:**
+
+| Риск | Вероятность | Митигация |
+|------|-------------|-----------|
+| Pipeline fails при занятом порте в CI | Средняя | fail_fast=False по умолчанию |
+| Нестабильные тесты из-за портов | Низкая | Использовать random port в тестах |
+
+---
+
+### Задача K3: Усилить покрытие жизненного цикла пайплайна
+
+**Статус:** 🟡 ВАЖНО
+
+**Проблема:**
+
+Текущие тесты `PipelineRunner.run()` не проверяют **порядок** вызовов и инварианты:
+
+1. Lock MUST быть захвачен ДО любых операций с данными
+2. Checkpoint load MUST быть ДО execute
+3. Clear MUST быть ДО execute (для rebuild/backfill)
+4. Checkpoint delete MUST быть ПОСЛЕ успешного execute
+5. Lock MUST быть освобождён в finally (даже при ошибке)
+
+**Целевое состояние:**
+
+Интеграционный тест фиксирует ожидаемую последовательность вызовов.
+
+**Конкретные изменения:**
+
+#### K3.1 Создать тест порядка вызовов (`tests/integration/test_runner_lifecycle.py`)
+
+```python
+"""Integration tests for PipelineRunner lifecycle invariants."""
+
+import pytest
+from collections import deque
+from dataclasses import dataclass, field
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+
+from bioetl.application.core.runner import PipelineRunner
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import RunType
+
+
+@dataclass
+class CallRecorder:
+    """Records the order of method calls for verification."""
+    calls: deque = field(default_factory=deque)
+
+    def record(self, method: str) -> None:
+        self.calls.append(method)
+
+    def assert_order(self, *expected: str) -> None:
+        """Assert calls happened in the specified order."""
+        actual = list(self.calls)
+        for i, method in enumerate(expected):
+            assert method in actual, f"Expected call '{method}' not found in {actual}"
+            idx = actual.index(method)
+            # Ensure this call comes after all previous expected calls
+            for prev in expected[:i]:
+                prev_idx = actual.index(prev)
+                assert prev_idx < idx, (
+                    f"'{prev}' (idx {prev_idx}) should come before '{method}' (idx {idx})"
+                )
+
+
+@pytest.fixture
+def call_recorder():
+    return CallRecorder()
+
+
+@pytest.fixture
+def mock_services_with_recorder(call_recorder):
+    """Create services that record all calls."""
+    services = MagicMock()
+
+    # Lock methods
+    services.lock = AsyncMock()
+    services.lock.acquire = AsyncMock(
+        side_effect=lambda *a, **kw: call_recorder.record("lock.acquire")
+    )
+    services.lock.release = AsyncMock(
+        side_effect=lambda *a, **kw: call_recorder.record("lock.release")
+    )
+
+    # Storage methods
+    services.storage = MagicMock()
+    services.storage.clear_silver = AsyncMock(
+        side_effect=lambda *a, **kw: (call_recorder.record("storage.clear_silver"), 0)[1]
+    )
+    services.storage.clear_gold = AsyncMock(
+        side_effect=lambda *a, **kw: (call_recorder.record("storage.clear_gold"), 0)[1]
+    )
+
+    # Context manager support
+    async def services_aenter():
+        call_recorder.record("services.__aenter__")
+        return services
+
+    async def services_aexit(*args):
+        call_recorder.record("services.__aexit__")
+
+    services.__aenter__ = services_aenter
+    services.__aexit__ = services_aexit
+
+    services.metrics = MagicMock()
+    return services
+
+
+@pytest.fixture
+def mock_checkpoint_manager_with_recorder(call_recorder):
+    """Create checkpoint manager that records calls."""
+    manager = AsyncMock()
+
+    async def load_checkpoint():
+        call_recorder.record("checkpoint.load")
+        return None
+
+    async def delete_checkpoint():
+        call_recorder.record("checkpoint.delete")
+
+    manager.load_checkpoint = load_checkpoint
+    manager.delete_checkpoint = delete_checkpoint
+    return manager
+
+
+@pytest.fixture
+def mock_executor_with_recorder(call_recorder):
+    """Create executor that records calls."""
+    executor = AsyncMock()
+
+    async def execute(*args, **kwargs):
+        call_recorder.record("executor.execute")
+
+    executor.execute = execute
+    executor.records_fetched = 100
+    return executor
+
+
+class TestPipelineRunnerLifecycle:
+    """Tests for PipelineRunner lifecycle invariants."""
+
+    @pytest.mark.asyncio
+    async def test_rebuild_lifecycle_order(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+    ):
+        """Verify call order for REBUILD run type.
+
+        Expected order:
+        1. services.__aenter__ (context manager entry)
+        2. lock.acquire (implicit in lock manager)
+        3. storage.clear_silver
+        4. storage.clear_gold
+        5. checkpoint.load
+        6. executor.execute
+        7. checkpoint.delete
+        8. lock.release
+        9. services.__aexit__
+        """
+        config = PipelineConfig(
+            pipeline_name="test_lifecycle",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.REBUILD,
+            logger=MagicMock(),
+        )
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+
+            async def lm_aenter():
+                call_recorder.record("lock_manager.__aenter__")
+                return lock_manager
+
+            async def lm_aexit(*args):
+                call_recorder.record("lock_manager.__aexit__")
+
+            lock_manager.__aenter__ = lm_aenter
+            lock_manager.__aexit__ = lm_aexit
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=mock_services_with_recorder,
+                context=context,
+                executor=mock_executor_with_recorder,
+                checkpoint_manager=mock_checkpoint_manager_with_recorder,
+                shutdown_signal=MagicMock(),
+                logger=MagicMock(),
+            )
+
+            await runner.run()
+
+        # Verify invariants
+        call_recorder.assert_order(
+            "services.__aenter__",
+            "lock_manager.__aenter__",
+            "storage.clear_silver",
+            "storage.clear_gold",
+            "checkpoint.load",
+            "executor.execute",
+            "checkpoint.delete",
+            "lock_manager.__aexit__",
+            "services.__aexit__",
+        )
+
+    @pytest.mark.asyncio
+    async def test_incremental_skips_clear(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+    ):
+        """Verify INCREMENTAL run does NOT clear storage."""
+        config = PipelineConfig(
+            pipeline_name="test_incremental",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=MagicMock(),
+        )
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+            lock_manager.__aexit__ = AsyncMock()
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=mock_services_with_recorder,
+                context=context,
+                executor=mock_executor_with_recorder,
+                checkpoint_manager=mock_checkpoint_manager_with_recorder,
+                shutdown_signal=MagicMock(),
+                logger=MagicMock(),
+            )
+
+            await runner.run()
+
+        # Verify clear was NOT called
+        calls = list(call_recorder.calls)
+        assert "storage.clear_silver" not in calls
+        assert "storage.clear_gold" not in calls
+        # But execute was called
+        assert "executor.execute" in calls
+
+    @pytest.mark.asyncio
+    async def test_lock_released_on_error(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+    ):
+        """Verify lock is released even when executor raises."""
+        config = PipelineConfig(
+            pipeline_name="test_error",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=MagicMock(),
+        )
+
+        # Executor that raises
+        failing_executor = AsyncMock()
+        failing_executor.execute = AsyncMock(side_effect=RuntimeError("Test error"))
+        failing_executor.records_fetched = 0
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+
+            async def lm_aenter():
+                call_recorder.record("lock_manager.__aenter__")
+                return lock_manager
+
+            async def lm_aexit(*args):
+                call_recorder.record("lock_manager.__aexit__")
+
+            lock_manager.__aenter__ = lm_aenter
+            lock_manager.__aexit__ = lm_aexit
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=mock_services_with_recorder,
+                context=context,
+                executor=failing_executor,
+                checkpoint_manager=mock_checkpoint_manager_with_recorder,
+                shutdown_signal=MagicMock(),
+                logger=MagicMock(),
+            )
+
+            with pytest.raises(RuntimeError, match="Test error"):
+                await runner.run()
+
+        # Verify lock was released despite error
+        calls = list(call_recorder.calls)
+        assert "lock_manager.__aenter__" in calls
+        assert "lock_manager.__aexit__" in calls
+        # __aexit__ should come after __aenter__
+        assert calls.index("lock_manager.__aenter__") < calls.index("lock_manager.__aexit__")
+```
+
+**Критерии приёмки:**
+
+- [ ] Тест `test_rebuild_lifecycle_order` проходит
+- [ ] Тест `test_incremental_skips_clear` проходит
+- [ ] Тест `test_lock_released_on_error` проходит
+- [ ] Тесты не требуют сетевых вызовов или файловой системы
+- [ ] `make test-integration` проходит
+
+**Риски и митигация:**
+
+| Риск | Вероятность | Митигация |
+|------|-------------|-----------|
+| Сложность фикстур | Средняя | CallRecorder упрощает проверку |
+| Хрупкость при рефакторинге | Средняя | Проверяем инварианты, не точный порядок |
+
+---
+
+### Задача K4: Документировать обновлённый жизненный цикл
+
+**Статус:** 🟢 ОБЫЧНЫЙ
+
+**Проблема:**
+
+Документация не описывает:
+- Асинхронную очистку слоёв
+- Политику fail_fast для метрик
+- Порядок операций в PipelineRunner
+
+**Целевое состояние:**
+
+Обновлённая документация синхронизирована с реализацией.
+
+**Конкретные изменения:**
+
+#### K4.1 Создать ADR-013 для асинхронной очистки
+
+Файл: `docs/02-architecture/decisions/ADR-013-async-storage-cleanup.md`
+
+```markdown
+# ADR-013: Асинхронная очистка хранилища в PipelineRunner
+
+## Status
+
+Accepted
+
+## Date
+
+2024-12-24
+
+## Context
+
+Метод `_clear_exports()` в `PipelineRunner` вызывает асинхронные методы `StoragePort.clear_silver()` и `StoragePort.clear_gold()`. Изначально метод был определён как синхронный, что приводило к синтаксической ошибке при использовании `await`.
+
+## Decision
+
+1. `_clear_exports()` объявляется как `async def`
+2. Вызов из `run()` использует `await self._clear_exports()`
+3. Очистка происходит ТОЛЬКО для `RunType.REBUILD` и `RunType.BACKFILL`
+4. Для `RunType.INCREMENTAL` метод возвращает сразу (early return)
+
+### Порядок операций в run()
+
+```
+1. services.__aenter__()
+2. lock_manager.__aenter__()
+3. await _clear_exports()      # Только для REBUILD/BACKFILL
+4. await checkpoint_manager.load_checkpoint()
+5. await executor.execute()
+6. await checkpoint_manager.delete_checkpoint()
+7. lock_manager.__aexit__()
+8. services.__aexit__()
+```
+
+## Consequences
+
+### Positive
+
+- Корректная работа с асинхронным StoragePort
+- Явная документация порядка операций
+- Тестируемость через CallRecorder pattern
+
+### Negative
+
+- Breaking change для тестов, вызывающих `_clear_exports()` напрямую
+- Требуется AsyncMock для storage методов в тестах
+```
+
+#### K4.2 Обновить docs/03-guides/pipeline-lifecycle.md
+
+```markdown
+# Жизненный цикл пайплайна
+
+## Порядок выполнения PipelineRunner.run()
+
+```mermaid
+sequenceDiagram
+    participant CLI
+    participant Runner
+    participant Lock
+    participant Storage
+    participant Checkpoint
+    participant Executor
+
+    CLI->>Runner: run()
+    Runner->>Services: __aenter__()
+    Runner->>Lock: acquire()
+    alt RunType == REBUILD or BACKFILL
+        Runner->>Storage: clear_silver()
+        Runner->>Storage: clear_gold()
+    end
+    Runner->>Checkpoint: load_checkpoint()
+    Runner->>Executor: execute()
+    Runner->>Checkpoint: delete_checkpoint()
+    Runner->>Lock: release()
+    Runner->>Services: __aexit__()
+```
+
+## Очистка слоёв по типу запуска
+
+| RunType | clear_silver | clear_gold | Обоснование |
+|---------|--------------|------------|-------------|
+| `incremental` | ❌ | ❌ | Merge/upsert сохраняет существующие данные |
+| `backfill` | ✅ | ✅ | Заполнение исторических данных |
+| `rebuild` | ✅ | ✅ | Полная перестройка таблицы |
+
+## Политика метрик (fail_fast)
+
+Параметр `BIOETL_FAIL_FAST_METRICS` управляет поведением при ошибках запуска Prometheus сервера:
+
+| Значение | Поведение |
+|----------|-----------|
+| `false` (default) | Warning в лог, метрики отключаются, пайплайн продолжает работу |
+| `true` | Исключение `MetricsServerError`, пайплайн не запускается |
+
+Рекомендации:
+- **Development/CI**: `false` — не блокировать из-за портов
+- **Production с мониторингом**: `true` — гарантировать наличие метрик
+```
+
+**Критерии приёмки:**
+
+- [ ] ADR-013 создан и описывает async _clear_exports
+- [ ] pipeline-lifecycle.md содержит mermaid диаграмму
+- [ ] Таблица RunType ↔ cleanup актуальна
+- [ ] Документация по fail_fast метрик добавлена
 
 ---
 

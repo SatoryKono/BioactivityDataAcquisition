@@ -59,8 +59,8 @@ def mock_services():
     services.metrics.increment_counter = MagicMock()
     # Storage with clear methods (part of StoragePort contract)
     services.storage = MagicMock()
-    services.storage.clear_csv = MagicMock(return_value=0)
-    services.storage.clear_delta = MagicMock(return_value=0)
+    services.storage.clear_silver = AsyncMock(return_value=0)
+    services.storage.clear_gold = AsyncMock(return_value=0)
     return services
 
 
@@ -522,3 +522,85 @@ class TestPipelineRunnerClearExports:
         services.storage.clear_gold.assert_called_once_with(
             "chembl.activity", dry_run=False
         )
+
+    @pytest.mark.asyncio
+    async def test_clear_exports_skips_for_incremental(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports does NOT clear storage for INCREMENTAL run."""
+        # Use INCREMENTAL run type - should skip clearing
+        incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_silver = AsyncMock(return_value=0)
+        services.storage.clear_gold = AsyncMock(return_value=0)
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=incremental_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        await runner._clear_exports()
+
+        # Should NOT call clear methods for incremental run
+        services.storage.clear_silver.assert_not_called()
+        services.storage.clear_gold.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_clear_exports_dry_run_mode(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_exports passes dry_run=True to storage methods."""
+        # Use REBUILD with dry_run=True
+        dry_run_runtime = RuntimeConfig(
+            run_type=RunType.REBUILD, limit=None, dry_run=True
+        )
+
+        services = MagicMock(spec=PipelineServices)
+        services.lock = AsyncMock()
+        services.metrics = MagicMock()
+        services.storage = MagicMock()
+        services.storage.clear_silver = AsyncMock(return_value=5)
+        services.storage.clear_gold = AsyncMock(return_value=2)
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=dry_run_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+        )
+
+        await runner._clear_exports()
+
+        # Should pass dry_run=True to storage methods
+        services.storage.clear_silver.assert_called_once_with(
+            pipeline_config.silver_table, dry_run=True
+        )
+        services.storage.clear_gold.assert_called_once()
