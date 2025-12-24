@@ -1,9 +1,9 @@
 # Архитектурный Обзор и План Рефакторинга BioETL
 
-*Версия: 2.2*
+*Версия: 2.3*
 *Дата: 2025-12-24*
 *На основе анализа RULES.md v5.2, AGENT.md v2.2 и глубокого исследования кодовой базы*
-*Обновлено: Реализация плана рефакторинга R1-R6*
+*Обновлено: Добавлен HealthAggregator, уточнённый анализ GenericPipelineFactory*
 
 ---
 
@@ -37,7 +37,7 @@
 | 2 | **Модульность и связность** | Cohesion модулей, coupling между компонентами | 12% | **8.5** | 1.020 | Хорошее разделение, но крупные трансформеры (358+ строк) требуют декомпозиции |
 | 3 | **Качество доменной модели** | Value Objects, Entities, Ports, Exceptions | 12% | **9.0** | 1.080 | 10 портов, frozen entities, 3-уровневая иерархия исключений (20+ классов). Отсутствуют Aggregate Roots |
 | 4 | **Тестирование** | Покрытие, пирамида тестов, VCR, архитектурные тесты | 12% | **7.5** | 0.900 | 1074 теста, 80% coverage target. Критический пробел: interfaces layer (3 теста), 0 тестов orchestration |
-| 5 | **Обработка ошибок** | Классификация, retry, circuit breaker, graceful shutdown | 10% | **9.0** | 0.900 | Полная реализация ADR-007/008, 3 типа ошибок, exponential backoff с jitter |
+| 5 | **Обработка ошибок** | Классификация, retry, circuit breaker, graceful shutdown | 10% | **9.5** | 0.950 | Полная реализация ADR-007/008, 3 типа ошибок, exponential backoff с jitter. **HealthAggregator добавлен (PR #694)** |
 | 6 | **Логирование и наблюдаемость** | Structured logs, metrics, tracing, run_id correlation | 10% | **9.0** | 0.900 | structlog + Prometheus + OpenTelemetry. run_id во всех компонентах |
 | 7 | **Производительность** | Rate limiting, batching, async I/O, Delta Lake VACUUM | 8% | **8.0** | 0.640 | TokenBucket, async httpx, Delta Lake. Нет performance тестов |
 | 8 | **Безопасность** | Secrets management, PII handling, VCR sanitization | 8% | **7.5** | 0.600 | Правильное управление секретами, VCR sanitization. Только 2 security теста |
@@ -47,11 +47,11 @@
 ### 1.3 Интегральный Балл
 
 ```
-Σ = 1.425 + 1.020 + 1.080 + 0.900 + 0.900 + 0.900 + 0.640 + 0.600 + 0.720 + 0.400
-  = 8.585 / 10.0
+Σ = 1.425 + 1.020 + 1.080 + 0.900 + 0.950 + 0.900 + 0.640 + 0.600 + 0.720 + 0.400
+  = 8.635 / 10.0
 ```
 
-**ИТОГОВАЯ ОЦЕНКА: 8.6 / 10.0**
+**ИТОГОВАЯ ОЦЕНКА: 8.6 / 10.0** (с учётом HealthAggregator: +0.05)
 
 ### 1.4 Интерпретация
 
@@ -699,7 +699,7 @@ xenon --max-absolute B --max-modules B --max-average A src/bioetl/
 
 | Фаза | Задача | Приоритет | Файлы | Статус |
 |------|--------|-----------|-------|--------|
-| **1** | R1: health_check() в PubMedAdapter | 🔴 BLOCKER | `pubmed_client.py` | ✅ Уже реализован |
+| **1** | R1: health_check() в PubMedAdapter | ✅ DONE | `pubmed_client.py:185-208` | ✅ Реализован |
 | **2** | R2: Тесты interfaces | 🟠 HIGH | `tests/unit/interfaces/` | ✅ Добавлено 6 тестов |
 | **2** | R2.1: VCR кассеты для integration | 🟠 HIGH | `tests/fixtures/vcr/` | ✅ Не требуется (тесты используют mocks) |
 | **2** | R2.2: Тесты для schemas.silver | 🟠 HIGH | `tests/unit/infrastructure/schemas/` | ✅ Создано 57 тестов |
@@ -713,8 +713,60 @@ xenon --max-absolute B --max-modules B --max-average A src/bioetl/
 | **4** | R8: Performance тесты | 🟢 LOW | `tests/performance/` | ⏳ |
 | **4** | R9: Документировать frozen entities | 🟢 LOW | `docs/RULES.md` | ⏳ |
 | **4** | R10: Thread-safe Registry | 🟢 LOW | `registry.py` | ⏳ |
+| **3** | R11: Декомпозиция GenericPipelineFactory | 🟡 MEDIUM | `generic_factory.py` → `runner_assembler.py` | ⏳ NEW |
 
-### 7.1 Выполненные Улучшения (2025-12-24)
+### 7.1 Новые Компоненты (2025-12-24)
+
+#### HealthAggregator (PR #694)
+
+**Файл**: `src/bioetl/application/core/health_aggregator.py`
+
+Добавлен компонент для pre-flight валидации инфраструктуры:
+
+```python
+class HealthAggregator:
+    """Агрегирует health checks для всех критических компонентов."""
+
+    async def check_all(self, services: PipelineServices) -> HealthReport:
+        """Проверяет storage и data_source перед запуском pipeline."""
+        ...
+
+    def assert_healthy(self, report: HealthReport) -> None:
+        """Raises InfrastructureError если критические компоненты unhealthy."""
+        ...
+```
+
+**Интеграция**: `PipelineRunner._validate_infrastructure()` вызывается перед запуском pipeline.
+
+**Влияние на оценку**: Категория "Обработка ошибок" +0.5 → **9.5/10**
+
+---
+
+### 7.2 Анализ GenericPipelineFactory
+
+**Файл**: `src/bioetl/composition/factories/generic_factory.py` (373 строки)
+
+**Текущие ответственности** (5+):
+1. Создание DataSource (`create_data_source`)
+2. Создание Services (`build_services`)
+3. Создание Pipeline (`create_with_services`)
+4. Создание Runner (`create_runner`)
+5. Создание CheckpointManager (`_create_checkpoint_manager`)
+6. Создание RecordProcessor (`_create_record_processor`)
+
+**Рекомендация**: Выделить `RunnerAssembler` для ответственностей 4-6.
+
+**Предлагаемая структура**:
+```
+composition/factories/
+├── generic_factory.py       # ~150 строк — координация
+├── service_builder.py       # ~100 строк — создание services
+└── runner_assembler.py      # ~120 строк — сборка runner
+```
+
+---
+
+### 7.3 Выполненные Улучшения (2025-12-24)
 
 **Созданные файлы:**
 - `tests/unit/infrastructure/schemas/__init__.py`
@@ -744,9 +796,11 @@ xenon --max-absolute B --max-modules B --max-average A src/bioetl/
 
 Ключевые области для улучшения:
 
-- 🔴 PubMedAdapter health_check (blocker)
+- ✅ PubMedAdapter health_check — **реализовано**
+- ✅ HealthAggregator — **добавлен (PR #694)**
 - 🟠 Тестирование interfaces слоя
 - 🟠 Security тесты
+- 🟡 Декомпозиция GenericPipelineFactory
 - 🟡 Декомпозиция крупных модулей
 
 Реализация плана рефакторинга позволит достичь **9.1/10** — уровень "Production Excellence".
