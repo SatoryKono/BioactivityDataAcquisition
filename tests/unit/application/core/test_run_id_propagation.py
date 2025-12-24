@@ -24,7 +24,7 @@ from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID for testing."""
-    return RunID(uuid4())
+    return uuid4()
 
 
 @pytest.fixture
@@ -231,7 +231,7 @@ class TestRunIdPropagation:
             mock_storage.write_bronze.reset_mock()
             mock_storage.write_silver.reset_mock()
 
-            run_id = RunID(uuid4())
+            run_id = uuid4()
             context = PipelineContext(
                 run_id=run_id,
                 run_type=run_type,

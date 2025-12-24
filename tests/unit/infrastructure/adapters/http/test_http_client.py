@@ -7,7 +7,6 @@ import httpx
 import pytest
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.adapters.http.client import (
     RetryConfig,
     UnifiedHTTPClient,
@@ -164,7 +163,7 @@ class TestUnifiedHTTPClientInit:
 
     def test_init_with_run_id(self, mock_rate_limiter, mock_circuit_breaker):
         """Test initialization with run_id."""
-        run_id = RunID(uuid4())
+        run_id = uuid4()
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,
@@ -214,7 +213,7 @@ class TestUnifiedHTTPClientContextManager:
         self, mock_rate_limiter, mock_circuit_breaker
     ):
         """Test __aenter__ sets correlation ID header when run_id provided."""
-        run_id = RunID(uuid4())
+        run_id = uuid4()
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,

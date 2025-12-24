@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.entities import Activity, Compound, Protein
-from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
+from bioetl.domain.types import BatchID, ContentHash, EntityID, RunType
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def base_entity_kwargs():
     return {
         "entity_id": EntityID("TEST123"),
         "content_hash": ContentHash("abc123hash"),
-        "run_id": RunID(uuid4()),
+        "run_id": uuid4(),
         "run_type": RunType.INCREMENTAL,
         "source_batch_id": BatchID(uuid4()),
     }

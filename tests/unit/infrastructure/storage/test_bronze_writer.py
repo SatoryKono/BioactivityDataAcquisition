@@ -23,7 +23,7 @@ def batch_id() -> BatchID:
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID."""
-    return RunID(uuid4())
+    return uuid4()
 
 
 @pytest.fixture
