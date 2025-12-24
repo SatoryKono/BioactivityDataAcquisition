@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import Assay
-from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
+from bioetl.domain.transformations import generate_entity_id, safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -77,9 +77,6 @@ class AssayTransformer(BaseTransformer):
             "confidence_description": record.get("confidence_description"),
             "relationship_type": record.get("relationship_type"),
             "relationship_description": record.get("relationship_description"),
-            # Additional metadata
-            "assay_pref_name": record.get("assay_pref_name"),
-            "score": safe_float(record.get("score")),
             # Variant information
             "variant_sequence": self.serialize_json(record.get("variant_sequence")),
             # Complex fields (stored as JSON strings)
