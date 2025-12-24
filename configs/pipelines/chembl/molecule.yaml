@@ -77,6 +77,6 @@ circuit_breaker:
 input_filter:
     enabled: true
     source_path: "data/input/molecule.csv"  # Default CSV path
-    column_name: "salt_chembl_id"        # Column in CSV with IDs
+    column_name: "molecule_chembl_id"        # Column in CSV with IDs (parent molecule)
     filter_field: "molecule_chembl_id"       # API field to filter by
     batch_size: 20                           # IDs per API request
