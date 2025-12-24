@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from prometheus_client import Counter, Histogram
+from prometheus_client import Counter, Gauge, Histogram
 
 # Generic pipeline metrics
 PIPELINE_DURATION_SECONDS = Histogram(
@@ -48,6 +48,31 @@ DQ_RECORDS_QUARANTINED_TOTAL = Counter(
     "bioetl_dq_records_quarantined_total",
     "Total number of records quarantined due to data quality issues",
     ["pipeline", "error_type", "run_type"],
+)
+
+# Circuit Breaker metrics (per ADR-007)
+CIRCUIT_BREAKER_STATE = Gauge(
+    "bioetl_circuit_breaker_state",
+    "Current state of the circuit breaker (0=closed, 0.5=half-open, 1=open)",
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_TRIPS_TOTAL = Counter(
+    "bioetl_circuit_breaker_trips_total",
+    "Total number of times the circuit breaker has tripped (opened)",
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_SUCCESS_TOTAL = Counter(
+    "bioetl_circuit_breaker_success_total",
+    "Total successful calls through the circuit breaker",
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_FAILURE_TOTAL = Counter(
+    "bioetl_circuit_breaker_failure_total",
+    "Total failed calls through the circuit breaker",
+    ["adapter"],
 )
 
 
