@@ -321,12 +321,13 @@ class GoldWriter:
             )
         )
 
-    def clear(self, table_name: str | None = None) -> int:
+    def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear Gold Delta table(s) at the start of a pipeline run.
 
         Args:
             table_name: If provided, only clear this table.
                        If None, clear all tables in base_path.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
             Number of tables cleared.
@@ -343,13 +344,15 @@ class GoldWriter:
             # Clear specific table
             table_path = base / table_name.replace(".", "/")
             if table_path.exists():
-                shutil.rmtree(table_path)
+                if not dry_run:
+                    shutil.rmtree(table_path)
                 cleared = 1
         else:
             # Clear all Delta tables (directories with _delta_log)
             for item in base.iterdir():
                 if item.is_dir() and (item / "_delta_log").exists():
-                    shutil.rmtree(item)
+                    if not dry_run:
+                        shutil.rmtree(item)
                     cleared += 1
 
         return cleared

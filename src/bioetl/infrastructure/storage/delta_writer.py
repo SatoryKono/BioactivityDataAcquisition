@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -56,15 +57,18 @@ class DeltaWriter:
         self,
         base_path: str | Path,
         csv_exporter: CsvExporter | None = None,
+        logger: LoggerPort | None = None,
     ) -> None:
         """Initialize Delta writer.
 
         Args:
             base_path: Base path for Delta tables (local filesystem)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
+            logger: Optional logger for debug output
         """
         self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
+        self.logger = logger
 
     def _prepare_arrow_data(
         self,
@@ -165,6 +169,17 @@ class DeltaWriter:
                 f"Records missing required metadata fields: {missing_fields}"
             )
 
+        if self.logger:
+            # Debug logging for optional fields/record structure
+            keys = set(records[0].keys())
+            optional_missing = [k for k in schema.names if k not in keys]
+            if optional_missing:
+                self.logger.debug(
+                    "Optional fields missing in batch",
+                    table=table_name,
+                    missing=optional_missing,
+                )
+
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
 
@@ -225,15 +240,16 @@ class DeltaWriter:
             ),
         )
 
-    def clear(self, table_name: str | None = None) -> int:
+    def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear Delta table(s) at the start of a pipeline run.
 
         Args:
             table_name: If provided, only clear this table.
                        If None, clear all tables in base_path.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
-            Number of tables cleared.
+            Number of tables cleared (or would be cleared).
         """
         import shutil
         from pathlib import Path
@@ -247,13 +263,15 @@ class DeltaWriter:
             # Clear specific table
             table_path = base / table_name.replace(".", "/")
             if table_path.exists():
-                shutil.rmtree(table_path)
+                if not dry_run:
+                    shutil.rmtree(table_path)
                 cleared = 1
         else:
             # Clear all Delta tables (directories with _delta_log)
             for item in base.iterdir():
                 if item.is_dir() and (item / "_delta_log").exists():
-                    shutil.rmtree(item)
+                    if not dry_run:
+                        shutil.rmtree(item)
                     cleared += 1
 
         return cleared

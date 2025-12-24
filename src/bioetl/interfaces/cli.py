@@ -171,6 +171,7 @@ def run(
             input_csv=input_csv,
             filter_column=filter_column,
             filter_field=filter_field,
+            dry_run=dry_run,
         )
         runner = bootstrap_pipeline(ctx)
     except (ValueError, FileNotFoundError) as e:
