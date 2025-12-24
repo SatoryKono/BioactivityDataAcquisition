@@ -20,12 +20,12 @@ from bioetl.composition.bootstrap import (
     bootstrap_cleanup,
     bootstrap_pipeline,
     bootstrap_quarantine,
+    load_pipeline_config,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:

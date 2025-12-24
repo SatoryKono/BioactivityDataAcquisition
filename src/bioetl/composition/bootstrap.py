@@ -52,6 +52,7 @@ __all__ = [
     "bootstrap_pipeline",
     "bootstrap_quarantine",
     "bootstrap_storage",
+    "load_pipeline_config",
 ]
 
 if TYPE_CHECKING:
