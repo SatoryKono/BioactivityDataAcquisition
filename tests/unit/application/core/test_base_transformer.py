@@ -21,7 +21,7 @@ from bioetl.application.core.base_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Activity
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 class ConcreteTransformer(BaseTransformer):

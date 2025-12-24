@@ -265,7 +265,6 @@ class TestChemblActivityFactory:
             chembl_activity_factory,
         )
         from bioetl.domain.config import RuntimeConfig
-        from bioetl.domain.types import RunID
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services

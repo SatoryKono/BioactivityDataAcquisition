@@ -52,7 +52,7 @@ class TestLockManager:
 
         mock_lock_port.acquire.assert_called_once_with(
             key="lock:test_pipeline",
-            owner_id=str(TEST_RUN_ID),
+            owner_id=TEST_RUN_ID,
             ttl=60,
             wait=False,
             wait_timeout=300,
@@ -78,7 +78,7 @@ class TestLockManager:
         await lock_manager.release()
 
         mock_lock_port.release.assert_called_once_with(
-            "lock:test_pipeline", str(TEST_RUN_ID), exclusive=False
+            "lock:test_pipeline", TEST_RUN_ID, exclusive=False
         )
 
     async def test_heartbeat_loop_loss(

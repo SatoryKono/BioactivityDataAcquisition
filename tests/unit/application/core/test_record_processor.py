@@ -13,7 +13,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
-from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
+from bioetl.domain.types import BatchID, RunType, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
 

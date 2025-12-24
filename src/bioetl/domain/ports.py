@@ -548,23 +548,23 @@ class LoggerPort(Protocol):
         """
         ...
 
-    def info(self, event: str, **kwargs: Any) -> Any:
+    def info(self, _event: str, **kwargs: Any) -> Any:
         """Log an informational message."""
         ...
 
-    def warning(self, event: str, **kwargs: Any) -> Any:
+    def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message."""
         ...
 
-    def error(self, event: str, **kwargs: Any) -> Any:
+    def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message."""
         ...
 
-    def debug(self, event: str, **kwargs: Any) -> Any:
+    def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message."""
         ...
 
-    def exception(self, event: str, **kwargs: Any) -> Any:
+    def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback."""
         ...
 
