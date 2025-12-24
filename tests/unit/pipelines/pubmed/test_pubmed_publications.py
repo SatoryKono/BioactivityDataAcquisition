@@ -33,7 +33,7 @@ def mock_runtime():
 
 @pytest.fixture
 def pipeline(mock_config, mock_runtime, mock_services):
-    run_id: RunID = uuid4()
+    run_id = uuid4()
     return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services, run_id)
 
 
