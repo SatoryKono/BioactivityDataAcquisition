@@ -77,9 +77,6 @@ class AssayTransformer(BaseTransformer):
             "confidence_description": record.get("confidence_description"),
             "relationship_type": record.get("relationship_type"),
             "relationship_description": record.get("relationship_description"),
-            # Additional metadata
-            "assay_pref_name": record.get("assay_pref_name"),
-            "score": safe_float(record.get("score")),
             # Variant information
             "variant_sequence": self.serialize_json(record.get("variant_sequence")),
             # Complex fields (stored as JSON strings)
