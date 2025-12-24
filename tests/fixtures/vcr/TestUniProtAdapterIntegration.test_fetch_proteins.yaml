@@ -1,0 +1,117 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=gene%3AMYC&size=2&format=json&fields=accession%2Cid%2Cgene_names%2Corganism_name%2Corganism_id%2Cprotein_name%2Clength%2Csequence%2Ccc_function%2Cft_domain%2Cxref_pdb%2Cxref_chembl
+  response:
+    body:
+      string: '{"results":[{"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"P01106","uniProtkbId":"MYC_HUMAN","organism":{"scientificName":"Homo
+        sapiens","commonName":"Human","taxonId":9606,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Primates","Haplorrhini","Catarrhini","Hominidae","Homo"]},"proteinDescription":{"recommendedName":{"fullName":{"value":"Myc
+        proto-oncogene protein"}},"alternativeNames":[{"fullName":{"value":"Class
+        E basic helix-loop-helix protein 39"},"shortNames":[{"value":"bHLHe39"}]},{"fullName":{"value":"Proto-oncogene
+        c-Myc"}},{"fullName":{"value":"Transcription factor p64"}}]},"genes":[{"geneName":{"value":"MYC"},"synonyms":[{"value":"BHLHE39"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"P01108"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"20010808"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"24940000"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"25956029"}],"value":"Transcription
+        factor that binds DNA in a non-specific manner, yet also specifically recognizes
+        the core sequence 5''-CAC[GA]TG-3'' (PubMed:24940000, PubMed:25956029). Activates
+        the transcription of growth-related genes (PubMed:24940000, PubMed:25956029).
+        Binds to the VEGFA promoter, promoting VEGFA production and subsequent sprouting
+        angiogenesis (PubMed:24940000, PubMed:25956029). Regulator of somatic reprogramming,
+        controls self-renewal of embryonic stem cells (By similarity). Functions with
+        TAF6L to activate target gene expression through RNA polymerase II pause release
+        (By similarity). Positively regulates transcription of HNRNPA1, HNRNPA2 and
+        PTBP1 which in turn regulate splicing of pyruvate kinase PKM by binding repressively
+        to sequences flanking PKM exon 9, inhibiting exon 9 inclusion and resulting
+        in exon 10 inclusion and production of the PKM M2 isoform (PubMed:20010808)"}],"commentType":"FUNCTION"}],"features":[{"type":"Domain","location":{"start":{"value":369,"modifier":"EXACT"},"end":{"value":421,"modifier":"EXACT"}},"description":"bHLH","evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU00981"}]}],"uniProtKBCrossReferences":[{"database":"PDB","id":"1A93","properties":[{"key":"Method","value":"NMR"},{"key":"Resolution","value":"-"},{"key":"Chains","value":"A=421-449"}]},{"database":"PDB","id":"1EE4","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.10
+        A"},{"key":"Chains","value":"C/D/E/F=335-343"}]},{"database":"PDB","id":"1MV0","properties":[{"key":"Method","value":"NMR"},{"key":"Resolution","value":"-"},{"key":"Chains","value":"A=70-83"}]},{"database":"PDB","id":"1NKP","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"1.80
+        A"},{"key":"Chains","value":"A/D=368-449"}]},{"database":"PDB","id":"2A93","properties":[{"key":"Method","value":"NMR"},{"key":"Resolution","value":"-"},{"key":"Chains","value":"A=421-449"}]},{"database":"PDB","id":"2OR9","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.70
+        A"},{"key":"Chains","value":"P=425-434"}]},{"database":"PDB","id":"4Y7R","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"1.90
+        A"},{"key":"Chains","value":"B=275-282"}]},{"database":"PDB","id":"5I4Z","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"1.95
+        A"},{"key":"Chains","value":"A/B=365-454"}]},{"database":"PDB","id":"5I50","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.70
+        A"},{"key":"Chains","value":"A/B=365-454"}]},{"database":"PDB","id":"6C4U","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.60
+        A"},{"key":"Chains","value":"G/H/I/J/K/L=69-77"}]},{"database":"PDB","id":"6E16","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.40
+        A"},{"key":"Chains","value":"A=111-140"}]},{"database":"PDB","id":"6E24","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"3.00
+        A"},{"key":"Chains","value":"A=111-140"}]},{"database":"PDB","id":"6G6J","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.25
+        A"},{"key":"Chains","value":"A/C=366-452"}]},{"database":"PDB","id":"6G6K","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"1.35
+        A"},{"key":"Chains","value":"A/C=366-452"}]},{"database":"PDB","id":"6G6L","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.20
+        A"},{"key":"Chains","value":"A/C/E/G=366-452"}]},{"database":"PDB","id":"7T1Y","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.55
+        A"},{"key":"Chains","value":"C=250-280"}]},{"database":"PDB","id":"7T1Z","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.77
+        A"},{"key":"Chains","value":"C=62-81"}]},{"database":"PDB","id":"8J2Q","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"1.92
+        A"},{"key":"Chains","value":"A=417-427"}]},{"database":"PDB","id":"8OTS","properties":[{"key":"Method","value":"EM"},{"key":"Resolution","value":"3.30
+        A"},{"key":"Chains","value":"M=351-437"}]},{"database":"PDB","id":"8OTT","properties":[{"key":"Method","value":"EM"},{"key":"Resolution","value":"3.30
+        A"},{"key":"Chains","value":"M=353-405"}]},{"database":"PDB","id":"8Q1N","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"1.84
+        A"},{"key":"Chains","value":"a/b=273-283"}]},{"database":"PDB","id":"8WLG","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.55
+        A"},{"key":"Chains","value":"A=417-426"}]},{"database":"PDB","id":"8X8S","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.04
+        A"},{"key":"Chains","value":"A=417-427"}]},{"database":"PDB","id":"8X8V","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.00
+        A"},{"key":"Chains","value":"A=417-427"}]},{"database":"ChEMBL","id":"CHEMBL1250348","properties":[{"key":"Description","value":"-"}]}],"sequence":{"value":"MDFFRVVENQQPPATMPLNVSFTNRNYDLDYDSVQPYFYCDEEENFYQQQQQSELQPPAPSEDIWKKFELLPTPPLSPSRRSGLCSPSYVAVTPFSLRGDNDGGGGSFSTADQLEMVTELLGGDMVNQSFICDPDDETFIKNIIIQDCMWSGFSAAAKLVSEKLASYQAARKDSGSPNPARGHSVCSTSSLYLQDLSAAASECIDPSVVFPYPLNDSSSPKSCASQDSSAFSPSSDSLLSSTESSPQGSPEPLVLHEETPPTTSSDSEEEQEDEEEIDVVSVEKRQAPGKRSESGSPSAGGHSKPPHSPLVLKRCHVSTHQHNYAAPPSTRKDYPAAKRVKLDSVRVLRQISNNRKCTSPRSSDTEENVKRRTHNVLERQRRNELKRSFFALRDQIPELENNEKAPKVVILKKATAYILSVQAEEQKLISEEDLLRKRREQLKHKLEQLRNSCA","length":454,"molWeight":50565,"crc64":"8B4107BB740689E5","md5":"5D04CA4B5A1BEF787A7FF182755D0DD2"},"extraAttributes":{"uniParcId":"UPI0000576839"}},
+
+        {"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"P01108","uniProtkbId":"MYC_MOUSE","organism":{"scientificName":"Mus
+        musculus","commonName":"Mouse","taxonId":10090,"lineage":["Eukaryota","Metazoa","Chordata","Craniata","Vertebrata","Euteleostomi","Mammalia","Eutheria","Euarchontoglires","Glires","Rodentia","Myomorpha","Muroidea","Muridae","Murinae","Mus","Mus"]},"proteinDescription":{"recommendedName":{"fullName":{"value":"Myc
+        proto-oncogene protein"}},"alternativeNames":[{"fullName":{"value":"Proto-oncogene
+        c-Myc"}},{"fullName":{"value":"Transcription factor p64"}}]},"genes":[{"geneName":{"value":"Myc"}}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000250","source":"UniProtKB","id":"P01106"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"31005419"}],"value":"Transcription
+        factor that binds DNA in a non-specific manner, yet also specifically recognizes
+        the core sequence 5''-CAC[GA]TG-3''. Activates the transcription of growth-related
+        genes. Binds to the VEGFA promoter, promoting VEGFA production and subsequent
+        sprouting angiogenesis. Regulator of somatic reprogramming, controls self-renewal
+        of embryonic stem cells. Functions with TAF6L to activate target gene expression
+        through RNA polymerase II pause release (PubMed:31005419). Positively regulates
+        transcription of HNRNPA1, HNRNPA2 and PTBP1 which in turn regulate splicing
+        of pyruvate kinase PKM by binding repressively to sequences flanking PKM exon
+        9, inhibiting exon 9 inclusion and resulting in exon 10 inclusion and production
+        of the PKM M2 isoform (By similarity)"}],"commentType":"FUNCTION"}],"features":[{"type":"Domain","location":{"start":{"value":369,"modifier":"EXACT"},"end":{"value":421,"modifier":"EXACT"}},"description":"bHLH","evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU00981"}]}],"uniProtKBCrossReferences":[],"sequence":{"value":"MDFLWALETPQTATTMPLNVNFTNRNYDLDYDSVQPYFICDEEENFYHQQQQSELQPPAPSEDIWKKFELLPTPPLSPSRRSGLCSPSYVAVATSFSPREDDDGGGGNFSTADQLEMMTELLGGDMVNQSFICDPDDETFIKNIIIQDCMWSGFSAAAKLVSEKLASYQAARKDSTSLSPARGHSVCSTSSLYLQDLTAAASECIDPSVVFPYPLNDSSSPKSCTSSDSTAFSPSSDSLLSSESSPRASPEPLVLHEETPPTTSSDSEEEQEDEEEIDVVSVEKRQTPAKRSESGSSPSRGHSKPPHSPLVLKRCHVSTHQHNYAAPPSTRKDYPAAKRAKLDSGRVLKQISNNRKCSSPRSSDTEENDKRRTHNVLERQRRNELKRSFFALRDQIPELENNEKAPKVVILKKATAYILSIQADEHKLTSEKDLLRKRREQLKHKLEQLRNSGA","length":454,"molWeight":50678,"crc64":"1CE6F658565FF720","md5":"14F50F907AB98168C537293D8901EBC5"},"extraAttributes":{"uniParcId":"UPI000057B85D"}}]}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      Access-Control-Allow-Methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      Access-Control-Max-Age:
+      - '1728000'
+      Cache-Control:
+      - public, max-age=43200
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 24 Dec 2025 19:27:15 GMT
+      Link:
+      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl&query=gene%3AMYC&cursor=88d67348nieo35i4qx4eeqfpfzi0iz5wz8&size=2>;
+        rel="next"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      X-API-Deployment-Date:
+      - 11-December-2025
+      X-Total-Results:
+      - '2172'
+      X-UniProt-Release:
+      - '2025_04'
+      X-UniProt-Release-Date:
+      - 15-October-2025
+      content-length:
+      - '9165'
+      x-cache:
+      - hit cached
+    status:
+      code: 200
+      message: OK
+version: 1
