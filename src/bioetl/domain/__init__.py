@@ -7,10 +7,19 @@ This module provides a clean public API for the domain layer, exposing:
 - Exceptions (Domain-specific error hierarchy)
 - Context (Pipeline execution context)
 - Filters (Gold layer and input filtering configuration)
+- Configuration (Domain config objects)
+- Transformations (Pure functions for hashing, schema drift, DQ)
 - Error classification (Pure domain logic for error categorization)
 """
 
-# Ports (Protocol interfaces)
+# Configuration objects
+from bioetl.domain.config import (
+    DQConfig,
+    PipelineConfig,
+    RuntimeConfig,
+    TableConfig,
+)
+
 # Context objects
 from bioetl.domain.context import (
     PipelineContext,
@@ -81,6 +90,20 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 
+# Pure domain transformations
+from bioetl.domain.transformations import (
+    calculate_dq_score,
+    canonical_json_dumps,
+    detect_hash_collision,
+    detect_schema_drift,
+    exceeds_threshold,
+    generate_content_hash,
+    generate_entity_id,
+    normalize_for_hash,
+    safe_float,
+    safe_int,
+)
+
 # Types
 from bioetl.domain.types import (
     BatchID,
@@ -97,37 +120,51 @@ from bioetl.domain.types import (
 )
 
 __all__ = [
+    # Configuration
+    "DQConfig",
+    "PipelineConfig",
+    "RuntimeConfig",
+    "TableConfig",
+    # Context
+    "PipelineContext",
+    "PipelineRunContext",
     # Entities
     "Activity",
-    # Exceptions - Base
-    "ApiError",
     "Assay",
     "BaseEntity",
-    # Types
-    "BatchID",
+    "Compound",
+    "Document",
+    "Molecule",
+    "Protein",
+    "Publication",
+    "Target",
+    "TargetComponent",
+    # Error classifier
+    "ErrorClassifier",
+    # Exceptions - Base
+    "ApiError",
     "BioETLError",
+    "CriticalError",
+    "DataQualityError",
+    "RecoverableError",
     # Exceptions - Critical
     "BucketNotFoundError",
     "CheckpointConflictError",
-    # Ports
-    "CheckpointPort",
+    "LockAcquisitionError",
+    "LockLostError",
+    "MergeConflictError",
     # Exceptions - Recoverable
     "ChemblApiError",
     "CircuitBreakerOpenError",
-    "CircuitBreakerState",
-    "Compound",
-    "ContentHash",
-    "CriticalError",
-    "DQStatus",
-    "DataClassification",
-    "DataQualityError",
-    "DataSourcePort",
-    "Document",
-    "DriftLevel",
-    "EntityID",
-    # Error classifier
-    "ErrorClassifier",
-    "ErrorType",
+    "RateLimitError",
+    "RetryExhaustedError",
+    "StorageError",
+    "TableNotFoundError",
+    "UploadError",
+    # Exceptions - Data Quality
+    "InvalidDataFormatError",
+    "MissingRequiredFieldError",
+    "SchemaViolationError",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",
@@ -135,37 +172,39 @@ __all__ = [
     "GoldListContainsFilter",
     "GoldListLengthFilter",
     "GoldRangeFilter",
-    "GoldValidatorPort",
-    "HealthStatus",
     "InputFilterConfig",
+    # Ports
+    "CheckpointPort",
+    "DataSourcePort",
+    "GoldValidatorPort",
     "InputFilterPort",
-    # Exceptions - Data Quality
-    "InvalidDataFormatError",
-    "LockAcquisitionError",
-    "LockLostError",
     "LockPort",
     "LoggerPort",
-    "MergeConflictError",
     "MetricsPort",
-    "MissingRequiredFieldError",
-    "Molecule",
-    # Context
-    "PipelineContext",
-    "PipelineRunContext",
-    "Protein",
-    "Publication",
     "QuarantinePort",
-    "RateLimitError",
-    "RecoverableError",
-    "RetryExhaustedError",
+    "StoragePort",
+    "TracingPort",
+    # Transformations (pure functions)
+    "calculate_dq_score",
+    "canonical_json_dumps",
+    "detect_hash_collision",
+    "detect_schema_drift",
+    "exceeds_threshold",
+    "generate_content_hash",
+    "generate_entity_id",
+    "normalize_for_hash",
+    "safe_float",
+    "safe_int",
+    # Types
+    "BatchID",
+    "CircuitBreakerState",
+    "ContentHash",
+    "DataClassification",
+    "DQStatus",
+    "DriftLevel",
+    "EntityID",
+    "ErrorType",
+    "HealthStatus",
     "RunID",
     "RunType",
-    "SchemaViolationError",
-    "StorageError",
-    "StoragePort",
-    "TableNotFoundError",
-    "Target",
-    "TargetComponent",
-    "TracingPort",
-    "UploadError",
 ]
