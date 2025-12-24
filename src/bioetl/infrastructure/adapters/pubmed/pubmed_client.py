@@ -1,6 +1,7 @@
 # src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
 from __future__ import annotations
 
+import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
@@ -183,7 +184,15 @@ class PubMedAdapter:
             yield record
 
     async def health_check(self) -> HealthStatus:
-        """Check PubMed API availability."""
+        """Проверка доступности PubMed API.
+
+        Выполняет lightweight запрос к esearch endpoint.
+
+        Returns:
+            HealthStatus.HEALTHY — API доступен
+            HealthStatus.DEGRADED — медленный отклик (>5 сек)
+            HealthStatus.UNHEALTHY — ошибка или timeout
+        """
         try:
             # Use esearch for a lightweight check
             params = {
@@ -196,15 +205,34 @@ class PubMedAdapter:
             if self.api_key:
                 params["api_key"] = self.api_key
 
+            start_time = time.monotonic()
             response = await self.http_client.get(
                 f"{ENTREZ_API_BASE}esearch.fcgi", params=params
             )
-            return (
-                HealthStatus.HEALTHY
-                if response.status_code == 200
-                else HealthStatus.UNHEALTHY
+            elapsed = time.monotonic() - start_time
+
+            if response.status_code != 200:
+                self.logger.warning(
+                    "pubmed_health_check_failed",
+                    status_code=response.status_code,
+                )
+                return HealthStatus.UNHEALTHY
+
+            # Медленный отклик = degraded
+            if elapsed > 5.0:
+                self.logger.warning(
+                    "pubmed_health_check_slow",
+                    elapsed_seconds=round(elapsed, 2),
+                )
+                return HealthStatus.DEGRADED
+
+            return HealthStatus.HEALTHY
+
+        except Exception as e:
+            self.logger.warning(
+                "pubmed_health_check_failed",
+                error=str(e),
             )
-        except Exception:
             return HealthStatus.UNHEALTHY
 
     async def aclose(self) -> None:
