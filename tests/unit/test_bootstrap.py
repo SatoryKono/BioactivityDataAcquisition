@@ -86,16 +86,35 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
+    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
     @patch("bioetl.composition.bootstrap.get_settings")
     @patch("bioetl.composition.bootstrap.bootstrap_logger")
     def test_bootstrap_pipeline_unknown_pipeline_raises(
-        self, mock_bootstrap_logger, mock_get_settings, mock_settings, mock_logger
+        self,
+        mock_bootstrap_logger: MagicMock,
+        mock_get_settings: MagicMock,
+        mock_bootstrap_tracer: MagicMock,
+        mock_start_metrics: MagicMock,
+        mock_settings: MagicMock,
+        mock_logger: MagicMock,
     ):
         """Test that unknown pipeline name raises ValueError."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
 
+        # Configure settings with required observability attributes
+        mock_settings.metrics_port = 8000
+        mock_settings.observability = MagicMock()
+        mock_settings.observability.metrics_enabled = True
+        mock_settings.observability.metrics_server_enabled = True
+        mock_settings.observability.metrics_fail_fast = False
+        mock_settings.observability.metrics_retry_count = 3
+        mock_settings.observability.metrics_retry_delay = 1.0
+        mock_settings.observability.tracing_enabled = False
+
         mock_get_settings.return_value = mock_settings
         mock_bootstrap_logger.return_value = mock_logger
+        mock_bootstrap_tracer.return_value = MagicMock()
 
         # Now raises "Configuration file not found" because load_pipeline_config is called first
         ctx = PipelineRunContext(
@@ -138,6 +157,9 @@ class TestBootstrapPipeline:
         test_settings.observability = MagicMock()
         test_settings.observability.metrics_enabled = True
         test_settings.observability.metrics_server_enabled = True
+        test_settings.observability.metrics_fail_fast = False
+        test_settings.observability.metrics_retry_count = 3
+        test_settings.observability.metrics_retry_delay = 1.0
         test_settings.observability.tracing_enabled = False
 
         mock_get_settings.return_value = test_settings
@@ -169,7 +191,12 @@ class TestBootstrapPipeline:
         result = bootstrap_pipeline(ctx)
 
         assert result is mock_runner
-        mock_start_metrics.assert_called_once_with(test_settings.metrics_port)
+        mock_start_metrics.assert_called_once_with(
+            port=test_settings.metrics_port,
+            fail_fast=False,
+            retry_count=3,
+            retry_delay=1.0,
+        )
 
     @pytest.mark.skip(
         reason="Requires full integration setup - covered by integration tests"
@@ -368,3 +395,113 @@ class TestChemblActivityFactory:
         finally:
             # Restore original class
             chembl_activity_factory.pipeline_class = original_class
+
+
+@pytest.mark.unit
+class TestBootstrapMetrics:
+    """Tests for bootstrap_metrics function with metrics configuration."""
+
+    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    def test_bootstrap_metrics_passes_config_params(
+        self,
+        mock_prometheus: MagicMock,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that bootstrap_metrics passes config params to start_metrics_server."""
+        from bioetl.composition.bootstrap import bootstrap_metrics
+
+        # Create mock settings with metrics config
+        settings = MagicMock()
+        settings.metrics_port = 9090
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = True
+        settings.observability.metrics_fail_fast = False
+        settings.observability.metrics_retry_count = 5
+        settings.observability.metrics_retry_delay = 2.0
+
+        mock_metrics = MagicMock()
+        mock_prometheus.return_value = mock_metrics
+
+        result = bootstrap_metrics(settings)
+
+        assert result is mock_metrics
+        mock_start_server.assert_called_once_with(
+            port=9090,
+            fail_fast=False,
+            retry_count=5,
+            retry_delay=2.0,
+        )
+
+    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    def test_bootstrap_metrics_fail_fast_true_raises_error(
+        self,
+        mock_prometheus: MagicMock,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that fail_fast=True propagates MetricsServerError."""
+        from bioetl.composition.bootstrap import MetricsServerError, bootstrap_metrics
+
+        settings = MagicMock()
+        settings.metrics_port = 8000
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = True
+        settings.observability.metrics_fail_fast = True
+        settings.observability.metrics_retry_count = 3
+        settings.observability.metrics_retry_delay = 1.0
+
+        # Simulate server failure in fail_fast mode
+        mock_start_server.side_effect = MetricsServerError(
+            port=8000, reason="port_in_use"
+        )
+
+        with pytest.raises(MetricsServerError) as exc_info:
+            bootstrap_metrics(settings)
+
+        assert exc_info.value.port == 8000
+        assert exc_info.value.reason == "port_in_use"
+
+    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    def test_bootstrap_metrics_fail_fast_false_suppresses_error(
+        self,
+        mock_prometheus: MagicMock,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that fail_fast=False suppresses exceptions."""
+        from bioetl.composition.bootstrap import bootstrap_metrics
+
+        settings = MagicMock()
+        settings.metrics_port = 8000
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = True
+        settings.observability.metrics_fail_fast = False
+        settings.observability.metrics_retry_count = 3
+        settings.observability.metrics_retry_delay = 1.0
+
+        mock_metrics = MagicMock()
+        mock_prometheus.return_value = mock_metrics
+
+        # Simulate exception in lenient mode
+        mock_start_server.side_effect = Exception("Random failure")
+
+        # Should not raise, should return metrics
+        result = bootstrap_metrics(settings)
+
+        assert result is mock_metrics
+
+    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    def test_bootstrap_metrics_disabled_returns_none(
+        self, mock_prometheus: MagicMock
+    ) -> None:
+        """Test that disabled metrics returns None without starting server."""
+        from bioetl.composition.bootstrap import bootstrap_metrics
+
+        settings = MagicMock()
+        settings.observability.metrics_enabled = False
+
+        result = bootstrap_metrics(settings)
+
+        assert result is None
+        mock_prometheus.assert_not_called()
