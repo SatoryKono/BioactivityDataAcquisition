@@ -19,6 +19,7 @@ def test_batch_metrics_quarantined_tracking():
         {
             "pipeline": "pipeline_test",
             "error_type": "DATA_QUALITY",
+            "run_type": "incremental",
         }
     )
 

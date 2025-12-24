@@ -512,5 +512,9 @@ class TestPipelineRunnerClearExports:
         runner._clear_exports()
 
         # Should use default gold table: provider.entity_type
-        services.storage.clear_silver.assert_called_once_with("chembl.silver_activity")
-        services.storage.clear_gold.assert_called_once_with("chembl.activity")
+        services.storage.clear_silver.assert_called_once_with(
+            "chembl.silver_activity", dry_run=False
+        )
+        services.storage.clear_gold.assert_called_once_with(
+            "chembl.activity", dry_run=False
+        )
