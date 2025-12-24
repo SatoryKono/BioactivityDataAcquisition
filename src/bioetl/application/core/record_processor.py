@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
@@ -129,7 +129,11 @@ class RecordProcessor:
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():
                     await self._quarantine_manager.quarantine_record(
-                        raw_record, error_type, batch_id, str(e)
+                        raw_record,
+                        error_type,
+                        batch_id,
+                        str(e),
+                        ingestion_ts=self._context.started_at,
                     )
                     records_quarantined += 1
                     self._batch_metrics.track_error("transform", error_type)
@@ -145,7 +149,8 @@ class RecordProcessor:
         batch_id: BatchID,
     ) -> BatchResult:
         """Process a batch of records through Bronze -> Silver -> Gold."""
-        ingestion_ts = datetime.now(UTC)
+        # Use context.started_at as single source of time (see ADR-014)
+        ingestion_ts = self._context.started_at
 
         # 1. Write to Bronze
         try:
@@ -260,6 +265,7 @@ class RecordProcessor:
             batch_id=batch_id,
             run_id=self._context.run_id,
             run_type=self._context.run_type,
+            ingestion_ts=ingestion_ts,  # Pass from context (single source of time)
         )
 
     async def _write_silver_batch(

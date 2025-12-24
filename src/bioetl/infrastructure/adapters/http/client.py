@@ -35,6 +35,8 @@ class RetryConfig:
         max_delay: Maximum delay in seconds (default: 60.0)
         multiplier: Delay multiplier per attempt (default: 2.0)
         jitter: Random jitter factor 0-1 (default: 0.1)
+        deterministic: Use hash-based jitter for reproducibility (default: False)
+        jitter_seed: Seed for deterministic jitter (default: None)
 
     """
 
@@ -43,14 +45,32 @@ class RetryConfig:
     max_delay: float = 60.0
     multiplier: float = 2.0
     jitter: float = 0.1
+    deterministic: bool = False
+    jitter_seed: int | None = None
 
-    def calculate_delay(self, attempt: int) -> float:
-        """Calculate delay for given attempt number (0-indexed)."""
+    def calculate_delay(self, attempt: int, url: str = "") -> float:
+        """Calculate delay for given attempt number (0-indexed).
+
+        Args:
+            attempt: Attempt number (0-indexed)
+            url: Request URL for deterministic jitter calculation
+
+        Returns:
+            Delay in seconds
+        """
         delay = self.base_delay * (self.multiplier**attempt)
         delay = min(delay, self.max_delay)
-        # Add jitter
+
         jitter_range = delay * self.jitter
-        delay += random.uniform(-jitter_range, jitter_range)
+        if self.deterministic:
+            # Hash-based deterministic jitter for reproducibility
+            hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
+            jitter_factor = (hash(hash_input) % 1000) / 1000.0
+            # Map 0.0-1.0 to -1.0 to +1.0
+            delay += jitter_range * (jitter_factor * 2 - 1)
+        else:
+            delay += random.uniform(-jitter_range, jitter_range)
+
         return max(0.0, delay)
 
 
@@ -138,10 +158,13 @@ class UnifiedHTTPClient:
         return self._client
 
     async def _handle_retry_delay(
-        self, attempt: int, response: httpx.Response | None = None
+        self,
+        attempt: int,
+        url: str = "",
+        response: httpx.Response | None = None,
     ) -> None:
         """Calculate and sleep for the appropriate retry delay."""
-        delay = self.retry_config.calculate_delay(attempt)
+        delay = self.retry_config.calculate_delay(attempt, url)
         if response:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
@@ -170,7 +193,7 @@ class UnifiedHTTPClient:
                     _is_retryable_status(response.status_code)
                     and attempt < self.retry_config.max_attempts - 1
                 ):
-                    await self._handle_retry_delay(attempt, response)
+                    await self._handle_retry_delay(attempt, url, response)
                     continue
 
                 response.raise_for_status()
@@ -185,7 +208,7 @@ class UnifiedHTTPClient:
                     raise
 
                 if attempt < self.retry_config.max_attempts - 1:
-                    await self._handle_retry_delay(attempt)
+                    await self._handle_retry_delay(attempt, url)
 
         raise RetryExhaustedError(url, self.retry_config.max_attempts, last_error)
 

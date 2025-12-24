@@ -178,13 +178,17 @@ watch-logs: ## Watch structured logs (tail -f)
 	tail -f logs/bioetl.log | jq '.'
 
 # Architecture and Quality Checks
-arch-test: ## Run architecture tests (layer dependencies)
+arch-test: ## Run architecture tests (layer dependencies, determinism)
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/test_architecture.py -v
+	$(VENV_PYTHON) -m pytest tests/architecture/ -v --tb=short
+	@echo "$(GREEN)Architecture tests passed!$(NC)"
 
 arch-lint: ## Run import-linter contracts
 	@echo "$(BLUE)Checking import contracts...$(NC)"
 	$(VENV_PYTHON) -m importlinter --config .importlinter
+
+arch-all: arch-lint arch-test ## Run all architecture checks (lint + tests)
+	@echo "$(GREEN)All architecture checks passed!$(NC)"
 
 complexity: ## Check cyclomatic complexity (max CC=10)
 	@echo "$(BLUE)Checking code complexity...$(NC)"
@@ -224,7 +228,7 @@ quality: lint arch-lint complexity typecheck ## Run all quality checks
 # CI/CD targets
 ci-lint: lint security arch-lint ## Run all CI linting checks
 
-ci-test: test arch-test ## Run all tests for CI
+ci-test: test arch-all ## Run all tests for CI (includes architecture checks)
 
 ci-quality: quality ## Run full quality gate
 

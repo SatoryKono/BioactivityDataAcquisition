@@ -55,6 +55,7 @@ class StorageAdapter:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime | None = None,
     ) -> None:
         """Write raw records to Bronze layer."""
         await self.bronze.write_bronze(
@@ -65,6 +66,7 @@ class StorageAdapter:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
     async def write_silver(
