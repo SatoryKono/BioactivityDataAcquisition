@@ -45,13 +45,16 @@ __all__ = [
     "UnifiedHTTPClient",
     "UnifiedQuarantine",
     "bootstrap_checkpoint",
+    "bootstrap_checkpoint_manager",
     "bootstrap_cleanup",
     "bootstrap_logger",
     "bootstrap_metrics",
     "bootstrap_observability",
     "bootstrap_pipeline",
     "bootstrap_quarantine",
+    "bootstrap_quarantine_manager",
     "bootstrap_storage",
+    "load_pipeline_config",
 ]
 
 if TYPE_CHECKING:
@@ -59,7 +62,9 @@ if TYPE_CHECKING:
 
     import structlog
 
+    from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.cleanup_service import CleanupService
+    from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
@@ -134,6 +139,57 @@ def bootstrap_cleanup() -> CleanupService:
     noop_logger = NoOpLogger()
 
     return CleanupService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManager:
+    """Bootstrap QuarantineManager for CLI inspection operations.
+
+    Creates a QuarantineManager for quarantine inspection and reporting.
+    Used by CLI for `quarantine inspect` and similar commands.
+
+    Args:
+        pipeline_name: Name of the pipeline to inspect.
+
+    Returns:
+        QuarantineManager configured for the specified pipeline.
+    """
+    from bioetl.application.core.quarantine_manager import QuarantineManager
+
+    quarantine_port = bootstrap_quarantine()
+    return QuarantineManager(
+        quarantine_port=quarantine_port,
+        pipeline_name=pipeline_name,
+    )
+
+
+def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
+    """Bootstrap CheckpointManager for CLI inspection operations.
+
+    Creates a minimal CheckpointManager for checkpoint listing and inspection.
+    Uses NoOpLogger and dummy run_id since CLI operations don't need full
+    pipeline execution context.
+
+    Args:
+        pipeline_name: Name of the pipeline (used for context, may be ignored
+            for operations like list_all).
+
+    Returns:
+        CheckpointManager configured for CLI inspection.
+    """
+    from uuid import uuid4
+
+    from bioetl.application.core.checkpoint_manager import CheckpointManager
+
+    checkpoint_port = bootstrap_checkpoint(pipeline_name)
+    noop_logger = NoOpLogger()
+
+    return CheckpointManager(
+        checkpoint_port=checkpoint_port,
+        logger=noop_logger,
+        pipeline_name=pipeline_name,
+        run_id=uuid4(),  # Dummy run_id for CLI inspection
+        resume=False,
+    )
 
 
 def bootstrap_logger(
