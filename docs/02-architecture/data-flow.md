@@ -1,6 +1,6 @@
 # Data Flow
 
-*Aligned with RULES.md v5.0*
+*Aligned with RULES.md v5.2 (Local-Only Deployment)*
 
 ## Overview
 
@@ -65,8 +65,11 @@ flowchart LR
 
 ## Storage Paths
 
+> **Note**: Local-Only deployment использует локальную файловую систему.
+> Для распределённого развёртывания (future) — S3/MinIO.
+
 ```
-s3://bioetl/
+data/                              # Local-Only (current)
 ├── bronze/
 │   └── v1/{provider}/{entity}/{date}/
 │       ├── batch_001.jsonl.zst
@@ -81,9 +84,12 @@ s3://bioetl/
 │   └── {provider}/{entity}_aggregated/
 │       └── _delta_log/
 │
-└── quarantine/
-    └── {provider}/{entity}/
-        └── {date}/
+├── quarantine/
+│   └── {provider}/{entity}/
+│       └── {date}/
+│
+└── checkpoints/
+    └── {pipeline_name}.json
 ```
 
 ---
@@ -93,8 +99,8 @@ s3://bioetl/
 ```mermaid
 flowchart TB
   subgraph Prepare
-    A1["Lock Acquire<br/>(Redis SETNX)"]
-    A2["Heartbeat Start<br/>(every 20s)"]
+    A1["Lock Acquire<br/>(MemoryLock)"]
+    A2["Load Config"]
     A3["Checkpoint Load<br/>(if --resume)"]
   end
 

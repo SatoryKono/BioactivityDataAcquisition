@@ -126,18 +126,19 @@
 - Soft: >5% DQ errors → Warning.
 - Hard: >20% → Fail Batch.
 
-### 4.3. Concurrency & Locks (Redis)
+### 4.3. Concurrency & Locks
 
-| Параметр      | Значение                    |
-|---------------|-----------------------------|
-| Механизм      | Redis `SETNX` + `EXPIRE`    |
-| TTL           | 60 секунд                   |
-| Heartbeat     | Каждые 20 сек               |
-| Fencing Token | `owner_id` (run_id воркера) |
-| Max Duration  | 4 часа                      |
+> **Note**: Local-Only Deployment (ADR-010). Redis отложен для будущего распределённого развёртывания.
+
+| Параметр      | Значение (Local-Only)        | Значение (Distributed, future) |
+|---------------|------------------------------|--------------------------------|
+| Механизм      | `MemoryLock` (in-process)    | Redis `SETNX` + `EXPIRE`       |
+| TTL           | —                            | 60 секунд                      |
+| Heartbeat     | —                            | Каждые 20 сек                  |
+| Max Duration  | 4 часа                       | 4 часа                         |
 
 - **Invariant**: Потеря блокировки = Потеря права на запись.
-- **Safety Guard**: Валидация `owner_id` перед записью в S3/Delta.
+- **Safety Guard**: Валидация lock ownership перед записью.
 
 ### 4.4. Circuit Breaker
 
@@ -188,6 +189,14 @@
 
 ### 5.3. Environment Isolation
 
+> **Note**: Local-Only Deployment использует локальную файловую систему.
+
+**Local-Only (current):**
+| Среда   | Storage           | Locking     |
+|---------|-------------------|-------------|
+| Dev     | `data/`           | MemoryLock  |
+
+**Distributed (future):**
 | Среда   | S3               | Redis | Доступ к Prod-секретам |
 |---------|------------------|-------|------------------------|
 | Dev     | `bioetl-dev`     | db0   | Нет                    |
