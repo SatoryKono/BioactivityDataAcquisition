@@ -24,6 +24,13 @@ class CheckpointManager:
         run_id: RunID,
         resume: bool,
     ) -> None:
+        """Initialize checkpoint manager.
+
+        Args:
+            checkpoint_port: Port for checkpoint operations.
+            pipeline_name: Name of the pipeline.
+            run_id: Unique identifier for the pipeline run.
+        """
         self._checkpoint = checkpoint_port
         self._logger = logger
         self._pipeline_name = pipeline_name
@@ -48,6 +55,7 @@ class CheckpointManager:
 
         Args:
             records_processed: Count of records processed so far
+
         """
         await self._checkpoint.save(
             pipeline=self._pipeline_name,

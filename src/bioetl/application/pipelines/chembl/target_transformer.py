@@ -98,6 +98,7 @@ class TargetTransformer(BaseTransformer):
         Returns:
             Dict with aggregated lists for accessions, IDs, types, relationships,
             descriptions, organisms, tax_ids, and protein classifications.
+
         """
         if not components or not isinstance(components, list):
             return self._empty_component_result()
@@ -202,6 +203,7 @@ class TargetTransformer(BaseTransformer):
 
         Returns:
             JSON string of list of synonyms, or None.
+
         """
         if not components or not isinstance(components, list):
             return None
@@ -227,6 +229,7 @@ class TargetTransformer(BaseTransformer):
 
         Returns:
             JSON string of aggregated xrefs, or None if empty.
+
         """
         if not components or not isinstance(components, list):
             return None

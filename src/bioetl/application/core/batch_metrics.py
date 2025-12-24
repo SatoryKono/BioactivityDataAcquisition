@@ -18,12 +18,15 @@ class BatchMetricsRecorder:
     def __init__(
         self,
         metrics: MetricsPort | None,
-        pipeline_label: str,
-        run_type_label: str,
-    ):
-        self._metrics = metrics
-        self._pipeline_label = pipeline_label
-        self._run_type_label = run_type_label
+        pipeline_name: str,
+    ) -> None:
+        """Initialize batch metrics recorder.
+
+        Args:
+            metrics: Metrics port instance.
+            pipeline_name: Name of the pipeline.
+        """
+        self.metrics = metrics
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record the size of a batch at a specific stage."""
@@ -66,6 +69,7 @@ class BatchMetricsRecorder:
         Args:
             error_type: Type of error that caused quarantine
             count: Number of records quarantined
+
         """
         if self._metrics:
             self._metrics.increment_counter(

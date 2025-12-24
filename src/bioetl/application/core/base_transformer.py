@@ -39,6 +39,7 @@ class TransformationError(Exception):
         Args:
             message: Error description.
             field: Name of the field that caused the error (optional).
+
         """
         super().__init__(message)
         self.field = field
@@ -69,6 +70,7 @@ class BaseTransformer(ABC):
 
         Args:
             provider: Data provider identifier (e.g., 'chembl', 'pubchem').
+
         """
         self.provider = provider
 
@@ -89,6 +91,7 @@ class BaseTransformer(ABC):
 
         Returns:
             SilverRecord if transformation successful, None if record should be skipped.
+
         """
         try:
             return await self._transform_impl(context, record)
@@ -133,6 +136,7 @@ class BaseTransformer(ABC):
         Raises:
             TransformationError: If required field is missing.
             ValueError: If entity validation fails.
+
         """
         ...
 
@@ -154,6 +158,7 @@ class BaseTransformer(ABC):
 
         Returns:
             ContentHash: SHA256 hash of normalized record.
+
         """
         return generate_content_hash(
             business_data,
@@ -172,6 +177,7 @@ class BaseTransformer(ABC):
 
         Returns:
             JSON string for dict/list, str(value) for other types, None for None.
+
         """
         if value is None:
             return None
@@ -194,6 +200,7 @@ class BaseTransformer(ABC):
 
         Returns:
             SilverRecord dictionary with renamed lineage fields.
+
         """
         silver_record = entity.__dict__.copy()
 
@@ -226,6 +233,7 @@ class BaseTransformer(ABC):
 
         Raises:
             TransformationError: If field is missing or empty (when allow_empty=False).
+
         """
         value = record.get(field)
         if value is None:
@@ -268,6 +276,7 @@ class BaseTransformer(ABC):
             9606
             >>> BaseTransformer._extract_nested(record, "organism.name", "unknown")
             'unknown'
+
         """
         keys = path.split(".")
         current = record
@@ -316,6 +325,7 @@ class BaseTransformer(ABC):
             ...     activity_id="12345",
             ...     molecule_chembl_id="CHEMBL25",
             ... )
+
         """
         return entity_class(
             entity_id=entity_id,
@@ -344,6 +354,7 @@ class BaseTransformer(ABC):
 
         Returns:
             Field value or default.
+
         """
         value = record.get(field)
         return value if value is not None else default

@@ -26,6 +26,7 @@ class ShutdownSignal:
         >>> # In executor
         >>> if signal.is_requested:
         ...     await checkpoint_manager.save()
+
     """
 
     _requested: bool = field(default=False, init=False)

@@ -131,6 +131,7 @@ class ActivityTransformer(BaseTransformer):
         Returns:
             Dict with flattened keys: ligand_efficiency_{bei,le,lle,sei}
             All values are converted to float or None
+
         """
         if not le_data or not isinstance(le_data, dict):
             return {

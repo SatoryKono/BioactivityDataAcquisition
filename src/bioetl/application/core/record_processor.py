@@ -1,5 +1,4 @@
-"""
-Processes a batch of records through the Bronze, Silver, and Gold layers.
+"""Processes a batch of records through the Bronze, Silver, and Gold layers.
 """
 
 from __future__ import annotations
@@ -38,8 +37,7 @@ class BatchResult:
 
 
 class RecordProcessor:
-    """
-    Handles the transformation and writing of a single batch of records.
+    """Handles the transformation and writing of a single batch of records.
     This class contains the core ETL logic for a batch.
     """
 

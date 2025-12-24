@@ -17,8 +17,7 @@ if TYPE_CHECKING:
 
 
 class LockManager:
-    """
-    Manages acquiring, releasing, and maintaining distributed locks.
+    """Manages acquiring, releasing, and maintaining distributed locks.
     This is an Application Service.
     """
 
@@ -36,8 +35,7 @@ class LockManager:
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
     ) -> None:
-        """
-        Initialize LockManager with explicit dependencies.
+        """Initialize LockManager with explicit dependencies.
         No infrastructure details should be present here.
         """
         self._lock = lock_port

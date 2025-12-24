@@ -73,6 +73,7 @@ class PubMedXMLParser:
 
         Returns:
             Tuple of (formatted_date_string, year_int)
+
         """
         if date_node is None:
             return None, None
@@ -100,6 +101,7 @@ class PubMedXMLParser:
 
         Returns:
             ISO formatted date string or None.
+
         """
         if history_node is None:
             return None
@@ -124,6 +126,7 @@ class PubMedXMLParser:
 
         Returns:
             ISO formatted date string or None.
+
         """
         if article_node is None:
             return None
