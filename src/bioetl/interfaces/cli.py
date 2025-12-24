@@ -16,16 +16,16 @@ import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.composition.bootstrap import (
-    bootstrap_checkpoint,
+    bootstrap_checkpoint_manager,
     bootstrap_cleanup,
     bootstrap_pipeline,
-    bootstrap_quarantine,
+    bootstrap_quarantine_manager,
+    load_pipeline_config,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
@@ -260,12 +260,12 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
     """Inspect quarantined records."""
     click.echo(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
-    # Initialize infrastructure directly via bootstrap (read-only op)
-    quarantine_service = bootstrap_quarantine()
+    # Use application-layer QuarantineManager via bootstrap
+    quarantine_manager = bootstrap_quarantine_manager(pipeline)
 
     # Run async inspection
     async def _inspect() -> None:
-        records = await quarantine_service.inspect(pipeline=pipeline, limit=limit)
+        records = await quarantine_manager.inspect(limit=limit)
         if not records:
             click.echo("No records found.")
             return
@@ -290,10 +290,11 @@ def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints."""
     click.echo(f"Listing checkpoints for {pipeline}...")
 
-    checkpoint_service = bootstrap_checkpoint(pipeline)
+    # Use application-layer CheckpointManager via bootstrap
+    checkpoint_manager = bootstrap_checkpoint_manager(pipeline)
 
     async def _list() -> None:
-        checkpoints = await checkpoint_service.list_all()
+        checkpoints = await checkpoint_manager.list_all()
         for cp in checkpoints:
             click.echo(f"- {cp}")
 

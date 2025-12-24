@@ -60,3 +60,37 @@ class QuarantineManager:
             metadata={"error_details": {"message": error_details}},
             ingestion_ts=ingestion_ts,
         )
+
+    async def inspect(
+        self,
+        limit: int = 100,
+        error_code: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Inspect quarantined records for this pipeline.
+
+        Delegates to QuarantinePort.inspect() for CLI inspection commands.
+
+        Args:
+            limit: Maximum number of records to return.
+            error_code: Optional filter by error code.
+
+        Returns:
+            List of quarantined records.
+
+        """
+        return await self._quarantine.inspect(
+            pipeline=self._pipeline_name,
+            limit=limit,
+            error_code=error_code,
+        )
+
+    async def get_stats(self) -> dict[str, Any]:
+        """Get statistics about quarantined records for this pipeline.
+
+        Delegates to QuarantinePort.get_stats() for CLI reporting.
+
+        Returns:
+            Dictionary with quarantine statistics.
+
+        """
+        return await self._quarantine.get_stats(self._pipeline_name)
