@@ -10,7 +10,7 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
-from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
+from bioetl.domain.types import BatchID, RunType, ValidationResult
 
 
 @pytest.fixture

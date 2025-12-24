@@ -13,7 +13,7 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture

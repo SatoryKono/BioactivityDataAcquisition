@@ -4,7 +4,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "activity",
     "fields": [],
@@ -78,7 +79,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "document",
     "fields": [],
@@ -113,7 +115,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "molecule",
     "fields": [],
@@ -147,7 +150,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "target",
     "fields": [],
@@ -182,7 +186,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "compound",
     "fields": [],
@@ -213,7 +218,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "publication",
     "fields": [],
@@ -244,7 +250,8 @@
     "checkpoint_interval": 1000,
     "dq": {
       "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
     },
     "entity_type": "protein",
     "fields": [],

@@ -284,8 +284,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         resume: bool,
     ) -> CheckpointManager:
         """Create configured CheckpointManager."""
-        from bioetl.domain.types import RunID
-
         return CheckpointManager(
             checkpoint_port=pipeline.services.checkpoint,
             logger=logger,
