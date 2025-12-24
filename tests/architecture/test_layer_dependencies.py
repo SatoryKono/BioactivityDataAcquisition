@@ -725,7 +725,6 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
     - Checking for dunder methods (__enter__, __aiter__, etc.)
     - Checking for private attributes (_internal)
     - fetch_filtered: Extension method for filterable adapters (ChEMBL-specific)
-      TODO: Create FilterableDataSourcePort Protocol to formalize this
     """
     import ast
 
