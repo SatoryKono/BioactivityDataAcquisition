@@ -78,9 +78,9 @@ class IntegrationPipelineTestCase:
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
                 base_path=self.bronze_path,
+                logger=logger,
                 save_json=save_json,
                 json_path=self.json_path if save_json else None,
-                logger=logger,
             ),
             silver_writer=DeltaWriter(
                 base_path=self.silver_path,

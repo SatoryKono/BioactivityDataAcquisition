@@ -22,6 +22,7 @@ from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.server import start_metrics_server
 from bioetl.infrastructure.observability.tracing import NoOpTracer, OpenTelemetryTracer
@@ -79,23 +80,25 @@ def bootstrap_storage() -> StorageAdapter:
 
     Creates a minimal StorageAdapter suitable for preview operations.
     No CSV export is configured since this is for read-only inspection.
+    Uses NoOpLogger since this is for CLI preview operations without observability.
 
     Returns:
         StorageAdapter configured for the current environment.
     """
     settings = get_settings()
+    noop_logger = NoOpLogger()
 
     return StorageAdapter(
         bronze_writer=BronzeWriter(
             base_path=settings.bronze_path,
+            logger=noop_logger,
             save_json=False,
             json_path=None,
-            logger=None,
         ),
         silver_writer=DeltaWriter(
             base_path=settings.silver_path,
             csv_exporter=None,
-            logger=None,
+            logger=noop_logger,
         ),
         gold_writer=GoldWriter(
             base_path=settings.gold_path,
