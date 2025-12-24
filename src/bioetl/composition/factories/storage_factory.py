@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -284,6 +286,66 @@ class StorageAdapter:
         Implements aclose() required by StoragePort protocol.
         """
         pass  # Writers don't need explicit cleanup
+
+    async def health_check(self) -> HealthStatus:
+        """Check storage accessibility and write capability.
+
+        Validates Bronze, Silver, and Gold directories are writable by
+        attempting to create and delete a temporary file in each layer.
+
+        Returns:
+            HealthStatus:
+            - HEALTHY: All layers accessible and writable
+            - DEGRADED: Partial access (1-2 layers have issues)
+            - UNHEALTHY: Critical storage failure (all layers unavailable)
+        """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._check_storage_health_sync)
+
+    def _check_storage_health_sync(self) -> HealthStatus:
+        """Synchronous storage health check implementation.
+
+        Checks if each layer's base directory is writable.
+        """
+        layers = [
+            ("bronze", self.bronze.base_path),
+            ("silver", self.silver.base_path),
+            ("gold", self.gold.base_path),
+        ]
+
+        issues = 0
+        for _layer_name, base_path in layers:
+            if not self._check_directory_writable(base_path):
+                issues += 1
+
+        if issues == 0:
+            return HealthStatus.HEALTHY
+        elif issues < len(layers):
+            return HealthStatus.DEGRADED
+        else:
+            return HealthStatus.UNHEALTHY
+
+    @staticmethod
+    def _check_directory_writable(dir_path: Path) -> bool:
+        """Check if a directory is writable.
+
+        Args:
+            dir_path: Directory path to check.
+
+        Returns:
+            True if directory is writable, False otherwise.
+        """
+        try:
+            # Ensure directory exists
+            dir_path.mkdir(parents=True, exist_ok=True)
+
+            # Try to create and delete a temporary file
+            temp_file = dir_path / ".health_check_probe"
+            temp_file.touch()
+            temp_file.unlink()
+            return True
+        except (OSError, PermissionError):
+            return False
 
 
 @dataclass(frozen=True)
