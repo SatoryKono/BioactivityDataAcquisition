@@ -128,9 +128,10 @@ class GoldWriter:
         )
         if not is_strict:
             raise ValueError("Gold layer requires strict=True schema validation")
-        import polars as pl
+        import pandas as pd
 
-        df = pl.DataFrame(records)
+        # Use pandas for validation (Gold schemas are Pandera pandas DataFrameModels)
+        df = pd.DataFrame(records)
         try:
             await self._run_in_executor(lambda: schema.validate(df, lazy=False))
         except pandera_pa.errors.SchemaError as e:
