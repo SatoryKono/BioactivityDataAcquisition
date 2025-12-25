@@ -20,7 +20,9 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
+
+T = TypeVar("T")
 
 import pandera as pandera_pa
 import pyarrow as pa
@@ -138,7 +140,9 @@ class GoldWriter:
                 schema,
             )
 
-    async def _run_in_executor(self, func, *args):
+    async def _run_in_executor(
+        self, func: Callable[..., T], *args: Any
+    ) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)

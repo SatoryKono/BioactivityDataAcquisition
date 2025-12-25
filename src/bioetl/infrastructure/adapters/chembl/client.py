@@ -285,6 +285,18 @@ class ChemblAdapter(BaseHttpAdapter):
         # Wrap in ChemblApiError for consistent handling
         raise ChemblApiError(str(e)) from e
 
+    def _get_primary_key_field(self, entity_type: str) -> str:
+        """Get the primary key field name for deduplication."""
+        pk_overrides = {
+            "molecule": "molecule_chembl_id",
+            "compound": "molecule_chembl_id",
+            "document": "document_chembl_id",
+            "target": "target_chembl_id",
+        }
+        return pk_overrides.get(
+            entity_type, ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
+        )
+
     async def _fetch_filtered(
         self,
         entity_type: str,
@@ -295,31 +307,20 @@ class ChemblAdapter(BaseHttpAdapter):
         """Perform filtered fetch using ID batches with client-side deduplication."""
         total_fetched = 0
         seen_ids: set[str] = set()
-
-        # Primary key field name for deduplication
-        pk_field = ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
-        if entity_type == "molecule" or entity_type == "compound":
-            pk_field = "molecule_chembl_id"
-        elif entity_type == "document":
-            pk_field = "document_chembl_id"
-        elif entity_type == "target":
-            pk_field = "target_chembl_id"
+        pk_field = self._get_primary_key_field(entity_type)
 
         for id_batch in self._batch_ids(filter_ids, batch_size=100):
             async for record in self._fetch_with_filter(
                 entity_type, id_batch, filter_field, limit
             ):
-                # Client-side deduplication (essential for joined filters)
                 record_id = str(record.get(pk_field, ""))
-                if record_id and record_id in seen_ids:
-                    continue
-                if record_id:
-                    seen_ids.add(record_id)
-
-                yield record
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+                if not record_id or record_id not in seen_ids:
+                    if record_id:
+                        seen_ids.add(record_id)
+                    yield record
+                    total_fetched += 1
+                    if limit and total_fetched >= limit:
+                        return
 
     async def _fetch_standard(
         self,
@@ -473,4 +474,5 @@ class ChemblAdapter(BaseHttpAdapter):
         response = await self.http_client.get(url, params=params)
         data = response.json()
         page_meta = data.get("page_meta", {})
-        return page_meta.get("total_count", 0)
+        total_count: int = page_meta.get("total_count", 0)
+        return total_count

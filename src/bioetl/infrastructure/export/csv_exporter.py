@@ -64,7 +64,7 @@ class CsvExporter:
 
         Handles PermissionError gracefully on Windows when files are locked.
         """
-        deleted = []
+        deleted: list[Path] = []
         if not self.base_path.exists():
             return deleted
 
@@ -91,7 +91,7 @@ class CsvExporter:
     @staticmethod
     def _is_complex_type(field_type: pa.DataType) -> bool:
         """Check if a PyArrow type is complex (list or struct)."""
-        return (
+        return bool(
             pa.types.is_list(field_type)
             or pa.types.is_large_list(field_type)
             or pa.types.is_struct(field_type)

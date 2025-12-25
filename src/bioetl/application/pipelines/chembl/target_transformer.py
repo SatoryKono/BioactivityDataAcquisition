@@ -47,10 +47,13 @@ class TargetTransformer(BaseTransformer):
             id_field="target_chembl_id",
         )
 
-        # Extract flattened components
-        flattened_components = self._flatten_target_components(
-            record.get("target_components")
+        # Extract target_components with proper typing
+        target_components = cast(
+            "list[dict[str, Any]] | None", record.get("target_components")
         )
+
+        # Extract flattened components
+        flattened_components = self._flatten_target_components(target_components)
 
         business_data: dict[str, Any] = {
             # Primary identifier
@@ -70,15 +73,9 @@ class TargetTransformer(BaseTransformer):
                 record.get("target_constraints")
             ),
             # Complex fields (JSON serialized)
-            "target_components": self.serialize_json(
-                record.get("target_components")
-            ),
-            "target_component_synonyms": self._aggregate_synonyms(
-                record.get("target_components")
-            ),
-            "cross_references": self._aggregate_component_xrefs(
-                record.get("target_components")
-            ),
+            "target_components": self.serialize_json(target_components),
+            "target_component_synonyms": self._aggregate_synonyms(target_components),
+            "cross_references": self._aggregate_component_xrefs(target_components),
             # Flattened components
             **flattened_components,
         }
