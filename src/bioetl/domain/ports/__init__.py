@@ -8,7 +8,7 @@ This package contains all port definitions organized by domain:
 - locking: LockPort for distributed locking
 - checkpoint: CheckpointPort for pipeline state
 - quarantine: QuarantinePort for failed records
-- observability: TracingPort, MetricsPort, LoggerPort
+- observability: TracingPort, MetricsPort, LoggerPort, DQMonitorPort
 - validation: GoldValidatorPort for Gold layer validation
 - filtering: InputFilterPort for CSV filter loading
 """
@@ -21,6 +21,7 @@ from bioetl.domain.ports.data_source import (
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.observability import (
+    DQMonitorPort,
     LoggerPort,
     MetricsPort,
     TracingPort,
@@ -31,6 +32,7 @@ from bioetl.domain.ports.validation import GoldValidatorPort
 
 __all__ = [
     "CheckpointPort",
+    "DQMonitorPort",
     "DataSourcePort",
     "FilterableDataSourcePort",
     "GoldValidatorPort",
