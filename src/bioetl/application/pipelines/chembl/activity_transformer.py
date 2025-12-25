@@ -40,6 +40,32 @@ class ActivityTransformer(BaseTransformer):
         """Initialize ChEMBL activity transformer."""
         super().__init__(provider)
 
+    def _extract_ligand_efficiency(
+        self, le_data: dict[str, Any] | None
+    ) -> dict[str, Any]:
+        """Extract ligand efficiency metrics from nested dictionary.
+
+        Args:
+            le_data: Nested ligand efficiency dictionary from ChEMBL API.
+                     Expected keys: bei, le, lle, sei.
+
+        Returns:
+            Flat dictionary with prefixed keys and float-converted values.
+        """
+        return flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+
+    def _extract_action_type(self, action_data: dict[str, Any] | None) -> dict[str, Any]:
+        """Extract action type fields from nested dictionary.
+
+        Args:
+            action_data: Nested action type dictionary from ChEMBL API.
+                         Expected keys: action_type, description, parent_type.
+
+        Returns:
+            Flat dictionary with prefixed keys.
+        """
+        return flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
+
     def _map_core_identifiers(
         self, record: BronzeRecord, activity_id: Any, molecule_id: Any
     ) -> dict[str, Any]:
@@ -89,11 +115,7 @@ class ActivityTransformer(BaseTransformer):
             "standard_text_value": record.get("standard_text_value"),
             "standard_flag": safe_int(record.get("standard_flag")),
             "pchembl_value": safe_float(record.get("pchembl_value")),
-            **flatten_nested_dict(
-                record.get("ligand_efficiency"),
-                "ligand_efficiency_",
-                _LIGAND_EFFICIENCY_FIELDS,
-            ),
+            **self._extract_ligand_efficiency(record.get("ligand_efficiency")),
             "qudt_units": record.get("qudt_units"),
             "uo_units": record.get("uo_units"),
         }
@@ -107,9 +129,7 @@ class ActivityTransformer(BaseTransformer):
             "data_validity_comment": record.get("data_validity_comment"),
             "data_validity_description": record.get("data_validity_description"),
             "potential_duplicate": safe_int(record.get("potential_duplicate")),
-            **flatten_nested_dict(
-                record.get("action_type"), "action_type_", _ACTION_TYPE_FIELDS
-            ),
+            **self._extract_action_type(record.get("action_type")),
             "activity_properties": self.serialize_json(
                 record.get("activity_properties")
             ),
