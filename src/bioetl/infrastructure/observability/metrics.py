@@ -77,6 +77,32 @@ CIRCUIT_BREAKER_FAILURE_TOTAL = Counter(
     ["adapter"],
 )
 
+# VACUUM metrics
+VACUUM_FILES_REMOVED_TOTAL = Counter(
+    "bioetl_vacuum_files_removed_total",
+    "Total files removed by vacuum operations",
+    ["table", "layer"],
+)
+
+VACUUM_DURATION_SECONDS = Histogram(
+    "bioetl_vacuum_duration_seconds",
+    "Duration of vacuum operations",
+    ["table"],
+)
+
+# Archive metrics
+ARCHIVE_FILES_TOTAL = Counter(
+    "bioetl_archive_files_total",
+    "Total files archived",
+    ["table", "target"],
+)
+
+ARCHIVE_DURATION_SECONDS = Histogram(
+    "bioetl_archive_duration_seconds",
+    "Duration of archive operations",
+    ["table"],
+)
+
 
 class MetricsCollector:
     """Collector for pipeline metrics.

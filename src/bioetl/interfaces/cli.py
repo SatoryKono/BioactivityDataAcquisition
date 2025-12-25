@@ -18,6 +18,7 @@ from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint_manager,
     bootstrap_cleanup,
+    bootstrap_lifecycle_service,
     bootstrap_pipeline,
     bootstrap_quarantine_manager,
     load_pipeline_config,
@@ -299,6 +300,87 @@ def checkpoint_list(pipeline: str) -> None:
             click.echo(f"- {cp}")
 
     asyncio.run(_list())
+
+
+@cli.group()
+def maintenance() -> None:
+    """Maintenance operations for Delta tables."""
+    pass
+
+
+@maintenance.command("vacuum")
+@click.argument("table")
+@click.option(
+    "--retention-days",
+    "-r",
+    default=7,
+    help="Minimum age of files to remove (days)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be removed without removing",
+)
+def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
+    """Vacuum Delta table to reclaim storage space.
+
+    TABLE: Table name in format "provider.entity" (e.g., chembl.activity)
+
+    Examples:
+
+        bioetl maintenance vacuum chembl.activity
+
+        bioetl maintenance vacuum chembl.activity --dry-run
+
+        bioetl maintenance vacuum chembl.activity -r 30
+    """
+    lifecycle = bootstrap_lifecycle_service()
+
+    async def _run() -> None:
+        if dry_run:
+            click.echo(f"[DRY-RUN] Would vacuum {table} (retention: {retention_days}d)")
+
+        files_removed = await lifecycle.vacuum(
+            table=table,
+            retention_days=retention_days,
+            dry_run=dry_run,
+        )
+
+        if dry_run:
+            click.echo(f"Would remove {files_removed} files")
+        else:
+            click.echo(f"Removed {files_removed} files")
+
+    asyncio.run(_run())
+
+
+@maintenance.command("archive")
+@click.argument("table")
+@click.argument("target_path")
+@click.option(
+    "--remove-source",
+    is_flag=True,
+    help="Remove source table after archiving",
+)
+def archive_command(table: str, target_path: str, remove_source: bool) -> None:
+    """Archive Delta table to cold storage.
+
+    TABLE: Table name to archive
+
+    TARGET_PATH: Destination path for archive
+    """
+    lifecycle = bootstrap_lifecycle_service()
+
+    async def _run() -> None:
+        files_archived = await lifecycle.archive(
+            table=table,
+            target_path=target_path,
+            remove_source=remove_source,
+        )
+
+        click.echo(f"Archived {files_archived} files to {target_path}")
+
+    asyncio.run(_run())
 
 
 def main() -> None:
