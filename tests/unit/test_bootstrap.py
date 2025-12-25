@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -395,14 +395,14 @@ class TestChemblActivityFactory:
             )
 
             # Verify run_id is passed to pipeline.create()
-            # After transformer DI refactoring, create() includes transformer
-            mock_pipeline_class.create.assert_called_once()
-            call_kwargs = mock_pipeline_class.create.call_args.kwargs
-            assert call_kwargs["run_id"] == run_id
-            assert call_kwargs["runtime"] == runtime
-            assert call_kwargs["services"] == mock_services
-            assert call_kwargs["config"] == mock_domain_config
-            assert "transformer" in call_kwargs  # Transformer now injected via DI
+            # Note: transformer is created by factory via DI and passed to pipeline
+            mock_pipeline_class.create.assert_called_once_with(
+                run_id=run_id,
+                runtime=runtime,
+                services=mock_services,
+                config=mock_domain_config,
+                transformer=ANY,  # Transformer instance created by factory
+            )
             assert result is mock_pipeline
         finally:
             # Restore original class

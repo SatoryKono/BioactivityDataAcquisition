@@ -5,21 +5,21 @@ Transforms Bronze records to Silver format (Assay entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.transform_utils import flatten_nested_dict
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
 from bioetl.domain.entities import Assay
 from bioetl.domain.transformations import (
-    generate_entity_id,
     safe_float,
     safe_int,
     safe_str,
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
@@ -54,12 +54,11 @@ def _extract_variant(data: dict[str, Any] | None) -> dict[str, Any]:
     return flatten_nested_dict(data, "variant_", _VARIANT_FIELDS)
 
 
-class AssayTransformer(BaseTransformer):
+class AssayTransformer(BaseChemblTransformer):
     """Transforms ChEMBL assay bronze records to silver."""
 
-    def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL assay transformer."""
-        super().__init__(provider)
+    entity_class = Assay
+    primary_id_field = "assay_chembl_id"
 
     def _map_core_identifiers(
         self, record: BronzeRecord, assay_chembl_id: Any
@@ -117,34 +116,24 @@ class AssayTransformer(BaseTransformer):
             "assay_parameters": self.serialize_json(record.get("assay_parameters")),
         }
 
-    async def _transform_impl(
+    def _extract_business_data(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL assay to normalized format."""
-        assay_chembl_id = self._get_required_field(record, "assay_chembl_id")
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract Assay business data from bronze record.
 
-        entity_id = generate_entity_id(
-            record={"assay_chembl_id": str(assay_chembl_id)},
-            provider=self.provider,
-            id_field="assay_chembl_id",
-        )
+        Args:
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated assay_chembl_id value.
 
-        business_data: dict[str, Any] = {
-            **self._map_core_identifiers(record, assay_chembl_id),
+        Returns:
+            Dictionary of Assay business fields.
+
+        """
+        return {
+            **self._map_core_identifiers(record, primary_id),
             **self._map_classification_fields(record),
             **self._map_biological_context(record),
             **self._map_metadata_fields(record),
         }
-
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-        entity = self._create_entity(
-            Assay,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            **business_data,
-        )
-
-        return cast("SilverRecord", self.entity_to_silver_record(entity))

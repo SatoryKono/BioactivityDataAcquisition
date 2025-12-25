@@ -5,48 +5,43 @@ Transforms Bronze records to Silver format (Target Component entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.transform_utils import extract_list_field
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
 from bioetl.domain.entities import TargetComponent
-from bioetl.domain.transformations import generate_entity_id, safe_int
+from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
-class TargetComponentTransformer(BaseTransformer):
+class TargetComponentTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze target component records to silver."""
 
-    def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL target component transformer.
+    entity_class = TargetComponent
+    primary_id_field = "component_id"
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract TargetComponent business data from bronze record.
 
         Args:
-            provider: Data provider identifier.
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated component_id value.
+
+        Returns:
+            Dictionary of TargetComponent business fields.
 
         """
-        super().__init__(provider)
-
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL target component to normalized format using Domain Entity."""
-        # Validate required field
-        component_id = self._get_required_field(record, "component_id")
-
-        entity_id = generate_entity_id(
-            record={"component_id": str(component_id)},
-            provider=self.provider,
-            id_field="component_id",
-        )
-
-        business_data: dict[str, Any] = {
+        return {
             # Primary identifier
-            "component_id": safe_int(component_id),
+            "component_id": safe_int(primary_id),
             # Core metadata
             "accession": record.get("accession"),
             "component_type": record.get("component_type"),
@@ -70,17 +65,3 @@ class TargetComponentTransformer(BaseTransformer):
                 safe_int,
             ),
         }
-
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # Create entity using helper method
-        entity = self._create_entity(
-            TargetComponent,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            **business_data,
-        )
-
-        # Convert Entity to SilverRecord for storage
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
