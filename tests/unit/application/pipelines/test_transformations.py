@@ -10,18 +10,25 @@ import pytest
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, RunType
 
 
 # Mock context object for tests
 @pytest.fixture
 def mock_context() -> PipelineContext:
-    mock = MagicMock(spec=PipelineContext)
-    # Add logger mock for Template Method error handling
-    mock.logger = MagicMock()
-    mock.logger.bind = MagicMock(return_value=mock.logger)
-    mock.logger.warning = MagicMock()
-    return mock
+    """Create a real PipelineContext with mock logger.
+
+    Using real PipelineContext instead of MagicMock because transformers
+    now use context.run_id and context.run_type for entity creation.
+    """
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    mock_logger.warning = MagicMock()
+    return PipelineContext(
+        run_id=uuid4(),
+        run_type=RunType.INCREMENTAL,
+        logger=mock_logger,
+    )
 
 
 # Mock pipeline base for instantiation
