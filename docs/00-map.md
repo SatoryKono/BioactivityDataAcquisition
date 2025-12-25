@@ -144,7 +144,16 @@ docs/
 ```
 src/bioetl/
 ├── domain/                      # Pure logic, no I/O (§1.1)
-│   ├── ports.py                 # Protocol interfaces (DataSourcePort, etc.)
+│   ├── ports/                   # Protocol interfaces (Ports & Adapters)
+│   │   ├── __init__.py          # Facade — single import point
+│   │   ├── data_source.py       # DataSourcePort, FilterableDataSourcePort
+│   │   ├── storage.py           # StoragePort
+│   │   ├── locking.py           # LockPort
+│   │   ├── checkpoint.py        # CheckpointPort
+│   │   ├── quarantine.py        # QuarantinePort
+│   │   ├── observability.py     # MetricsPort, TracingPort, LoggerPort
+│   │   ├── validation.py        # GoldValidatorPort
+│   │   └── filtering.py         # InputFilterPort
 │   ├── config.py                # Domain config models
 │   ├── exceptions.py            # Domain exceptions hierarchy
 │   ├── transformations.py       # Pure transformation functions
@@ -238,7 +247,7 @@ graph TD
 | `docs/RULES.md`                                    | Master rules document     |
 | `CHANGELOG.md`                                     | Version history           |
 | `configs/pipelines/{provider}/{entity}.yaml`       | Pipeline configuration    |
-| `src/bioetl/domain/ports.py`                       | Protocol interfaces       |
+| `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
 | `src/bioetl/composition/bootstrap.py`              | Composition root          |
 | `src/bioetl/infrastructure/config.py`              | Application settings      |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
