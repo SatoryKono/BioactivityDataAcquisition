@@ -118,18 +118,33 @@ class BronzeWriter:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
-        ingestion_ts: datetime | None = None,
+        ingestion_ts: datetime,
     ) -> Path:
-        """Write raw records to Bronze layer (JSONL + zstd)."""
+        """Write raw records to Bronze layer (JSONL + zstd).
+
+        Args:
+            records: Iterator of JSON-encoded record bytes.
+            provider: Provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'activity').
+            date: Date for path partitioning.
+            batch_id: Unique identifier for this batch.
+            run_id: Pipeline run identifier.
+            run_type: Type of run (incremental, backfill, etc.).
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014).
+
+        Returns:
+            Relative path to the written file.
+
+        """
         self._validate_bronze_names(provider, entity)
 
         date_str = date.strftime("%Y-%m-%d")
         relative_path = (
             f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
         )
-        effective_ts = ingestion_ts or date
         metadata = self._build_bronze_metadata(
-            run_id, run_type, effective_ts, provider, entity, batch_id
+            run_id, run_type, ingestion_ts, provider, entity, batch_id
         )
 
         loop = asyncio.get_running_loop()

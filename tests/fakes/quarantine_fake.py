@@ -6,7 +6,7 @@ Implements QuarantinePort interface without filesystem I/O.
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime  # UTC used in add_record
 from typing import Any
 
 from bioetl.domain.types import BatchID, DQStatus, RunID
@@ -31,14 +31,14 @@ class InMemoryQuarantine:
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
         metadata: dict[str, Any] | None = None,
-        ingestion_ts: datetime | None = None,
+        *,
+        ingestion_ts: datetime,
     ) -> None:
         """Write record to quarantine."""
         meta = metadata or {}
-        effective_ts = ingestion_ts or datetime.now(UTC)
 
         record = {
-            "ingestion_ts": effective_ts.isoformat(),
+            "ingestion_ts": ingestion_ts.isoformat(),
             "pipeline": pipeline,
             "error_code": error_code,
             "payload": payload,

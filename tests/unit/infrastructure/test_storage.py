@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
@@ -20,6 +20,8 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 # Default test run metadata
 TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 TEST_RUN_TYPE = RunType.INCREMENTAL
+# Fixed timestamp for deterministic tests (see ADR-014)
+TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -67,6 +69,7 @@ class TestBronzeWriter:
             batch_id=batch_id,
             run_id=TEST_RUN_ID,
             run_type=TEST_RUN_TYPE,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         expected_file = tmp_path / path
@@ -90,6 +93,7 @@ class TestBronzeWriter:
             batch_id=batch_id,
             run_id=TEST_RUN_ID,
             run_type=TEST_RUN_TYPE,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         # Check path contains expected parts (path format: bronze/v1/{provider}/{entity}/{date}/batch_{id}.jsonl.zst)
@@ -113,6 +117,7 @@ class TestBronzeWriter:
             batch_id=batch_id,
             run_id=TEST_RUN_ID,
             run_type=TEST_RUN_TYPE,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         file_path = tmp_path / path
@@ -148,6 +153,7 @@ class TestBronzeWriter:
                 batch_id=batch_id,
                 run_id=TEST_RUN_ID,
                 run_type=TEST_RUN_TYPE,
+                ingestion_ts=TEST_INGESTION_TS,
             )
 
     async def test_write_bronze_save_json_copy(self, tmp_path, noop_logger):
@@ -166,6 +172,7 @@ class TestBronzeWriter:
             batch_id=batch_id,
             run_id=TEST_RUN_ID,
             run_type=TEST_RUN_TYPE,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         # Check JSON file was created
@@ -223,6 +230,7 @@ class TestBronzeWriter:
                 batch_id=batch_id,
                 run_id=TEST_RUN_ID,
                 run_type=TEST_RUN_TYPE,
+                ingestion_ts=TEST_INGESTION_TS,
             )
 
         batches = await writer.list_batches("test_provider", "test_entity", date)
@@ -254,6 +262,7 @@ class TestBronzeWriter:
             batch_id=batch_id,
             run_id=TEST_RUN_ID,
             run_type=TEST_RUN_TYPE,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         # Check metadata file was created

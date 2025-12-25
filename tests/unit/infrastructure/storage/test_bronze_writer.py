@@ -43,6 +43,12 @@ def run_type() -> RunType:
 
 
 @pytest.fixture
+def ingestion_ts() -> datetime:
+    """Return fixed ingestion timestamp for deterministic tests."""
+    return datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
+
+
+@pytest.fixture
 def sample_records() -> list[bytes]:
     """Create sample records as JSONL bytes."""
     records = [
@@ -147,6 +153,7 @@ class TestBronzeWriterWriteLocal:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test writing Bronze data to local storage."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -160,6 +167,7 @@ class TestBronzeWriterWriteLocal:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # Verify path format (normalize for cross-platform)
@@ -204,6 +212,7 @@ class TestBronzeWriterWriteLocal:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that local write is performed asynchronously."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -223,6 +232,7 @@ class TestBronzeWriterWriteLocal:
                 batch_id=batch_id,
                 run_id=run_id,
                 run_type=run_type,
+                ingestion_ts=ingestion_ts,
             )
 
             # Verify run_in_executor was called at least twice (1 for compression, 1 for write)
@@ -242,6 +252,7 @@ class TestBronzeWriterWriteLocal:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test writing Bronze data with JSON copy."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
@@ -255,6 +266,7 @@ class TestBronzeWriterWriteLocal:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # Verify JSON copy exists
@@ -276,6 +288,7 @@ class TestBronzeWriterWriteLocal:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that empty records raise ValueError."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -290,6 +303,7 @@ class TestBronzeWriterWriteLocal:
                 batch_id=batch_id,
                 run_id=run_id,
                 run_type=run_type,
+                ingestion_ts=ingestion_ts,
             )
 
 
@@ -306,6 +320,7 @@ class TestBronzeWriterReadLocal:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test reading Bronze data from local storage."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -320,6 +335,7 @@ class TestBronzeWriterReadLocal:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # Read back
@@ -345,6 +361,7 @@ class TestBronzeWriterListBatches:
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test listing batches from local storage."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -361,6 +378,7 @@ class TestBronzeWriterListBatches:
             batch_id=BatchID(uuid4()),
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
         await writer.write_bronze(
             records=iter(sample_records),
@@ -370,6 +388,7 @@ class TestBronzeWriterListBatches:
             batch_id=BatchID(uuid4()),
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # List all batches
@@ -384,6 +403,7 @@ class TestBronzeWriterListBatches:
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test listing batches with date filter."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -399,6 +419,7 @@ class TestBronzeWriterListBatches:
             batch_id=BatchID(uuid4()),
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
         await writer.write_bronze(
             records=iter(sample_records),
@@ -408,6 +429,7 @@ class TestBronzeWriterListBatches:
             batch_id=BatchID(uuid4()),
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # List with date filter
@@ -437,6 +459,7 @@ class TestBronzeWriterAtomicWrite:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that no partial files remain if write fails mid-operation.
 
@@ -462,6 +485,7 @@ class TestBronzeWriterAtomicWrite:
                     batch_id=batch_id,
                     run_id=run_id,
                     run_type=run_type,
+                    ingestion_ts=ingestion_ts,
                 )
 
         # Verify no data files exist
@@ -485,6 +509,7 @@ class TestBronzeWriterAtomicWrite:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that metadata file never exists without corresponding data file.
 
@@ -502,6 +527,7 @@ class TestBronzeWriterAtomicWrite:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         full_path = tmp_path / path
@@ -520,6 +546,7 @@ class TestBronzeWriterAtomicWrite:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that no temp files remain after successful write."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -533,6 +560,7 @@ class TestBronzeWriterAtomicWrite:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # No temp files should remain
@@ -548,6 +576,7 @@ class TestBronzeWriterAtomicWrite:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that failure during AtomicWriteGroup.add cleans up temp files."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -575,6 +604,7 @@ class TestBronzeWriterAtomicWrite:
                     batch_id=batch_id,
                     run_id=run_id,
                     run_type=run_type,
+                    ingestion_ts=ingestion_ts,
                 )
 
         # No temp files should remain
@@ -590,6 +620,7 @@ class TestBronzeWriterAtomicWrite:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that JSON copy also uses atomic write."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
@@ -603,6 +634,7 @@ class TestBronzeWriterAtomicWrite:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # Verify JSON file exists
@@ -627,6 +659,7 @@ class TestBronzeWriterLoggerInjection:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
+        ingestion_ts: datetime,
     ) -> None:
         """Test that injected logger is called during write operations."""
         mock_logger = MagicMock()
@@ -641,6 +674,7 @@ class TestBronzeWriterLoggerInjection:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         # Verify logger.info was called with bronze_write_complete
