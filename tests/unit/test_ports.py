@@ -183,6 +183,11 @@ class TestStoragePortProtocol:
             ) -> dict[str, Any]:
                 return {}
 
+            async def health_check(self) -> Any:
+                from bioetl.domain.types import HealthStatus
+
+                return HealthStatus.HEALTHY
+
         assert isinstance(ValidStorage(), StoragePort)
 
         # Note: @runtime_checkable protocols only check for method presence,
