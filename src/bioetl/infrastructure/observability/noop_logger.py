@@ -35,22 +35,32 @@ class NoOpLogger:
         """Bind additional context (no-op, returns self)."""
         return self
 
-    def info(self, _event: str, **_kwargs: Any) -> None:
+    def info(
+        self, _event: str | None = None, *_args: Any, **_kwargs: Any
+    ) -> None:
         """Log info message (no-op)."""
         pass
 
-    def warning(self, _event: str, **_kwargs: Any) -> None:
+    def warning(
+        self, _event: str | None = None, *_args: Any, **_kwargs: Any
+    ) -> None:
         """Log warning message (no-op)."""
         pass
 
-    def error(self, _event: str, **_kwargs: Any) -> None:
+    def error(
+        self, _event: str | None = None, *_args: Any, **_kwargs: Any
+    ) -> None:
         """Log error message (no-op)."""
         pass
 
-    def debug(self, _event: str, **_kwargs: Any) -> None:
+    def debug(
+        self, _event: str | None = None, *_args: Any, **_kwargs: Any
+    ) -> None:
         """Log debug message (no-op)."""
         pass
 
-    def exception(self, _event: str, **_kwargs: Any) -> None:
+    def exception(
+        self, _event: str | None = None, *_args: Any, **_kwargs: Any
+    ) -> None:
         """Log exception with traceback (no-op)."""
         pass

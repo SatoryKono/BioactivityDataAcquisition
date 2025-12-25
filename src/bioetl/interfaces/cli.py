@@ -26,7 +26,7 @@ from bioetl.composition.bootstrap import (
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunID, RunType
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
@@ -207,7 +207,7 @@ def run(
     if not _handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
         return
 
-    run_id = uuid4()
+    run_id = RunID(uuid4())
 
     try:
         ctx = PipelineRunContext(
@@ -234,7 +234,9 @@ def run(
         click.echo("Critical: Logger not initialized.", err=True)
         sys.exit(1)
 
-    setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
+    shutdown_signal = getattr(runner, "shutdown_signal", None)
+    if shutdown_signal is not None:
+        setup_shutdown_handlers(shutdown_signal)
 
     logger.info("Starting pipeline run")
     try:

@@ -90,7 +90,7 @@ class NoOpTracer:
         """Return a dummy object that swallows calls."""
 
         class DummySpan:
-            def __enter__(self) -> "DummySpan":
+            def __enter__(self) -> DummySpan:
                 return self
 
             def __exit__(self, *args: Any) -> None:

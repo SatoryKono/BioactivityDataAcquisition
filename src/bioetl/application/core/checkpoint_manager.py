@@ -6,13 +6,10 @@ for pipeline run tracking.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from bioetl.domain.ports import CheckpointPort
+from bioetl.domain.ports import CheckpointPort, LoggerPort
 from bioetl.domain.types import RunID
-
-if TYPE_CHECKING:
-    import structlog
 
 
 class CheckpointManager:
@@ -21,7 +18,7 @@ class CheckpointManager:
     def __init__(
         self,
         checkpoint_port: CheckpointPort,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         pipeline_name: str,
         run_id: RunID,
         resume: bool,

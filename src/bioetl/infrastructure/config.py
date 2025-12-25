@@ -204,13 +204,19 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
     return source_fields  # type: ignore[return-value]
 
 
-def _extract_write_modes(yaml_config: PipelineYamlConfig) -> tuple[str, str]:
+def _extract_write_modes(
+    yaml_config: PipelineYamlConfig,
+) -> tuple[Literal["merge", "append", "overwrite"], Literal["append", "overwrite", "scd2"]]:
     """Extract write modes from sink config."""
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
 
-    write_mode = silver_config.mode if silver_config and silver_config.mode else "merge"
-    gold_write_mode = gold_config.mode if gold_config and gold_config.mode else "append"
+    write_mode: Literal["merge", "append", "overwrite"] = (
+        silver_config.mode if silver_config and silver_config.mode else "merge"  # type: ignore[assignment]
+    )
+    gold_write_mode: Literal["append", "overwrite", "scd2"] = (
+        gold_config.mode if gold_config and gold_config.mode else "append"  # type: ignore[assignment]
+    )
 
     return write_mode, gold_write_mode
 

@@ -99,7 +99,7 @@ class LocalCheckpoint:
             checkpoint_json = f.read()
 
         checkpoint_data = json.loads(checkpoint_json)
-        run_id: RunID = UUID(checkpoint_data["run_id"])
+        run_id = RunID(UUID(checkpoint_data["run_id"]))
         metadata = checkpoint_data.get("metadata", {})
         return (run_id, metadata)
 

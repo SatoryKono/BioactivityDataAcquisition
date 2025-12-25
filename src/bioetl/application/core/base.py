@@ -15,10 +15,9 @@ from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:
-    import structlog
-
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
 
@@ -115,7 +114,7 @@ class BasePipeline(ABC):
         return self._context
 
     @property
-    def logger(self) -> structlog.BoundLogger:
+    def logger(self) -> LoggerPort:
         """Access bound logger."""
         return self._logger
 

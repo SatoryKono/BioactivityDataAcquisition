@@ -6,6 +6,7 @@ including lifecycle management (context manager) and health checks.
 
 from __future__ import annotations
 
+from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import DataSourcePort, LoggerPort
@@ -55,7 +56,12 @@ class BaseHttpAdapter(DataSourcePort):
         await self.http_client.__aenter__()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Exit async context manager.
 
         Delegates to the underlying HTTP client.

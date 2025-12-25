@@ -21,12 +21,12 @@ from bioetl.composition.factories.data_source_registry import (
 )
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
     import pyarrow as pa
-    import structlog
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.pipeline_services import PipelineServices
@@ -111,7 +111,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create data source using the configured creator.
@@ -132,7 +132,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
     def build_services(
         self,
         settings: Settings,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -170,7 +170,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         run_id: RunID,
         runtime: RuntimeConfig,
         settings: Settings,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -298,7 +298,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
     def _create_checkpoint_manager(
         self,
         pipeline: TPipeline,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         run_id: RunID,
         resume: bool,
     ) -> CheckpointManager:
