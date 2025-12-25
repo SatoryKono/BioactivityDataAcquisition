@@ -8,7 +8,14 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable
 
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+
+@pytest.fixture
+def noop_logger():
+    """Provide a NoOpLogger for tests."""
+    return NoOpLogger()
 
 
 @pytest.fixture
@@ -19,8 +26,8 @@ def temp_delta_path(tmp_path):
 
 
 @pytest.fixture
-def delta_writer(temp_delta_path):
-    return DeltaWriter(base_path=temp_delta_path)
+def delta_writer(temp_delta_path, noop_logger):
+    return DeltaWriter(base_path=temp_delta_path, logger=noop_logger)
 
 
 @pytest.fixture

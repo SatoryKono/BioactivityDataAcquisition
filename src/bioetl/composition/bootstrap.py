@@ -124,11 +124,12 @@ def bootstrap_storage() -> StorageAdapter:
         ),
         silver_writer=DeltaWriter(
             base_path=settings.silver_path,
-            csv_exporter=None,
             logger=noop_logger,
+            csv_exporter=None,
         ),
         gold_writer=GoldWriter(
             base_path=settings.gold_path,
+            logger=noop_logger,
             csv_exporter=None,
         ),
     )

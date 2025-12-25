@@ -494,3 +494,49 @@ class TestDQMonitorPortContract:
         assert is_runtime_checkable, (
             "DQMonitorPort MUST be decorated with @runtime_checkable"
         )
+
+
+# ============================================================================
+# Storage Writer LoggerPort Contract Tests
+# ============================================================================
+
+
+class TestStorageWriterLoggerContract:
+    """Tests for storage writer LoggerPort requirements.
+
+    All storage writers (BronzeWriter, DeltaWriter, GoldWriter) MUST
+    require a LoggerPort parameter in their constructor for observability.
+    Per RULES.md: Dependencies MUST be injected through constructor.
+    """
+
+    STORAGE_WRITERS = [
+        ("BronzeWriter", "bioetl.infrastructure.storage.bronze_writer"),
+        ("DeltaWriter", "bioetl.infrastructure.storage.delta_writer"),
+        ("GoldWriter", "bioetl.infrastructure.storage.gold_writer"),
+    ]
+
+    @pytest.mark.parametrize("writer_name,module_path", STORAGE_WRITERS)
+    def test_storage_writer_has_required_logger_parameter(
+        self, writer_name: str, module_path: str
+    ) -> None:
+        """All storage writers MUST have LoggerPort as required parameter."""
+        import importlib
+        import inspect
+
+        module = importlib.import_module(module_path)
+        writer_class = getattr(module, writer_name)
+
+        sig = inspect.signature(writer_class.__init__)
+        params = sig.parameters
+
+        assert "logger" in params, (
+            f"{writer_name}.__init__() MUST have 'logger' parameter. "
+            "All writers require LoggerPort for observability."
+        )
+
+        # Check that logger is a required parameter (no default value)
+        logger_param = params["logger"]
+        assert logger_param.default is inspect.Parameter.empty, (
+            f"{writer_name}.__init__() 'logger' MUST be required (no default). "
+            "Optional loggers violate DI principles per RULES.md."
+        )

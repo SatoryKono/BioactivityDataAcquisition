@@ -9,13 +9,20 @@ import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import Column, DataFrameSchema
 
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @pytest.fixture
-def gold_writer():
+def noop_logger():
+    """Provide a NoOpLogger for tests."""
+    return NoOpLogger()
+
+
+@pytest.fixture
+def gold_writer(noop_logger):
     """Create a GoldWriter instance."""
-    return GoldWriter(base_path="s3://test-bucket/gold")
+    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
 
 
 @pytest.fixture
@@ -54,22 +61,24 @@ def valid_records():
 class TestGoldWriterInit:
     """Tests for GoldWriter initialization."""
 
-    def test_init_strips_trailing_slash(self):
+    def test_init_strips_trailing_slash(self, noop_logger):
         """Test that trailing slash is stripped from base_path."""
-        writer = GoldWriter(base_path="s3://bucket/gold/")
+        writer = GoldWriter(base_path="s3://bucket/gold/", logger=noop_logger)
         assert writer.base_path == "s3://bucket/gold"
 
-    def test_init_with_csv_exporter(self):
+    def test_init_with_csv_exporter(self, noop_logger):
         """Test initialization with CSV exporter."""
         from unittest.mock import MagicMock
 
         mock_exporter = MagicMock()
-        writer = GoldWriter(base_path="/tmp/gold", csv_exporter=mock_exporter)
+        writer = GoldWriter(
+            base_path="/tmp/gold", logger=noop_logger, csv_exporter=mock_exporter
+        )
         assert writer.csv_exporter is mock_exporter
 
-    def test_init_without_csv_exporter(self):
+    def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
-        writer = GoldWriter(base_path="/tmp/gold")
+        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
         assert writer.csv_exporter is None
 
 
