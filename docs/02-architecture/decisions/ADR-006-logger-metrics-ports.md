@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted
 *   **Date**: 2025-12-18
+*   **Updated**: 2025-12-25 — `domain/ports.py` реорганизован в пакет `domain/ports/` с фасадом. Импорт: `from bioetl.domain.ports import LoggerPort`.
 *   **Context**: Logger and metrics dependencies were not consistently formalized as ports. The logger was typed as a concrete `structlog.BoundLogger` in `PipelineServices`, while metrics already had a proper `MetricsPort`. This inconsistency violated the Ports & Adapters architecture principle.
 
 ## The Decision

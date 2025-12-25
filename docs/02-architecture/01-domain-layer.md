@@ -13,19 +13,50 @@
 
 ## 2. Ключевые Компоненты
 
-### 2.1. `ports.py` — Порты (Контракты)
+### 2.1. `ports/` — Пакет Портов (Контракты)
 
-**Источник:** `src/bioetl/domain/ports.py`
+**Расположение:** `src/bioetl/domain/ports/`
 
-Этот модуль является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
+Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
-**Основные порты:**
+**Структура пакета:**
+```
+src/bioetl/domain/ports/
+├── __init__.py          # Фасад — единая точка импорта всех портов
+├── data_source.py       # DataSourcePort, FilterableDataSourcePort
+├── storage.py           # StoragePort
+├── locking.py           # LockPort
+├── checkpoint.py        # CheckpointPort
+├── quarantine.py        # QuarantinePort
+├── observability.py     # MetricsPort, TracingPort, LoggerPort, DQMonitorPort
+├── validation.py        # GoldValidatorPort
+└── filtering.py         # InputFilterPort
+```
+
+**Основные порты (12 шт):**
 - `DataSourcePort`: Абстракция для источников данных (API, файлы).
+- `FilterableDataSourcePort`: Расширение с server-side фильтрацией.
 - `StoragePort`: Абстракция для хранилищ данных (Bronze, Silver, Gold).
 - `LockPort`: Контракт для распределённых блокировок.
 - `CheckpointPort`: Интерфейс для сохранения и загрузки состояния пайплайнов.
 - `QuarantinePort`: Контракт для "карантина" — хранилища записей, не прошедших валидацию.
 - `MetricsPort`: Интерфейс для сбора метрик.
+- `TracingPort`: Распределённый трейсинг (OpenTelemetry).
+- `LoggerPort`: Структурированное логирование.
+- `DQMonitorPort`: Data Quality мониторинг.
+- `GoldValidatorPort`: Валидация Gold-записей.
+- `InputFilterPort`: Загрузка filter IDs.
+
+**Правило импорта (MUST):**
+```python
+# ✅ Правильно — из фасада:
+from bioetl.domain.ports import StoragePort, LockPort
+
+# ❌ Неправильно — из внутренних модулей:
+from bioetl.domain.ports.storage import StoragePort  # Запрещено!
+```
+
+Это правило проверяется архитектурным тестом `test_ports_imported_only_from_facade`.
 
 ### 2.2. `types.py` — Пользовательские Типы
 
