@@ -1,0 +1,120 @@
+"""Data source ports for fetching records from external systems.
+
+Defines DataSourcePort for basic fetching and FilterableDataSourcePort
+for adapters that support server-side filtering.
+"""
+
+from __future__ import annotations
+
+from collections.abc import AsyncIterator
+from typing import Any, Protocol, Self, runtime_checkable
+
+from bioetl.domain.types import HealthStatus
+
+
+@runtime_checkable
+class DataSourcePort(Protocol):
+    """Port for data sources (e.g., ChEMBL, PubChem).
+
+    This interface abstracts the process of fetching data from an external
+    source, allowing the application to be independent of the specific
+    implementation of the data source client.
+    """
+
+    @property
+    def provider_name(self) -> str:
+        """The unique name of the data provider (e.g., 'chembl')."""
+        ...
+
+    async def __aenter__(self) -> Self:
+        """Enter the async context manager."""
+        ...
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        """Exit the async context manager."""
+        ...
+
+    def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from the data source (async generator).
+
+        Note: This is NOT an async def because async generator functions
+        return AsyncIterator directly without needing to be awaited.
+        Implementations should be async generators (async def with yield).
+
+        Args:
+            entity_type: The type of entity to fetch (e.g., 'activity', 'molecule').
+            limit: The maximum number of records to fetch.
+            query: Optional search query for providers that support it (e.g., PubChem, UniProt).
+            filter_ids: Optional set of IDs to filter by (for adapters that support filtering).
+            filter_field: Optional field name to filter on (for adapters that support filtering).
+
+        Yields:
+            A dictionary representing a single record from the data source.
+        """
+        ...
+
+    async def health_check(self) -> HealthStatus:
+        """Check the health of the data source.
+
+        Returns:
+            A HealthStatus object indicating the current status of the source.
+        """
+        ...
+
+    async def aclose(self) -> None:
+        """Gracefully close the data source and release resources."""
+        ...
+
+
+@runtime_checkable
+class FilterableDataSourcePort(DataSourcePort, Protocol):
+    """Extended DataSourcePort that supports filtering at API level.
+
+    This Protocol extends DataSourcePort for adapters that can perform
+    server-side filtering by IDs (e.g., ChEMBL, PubMed).
+
+    Use isinstance() check to detect if an adapter supports filtering:
+        if isinstance(adapter, FilterableDataSourcePort):
+            async for record in adapter.fetch_filtered(...):
+                ...
+
+    Note:
+        Adapters that implement this Protocol MUST also implement DataSourcePort.
+        The fetch_filtered() method should delegate to the provider's native
+        filtering capabilities for efficient server-side filtering.
+    """
+
+    def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by specific IDs at the source level.
+
+        This method enables efficient server-side filtering by passing
+        filter criteria directly to the data source API.
+
+        Args:
+            entity_type: The type of entity to fetch (e.g., 'activity', 'publication').
+            filter_ids: Sorted list of IDs to filter by (for deterministic batching).
+            filter_field: Field name to filter on (e.g., 'molecule_chembl_id', 'pmid').
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+        """
+        ...
