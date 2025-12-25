@@ -247,11 +247,12 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Hard Threshold**: >20% ошибок -> Fail Batch. 
 - **Metric Scope**: Отслеживать как `record_error_rate` (доля битых строк), так и `entity_error_rate` (доля битых уникальных сущностей). 
  
-### 3.1.3. Параметры Retry (Backoff) 
-Для типа ошибок **Recoverable** применять стратегию Exponential Backoff: 
-- **Max Attempts**: 3 
-- **Multiplier**: 2.0 (wait 1s, 2s, 4s...) 
+### 3.1.3. Параметры Retry (Backoff)
+Для типа ошибок **Recoverable** применять стратегию Exponential Backoff:
+- **Max Attempts**: 3
+- **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
 - **Jitter**: Random(0.1s, 0.5s). Jitter **SHOULD** применяться для избежания thundering herd.
+- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md).
  
 ### 3.1.4. Circuit Breaker (Размыкатель цепи)
 Паттерн защиты от каскадных сбоев. См. [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
@@ -432,14 +433,16 @@ class LegacyAdapter(BaseSyncAdapter):
 2. Timestamps **MUST** передаваться из application слоя, не создаваться в infrastructure
 3. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
 4. `PipelineContext.started_at` — единственный источник времени для batch
+5. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort`
 
 #### Архитектурные Тесты (REQ-ARCH-030)
 | Тест | Цель | Проверки |
 |------|------|----------|
 | `test_no_random_in_writers` | Блокирует `random` в storage writers | `import random`, `from random import`, `random.uniform()`, `random.choice()` |
 | `test_no_datetime_now_in_infrastructure` | Блокирует `datetime.now()` в infra | `datetime.now()`, `datetime.datetime.now()` |
+| `test_no_structlog_in_application_interfaces` | Блокирует прямой импорт `structlog` | `import structlog`, `from structlog import` |
 
-**Путь:** `tests/architecture/test_no_random_in_writers.py`, `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+**Путь:** `tests/architecture/test_no_random_in_writers.py`, `tests/architecture/test_no_datetime_now_in_infrastructure.py`, `tests/architecture/test_no_structlog_in_application_interfaces.py`
 
 #### Детерминистичный Jitter
 ```python
@@ -796,7 +799,7 @@ fields:
 | [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Pipeline Services Lifecycle | Accepted | 2025-12-24 |
 
 ## История Изменений (Changelog)
-- **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015).
+- **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
 - **5.3** (2025-12-24): Determinism and Reproducibility (ADR-014). Добавлен §4.3 с правилами детерминизма. Архитектурные тесты для random и datetime.now().
 - **5.2** (2025-12-23): Local-Only Deployment (ADR-010). Обновлены §3.3 и §8.2 для MemoryLock. ADR-003 superseded.
 - **5.1** (2025-12-22): ADR additions (007-009), ADR index appendix.
@@ -810,5 +813,4 @@ fields:
 - **4.0** (2025-05-20): Data Contracts, Partitioning, Null Policy, Recovery Playbook. 
 - **3.0** (2025-05-20): Lineage, Backfill, Concurrency, Graceful Shutdown, Dev Experience. 
 - **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский. 
-- **1.0** (2025-04-01): Черновик. 
-2
+- **1.0** (2025-04-01): Черновик.

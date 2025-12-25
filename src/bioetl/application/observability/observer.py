@@ -126,13 +126,17 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         else:
             self.logger.info("pipeline_finished", **log_ctx)
 
-        # 3. End Trace Span
+        # 3. End Trace Span (O3: handle close errors gracefully)
         if self.span:
-            self.span.set_attribute("bioetl.status", status)
-            self.span.set_attribute("bioetl.duration_ms", duration * 1000)
-            if status == "failed":
-                self.span.record_exception(exc_val)
-                self.span.set_attribute("error", True)
-            self.span.__exit__(exc_type, exc_val, exc_tb)
+            try:
+                self.span.set_attribute("bioetl.status", status)
+                self.span.set_attribute("bioetl.duration_ms", duration * 1000)
+                if status == "failed":
+                    self.span.record_exception(exc_val)
+                    self.span.set_attribute("error", True)
+                self.span.__exit__(exc_type, exc_val, exc_tb)
+            except Exception:
+                # Best effort - don't fail the pipeline on tracing cleanup
+                pass
 
         return suppress_exception
