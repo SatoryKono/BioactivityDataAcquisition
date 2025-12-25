@@ -326,9 +326,27 @@ class TestDeltaWriter:
 
     async def test_write_silver_merge_existing_table(self, mock_delta_writer, noop_logger):
         """Test write_silver merges into existing table."""
+        import pyarrow as pa
+
         mock_delta_table, _mock_write_deltalake = mock_delta_writer
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
+
+        # Mock schema to match records (avoid schema drift error)
+        existing_schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("value", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+        mock_schema = MagicMock()
+        mock_schema.to_arrow.return_value = existing_schema
+        mock_table_instance.schema.return_value = mock_schema
+
         # Set up merge chain
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
