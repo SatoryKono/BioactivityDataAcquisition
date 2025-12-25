@@ -581,7 +581,7 @@ class TestDeltaWriterSchemaDrift:
 
         expected_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = expected_schema
+        mock_delta_schema.to_arrow.return_value = expected_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
@@ -607,7 +607,7 @@ class TestDeltaWriterSchemaDrift:
         # Existing schema has fewer fields than incoming records
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = existing_schema
+        mock_delta_schema.to_arrow.return_value = existing_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
@@ -644,7 +644,7 @@ class TestDeltaWriterSchemaDrift:
             pa.field("_ingestion_ts", pa.string()),
         ])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = existing_schema
+        mock_delta_schema.to_arrow.return_value = existing_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
