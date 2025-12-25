@@ -433,11 +433,13 @@ class LegacyAdapter(BaseSyncAdapter):
 3. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
 4. `PipelineContext.started_at` — единственный источник времени для batch
 
-#### Архитектурные Тесты
-| Тест | Цель | Файл |
-|------|------|------|
-| `test_no_random_in_writers` | Блокирует `random` в storage | `tests/architecture/` |
-| `test_no_datetime_now_in_infrastructure` | Блокирует `datetime.now()` в infra | `tests/architecture/` |
+#### Архитектурные Тесты (REQ-ARCH-030)
+| Тест | Цель | Проверки |
+|------|------|----------|
+| `test_no_random_in_writers` | Блокирует `random` в storage writers | `import random`, `from random import`, `random.uniform()`, `random.choice()` |
+| `test_no_datetime_now_in_infrastructure` | Блокирует `datetime.now()` в infra | `datetime.now()`, `datetime.datetime.now()` |
+
+**Путь:** `tests/architecture/test_no_random_in_writers.py`, `tests/architecture/test_no_datetime_now_in_infrastructure.py`
 
 #### Детерминистичный Jitter
 ```python

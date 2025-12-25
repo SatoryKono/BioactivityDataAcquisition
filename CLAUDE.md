@@ -189,6 +189,28 @@ sha256(provider + canonical_json(record))
 | **Completeness** | Все порты экспортированы в `__all__` |
 | **Contracts** | StoragePort, LockPort, CheckpointPort, QuarantinePort методы |
 
+### Тесты детерминизма (REQ-ARCH-030)
+
+Файл `tests/architecture/test_no_random_in_writers.py` проверяет:
+
+| Тест | Проверка |
+|------|----------|
+| `test_no_random_import_in_storage_writers` | Запрет `import random` и `from random import` в storage writers |
+| `test_no_random_uniform_calls_in_storage` | Запрет вызовов `random.uniform()` |
+| `test_no_random_choice_calls_in_storage` | Запрет вызовов `random.choice()` |
+
+**Цель:** Гарантировать детерминизм операций записи для воспроизводимости.
+См. [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md).
+
+Файл `tests/architecture/test_no_datetime_now_in_infrastructure.py` проверяет:
+
+| Тест | Проверка |
+|------|----------|
+| `test_no_datetime_now_in_infrastructure` | Запрет `datetime.now()` в infrastructure слое |
+| `test_allowed_files_still_exist` | Проверка актуальности списка исключений |
+
+**Цель:** Timestamps создаются в application слое и передаются как параметры.
+
 ### Команды
 
 ```bash
