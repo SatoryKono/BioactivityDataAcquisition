@@ -6,6 +6,7 @@
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![Version](https://img.shields.io/badge/version-5.0.0-blue)](CHANGELOG.md)
 [![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development%20(55%25)-yellow)](IMPLEMENTATION_ROADMAP.md)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
 from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, analysis-ready **Delta Lake** warehouse.
@@ -176,6 +177,14 @@ make docker-down
 ```
 
 > **Note**: This mode is deprecated for local development. See [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) for the rationale behind the Local-Only architecture.
+
+## 🔒 Security
+
+Please review our **[Security Policy](SECURITY.md)** for:
+- Threat model and trust boundaries
+- Secret management guidelines
+- Data validation architecture
+- Vulnerability reporting process
 
 ## 🤝 Contributing
 
