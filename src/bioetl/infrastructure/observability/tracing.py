@@ -90,23 +90,23 @@ class NoOpTracer:
         """Return a dummy object that swallows calls."""
 
         class DummySpan:
-            def __enter__(self):
+            def __enter__(self) -> "DummySpan":
                 return self
 
-            def __exit__(self, *args):
+            def __exit__(self, *args: Any) -> None:
                 pass
 
-            def set_attribute(self, *args):
+            def set_attribute(self, *args: Any) -> None:
                 pass
 
-            def add_event(self, *args):
+            def add_event(self, *args: Any) -> None:
                 pass
 
-            def record_exception(self, *args):
+            def record_exception(self, *args: Any) -> None:
                 pass
 
         class DummyTracer:
-            def start_as_current_span(self, *args, **kwargs):
+            def start_as_current_span(self, *args: Any, **kwargs: Any) -> DummySpan:
                 return DummySpan()
 
         return DummyTracer()

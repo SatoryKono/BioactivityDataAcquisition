@@ -35,6 +35,54 @@ class MetricsServerError(Exception):
         self.original_error = original_error
 
 
+def _handle_port_in_use(port: int, e: OSError, fail_fast: bool) -> bool:
+    """Handle port already in use error."""
+    global _SERVER_STARTED
+    logger.warning(
+        "Metrics port already in use",
+        extra={
+            "port": port,
+            "errno": e.errno,
+            "action": "metrics_disabled" if not fail_fast else "failing",
+        },
+    )
+    if fail_fast:
+        raise MetricsServerError(
+            port=port,
+            reason="port_in_use",
+            original_error=e,
+        ) from e
+    _SERVER_STARTED = True
+    return False
+
+
+def _handle_os_error(port: int, e: OSError, retry_count: int, fail_fast: bool) -> bool:
+    """Handle transient OS error after all retries exhausted."""
+    logger.error(
+        "Failed to start metrics server",
+        extra={"port": port, "errno": e.errno, "attempts": retry_count},
+    )
+    if fail_fast:
+        raise MetricsServerError(
+            port=port, reason="os_error", original_error=e
+        ) from e
+    return False
+
+
+def _handle_unexpected_error(port: int, e: Exception, fail_fast: bool) -> bool:
+    """Handle unexpected errors during server startup."""
+    logger.error(
+        "Unexpected error starting metrics server",
+        extra={"port": port, "error_type": type(e).__name__},
+        exc_info=True,
+    )
+    if fail_fast:
+        raise MetricsServerError(
+            port=port, reason="unexpected", original_error=e
+        ) from e
+    return False
+
+
 def start_metrics_server(
     port: int = 8000,
     *,
@@ -76,70 +124,20 @@ def start_metrics_server(
                 _SERVER_STARTED = True
                 logger.info(
                     "Prometheus metrics server started",
-                    extra={
-                        "port": port,
-                        "attempt": attempt + 1,
-                    },
+                    extra={"port": port, "attempt": attempt + 1},
                 )
                 return True
             except OSError as e:
                 if e.errno == errno.EADDRINUSE:
-                    # Port conflict — no retry will help
-                    logger.warning(
-                        "Metrics port already in use",
-                        extra={
-                            "port": port,
-                            "errno": e.errno,
-                            "action": "metrics_disabled" if not fail_fast else "failing",
-                        },
-                    )
-                    if fail_fast:
-                        raise MetricsServerError(
-                            port=port,
-                            reason="port_in_use",
-                            original_error=e,
-                        ) from e
-                    # Mark as "attempted" to prevent retries, but don't pretend success
-                    _SERVER_STARTED = True
-                    return False
-                else:
-                    # Transient error — retry with backoff
-                    if attempt < retry_count - 1:
-                        time.sleep(retry_delay * (2**attempt))
-                        continue
-                    logger.error(
-                        "Failed to start metrics server",
-                        extra={
-                            "port": port,
-                            "errno": e.errno,
-                            "attempts": retry_count,
-                        },
-                    )
-                    if fail_fast:
-                        raise MetricsServerError(
-                            port=port,
-                            reason="os_error",
-                            original_error=e,
-                        ) from e
-                    return False
+                    return _handle_port_in_use(port, e, fail_fast)
+                if attempt < retry_count - 1:
+                    time.sleep(retry_delay * (2**attempt))
+                    continue
+                return _handle_os_error(port, e, retry_count, fail_fast)
             except Exception as e:
-                logger.error(
-                    "Unexpected error starting metrics server",
-                    extra={
-                        "port": port,
-                        "error_type": type(e).__name__,
-                    },
-                    exc_info=True,
-                )
-                if fail_fast:
-                    raise MetricsServerError(
-                        port=port,
-                        reason="unexpected",
-                        original_error=e,
-                    ) from e
-                return False
+                return _handle_unexpected_error(port, e, fail_fast)
 
-        return False  # All retries exhausted
+        return False
 
 
 def reset_server_state() -> None:

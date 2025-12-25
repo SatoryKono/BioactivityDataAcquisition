@@ -186,7 +186,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 f"{self.base_url}/uniprotkb/{query}.json"
             )
             if response.status_code == 200:
-                return response.json().get("features", [])
+                features: list[dict[str, Any]] = response.json().get("features", [])
+                return features
             return []
         except Exception:
             self._handle_fetch_error("feature", query)

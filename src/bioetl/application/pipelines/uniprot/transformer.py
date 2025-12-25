@@ -58,14 +58,15 @@ class UniProtProteinTransformer(BaseTransformer):
 
     def _extract_protein_name(self, record: BronzeRecord) -> str | None:
         """Extract protein name using nested path extraction."""
-        return self._extract_nested(
+        result = self._extract_nested(
             record,
             "proteinDescription.recommendedName.fullName.value",
         )
+        return str(result) if result is not None else None
 
     def _extract_gene_names(self, record: BronzeRecord) -> list[str]:
         """Extract gene names from genes list."""
-        names = []
+        names: list[str] = []
         genes = record.get("genes")
         if not genes or not isinstance(genes, list):
             return names
