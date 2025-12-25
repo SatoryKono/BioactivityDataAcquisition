@@ -196,11 +196,17 @@ class Protein(BaseEntity):
 
     def __post_init__(self) -> None:
         super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
         if not self.accession:
             raise ValueError("Protein accession is required")
         if not self.entry_name:
             raise ValueError("Protein entry_name is required")
+        self._validate_sequence_length()
 
+    def _validate_sequence_length(self) -> None:
+        """Validate sequence_length is positive if present."""
         if self.sequence_length is not None and self.sequence_length <= 0:
             raise ValueError(
                 f"Sequence length must be positive, got {self.sequence_length}"
