@@ -24,14 +24,14 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     standard_units: Series[str] = pa.Field(nullable=True)
     pchembl_value: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
 
-    # Metadata
-    _run_id: Series[str] = pa.Field(nullable=False)
-    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class PubChemCompoundGoldSchema(pa.DataFrameModel):
@@ -99,10 +99,14 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
 
+    # Pipeline metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns (authors, keywords, mesh_terms, etc.)
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009) (authors, keywords, mesh_terms, etc.)
 
 
 class ChEMBLAssayGoldSchema(pa.DataFrameModel):
@@ -127,14 +131,14 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     # Quality indicators
     confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9, coerce=True)
 
-    # Metadata
-    _run_id: Series[str] = pa.Field(nullable=False)
-    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class ChEMBLTargetGoldSchema(pa.DataFrameModel):
@@ -154,14 +158,14 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     # Note: protein_classifications not available in /target endpoint
     # Use ChEMBLTargetComponentGoldSchema for protein classification data
 
-    # Metadata
-    _run_id: Series[str] = pa.Field(nullable=False)
-    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
@@ -183,14 +187,14 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     # Flattened fields (extracted from protein_classifications)
     protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
-    # Metadata
-    _run_id: Series[str] = pa.Field(nullable=False)
-    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
@@ -211,14 +215,14 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     pubmed_id: Series[float] = pa.Field(nullable=True, coerce=True)
     doi: Series[str] = pa.Field(nullable=True)
 
-    # Metadata
-    _run_id: Series[str] = pa.Field(nullable=False)
-    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
@@ -274,11 +278,11 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     structure_standard_inchi: Series[str] = pa.Field(nullable=True)
     structure_standard_inchi_key: Series[str] = pa.Field(nullable=True)
 
-    # Metadata
-    _run_id: Series[str] = pa.Field(nullable=False)
-    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow transition period
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)

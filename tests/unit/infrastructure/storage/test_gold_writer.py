@@ -249,7 +249,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
-        self, mock_delta_table, gold_writer, strict_schema
+        self, mock_delta_table, gold_writer
     ):
         """Test SCD2 write with list of business keys."""
         mock_table_instance = MagicMock()
@@ -267,10 +267,20 @@ class TestGoldWriterSCD2:
             {"provider": "chembl", "entity_id": "CHEMBL123", "value": 5.5},
         ]
 
+        # Create schema that matches records
+        multi_key_schema = DataFrameSchema(
+            {
+                "provider": Column(str, nullable=False),
+                "entity_id": Column(str, nullable=False),
+                "value": Column(float, nullable=False),
+            },
+            strict=True,
+        )
+
         await gold_writer.write_gold(
             table_name="test.table",
             records=records,
-            schema=strict_schema,
+            schema=multi_key_schema,
             mode="scd2",
             scd_config=scd_config,
         )

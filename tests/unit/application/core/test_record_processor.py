@@ -159,6 +159,7 @@ def record_processor(
         provider="test_provider",
         entity_type="test_entity",
         silver_schema=MagicMock(),
+        gold_schema=MagicMock(),
         table_config=TableConfig(),
     )
     return RecordProcessor(
@@ -258,6 +259,7 @@ class TestRecordProcessorProcessBatch:
             provider="test",
             entity_type="test",
             silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
         )
 
         gold_validator = MagicMock()
@@ -302,6 +304,7 @@ class TestRecordProcessorProcessBatch:
             provider="test",
             entity_type="test",
             silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
         )
 
         gold_validator = MagicMock()
@@ -364,6 +367,7 @@ class TestRecordProcessorProcessBatch:
             provider="test",
             entity_type="test",
             silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
             dq_config=config.dq,
         )
 
@@ -418,6 +422,7 @@ class TestRecordProcessorProcessBatch:
             provider="test",
             entity_type="test",
             silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
             dq_config=config.dq,
         )
 

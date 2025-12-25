@@ -120,7 +120,13 @@ class GoldWriter:
         if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
             raise ValueError("scd_config required for SCD Type 2 mode")
 
-        if not schema.strict:
+        # Check strict attribute - supports both DataFrameSchema and DataFrameModel
+        # DataFrameSchema: schema.strict directly
+        # DataFrameModel: schema.Config.strict
+        is_strict = getattr(schema, "strict", False) or getattr(
+            getattr(schema, "Config", None), "strict", False
+        )
+        if not is_strict:
             raise ValueError("Gold layer requires strict=True schema validation")
         import polars as pl
 

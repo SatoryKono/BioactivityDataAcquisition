@@ -229,12 +229,18 @@ class TestTransformForGold:
     def test_gold_exclude_fields_constant(self, mock_pipeline):
         """Test that GOLD_EXCLUDE_FIELDS contains expected fields."""
         expected_fields = {
+            # Molecule JSON fields (Silver forensic only)
             "molecule_hierarchy",
             "molecule_properties",
             "molecule_structures",
             "molecule_synonyms",
             "cross_references",
             "atc_classifications",
+            # Internal metadata fields (Silver only)
+            "entity_id",
+            "content_hash",
+            "_run_type",
+            "_source_batch_id",
         }
         assert mock_pipeline.GOLD_EXCLUDE_FIELDS == expected_fields
 

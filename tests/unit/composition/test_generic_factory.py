@@ -147,6 +147,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
+            gold_schema=MagicMock(),
         )
 
         assert factory.pipeline_name == "test_pipeline"
@@ -163,6 +164,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            gold_schema=MagicMock(),
             data_source_creator=custom_creator,
         )
 
@@ -180,6 +182,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            gold_schema=MagicMock(),
             data_source_creator=custom_creator,
         )
 
@@ -214,6 +217,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            gold_schema=MagicMock(),
             data_source_creator=custom_creator,
         )
 
@@ -236,6 +240,7 @@ class TestCreatePipelineFactory:
             pipeline_class=mock_pipeline_class,
             provider="chembl",
             silver_schema=mock_schema,
+            gold_schema=MagicMock(),
         )
 
         assert isinstance(factory, GenericPipelineFactory)
@@ -258,6 +263,7 @@ class TestPipelineRegistryIntegration:
             pipeline_class=mock_pipeline_class,
             provider="chembl",
             silver_schema=mock_schema,
+            gold_schema=MagicMock(),
             data_source_creator=MagicMock(),
         )
 
