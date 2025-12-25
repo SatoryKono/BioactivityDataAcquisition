@@ -63,6 +63,68 @@ class TestRetryConfig:
         # With 10% jitter, delays should vary between 9 and 11
         assert not all(d == delays[0] for d in delays)  # Some variation expected
 
+    def test_deterministic_jitter_same_input_same_output(self):
+        """Test deterministic mode produces same delay for same inputs."""
+        config = RetryConfig(
+            base_delay=10.0,
+            jitter=0.1,
+            deterministic=True,
+            jitter_seed=42,
+        )
+        url = "https://api.example.com/data"
+
+        # Same inputs should produce identical delays
+        delay1 = config.calculate_delay(attempt=0, url=url)
+        delay2 = config.calculate_delay(attempt=0, url=url)
+        delay3 = config.calculate_delay(attempt=0, url=url)
+
+        assert delay1 == delay2 == delay3
+
+        # Different attempt numbers should also be deterministic
+        delay_a1 = config.calculate_delay(attempt=1, url=url)
+        delay_a1_again = config.calculate_delay(attempt=1, url=url)
+        assert delay_a1 == delay_a1_again
+
+    def test_deterministic_jitter_different_urls_different_output(self):
+        """Test deterministic mode produces different delays for different URLs."""
+        config = RetryConfig(
+            base_delay=10.0,
+            jitter=0.1,
+            deterministic=True,
+            jitter_seed=42,
+        )
+
+        delay1 = config.calculate_delay(attempt=0, url="https://api.example.com/data1")
+        delay2 = config.calculate_delay(attempt=0, url="https://api.example.com/data2")
+
+        # Different URLs should produce different jitter values
+        assert delay1 != delay2
+
+        # Both should still be within jitter range (9.0 to 11.0)
+        assert 9.0 <= delay1 <= 11.0
+        assert 9.0 <= delay2 <= 11.0
+
+    def test_non_deterministic_mode_uses_random(self):
+        """Test non-deterministic mode produces varying delays."""
+        config = RetryConfig(
+            base_delay=10.0,
+            jitter=0.1,
+            deterministic=False,  # Explicit non-deterministic
+        )
+        url = "https://api.example.com/data"
+
+        # Collect multiple delay values
+        delays = [config.calculate_delay(attempt=0, url=url) for _ in range(20)]
+
+        # With random jitter, not all delays should be identical
+        # (extremely unlikely for 20 random values to be the same)
+        unique_delays = set(delays)
+        assert len(unique_delays) > 1, "Random jitter should produce varying delays"
+
+        # All delays should still be within jitter range
+        for delay in delays:
+            assert 9.0 <= delay <= 11.0
+
 
 @pytest.mark.unit
 class TestIsRetryableStatus:
