@@ -179,26 +179,36 @@ class ChemblAdapter(BaseHttpAdapter):
             return [], False
 
     async def _page_iterator(
-        self, entity_type: str
+        self, entity_type: str, limit: int | None = None
     ) -> AsyncIterator[list[dict[str, Any]]]:
         """Yield pages of records."""
         url = self._get_resource_url(entity_type)
         offset = 0
         while True:
             params = self._build_params(offset)
+            # Optimize limit: if we have a global limit and it's smaller than effective batch size
+            if limit is not None:
+                remaining = limit - offset
+                if remaining > 0:
+                    params["limit"] = min(params["limit"], remaining)
+                elif remaining <= 0:
+                    break
+
             records, has_next = await self._fetch_page(url, params, entity_type)
             if not records:
                 break
             yield records
             if not has_next:
                 break
-            offset += self.batch_size
+            # Fix: increment by actual records fetched to handle dynamic limits correctly
+            offset += len(records)
 
     async def _fetch_with_filter(
         self,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,
+        limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records filtered by ID batch."""
         url = self._get_resource_url(entity_type)
@@ -217,7 +227,11 @@ class ChemblAdapter(BaseHttpAdapter):
 
             if not has_next:
                 break
-            offset += self.batch_size
+            # Fix: increment by actual records fetched
+            offset += len(records)
+
+            if limit and offset >= limit:
+                break
 
     def _handle_error(self, e: Exception, context: str = "fetch") -> None:
         """Handle fetch errors with classification and metrics.
@@ -272,12 +286,30 @@ class ChemblAdapter(BaseHttpAdapter):
         filter_ids: list[str],
         filter_field: str,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Perform filtered fetch using ID batches."""
+        """Perform filtered fetch using ID batches with client-side deduplication."""
         total_fetched = 0
+        seen_ids: set[str] = set()
+        
+        # Primary key field name for deduplication
+        pk_field = ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
+        if entity_type == "molecule" or entity_type == "compound":
+            pk_field = "molecule_chembl_id"
+        elif entity_type == "document":
+            pk_field = "document_chembl_id"
+        elif entity_type == "target":
+            pk_field = "target_chembl_id"
+
         for id_batch in self._batch_ids(filter_ids, batch_size=100):
             async for record in self._fetch_with_filter(
-                entity_type, id_batch, filter_field
+                entity_type, id_batch, filter_field, limit
             ):
+                # Client-side deduplication (essential for joined filters)
+                record_id = str(record.get(pk_field, ""))
+                if record_id and record_id in seen_ids:
+                    continue
+                if record_id:
+                    seen_ids.add(record_id)
+
                 yield record
                 total_fetched += 1
                 if limit and total_fetched >= limit:
@@ -290,7 +322,7 @@ class ChemblAdapter(BaseHttpAdapter):
     ) -> AsyncIterator[dict[str, Any]]:
         """Perform standard paginated fetch."""
         total_fetched = 0
-        async for records in self._page_iterator(entity_type):
+        async for records in self._page_iterator(entity_type, limit):
             for record in records:
                 yield record
                 total_fetched += 1
