@@ -156,6 +156,32 @@ def mock_logger():
     return logger
 
 
+@pytest.fixture
+def mock_lifecycle_service_with_recorder(call_recorder, mock_services_with_recorder):
+    """Create lifecycle service that records calls and delegates to storage."""
+    from bioetl.application.services.medallion_lifecycle import (
+        ClearResult,
+        MedallionLifecycleService,
+    )
+
+    service = MagicMock(spec=MedallionLifecycleService)
+
+    async def clear_with_recording(*args, **kwargs):
+        # Delegate to storage methods which have their own recording
+        await mock_services_with_recorder.storage.clear_silver(
+            kwargs.get("silver_table", "test.silver"),
+            dry_run=kwargs.get("dry_run", False),
+        )
+        await mock_services_with_recorder.storage.clear_gold(
+            kwargs.get("gold_table", "test.gold"),
+            dry_run=kwargs.get("dry_run", False),
+        )
+        return ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
+
+    service.clear = AsyncMock(side_effect=clear_with_recording)
+    return service
+
+
 @pytest.mark.integration
 class TestPipelineRunnerLifecycle:
     """Tests for PipelineRunner lifecycle invariants."""
@@ -167,6 +193,7 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
         mock_logger,
     ):
         """Verify call order for REBUILD run type.
@@ -219,6 +246,7 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
             )
 
             await runner.run()
@@ -243,6 +271,7 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
         mock_logger,
     ):
         """Verify INCREMENTAL run does NOT clear storage.
@@ -279,6 +308,7 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
             )
 
             await runner.run()
@@ -296,6 +326,7 @@ class TestPipelineRunnerLifecycle:
         call_recorder,
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
+        mock_lifecycle_service_with_recorder,
         mock_logger,
     ):
         """Verify lock is released even when executor raises.
@@ -345,6 +376,7 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
             )
 
             with pytest.raises(RuntimeError, match="Test error"):
@@ -366,6 +398,7 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
         mock_logger,
     ):
         """Verify BACKFILL run clears storage (same as REBUILD)."""
@@ -398,6 +431,7 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
             )
 
             await runner.run()
