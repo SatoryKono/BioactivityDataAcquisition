@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.3 (Determinism & Reproducibility), 2025-12-24* 
+*Версия: 5.4 (Architecture Documentation Update), 2025-12-25* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -56,10 +56,36 @@
 ```python 
 class DataSourcePort(Protocol): 
     def fetch(self, query: Query) -> Iterator[RawRecord]: ... 
-    def health_check(self) -> bool: ... 
-``` 
- 
-## 2. Поток Данных и Стратегия Medallion 
+    async def health_check(self) -> HealthStatus: ... 
+```
+
+### 1.1.2. Health Check Protocol
+Все адаптеры **MUST** реализовывать асинхронный метод `health_check()`:
+
+```python
+from bioetl.domain.types import HealthStatus
+
+class MyAdapter:
+    async def health_check(self) -> HealthStatus:
+        """Проверка доступности внешнего сервиса.
+
+        Returns:
+            HealthStatus.HEALTHY — сервис доступен и отвечает < 5 сек
+            HealthStatus.DEGRADED — медленный отклик (> 5 сек)
+            HealthStatus.UNHEALTHY — ошибка или timeout
+        """
+```
+
+**Контракт:**
+- **MUST** быть `async def` (асинхронный)
+- **MUST** возвращать `HealthStatus` enum, не `bool`
+- **MUST** использовать lightweight probe (не тяжёлые запросы)
+- **SHOULD** кэшировать результат на 30 секунд для избежания лишних вызовов
+- **MUST NOT** выбрасывать исключения — ловить и возвращать `UNHEALTHY`
+
+**Проверка:** Архитектурный тест `tests/architecture/` валидирует сигнатуры.
+
+## 2. Поток Данных и Стратегия Medallion
 Пайплайны реализуются как направленные ациклические графы (**DAG**). 
  
 ### 2.1. Архитектура Medallion 
@@ -104,7 +130,29 @@ Lock key включает тип запуска:
 При наличии активного `incremental` lock попытка взять `:exclusive`:
 - **Default**: Fail immediately (configurable).
 - **Wait mode**: `--wait-for-lock TIMEOUT_SEC`. Timeout по умолчанию: 300 секунд.
- 
+
+#### 2.4.2. Medallion Clear Policy by Run Type
+См. [ADR-012](02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) и [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md).
+
+| Run Type | Clear Silver | Clear Gold | Rationale |
+|----------|--------------|------------|-----------|
+| `REBUILD` | ✅ MUST | ✅ MUST | Полная перестройка данных |
+| `BACKFILL` | ✅ MUST | ✅ MUST | Историческая загрузка заново |
+| `INCREMENTAL` | ❌ MUST NOT | ❌ MUST NOT | Merge/Upsert, сохранение данных |
+
+**Инвариант Medallion**: Incremental runs **MUST NOT** вызывать `clear_silver()` или `clear_gold()`. Нарушение этого правила приводит к потере данных.
+
+**Реализация:**
+```python
+# В PipelineRunner._clear_exports()
+if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
+    await self.services.storage.clear_silver(self.config.silver_table)
+    if self.config.gold_table:
+        await self.services.storage.clear_gold(self.config.gold_table)
+```
+
+**Проверка:** Интеграционный тест `tests/integration/test_runner_lifecycle.py::test_incremental_skips_clear`.
+
 ### 2.5. Стратегия Партиционирования 
 | Уровень | Стратегия партиционирования | Пример | 
 |---------|----------------------------|--------| 
@@ -373,6 +421,34 @@ await bronze_writer.write_bronze(..., ingestion_ts=context.started_at)
 await quarantine.write(..., ingestion_ts=context.started_at)
 ```
 
+### 4.4. Python Standards
+
+#### 4.4.1. Future Annotations (PEP 563)
+Все Python-файлы **MUST** начинаться с:
+
+```python
+from __future__ import annotations
+```
+
+**Причины:**
+- Отложенная evaluation типов (производительность)
+- Поддержка forward references без кавычек
+- Совместимость с Python 3.10+ стилем типизации
+
+**Проверка:** `ruff check --select FA` (Future Annotations rules).
+
+**Расположение в файле:**
+1. Shebang (если есть): `#!/usr/bin/env python`
+2. Encoding declaration (если есть): `# -*- coding: utf-8 -*-`
+3. Module docstring
+4. `from __future__ import annotations`  ← сразу после docstring
+5. Другие импорты
+
+#### 4.4.2. Type Hints
+- **MUST** использовать новый стиль типов: `list[str]` вместо `List[str]`
+- **MUST** использовать `X | None` вместо `Optional[X]`
+- **SHOULD** использовать `X | Y` вместо `Union[X, Y]`
+
 ## 5. Операции (Лимиты, Секреты, Shutdown) 
  
 ### 5.1. Ограничение скорости (Rate Limiting) 
@@ -402,8 +478,39 @@ await quarantine.write(..., ingestion_ts=context.started_at)
    - Логирует: `Resuming from checkpoint: {id}`. 
 3. Если найден без флага: 
    - Warning: "Stale checkpoint detected. Use --resume or --ignore-checkpoint." 
-4. После успешного завершения: удалить файл чекпоинта из S3. 
- 
+4. После успешного завершения: удалить файл чекпоинта из S3.
+
+### 5.3.2. Async Resource Cleanup
+См. [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md) и [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md).
+
+**Контракт `aclose()`:**
+Все адаптеры и сервисы **MUST** реализовывать асинхронный метод `aclose()` для освобождения ресурсов:
+
+```python
+class MyAdapter:
+    async def aclose(self) -> None:
+        """Освобождение ресурсов.
+
+        Идемпотентный — безопасен для повторных вызовов.
+        """
+        if self._client:
+            await self._client.aclose()
+            self._client = None
+```
+
+**Требования:**
+- **MUST** быть `async def` (асинхронный)
+- **MUST** быть идемпотентным (безопасен для повторных вызовов)
+- **MUST NOT** выбрасывать исключения
+- **SHOULD** обнулять ссылки после закрытия (`self._client = None`)
+
+**PipelineServices Lifecycle:**
+```python
+async with services:  # __aenter__ инициализирует ресурсы
+    await runner.run()
+# __aexit__ вызывает aclose() для всех компонентов
+```
+
 ### 5.4. Политика Чувствительных Данных (Sensitive Data) 
 - **Classification**: Public / Internal / Restricted. 
 - **IAM**: Принцип Least Privilege. Разделение ролей `writer` (пайплайн) и `reader` (аналитик). 
@@ -636,9 +743,14 @@ fields:
 | [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy | Accepted | 2025-12-22 |
 | [ADR-009](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin Design | Accepted | 2025-12-22 |
 | [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment | Accepted | 2025-12-23 |
+| [ADR-011](02-architecture/decisions/ADR-011-remove-watermark-mechanism.md) | Remove Watermark Mechanism | Accepted | 2025-12-23 |
+| [ADR-012](02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage Clear Contract and Run ID | Accepted | 2025-12-23 |
+| [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md) | Async Storage Cleanup | Accepted | 2025-12-24 |
 | [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) | Deterministic Writes and Retries | Accepted | 2025-12-24 |
+| [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Pipeline Services Lifecycle | Accepted | 2025-12-24 |
 
 ## История Изменений (Changelog)
+- **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015).
 - **5.3** (2025-12-24): Determinism and Reproducibility (ADR-014). Добавлен §4.3 с правилами детерминизма. Архитектурные тесты для random и datetime.now().
 - **5.2** (2025-12-23): Local-Only Deployment (ADR-010). Обновлены §3.3 и §8.2 для MemoryLock. ADR-003 superseded.
 - **5.1** (2025-12-22): ADR additions (007-009), ADR index appendix.
