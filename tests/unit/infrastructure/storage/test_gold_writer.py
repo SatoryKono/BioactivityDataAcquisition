@@ -77,12 +77,13 @@ class TestGoldWriterInit:
 class TestGoldWriterValidation:
     """Tests for GoldWriter validation."""
 
-    async def test_write_gold_empty_records_raises(self, gold_writer):
+    async def test_write_gold_empty_records_raises(self, gold_writer, strict_schema):
         """Test write_gold raises ValueError for empty records."""
         with pytest.raises(ValueError, match="No records to write"):
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=[],
+                schema=strict_schema,
                 mode="overwrite",
             )
 
@@ -98,23 +99,25 @@ class TestGoldWriterValidation:
                 mode="overwrite",
             )
 
-    async def test_write_gold_invalid_mode_raises(self, gold_writer, valid_records):
+    async def test_write_gold_invalid_mode_raises(self, gold_writer, valid_records, strict_schema):
         """Test write_gold raises ValueError for invalid mode."""
         with pytest.raises(ValueError, match="Invalid Gold write mode"):
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
+                schema=strict_schema,
                 mode="invalid",
             )
 
     async def test_write_gold_scd2_without_config_raises(
-        self, gold_writer, valid_records
+        self, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold raises ValueError for SCD2 mode without config."""
         with pytest.raises(ValueError, match="scd_config required"):
             await gold_writer.write_gold(
                 table_name="test.table",
                 records=valid_records,
+                schema=strict_schema,
                 mode="scd2",
             )
 
@@ -125,12 +128,13 @@ class TestGoldWriterWriteSimple:
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_overwrite_mode(
-        self, mock_write_deltalake, gold_writer, valid_records
+        self, mock_write_deltalake, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold with overwrite mode."""
         await gold_writer.write_gold(
             table_name="test.table",
             records=valid_records,
+            schema=strict_schema,
             mode="overwrite",
         )
 
@@ -141,12 +145,13 @@ class TestGoldWriterWriteSimple:
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_append_mode(
-        self, mock_write_deltalake, gold_writer, valid_records
+        self, mock_write_deltalake, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold with append mode."""
         await gold_writer.write_gold(
             table_name="test.table",
             records=valid_records,
+            schema=strict_schema,
             mode="append",
         )
 
@@ -156,12 +161,13 @@ class TestGoldWriterWriteSimple:
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_with_partitions(
-        self, mock_write_deltalake, gold_writer, valid_records
+        self, mock_write_deltalake, gold_writer, valid_records, strict_schema
     ):
         """Test write_gold with partition columns."""
         await gold_writer.write_gold(
             table_name="test.table",
             records=valid_records,
+            schema=strict_schema,
             mode="overwrite",
             partition_cols=["year", "month"],
         )
@@ -178,7 +184,7 @@ class TestGoldWriterSCD2:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_scd2_creates_new_table(
-        self, mock_write_deltalake, mock_delta_table, gold_writer, valid_records
+        self, mock_write_deltalake, mock_delta_table, gold_writer, valid_records, strict_schema
     ):
         """Test SCD2 write creates new table when table doesn't exist."""
         mock_delta_table.side_effect = TableNotFoundError("Not found")
@@ -194,6 +200,7 @@ class TestGoldWriterSCD2:
         await gold_writer.write_gold(
             table_name="test.table",
             records=valid_records,
+            schema=strict_schema,
             mode="scd2",
             scd_config=scd_config,
         )
@@ -205,7 +212,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_merge_existing_table(
-        self, mock_delta_table, gold_writer, valid_records
+        self, mock_delta_table, gold_writer, valid_records, strict_schema
     ):
         """Test SCD2 write merges into existing table."""
         mock_table_instance = MagicMock()
@@ -222,6 +229,7 @@ class TestGoldWriterSCD2:
         await gold_writer.write_gold(
             table_name="test.table",
             records=valid_records,
+            schema=strict_schema,
             mode="scd2",
             scd_config=scd_config,
         )
@@ -232,7 +240,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
-        self, mock_delta_table, gold_writer, valid_records
+        self, mock_delta_table, gold_writer, strict_schema
     ):
         """Test SCD2 write with list of business keys."""
         mock_table_instance = MagicMock()
@@ -253,6 +261,7 @@ class TestGoldWriterSCD2:
         await gold_writer.write_gold(
             table_name="test.table",
             records=records,
+            schema=strict_schema,
             mode="scd2",
             scd_config=scd_config,
         )

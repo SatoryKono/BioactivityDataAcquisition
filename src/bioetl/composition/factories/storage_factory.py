@@ -93,6 +93,7 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[dict[str, Any]],
+        schema: Any,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
     ) -> None:
@@ -100,6 +101,7 @@ class StorageAdapter:
         await self.gold.write_gold(
             table_name=table_name,
             records=records,
+            schema=schema,
             primary_keys=primary_keys,
             mode=mode,
         )

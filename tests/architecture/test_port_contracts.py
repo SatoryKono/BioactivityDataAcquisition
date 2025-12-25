@@ -260,6 +260,30 @@ class TestStoragePortContract:
         assert "target_path" in params, "archive() MUST have target_path parameter"
         assert "remove_source" in params, "archive() MUST have remove_source parameter"
 
+    def test_storage_port_write_gold_requires_schema(self) -> None:
+        """StoragePort.write_gold() MUST have required schema parameter.
+
+        Gold layer writes MUST include schema for validation.
+        This ensures data quality at the Gold layer boundary.
+        See RULES.md §2.1.1 - Gold Layer specifications.
+        """
+        import inspect
+
+        sig = inspect.signature(ports.StoragePort.write_gold)
+        params = sig.parameters
+
+        assert "schema" in params, (
+            "StoragePort.write_gold() MUST have schema parameter. "
+            "Gold layer requires strict schema validation."
+        )
+
+        # Schema parameter MUST NOT have a default value (i.e., it's required)
+        schema_param = params["schema"]
+        assert schema_param.default is inspect.Parameter.empty, (
+            "StoragePort.write_gold() schema parameter MUST be required (no default). "
+            "All Gold layer writes MUST provide a schema for validation."
+        )
+
 
 # ============================================================================
 # Metrics Port Contract Tests
