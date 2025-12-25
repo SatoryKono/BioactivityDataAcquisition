@@ -112,4 +112,63 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP62988&size=1&format=json
+  response:
+    body:
+      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P62987","P62979","P0CG48","P0CG47"]}}]}'
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      Access-Control-Allow-Methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      Access-Control-Max-Age:
+      - '1728000'
+      Cache-Control:
+      - public, max-age=43200
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 25 Dec 2025 06:06:56 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      X-API-Deployment-Date:
+      - 11-December-2025
+      X-Total-Results:
+      - '1'
+      X-UniProt-Release:
+      - '2025_04'
+      X-UniProt-Release-Date:
+      - 15-October-2025
+      content-length:
+      - '221'
+      x-cache:
+      - hit cached
+    status:
+      code: 200
+      message: OK
 version: 1
