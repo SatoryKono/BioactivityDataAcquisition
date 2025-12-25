@@ -202,4 +202,4 @@ class ProviderRegistry:
         Warning:
             Только для использования в тестах!
         """
-        cls._providers.clear()
+        cls.clear()
