@@ -144,10 +144,10 @@ async def test_write_silver_append_mode(
 
 
 @pytest.mark.asyncio
-async def test_write_silver_overwrite_mode(
+async def test_write_silver_delete_mode(
     delta_writer, temp_delta_path, sample_records, sample_schema
 ):
-    """Test overwrite mode."""
+    """Test delete mode (replaces all existing data)."""
     await delta_writer.write_silver(
         table_name="test_overwrite",
         records=sample_records,
@@ -171,7 +171,7 @@ async def test_write_silver_overwrite_mode(
         records=new_records,
         primary_keys=["id"],
         schema=sample_schema,
-        mode="overwrite",
+        mode="delete",
     )
 
     dt = DeltaTable(f"{temp_delta_path}/test_overwrite")
@@ -190,7 +190,7 @@ async def test_write_silver_partitioning(
         records=sample_records,
         primary_keys=["id"],
         schema=sample_schema,
-        mode="overwrite",
+        mode="delete",
         partition_cols=["val"],
     )
 
