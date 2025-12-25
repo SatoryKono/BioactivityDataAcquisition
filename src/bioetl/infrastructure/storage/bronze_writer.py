@@ -50,7 +50,7 @@ class BronzeWriter:
     def __init__(
         self,
         base_path: str | Path,
-        logger: "LoggerPort",
+        logger: LoggerPort,
         save_json: bool = False,
         json_path: str | None = None,
     ) -> None:
