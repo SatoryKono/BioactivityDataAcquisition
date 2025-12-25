@@ -364,9 +364,51 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 |--------|------------|--------------|-----------------| 
 | **Оркестрация** | **Prefect** | Simple Runner | <5 DAG-ов — свой Runner (скрипт). Иначе Prefect. | 
 | **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. | 
-| **HTTP Клиент** | **httpx** | requests | Поддержка `async`. **Legacy Wrappers**: Для библиотек без async поддержки (pubchempy, biopython) обязателен запуск в отдельном пуле потоков: `await loop.run_in_executor(thread_pool, fetch_func)`. | 
-| **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". | 
- 
+| **HTTP Клиент** | **httpx** via `UnifiedHTTPClient` | requests | Поддержка `async`. Все адаптеры **MUST** использовать `UnifiedHTTPClient` (см. §4.1.1). **Legacy Wrappers**: Для библиотек без async поддержки (pubchempy) — `BaseSyncAdapter` с `ThreadPoolExecutor`. | 
+| **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |
+
+### 4.1.1. Унифицированный HTTP-клиент (UnifiedHTTPClient)
+
+**Все HTTP-адаптеры используют единую инфраструктуру для HTTP-запросов.**
+
+| Адаптер | Базовый класс | HTTP-клиент | Статус |
+|---------|---------------|-------------|--------|
+| `ChemblAdapter` | `BaseHttpAdapter` | `UnifiedHTTPClient` | ✅ Унифицирован |
+| `UniProtAdapter` | `BaseHttpAdapter` | `UnifiedHTTPClient` | ✅ Унифицирован |
+| `PubMedAdapter` | `@dataclass` | `UnifiedHTTPClient` | ✅ Унифицирован |
+| `PubChemAdapter` | `BaseSyncAdapter` | `pubchempy` + ThreadPool | ✅ Legacy-обёртка |
+
+**Компоненты `UnifiedHTTPClient`:**
+- **Rate Limiter** (`TokenBucket`): Ограничение частоты запросов по провайдеру
+- **Circuit Breaker**: Защита от каскадных отказов (см. [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
+- **Retry Logic**: Exponential backoff с configurable jitter
+- **Metrics Integration**: Автоматический сбор метрик через `MetricsPort`
+
+**Расположение:** `src/bioetl/infrastructure/adapters/http/client.py`
+
+**Создание нового адаптера:**
+```python
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+class NewProviderAdapter(BaseHttpAdapter):
+    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort):
+        super().__init__(http_client, logger)
+        self.provider_name = "new_provider"
+```
+
+**Для sync-библиотек** используйте `BaseSyncAdapter`:
+```python
+from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
+
+class LegacyAdapter(BaseSyncAdapter):
+    provider_name = "legacy"
+
+    async def fetch(self, ...):
+        # Sync call wrapped in executor
+        result = await self._run_in_executor(sync_library.fetch, query)
+```
+
 ### 4.2. Политика Тестирования
 **Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`).
 
