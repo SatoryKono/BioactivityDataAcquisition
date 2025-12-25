@@ -173,6 +173,7 @@ class BaseTransformer(ABC):
         Used for storing nested structures in Silver layer as JSON strings.
         - Empty collections ([], {}) are treated as None for semantic consistency
         - Single-element lists are unwrapped: [x] → x
+        - Uses sort_keys=True for deterministic output (RULES.md §2.8.1)
 
         Args:
             value: Value to serialize.
@@ -187,7 +188,7 @@ class BaseTransformer(ABC):
         if isinstance(value, dict):
             if len(value) == 0:
                 return None
-            return json.dumps(value, ensure_ascii=False)
+            return json.dumps(value, sort_keys=True, ensure_ascii=False)
         if isinstance(value, list):
             if len(value) == 0:
                 return None
@@ -195,9 +196,9 @@ class BaseTransformer(ABC):
             if len(value) == 1:
                 item = value[0]
                 if isinstance(item, dict):
-                    return json.dumps(item, ensure_ascii=False)
+                    return json.dumps(item, sort_keys=True, ensure_ascii=False)
                 return str(item)
-            return json.dumps(value, ensure_ascii=False)
+            return json.dumps(value, sort_keys=True, ensure_ascii=False)
         return str(value)
 
     @staticmethod

@@ -70,10 +70,10 @@
     'assay_category': None,
     'assay_cell_type': None,
     'assay_chembl_id': 'CHEMBL1234567',
-    'assay_classifications': '[{"class": "Pharmacology"}]',
+    'assay_classifications': '{"class": "Pharmacology"}',
     'assay_group': None,
     'assay_organism': 'Homo sapiens',
-    'assay_parameters': '[{"param": "IC50"}]',
+    'assay_parameters': '{"param": "IC50"}',
     'assay_pref_name': None,
     'assay_strain': None,
     'assay_subcellular_fraction': None,
@@ -156,8 +156,8 @@
     'inorganic_flag': None,
     'max_phase': 4,
     'molecule_chembl_id': 'CHEMBL25',
-    'molecule_hierarchy': '{"parent_chembl_id": "CHEMBL25", "active_chembl_id": "CHEMBL25", "molecule_chembl_id": "CHEMBL25"}',
-    'molecule_properties': '{"alogp": 1.19, "mw_freebase": 180.16, "hba": 4, "hbd": 1, "psa": 63.6, "ro3_pass": "Y"}',
+    'molecule_hierarchy': '{"active_chembl_id": "CHEMBL25", "molecule_chembl_id": "CHEMBL25", "parent_chembl_id": "CHEMBL25"}',
+    'molecule_properties': '{"alogp": 1.19, "hba": 4, "hbd": 1, "mw_freebase": 180.16, "psa": 63.6, "ro3_pass": "Y"}',
     'molecule_species': None,
     'molecule_structures': '{"canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O", "standard_inchi": "InChI=1S/C9H8O4/c...", "standard_inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"}',
     'molecule_synonyms': None,
@@ -196,6 +196,10 @@
 # ---
 # name: TestPubChemCompoundTransformerSnapshot.test_transform_snapshot
   dict({
+    '_ingestion_ts': '<ingestion_ts>',
+    '_run_id': '<run_id>',
+    '_run_type': 'incremental',
+    '_source_batch_id': 'None',
     'canonical_smiles': 'CC(=O)OC1=CC=CC=C1C(=O)O',
     'cid': '2244',
     'content_hash': '<content_hash>',
@@ -224,7 +228,7 @@
     'protein_classification_ids': None,
     'protein_classifications': None,
     'target_component_synonyms': '[{"synonym": "Gene1"}, {"synonym": "Protein1"}]',
-    'target_component_xrefs': '[{"xref_id": "P12345", "xref_src_db": "UniProt"}]',
+    'target_component_xrefs': '{"xref_id": "P12345", "xref_src_db": "UniProt"}',
     'tax_id': 9606,
   })
 # ---
@@ -252,7 +256,7 @@
       'PROTEIN',
     ]),
     'content_hash': '<content_hash>',
-    'cross_references': '[{"xref_id": "P35354", "xref_src_db": "UniProt"}]',
+    'cross_references': '{"xref_id": "P35354", "xref_src_db": "UniProt"}',
     'dap_id': None,
     'description': 'Prostaglandin G/H synthase 2',
     'downgraded': None,
@@ -263,7 +267,7 @@
     'species_group_flag': None,
     'target_chembl_id': 'CHEMBL1862',
     'target_component_synonyms': None,
-    'target_components': '[{"accession": "P35354", "component_id": 123, "component_type": "PROTEIN", "organism": "Homo sapiens", "tax_id": 9606, "target_component_xrefs": [{"xref_id": "P35354", "xref_src_db": "UniProt"}]}]',
+    'target_components': '{"accession": "P35354", "component_id": 123, "component_type": "PROTEIN", "organism": "Homo sapiens", "target_component_xrefs": [{"xref_id": "P35354", "xref_src_db": "UniProt"}], "tax_id": 9606}',
     'target_constraints': None,
     'target_type': 'SINGLE PROTEIN',
     'tax_id': 9606,
@@ -271,6 +275,10 @@
 # ---
 # name: TestUniProtProteinTransformerSnapshot.test_transform_snapshot
   dict({
+    '_ingestion_ts': '<ingestion_ts>',
+    '_run_id': '<run_id>',
+    '_run_type': 'incremental',
+    '_source_batch_id': 'None',
     'accession': 'P12345',
     'content_hash': '<content_hash>',
     'entity_id': '<entity_id>',
