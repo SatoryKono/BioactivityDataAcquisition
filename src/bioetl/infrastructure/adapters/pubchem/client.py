@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, Any
 import pubchempy as pcp
 
 from bioetl.composition.providers import register_provider
+from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -282,10 +284,30 @@ class PubChemAdapter(BaseSyncAdapter):
 
             if compound:
                 return assess_health_from_circuit_breaker(self.circuit_breaker)
-            else:
-                return HealthStatus.DEGRADED
 
-        except Exception:
+            self.logger.warning(
+                "health_check_degraded",
+                provider=self.provider_name,
+                reason="empty_response",
+            )
+            return HealthStatus.DEGRADED
+
+        except CircuitBreakerOpenError:
+            self.logger.warning(
+                "health_check_circuit_open",
+                provider=self.provider_name,
+            )
+            return HealthStatus.UNHEALTHY
+
+        except Exception as e:
+            error_classifier = ErrorClassifier()
+            error_type = error_classifier.classify(e)
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error_type=error_type.value,
+                error=str(e),
+            )
             return HealthStatus.UNHEALTHY
 
     def __repr__(self) -> str:

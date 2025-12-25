@@ -119,11 +119,12 @@ def create_local_storage_context(
         ),
         silver_writer=DeltaWriter(
             base_path=str(storage_paths["silver"]),
-            csv_exporter=None,
             logger=logger,
+            csv_exporter=None,
         ),
         gold_writer=GoldWriter(
             base_path=str(storage_paths["gold"]),
+            logger=logger,
             csv_exporter=None,
         ),
     )

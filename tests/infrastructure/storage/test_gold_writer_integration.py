@@ -10,12 +10,19 @@ import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import DataFrameSchema
 
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @pytest.fixture
-def gold_writer():
-    return GoldWriter(base_path="s3://test-bucket/gold")
+def noop_logger():
+    """Provide a NoOpLogger for tests."""
+    return NoOpLogger()
+
+
+@pytest.fixture
+def gold_writer(noop_logger):
+    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
 
 
 @pytest.fixture
@@ -34,10 +41,10 @@ def strict_schema():
     )
 
 
-async def test_write_gold_no_records(gold_writer):
+async def test_write_gold_no_records(gold_writer, strict_schema):
     """Test writing empty records raises ValueError."""
     with pytest.raises(ValueError, match="No records to write"):
-        await gold_writer.write_gold("test_table", [])
+        await gold_writer.write_gold("test_table", [], schema=strict_schema)
 
 
 async def test_write_gold_schema_not_strict(gold_writer, valid_records):
@@ -58,18 +65,18 @@ async def test_write_gold_schema_validation_failure(gold_writer, strict_schema):
         )
 
 
-async def test_write_gold_invalid_mode(gold_writer, valid_records):
+async def test_write_gold_invalid_mode(gold_writer, valid_records, strict_schema):
     """Test invalid write mode raises ValueError."""
     with pytest.raises(ValueError, match="Invalid Gold write mode"):
-        await gold_writer.write_gold("test_table", valid_records, mode="invalid")
+        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="invalid")
 
 
-async def test_write_simple_overwrite(gold_writer, valid_records):
+async def test_write_simple_overwrite(gold_writer, valid_records, strict_schema):
     """Test simple overwrite mode."""
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
     ) as mock_write:
-        await gold_writer.write_gold("test_table", valid_records, mode="overwrite")
+        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="overwrite")
 
         mock_write.assert_called_once()
         call_kwargs = mock_write.call_args[1]
@@ -85,25 +92,25 @@ async def test_write_simple_overwrite(gold_writer, valid_records):
         assert actual_data.equals(expected_table)
 
 
-async def test_write_simple_append(gold_writer, valid_records):
+async def test_write_simple_append(gold_writer, valid_records, strict_schema):
     """Test simple append mode."""
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
     ) as mock_write:
-        await gold_writer.write_gold("test_table", valid_records, mode="append")
+        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="append")
 
         mock_write.assert_called_once()
         call_kwargs = mock_write.call_args[1]
         assert call_kwargs["mode"] == "append"
 
 
-async def test_write_scd2_missing_config(gold_writer, valid_records):
+async def test_write_scd2_missing_config(gold_writer, valid_records, strict_schema):
     """Test SCD2 mode without config raises ValueError."""
     with pytest.raises(ValueError, match="scd_config required"):
-        await gold_writer.write_gold("test_table", valid_records, mode="scd2")
+        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="scd2")
 
 
-async def test_write_scd2_new_table(gold_writer, valid_records):
+async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 write when table does not exist (creates new)."""
     scd_config = {"business_key": "id"}
 
@@ -116,7 +123,7 @@ async def test_write_scd2_new_table(gold_writer, valid_records):
         mock_dt.side_effect = TableNotFoundError("Table not found")
 
         await gold_writer.write_gold(
-            "test_table", valid_records, mode="scd2", scd_config=scd_config
+            "test_table", valid_records, schema=strict_schema, mode="scd2", scd_config=scd_config
         )
 
         # Should call write_deltalake to create table
@@ -137,7 +144,7 @@ async def test_write_scd2_new_table(gold_writer, valid_records):
         assert written_data[0]["valid_to"] is None
 
 
-async def test_write_scd2_existing_table(gold_writer, valid_records):
+async def test_write_scd2_existing_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 merge with existing table."""
     scd_config = {"business_key": "id"}
 
@@ -152,7 +159,7 @@ async def test_write_scd2_existing_table(gold_writer, valid_records):
         return_value=mock_dt_instance,
     ):
         await gold_writer.write_gold(
-            "test_table", valid_records, mode="scd2", scd_config=scd_config
+            "test_table", valid_records, schema=strict_schema, mode="scd2", scd_config=scd_config
         )
 
         # Should call merge

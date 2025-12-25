@@ -22,7 +22,7 @@ from bioetl.composition.factories.data_source_registry import (
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
-from bioetl.infrastructure.validation import NoOpGoldValidator, PanderaGoldValidator
+from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -74,7 +74,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
-        gold_schema: Any | None = None,
+        gold_schema: Any = None,
         data_source_creator: DataSourceCreator | None = None,
     ) -> None:
         """Initialize the factory.
@@ -84,10 +84,18 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pipeline_class: The pipeline class to instantiate
             provider: Provider name for data source creation
             silver_schema: Optional PyArrow schema for Silver layer
-            gold_schema: Optional Pandera schema for Gold layer
+            gold_schema: Pandera schema for Gold layer validation (required)
             data_source_creator: Optional custom creator function. If not provided,
                 uses DataSourceRegistry.get(provider)
+
+        Raises:
+            ValueError: If gold_schema is not provided
         """
+        if gold_schema is None:
+            raise ValueError(
+                f"gold_schema is required for pipeline '{pipeline_name}'. "
+                "All Gold layer writes must have schema validation."
+            )
         self.pipeline_name = pipeline_name
         self.pipeline_class = pipeline_class
         self.provider = provider
@@ -325,11 +333,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         )
 
         # Create Gold validator from schema (DI pattern)
-        gold_validator = (
-            PanderaGoldValidator(self.gold_schema)
-            if self.gold_schema
-            else NoOpGoldValidator()
-        )
+        # gold_schema is always required, so always use PanderaGoldValidator
+        gold_validator = PanderaGoldValidator(self.gold_schema)
 
         return RecordProcessor(
             services=pipeline.services,
@@ -348,7 +353,7 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
-    gold_schema: Any | None = None,
+    gold_schema: Any = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories.
 
@@ -357,7 +362,7 @@ def create_pipeline_factory(
         pipeline_class: Pipeline class to instantiate
         provider: Data source provider name
         silver_schema: Optional Silver layer schema
-        gold_schema: Optional Gold layer schema
+        gold_schema: Pandera schema for Gold layer validation (required)
 
     Returns:
         Configured GenericPipelineFactory
