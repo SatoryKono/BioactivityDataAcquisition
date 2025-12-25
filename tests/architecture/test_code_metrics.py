@@ -175,7 +175,7 @@ class TestFunctionLength:
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    MAX_VIOLATIONS = 40
+    MAX_VIOLATIONS = 30
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
