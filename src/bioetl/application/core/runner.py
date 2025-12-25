@@ -113,7 +113,13 @@ class PipelineRunner:
         return self._services
 
     async def run(self) -> None:
-        """Execute pipeline. Main entry point."""
+        """Execute pipeline. Main entry point.
+
+        Implements graceful shutdown (O3):
+        - Uses try/finally to ensure cleanup runs on all exit paths
+        - Flushes tracer spans before shutdown
+        - Handles tracer close errors without failing the pipeline
+        """
         self._logger.info(
             f"Starting pipeline: {self._config.pipeline_name}",
             extra={"stage": "startup", "run_type": self._runtime.run_type.value},
@@ -129,36 +135,56 @@ class PipelineRunner:
             tracer=self._tracer,
         )
 
-        with observer:
-            # Observer handles ShutdownSignal suppression and status recording
-            async with self._services, self._lock_manager:
-                # Pre-flight health check: validate infrastructure before execution
-                await self._validate_infrastructure()
+        try:
+            with observer:
+                # Observer handles ShutdownSignal suppression and status recording
+                async with self._services, self._lock_manager:
+                    # Pre-flight health check: validate infrastructure before execution
+                    await self._validate_infrastructure()
 
-                # Clear data exports at the start of the run
-                # to avoid appending to stale data from previous runs
-                await self._clear_via_lifecycle()
+                    # Clear data exports at the start of the run
+                    # to avoid appending to stale data from previous runs
+                    await self._clear_via_lifecycle()
 
-                # Load checkpoint metadata (for logging purposes)
-                await self._checkpoint_manager.load_checkpoint()
-                await self._executor.execute(
-                    limit=self._runtime.limit,
-                    query=self._runtime.query,
+                    # Load checkpoint metadata (for logging purposes)
+                    await self._checkpoint_manager.load_checkpoint()
+                    await self._executor.execute(
+                        limit=self._runtime.limit,
+                        query=self._runtime.query,
+                    )
+
+                    # Check data quality after execution
+                    await self._check_data_quality()
+
+                    # Run VACUUM if enabled (Phase 1 refactoring)
+                    await self._run_vacuum_if_enabled()
+
+                    await self._checkpoint_manager.delete_checkpoint()
+
+                # Add extra info to logs if needed, though observer handles success/failure logging
+                self._logger.debug(
+                    "Pipeline execution finished",
+                    extra={"records_fetched": self._executor.records_fetched},
                 )
+        finally:
+            await self._cleanup()
 
-                # Check data quality after execution
-                await self._check_data_quality()
+    async def _cleanup(self) -> None:
+        """Cleanup all resources including observability.
 
-                # Run VACUUM if enabled (Phase 1 refactoring)
-                await self._run_vacuum_if_enabled()
-
-                await self._checkpoint_manager.delete_checkpoint()
-
-            # Add extra info to logs if needed, though observer handles success/failure logging
-            self._logger.debug(
-                "Pipeline execution finished",
-                extra={"records_fetched": self._executor.records_fetched},
-            )
+        Ensures tracer spans are flushed before shutdown (O3).
+        Handles errors gracefully to avoid masking pipeline exceptions.
+        """
+        # Flush tracer spans - explicit cleanup for graceful shutdown
+        if self._tracer is not None:
+            try:
+                self._tracer.close()
+                self._logger.debug("Tracer closed successfully")
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to close tracer",
+                    error=str(e),
+                )
 
     async def _validate_infrastructure(self) -> None:
         """Validate infrastructure health before pipeline execution.
