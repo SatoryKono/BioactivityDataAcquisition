@@ -312,12 +312,13 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`
 - **Lock Max Duration**: **4 часа**. Принудительное снятие по истечении.
 
-#### Спецификация для распределённого развёртывания
-См. [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) (отложено).
-- **Механизм**: Redis `SETNX` + `EXPIRE`
-- **TTL**: 60 секунд
-- **Heartbeat**: Обновление TTL каждые 20 секунд
-- **Fencing Token**: `owner_id` (run_id воркера)
+#### Распределённое развёртывание (Deferred)
+
+> **Status: Deferred** — см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)
+>
+> При необходимости распределённого развёртывания можно реализовать `RedisLockAdapter`
+> на основе спецификации ADR-003. Hexagonal-архитектура позволяет добавить адаптер
+> без изменения domain/application слоёв.
 
 **Invariant** (применимо ко всем вариантам развёртывания):
 - Потеря блокировки = Потеря права на запись.
