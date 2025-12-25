@@ -8,14 +8,14 @@
 - **Покрытие**: `pytest-cov`
 - **Запись HTTP**: `VCR.py`
 - **Property-based**: `Hypothesis`
-- **Mocking**: `unittest.mock` (для инфраструктуры), in-memory fakes (для домена)
+- **Mocking**: In-memory fakes предпочтительны, `unittest.mock.MagicMock` допустим
 
 ## 2. Уровни Тестирования
 
 ### 2.1. Unit Tests (`tests/unit/`)
 Изолированные тесты бизнес-логики и трансформаций.
 - **Domain**: Тестирование сущностей и чистых функций в `src/bioetl/domain/`.
-- **Application**: Тестирование трансформеров и логики пайплайнов с использованием моков портов.
+- **Application**: Тестирование трансформеров и логики пайплайнов. In-memory fakes предпочтительны, MagicMock допустим.
 - **Правило**: Никакого сетевого взаимодействия или реального ввода-вывода.
 
 ### 2.2. Integration Tests (`tests/integration/`)
