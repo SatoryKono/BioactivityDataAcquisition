@@ -147,6 +147,7 @@ class PipelineConfig:
             silver_write_mode=self.write_mode,
             gold_write_mode=self.gold_write_mode,
             partition_cols=self.partition_cols,
+            on_schema_mismatch=self.on_schema_mismatch,
         )
 
 
