@@ -905,8 +905,8 @@ def test_atomic_write_used_in_writers(src_dir: Path) -> None:
     # Writers that should use atomic patterns
     writer_files = ["bronze_writer.py", "gold_writer.py"]
 
-    # Patterns indicating non-atomic writes
-    non_atomic_patterns = [
+    # Patterns indicating non-atomic writes (reserved for future validation)
+    _non_atomic_patterns = [
         r'with\s+open\s*\([^)]+,\s*["\']w',  # with open(path, 'w')
         r'\.write\s*\([^)]+\)\s*$',  # .write() at end of line (might be in context)
     ]

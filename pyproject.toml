@@ -210,7 +210,7 @@ select = [
     "UP", # pyupgrade
     "ARG", # flake8-unused-arguments
     "SIM", # flake8-simplify
-    "TCH", # flake8-type-checking
+    # TCH disabled: types are used at runtime for isinstance checks with Protocols
     "PTH", # flake8-use-pathlib
     "RUF", # ruff-specific
 ]
@@ -225,7 +225,9 @@ known-first-party = ["bioetl", "tests"]
 [tool.ruff.lint.per-file-ignores]
 # Tests may have unused arguments, ignore import order (handled by isort)
 # C901: Architecture tests perform complex static analysis checks
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901"]
+# E402: Allow imports after future imports and docstrings
+# RUF012: Mutable class attributes for parametrize test data are intentional
+"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901", "E402", "RUF012"]
 # Domain __init__.py uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/domain/__init__.py" = ["RUF022"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
@@ -237,7 +239,8 @@ known-first-party = ["bioetl", "tests"]
 # Application core may have unused context args for future use
 "src/bioetl/application/**/*.py" = ["ARG001", "ARG002", "SIM105"]
 # Composition factories may have unused args for interface consistency
-"src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004"]
+# E402: Allow imports after future imports and docstrings
+"src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "E402"]
 # Interfaces layer
 "src/bioetl/interfaces/**/*.py" = ["ARG001", "ARG002"]
 
