@@ -413,7 +413,7 @@ class LegacyAdapter(BaseSyncAdapter):
 ### 4.2. Политика Тестирования
 **Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`).
 
-- **Unit**: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек.
+- **Unit**: Только доменная логика. In-memory fakes предпочтительны, MagicMock допустим.
 - **Integration**:
     - **VCR.py**: Запись ответов API в кассеты (`tests/fixtures/vcr/`).
     - **Санитизация**: Обязательная очистка секретов (`Authorization`, `X-API-Key`) и PII в хуке `before_record`.
