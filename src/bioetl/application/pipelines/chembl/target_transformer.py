@@ -116,7 +116,7 @@ class TargetTransformer(BaseTransformer):
 
         return self._extract_basic_component_fields(components)
 
-    def _empty_component_result(self) -> dict[str, None]:
+    def _empty_component_result(self) -> dict[str, list[Any] | None]:
         """Return empty result dict for missing components."""
         return {
             "component_accessions": None,

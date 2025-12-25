@@ -450,7 +450,7 @@ class LineageTracker:
             return {
                 "total_batches": total_batches,
                 "total_records": int(total_records or 0),
-                "avg_batch_size": float(avg_batch_size or 0.0),
+                "avg_batch_size": float(avg_batch_size or 0.0),  # type: ignore[arg-type]
             }
 
         except Exception as e:

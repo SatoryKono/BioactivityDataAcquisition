@@ -65,7 +65,7 @@ class TargetComponentTransformer(BaseTransformer):
             ),
             # Flattened fields (extracted from protein_classifications)
             "protein_classification_ids": extract_list_field(
-                record.get("protein_classifications"),
+                record.get("protein_classifications"),  # type: ignore[arg-type]
                 "protein_classification_id",
                 safe_int,
             ),

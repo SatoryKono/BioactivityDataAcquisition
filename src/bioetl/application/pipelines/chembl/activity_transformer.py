@@ -115,7 +115,7 @@ class ActivityTransformer(BaseTransformer):
             "standard_text_value": record.get("standard_text_value"),
             "standard_flag": safe_int(record.get("standard_flag")),
             "pchembl_value": safe_float(record.get("pchembl_value")),
-            **self._extract_ligand_efficiency(record.get("ligand_efficiency")),
+            **self._extract_ligand_efficiency(record.get("ligand_efficiency")),  # type: ignore[arg-type]
             "qudt_units": record.get("qudt_units"),
             "uo_units": record.get("uo_units"),
         }
@@ -129,7 +129,7 @@ class ActivityTransformer(BaseTransformer):
             "data_validity_comment": record.get("data_validity_comment"),
             "data_validity_description": record.get("data_validity_description"),
             "potential_duplicate": safe_int(record.get("potential_duplicate")),
-            **self._extract_action_type(record.get("action_type")),
+            **self._extract_action_type(record.get("action_type")),  # type: ignore[arg-type]
             "activity_properties": self.serialize_json(
                 record.get("activity_properties")
             ),

@@ -154,9 +154,9 @@ class MoleculeTransformer(BaseTransformer):
             **self._map_molecule_flags(record),
             **self._map_additional_metadata(record),
             **self._map_complex_fields(record),
-            **_extract_hierarchy(record.get("molecule_hierarchy")),
-            **_extract_properties(record.get("molecule_properties")),
-            **_extract_structures(record.get("molecule_structures")),
+            **_extract_hierarchy(record.get("molecule_hierarchy")),  # type: ignore[arg-type]
+            **_extract_properties(record.get("molecule_properties")),  # type: ignore[arg-type]
+            **_extract_structures(record.get("molecule_structures")),  # type: ignore[arg-type]
         }
 
         content_hash = self.compute_content_hash(business_data, exclude_none=True)

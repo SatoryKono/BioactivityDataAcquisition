@@ -83,7 +83,7 @@ class HealthAggregator:
                     )
                 )
             else:
-                component_results.append(result)
+                component_results.append(result)  # type: ignore[arg-type]
 
         report = HealthReport(results=component_results)
 
