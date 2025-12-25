@@ -42,3 +42,29 @@ source_modules =
     bioetl.composition
 forbidden_modules =
     bioetl.interfaces
+
+# Dependency Injection Constraints (CLAUDE.md §6.3.2)
+# Application layer must not directly instantiate infrastructure classes
+
+[importlinter:contract:no-direct-instantiation-in-application]
+name = Application layer must not directly import concrete infrastructure classes
+type = forbidden
+source_modules =
+    bioetl.application
+forbidden_modules =
+    # Concrete adapter implementations
+    bioetl.infrastructure.adapters.chembl
+    bioetl.infrastructure.adapters.pubchem
+    bioetl.infrastructure.adapters.uniprot
+    bioetl.infrastructure.adapters.pubmed
+    bioetl.infrastructure.locking.memory_lock
+    bioetl.infrastructure.checkpoint.local_checkpoint
+    bioetl.infrastructure.quarantine.unified_quarantine
+
+# Note: interfaces -> composition -> infrastructure is allowed
+# The import-linter traces transitive imports, so we can't enforce
+# that interfaces doesn't transitively import infrastructure through composition.
+# The core hexagonal constraints are enforced by:
+# - Domain must not import other layers
+# - Application must not import infrastructure or composition
+# - Infrastructure must not import application or interfaces
