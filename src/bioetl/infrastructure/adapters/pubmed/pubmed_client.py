@@ -273,9 +273,9 @@ class PubMedAdapter:
 
 
 def _create_pubmed_adapter(
-    http_client: "UnifiedHTTPClient | None",
-    logger: "LoggerPort | None",
-    settings: "Settings | None",
+    http_client: UnifiedHTTPClient | None,
+    logger: LoggerPort | None,
+    settings: Settings | None,
     **kwargs: Any,
 ) -> PubMedAdapter:
     """Custom creator для PubMed адаптера.
@@ -329,8 +329,11 @@ def _create_pubmed_adapter(
 # Используем отложенную регистрацию, чтобы избежать circular imports
 def _register_pubmed() -> None:
     """Регистрирует PubMed провайдера в ProviderRegistry."""
-    from bioetl.composition.providers import ProviderRegistry
-    from bioetl.composition.providers.provider_registry import HttpConfig, ProviderConfig
+    from bioetl.composition.providers.provider_registry import (
+        HttpConfig,
+        ProviderConfig,
+        ProviderRegistry,
+    )
 
     if ProviderRegistry.is_registered("pubmed"):
         return

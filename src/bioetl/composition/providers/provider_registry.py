@@ -149,7 +149,7 @@ class ProviderRegistry:
         """
         config = cls.get(name)
 
-        # Если есть кастомный creator — используем его
+        # Use custom creator if available
         if config.custom_creator:
             return config.custom_creator(
                 http_client=http_client,
@@ -158,7 +158,7 @@ class ProviderRegistry:
                 **kwargs,
             )
 
-        # Стандартная логика создания
+        # Standard creation logic
         init_kwargs: dict[str, Any] = {**config.default_kwargs, **kwargs}
 
         if config.requires_http_client and http_client is not None:

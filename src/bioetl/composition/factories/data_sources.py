@@ -10,9 +10,9 @@ import importlib
 from typing import TYPE_CHECKING, Any, ClassVar
 
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
-from bioetl.domain.ports import DataSourcePort, LoggerPort
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import DataSourcePort, LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 

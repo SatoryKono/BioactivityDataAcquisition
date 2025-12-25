@@ -295,7 +295,7 @@ class ChemblAdapter(BaseHttpAdapter):
         """Perform filtered fetch using ID batches with client-side deduplication."""
         total_fetched = 0
         seen_ids: set[str] = set()
-        
+
         # Primary key field name for deduplication
         pk_field = ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
         if entity_type == "molecule" or entity_type == "compound":

@@ -20,7 +20,6 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
-    from pathlib import Path
 
     import structlog
 
