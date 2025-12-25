@@ -666,6 +666,29 @@ def test_infrastructure_does_not_import_interfaces(src_dir: Path) -> None:
     assert not all_errors, "\n".join(all_errors)
 
 
+def test_infrastructure_does_not_import_composition(src_dir: Path) -> None:
+    """Infrastructure layer must not import from composition layer.
+
+    REQ-ARCH-017: Composition is the assembly layer. Infrastructure
+    must not depend on it to maintain proper dependency direction.
+    See CLAUDE.md §2.1 Matrix of Imports.
+    """
+    infra_path = src_dir / "bioetl" / "infrastructure"
+    if not infra_path.exists():
+        pytest.skip("Infrastructure layer not found")
+
+    all_errors = []
+    forbidden = {"bioetl.composition"}
+
+    for py_file in infra_path.rglob("*.py"):
+        errors = _check_imports_in_file(py_file, forbidden)
+        all_errors.extend(errors)
+
+    assert not all_errors, (
+        "Infrastructure must not import composition.\n" + "\n".join(all_errors)
+    )
+
+
 def test_no_mutable_defaults_in_frozen_dataclasses(src_dir: Path) -> None:
     """Frozen dataclasses should not have mutable default arguments.
 
