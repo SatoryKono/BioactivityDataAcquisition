@@ -71,16 +71,18 @@ class DeltaWriter:
     def __init__(
         self,
         base_path: str | Path,
+        logger: LoggerPort,
         csv_exporter: CsvExporter | None = None,
-        logger: LoggerPort | None = None,
     ) -> None:
         """Initialize Delta writer.
 
         Args:
             base_path: Base path for Delta tables (local filesystem)
+            logger: Structured logger for observability (MUST be injected)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
-            logger: Optional logger for debug output
 
+        Note: LoggerPort is required per RULES.md DI requirements. All dependencies
+        MUST be injected through constructor without fallback defaults.
         """
         self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter

@@ -272,19 +272,19 @@ class TestBronzeWriter:
 class TestDeltaWriter:
     """Test DeltaWriter functionality."""
 
-    def test_delta_writer_initialization(self):
+    def test_delta_writer_initialization(self, noop_logger):
         """Test DeltaWriter can be initialized."""
-        writer = DeltaWriter(base_path="/tmp/delta")
+        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger)
         assert writer.base_path == "/tmp/delta"
 
-    async def test_write_silver_creates_new_table(self, mock_delta_writer):
+    async def test_write_silver_creates_new_table(self, mock_delta_writer, noop_logger):
         """Test write_silver creates table if not exists."""
         from deltalake.exceptions import TableNotFoundError
 
         mock_delta_table, mock_write_deltalake = mock_delta_writer
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        writer = DeltaWriter(base_path="/tmp/delta")
+        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger)
 
         records = [
             {
@@ -315,7 +315,7 @@ class TestDeltaWriter:
 
         mock_write_deltalake.assert_called_once()
 
-    async def test_write_silver_merge_existing_table(self, mock_delta_writer):
+    async def test_write_silver_merge_existing_table(self, mock_delta_writer, noop_logger):
         """Test write_silver merges into existing table."""
         mock_delta_table, _mock_write_deltalake = mock_delta_writer
         mock_table_instance = MagicMock()
@@ -326,7 +326,7 @@ class TestDeltaWriter:
         mock_merge.when_matched_update_all.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
-        writer = DeltaWriter(base_path="/tmp/delta")
+        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger)
 
         records = [
             {
@@ -358,8 +358,8 @@ class TestDeltaWriter:
         mock_table_instance.merge.assert_called_once()
 
     @pytest.mark.usefixtures("mock_delta_writer")
-    async def test_write_silver_empty_records_raises_error(self):
-        writer = DeltaWriter(base_path="/tmp/delta")
+    async def test_write_silver_empty_records_raises_error(self, noop_logger):
+        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger)
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
@@ -387,11 +387,11 @@ class TestGoldWriter:
         ):
             yield mock_delta_table, mock_write_deltalake
 
-    async def test_gold_writer_sorts_columns(self, mock_gold_writer_deps):
+    async def test_gold_writer_sorts_columns(self, mock_gold_writer_deps, noop_logger):
         """Test that GoldWriter sorts columns alphabetically in _to_arrow_table."""
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 
-        writer = GoldWriter(base_path="/tmp/gold")
+        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
 
         # Records with mixed key order
         records = [

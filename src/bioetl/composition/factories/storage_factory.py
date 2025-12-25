@@ -562,11 +562,12 @@ class StorageFactory:
             ),
             silver_writer=DeltaWriter(
                 base_path=silver_path,
-                csv_exporter=silver_csv_exporter,
                 logger=logger,
+                csv_exporter=silver_csv_exporter,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
+                logger=logger,
                 csv_exporter=gold_csv_exporter,
             ),
         )
