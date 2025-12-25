@@ -5,6 +5,8 @@ Bronze → Silver → Gold layers.
 
 Entity: Scientific Documents (publications, patents)
 Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
+
+Updated: Transformer injection via DI (Phase 1 refactoring).
 """
 
 from __future__ import annotations
@@ -12,17 +14,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 
 if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, RunID, SilverRecord
+    from bioetl.domain.types import RunID
 
 
 class ChEMBLDocumentPipeline(BasePipeline):
-    """Pipeline for ChEMBL document data."""
+    """Pipeline for ChEMBL document data.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    Fallback to local creation for backward compatibility with tests.
+    """
 
     def __init__(
         self,
@@ -30,17 +35,27 @@ class ChEMBLDocumentPipeline(BasePipeline):
         runtime: RuntimeConfig,
         services: PipelineServices,
         run_id: RunID,
+        transformer: "BaseTransformer | None" = None,
     ) -> None:
-        """Initialize pipeline with transformer."""
-        super().__init__(config, runtime, services, run_id)
-        self._transformer = DocumentTransformer(provider=self.provider)
+        """Initialize pipeline with optional transformer.
 
-    async def transform_bronze_to_silver(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL document to normalized format using Domain Entity."""
-        return await self._transformer.transform(context, record)
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Injected services (ports).
+            run_id: Unique identifier for this pipeline run.
+            transformer: Injected transformer (DI). If None, creates fallback.
 
+        """
+        # Create fallback transformer if not injected (backward compatibility)
+        if transformer is None:
+            from bioetl.application.pipelines.chembl.document_transformer import (
+                DocumentTransformer,
+            )
+
+            transformer = DocumentTransformer(provider=config.provider)
+
+        super().__init__(config, runtime, services, run_id, transformer=transformer)
+
+    # transform_bronze_to_silver() is inherited from BasePipeline
     # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)

@@ -4,11 +4,12 @@ Defines the structure and logic of a pipeline (config, transformations, filters)
 Does NOT handle execution orchestration.
 
 Refactored per ADR-0005.
+Updated: Transformer injection via DI (Phase 1 refactoring).
 """
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 from bioetl.application.core.shutdown import ShutdownSignal
@@ -17,6 +18,7 @@ from bioetl.domain.context import PipelineContext
 if TYPE_CHECKING:
     import structlog
 
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
@@ -40,6 +42,7 @@ class BasePipeline(ABC):
         runtime: RuntimeConfig,
         services: PipelineServices,
         config: PipelineConfig,
+        transformer: "BaseTransformer | None" = None,
     ) -> Self:
         """Create pipeline instance.
 
@@ -50,9 +53,12 @@ class BasePipeline(ABC):
             runtime: Runtime configuration.
             services: Injected services (ports).
             config: Pipeline configuration.
+            transformer: Injected transformer for Bronze→Silver transformation (DI).
+                If provided, the pipeline will use this transformer instead of
+                creating one internally. This is the preferred DI approach.
 
         """
-        return cls(config, runtime, services, run_id)
+        return cls(config, runtime, services, run_id, transformer=transformer)
 
     def __init__(
         self,
@@ -60,6 +66,7 @@ class BasePipeline(ABC):
         runtime: RuntimeConfig,
         services: PipelineServices,
         run_id: RunID,
+        transformer: "BaseTransformer | None" = None,
     ) -> None:
         """Initialize pipeline definition.
 
@@ -69,12 +76,16 @@ class BasePipeline(ABC):
             services: Injected services (ports).
             run_id: Unique identifier for this pipeline run.
                     MUST be passed from CLI/orchestrator to ensure consistency.
+            transformer: Injected transformer for Bronze→Silver transformation.
+                If None, subclass MUST override transform_bronze_to_silver()
+                or set self._transformer in its __init__.
 
         """
         self._config = config
         self._runtime = runtime
         self._services = services
         self._run_id = run_id
+        self._transformer = transformer
         self._logger = services.logger.bind(
             run_id=str(self._run_id),
             pipeline=config.pipeline_name,
@@ -156,14 +167,38 @@ class BasePipeline(ABC):
         """Record limit (from runtime)."""
         return self._runtime.limit
 
+    @property
+    def transformer(self) -> "BaseTransformer | None":
+        """Access the injected transformer."""
+        return self._transformer
+
     # --- Logic Methods (to be used by Executor) ---
 
-    @abstractmethod
     async def transform_bronze_to_silver(
         self, context: PipelineContext, record: BronzeRecord
     ) -> SilverRecord | None:
-        """Transform a raw record from Bronze to Silver format."""
-        pass
+        """Transform a raw record from Bronze to Silver format.
+
+        If a transformer was injected via DI, delegates to it.
+        Otherwise, subclasses MUST override this method.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record from data source.
+
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
+
+        Raises:
+            NotImplementedError: If no transformer is available and method not overridden.
+
+        """
+        if self._transformer is not None:
+            return await self._transformer.transform(context, record)
+        raise NotImplementedError(
+            f"{self.__class__.__name__} must either receive a transformer via DI "
+            "or override transform_bronze_to_silver()"
+        )
 
     # Fields to exclude from Gold layer (JSON strings retained only in Silver)
     GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset({
