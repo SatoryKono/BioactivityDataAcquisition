@@ -24,10 +24,52 @@
 Создание и настройка адаптеров централизованы в [DataSourceRegistry](05-composition-layer.md#22-factories-фабрики-компонентов) слоя Composition.
 
 **Обязанности адаптера:**
-- Управление HTTP-соединениями (`httpx.AsyncClient`).
+- Управление HTTP-соединениями через `UnifiedHTTPClient`.
 - Обработка специфичных для API ошибок (например, `429 Rate Limit`).
 - Преобразование ответа API в стандартизированный формат (словари Python).
 - Реализация `health_check()` для проверки доступности API.
+
+#### 2.1.1. Унифицированный HTTP-клиент
+
+**Все адаптеры используют унифицированную HTTP-инфраструктуру:**
+
+| Адаптер | Базовый класс | HTTP-клиент | Примечание |
+|---------|---------------|-------------|------------|
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP |
+| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP |
+| **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP |
+| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync библиотека |
+
+**Архитектура HTTP-адаптеров:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DataSourcePort (Protocol)                 │
+└─────────────────────────────────────────────────────────────┘
+                              ▲
+              ┌───────────────┴───────────────┐
+              │                               │
+┌─────────────────────────┐     ┌─────────────────────────┐
+│    BaseHttpAdapter      │     │    BaseSyncAdapter      │
+│  (UnifiedHTTPClient)    │     │  (ThreadPoolExecutor)   │
+└─────────────────────────┘     └─────────────────────────┘
+         ▲                                  ▲
+    ┌────┴────┐                             │
+    │         │                             │
+ChemblAdapter UniProtAdapter          PubChemAdapter
+PubMedAdapter                         (pubchempy)
+```
+
+**Ключевые компоненты `UnifiedHTTPClient`:**
+- **Rate Limiter** (`TokenBucket`): Ограничение частоты запросов
+- **Circuit Breaker**: Защита от каскадных отказов
+- **Retry Logic**: Автоматические повторы с exponential backoff
+- **Metrics**: Интеграция с `MetricsPort` для наблюдаемости
+
+**Для sync-библиотек** (pubchempy, biopython) используется `BaseSyncAdapter`:
+- `ThreadPoolExecutor` для изоляции блокирующего I/O
+- Собственные `TokenBucket` и `CircuitBreaker`
+- Async-обёртка через `run_in_executor()`
 
 ### 2.2. `storage/` — Адаптеры Хранилищ
 
