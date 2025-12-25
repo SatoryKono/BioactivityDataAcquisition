@@ -222,8 +222,37 @@ class DataSourceRegistry:
         """List all registered providers.
 
         Returns providers from both this registry and ProviderRegistry.
+        Legacy alias for list_keys().
         """
         ensure_providers_loaded()
         registry_providers = set(ProviderRegistry.list_providers())
         local_providers = set(cls._creators.keys())
         return sorted(registry_providers | local_providers)
+
+    @classmethod
+    def list_keys(cls) -> list[str]:
+        """List all registered provider names (unified API).
+
+        Alias for list_providers().
+        """
+        return cls.list_providers()
+
+    @classmethod
+    def contains(cls, key: str) -> bool:
+        """Check if provider is registered.
+
+        Args:
+            key: Provider name to check
+
+        Returns:
+            True if provider is registered, False otherwise
+        """
+        return key in cls._creators
+
+    @classmethod
+    def clear(cls) -> None:
+        """Clear all registrations (for testing).
+
+        WARNING: Only use in tests. Not for production.
+        """
+        cls._creators.clear()
