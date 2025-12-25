@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
@@ -13,6 +14,9 @@ from bioetl.infrastructure.quarantine.unified_quarantine import (
     UnifiedQuarantine,
     _quote_literal,
 )
+
+# Fixed timestamp for test reproducibility
+TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
 
 
 def _extract_record_from_call(mock_call) -> dict:
@@ -134,6 +138,7 @@ class TestUnifiedQuarantineWrite:
             error_code="INVALID_DATA",
             payload=payload,
             bronze_batch_id=batch_id,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         mock_write_deltalake.assert_called_once()
@@ -151,6 +156,7 @@ class TestUnifiedQuarantineWrite:
             payload={"id": 1},
             bronze_batch_id=batch_id,
             metadata={"error_details": {"field": "value", "reason": "Invalid type"}},
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
@@ -169,6 +175,7 @@ class TestUnifiedQuarantineWrite:
             payload={"id": 1},
             bronze_batch_id=batch_id,
             metadata={"bronze_file_uri": "s3://bronze/v1/file.jsonl.zst"},
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
@@ -187,6 +194,7 @@ class TestUnifiedQuarantineWrite:
             error_code="ERROR",
             payload=payload,
             bronze_batch_id=batch_id,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
@@ -205,6 +213,7 @@ class TestUnifiedQuarantineWrite:
             error_code="ERROR",
             payload=payload,
             bronze_batch_id=batch_id,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
@@ -227,6 +236,7 @@ class TestUnifiedQuarantineWrite:
             error_code="ERROR",
             payload={"id": 1},
             bronze_batch_id=batch_id,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         assert mock_write_deltalake.call_count == 2
@@ -243,6 +253,7 @@ class TestUnifiedQuarantineWrite:
             error_code="ERROR",
             payload={"id": 1},
             bronze_batch_id=batch_id,
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
