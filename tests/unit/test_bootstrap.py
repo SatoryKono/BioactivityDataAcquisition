@@ -502,7 +502,7 @@ class TestBootstrapMetrics:
 
         assert result is mock_metrics
 
-    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
     def test_bootstrap_metrics_disabled_returns_none(
         self, mock_prometheus: MagicMock
     ) -> None:
