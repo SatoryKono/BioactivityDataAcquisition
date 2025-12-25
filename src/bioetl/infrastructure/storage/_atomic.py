@@ -219,7 +219,7 @@ class AtomicWriteGroup:
                 except OSError:
                     pass
 
-    def __enter__(self) -> "AtomicWriteGroup":
+    def __enter__(self) -> AtomicWriteGroup:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

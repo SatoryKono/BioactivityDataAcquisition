@@ -15,8 +15,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from datetime import date
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from bioetl.domain.transformations import safe_float, safe_int
 
@@ -301,13 +302,13 @@ def safe_extract(
 
 # Re-export safe_float and safe_int for convenience
 __all__ = [
-    "flatten_nested_dict",
-    "extract_list_field",
     "aggregate_nested_lists",
+    "extract_list_field",
+    "flatten_nested_dict",
     "normalize_string",
     "parse_date_field",
-    "validate_smiles",
     "safe_extract",
     "safe_float",
     "safe_int",
+    "validate_smiles",
 ]

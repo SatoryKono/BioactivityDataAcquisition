@@ -73,7 +73,7 @@ def requirements_md(project_root: Path) -> Path:
 # =============================================================================
 
 
-def _sanitize_request(request: "Request") -> "Request":
+def _sanitize_request(request: Request) -> Request:
     """Sanitize secrets from recorded requests.
 
     Removes:
@@ -176,7 +176,7 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
 
 
 @pytest.fixture
-def run_id() -> "RunID":
+def run_id() -> RunID:
     """Generate a unique run ID for tests."""
     return uuid4()
 

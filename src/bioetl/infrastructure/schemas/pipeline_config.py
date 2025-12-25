@@ -39,7 +39,7 @@ class DQConfig(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_thresholds(self) -> "DQConfig":
+    def validate_thresholds(self) -> DQConfig:
         """Validate that thresholds are between 0 and 1."""
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,

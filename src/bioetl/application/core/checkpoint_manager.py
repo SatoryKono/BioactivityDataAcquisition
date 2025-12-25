@@ -21,7 +21,7 @@ class CheckpointManager:
     def __init__(
         self,
         checkpoint_port: CheckpointPort,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         pipeline_name: str,
         run_id: RunID,
         resume: bool,

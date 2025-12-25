@@ -30,24 +30,24 @@ class PipelineFactoryProtocol(Protocol):
 
     def create_with_services(
         self,
-        run_id: "RunID",
-        runtime: "RuntimeConfig",
-        settings: "Settings",
-        logger: "LoggerPort",
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        logger: LoggerPort,
         **kwargs: Any,
-    ) -> "BasePipeline":
+    ) -> BasePipeline:
         """Create pipeline with services."""
         ...
 
     def create_runner(
         self,
-        run_id: "RunID",
-        runtime: "RuntimeConfig",
-        settings: "Settings",
-        observability: "ObservabilityBundle",
-        filter_config: "InputFilterConfig | None" = None,
-        config: "PipelineYamlConfig | None" = None,
-    ) -> "PipelineRunner":
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        observability: ObservabilityBundle,
+        filter_config: InputFilterConfig | None = None,
+        config: PipelineYamlConfig | None = None,
+    ) -> PipelineRunner:
         """Create pipeline runner."""
         ...
 

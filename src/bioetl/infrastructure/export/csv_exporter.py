@@ -175,14 +175,14 @@ class CsvExporter:
             os.close(fd)
             pv.write_csv(data, temp_path, write_options=write_options)
 
-            # Use os.replace for atomic overwrite (works on Windows and Unix)
+            # Use Path.replace for atomic overwrite (works on Windows and Unix)
             try:
-                os.replace(temp_path, target_path)
+                temp_path.replace(target_path)
             except PermissionError:
                 # File is locked by another process - use backup filename
                 timestamp = int(time.time())
                 backup_path = target_path.with_suffix(f".{timestamp}.csv")
-                os.replace(temp_path, backup_path)
+                temp_path.replace(backup_path)
                 logger.warning(
                     "Target CSV locked, wrote to backup: %s", backup_path
                 )
