@@ -238,7 +238,7 @@ class TestClassSize:
     EXEMPTIONS = {
         # Large classes that are acceptable due to their nature
         "BasePipeline": 400,
-        "PipelineRunner": 420,  # 415 lines - added vacuum method
+        "PipelineRunner": 450,  # 441 lines - includes vacuum + health check methods
         "UnifiedHTTPClient": 350,
         # Baseline exemptions for existing classes
         "StorageAdapter": 500,

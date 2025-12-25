@@ -366,20 +366,9 @@ class TestDeltaWriter:
             }
         ]
 
-        import pyarrow as pa
-
-        schema = pa.schema(
-            [
-                pa.field("id", pa.int64()),
-                pa.field("value", pa.string()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
+        # Use same schema as existing_schema mock
         await writer.write_silver(
-            table_name="test_table", records=records, primary_keys=["id"], schema=schema
+            table_name="test_table", records=records, primary_keys=["id"], schema=existing_schema
         )
 
         mock_table_instance.merge.assert_called_once()
