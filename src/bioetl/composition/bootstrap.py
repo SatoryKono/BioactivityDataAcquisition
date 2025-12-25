@@ -16,8 +16,6 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -38,7 +36,6 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 __all__ = [
     "BronzeWriter",
-    "ChemblAdapter",
     "DeltaWriter",
     "GoldWriter",
     "LocalCheckpoint",
@@ -47,7 +44,6 @@ __all__ = [
     "ObservabilityBundle",
     "PrometheusMetrics",
     "StorageAdapter",
-    "UnifiedHTTPClient",
     "UnifiedQuarantine",
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
