@@ -86,7 +86,7 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
-    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.bootstrap_tracer")
     @patch("bioetl.composition.bootstrap.get_settings")
     @patch("bioetl.composition.bootstrap.bootstrap_logger")
@@ -135,7 +135,7 @@ class TestBootstrapPipeline:
     @patch("bioetl.composition.bootstrap.PipelineRegistry")
     @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
     @patch("bioetl.composition.bootstrap.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.start_metrics_server")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.bootstrap_tracer")
     @patch("bioetl.composition.bootstrap.bootstrap_logger")
     @patch("bioetl.composition.bootstrap.get_settings")
@@ -411,8 +411,8 @@ class TestChemblActivityFactory:
 class TestBootstrapMetrics:
     """Tests for bootstrap_metrics function with metrics configuration."""
 
-    @patch("bioetl.composition.bootstrap.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
+    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
     def test_bootstrap_metrics_passes_config_params(
         self,
         mock_prometheus: MagicMock,
@@ -443,8 +443,8 @@ class TestBootstrapMetrics:
             retry_delay=2.0,
         )
 
-    @patch("bioetl.composition.bootstrap.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
+    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
     def test_bootstrap_metrics_fail_fast_true_raises_error(
         self,
         mock_prometheus: MagicMock,
@@ -472,8 +472,8 @@ class TestBootstrapMetrics:
         assert exc_info.value.port == 8000
         assert exc_info.value.reason == "port_in_use"
 
-    @patch("bioetl.composition.bootstrap.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
+    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
     def test_bootstrap_metrics_fail_fast_false_suppresses_error(
         self,
         mock_prometheus: MagicMock,
