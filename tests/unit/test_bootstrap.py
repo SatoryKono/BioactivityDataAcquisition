@@ -451,7 +451,8 @@ class TestBootstrapMetrics:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that fail_fast=True propagates MetricsServerError."""
-        from bioetl.composition.bootstrap import MetricsServerError, bootstrap_metrics
+        from bioetl.composition.bootstrap import bootstrap_metrics
+        from bioetl.interfaces.observability import MetricsServerError
 
         settings = MagicMock()
         settings.metrics_port = 8000
