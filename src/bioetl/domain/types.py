@@ -183,6 +183,9 @@ class ErrorType(str, Enum):
     DB_UNAVAILABLE = "DB_UNAVAILABLE"
     """Database connection failed."""
 
+    SCHEMA_EVOLUTION = "SCHEMA_EVOLUTION"
+    """Schema drift detected in Silver layer (new/removed fields)."""
+
     LOCK_LOST = "LOCK_LOST"
     """Distributed lock lost during execution."""
 
@@ -215,6 +218,7 @@ class ErrorType(str, Enum):
             ErrorType.AUTH_FAILURE,
             ErrorType.SCHEMA_MISMATCH_GOLD,
             ErrorType.DB_UNAVAILABLE,
+            ErrorType.SCHEMA_EVOLUTION,
             ErrorType.LOCK_LOST,
         }
 

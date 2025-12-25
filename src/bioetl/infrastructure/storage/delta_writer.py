@@ -25,7 +25,7 @@ from __future__ import annotations
 import asyncio
 import json
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
@@ -35,6 +35,7 @@ from pyarrow import ArrowTypeError
 
 from bioetl.domain.exceptions import (
     MergeConflictError,
+    SchemaEvolutionError,
     SchemaViolationError,
     TableNotFoundError,
 )
@@ -217,6 +218,73 @@ class DeltaWriter:
         else:  # SilverWriteMode.MERGE
             await self._write_merge(table_path, arrow_data, primary_keys, partition_cols)
 
+    async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
+        """Get existing table schema if table exists.
+
+        Args:
+            table_name: Target table name
+
+        Returns:
+            PyArrow schema if table exists, None otherwise
+        """
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        loop = asyncio.get_running_loop()
+        try:
+            dt = await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path),
+            )
+            return dt.schema().to_pyarrow()
+        except DeltaTableNotFoundError:
+            return None
+
+    async def _check_schema_drift(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    ) -> None:
+        """Check for schema drift and handle according to policy.
+
+        Args:
+            table_name: Target table name
+            records: List of records to write
+            on_schema_mismatch: How to handle schema drift
+
+        Raises:
+            SchemaEvolutionError: If on_schema_mismatch='error' and drift detected
+        """
+        existing_schema = await self._get_table_schema(table_name)
+        if existing_schema is None or not records:
+            return
+
+        incoming_fields = set(records[0].keys())
+        existing_fields = set(existing_schema.names)
+
+        new_fields = incoming_fields - existing_fields
+        removed_fields = existing_fields - incoming_fields
+
+        if not new_fields and not removed_fields:
+            return
+
+        self.logger.warning(
+            "Schema drift detected",
+            table=table_name,
+            new_fields=sorted(new_fields) if new_fields else None,
+            removed_fields=sorted(removed_fields) if removed_fields else None,
+            action=on_schema_mismatch,
+        )
+
+        if on_schema_mismatch == "error":
+            raise SchemaEvolutionError(
+                table=table_name,
+                new_fields=new_fields,
+                removed_fields=removed_fields,
+            )
+        # "evolve" and "ignore" proceed without error
+        # "evolve" will let Delta Lake handle schema evolution via schema_mode
+        # "ignore" will filter records to match existing schema
+
     async def write_silver(
         self,
         table_name: str,
@@ -225,6 +293,7 @@ class DeltaWriter:
         schema: pa.Schema,
         mode: str = "merge",
         partition_cols: list[str] | None = None,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -235,12 +304,20 @@ class DeltaWriter:
             schema: PyArrow schema for the table
             mode: Write mode - 'merge', 'append', or 'delete'
             partition_cols: Optional partition columns
+            on_schema_mismatch: How to handle schema drift:
+                - 'error': Raise SchemaEvolutionError (default)
+                - 'evolve': Allow schema evolution (add new columns)
+                - 'ignore': Proceed without changes (filter to existing schema)
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
+            SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
         """
         validated_mode = self._validate_write_mode(mode)
         self._validate_records(records, table_name, schema)
+
+        # Check for schema drift before writing
+        await self._check_schema_drift(table_name, records, on_schema_mismatch)
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         arrow_data = self._prepare_arrow_data(records, schema, primary_keys)

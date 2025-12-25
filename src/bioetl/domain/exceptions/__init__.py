@@ -41,6 +41,7 @@ from bioetl.domain.exceptions.recoverable import (
 )
 from bioetl.domain.exceptions.storage import (
     BucketNotFoundError,
+    SchemaEvolutionError,
     StorageError,
     TableNotFoundError,
     UploadError,
@@ -67,6 +68,7 @@ __all__ = [
     "RateLimitError",
     "RecoverableError",
     "RetryExhaustedError",
+    "SchemaEvolutionError",
     "SchemaViolationError",
     "StorageError",
     "TableNotFoundError",
