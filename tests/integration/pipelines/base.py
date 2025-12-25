@@ -88,10 +88,12 @@ class IntegrationPipelineTestCase:
             ),
             silver_writer=DeltaWriter(
                 base_path=self.silver_path,
+                logger=logger,
                 csv_exporter=None,
             ),
             gold_writer=GoldWriter(
                 base_path=self.gold_path,
+                logger=logger,
                 csv_exporter=None,
             ),
         )

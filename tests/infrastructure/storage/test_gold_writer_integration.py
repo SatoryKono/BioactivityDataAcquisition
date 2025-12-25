@@ -10,12 +10,19 @@ import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import DataFrameSchema
 
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @pytest.fixture
-def gold_writer():
-    return GoldWriter(base_path="s3://test-bucket/gold")
+def noop_logger():
+    """Provide a NoOpLogger for tests."""
+    return NoOpLogger()
+
+
+@pytest.fixture
+def gold_writer(noop_logger):
+    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
 
 
 @pytest.fixture
