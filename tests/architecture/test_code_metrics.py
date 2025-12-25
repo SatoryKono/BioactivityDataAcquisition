@@ -26,18 +26,20 @@ class TestFileSizeLimits:
 
     # Exemptions for specific files (baseline for existing code)
     # New files should adhere to layer limits
+    # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
-        "ports.py": 800,  # Until ports are split into package
+        # Application layer exemptions
         "runner.py": 700,  # Complex orchestration
         "base.py": 600,  # Base classes may be larger
+        # Infrastructure layer exemptions
         "config.py": 600,  # Config can be verbose
         # Domain layer exemptions (baseline)
-        "filter_config.py": 400,
-        "entities.py": 600,
-        "types.py": 350,
-        "exceptions.py": 550,
+        "filter_config.py": 400,  # 354 LOC
+        "entities.py": 600,  # 569 LOC
+        "types.py": 350,  # 314 LOC
+        "exceptions.py": 550,  # 513 LOC
         # Composition layer exemptions
-        "storage_factory.py": 650,
+        "storage_factory.py": 650,  # 599 LOC
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
