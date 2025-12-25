@@ -10,7 +10,12 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
+from bioetl.application.core.transform_utils import flatten_nested_dict
+from bioetl.application.pipelines.chembl.activity_transformer import (
+    ActivityTransformer,
+    _ACTION_TYPE_FIELDS,
+    _LIGAND_EFFICIENCY_FIELDS,
+)
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -286,136 +291,128 @@ class TestActivityTransformerTransform:
 
 @pytest.mark.unit
 class TestActivityTransformerLigandEfficiency:
-    """Tests for ActivityTransformer ligand efficiency extraction."""
+    """Tests for ligand efficiency extraction using flatten_nested_dict."""
 
+    def test_extract_ligand_efficiency_valid_dict(self):
+        """Test extraction with valid ligand efficiency dictionary."""
+        le_data = {
+            "bei": "14.06",
+            "le": "0.26",
+            "lle": "1.30",
+            "sei": "5.56",
+        }
 
-def test_extract_ligand_efficiency_valid_dict(transformer):
-    """Test extraction with valid ligand efficiency dictionary."""
-    le_data = {
-        "bei": "14.06",
-        "le": "0.26",
-        "lle": "1.30",
-        "sei": "5.56",
-    }
+        result = flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
-    result = transformer._extract_ligand_efficiency(le_data)
+        assert result["ligand_efficiency_bei"] == pytest.approx(14.06)
+        assert result["ligand_efficiency_le"] == pytest.approx(0.26)
+        assert result["ligand_efficiency_lle"] == pytest.approx(1.30)
+        assert result["ligand_efficiency_sei"] == pytest.approx(5.56)
 
-    assert result["ligand_efficiency_bei"] == pytest.approx(14.06)
-    assert result["ligand_efficiency_le"] == pytest.approx(0.26)
-    assert result["ligand_efficiency_lle"] == pytest.approx(1.30)
-    assert result["ligand_efficiency_sei"] == pytest.approx(5.56)
+    def test_extract_ligand_efficiency_none(self):
+        """Test extraction with None input."""
+        result = flatten_nested_dict(None, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
+        assert result["ligand_efficiency_bei"] is None
+        assert result["ligand_efficiency_le"] is None
+        assert result["ligand_efficiency_lle"] is None
+        assert result["ligand_efficiency_sei"] is None
 
-def test_extract_ligand_efficiency_none(transformer):
-    """Test extraction with None input."""
-    result = transformer._extract_ligand_efficiency(None)
+    def test_extract_ligand_efficiency_empty_dict(self):
+        """Test extraction with empty dictionary."""
+        result = flatten_nested_dict({}, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
-    assert result["ligand_efficiency_bei"] is None
-    assert result["ligand_efficiency_le"] is None
-    assert result["ligand_efficiency_lle"] is None
-    assert result["ligand_efficiency_sei"] is None
+        assert result["ligand_efficiency_bei"] is None
+        assert result["ligand_efficiency_le"] is None
+        assert result["ligand_efficiency_lle"] is None
+        assert result["ligand_efficiency_sei"] is None
 
+    def test_extract_ligand_efficiency_partial_dict(self):
+        """Test extraction with partially filled dictionary."""
+        le_data = {
+            "bei": "10.5",
+            "le": "0.2",
+            # lle and sei missing
+        }
 
-def test_extract_ligand_efficiency_empty_dict(transformer):
-    """Test extraction with empty dictionary."""
-    result = transformer._extract_ligand_efficiency({})
+        result = flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
-    assert result["ligand_efficiency_bei"] is None
-    assert result["ligand_efficiency_le"] is None
-    assert result["ligand_efficiency_lle"] is None
-    assert result["ligand_efficiency_sei"] is None
+        assert result["ligand_efficiency_bei"] == pytest.approx(10.5)
+        assert result["ligand_efficiency_le"] == pytest.approx(0.2)
+        assert result["ligand_efficiency_lle"] is None
+        assert result["ligand_efficiency_sei"] is None
 
+    def test_extract_ligand_efficiency_invalid_values(self):
+        """Test extraction with invalid numeric values."""
+        le_data = {
+            "bei": "invalid",
+            "le": "not_a_number",
+            "lle": None,
+            "sei": "",
+        }
 
-def test_extract_ligand_efficiency_partial_dict(transformer):
-    """Test extraction with partially filled dictionary."""
-    le_data = {
-        "bei": "10.5",
-        "le": "0.2",
-        # lle and sei missing
-    }
+        result = flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
-    result = transformer._extract_ligand_efficiency(le_data)
+        # safe_float should return None for invalid values
+        assert result["ligand_efficiency_bei"] is None
+        assert result["ligand_efficiency_le"] is None
+        assert result["ligand_efficiency_lle"] is None
+        assert result["ligand_efficiency_sei"] is None
 
-    assert result["ligand_efficiency_bei"] == pytest.approx(10.5)
-    assert result["ligand_efficiency_le"] == pytest.approx(0.2)
-    assert result["ligand_efficiency_lle"] is None
-    assert result["ligand_efficiency_sei"] is None
+    def test_extract_ligand_efficiency_non_dict_input(self):
+        """Test extraction with non-dictionary input."""
+        # String input - flatten_nested_dict handles gracefully
+        result1 = flatten_nested_dict("not a dict", "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+        assert all(v is None for v in result1.values())
 
+        # List input
+        result2 = flatten_nested_dict([1, 2, 3], "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+        assert all(v is None for v in result2.values())
 
-def test_extract_ligand_efficiency_invalid_values(transformer):
-    """Test extraction with invalid numeric values."""
-    le_data = {
-        "bei": "invalid",
-        "le": "not_a_number",
-        "lle": None,
-        "sei": "",
-    }
+        # Integer input
+        result3 = flatten_nested_dict(123, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+        assert all(v is None for v in result3.values())
 
-    result = transformer._extract_ligand_efficiency(le_data)
+    def test_extract_ligand_efficiency_negative_values(self):
+        """Test extraction with negative values (valid edge case)."""
+        le_data = {
+            "bei": "-5.0",
+            "le": "-0.1",
+            "lle": "-2.5",
+            "sei": "0.0",
+        }
 
-    # safe_float should return None for invalid values
-    assert result["ligand_efficiency_bei"] is None
-    assert result["ligand_efficiency_le"] is None
-    assert result["ligand_efficiency_lle"] is None
-    assert result["ligand_efficiency_sei"] is None
+        result = flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
+        # Negative values are technically valid floats
+        assert result["ligand_efficiency_bei"] == pytest.approx(-5.0)
+        assert result["ligand_efficiency_le"] == pytest.approx(-0.1)
+        assert result["ligand_efficiency_lle"] == pytest.approx(-2.5)
+        assert result["ligand_efficiency_sei"] == pytest.approx(0.0)
 
-def test_extract_ligand_efficiency_non_dict_input(transformer):
-    """Test extraction with non-dictionary input."""
-    # String input
-    result1 = transformer._extract_ligand_efficiency("not a dict")
-    assert all(v is None for v in result1.values())
+    def test_extract_ligand_efficiency_float_precision(self):
+        """Test extraction preserves float precision."""
+        le_data = {
+            "bei": "14.123456789",
+            "le": "0.987654321",
+            "lle": "1.111111111",
+            "sei": "5.999999999",
+        }
 
-    # List input
-    result2 = transformer._extract_ligand_efficiency([1, 2, 3])
-    assert all(v is None for v in result2.values())
+        result = flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
 
-    # Integer input
-    result3 = transformer._extract_ligand_efficiency(123)
-    assert all(v is None for v in result3.values())
-
-
-def test_extract_ligand_efficiency_negative_values(transformer):
-    """Test extraction with negative values (valid edge case)."""
-    le_data = {
-        "bei": "-5.0",
-        "le": "-0.1",
-        "lle": "-2.5",
-        "sei": "0.0",
-    }
-
-    result = transformer._extract_ligand_efficiency(le_data)
-
-    # Negative values are technically valid floats
-    assert result["ligand_efficiency_bei"] == pytest.approx(-5.0)
-    assert result["ligand_efficiency_le"] == pytest.approx(-0.1)
-    assert result["ligand_efficiency_lle"] == pytest.approx(-2.5)
-    assert result["ligand_efficiency_sei"] == pytest.approx(0.0)
-
-
-def test_extract_ligand_efficiency_float_precision(transformer):
-    """Test extraction preserves float precision."""
-    le_data = {
-        "bei": "14.123456789",
-        "le": "0.987654321",
-        "lle": "1.111111111",
-        "sei": "5.999999999",
-    }
-
-    result = transformer._extract_ligand_efficiency(le_data)
-
-    # Check that precision is preserved within float64 limits
-    assert result["ligand_efficiency_bei"] == pytest.approx(14.123456789, rel=1e-9)
-    assert result["ligand_efficiency_le"] == pytest.approx(0.987654321, rel=1e-9)
-    assert result["ligand_efficiency_lle"] == pytest.approx(1.111111111, rel=1e-9)
-    assert result["ligand_efficiency_sei"] == pytest.approx(5.999999999, rel=1e-9)
+        # Check that precision is preserved within float64 limits
+        assert result["ligand_efficiency_bei"] == pytest.approx(14.123456789, rel=1e-9)
+        assert result["ligand_efficiency_le"] == pytest.approx(0.987654321, rel=1e-9)
+        assert result["ligand_efficiency_lle"] == pytest.approx(1.111111111, rel=1e-9)
+        assert result["ligand_efficiency_sei"] == pytest.approx(5.999999999, rel=1e-9)
 
 
 @pytest.mark.unit
 class TestActivityTransformerActionType:
-    """Tests for ActivityTransformer action type extraction."""
+    """Tests for action type extraction using flatten_nested_dict."""
 
-    def test_extract_action_type_valid_dict(self, transformer):
+    def test_extract_action_type_valid_dict(self):
         """Test extraction with valid action type dictionary."""
         action_data = {
             "action_type": "INHIBITOR",
@@ -423,29 +420,29 @@ class TestActivityTransformerActionType:
             "parent_type": "NEGATIVE MODULATOR",
         }
 
-        result = transformer._extract_action_type(action_data)
+        result = flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
 
         assert result["action_type_action_type"] == "INHIBITOR"
         assert result["action_type_description"] == "Compound that inhibits target activity"
         assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
 
-    def test_extract_action_type_none(self, transformer):
+    def test_extract_action_type_none(self):
         """Test extraction with None input."""
-        result = transformer._extract_action_type(None)
+        result = flatten_nested_dict(None, "action_type_", _ACTION_TYPE_FIELDS)
 
         assert result["action_type_action_type"] is None
         assert result["action_type_description"] is None
         assert result["action_type_parent_type"] is None
 
-    def test_extract_action_type_empty_dict(self, transformer):
+    def test_extract_action_type_empty_dict(self):
         """Test extraction with empty dictionary."""
-        result = transformer._extract_action_type({})
+        result = flatten_nested_dict({}, "action_type_", _ACTION_TYPE_FIELDS)
 
         assert result["action_type_action_type"] is None
         assert result["action_type_description"] is None
         assert result["action_type_parent_type"] is None
 
-    def test_extract_action_type_partial_dict(self, transformer):
+    def test_extract_action_type_partial_dict(self):
         """Test extraction with partial data (parent_type nullable)."""
         action_data = {
             "action_type": "AGONIST",
@@ -453,39 +450,39 @@ class TestActivityTransformerActionType:
             # parent_type missing
         }
 
-        result = transformer._extract_action_type(action_data)
+        result = flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
 
         assert result["action_type_action_type"] == "AGONIST"
         assert result["action_type_description"] == "Activates receptor"
         assert result["action_type_parent_type"] is None
 
-    def test_extract_action_type_only_type(self, transformer):
+    def test_extract_action_type_only_type(self):
         """Test extraction with only action_type field."""
         action_data = {
             "action_type": "ANTAGONIST",
         }
 
-        result = transformer._extract_action_type(action_data)
+        result = flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
 
         assert result["action_type_action_type"] == "ANTAGONIST"
         assert result["action_type_description"] is None
         assert result["action_type_parent_type"] is None
 
-    def test_extract_action_type_non_dict_input(self, transformer):
+    def test_extract_action_type_non_dict_input(self):
         """Test extraction with non-dictionary input."""
         # String input
-        result1 = transformer._extract_action_type("INHIBITOR")
+        result1 = flatten_nested_dict("INHIBITOR", "action_type_", _ACTION_TYPE_FIELDS)
         assert all(v is None for v in result1.values())
 
         # List input (old format like ["INHIBITOR"])
-        result2 = transformer._extract_action_type(["INHIBITOR"])
+        result2 = flatten_nested_dict(["INHIBITOR"], "action_type_", _ACTION_TYPE_FIELDS)
         assert all(v is None for v in result2.values())
 
         # Integer input
-        result3 = transformer._extract_action_type(123)
+        result3 = flatten_nested_dict(123, "action_type_", _ACTION_TYPE_FIELDS)
         assert all(v is None for v in result3.values())
 
-    def test_extract_action_type_all_parent_types(self, transformer):
+    def test_extract_action_type_all_parent_types(self):
         """Test extraction with different parent_type values."""
         # POSITIVE MODULATOR parent type
         action_data_positive = {
@@ -493,7 +490,7 @@ class TestActivityTransformerActionType:
             "description": "Activates receptor",
             "parent_type": "POSITIVE MODULATOR",
         }
-        result = transformer._extract_action_type(action_data_positive)
+        result = flatten_nested_dict(action_data_positive, "action_type_", _ACTION_TYPE_FIELDS)
         assert result["action_type_parent_type"] == "POSITIVE MODULATOR"
 
         # NEGATIVE MODULATOR parent type
@@ -502,10 +499,10 @@ class TestActivityTransformerActionType:
             "description": "Inhibits activity",
             "parent_type": "NEGATIVE MODULATOR",
         }
-        result = transformer._extract_action_type(action_data_negative)
+        result = flatten_nested_dict(action_data_negative, "action_type_", _ACTION_TYPE_FIELDS)
         assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
 
-    def test_extract_action_type_preserves_whitespace(self, transformer):
+    def test_extract_action_type_preserves_whitespace(self):
         """Test extraction preserves whitespace in strings."""
         action_data = {
             "action_type": "PARTIAL AGONIST",
@@ -513,7 +510,7 @@ class TestActivityTransformerActionType:
             "parent_type": "POSITIVE MODULATOR",
         }
 
-        result = transformer._extract_action_type(action_data)
+        result = flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
 
         assert result["action_type_action_type"] == "PARTIAL AGONIST"
         assert result["action_type_description"] == "Compound with partial agonist activity"
