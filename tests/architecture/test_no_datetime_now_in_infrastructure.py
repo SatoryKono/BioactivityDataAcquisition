@@ -66,7 +66,7 @@ class TestNoDatetimeNowInInfrastructure:
             if py_file.name in ALLOWED_FILES:
                 continue
 
-            source = py_file.read_text()
+            source = py_file.read_text(encoding="utf-8")
             tree = ast.parse(source)
 
             for node in ast.walk(tree):
