@@ -441,9 +441,16 @@ class ChemblAdapter(BaseHttpAdapter):
         try:
             response = await self.http_client.get(CHEMBL_STATUS_URL)
             self._handle_health_response(response)
-        except Exception:
+        except Exception as e:
             self._consecutive_errors += 1
             self._update_health()
+            error_type = self._error_classifier.classify(e)
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error_type=error_type.value,
+                error=str(e),
+            )
 
         self._last_health_check = datetime.now()
         return self._cached_health
@@ -458,9 +465,21 @@ class ChemblAdapter(BaseHttpAdapter):
                 self._cached_health = HealthStatus.HEALTHY
             else:
                 self._cached_health = HealthStatus.DEGRADED
+                self.logger.warning(
+                    "health_check_degraded",
+                    provider=self.provider_name,
+                    reason="status_not_up",
+                    api_status=data.get("status"),
+                )
         else:
             self._consecutive_errors += 1
             self._update_health()
+            self.logger.warning(
+                "health_check_degraded",
+                provider=self.provider_name,
+                reason="non_200_response",
+                status_code=response.status_code,
+            )
 
     def _update_health(self) -> None:
         """Update health status based on error count."""
