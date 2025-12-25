@@ -343,6 +343,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             gold_table=pipeline.config.gold_table,
             silver_write_mode=pipeline.config.write_mode,
             gold_write_mode=pipeline.config.gold_write_mode,
+            on_schema_mismatch=pipeline.config.on_schema_mismatch,
         )
 
         processor_config = RecordProcessorConfig(
