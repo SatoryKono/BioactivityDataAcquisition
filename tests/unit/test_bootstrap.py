@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -395,11 +395,13 @@ class TestChemblActivityFactory:
             )
 
             # Verify run_id is passed to pipeline.create()
+            # Note: transformer is created by factory via DI and passed to pipeline
             mock_pipeline_class.create.assert_called_once_with(
                 run_id=run_id,
                 runtime=runtime,
                 services=mock_services,
                 config=mock_domain_config,
+                transformer=ANY,  # Transformer instance created by factory
             )
             assert result is mock_pipeline
         finally:

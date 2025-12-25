@@ -7,92 +7,25 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.transform_utils import (
     aggregate_nested_lists,
     extract_list_field,
 )
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
 from bioetl.domain.entities import Target
-from bioetl.domain.transformations import generate_entity_id, safe_int
+from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
-class TargetTransformer(BaseTransformer):
+class TargetTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze target records to silver."""
 
-    def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL target transformer.
-
-        Args:
-            provider: Data provider identifier.
-
-        """
-        super().__init__(provider)
-
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL target to normalized format using Domain Entity."""
-        # Validate required field
-        target_chembl_id = self._get_required_field(record, "target_chembl_id")
-
-        entity_id = generate_entity_id(
-            record={"target_chembl_id": str(target_chembl_id)},
-            provider=self.provider,
-            id_field="target_chembl_id",
-        )
-
-        # Extract target_components with proper typing
-        target_components = cast(
-            "list[dict[str, Any]] | None", record.get("target_components")
-        )
-
-        # Extract flattened components
-        flattened_components = self._flatten_target_components(target_components)
-
-        business_data: dict[str, Any] = {
-            # Primary identifier
-            "target_chembl_id": str(target_chembl_id),
-            # Core metadata
-            "pref_name": record.get("pref_name"),
-            "target_type": record.get("target_type"),
-            "organism": record.get("organism"),
-            "tax_id": safe_int(record.get("tax_id")),
-            "species_group_flag": record.get("species_group_flag"),
-            "description": record.get("description"),
-            "downgraded": record.get("downgraded"),
-            # Optional fields (present for specific target types)
-            "dap_id": safe_int(record.get("dap_id")),
-            "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
-            "target_constraints": self.serialize_json(
-                record.get("target_constraints")
-            ),
-            # Complex fields (JSON serialized)
-            "target_components": self.serialize_json(target_components),
-            "target_component_synonyms": self._aggregate_synonyms(target_components),
-            "cross_references": self._aggregate_component_xrefs(target_components),
-            # Flattened components
-            **flattened_components,
-        }
-
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # Create entity using helper method
-        entity = self._create_entity(
-            Target,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            **business_data,
-        )
-
-        # Convert Entity to SilverRecord for storage
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
+    entity_class = Target
+    primary_id_field = "target_chembl_id"
 
     def _flatten_target_components(
         self, components: list[dict[str, Any]] | None
@@ -179,3 +112,51 @@ class TargetTransformer(BaseTransformer):
         """
         xrefs = aggregate_nested_lists(components, "target_component_xrefs")
         return self.serialize_json(xrefs) if xrefs else None
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract Target business data from bronze record.
+
+        Args:
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated target_chembl_id value.
+
+        Returns:
+            Dictionary of Target business fields.
+
+        """
+        # Extract target_components with proper typing
+        target_components = cast(
+            "list[dict[str, Any]] | None", record.get("target_components")
+        )
+
+        # Extract flattened components
+        flattened_components = self._flatten_target_components(target_components)
+
+        return {
+            # Primary identifier
+            "target_chembl_id": str(primary_id),
+            # Core metadata
+            "pref_name": record.get("pref_name"),
+            "target_type": record.get("target_type"),
+            "organism": record.get("organism"),
+            "tax_id": safe_int(record.get("tax_id")),
+            "species_group_flag": record.get("species_group_flag"),
+            "description": record.get("description"),
+            "downgraded": record.get("downgraded"),
+            # Optional fields (present for specific target types)
+            "dap_id": safe_int(record.get("dap_id")),
+            "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
+            "target_constraints": self.serialize_json(
+                record.get("target_constraints")
+            ),
+            # Complex fields (JSON serialized)
+            "target_components": self.serialize_json(target_components),
+            "target_component_synonyms": self._aggregate_synonyms(target_components),
+            "cross_references": self._aggregate_component_xrefs(target_components),
+            # Flattened components
+            **flattened_components,
+        }
