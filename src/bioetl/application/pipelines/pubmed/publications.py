@@ -1,55 +1,22 @@
 # src/bioetl/application/pipelines/pubmed/publications.py
 """PubMed Publications Pipeline.
 
-Updated: Transformer injection via DI (Phase 1 refactoring).
+Refactored: Uses default_transformer_class for fallback (eliminates __init__ boilerplate).
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.application.core.base import BasePipeline
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.domain.config import PipelineConfig, RuntimeConfig
-    from bioetl.domain.types import RunID
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 
 
 class PubMedPublicationsPipeline(BasePipeline):
     """Пайплайн для данных о публикациях из PubMed.
 
     Transformer is injected via DI from GenericPipelineFactory.
-    Fallback to local creation for backward compatibility with tests.
+    Falls back to PubMedPublicationTransformer if not injected.
     """
 
-    def __init__(
-        self,
-        config: PipelineConfig,
-        runtime: RuntimeConfig,
-        services: PipelineServices,
-        run_id: RunID,
-        transformer: "BaseTransformer | None" = None,
-    ) -> None:
-        """Initialize PubMed publications pipeline.
-
-        Args:
-            config: Pipeline configuration.
-            runtime: Runtime configuration.
-            services: Injected services (ports).
-            run_id: Unique identifier for this pipeline run.
-            transformer: Injected transformer (DI). If None, creates fallback.
-
-        """
-        # Create fallback transformer if not injected (backward compatibility)
-        if transformer is None:
-            from bioetl.application.pipelines.pubmed.transformer import (
-                PubMedPublicationTransformer,
-            )
-
-            transformer = PubMedPublicationTransformer(provider=config.provider)
-
-        super().__init__(config, runtime, services, run_id, transformer=transformer)
+    default_transformer_class = PubMedPublicationTransformer
 
     # transform_bronze_to_silver() is inherited from BasePipeline

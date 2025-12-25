@@ -261,16 +261,11 @@ class PubMedAdapter:
     async def aclose(self) -> None:
         """Close adapter resources.
 
-        Safely closes the HTTP client if it's open. Idempotent - safe to call
-        multiple times. Handles cases where client may already be closed.
+        Safely closes the HTTP client via its public context manager interface.
+        Idempotent - safe to call multiple times.
         """
-        if (
-            self.http_client
-            and hasattr(self.http_client, "_client")
-            and self.http_client._client is not None
-        ):
-            await self.http_client._client.aclose()
-            self.http_client._client = None
+        if self.http_client:
+            await self.http_client.__aexit__(None, None, None)
 
 
 def _create_pubmed_adapter(
