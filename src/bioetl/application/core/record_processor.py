@@ -185,7 +185,7 @@ class RecordProcessor:
         # 4. Write to Gold
         if gold_records:
             try:
-                await self._write_gold_batch(gold_records)
+                await self._write_gold_batch(gold_records, ingestion_ts)
             except Exception as e:
                 self._log_and_track_write_error("gold", e, batch_id)
                 raise
@@ -298,7 +298,9 @@ class RecordProcessor:
             mode=write_mode,
         )
 
-    async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
+    async def _write_gold_batch(
+        self, records: list[dict[str, Any]], ingestion_ts: datetime
+    ) -> None:
         # Validate Gold records using dedicated validator (SRP)
         result = self._gold_validator.validate(records)
         if not result.valid:
@@ -318,4 +320,5 @@ class RecordProcessor:
             records=records,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
+            ingestion_ts=ingestion_ts,
         )
