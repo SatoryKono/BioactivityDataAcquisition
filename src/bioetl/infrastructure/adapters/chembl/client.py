@@ -288,10 +288,14 @@ class ChemblAdapter(BaseHttpAdapter):
     def _get_primary_key_field(self, entity_type: str) -> str:
         """Get the primary key field name for deduplication."""
         pk_overrides = {
+            "assay": "assay_chembl_id",
             "molecule": "molecule_chembl_id",
             "compound": "molecule_chembl_id",
             "document": "document_chembl_id",
             "target": "target_chembl_id",
+            "target_component": "component_id",
+            "cell_line": "cell_chembl_id",
+            "tissue": "tissue_chembl_id",
         }
         return pk_overrides.get(
             entity_type, ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
