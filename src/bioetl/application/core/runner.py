@@ -13,8 +13,6 @@ from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.observability.observer import PipelineObserver
 
 if TYPE_CHECKING:
-    import structlog
-
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
@@ -25,7 +23,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.ports import LoggerPort, TracingPort
 
 
 class PipelineRunner:
@@ -44,7 +42,7 @@ class PipelineRunner:
         executor: PipelineExecutor,
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         lifecycle_service: MedallionLifecycleService,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
@@ -100,7 +98,7 @@ class PipelineRunner:
         )
 
     @property
-    def logger(self) -> structlog.BoundLogger:
+    def logger(self) -> LoggerPort:
         """Get the logger instance."""
         return self._logger
 
