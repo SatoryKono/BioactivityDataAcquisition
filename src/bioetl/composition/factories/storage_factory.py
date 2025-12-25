@@ -307,10 +307,11 @@ class StorageAdapter:
 
         Checks if each layer's base directory is writable.
         """
+        # Convert to Path objects since DeltaWriter and GoldWriter store as strings
         layers = [
-            ("bronze", self.bronze.base_path),
-            ("silver", self.silver.base_path),
-            ("gold", self.gold.base_path),
+            ("bronze", Path(self.bronze.base_path)),
+            ("silver", Path(self.silver.base_path)),
+            ("gold", Path(self.gold.base_path)),
         ]
 
         issues = 0
