@@ -38,11 +38,11 @@ class TestDQMonitorAnomalyDetection:
         """DQ Monitor should detect record count drop."""
         monitor = DataQualityMonitor(z_score_threshold=2.0)
 
-        # Build baseline
-        for _ in range(5):
-            monitor.update_baseline_from_metrics({"record_count": 1000.0})
+        # Build baseline with slight variation (required for stddev > 0)
+        for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
+            monitor.update_baseline_from_metrics({"record_count": value})
 
-        # Check with drop
+        # Check with significant drop (z-score will be high)
         anomalies = monitor.check_quality({"record_count": 100.0})
 
         assert len(anomalies) == 1
@@ -104,17 +104,16 @@ class TestDQMonitorSeverityLevels:
         monitor = DataQualityMonitor(z_score_threshold=2.0)
 
         # Build baseline with consistent values
+        # mean=100, stddev≈1.58
         for value in [100.0, 102.0, 98.0, 101.0, 99.0]:
             monitor.detector.add_baseline_value("metric", value)
 
-        # Slightly elevated value (z-score ~2.5)
-        anomalies = monitor.check_quality({"metric": 107.0})
+        # Value that gives z-score ~2.5 (between 2.0 and 3.0 for LOW severity)
+        # z = |104 - 100| / 1.58 ≈ 2.53
+        anomalies = monitor.check_quality({"metric": 104.0})
 
-        if anomalies:
-            assert anomalies[0].severity in (
-                AnomalySeverity.LOW,
-                AnomalySeverity.MEDIUM,
-            )
+        assert len(anomalies) == 1
+        assert anomalies[0].severity == AnomalySeverity.LOW
 
     def test_critical_severity_for_extreme_deviation(self) -> None:
         """Extreme deviations should get CRITICAL severity."""
