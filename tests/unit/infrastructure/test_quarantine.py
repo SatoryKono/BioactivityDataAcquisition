@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import UUID
 
@@ -9,6 +10,9 @@ import pytest
 
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+
+# Fixed timestamp for test reproducibility
+TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
 
 
 def _extract_record_from_call(mock_call) -> dict:
@@ -57,6 +61,7 @@ class TestUnifiedQuarantine:
             payload=payload,
             bronze_batch_id=bronze_batch_id,
             metadata={"error_details": error_details},
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         mock_deltalake.assert_called_once()
@@ -82,6 +87,7 @@ class TestUnifiedQuarantine:
             error_code="INVALID_DATA",
             payload=payload,
             bronze_batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+            ingestion_ts=TEST_INGESTION_TS,
         )
 
         mock_deltalake.assert_called_once()
