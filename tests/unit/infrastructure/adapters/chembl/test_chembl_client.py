@@ -145,6 +145,46 @@ async def test_fetch_deduplicates_assay_by_chembl_id(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
+async def test_fetch_with_filter_deduplicates_across_pages(adapter, mock_http_client):
+    """Test deduplication for filtered fetch across multiple pages."""
+    # First page with 2 assays
+    resp1 = MagicMock()
+    resp1.json.return_value = {
+        "assays": [
+            {"assay_chembl_id": "CHEMBL1000"},
+            {"assay_chembl_id": "CHEMBL1001"},
+        ],
+        "page_meta": {"next": "page2"},
+    }
+    # Second page with one duplicate and one new
+    resp2 = MagicMock()
+    resp2.json.return_value = {
+        "assays": [
+            {"assay_chembl_id": "CHEMBL1000"},  # Duplicate from page 1
+            {"assay_chembl_id": "CHEMBL1002"},
+        ],
+        "page_meta": {"next": None},
+    }
+
+    mock_http_client.get.side_effect = [resp1, resp2]
+
+    records = []
+    async for record in adapter.fetch_filtered(
+        entity_type="assay",
+        filter_ids=["CHEMBL1000", "CHEMBL1001", "CHEMBL1002"],
+        filter_field="assay_chembl_id",
+    ):
+        records.append(record)
+
+    # Should have 3 unique assays (duplicate CHEMBL1000 filtered out)
+    assert len(records) == 3
+    chembl_ids = [r["assay_chembl_id"] for r in records]
+    assert chembl_ids.count("CHEMBL1000") == 1
+    assert "CHEMBL1001" in chembl_ids
+    assert "CHEMBL1002" in chembl_ids
+
+
+@pytest.mark.asyncio
 async def test_fetch_error(adapter, mock_http_client):
     """Test API error handling."""
     mock_http_client.get.side_effect = Exception("API Error")
