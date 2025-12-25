@@ -5,47 +5,42 @@ Transforms Bronze records to Silver format (Document entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
 from bioetl.domain.entities import Document
-from bioetl.domain.transformations import generate_entity_id, safe_int
+from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
-class DocumentTransformer(BaseTransformer):
+class DocumentTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze document records to silver."""
 
-    def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL document transformer.
+    entity_class = Document
+    primary_id_field = "document_chembl_id"
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract Document business data from bronze record.
 
         Args:
-            provider: Data provider identifier.
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated document_chembl_id value.
+
+        Returns:
+            Dictionary of Document business fields.
 
         """
-        super().__init__(provider)
-
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL document to normalized format using Domain Entity."""
-        # Validate required field
-        document_chembl_id = self._get_required_field(record, "document_chembl_id")
-
-        entity_id = generate_entity_id(
-            record={"document_chembl_id": str(document_chembl_id)},
-            provider=self.provider,
-            id_field="document_chembl_id",
-        )
-
-        business_data: dict[str, Any] = {
+        return {
             # Primary identifier
-            "document_chembl_id": str(document_chembl_id),
+            "document_chembl_id": str(primary_id),
             # Publication identifiers
             "pubmed_id": safe_int(record.get("pubmed_id")),
             "doi": record.get("doi"),
@@ -66,17 +61,3 @@ class DocumentTransformer(BaseTransformer):
             # Source information
             "src_id": safe_int(record.get("src_id")),
         }
-
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # Create entity using helper method
-        entity = self._create_entity(
-            Document,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            **business_data,
-        )
-
-        # Convert Entity to SilverRecord for storage
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
