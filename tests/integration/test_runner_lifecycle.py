@@ -158,7 +158,10 @@ def mock_logger():
 
 @pytest.fixture
 def mock_lifecycle_service_with_recorder(call_recorder, mock_services_with_recorder):
-    """Create lifecycle service that records calls and delegates to storage."""
+    """Create lifecycle service that records calls and delegates to storage.
+
+    Respects MedallionPolicy - only clears when policy indicates.
+    """
     from bioetl.application.services.medallion_lifecycle import (
         ClearResult,
         MedallionLifecycleService,
@@ -167,16 +170,27 @@ def mock_lifecycle_service_with_recorder(call_recorder, mock_services_with_recor
     service = MagicMock(spec=MedallionLifecycleService)
 
     async def clear_with_recording(*args, **kwargs):
-        # Delegate to storage methods which have their own recording
-        await mock_services_with_recorder.storage.clear_silver(
-            kwargs.get("silver_table", "test.silver"),
+        # Respect policy - only clear when policy indicates (mimics real behavior)
+        policy = kwargs.get("policy")
+        silver_cleared = 0
+        gold_cleared = 0
+
+        if policy and policy.should_clear_silver:
+            silver_cleared = await mock_services_with_recorder.storage.clear_silver(
+                kwargs.get("silver_table", "test.silver"),
+                dry_run=kwargs.get("dry_run", False),
+            )
+        if policy and policy.should_clear_gold:
+            gold_cleared = await mock_services_with_recorder.storage.clear_gold(
+                kwargs.get("gold_table", "test.gold"),
+                dry_run=kwargs.get("dry_run", False),
+            )
+
+        return ClearResult(
+            silver_cleared=silver_cleared or 0,
+            gold_cleared=gold_cleared or 0,
             dry_run=kwargs.get("dry_run", False),
         )
-        await mock_services_with_recorder.storage.clear_gold(
-            kwargs.get("gold_table", "test.gold"),
-            dry_run=kwargs.get("dry_run", False),
-        )
-        return ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
 
     service.clear = AsyncMock(side_effect=clear_with_recording)
     return service
