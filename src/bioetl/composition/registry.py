@@ -5,6 +5,7 @@ MOVED to composition layer to fix dependency direction.
 
 from __future__ import annotations
 
+import threading
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Protocol, runtime_checkable
 
 import pyarrow as pa
@@ -68,12 +69,16 @@ class PipelineDefinition(NamedTuple):
 class PipelineRegistry:
     """Registry for pipeline factories.
 
+    Thread-safe singleton registry for pipeline factory instances.
+    All public methods are protected with RLock for concurrent access.
+
     Example:
         >>> factory = GenericPipelineFactory(...)
         >>> PipelineRegistry.register_factory(factory)
     """
 
     _registry: ClassVar[dict[str, PipelineDefinition]] = {}
+    _registry_lock: ClassVar[threading.RLock] = threading.RLock()
 
     @classmethod
     def register_factory(
@@ -82,11 +87,14 @@ class PipelineRegistry:
     ) -> None:
         """Register a pipeline factory instance.
 
+        Thread-safe registration with duplicate detection.
+
         Args:
             factory: Factory instance with pipeline_name and silver_schema attributes
 
         Raises:
             ValueError: If factory does not have gold_schema attribute
+            ValueError: If pipeline is already registered (prevents double registration)
         """
         gold_schema = getattr(factory, "gold_schema", None)
         if gold_schema is None:
@@ -95,15 +103,23 @@ class PipelineRegistry:
                 "All Gold layer writes require schema validation."
             )
 
-        cls._registry[factory.pipeline_name] = PipelineDefinition(
-            factory=factory,
-            silver_schema=factory.silver_schema,
-            gold_schema=gold_schema,
-        )
+        with cls._registry_lock:
+            if factory.pipeline_name in cls._registry:
+                raise ValueError(
+                    f"Pipeline already registered: {factory.pipeline_name}. "
+                    "Use clear() in tests to reset registry state."
+                )
+            cls._registry[factory.pipeline_name] = PipelineDefinition(
+                factory=factory,
+                silver_schema=factory.silver_schema,
+                gold_schema=gold_schema,
+            )
 
     @classmethod
     def get(cls, pipeline_name: str) -> PipelineDefinition:
         """Get pipeline definition by name.
+
+        Thread-safe read access to registry.
 
         Args:
             pipeline_name: Pipeline identifier
@@ -115,25 +131,31 @@ class PipelineRegistry:
             RuntimeError: If registry is empty (registration not called)
             ValueError: If pipeline is not registered
         """
-        if not cls._registry:
-            raise RuntimeError(
-                "PipelineRegistry is empty. "
-                "Did you forget to call register_all_pipelines()?"
-            )
-        if pipeline_name not in cls._registry:
-            raise ValueError(
-                f"Unknown pipeline name: {pipeline_name}. "
-                f"Available: {list(cls._registry.keys())}"
-            )
-        return cls._registry[pipeline_name]
+        with cls._registry_lock:
+            if not cls._registry:
+                raise RuntimeError(
+                    "PipelineRegistry is empty. "
+                    "Did you forget to call register_all_pipelines()?"
+                )
+            if pipeline_name not in cls._registry:
+                raise ValueError(
+                    f"Unknown pipeline name: {pipeline_name}. "
+                    f"Available: {sorted(cls._registry.keys())}"
+                )
+            return cls._registry[pipeline_name]
 
     @classmethod
     def list_pipelines(cls) -> list[str]:
         """List all registered pipeline names.
 
-        Legacy alias for list_keys().
+        Thread-safe listing with deterministic ordering.
+        Returns a snapshot of keys sorted alphabetically.
+
+        Returns:
+            Sorted list of pipeline names (deterministic order).
         """
-        return list(cls._registry.keys())
+        with cls._registry_lock:
+            return sorted(cls._registry.keys())
 
     @classmethod
     def register(
@@ -143,6 +165,7 @@ class PipelineRegistry:
     ) -> None:
         """Register a pipeline factory (unified API).
 
+        Thread-safe registration with duplicate detection.
         This method provides a unified API consistent with other registries.
         For backward compatibility, use register_factory() which extracts
         the key from factory.pipeline_name.
@@ -153,6 +176,7 @@ class PipelineRegistry:
 
         Raises:
             ValueError: If factory does not have gold_schema attribute
+            ValueError: If pipeline is already registered
         """
         gold_schema = getattr(value, "gold_schema", None)
         if gold_schema is None:
@@ -160,11 +184,17 @@ class PipelineRegistry:
                 f"Factory '{key}' must have gold_schema. "
                 "All Gold layer writes require schema validation."
             )
-        cls._registry[key] = PipelineDefinition(
-            factory=value,
-            silver_schema=value.silver_schema,
-            gold_schema=gold_schema,
-        )
+        with cls._registry_lock:
+            if key in cls._registry:
+                raise ValueError(
+                    f"Pipeline already registered: {key}. "
+                    "Use clear() in tests to reset registry state."
+                )
+            cls._registry[key] = PipelineDefinition(
+                factory=value,
+                silver_schema=value.silver_schema,
+                gold_schema=gold_schema,
+            )
 
     @classmethod
     def list_keys(cls) -> list[str]:
@@ -178,18 +208,23 @@ class PipelineRegistry:
     def contains(cls, key: str) -> bool:
         """Check if pipeline is registered.
 
+        Thread-safe check for key existence.
+
         Args:
             key: Pipeline name to check
 
         Returns:
             True if pipeline is registered, False otherwise
         """
-        return key in cls._registry
+        with cls._registry_lock:
+            return key in cls._registry
 
     @classmethod
     def clear(cls) -> None:
         """Clear all registrations (for testing).
 
+        Thread-safe reset of registry state.
         WARNING: Only use in tests. Not for production.
         """
-        cls._registry.clear()
+        with cls._registry_lock:
+            cls._registry.clear()
