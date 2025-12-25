@@ -18,6 +18,7 @@ Example:
     10.0
 """
 
+from bioetl.composition.providers.decorators import register_provider
 from bioetl.composition.providers.loader import (
     ensure_providers_loaded,
     load_providers,
@@ -36,4 +37,5 @@ __all__ = [
     "ensure_providers_loaded",
     "load_providers",
     "register_all_providers",
+    "register_provider",
 ]
