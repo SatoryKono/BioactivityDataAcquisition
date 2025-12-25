@@ -72,10 +72,13 @@ class BaseServicesFactory:
 
         # Use provided tracer or fallback to NoOpTracing
         # Tracer should be created via bootstrap_tracer() for consistent configuration
+        actual_tracer: TracingPort
         if tracer is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
-            tracer = NoOpTracing()
+            actual_tracer = NoOpTracing()
+        else:
+            actual_tracer = tracer
 
         return PipelineServices(
             data_source=data_source,
@@ -84,7 +87,7 @@ class BaseServicesFactory:
             checkpoint=checkpoint,
             quarantine=quarantine,
             metrics=metrics,
-            tracing=tracer,
+            tracing=actual_tracer,
             logger=logger,
             dq_monitor=dq_monitor,
         )
