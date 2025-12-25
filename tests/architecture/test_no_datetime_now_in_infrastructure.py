@@ -19,8 +19,6 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 ALLOWED_FILES: set[str] = {
     # Operations use datetime.now() for calculating retention periods (cleanup)
     "operations.py",
-    # Unified quarantine has fallback for backward compatibility
-    "unified.py",
     # Gold writer uses datetime.now() for SCD2 valid_from/valid_to columns
     # TODO (#arch-review): Consider passing timestamp for SCD2 as well
     "gold_writer.py",

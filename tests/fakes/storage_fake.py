@@ -45,16 +45,28 @@ class InMemoryStorage:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
-        ingestion_ts: datetime | None = None,
+        ingestion_ts: datetime,
     ) -> None:
-        """Write raw records to the Bronze layer."""
+        """Write raw records to the Bronze layer.
+
+        Args:
+            records: Iterator of JSON-encoded record bytes.
+            provider: Provider name.
+            entity: Entity type.
+            date: Date for path partitioning.
+            batch_id: Unique batch identifier.
+            run_id: Pipeline run identifier.
+            run_type: Type of run.
+            ingestion_ts: Ingestion timestamp from application layer.
+
+        """
         key = f"bronze/v1/{provider}/{entity}/{date.strftime('%Y-%m-%d')}/{batch_id}.jsonl.zst"
         record_list = list(records)
         self.bronze[key].extend(record_list)
         self.bronze_metadata[key] = {
             "run_id": str(run_id),
             "run_type": run_type.value if hasattr(run_type, "value") else str(run_type),
-            "ingestion_ts": ingestion_ts.isoformat() if ingestion_ts else None,
+            "ingestion_ts": ingestion_ts.isoformat(),
         }
         self.operations.append({
             "operation": "write_bronze",

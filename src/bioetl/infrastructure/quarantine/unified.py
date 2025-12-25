@@ -12,7 +12,7 @@ Requirements:
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
@@ -62,7 +62,8 @@ class UnifiedQuarantine:
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
         metadata: dict[str, Any] | None = None,
-        ingestion_ts: datetime | None = None,
+        *,
+        ingestion_ts: datetime,
     ) -> None:
         """Write record to quarantine.
 
@@ -73,8 +74,8 @@ class UnifiedQuarantine:
             bronze_batch_id: The ID of the bronze batch containing the record.
             run_id: Optional ID of the pipeline run for traceability.
             metadata: Optional additional metadata (e.g., error_details, bronze_file_uri).
-            ingestion_ts: Ingestion timestamp from application layer.
-                         If None, uses current UTC time (backward compat).
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014). Required.
 
         """
         payload_json = json.dumps(payload, ensure_ascii=True)
@@ -87,11 +88,9 @@ class UnifiedQuarantine:
 
         payload_hash = calculate_hash(payload_json)
         meta = metadata or {}
-        # Use provided timestamp or fall back to current time (backward compat)
-        effective_ts = ingestion_ts or datetime.now(UTC)
 
         record = {
-            "ingestion_ts": effective_ts.isoformat(),
+            "ingestion_ts": ingestion_ts.isoformat(),
             "pipeline": pipeline,
             "error_code": error_code,
             "payload": payload_json,

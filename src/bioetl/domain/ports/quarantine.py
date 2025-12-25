@@ -28,7 +28,8 @@ class QuarantinePort(Protocol):
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
         metadata: dict[str, Any] | None = None,
-        ingestion_ts: datetime | None = None,
+        *,
+        ingestion_ts: datetime,
     ) -> None:
         """Write a record to quarantine.
 
@@ -39,7 +40,8 @@ class QuarantinePort(Protocol):
             bronze_batch_id: The ID of the bronze batch containing the record.
             run_id: Optional ID of the pipeline run for traceability.
             metadata: Optional additional metadata (e.g., error_details, bronze_file_uri).
-            ingestion_ts: Ingestion timestamp from application layer.
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014). Required.
         """
         ...
 

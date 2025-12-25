@@ -128,7 +128,7 @@ class TestStoragePortProtocol:
                 batch_id: BatchID,
                 run_id: Any,
                 run_type: Any,
-                ingestion_ts: Any = None,
+                ingestion_ts: Any,  # Required per ADR-014
             ) -> None:
                 pass
 

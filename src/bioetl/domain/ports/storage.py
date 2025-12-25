@@ -37,7 +37,7 @@ class StoragePort(Protocol):
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
-        ingestion_ts: datetime | None = None,
+        ingestion_ts: datetime,
     ) -> None:
         """Write raw records to the Bronze layer.
 
@@ -49,7 +49,8 @@ class StoragePort(Protocol):
             batch_id: The unique identifier for the batch of records.
             run_id: The unique identifier for the pipeline run (for traceability).
             run_type: The type of pipeline run (incremental, backfill, rebuild).
-            ingestion_ts: Ingestion timestamp from context (single source of time).
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014). Required.
         """
         ...
 

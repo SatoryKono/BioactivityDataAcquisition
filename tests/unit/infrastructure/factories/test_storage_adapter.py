@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -99,6 +99,8 @@ class TestStorageAdapterWriteBronze:
         batch_id = uuid4()
         run_id = uuid4()
         run_type = RunType.INCREMENTAL
+        # Fixed timestamp for deterministic tests (ADR-014)
+        ingestion_ts = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
 
         await storage_adapter.write_bronze(
             records=records,
@@ -108,6 +110,7 @@ class TestStorageAdapterWriteBronze:
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         mock_bronze_writer.write_bronze.assert_called_once()
@@ -118,6 +121,7 @@ class TestStorageAdapterWriteBronze:
         assert call_kwargs["batch_id"] == batch_id
         assert call_kwargs["run_id"] == run_id
         assert call_kwargs["run_type"] == run_type
+        assert call_kwargs["ingestion_ts"] == ingestion_ts
 
 
 @pytest.mark.unit
