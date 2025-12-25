@@ -341,9 +341,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             error_classifier=error_classifier,
             context=pipeline.context,
             config=processor_config,
-            transform_callback=pipeline.transform_bronze_to_silver,
-            gold_filter_callback=pipeline.should_write_gold,
-            gold_transform_callback=pipeline.transform_for_gold,
+            transform_callback=pipeline.transform_bronze_to_silver,  # type: ignore[arg-type]
+            gold_filter_callback=pipeline.should_write_gold,  # type: ignore[arg-type]
+            gold_transform_callback=pipeline.transform_for_gold,  # type: ignore[arg-type]
             gold_validator=gold_validator,
         )
 

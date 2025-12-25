@@ -141,7 +141,9 @@ class GoldWriter:
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
         if validated_mode == GoldWriteMode.SCD2:
-            await self._write_scd2(table_path, records, scd_config, partition_cols)
+            await self._write_scd2(
+                table_path, records, scd_config, partition_cols  # type: ignore[arg-type]
+            )
         else:  # OVERWRITE or APPEND
             await self._write_simple(
                 table_path,
@@ -452,7 +454,7 @@ class GoldWriter:
             import pyarrow.compute as pc
 
             arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
-        return arrow_table.to_pylist()
+        return arrow_table.to_pylist()  # type: ignore[no-any-return]
 
     async def get_history(
         self,
@@ -489,4 +491,4 @@ class GoldWriter:
 
         if "valid_from" in arrow_table.column_names:
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
-        return arrow_table.to_pylist()
+        return arrow_table.to_pylist()  # type: ignore[no-any-return]

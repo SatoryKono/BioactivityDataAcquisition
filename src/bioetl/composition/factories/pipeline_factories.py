@@ -143,15 +143,19 @@ def register_all_pipelines() -> None:
     if _factories_registered:
         return
 
-    PipelineRegistry.register_factory(chembl_activity_factory)
-    PipelineRegistry.register_factory(chembl_assay_factory)
-    PipelineRegistry.register_factory(chembl_document_factory)
-    PipelineRegistry.register_factory(chembl_target_factory)
-    PipelineRegistry.register_factory(chembl_target_component_factory)
-    PipelineRegistry.register_factory(chembl_molecule_factory)
-    PipelineRegistry.register_factory(pubchem_compound_factory)
-    PipelineRegistry.register_factory(uniprot_protein_factory)
-    PipelineRegistry.register_factory(pubmed_publications_factory)
+    # Note: type: ignore[arg-type] is needed due to Protocol covariance limitations.
+    # GenericPipelineFactory[T] returns T (a specific pipeline), but the Protocol
+    # expects BasePipeline (the base class). This is structurally sound but mypy
+    # cannot verify covariant return types in Protocols without explicit TypeVar.
+    PipelineRegistry.register_factory(chembl_activity_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(chembl_assay_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(chembl_document_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(chembl_target_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(chembl_target_component_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(chembl_molecule_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(pubchem_compound_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(uniprot_protein_factory)  # type: ignore[arg-type]
+    PipelineRegistry.register_factory(pubmed_publications_factory)  # type: ignore[arg-type]
 
     _factories_registered = True
 

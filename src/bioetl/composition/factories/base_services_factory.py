@@ -76,7 +76,7 @@ class BaseServicesFactory:
         if tracer is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
-            actual_tracer = NoOpTracing()
+            actual_tracer = NoOpTracing()  # type: ignore[assignment]
         else:
             actual_tracer = tracer
 

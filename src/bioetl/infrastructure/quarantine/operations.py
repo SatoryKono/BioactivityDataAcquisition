@@ -53,7 +53,7 @@ def inspect_records(
         record["payload"] = json.loads(record["payload"])
         record["error_details"] = json.loads(record["error_details"])
 
-    return records
+    return records  # type: ignore[no-any-return]
 
 
 def replay_records(
