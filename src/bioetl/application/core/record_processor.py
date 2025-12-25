@@ -7,25 +7,25 @@ Observability (O2):
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+from bioetl.application.core.handlers.layer_handlers import (
+    BronzeLayerHandler,
+    GoldLayerHandler,
+    HandlerContext,
+    SilverLayerHandler,
+)
 from bioetl.application.core.quarantine_manager import QuarantineManager
-from bioetl.domain.exceptions import DataQualityThresholdError, SchemaViolationError
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.application.core.protocols import (
-        GoldFilterCallback,
-        GoldTransformCallback,
-        TransformCallback,
-    )
+    from bioetl.application.core.protocols import TransformCallback
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports.gold_transformer import GoldTransformerPort
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
     from bioetl.domain.types import BatchID
 
@@ -44,6 +44,7 @@ class RecordProcessor:
     """Handles the transformation and writing of a single batch of records.
 
     This class contains the core ETL logic for a batch.
+    Refactored to delegate logic to specific layer handlers (R1).
 
     Observability (O2):
     - Nested spans for transform, write_bronze, write_silver, write_gold
@@ -57,8 +58,7 @@ class RecordProcessor:
         context: PipelineContext,
         config: RecordProcessorConfig,
         transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        gold_transform_callback: GoldTransformCallback,
+        gold_transformer: GoldTransformerPort,
         gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
     ):
@@ -76,115 +76,45 @@ class RecordProcessor:
             tracer: Optional tracing port for distributed tracing.
 
         """
-        self._storage = services.storage
-        self._quarantine_manager = QuarantineManager(
-            quarantine_port=services.quarantine,
-            pipeline_name=config.pipeline_name,
-        )
-        self._error_classifier = error_classifier
         self._context = context
-        self._config = config
-        self._transform = transform_callback
-        self._gold_filter = gold_filter_callback
-        self._gold_transform = gold_transform_callback
-        self._gold_validator = gold_validator
-        self._tracer = tracer
 
-        # Convenience properties
-        self._provider = config.provider
-        self._entity_type = config.entity_type
-        self._silver_schema = config.silver_schema
-        self._dq_config = config.dq_config
-        self._table_config = config.table_config
-
-        # Instantiate Metrics Recorder
-        pipeline_label = f"{self._provider}_{self._entity_type}"
-        run_type_label = self._context.run_type.value
+        # Initialize Metrics Recorder
+        pipeline_label = f"{config.provider}_{config.entity_type}"
+        run_type_label = context.run_type.value
         self._batch_metrics = BatchMetricsRecorder(
             services.metrics, pipeline_label, run_type_label
         )
 
-    def _log_and_track_write_error(
-        self, layer: str, error: Exception, batch_id: BatchID
-    ) -> None:
-        """Log write error and track metrics."""
-        error_type = self._error_classifier.classify(error)
-        self._context.logger.error(
-            f"{layer} write failed",
-            error=str(error),
-            error_type=error_type.value,
-            batch_id=str(batch_id),
+        # Initialize Quarantine Manager
+        quarantine_manager = QuarantineManager(
+            quarantine_port=services.quarantine,
+            pipeline_name=config.pipeline_name,
         )
-        self._batch_metrics.track_error(f"{layer}_write", error_type)
 
-    def _start_span(self, name: str, **attributes: Any) -> Any:
-        """Start a tracing span if tracer is available.
+        # Create Shared Context
+        handler_context = HandlerContext(
+            pipeline_context=context,
+            storage=services.storage,
+            metrics=self._batch_metrics,
+            error_classifier=error_classifier,
+            tracer=tracer,
+            config=config,
+        )
 
-        Args:
-            name: Name of the span.
-            **attributes: Span attributes.
+        # Initialize Layer Handlers
+        self._bronze_handler = BronzeLayerHandler(handler_context)
 
-        Returns:
-            Span object or None if tracer not available.
-        """
-        if not self._tracer:
-            return None
-        otel_tracer = self._tracer.get_tracer("bioetl.processor")
-        span = otel_tracer.start_as_current_span(name, attributes=attributes)
-        span.__enter__()
-        return span
+        self._silver_handler = SilverLayerHandler(
+            context=handler_context,
+            quarantine_manager=quarantine_manager,
+            transform_callback=transform_callback,
+            gold_transformer=gold_transformer,
+        )
 
-    def _end_span(self, span: Any, error: Exception | None = None) -> None:
-        """End a tracing span.
-
-        Args:
-            span: Span object to end.
-            error: Optional exception to record.
-        """
-        if not span:
-            return
-        if error:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-        span.__exit__(None, None, None)
-
-    async def _transform_records_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
-        """Transform all records, returning silver, gold, and quarantine count."""
-        silver_records: list[dict[str, Any]] = []
-        gold_records: list[dict[str, Any]] = []
-        records_quarantined = 0
-
-        for raw_record in records:
-            record_context = self._context.bind_logger(
-                batch_id=str(batch_id),
-                entity_id=raw_record.get("activity_id"),
-            )
-            try:
-                transformed = await self._transform_record(record_context, raw_record)
-                if transformed:
-                    silver_records.append(transformed)
-                    if self._gold_filter(record_context, transformed):
-                        gold_record = self._gold_transform(record_context, transformed)
-                        gold_records.append(gold_record)
-            except Exception as e:
-                error_type = self._error_classifier.classify(e)
-                if error_type.is_data_quality():
-                    await self._quarantine_manager.quarantine_record(
-                        raw_record,
-                        error_type,
-                        batch_id,
-                        str(e),
-                        ingestion_ts=self._context.started_at,
-                    )
-                    records_quarantined += 1
-                    self._batch_metrics.track_error("transform", error_type)
-                    self._batch_metrics.track_quarantined_records(error_type, 1)
-                else:
-                    raise
-
-        return silver_records, gold_records, records_quarantined
+        self._gold_handler = GoldLayerHandler(
+            context=handler_context,
+            validator=gold_validator,
+        )
 
     async def process_batch(
         self,
@@ -193,257 +123,32 @@ class RecordProcessor:
     ) -> BatchResult:
         """Process a batch of records through Bronze -> Silver -> Gold.
 
-        Creates nested spans for each stage:
-        - write_bronze: Writing raw records to Bronze layer
-        - transform: Transforming records to Silver/Gold formats
-        - write_silver: Writing to Silver Delta Lake
-        - write_gold: Writing to Gold Delta Lake
+        Delegates to layer handlers.
         """
         # Use context.started_at as single source of time (see ADR-014)
         ingestion_ts = self._context.started_at
 
-        # 1. Write to Bronze with span
-        span = self._start_span(
-            "write_bronze",
-            **{
-                "bioetl.batch_id": str(batch_id),
-                "bioetl.record_count": len(records),
-            },
+        # 1. Write to Bronze
+        bronze_count = await self._bronze_handler.write_bronze(
+            records, batch_id, ingestion_ts
         )
-        try:
-            await self._write_bronze_batch(records, batch_id, ingestion_ts)
-            self._end_span(span)
-        except Exception as e:
-            self._end_span(span, e)
-            self._log_and_track_write_error("bronze", e, batch_id)
-            raise
 
-        records_bronze = len(records)
-        self._batch_metrics.track_batch_size("bronze", records_bronze)
-        self._batch_metrics.track_processed_records("bronze", records_bronze)
-
-        # 2. Transform and collect Silver/Gold with span
-        span = self._start_span(
-            "transform",
-            **{
-                "bioetl.batch_id": str(batch_id),
-                "bioetl.input_count": len(records),
-            },
+        # 2. Transform and Write Silver
+        # Also returns gold records ready for processing and quarantined count
+        silver_count, gold_records, quarantined_count = (
+            await self._silver_handler.transform_and_write(
+                records, batch_id, ingestion_ts
+            )
         )
-        try:
-            silver_records, gold_records, records_quarantined = (
-                await self._transform_records_batch(records, batch_id)
-            )
-            if span:
-                span.set_attribute("bioetl.silver_count", len(silver_records))
-                span.set_attribute("bioetl.gold_count", len(gold_records))
-                span.set_attribute("bioetl.quarantined_count", records_quarantined)
-            self._end_span(span)
-        except Exception as e:
-            self._end_span(span, e)
-            raise
 
-        self._collect_dq_stats(records, records_quarantined)
-
-        # Update metrics
-        self._batch_metrics.track_processed_records("quarantined", records_quarantined)
-        self._batch_metrics.track_processed_records("silver", len(silver_records))
-        self._batch_metrics.track_processed_records("gold", len(gold_records))
-
-        # 3. Write to Silver with span
-        if silver_records:
-            span = self._start_span(
-                "write_silver",
-                **{
-                    "bioetl.batch_id": str(batch_id),
-                    "bioetl.record_count": len(silver_records),
-                },
-            )
-            try:
-                await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
-                self._end_span(span)
-            except Exception as e:
-                self._end_span(span, e)
-                self._log_and_track_write_error("silver", e, batch_id)
-                raise
-
-        # 4. Write to Gold with span
-        if gold_records:
-            span = self._start_span(
-                "write_gold",
-                **{
-                    "bioetl.batch_id": str(batch_id),
-                    "bioetl.record_count": len(gold_records),
-                },
-            )
-            try:
-                await self._write_gold_batch(gold_records)
-                self._end_span(span)
-            except Exception as e:
-                self._end_span(span, e)
-                self._log_and_track_write_error("gold", e, batch_id)
-                raise
+        # 3. Validate and Write Gold
+        gold_count = await self._gold_handler.write_gold(
+            gold_records, batch_id
+        )
 
         return BatchResult(
-            bronze_count=records_bronze,
-            silver_count=len(silver_records),
-            gold_count=len(gold_records),
-            quarantined_count=records_quarantined,
+            bronze_count=bronze_count,
+            silver_count=silver_count,
+            gold_count=gold_count,
+            quarantined_count=quarantined_count,
         )
-
-    async def _transform_record(
-        self, record_context: PipelineContext, raw_record: dict[str, Any]
-    ) -> dict[str, Any] | None:
-        """Transform a single record using the callback."""
-        return await self._transform(record_context, raw_record)
-
-    def _collect_dq_stats(
-        self, records: list[dict[str, Any]], quarantined_count: int
-    ) -> None:
-        """Collect DQ stats and check thresholds.
-
-        Tracks quarantined records via metrics and checks against
-        configured soft/hard thresholds.
-        """
-        if not records:
-            return
-
-        total_count = len(records)
-        error_rate = quarantined_count / total_count if total_count > 0 else 0.0
-
-        if not self._dq_config:
-            return
-
-        # Hard fail check
-        if (
-            self._dq_config.hard_fail_threshold
-            and error_rate >= self._dq_config.hard_fail_threshold
-        ):
-            raise DataQualityThresholdError(
-                error_rate, self._dq_config.hard_fail_threshold
-            )
-
-        # Soft fail check with detailed logging
-        if (
-            self._dq_config.soft_fail_threshold
-            and error_rate >= self._dq_config.soft_fail_threshold
-        ):
-            self._context.logger.warning(
-                "DQ Soft Threshold exceeded",
-                error_rate=round(error_rate, 4),
-                threshold=self._dq_config.soft_fail_threshold,
-                quarantined_count=quarantined_count,
-                total_count=total_count,
-                hard_threshold=self._dq_config.hard_fail_threshold,
-                pipeline=self._config.pipeline_name,
-            )
-
-    async def _write_bronze_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
-    ) -> None:
-        # 1. Serialize all records to JSON strings with deterministic key ordering
-        # This avoids serializing twice (once for sort, once for write)
-        json_strings = [json.dumps(r, sort_keys=True) for r in records]
-
-        # 2. Sort the JSON strings to ensure deterministic file content
-        json_strings.sort()
-
-        # 3. Create generator for bytes
-        record_bytes = ((s + "\n").encode("utf-8") for s in json_strings)
-
-        await self._storage.write_bronze(
-            records=record_bytes,
-            provider=self._provider,
-            entity=self._entity_type,
-            date=ingestion_ts,
-            batch_id=batch_id,
-            run_id=self._context.run_id,
-            run_type=self._context.run_type,
-            ingestion_ts=ingestion_ts,  # Pass from context (single source of time)
-        )
-
-    async def _write_silver_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
-    ) -> None:
-        records_with_meta = [
-            {
-                **r,
-                "_run_id": str(self._context.run_id),
-                "_run_type": self._context.run_type.value,
-                "_source_batch_id": str(batch_id),
-                "_ingestion_ts": ingestion_ts.isoformat(),
-            }
-            for r in records
-        ]
-        # Use configured table name or default
-        table_name = (
-            self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
-        )
-        # For "overwrite" mode, use "append" for batch writes since table is cleared at run start
-        # This allows accumulating batches within a run while still replacing previous run data
-        write_mode = self._table_config.silver_write_mode
-        if write_mode == "overwrite":
-            write_mode = "append"
-        await self._storage.write_silver(
-            table_name=table_name,
-            records=records_with_meta,
-            primary_keys=self._table_config.primary_keys,
-            schema=self._silver_schema,
-            mode=write_mode,
-        )
-
-    async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
-        # Get schema column names for filtering (strict mode requires exact columns)
-        gold_schema = self._config.gold_schema
-        schema_columns = self._get_schema_columns(gold_schema)
-
-        # Filter records to only include columns defined in Gold schema
-        if schema_columns:
-            records = [
-                {k: v for k, v in r.items() if k in schema_columns} for r in records
-            ]
-
-        # Validate Gold records using dedicated validator (SRP)
-        result = self._gold_validator.validate(records)
-        if not result.valid:
-            raise SchemaViolationError("gold", result.errors)
-
-        # Use configured table name or default
-        table_name = (
-            self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
-        )
-        # For "overwrite" mode, use "append" for batch writes since table is cleared at run start
-        # This allows accumulating batches within a run while still replacing previous run data
-        write_mode = self._table_config.gold_write_mode
-        if write_mode == "overwrite":
-            write_mode = "append"
-        await self._storage.write_gold(
-            table_name=table_name,
-            records=records,
-            schema=gold_schema,
-            primary_keys=self._table_config.primary_keys,
-            mode=write_mode,
-        )
-
-    def _get_schema_columns(self, schema: Any) -> set[str] | None:
-        """Extract column names from Pandera schema.
-
-        Args:
-            schema: Pandera DataFrameModel or DataFrameSchema.
-
-        Returns:
-            Set of column names, or None if schema is not recognized.
-
-        """
-        # Handle Pandera DataFrameModel (class with to_schema method)
-        # Use to_schema() to get actual column names including aliases
-        if hasattr(schema, "to_schema"):
-            try:
-                converted = schema.to_schema()
-                return set(converted.columns.keys())
-            except Exception:
-                pass
-        # Handle Pandera DataFrameSchema (instance with columns dict)
-        if hasattr(schema, "columns"):
-            return set(schema.columns.keys())
-        return None

@@ -1,59 +1,25 @@
 """Unit tests for RecordProcessor."""
 
-from __future__ import annotations
-
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
-
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.domain.config import TableConfig
+from bioetl.application.core.transformers.gold import DefaultGoldTransformer
+from bioetl.domain.config import PipelineConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.ports.validation import ValidationResult
+from bioetl.domain.types import BatchID, RunType
 from bioetl.infrastructure.config import get_pipeline_config
 
 
-def _write_temp_pipeline_config(
-    base_path: Path, pipeline_name: str, soft_threshold: float, hard_threshold: float
-) -> Path:
-    """Создаёт временную YAML-конфигурацию пайплайна с кастомными DQ-порогами."""
-
-    provider, entity = pipeline_name.split("_", 1)
-    config_dir = base_path / "configs" / "pipelines" / provider
-    config_dir.mkdir(parents=True, exist_ok=True)
-    config_path = config_dir / f"{entity}.yaml"
-
-    config_path.write_text(
-        "\n".join(
-            [
-                f"pipeline_name: {pipeline_name}",
-                f"provider: {provider}",
-                f"entity_type: {entity}",
-                "primary_keys: ['id']",
-                "silver_table: 'tmp_silver'",
-                "batch_size: 10",
-                "checkpoint_interval: 100",
-                "sink: {}",
-                "dq_rules:",
-                f"  soft_fail_threshold: {soft_threshold}",
-                f"  hard_fail_threshold: {hard_threshold}",
-            ]
-        ),
-        encoding="utf-8",
-    )
-
-    return config_path
-
-
+# --- Fixtures ---
 @pytest.fixture
 def mock_storage():
-    """Create mock storage."""
+    """Mock storage port."""
     storage = AsyncMock()
     storage.write_bronze = AsyncMock()
     storage.write_silver = AsyncMock()
@@ -62,125 +28,105 @@ def mock_storage():
 
 
 @pytest.fixture
+def mock_quarantine():
+    """Mock quarantine port."""
+    quarantine = AsyncMock()
+    quarantine.write = AsyncMock()
+    return quarantine
+
+
+@pytest.fixture
 def mock_metrics():
-    """Create mock metrics."""
-    metrics = AsyncMock()
+    """Mock metrics port."""
+    metrics = MagicMock()
+    metrics.increment = MagicMock()
     return metrics
 
 
 @pytest.fixture
-def mock_quarantine_port():
-    """Create mock quarantine port."""
-    port = AsyncMock()
-    port.write = AsyncMock()
-    return port
-
-
-@pytest.fixture
-def mock_services(mock_storage, mock_metrics, mock_quarantine_port):
-    """Create mock pipeline services."""
-    services = MagicMock(spec=PipelineServices)
+def mock_services(mock_storage, mock_quarantine, mock_metrics):
+    """Mock PipelineServices."""
+    services = MagicMock()
     services.storage = mock_storage
+    services.quarantine = mock_quarantine
     services.metrics = mock_metrics
-    services.quarantine = mock_quarantine_port
     return services
 
 
 @pytest.fixture
 def mock_error_classifier():
-    """Create mock error classifier."""
-    return ErrorClassifier()
+    """Mock ErrorClassifier."""
+    classifier = ErrorClassifier()
+    return classifier
 
 
 @pytest.fixture
 def mock_context():
-    """Create mock pipeline context."""
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-    return PipelineContext(
+    """Mock PipelineContext."""
+    return PipelineContext.create(
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
-        logger=mock_logger,
+        logger=MagicMock(),
     )
 
 
 @pytest.fixture
-def transform_callback():
-    """Create mock transform callback."""
-
-    async def transform(ctx, record):
-        return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
-
-    return transform
-
-
-@pytest.fixture
-def gold_filter_callback():
-    """Create mock gold filter callback."""
-
-    def filter_gold(ctx, record):
-        return record.get("value", 0) > 5
-
-    return filter_gold
-
-
-@pytest.fixture
-def gold_transform_callback():
-    """Create mock gold transform callback."""
-
-    def transform_gold(ctx, record):
-        # Simple pass-through for tests
-        return record
-
-    return transform_gold
-
-
-@pytest.fixture
-def mock_gold_validator():
-    """Create mock gold validator."""
-    validator = MagicMock()
-    validator.validate = MagicMock(return_value=ValidationResult(valid=True))
-    return validator
+def mock_gold_transformer():
+    """Mock GoldTransformer."""
+    transformer = MagicMock()
+    transformer.should_process.return_value = True
+    transformer.transform.side_effect = lambda ctx, rec: rec  # Identity transform
+    return transformer
 
 
 @pytest.fixture
 def record_processor(
-    mock_services,
-    mock_error_classifier,
-    mock_context,
-    transform_callback,
-    gold_filter_callback,
-    gold_transform_callback,
-    mock_gold_validator,
+    mock_services, mock_error_classifier, mock_context, mock_gold_transformer
 ):
-    """Create RecordProcessor instance."""
+    """Create a RecordProcessor instance."""
+    table_config = TableConfig(
+        primary_keys=["id"],
+        silver_table="silver_test",
+        gold_table="gold_test",
+        silver_write_mode="append",
+        gold_write_mode="append",
+    )
     config = RecordProcessorConfig(
-        pipeline_name="test_provider_test_entity",
-        provider="test_provider",
-        entity_type="test_entity",
+        pipeline_name="test",
+        provider="test",
+        entity_type="test",
         silver_schema=MagicMock(),
         gold_schema=MagicMock(),
-        table_config=TableConfig(),
+        dq_config=None,
+        table_config=table_config,
     )
+
+    # Mock callbacks
+    async def transform_callback(ctx, record):
+        return record
+
+    gold_validator = MagicMock()
+    gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
+
     return RecordProcessor(
         services=mock_services,
         error_classifier=mock_error_classifier,
         context=mock_context,
         config=config,
         transform_callback=transform_callback,
-        gold_filter_callback=gold_filter_callback,
-        gold_transform_callback=gold_transform_callback,
-        gold_validator=mock_gold_validator,
+        gold_transformer=mock_gold_transformer,
+        gold_validator=gold_validator,
     )
 
 
+# --- Tests ---
 @pytest.mark.unit
 class TestRecordProcessorInit:
     """Tests for RecordProcessor initialization."""
 
     def test_init_stores_dependencies(self, record_processor, mock_storage):
         """Test that initialization stores all dependencies."""
-        assert record_processor._storage is mock_storage
+        assert record_processor._bronze_handler._ctx.storage is mock_storage
 
 
 @pytest.mark.unit
@@ -188,9 +134,13 @@ class TestRecordProcessorProcessBatch:
     """Tests for process_batch method."""
 
     async def test_process_batch_writes_to_all_layers(
-        self, record_processor, mock_storage
+        self, record_processor, mock_storage, mock_gold_transformer
     ):
         """Test that process_batch writes to Bronze, Silver, and Gold."""
+
+        # Override mock_gold_transformer behavior for this test
+        mock_gold_transformer.should_process.side_effect = lambda ctx, r: r["value"] > 5
+
         records = [
             {"id": "1", "value": 10},  # Goes to gold (value > 5)
             {"id": "2", "value": 3},  # Not in gold
@@ -231,8 +181,12 @@ class TestRecordProcessorProcessBatch:
             assert record["_run_id"] == str(mock_context.run_id)
             assert record["_run_type"] == mock_context.run_type.value
 
-    async def test_process_batch_no_gold_records(self, record_processor, mock_storage):
+    async def test_process_batch_no_gold_records(
+        self, record_processor, mock_storage, mock_gold_transformer
+    ):
         """Test process_batch when no records pass gold filter."""
+        mock_gold_transformer.should_process.return_value = False
+
         records = [
             {"id": "1", "value": 1},
             {"id": "2", "value": 2},
@@ -245,7 +199,7 @@ class TestRecordProcessorProcessBatch:
         mock_storage.write_gold.assert_not_called()
 
     async def test_process_batch_handles_transform_error(
-        self, mock_services, mock_error_classifier, mock_context
+        self, mock_services, mock_error_classifier, mock_context, mock_gold_transformer
     ):
         """Test that transform errors result in quarantine."""
 
@@ -271,8 +225,7 @@ class TestRecordProcessorProcessBatch:
             context=mock_context,
             config=config,
             transform_callback=failing_transform,
-            gold_filter_callback=lambda c, r: True,
-            gold_transform_callback=lambda c, r: r,
+            gold_transformer=mock_gold_transformer,
             gold_validator=gold_validator,
         )
 
@@ -291,7 +244,7 @@ class TestRecordProcessorProcessBatch:
         mock_services.quarantine.write.assert_called_once()
 
     async def test_process_batch_raises_non_data_quality_errors(
-        self, mock_services, mock_error_classifier, mock_context
+        self, mock_services, mock_error_classifier, mock_context, mock_gold_transformer
     ):
         """Test that non-data-quality errors are re-raised."""
         from bioetl.domain.exceptions import LockLostError
@@ -316,8 +269,7 @@ class TestRecordProcessorProcessBatch:
             context=mock_context,
             config=config,
             transform_callback=failing_transform,
-            gold_filter_callback=lambda c, r: True,
-            gold_transform_callback=lambda c, r: r,
+            gold_transformer=mock_gold_transformer,
             gold_validator=gold_validator,
         )
 
@@ -347,6 +299,7 @@ class TestRecordProcessorProcessBatch:
         mock_services,
         mock_error_classifier,
         mock_context,
+        mock_gold_transformer
     ):
         """DQ hard threshold берётся из YAML и вызывает ошибку при превышении."""
 
@@ -380,8 +333,7 @@ class TestRecordProcessorProcessBatch:
             context=mock_context,
             config=processor_config,
             transform_callback=transform,
-            gold_filter_callback=lambda c, r: True,
-            gold_transform_callback=lambda c, r: r,
+            gold_transformer=mock_gold_transformer,
             gold_validator=gold_validator,
         )
 
@@ -402,6 +354,7 @@ class TestRecordProcessorProcessBatch:
         mock_services,
         mock_error_classifier,
         mock_context,
+        mock_gold_transformer
     ):
         """Высокий soft-порог из YAML отключает предупреждения при низкой доле ошибок."""
 
@@ -435,8 +388,7 @@ class TestRecordProcessorProcessBatch:
             context=mock_context,
             config=processor_config,
             transform_callback=transform,
-            gold_filter_callback=lambda c, r: True,
-            gold_transform_callback=lambda c, r: r,
+            gold_transformer=mock_gold_transformer,
             gold_validator=gold_validator,
         )
 
@@ -454,3 +406,32 @@ class TestRecordProcessorProcessBatch:
         mock_context.logger.warning.assert_not_called()
 
         get_pipeline_config.cache_clear()
+
+
+def _write_temp_pipeline_config(tmp_path, name, soft, hard):
+    """Helper to write temp config."""
+    try:
+        provider, entity = name.split("_", 1)
+    except ValueError:
+        provider, entity = "tmp", name
+
+    config_dir = tmp_path / "configs" / "pipelines" / provider
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file = config_dir / f"{entity}.yaml"
+
+    content = f"""
+pipeline_name: {name}
+provider: tmp
+entity_type: {name}
+source:
+  type: api
+  endpoint_url: http://test.local/
+  rate_limit: 10
+  format: json
+primary_keys: ["entity_id"]
+silver_table: silver_{name}
+dq:
+  soft_fail_threshold: {soft}
+  hard_fail_threshold: {hard}
+"""
+    config_file.write_text(content)

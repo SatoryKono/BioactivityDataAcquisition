@@ -91,10 +91,41 @@ class BaseSyncAdapter(DataSourcePort):
         """Gracefully close resources."""
         await self.close()
 
-    async def _run_in_executor(self, func: Any, *args: Any) -> Any:
-        """Run synchronous function in thread pool."""
+    async def _run_in_executor(self, func: Any, *args: Any, **kwargs: Any) -> Any:
+        """Run synchronous function in thread pool.
+
+        Args:
+            func: Function to execute.
+            *args: Positional arguments for the function.
+            **kwargs: Keyword arguments for the function.
+        """
         loop = asyncio.get_running_loop()
+        # run_in_executor does not support kwargs, so we use a lambda/partial
+        if kwargs:
+            return await loop.run_in_executor(
+                self.thread_pool, lambda: func(*args, **kwargs)
+            )
         return await loop.run_in_executor(self.thread_pool, func, *args)
+
+    async def _execute(self, func: Any, *args: Any, **kwargs: Any) -> Any:
+        """Execute a synchronous function with rate limiting and circuit breaker.
+
+        This helper method encapsulates the standard resilient execution pattern:
+        1. Acquire rate limit token.
+        2. Execute function in thread pool via Circuit Breaker.
+
+        Args:
+            func: Synchronous function to execute.
+            *args: Positional arguments for the function.
+            **kwargs: Keyword arguments for the function.
+
+        Returns:
+            Result of the function call.
+        """
+        await self.rate_limiter.acquire()
+        return await self.circuit_breaker.call(
+            self._run_in_executor, func, *args, **kwargs
+        )
 
     async def health_check(self) -> HealthStatus:
         """Perform health check based on Circuit Breaker state."""

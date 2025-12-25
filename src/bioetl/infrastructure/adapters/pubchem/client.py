@@ -127,10 +127,7 @@ class PubChemAdapter(BaseSyncAdapter):
         self, query: str, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds by query."""
-        await self.rate_limiter.acquire()
-        compounds = await self.circuit_breaker.call(
-            self._run_in_executor, pcp.get_compounds, query, "name"
-        )
+        compounds = await self._execute(pcp.get_compounds, query, "name")
         for i, compound in enumerate(compounds or []):
             if limit and i >= limit:
                 break
@@ -146,14 +143,7 @@ class PubChemAdapter(BaseSyncAdapter):
             raise ValueError("Query is required for substance search")
 
         fetched = 0
-        await self.rate_limiter.acquire()
-
-        substances = await self.circuit_breaker.call(
-            self._run_in_executor,
-            pcp.get_substances,
-            query,
-            "name",
-        )
+        substances = await self._execute(pcp.get_substances, query, "name")
 
         for substance in substances or []:
             if limit and fetched >= limit:
@@ -171,13 +161,7 @@ class PubChemAdapter(BaseSyncAdapter):
             raise ValueError("Query is required for assay search")
 
         fetched = 0
-        await self.rate_limiter.acquire()
-
-        assays = await self.circuit_breaker.call(
-            self._run_in_executor,
-            pcp.get_assays,
-            query,
-        )
+        assays = await self._execute(pcp.get_assays, query)
 
         for assay in assays or []:
             if limit and fetched >= limit:
@@ -266,14 +250,7 @@ class PubChemAdapter(BaseSyncAdapter):
         """
         try:
             # Lightweight query: fetch water (CID 962)
-            await self.rate_limiter.acquire()
-
-            compound = await self.circuit_breaker.call(
-                self._run_in_executor,
-                pcp.get_compounds,
-                962,
-                "cid",
-            )
+            compound = await self._execute(pcp.get_compounds, 962, "cid")
 
             if compound:
                 return assess_health_from_circuit_breaker(self.circuit_breaker)

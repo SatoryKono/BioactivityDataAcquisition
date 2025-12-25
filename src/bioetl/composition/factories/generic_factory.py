@@ -15,6 +15,7 @@ from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.transformers.gold import DefaultGoldTransformer
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.composition.factories.data_source_registry import (
@@ -37,6 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, DQMonitorPort, TracingPort
+    from bioetl.domain.ports.gold_transformer import GoldTransformerPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -359,14 +361,16 @@ class GenericPipelineFactory(Generic[TPipeline]):
         # gold_schema is always required, so always use PanderaGoldValidator
         gold_validator = PanderaGoldValidator(self.gold_schema)
 
+        # Create Gold Transformer (DI pattern)
+        gold_transformer: GoldTransformerPort = DefaultGoldTransformer(pipeline.config)
+
         return RecordProcessor(
             services=pipeline.services,
             error_classifier=error_classifier,
             context=pipeline.context,
             config=processor_config,
             transform_callback=pipeline.transform_bronze_to_silver,
-            gold_filter_callback=pipeline.should_write_gold,
-            gold_transform_callback=pipeline.transform_for_gold,
+            gold_transformer=gold_transformer,
             gold_validator=gold_validator,
         )
 
