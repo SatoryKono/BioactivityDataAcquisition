@@ -149,36 +149,109 @@ class MedallionLifecycleService:
                 },
             )
 
-    async def vacuum(self, table: str, _retention_days: int = 7) -> int:
-        """Vacuum Delta table (remove old versions).
+    async def vacuum(
+        self,
+        table: str,
+        retention_days: int = 7,
+        dry_run: bool = False,
+    ) -> int:
+        """Vacuum Delta table to reclaim storage space.
 
-        Future implementation for ADR-011.
-
-        Args:
-            table: Table name to vacuum.
-            _retention_days: Days to retain before vacuum.
-
-        Returns:
-            Number of files removed.
-
-        Raises:
-            NotImplementedError: Vacuum not yet implemented.
-        """
-        raise NotImplementedError("Vacuum not yet implemented")
-
-    async def archive(self, table: str, target_path: str) -> int:
-        """Archive table to cold storage.
-
-        Future implementation for archival strategy.
+        Removes files older than retention period that are no longer
+        referenced by the Delta log. Safe to run concurrently with reads.
 
         Args:
-            table: Table name to archive.
-            target_path: Destination path for archive.
+            table: Table name in format "provider.entity"
+            retention_days: Minimum age of files to remove (default 7)
+            dry_run: If True, only report what would be removed
 
         Returns:
-            Number of records archived.
+            Number of files removed
 
         Raises:
-            NotImplementedError: Archive not yet implemented.
+            StorageError: If vacuum fails
         """
-        raise NotImplementedError("Archive not yet implemented")
+        retention_hours = retention_days * 24
+
+        self.logger.info(
+            "Starting vacuum operation",
+            table=table,
+            retention_days=retention_days,
+            dry_run=dry_run,
+        )
+
+        try:
+            files_removed = await self.storage.vacuum(
+                table_name=table,
+                retention_hours=retention_hours,
+                dry_run=dry_run,
+            )
+
+            self.logger.info(
+                "Vacuum completed",
+                table=table,
+                files_removed=files_removed,
+                dry_run=dry_run,
+            )
+
+            return files_removed
+
+        except Exception as e:
+            self.logger.error(
+                "Vacuum failed",
+                table=table,
+                error=str(e),
+            )
+            raise
+
+    async def archive(
+        self,
+        table: str,
+        target_path: str,
+        remove_source: bool = False,
+    ) -> int:
+        """Archive Delta table to cold storage.
+
+        Copies table data to archive location. Optionally removes source
+        after successful copy.
+
+        Args:
+            table: Table name to archive
+            target_path: Destination path for archive
+            remove_source: If True, remove source after successful copy
+
+        Returns:
+            Number of files archived
+
+        Raises:
+            StorageError: If archive fails
+        """
+        self.logger.info(
+            "Starting archive operation",
+            table=table,
+            target_path=target_path,
+            remove_source=remove_source,
+        )
+
+        try:
+            files_archived = await self.storage.archive(
+                table_name=table,
+                target_path=target_path,
+                remove_source=remove_source,
+            )
+
+            self.logger.info(
+                "Archive completed",
+                table=table,
+                files_archived=files_archived,
+            )
+
+            return files_archived
+
+        except Exception as e:
+            self.logger.error(
+                "Archive failed",
+                table=table,
+                error=str(e),
+            )
+            raise

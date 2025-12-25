@@ -347,6 +347,53 @@ class StoragePort(Protocol):
         """
         ...
 
+    async def vacuum(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> int:
+        """Vacuum Delta table to remove old file versions.
+
+        Removes files no longer referenced by the Delta log and older
+        than retention period. Uses delta-rs VACUUM operation.
+
+        Args:
+            table_name: Table name in format "provider.entity" (e.g., "chembl.activity")
+            retention_hours: Minimum age of files to remove (default 168h = 7 days)
+            dry_run: If True, only report what would be removed
+
+        Returns:
+            Number of files removed (or would be removed if dry_run)
+
+        Raises:
+            StorageError: If vacuum operation fails
+        """
+        ...
+
+    async def archive(
+        self,
+        table_name: str,
+        target_path: str,
+        remove_source: bool = False,
+    ) -> int:
+        """Archive Delta table to cold storage.
+
+        Copies table data to archive location. Optionally removes source.
+
+        Args:
+            table_name: Table name to archive
+            target_path: Destination path for archive
+            remove_source: If True, remove source after successful copy
+
+        Returns:
+            Number of files archived
+
+        Raises:
+            StorageError: If archive operation fails
+        """
+        ...
+
     def preview_cleanup(
         self,
         silver_table: str,

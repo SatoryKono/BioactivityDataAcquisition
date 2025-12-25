@@ -51,6 +51,7 @@ __all__ = [
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
     "bootstrap_cleanup",
+    "bootstrap_lifecycle_service",
     "bootstrap_logger",
     "bootstrap_metrics",
     "bootstrap_observability",
@@ -70,6 +71,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupService
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -143,6 +147,25 @@ def bootstrap_cleanup() -> CleanupService:
     noop_logger = NoOpLogger()
 
     return CleanupService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_lifecycle_service() -> MedallionLifecycleService:
+    """Bootstrap MedallionLifecycleService for CLI maintenance commands.
+
+    Creates a MedallionLifecycleService for vacuum and archive operations.
+    Used by CLI for `maintenance vacuum` and `maintenance archive` commands.
+
+    Returns:
+        MedallionLifecycleService configured for the current environment.
+    """
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+
+    storage = bootstrap_storage()
+    noop_logger = NoOpLogger()
+
+    return MedallionLifecycleService(storage=storage, logger=noop_logger)
 
 
 def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManager:
