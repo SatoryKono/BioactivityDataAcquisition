@@ -389,6 +389,8 @@ class TestGoldWriter:
 
     async def test_gold_writer_sorts_columns(self, mock_gold_writer_deps):
         """Test that GoldWriter sorts columns alphabetically in _to_arrow_table."""
+        from pandera.polars import Column, DataFrameSchema
+
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 
         writer = GoldWriter(base_path="/tmp/gold")
@@ -399,9 +401,16 @@ class TestGoldWriter:
             {"c": 30, "b": 20, "a": 10},
         ]
 
+        # Create a strict schema matching the records
+        strict_schema = DataFrameSchema(
+            {"a": Column(int), "b": Column(int), "c": Column(int)},
+            strict=True,
+        )
+
         await writer.write_gold(
             table_name="test_table",
             records=records,
+            schema=strict_schema,
             mode="overwrite",
         )
 
