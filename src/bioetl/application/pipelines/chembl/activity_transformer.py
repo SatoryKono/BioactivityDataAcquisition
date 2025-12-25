@@ -5,16 +5,17 @@ Transforms Bronze records to Silver format (Activity entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.transform_utils import flatten_nested_dict
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
 from bioetl.domain.entities import Activity
-from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
+from bioetl.domain.transformations import safe_float, safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
 # Mapping for ligand efficiency fields extraction
@@ -33,12 +34,11 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
 }
 
 
-class ActivityTransformer(BaseTransformer):
+class ActivityTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze records to silver."""
 
-    def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL activity transformer."""
-        super().__init__(provider)
+    entity_class = Activity
+    primary_id_field = "activity_id"
 
     def _extract_ligand_efficiency(
         self, le_data: dict[str, Any] | None
@@ -136,35 +136,27 @@ class ActivityTransformer(BaseTransformer):
             "toid": safe_int(record.get("toid")),
         }
 
-    async def _transform_impl(
+    def _extract_business_data(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL activity to normalized format."""
-        activity_id = self._get_required_field(record, "activity_id")
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract Activity business data from bronze record.
+
+        Args:
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated activity_id value.
+
+        Returns:
+            Dictionary of Activity business fields.
+
+        """
+        # Validate secondary required field
         molecule_id = self._get_required_field(record, "molecule_chembl_id")
 
-        entity_id = generate_entity_id(
-            record={"activity_id": str(activity_id)},
-            provider=self.provider,
-            id_field="activity_id",
-        )
-
-        business_data: dict[str, Any] = {
-            **self._map_core_identifiers(record, activity_id, molecule_id),
+        return {
+            **self._map_core_identifiers(record, primary_id, molecule_id),
             **self._map_molecule_target_assay(record),
             **self._map_activity_values(record),
             **self._map_quality_annotations(record),
         }
-
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-        entity = self._create_entity(
-            Activity,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            **business_data,
-        )
-
-        return cast("SilverRecord", self.entity_to_silver_record(entity))

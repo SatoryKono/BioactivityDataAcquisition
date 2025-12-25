@@ -5,16 +5,17 @@ Transforms Bronze records to Silver format (Molecule entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.transform_utils import flatten_nested_dict
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
 from bioetl.domain.entities import Molecule
-from bioetl.domain.transformations import generate_entity_id, safe_float, safe_int
+from bioetl.domain.transformations import safe_float, safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
 # Field mappings for molecule nested structures
@@ -70,12 +71,11 @@ def _extract_structures(data: dict[str, Any] | None) -> dict[str, Any]:
     return flatten_nested_dict(data, "structure_", _STRUCTURES_FIELDS)
 
 
-class MoleculeTransformer(BaseTransformer):
+class MoleculeTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze molecule records to silver."""
 
-    def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL molecule transformer."""
-        super().__init__(provider)
+    entity_class = Molecule
+    primary_id_field = "molecule_chembl_id"
 
     def _map_core_metadata(self, record: BronzeRecord) -> dict[str, Any]:
         """Map core molecule metadata fields."""
@@ -134,22 +134,23 @@ class MoleculeTransformer(BaseTransformer):
             ),
         }
 
-    async def _transform_impl(
+    def _extract_business_data(
         self,
-        context: PipelineContext,
         record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL molecule to normalized format."""
-        molecule_chembl_id = self._get_required_field(record, "molecule_chembl_id")
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract Molecule business data from bronze record.
 
-        entity_id = generate_entity_id(
-            record={"molecule_chembl_id": str(molecule_chembl_id)},
-            provider=self.provider,
-            id_field="molecule_chembl_id",
-        )
+        Args:
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated molecule_chembl_id value.
 
-        business_data: dict[str, Any] = {
-            "molecule_chembl_id": str(molecule_chembl_id),
+        Returns:
+            Dictionary of Molecule business fields.
+
+        """
+        return {
+            "molecule_chembl_id": str(primary_id),
             **self._map_core_metadata(record),
             **self._map_molecule_flags(record),
             **self._map_additional_metadata(record),
@@ -158,14 +159,3 @@ class MoleculeTransformer(BaseTransformer):
             **_extract_properties(record.get("molecule_properties")),
             **_extract_structures(record.get("molecule_structures")),
         }
-
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
-        entity = self._create_entity(
-            Molecule,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            **business_data,
-        )
-
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
