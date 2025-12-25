@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 from typing_extensions import override
 
 from bioetl.composition.providers import register_provider
+from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
@@ -290,9 +291,23 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 f"{self.base_url}/uniprotkb/search", params=params
             )
             if resp.status_code != 200:
+                self.logger.warning(
+                    "health_check_degraded",
+                    provider=self.provider_name,
+                    reason="non_200_response",
+                    status_code=resp.status_code,
+                )
                 return HealthStatus.DEGRADED
-        except Exception:
-            pass  # Fallback to circuit breaker check
+        except Exception as e:
+            error_classifier = ErrorClassifier()
+            error_type = error_classifier.classify(e)
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error_type=error_type.value,
+                error=str(e),
+            )
+            # Fallback to circuit breaker check
 
         return await super().health_check()
 
