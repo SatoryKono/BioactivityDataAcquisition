@@ -53,12 +53,12 @@ class SilverWriteMode(str, Enum):
     Values:
         MERGE: Upsert records based on primary keys (default)
         APPEND: Add records without deduplication
-        OVERWRITE: Replace all data in the table
+        DELETE: Delete and replace all data in the table
     """
 
     MERGE = "merge"
     APPEND = "append"
-    OVERWRITE = "overwrite"
+    DELETE = "delete"
 
 
 class DeltaWriter:
@@ -119,10 +119,10 @@ class DeltaWriter:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
         return arrow_data
 
-    async def _write_overwrite(
+    async def _write_delete(
         self, table_path: str, data: pa.Table, partition_cols: list[str] | None
     ) -> None:
-        """Write data in overwrite mode."""
+        """Write data in delete mode (replace all existing data)."""
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
@@ -210,8 +210,8 @@ class DeltaWriter:
         partition_cols: list[str] | None,
     ) -> None:
         """Dispatch write to appropriate method based on mode."""
-        if validated_mode == SilverWriteMode.OVERWRITE:
-            await self._write_overwrite(table_path, arrow_data, partition_cols)
+        if validated_mode == SilverWriteMode.DELETE:
+            await self._write_delete(table_path, arrow_data, partition_cols)
         elif validated_mode == SilverWriteMode.APPEND:
             await self._write_append(table_path, arrow_data, partition_cols)
         else:  # SilverWriteMode.MERGE
@@ -233,7 +233,7 @@ class DeltaWriter:
             records: List of records to write
             primary_keys: Primary key columns for merge
             schema: PyArrow schema for the table
-            mode: Write mode - 'merge', 'append', or 'overwrite'
+            mode: Write mode - 'merge', 'append', or 'delete'
             partition_cols: Optional partition columns
 
         Raises:
@@ -257,7 +257,7 @@ class DeltaWriter:
             raise
 
         if self.csv_exporter:
-            csv_append = mode != "overwrite"
+            csv_append = mode != "delete"
             await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
 
     async def _merge_records(
