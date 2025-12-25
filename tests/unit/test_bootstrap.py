@@ -395,12 +395,14 @@ class TestChemblActivityFactory:
             )
 
             # Verify run_id is passed to pipeline.create()
-            mock_pipeline_class.create.assert_called_once_with(
-                run_id=run_id,
-                runtime=runtime,
-                services=mock_services,
-                config=mock_domain_config,
-            )
+            # After transformer DI refactoring, create() includes transformer
+            mock_pipeline_class.create.assert_called_once()
+            call_kwargs = mock_pipeline_class.create.call_args.kwargs
+            assert call_kwargs["run_id"] == run_id
+            assert call_kwargs["runtime"] == runtime
+            assert call_kwargs["services"] == mock_services
+            assert call_kwargs["config"] == mock_domain_config
+            assert "transformer" in call_kwargs  # Transformer now injected via DI
             assert result is mock_pipeline
         finally:
             # Restore original class
