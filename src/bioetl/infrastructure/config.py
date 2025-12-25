@@ -264,6 +264,11 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
     gold_filters = _build_gold_filters(yaml_config)
 
+    # Extract on_schema_mismatch from silver sink config
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
+    if yaml_config.sink and yaml_config.sink.silver:
+        on_schema_mismatch = yaml_config.sink.silver.on_schema_mismatch
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
@@ -281,6 +286,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
             soft_fail_threshold=yaml_config.dq_rules.soft_fail_threshold,
             hard_fail_threshold=yaml_config.dq_rules.hard_fail_threshold,
         ),
+        on_schema_mismatch=on_schema_mismatch,
     )
 
 
