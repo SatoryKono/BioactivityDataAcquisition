@@ -51,6 +51,7 @@ __all__ = [
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
     "bootstrap_cleanup",
+    "bootstrap_dq_monitor",
     "bootstrap_lifecycle_service",
     "bootstrap_logger",
     "bootstrap_metrics",
@@ -77,6 +78,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
         CheckpointPort,
+        DQMonitorPort,
         MetricsPort,
         QuarantinePort,
         TracingPort,
@@ -284,6 +286,48 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort | None:
     return metrics
 
 
+def bootstrap_dq_monitor(settings: Settings) -> DQMonitorPort | None:
+    """Bootstrap data quality monitor for anomaly detection.
+
+    Creates a DataQualityMonitor configured with settings from ObservabilitySettings.
+    Returns None if dq_monitor_enabled=False.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        Configured DQMonitorPort or None if disabled.
+    """
+    obs_settings = settings.observability
+
+    if not obs_settings.dq_monitor_enabled:
+        return None
+
+    from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+
+    monitor = DataQualityMonitor(
+        baseline_window=obs_settings.dq_baseline_window,
+        z_score_threshold=obs_settings.dq_z_score_threshold,
+    )
+
+    # Configure min baseline samples
+    monitor.detector.min_baseline_samples = obs_settings.dq_min_baseline_samples
+
+    # Set absolute thresholds for critical metrics
+    monitor.detector.set_threshold(
+        "error_rate",
+        min_value=0.0,
+        max_value=obs_settings.dq_error_rate_max,
+    )
+    monitor.detector.set_threshold(
+        "quality_score",
+        min_value=obs_settings.dq_quality_score_min,
+        max_value=1.0,
+    )
+
+    return monitor
+
+
 def bootstrap_observability(
     pipeline: str,
     run_id: UUID,
@@ -291,7 +335,8 @@ def bootstrap_observability(
 ) -> ObservabilityBundle:
     """Bootstrap all observability components.
 
-    Creates a unified observability bundle containing logger, tracer, and metrics.
+    Creates a unified observability bundle containing logger, tracer, metrics,
+    and data quality monitor.
 
     Args:
         pipeline: Pipeline name for logger context.
@@ -304,8 +349,14 @@ def bootstrap_observability(
     logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
     tracer = bootstrap_tracer()
     metrics = bootstrap_metrics(settings)
+    dq_monitor = bootstrap_dq_monitor(settings)
 
-    return ObservabilityBundle(logger=logger, tracer=tracer, metrics=metrics)
+    return ObservabilityBundle(
+        logger=logger,
+        tracer=tracer,
+        metrics=metrics,
+        dq_monitor=dq_monitor,
+    )
 
 
 def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:

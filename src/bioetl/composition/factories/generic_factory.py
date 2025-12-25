@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, TracingPort
+    from bioetl.domain.ports import DataSourcePort, DQMonitorPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -128,6 +128,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineServices:
         """Build PipelineServices from settings.
 
@@ -137,6 +138,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
             tracer: Optional tracer (created via bootstrap_tracer())
+            dq_monitor: Optional data quality monitor for anomaly detection
 
         Returns:
             Configured PipelineServices instance
@@ -152,6 +154,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             data_source=data_source,
             pipeline_config=pipeline_config,
             tracer=tracer,
+            dq_monitor=dq_monitor,
         )
 
     def create_with_services(
@@ -163,6 +166,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
     ) -> TPipeline:
         """Create pipeline instance.
 
@@ -176,6 +180,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config: Pre-loaded pipeline config (avoids duplicate I/O)
             filter_config: Optional input filter configuration
             tracer: Optional tracer (created via bootstrap_tracer())
+            dq_monitor: Optional data quality monitor for anomaly detection
 
         Returns:
             Configured pipeline instance
@@ -188,6 +193,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config=yaml_config,
             filter_config=filter_config,
             tracer=tracer,
+            dq_monitor=dq_monitor,
         )
 
         domain_config = yaml_config_to_domain(yaml_config)
@@ -217,7 +223,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             run_id: Unique identifier for this run
             runtime: Runtime configuration
             settings: Application settings
-            observability: Unified observability bundle (logger, tracer, metrics)
+            observability: Unified observability bundle (logger, tracer, metrics, dq_monitor)
             filter_config: Optional filter configuration
             config: Pre-loaded pipeline config (optional)
 
@@ -227,7 +233,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         # Load config once if not provided
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
-        # Create pipeline instance with services and tracer
+        # Create pipeline instance with services, tracer, and dq_monitor
         pipeline = self.create_with_services(
             run_id=run_id,
             runtime=runtime,
@@ -236,6 +242,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config=yaml_config,
             filter_config=filter_config,
             tracer=observability.tracer,
+            dq_monitor=observability.dq_monitor,
         )
 
         # Create Helper Components
