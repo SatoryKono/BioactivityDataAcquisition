@@ -9,9 +9,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import structlog
+from bioetl.domain.ports import LoggerPort
 
+if TYPE_CHECKING:
     from bioetl.domain.ports import DQMonitorPort, MetricsPort, TracingPort
 
 
@@ -30,7 +30,7 @@ class ObservabilityBundle:
         dq_monitor: Optional data quality anomaly detector.
     """
 
-    logger: structlog.BoundLogger
+    logger: LoggerPort
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
     dq_monitor: DQMonitorPort | None = None
@@ -38,7 +38,7 @@ class ObservabilityBundle:
     @classmethod
     def create(
         cls,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         dq_monitor: DQMonitorPort | None = None,

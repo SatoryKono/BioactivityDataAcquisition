@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 def inspect_records(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
     limit: int = 100,
     error_code: str | None = None,
@@ -58,7 +58,7 @@ def inspect_records(
 
 def replay_records(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
     error_code: str | None = None,
     max_age_days: int = 7,
@@ -93,7 +93,7 @@ def replay_records(
 
 def get_statistics(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
 ) -> dict[str, Any]:
     """Get quarantine statistics for a pipeline."""
@@ -141,7 +141,7 @@ def get_statistics(
 
 def purge_records(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
     older_than_days: int = 30,
 ) -> int:
