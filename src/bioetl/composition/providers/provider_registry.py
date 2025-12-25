@@ -136,8 +136,8 @@ class ProviderRegistry:
 
         Args:
             name: Имя провайдера
-            http_client: HTTP клиент (опционально)
-            logger: Логгер (опционально)
+            http_client: HTTP клиент (требуется для провайдеров с requires_http_client=True)
+            logger: Логгер (требуется для провайдеров с requires_logger=True)
             settings: Настройки приложения (для кастомных creators)
             **kwargs: Дополнительные аргументы для конструктора
 
@@ -146,6 +146,7 @@ class ProviderRegistry:
 
         Raises:
             KeyError: Если провайдер не зарегистрирован
+            ValueError: Если требуемый http_client или logger не передан
         """
         config = cls.get(name)
 
@@ -161,9 +162,20 @@ class ProviderRegistry:
         # Standard creation logic
         init_kwargs: dict[str, Any] = {**config.default_kwargs, **kwargs}
 
-        if config.requires_http_client and http_client is not None:
+        if config.requires_http_client:
+            if http_client is None:
+                raise ValueError(
+                    f"Provider '{name}' requires http_client but none was provided. "
+                    "Ensure http_client is passed from Composition Root."
+                )
             init_kwargs["http_client"] = http_client
-        if config.requires_logger and logger is not None:
+
+        if config.requires_logger:
+            if logger is None:
+                raise ValueError(
+                    f"Provider '{name}' requires logger but none was provided. "
+                    "Ensure logger is passed from Composition Root."
+                )
             init_kwargs["logger"] = logger
 
         return config.adapter_class(**init_kwargs)

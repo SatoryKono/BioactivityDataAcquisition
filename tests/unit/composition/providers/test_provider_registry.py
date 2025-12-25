@@ -293,6 +293,8 @@ class TestProviderRegistryAdapterCreation:
         config = ProviderConfig(
             adapter_class=AdapterWithDefaults,
             default_kwargs={"batch_size": 500, "timeout": 60},
+            requires_http_client=False,
+            requires_logger=False,
         )
         ProviderRegistry.register("defaults_test", config)
 
@@ -313,6 +315,8 @@ class TestProviderRegistryAdapterCreation:
         config = ProviderConfig(
             adapter_class=AdapterWithDefaults,
             default_kwargs={"batch_size": 500},
+            requires_http_client=False,
+            requires_logger=False,
         )
         ProviderRegistry.register("override_test", config)
 
@@ -322,6 +326,30 @@ class TestProviderRegistryAdapterCreation:
         )
 
         assert adapter.batch_size == 1000
+
+    def test_create_adapter_raises_when_logger_missing(self):
+        """Verify ValueError raised when required logger is not provided."""
+        config = ProviderConfig(
+            adapter_class=MockAdapter,
+            requires_http_client=False,
+            requires_logger=True,
+        )
+        ProviderRegistry.register("logger_required_test", config)
+
+        with pytest.raises(ValueError, match="requires logger"):
+            ProviderRegistry.create_adapter("logger_required_test", logger=None)
+
+    def test_create_adapter_raises_when_http_client_missing(self):
+        """Verify ValueError raised when required http_client is not provided."""
+        config = ProviderConfig(
+            adapter_class=MockAdapter,
+            requires_http_client=True,
+            requires_logger=False,
+        )
+        ProviderRegistry.register("http_required_test", config)
+
+        with pytest.raises(ValueError, match="requires http_client"):
+            ProviderRegistry.create_adapter("http_required_test", http_client=None)
 
 
 class TestRegisterProviderDecorator:
