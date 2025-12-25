@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
-from bioetl.composition.providers import register_provider
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
@@ -32,12 +31,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-@register_provider(
-    "pubchem",
-    http_rate=5.0,
-    http_capacity=10,
-    requires_http_client=False,
-)
 class PubChemAdapter(BaseSyncAdapter):
     """PubChem API adapter implementing DataSourcePort.
 
