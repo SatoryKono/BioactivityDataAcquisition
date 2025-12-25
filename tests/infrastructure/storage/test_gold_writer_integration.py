@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandera as pa
+import pandera.pandas as pa
 import pyarrow as pa_arrow
 import pytest
 from deltalake.exceptions import TableNotFoundError
-from pandera import DataFrameSchema
+from pandera.pandas import DataFrameSchema
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
