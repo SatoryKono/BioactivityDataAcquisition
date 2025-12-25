@@ -70,6 +70,7 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
     StorageError,
     TableNotFoundError,
+    TimeoutError,
     UploadError,
 )
 
@@ -91,6 +92,7 @@ from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
+    DQMonitorPort,
     FilterableDataSourcePort,
     GoldValidatorPort,
     InputFilterPort,
@@ -183,6 +185,7 @@ __all__ = [
     "RetryExhaustedError",
     "StorageError",
     "TableNotFoundError",
+    "TimeoutError",
     "UploadError",
     # Exceptions - Data Quality
     "DataQualityThresholdError",
@@ -203,6 +206,7 @@ __all__ = [
     # Ports
     "CheckpointPort",
     "DataSourcePort",
+    "DQMonitorPort",
     "FilterableDataSourcePort",
     "GoldValidatorPort",
     "InputFilterPort",
