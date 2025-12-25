@@ -158,7 +158,12 @@ class TestPubChemCompoundPipelineTransform:
         pubchem_runtime,
         mock_pubchem_services,
     ):
-        """Тест трансформации неполной записи."""
+        """Тест трансформации неполной записи.
+
+        Note: Compound entity requires at least one structural identifier
+        (canonical_smiles, isomeric_smiles, or inchi). Records without
+        structural identifiers are rejected per entity invariant.
+        """
         run_id = uuid4()
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
@@ -173,10 +178,11 @@ class TestPubChemCompoundPipelineTransform:
             logger=mock_pubchem_services.logger,
         )
 
-        # Partial record - only CID and molecular_weight
+        # Partial record - CID, molecular_weight and one structural identifier
         bronze_record = {
             "cid": 123456,
             "molecular_weight": 250.5,
+            "canonical_smiles": "CCCC",  # Required: at least one structural ID
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
@@ -187,9 +193,46 @@ class TestPubChemCompoundPipelineTransform:
         assert silver_record["cid"] == "123456"  # Now string
         assert silver_record["molecular_weight"] == 250.5
         assert silver_record["molecular_formula"] is None
-        assert silver_record["canonical_smiles"] is None
+        assert silver_record["canonical_smiles"] == "CCCC"
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
+
+    async def test_transform_bronze_to_silver_no_structural_id_returns_none(
+        self,
+        pubchem_config,
+        pubchem_runtime,
+        mock_pubchem_services,
+    ):
+        """Тест: запись без структурных идентификаторов возвращает None.
+
+        Compound entity invariant requires at least one of:
+        canonical_smiles, isomeric_smiles, or inchi.
+        """
+        run_id = uuid4()
+        pipeline = PubChemCompoundPipeline(
+            config=pubchem_config,
+            runtime=pubchem_runtime,
+            services=mock_pubchem_services,
+            run_id=run_id,
+        )
+
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_pubchem_services.logger,
+        )
+
+        # Record without any structural identifiers
+        bronze_record = {
+            "cid": 123456,
+            "molecular_weight": 250.5,
+        }
+
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
+
+        assert silver_record is None
 
     async def test_transform_bronze_to_silver_missing_cid_returns_none(
         self,

@@ -1,10 +1,15 @@
-"""PubChem Compound Transformer."""
+"""PubChem Compound Transformer.
+
+Transforms raw PubChem compound records into Silver-layer format using
+the Compound domain entity for validation and invariant checking.
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.entities import Compound
 from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
@@ -13,7 +18,12 @@ if TYPE_CHECKING:
 
 
 class PubChemCompoundTransformer(BaseTransformer):
-    """Transformer for PubChem compound records."""
+    """Transformer for PubChem compound records.
+
+    Uses Compound domain entity for validation and lineage tracking.
+    Records without structural identifiers (SMILES/InChI) are skipped
+    per entity invariant validation.
+    """
 
     def __init__(self, provider: str = "pubchem"):
         """Initialize PubChem compound transformer.
@@ -26,14 +36,28 @@ class PubChemCompoundTransformer(BaseTransformer):
 
     async def _transform_impl(
         self,
-        _context: PipelineContext,
+        context: PipelineContext,
         record: BronzeRecord,
     ) -> SilverRecord | None:
-        """Transform raw PubChem record to Silver format."""
-        # Validate required field
+        """Transform raw PubChem record to Silver format.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record from PubChem.
+
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
+
+        Raises:
+            TransformationError: If cid is missing.
+            ValueError: If Compound entity validation fails.
+
+        """
+        # Step 1: Validate required field
         cid = self._get_required_field(record, "cid")
 
-        normalized = {
+        # Step 2: Build business data dictionary
+        business_data: dict[str, Any] = {
             "cid": str(cid),
             "molecular_formula": record.get("molecular_formula"),
             "molecular_weight": record.get("molecular_weight"),
@@ -44,16 +68,25 @@ class PubChemCompoundTransformer(BaseTransformer):
             "iupac_name": record.get("iupac_name"),
         }
 
-        # Генерация entity_id согласно RULES.md §2.8
+        # Step 3: Generate entity_id (RULES.md §2.8)
         entity_id = generate_entity_id(
             record={"cid": cid},
             provider=self.provider,
             id_field="cid",
         )
-        normalized["entity_id"] = entity_id
 
-        # Генерация content_hash согласно RULES.md §2.8.1
-        content_hash = self.compute_content_hash(normalized, exclude_none=False)
-        normalized["content_hash"] = content_hash
+        # Step 4: Compute content_hash (RULES.md §2.8.1)
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
-        return cast("SilverRecord", normalized)
+        # Step 5: Create domain entity with lineage metadata
+        # ValueError is raised if invariants fail (e.g., no structural identifiers)
+        entity = self._create_entity(
+            Compound,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            **business_data,
+        )
+
+        # Step 6: Convert to SilverRecord with lineage field renaming
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
