@@ -320,11 +320,18 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
 
 def test_ports_are_protocols(src_dir: Path):
     """Ports must be defined using typing.Protocol."""
-    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-    with ports_file.open(encoding="utf-8") as f:
-        content = f.read()
-    assert "Protocol" in content
-    assert "@runtime_checkable" in content
+    ports_dir = src_dir / "bioetl" / "domain" / "ports"
+    assert ports_dir.is_dir(), f"Ports directory not found: {ports_dir}"
+
+    # Collect all port files (exclude __init__.py)
+    port_files = [f for f in ports_dir.glob("*.py") if f.name != "__init__.py"]
+    assert port_files, "No port files found in ports directory"
+
+    # Check each port file contains Protocol definitions
+    for port_file in port_files:
+        content = port_file.read_text(encoding="utf-8")
+        assert "Protocol" in content, f"{port_file.name} must use Protocol"
+        assert "@runtime_checkable" in content, f"{port_file.name} must use @runtime_checkable"
 
 
 def test_io_ports_are_async():
