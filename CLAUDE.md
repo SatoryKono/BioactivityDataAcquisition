@@ -335,6 +335,7 @@ await self._run_in_executor(sync_func, *args)
 ### Архитектура
 - ❌ Импорт `infrastructure` в `domain` или `application`
 - ❌ Создание зависимостей внутри классов
+- ❌ Прямой импорт `structlog` в `application` или `interfaces` → Использовать `LoggerPort`
 
 ### Код
 - ❌ Sentinel values (`-1`, `"N/A"`, `9999`) → Использовать `None`
