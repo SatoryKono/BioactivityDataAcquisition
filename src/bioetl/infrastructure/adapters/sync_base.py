@@ -2,6 +2,10 @@
 
 Provides common functionality for adapters that must use synchronous libraries
 (like pubchempy) but need to integrate with the async architecture.
+
+Uses Template Method pattern for health checks: subclasses implement
+_probe_health() for provider-specific probes, with automatic fallback
+to circuit breaker assessment on failure.
 """
 
 from __future__ import annotations
@@ -24,6 +28,11 @@ class BaseSyncAdapter(DataSourcePort):
     """Base class for adapters using synchronous libraries.
 
     Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreaker.
+
+    Uses Template Method pattern for health checks:
+    - health_check(): Template method that handles try/except
+    - _probe_health(): Override for provider-specific health probe
+    - _fallback_health_status(): Fallback using circuit breaker state
 
     Attributes:
         provider_name: Unique identifier for the data provider.
@@ -97,7 +106,41 @@ class BaseSyncAdapter(DataSourcePort):
         return await loop.run_in_executor(self.thread_pool, func, *args)
 
     async def health_check(self) -> HealthStatus:
-        """Perform health check based on Circuit Breaker state."""
+        """Check API health status using Template Method pattern.
+
+        Calls _probe_health() for provider-specific probe, falling back
+        to _fallback_health_status() on any exception.
+
+        Returns:
+            HealthStatus from probe or fallback.
+
+        """
+        try:
+            return await self._probe_health()
+        except Exception:
+            return self._fallback_health_status()
+
+    async def _probe_health(self) -> HealthStatus:
+        """Perform provider-specific health probe.
+
+        Subclasses SHOULD override this with a specific API call.
+        Default implementation returns fallback health status.
+
+        Returns:
+            HealthStatus from the health probe.
+
+        """
+        return self._fallback_health_status()
+
+    def _fallback_health_status(self) -> HealthStatus:
+        """Get health status from circuit breaker state.
+
+        Used as fallback when _probe_health() fails or is not implemented.
+
+        Returns:
+            HealthStatus based on circuit breaker state.
+
+        """
         try:
             return assess_health_from_circuit_breaker(self.circuit_breaker)
         except Exception:
