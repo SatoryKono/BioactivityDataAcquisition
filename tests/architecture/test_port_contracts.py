@@ -1,6 +1,6 @@
 """Tests for port contract verification.
 
-These tests ensure that all port definitions in domain/ports.py follow
+These tests ensure that all port definitions in domain/ports/ package follow
 the established contracts for lifecycle management and interface consistency.
 
 Implements the refactoring plan: "Расширение контрактных тестов портов".
@@ -345,35 +345,39 @@ class TestPortDefinitionQuality:
 
     def test_all_port_methods_have_docstrings(self, src_dir: Path) -> None:
         """All port methods SHOULD have docstrings."""
-        ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-        if not ports_file.exists():
-            pytest.skip("ports.py not found")
-
-        with ports_file.open(encoding="utf-8") as f:
-            tree = ast.parse(f.read(), filename=str(ports_file))
+        ports_dir = src_dir / "bioetl" / "domain" / "ports"
+        if not ports_dir.exists():
+            pytest.skip("ports/ package not found")
 
         missing_docstrings = []
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                # Check if it's a Port class
-                if not node.name.endswith("Port"):
-                    continue
+        for ports_file in ports_dir.glob("*.py"):
+            if ports_file.name == "__init__.py":
+                continue
 
-                for item in node.body:
-                    if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
-                        # Skip __init__ and private methods
-                        if item.name.startswith("_") and item.name != "__aenter__" and item.name != "__aexit__":
-                            continue
+            with ports_file.open(encoding="utf-8") as f:
+                tree = ast.parse(f.read(), filename=str(ports_file))
 
-                        # Check for docstring
-                        if not (
-                            item.body
-                            and isinstance(item.body[0], ast.Expr)
-                            and isinstance(item.body[0].value, ast.Constant)
-                            and isinstance(item.body[0].value.value, str)
-                        ):
-                            missing_docstrings.append(f"{node.name}.{item.name}")
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef):
+                    # Check if it's a Port class
+                    if not node.name.endswith("Port"):
+                        continue
+
+                    for item in node.body:
+                        if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
+                            # Skip __init__ and private methods
+                            if item.name.startswith("_") and item.name != "__aenter__" and item.name != "__aexit__":
+                                continue
+
+                            # Check for docstring
+                            if not (
+                                item.body
+                                and isinstance(item.body[0], ast.Expr)
+                                and isinstance(item.body[0].value, ast.Constant)
+                                and isinstance(item.body[0].value.value, str)
+                            ):
+                                missing_docstrings.append(f"{node.name}.{item.name}")
 
         # Allow some missing (ellipsis-only methods in Protocols are ok without detailed docs)
         # But warn if there are many
@@ -385,50 +389,54 @@ class TestPortDefinitionQuality:
 
     def test_no_implementation_in_ports(self, src_dir: Path) -> None:
         """Port methods MUST only have ellipsis (...) as body, no implementation."""
-        ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-        if not ports_file.exists():
-            pytest.skip("ports.py not found")
-
-        with ports_file.open(encoding="utf-8") as f:
-            tree = ast.parse(f.read(), filename=str(ports_file))
+        ports_dir = src_dir / "bioetl" / "domain" / "ports"
+        if not ports_dir.exists():
+            pytest.skip("ports/ package not found")
 
         implementations_found = []
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and node.name.endswith("Port"):
-                for item in node.body:
-                    if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
-                        # Check method body
-                        body = item.body
+        for ports_file in ports_dir.glob("*.py"):
+            if ports_file.name == "__init__.py":
+                continue
 
-                        # Allow: docstring + Ellipsis, or just Ellipsis
-                        if len(body) == 1:
-                            if isinstance(body[0], ast.Expr):
-                                # Just docstring or ellipsis
-                                if isinstance(body[0].value, ast.Constant):
-                                    continue  # docstring only
-                                if isinstance(body[0].value, ast.Ellipsis) or (
-                                    isinstance(body[0].value, ast.Constant)
-                                    and body[0].value.value is ...
-                                ):
-                                    continue  # ellipsis only
-                        elif len(body) == 2:
-                            # docstring + ellipsis
-                            if (
-                                isinstance(body[0], ast.Expr)
-                                and isinstance(body[0].value, ast.Constant)
-                                and isinstance(body[0].value.value, str)
-                            ):
-                                if isinstance(body[1], ast.Expr) and (
-                                    isinstance(body[1].value, ast.Ellipsis) or (
-                                        isinstance(body[1].value, ast.Constant)
-                                        and body[1].value.value is ...
-                                    )
-                                ):
-                                    continue
+            with ports_file.open(encoding="utf-8") as f:
+                tree = ast.parse(f.read(), filename=str(ports_file))
 
-                        # If we get here, there's actual implementation
-                        implementations_found.append(f"{node.name}.{item.name}")
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name.endswith("Port"):
+                    for item in node.body:
+                        if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
+                            # Check method body
+                            body = item.body
+
+                            # Allow: docstring + Ellipsis, or just Ellipsis
+                            if len(body) == 1:
+                                if isinstance(body[0], ast.Expr):
+                                    # Just docstring or ellipsis
+                                    if isinstance(body[0].value, ast.Constant):
+                                        continue  # docstring only
+                                    if isinstance(body[0].value, ast.Ellipsis) or (
+                                        isinstance(body[0].value, ast.Constant)
+                                        and body[0].value.value is ...
+                                    ):
+                                        continue  # ellipsis only
+                            elif len(body) == 2:
+                                # docstring + ellipsis
+                                if (
+                                    isinstance(body[0], ast.Expr)
+                                    and isinstance(body[0].value, ast.Constant)
+                                    and isinstance(body[0].value.value, str)
+                                ):
+                                    if isinstance(body[1], ast.Expr) and (
+                                        isinstance(body[1].value, ast.Ellipsis) or (
+                                            isinstance(body[1].value, ast.Constant)
+                                            and body[1].value.value is ...
+                                        )
+                                    ):
+                                        continue
+
+                            # If we get here, there's actual implementation
+                            implementations_found.append(f"{node.name}.{item.name}")
 
         assert not implementations_found, (
             "Ports should not contain implementations (use ... only):\n"
