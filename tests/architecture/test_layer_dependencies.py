@@ -1310,3 +1310,53 @@ def test_filtered_data_source_uses_isinstance(src_dir: Path) -> None:
         "FilteredDataSource must use isinstance(adapter, FilterableDataSourcePort) "
         "for type-safe Protocol check."
     )
+
+
+def test_bootstrap_no_direct_adapter_imports(src_dir: Path) -> None:
+    """bootstrap.py MUST NOT import concrete adapters directly.
+
+    REQ-ARCH-COMP-001: Composition Root delegates adapter creation to factories.
+    Adding a new provider should only require changes in:
+    - providers/registration.py (ProviderRegistry)
+    - factories/data_source_registry.py (DataSourceRegistry)
+
+    This prevents tight coupling and ensures the factory pattern is enforced.
+    """
+    bootstrap_file = src_dir / "bioetl" / "composition" / "bootstrap.py"
+    if not bootstrap_file.exists():
+        pytest.skip("bootstrap.py not found")
+
+    content = bootstrap_file.read_text(encoding="utf-8")
+
+    # Forbidden: direct imports of concrete adapter classes from provider packages
+    # Pattern: from bioetl.infrastructure.adapters.{provider}.{module} import {Class}
+    forbidden_patterns = [
+        (
+            r"from bioetl\.infrastructure\.adapters\.chembl\.\w+ import",
+            "ChEMBL adapter",
+        ),
+        (
+            r"from bioetl\.infrastructure\.adapters\.pubchem\.\w+ import",
+            "PubChem adapter",
+        ),
+        (
+            r"from bioetl\.infrastructure\.adapters\.uniprot\.\w+ import",
+            "UniProt adapter",
+        ),
+        (
+            r"from bioetl\.infrastructure\.adapters\.pubmed\.\w+ import",
+            "PubMed adapter",
+        ),
+    ]
+
+    violations = []
+    for pattern, description in forbidden_patterns:
+        matches = re.findall(pattern, content)
+        if matches:
+            violations.append(f"{description}: {matches}")
+
+    assert not violations, (
+        "bootstrap.py must not import concrete adapters directly.\n"
+        "Use ProviderRegistry and factories (DataSourceFactory, HttpClientFactory) instead.\n"
+        "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
+    )
