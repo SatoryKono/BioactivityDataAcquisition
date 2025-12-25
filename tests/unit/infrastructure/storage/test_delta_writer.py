@@ -7,6 +7,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+@pytest.fixture
+def noop_logger():
+    """Provide a NoOpLogger for tests."""
+    return NoOpLogger()
 
 
 @pytest.fixture
@@ -36,28 +43,30 @@ def valid_records():
 class TestDeltaWriterInit:
     """Tests for DeltaWriter initialization."""
 
-    def test_init_strips_trailing_slash(self):
+    def test_init_strips_trailing_slash(self, noop_logger):
         """Test that trailing slash is stripped from base_path."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/path/")
+        writer = DeltaWriter(base_path="s3://bucket/path/", logger=noop_logger)
         assert writer.base_path == "s3://bucket/path"
 
-    def test_init_with_csv_exporter(self):
+    def test_init_with_csv_exporter(self, noop_logger):
         """Test initialization with CSV exporter."""
         from unittest.mock import MagicMock
 
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         mock_exporter = MagicMock()
-        writer = DeltaWriter(base_path="/tmp/silver", csv_exporter=mock_exporter)
+        writer = DeltaWriter(
+            base_path="/tmp/silver", logger=noop_logger, csv_exporter=mock_exporter
+        )
         assert writer.csv_exporter is mock_exporter
 
-    def test_init_without_csv_exporter(self):
+    def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="/tmp/silver")
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         assert writer.csv_exporter is None
 
 
@@ -66,11 +75,11 @@ class TestDeltaWriterValidation:
     """Tests for DeltaWriter validation."""
 
     @pytest.mark.asyncio
-    async def test_write_silver_empty_records_raises(self):
+    async def test_write_silver_empty_records_raises(self, noop_logger):
         """Test write_silver raises ValueError for empty records."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket")
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
 
         import pyarrow as pa
 
@@ -85,11 +94,11 @@ class TestDeltaWriterValidation:
             )
 
     @pytest.mark.asyncio
-    async def test_write_silver_missing_metadata_raises(self):
+    async def test_write_silver_missing_metadata_raises(self, noop_logger):
         """Test write_silver raises ValueError for missing metadata."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket")
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
         import pyarrow as pa
@@ -105,11 +114,11 @@ class TestDeltaWriterValidation:
             )
 
     @pytest.mark.asyncio
-    async def test_write_silver_missing_run_id_raises(self):
+    async def test_write_silver_missing_run_id_raises(self, noop_logger):
         """Test write_silver raises ValueError when _run_id is missing."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket")
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -136,11 +145,11 @@ class TestDeltaWriterValidation:
 class TestDeltaWriterTablePath:
     """Tests for table path construction."""
 
-    def test_table_path_construction(self):
+    def test_table_path_construction(self, noop_logger):
         """Test table path is constructed correctly."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         # Access internal path construction
         table_name = "chembl.activity"
@@ -149,11 +158,11 @@ class TestDeltaWriterTablePath:
 
         assert actual_path == expected_path
 
-    def test_table_path_with_nested_name(self):
+    def test_table_path_with_nested_name(self, noop_logger):
         """Test table path with nested table name."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         table_name = "provider.schema.table"
         expected_path = "s3://bucket/silver/provider/schema/table"
@@ -202,7 +211,7 @@ class TestDeltaWriterVacuum:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_vacuum_returns_deleted_files(self, mock_delta_table):
+    async def test_vacuum_returns_deleted_files(self, mock_delta_table, noop_logger):
         """Test vacuum returns list of deleted files."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -213,7 +222,7 @@ class TestDeltaWriterVacuum:
             "file2.parquet",
         ]
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.vacuum("test.table", retention_hours=168)
 
         assert len(result) == 2
@@ -223,7 +232,7 @@ class TestDeltaWriterVacuum:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_vacuum_dry_run(self, mock_delta_table):
+    async def test_vacuum_dry_run(self, mock_delta_table, noop_logger):
         """Test vacuum dry run."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -231,7 +240,7 @@ class TestDeltaWriterVacuum:
         mock_delta_table.return_value = mock_table_instance
         mock_table_instance.vacuum.return_value = ["file1.parquet"]
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         await writer.vacuum("test.table", retention_hours=24, dry_run=True)
 
         mock_table_instance.vacuum.assert_called_once_with(
@@ -239,7 +248,7 @@ class TestDeltaWriterVacuum:
         )
 
     @pytest.mark.asyncio
-    async def test_vacuum_table_not_found(self):
+    async def test_vacuum_table_not_found(self, noop_logger):
         """Test vacuum raises TableNotFoundError for missing table."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -250,7 +259,7 @@ class TestDeltaWriterVacuum:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver")
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.vacuum("nonexistent.table")
@@ -262,7 +271,7 @@ class TestDeltaWriterOptimize:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_optimize_returns_metrics(self, mock_delta_table):
+    async def test_optimize_returns_metrics(self, mock_delta_table, noop_logger):
         """Test optimize returns compaction metrics."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -275,7 +284,7 @@ class TestDeltaWriterOptimize:
             "numFilesRemoved": 5,
         }
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.optimize("test.table")
 
         assert result["numFilesRemoved"] == 5
@@ -283,7 +292,7 @@ class TestDeltaWriterOptimize:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_optimize_with_partition_filters(self, mock_delta_table):
+    async def test_optimize_with_partition_filters(self, mock_delta_table, noop_logger):
         """Test optimize with partition filters."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -293,7 +302,7 @@ class TestDeltaWriterOptimize:
         mock_table_instance.optimize = mock_optimize
         mock_optimize.compact.return_value = {}
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         await writer.optimize("test.table", partition_filters=[("year", "=", 2025)])
 
         mock_optimize.compact.assert_called_once_with(
@@ -301,7 +310,7 @@ class TestDeltaWriterOptimize:
         )
 
     @pytest.mark.asyncio
-    async def test_optimize_table_not_found(self):
+    async def test_optimize_table_not_found(self, noop_logger):
         """Test optimize raises TableNotFoundError for missing table."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -312,7 +321,7 @@ class TestDeltaWriterOptimize:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver")
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.optimize("nonexistent.table")
@@ -324,7 +333,7 @@ class TestDeltaWriterGetTableInfo:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_get_table_info_returns_metadata(self, mock_delta_table):
+    async def test_get_table_info_returns_metadata(self, mock_delta_table, noop_logger):
         """Test get_table_info returns table metadata."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -337,14 +346,14 @@ class TestDeltaWriterGetTableInfo:
         mock_table_instance.schema.return_value = mock_schema
         mock_table_instance.metadata.return_value = {"id": "test-table"}
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.get_table_info("test.table")
 
         assert result["version"] == 10
         assert result["num_files"] == 2
 
     @pytest.mark.asyncio
-    async def test_get_table_info_table_not_found(self):
+    async def test_get_table_info_table_not_found(self, noop_logger):
         """Test get_table_info raises TableNotFoundError for missing table."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -355,7 +364,7 @@ class TestDeltaWriterGetTableInfo:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver")
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.get_table_info("nonexistent.table")
@@ -367,14 +376,14 @@ class TestDeltaWriterTimeTravel:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_time_travel_by_version(self, mock_delta_table):
+    async def test_time_travel_by_version(self, mock_delta_table, noop_logger):
         """Test time_travel by version number."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.time_travel("test.table", version=5)
 
         assert result == mock_table_instance
@@ -382,7 +391,7 @@ class TestDeltaWriterTimeTravel:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_time_travel_by_timestamp(self, mock_delta_table):
+    async def test_time_travel_by_timestamp(self, mock_delta_table, noop_logger):
         """Test time_travel by timestamp."""
         from datetime import datetime
 
@@ -391,20 +400,20 @@ class TestDeltaWriterTimeTravel:
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
         ts = datetime(2025, 1, 1, 12, 0, 0)
         result = await writer.time_travel("test.table", timestamp=ts)
 
         assert result == mock_table_instance
 
     @pytest.mark.asyncio
-    async def test_time_travel_both_version_and_timestamp_raises(self):
+    async def test_time_travel_both_version_and_timestamp_raises(self, noop_logger):
         """Test time_travel raises ValueError when both version and timestamp given."""
         from datetime import datetime
 
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         with pytest.raises(ValueError, match="Specify either version or timestamp"):
             await writer.time_travel(
@@ -412,11 +421,11 @@ class TestDeltaWriterTimeTravel:
             )
 
     @pytest.mark.asyncio
-    async def test_time_travel_neither_version_nor_timestamp_raises(self):
+    async def test_time_travel_neither_version_nor_timestamp_raises(self, noop_logger):
         """Test time_travel raises ValueError when neither version nor timestamp given."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver")
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         with pytest.raises(
             ValueError, match="Must specify either version or timestamp"
@@ -424,7 +433,7 @@ class TestDeltaWriterTimeTravel:
             await writer.time_travel("test.table")
 
     @pytest.mark.asyncio
-    async def test_time_travel_table_not_found(self):
+    async def test_time_travel_table_not_found(self, noop_logger):
         """Test time_travel raises TableNotFoundError for missing table."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -435,7 +444,7 @@ class TestDeltaWriterTimeTravel:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver")
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.time_travel("nonexistent.table", version=1)
@@ -446,7 +455,7 @@ class TestDeltaWriterErrorHandling:
     """Tests for error handling in DeltaWriter."""
 
     @pytest.mark.asyncio
-    async def test_write_silver_schema_mismatch_error(self, valid_records):
+    async def test_write_silver_schema_mismatch_error(self, valid_records, noop_logger):
         """Test write_silver raises SchemaViolationError for schema mismatch."""
         from unittest.mock import patch
 
@@ -470,7 +479,7 @@ class TestDeltaWriterErrorHandling:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=SchemaMismatchError("Schema mismatch"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver")
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
@@ -481,7 +490,7 @@ class TestDeltaWriterErrorHandling:
                 )
 
     @pytest.mark.asyncio
-    async def test_write_silver_merge_conflict_error(self, valid_records):
+    async def test_write_silver_merge_conflict_error(self, valid_records, noop_logger):
         """Test write_silver raises MergeConflictError for merge conflicts."""
         from unittest.mock import MagicMock, patch
 
@@ -513,7 +522,7 @@ class TestDeltaWriterErrorHandling:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver")
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(MergeConflictError):
                 await writer.write_silver(

@@ -260,6 +260,30 @@ class TestStoragePortContract:
         assert "target_path" in params, "archive() MUST have target_path parameter"
         assert "remove_source" in params, "archive() MUST have remove_source parameter"
 
+    def test_storage_port_write_gold_requires_schema(self) -> None:
+        """StoragePort.write_gold() MUST have required schema parameter.
+
+        Gold layer writes MUST include schema for validation.
+        This ensures data quality at the Gold layer boundary.
+        See RULES.md §2.1.1 - Gold Layer specifications.
+        """
+        import inspect
+
+        sig = inspect.signature(ports.StoragePort.write_gold)
+        params = sig.parameters
+
+        assert "schema" in params, (
+            "StoragePort.write_gold() MUST have schema parameter. "
+            "Gold layer requires strict schema validation."
+        )
+
+        # Schema parameter MUST NOT have a default value (i.e., it's required)
+        schema_param = params["schema"]
+        assert schema_param.default is inspect.Parameter.empty, (
+            "StoragePort.write_gold() schema parameter MUST be required (no default). "
+            "All Gold layer writes MUST provide a schema for validation."
+        )
+
 
 # ============================================================================
 # Metrics Port Contract Tests
@@ -493,4 +517,50 @@ class TestDQMonitorPortContract:
 
         assert is_runtime_checkable, (
             "DQMonitorPort MUST be decorated with @runtime_checkable"
+        )
+
+
+# ============================================================================
+# Storage Writer LoggerPort Contract Tests
+# ============================================================================
+
+
+class TestStorageWriterLoggerContract:
+    """Tests for storage writer LoggerPort requirements.
+
+    All storage writers (BronzeWriter, DeltaWriter, GoldWriter) MUST
+    require a LoggerPort parameter in their constructor for observability.
+    Per RULES.md: Dependencies MUST be injected through constructor.
+    """
+
+    STORAGE_WRITERS = [
+        ("BronzeWriter", "bioetl.infrastructure.storage.bronze_writer"),
+        ("DeltaWriter", "bioetl.infrastructure.storage.delta_writer"),
+        ("GoldWriter", "bioetl.infrastructure.storage.gold_writer"),
+    ]
+
+    @pytest.mark.parametrize("writer_name,module_path", STORAGE_WRITERS)
+    def test_storage_writer_has_required_logger_parameter(
+        self, writer_name: str, module_path: str
+    ) -> None:
+        """All storage writers MUST have LoggerPort as required parameter."""
+        import importlib
+        import inspect
+
+        module = importlib.import_module(module_path)
+        writer_class = getattr(module, writer_name)
+
+        sig = inspect.signature(writer_class.__init__)
+        params = sig.parameters
+
+        assert "logger" in params, (
+            f"{writer_name}.__init__() MUST have 'logger' parameter. "
+            "All writers require LoggerPort for observability."
+        )
+
+        # Check that logger is a required parameter (no default value)
+        logger_param = params["logger"]
+        assert logger_param.default is inspect.Parameter.empty, (
+            f"{writer_name}.__init__() 'logger' MUST be required (no default). "
+            "Optional loggers violate DI principles per RULES.md."
         )

@@ -61,8 +61,8 @@ class PipelineDefinition(NamedTuple):
     silver_schema: pa.Schema | None
     """PyArrow schema for Silver layer validation."""
 
-    gold_schema: Any | None = None
-    """Pandera schema for Gold layer validation."""
+    gold_schema: Any
+    """Pandera schema for Gold layer validation (required)."""
 
 
 class PipelineRegistry:
@@ -84,8 +84,16 @@ class PipelineRegistry:
 
         Args:
             factory: Factory instance with pipeline_name and silver_schema attributes
+
+        Raises:
+            ValueError: If factory does not have gold_schema attribute
         """
         gold_schema = getattr(factory, "gold_schema", None)
+        if gold_schema is None:
+            raise ValueError(
+                f"Factory '{factory.pipeline_name}' must have gold_schema. "
+                "All Gold layer writes require schema validation."
+            )
 
         cls._registry[factory.pipeline_name] = PipelineDefinition(
             factory=factory,
@@ -142,8 +150,16 @@ class PipelineRegistry:
         Args:
             key: Pipeline name (must match factory.pipeline_name)
             value: Pipeline factory instance
+
+        Raises:
+            ValueError: If factory does not have gold_schema attribute
         """
         gold_schema = getattr(value, "gold_schema", None)
+        if gold_schema is None:
+            raise ValueError(
+                f"Factory '{key}' must have gold_schema. "
+                "All Gold layer writes require schema validation."
+            )
         cls._registry[key] = PipelineDefinition(
             factory=value,
             silver_schema=value.silver_schema,
