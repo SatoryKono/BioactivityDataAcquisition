@@ -137,6 +137,10 @@ class SinkLayerConfig(BaseModel):
     deterministic: bool = Field(
         default=True, description="Enable deterministic write order"
     )
+    # Schema drift handling
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = Field(
+        default="error", description="How to handle schema drift"
+    )
 
 
 class GoldRangeFilterConfig(BaseModel):
