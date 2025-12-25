@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.infrastructure.config import Settings
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 
@@ -269,3 +270,87 @@ class PubMedAdapter:
         ):
             await self.http_client._client.aclose()
             self.http_client._client = None
+
+
+def _create_pubmed_adapter(
+    http_client: UnifiedHTTPClient | None,
+    logger: LoggerPort | None,
+    settings: Settings | None,
+    **kwargs: Any,
+) -> PubMedAdapter:
+    """Custom creator для PubMed адаптера.
+
+    Обрабатывает логику получения email и api_key из settings.
+
+    Args:
+        http_client: HTTP клиент
+        logger: Логгер
+        settings: Настройки приложения
+        **kwargs: Дополнительные параметры (email, api_key)
+
+    Returns:
+        Инициализированный PubMedAdapter
+
+    Raises:
+        ValueError: Если email не указан и не найден в settings
+    """
+    # Email: из kwargs или settings
+    email = kwargs.get("email")
+    if not email and settings:
+        email = getattr(settings, "default_email", None)
+    if not email:
+        raise ValueError(
+            "PubMed adapter requires email. "
+            "Provide via 'email' kwarg or settings.default_email"
+        )
+
+    # API key: из kwargs или settings
+    api_key = kwargs.get("api_key")
+    if not api_key and settings and hasattr(settings, "pubmed_api_key"):
+        pubmed_key = settings.pubmed_api_key
+        if pubmed_key:
+            api_key = pubmed_key.get_secret_value()
+
+    if http_client is None:
+        raise ValueError("PubMed adapter requires http_client")
+    if logger is None:
+        raise ValueError("PubMed adapter requires logger")
+
+    return PubMedAdapter(
+        http_client=http_client,
+        logger=logger,
+        email=email,
+        api_key=api_key,
+        batch_size=kwargs.get("batch_size", 200),
+    )
+
+
+# Регистрация провайдера
+# Используем отложенную регистрацию, чтобы избежать circular imports
+def _register_pubmed() -> None:
+    """Регистрирует PubMed провайдера в ProviderRegistry."""
+    from bioetl.composition.providers.provider_registry import (
+        HttpConfig,
+        ProviderConfig,
+        ProviderRegistry,
+    )
+
+    if ProviderRegistry.is_registered("pubmed"):
+        return
+
+    config = ProviderConfig(
+        adapter_class=PubMedAdapter,
+        http_config=HttpConfig(
+            rate=3.0,
+            capacity=6,
+            rate_overrides={"pubmed_api_key": 10.0},
+        ),
+        requires_http_client=True,
+        requires_logger=True,
+        custom_creator=_create_pubmed_adapter,
+    )
+    ProviderRegistry.register("pubmed", config)
+
+
+# Выполняем регистрацию при импорте модуля
+_register_pubmed()

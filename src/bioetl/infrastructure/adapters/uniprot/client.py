@@ -14,19 +14,30 @@ Documentation: https://www.uniprot.org/help/api
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import httpx
 from typing_extensions import override
 
-from bioetl.domain.ports import LoggerPort
+from bioetl.composition.providers import register_provider
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
+    import httpx
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+
+@register_provider(
+    "uniprot",
+    http_rate=10.0,
+    http_capacity=20,
+    rate_overrides={"uniprot_api_key": 100.0},
+)
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
 
