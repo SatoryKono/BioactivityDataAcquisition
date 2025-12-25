@@ -252,7 +252,7 @@ class TestCreateUniprotDataSource:
         mock_adapter = MagicMock()
         mock_ds_factory.create.return_value = mock_adapter
 
-        result = create_uniprot_data_source(
+        create_uniprot_data_source(
             settings=mock_settings,
             pipeline_config=mock_config,
             logger=mock_logger,

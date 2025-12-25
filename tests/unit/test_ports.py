@@ -117,7 +117,6 @@ class TestStoragePortProtocol:
         from collections.abc import Iterator
         from typing import Literal
 
-        from bioetl.domain.types import BatchID
 
         class ValidStorage:
             async def write_bronze(
@@ -182,11 +181,6 @@ class TestStoragePortProtocol:
                 gold_table: str | None = None,
             ) -> dict[str, Any]:
                 return {}
-
-            async def health_check(self) -> Any:
-                from bioetl.domain.types import HealthStatus
-
-                return HealthStatus.HEALTHY
 
         assert isinstance(ValidStorage(), StoragePort)
 
@@ -319,7 +313,6 @@ class TestQuarantinePortProtocol:
 
     def test_valid_quarantine_implementation(self) -> None:
         """QuarantinePort should accept valid implementations."""
-        from bioetl.domain.types import RunID
 
         class ValidQuarantine:
             async def write(
