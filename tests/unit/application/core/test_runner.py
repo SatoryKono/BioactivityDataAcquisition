@@ -136,6 +136,21 @@ def mock_lock_manager():
 
 
 @pytest.fixture
+def mock_lifecycle_service():
+    """Create a mock lifecycle service."""
+    from bioetl.application.services.medallion_lifecycle import (
+        ClearResult,
+        MedallionLifecycleService,
+    )
+
+    service = MagicMock(spec=MedallionLifecycleService)
+    service.clear = AsyncMock(
+        return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
+    )
+    return service
+
+
+@pytest.fixture
 def runner(
     pipeline_config,
     runtime_config,
@@ -146,6 +161,7 @@ def runner(
     shutdown_signal,
     mock_logger,
     mock_lock_manager,
+    mock_lifecycle_service,
 ):
     """Create a PipelineRunner instance."""
     return PipelineRunner(
@@ -157,6 +173,7 @@ def runner(
         checkpoint_manager=mock_checkpoint_manager,
         shutdown_signal=shutdown_signal,
         logger=mock_logger,
+        lifecycle_service=mock_lifecycle_service,
     )
 
 
@@ -175,6 +192,7 @@ class TestPipelineRunnerInit:
         shutdown_signal,
         mock_logger,
         mock_lock_manager,
+        mock_lifecycle_service,
     ):
         """Test runner initializes correctly."""
         runner = PipelineRunner(
@@ -186,11 +204,13 @@ class TestPipelineRunnerInit:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
         )
 
         assert runner._config == pipeline_config
         assert runner._runtime == runtime_config
         assert runner.shutdown_signal == shutdown_signal
+        assert runner._lifecycle_service == mock_lifecycle_service
 
     def test_lock_manager_created_on_init(
         self,
@@ -203,6 +223,7 @@ class TestPipelineRunnerInit:
         shutdown_signal,
         mock_logger,
         mock_lock_manager,
+        mock_lifecycle_service,
     ):
         """Test LockManager is created during initialization."""
         PipelineRunner(
@@ -214,6 +235,7 @@ class TestPipelineRunnerInit:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
         )
 
         mock_lock_manager.create.assert_called_once()
@@ -358,6 +380,7 @@ class TestPipelineRunnerRun:
         shutdown_signal,
         mock_logger,
         mock_lock_manager,
+        mock_lifecycle_service,
     ):
         """Test run passes limit to executor."""
         runtime_with_limit = RuntimeConfig(
@@ -373,7 +396,7 @@ class TestPipelineRunnerRun:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            pipeline=None,
+            lifecycle_service=mock_lifecycle_service,
         )
 
         await runner.run()
@@ -469,506 +492,3 @@ class TestPipelineRunnerClearViaLifecycle:
 
         # Should not call lifecycle service for incremental
         lifecycle_service.clear.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_clear_via_lifecycle_falls_back_to_legacy(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_via_lifecycle falls back to legacy when no service."""
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=5)
-        services.storage.clear_gold = AsyncMock(return_value=3)
-
-        # No lifecycle service injected
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-            lifecycle_service=None,
-        )
-
-        await runner._clear_via_lifecycle()
-
-        # Should fall back to calling storage directly
-        services.storage.clear_silver.assert_called_once()
-        services.storage.clear_gold.assert_called_once()
-
-
-@pytest.mark.unit
-class TestPipelineRunnerClearExportsLegacy:
-    """Tests for PipelineRunner._clear_exports_legacy method."""
-
-    @pytest.mark.asyncio
-    async def test_clear_exports_legacy_calls_storage_methods(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports_legacy calls storage clear methods for REBUILD run."""
-        # Use REBUILD run type to trigger clearing
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        # Create services with storage that has clear methods
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=5)
-        services.storage.clear_gold = AsyncMock(return_value=1)
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        await runner._clear_exports_legacy()
-
-        # Should clear both silver and gold tables
-        services.storage.clear_silver.assert_called_once()
-        services.storage.clear_gold.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_clear_exports_legacy_logs_when_files_cleared(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports_legacy logs when files are cleared."""
-        # Use REBUILD run type to trigger clearing
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=3)
-        services.storage.clear_gold = AsyncMock(return_value=2)
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        await runner._clear_exports_legacy()
-
-        # Should log when files are cleared
-        info_calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("Cleared storage" in call for call in info_calls)
-
-    @pytest.mark.asyncio
-    async def test_clear_exports_legacy_no_log_when_nothing_cleared(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports_legacy does not log when nothing cleared."""
-        # Use REBUILD run type to trigger clearing logic
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=0)
-        services.storage.clear_gold = AsyncMock(return_value=0)
-
-        mock_logger.reset_mock()
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        await runner._clear_exports_legacy()
-
-        # Should not log about cleared files when nothing was cleared
-        info_calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert not any("Cleared storage" in call for call in info_calls)
-
-    @pytest.mark.asyncio
-    async def test_clear_exports_legacy_uses_default_gold_table(
-        self,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports_legacy uses default gold table name when not specified."""
-        # Use REBUILD run type to trigger clearing
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        # Config without explicit gold_table
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="chembl.silver_activity",
-            gold_table=None,  # No explicit gold table
-        )
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=0)
-        services.storage.clear_gold = AsyncMock(return_value=0)
-
-        runner = PipelineRunner(
-            config=config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        await runner._clear_exports_legacy()
-
-        # Should use default gold table: provider.entity_type
-        services.storage.clear_silver.assert_called_once_with(
-            "chembl.silver_activity", dry_run=False
-        )
-        services.storage.clear_gold.assert_called_once_with(
-            "chembl.activity", dry_run=False
-        )
-
-    @pytest.mark.asyncio
-    async def test_clear_exports_legacy_skips_for_incremental(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports_legacy does NOT clear storage for INCREMENTAL run."""
-        # Use INCREMENTAL run type - should skip clearing
-        incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=0)
-        services.storage.clear_gold = AsyncMock(return_value=0)
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=incremental_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        await runner._clear_exports_legacy()
-
-        # Should NOT call clear methods for incremental run
-        services.storage.clear_silver.assert_not_called()
-        services.storage.clear_gold.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_clear_exports_legacy_dry_run_mode(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_exports_legacy passes dry_run=True to storage methods."""
-        # Use REBUILD with dry_run=True
-        dry_run_runtime = RuntimeConfig(
-            run_type=RunType.REBUILD, limit=None, dry_run=True
-        )
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=5)
-        services.storage.clear_gold = AsyncMock(return_value=2)
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=dry_run_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-        )
-
-        await runner._clear_exports_legacy()
-
-        # Should pass dry_run=True to storage methods
-        services.storage.clear_silver.assert_called_once_with(
-            pipeline_config.silver_table, dry_run=True
-        )
-        services.storage.clear_gold.assert_called_once()
-
-
-@pytest.mark.unit
-class TestPipelineRunnerClearViaCleanupService:
-    """Tests for PipelineRunner._clear_via_cleanup_service method."""
-
-    @pytest.mark.asyncio
-    async def test_clear_via_cleanup_service_uses_service(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test _clear_via_lifecycle uses cleanup service when injected."""
-        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
-
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        services = create_mock_services()
-
-        # Mock cleanup service
-        cleanup_service = MagicMock(spec=CleanupService)
-        cleanup_service.execute = AsyncMock(
-            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=False)
-        )
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-            cleanup_service=cleanup_service,
-        )
-
-        await runner._clear_via_lifecycle()
-
-        # Should use cleanup service
-        cleanup_service.execute.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_cleanup_service_priority_over_legacy(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test cleanup service is used over legacy when no lifecycle service."""
-        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
-
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        services = create_mock_services()
-        services.storage.clear_silver = AsyncMock(return_value=0)
-        services.storage.clear_gold = AsyncMock(return_value=0)
-
-        # Mock cleanup service (no lifecycle service)
-        cleanup_service = MagicMock(spec=CleanupService)
-        cleanup_service.execute = AsyncMock(
-            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=False)
-        )
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-            lifecycle_service=None,  # No lifecycle service
-            cleanup_service=cleanup_service,
-        )
-
-        await runner._clear_via_lifecycle()
-
-        # Should use cleanup service, not storage directly
-        cleanup_service.execute.assert_called_once()
-        services.storage.clear_silver.assert_not_called()
-        services.storage.clear_gold.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_lifecycle_service_priority_over_cleanup(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test lifecycle service is used over cleanup service when both present."""
-        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
-        from bioetl.application.services.medallion_lifecycle import (
-            ClearResult,
-            MedallionLifecycleService,
-        )
-
-        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
-
-        services = create_mock_services()
-
-        # Mock both services
-        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
-        lifecycle_service.clear = AsyncMock(
-            return_value=ClearResult(silver_cleared=10, gold_cleared=5, dry_run=False)
-        )
-
-        cleanup_service = MagicMock(spec=CleanupService)
-        cleanup_service.execute = AsyncMock(
-            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=False)
-        )
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=rebuild_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-            lifecycle_service=lifecycle_service,
-            cleanup_service=cleanup_service,
-        )
-
-        await runner._clear_via_lifecycle()
-
-        # Should use lifecycle service (higher priority)
-        lifecycle_service.clear.assert_called_once()
-        cleanup_service.execute.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_cleanup_service_skips_for_incremental(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test cleanup service is not called for incremental runs."""
-        from bioetl.application.core.cleanup_service import CleanupService
-
-        incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
-
-        services = create_mock_services()
-
-        cleanup_service = MagicMock(spec=CleanupService)
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=incremental_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-            cleanup_service=cleanup_service,
-        )
-
-        await runner._clear_via_lifecycle()
-
-        # Should not call cleanup service for incremental
-        cleanup_service.execute.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_cleanup_service_passes_dry_run(
-        self,
-        pipeline_config,
-        mock_context,
-        mock_executor,
-        mock_checkpoint_manager,
-        shutdown_signal,
-        mock_logger,
-        mock_lock_manager,
-    ):
-        """Test cleanup service receives dry_run flag."""
-        from bioetl.application.core.cleanup_service import CleanupResult, CleanupService
-
-        dry_run_runtime = RuntimeConfig(
-            run_type=RunType.REBUILD, limit=None, dry_run=True
-        )
-
-        services = create_mock_services()
-
-        cleanup_service = MagicMock(spec=CleanupService)
-        cleanup_service.execute = AsyncMock(
-            return_value=CleanupResult(silver_cleared=5, gold_cleared=3, dry_run=True)
-        )
-
-        runner = PipelineRunner(
-            config=pipeline_config,
-            runtime=dry_run_runtime,
-            services=services,
-            context=mock_context,
-            executor=mock_executor,
-            checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            logger=mock_logger,
-            cleanup_service=cleanup_service,
-        )
-
-        await runner._clear_via_lifecycle()
-
-        # Should pass dry_run=True
-        cleanup_service.execute.assert_called_once()
-        call_kwargs = cleanup_service.execute.call_args.kwargs
-        assert call_kwargs["dry_run"] is True
