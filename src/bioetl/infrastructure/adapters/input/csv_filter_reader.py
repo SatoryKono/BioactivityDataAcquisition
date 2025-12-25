@@ -18,68 +18,30 @@ logger = logging.getLogger(__name__)
 
 
 class CsvFilterReader:
-    """Reads filter IDs from CSV files using Polars.
+    """Reads filter IDs from CSV files using Polars."""
 
-    This adapter implements the InputFilterPort protocol for loading
-    unique IDs from CSV files to filter API requests.
-
-    Example:
-        >>> reader = CsvFilterReader()
-        >>> result = await reader.load_filter_ids("data/input/molecules.csv", "molecule_chembl_id")
-        >>> print(result.ids)
-        ('CHEMBL1201198', 'CHEMBL25', 'CHEMBL612545')
-        >>> print(result.duplicate_count)
-        0
-
-    """
-
-    async def load_filter_ids(
-        self,
-        source_path: str,
-        column_name: str,
-    ) -> FilterLoadResult:
-        """Load unique IDs from a CSV file.
-
-        Reads the specified column from the CSV file and returns a FilterLoadResult
-        with unique, sorted IDs and duplicate statistics.
-
-        Handles common CSV issues:
-        - Strips whitespace from values
-        - Skips null/empty values
-        - Removes duplicates (with statistics)
-        - Sorts alphabetically for deterministic order
-
-        Args:
-            source_path: Path to the CSV file.
-            column_name: Name of the column containing filter IDs.
-
-        Returns:
-            FilterLoadResult with sorted unique IDs and duplicate statistics.
-
-        Raises:
-            FileNotFoundError: If the CSV file does not exist.
-            ValueError: If the specified column is not found in the CSV.
-
-        """
+    def _read_csv_dataframe(self, source_path: str) -> pl.DataFrame:
+        """Read CSV file and return DataFrame."""
         path = Path(source_path)
         if not path.exists():
             raise FileNotFoundError(f"CSV filter file not found: {source_path}")
 
-        # Read CSV with Polars (efficient for large files)
         try:
-            df = pl.read_csv(source_path)
+            return pl.read_csv(source_path)
         except Exception as e:
             raise ValueError(f"Failed to read CSV file: {e}") from e
 
-        # Validate column exists
+    def _extract_column_ids(
+        self, df: pl.DataFrame, column_name: str
+    ) -> list[str]:
+        """Extract and clean IDs from specified column."""
         if column_name not in df.columns:
             available = ", ".join(df.columns)
             raise ValueError(
                 f"Column '{column_name}' not found in CSV. Available columns: {available}"
             )
 
-        # Extract all non-null, stripped IDs (before deduplication)
-        all_ids = (
+        return (
             df.select(pl.col(column_name).cast(pl.Utf8).str.strip_chars())
             .filter(pl.col(column_name).is_not_null())
             .filter(pl.col(column_name) != "")
@@ -87,35 +49,46 @@ class CsvFilterReader:
             .to_list()
         )
 
+    def _compute_duplicate_stats(
+        self, all_ids: list[str]
+    ) -> tuple[tuple[str, ...], int, int, frozenset[str]]:
+        """Compute unique IDs and duplicate statistics."""
         total_count = len(all_ids)
-
-        # Find duplicates
         id_counts = Counter(all_ids)
-        duplicates = frozenset(id_val for id_val, count in id_counts.items() if count > 1)
-
-        # Get unique sorted IDs
+        duplicates = frozenset(
+            id_val for id_val, count in id_counts.items() if count > 1
+        )
         unique_ids = tuple(sorted(set(all_ids)))
         unique_count = len(unique_ids)
         duplicate_count = total_count - unique_count
+        return unique_ids, unique_count, duplicate_count, duplicates
 
-        # Log duplicates if found
+    async def load_filter_ids(
+        self, source_path: str, column_name: str
+    ) -> FilterLoadResult:
+        """Load unique IDs from a CSV file."""
+        df = self._read_csv_dataframe(source_path)
+        all_ids = self._extract_column_ids(df, column_name)
+        unique_ids, unique_count, duplicate_count, duplicates = (
+            self._compute_duplicate_stats(all_ids)
+        )
+
         if duplicate_count > 0:
-            sample_duplicates = list(duplicates)[:10]
             logger.warning(
                 "filter_ids_duplicates_found",
                 extra={
                     "source_path": source_path,
                     "column_name": column_name,
-                    "total_count": total_count,
+                    "total_count": len(all_ids),
                     "unique_count": unique_count,
                     "duplicate_count": duplicate_count,
-                    "sample_duplicates": sample_duplicates,
+                    "sample_duplicates": list(duplicates)[:10],
                 },
             )
 
         return FilterLoadResult(
             ids=unique_ids,
-            total_count=total_count,
+            total_count=len(all_ids),
             unique_count=unique_count,
             duplicate_count=duplicate_count,
             duplicates=duplicates,
