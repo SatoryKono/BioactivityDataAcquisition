@@ -390,6 +390,7 @@ class RecordProcessor:
             primary_keys=self._table_config.primary_keys,
             schema=self._silver_schema,
             mode=write_mode,
+            on_schema_mismatch=self._table_config.on_schema_mismatch,
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
