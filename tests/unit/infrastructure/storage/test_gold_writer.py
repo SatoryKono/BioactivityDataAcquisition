@@ -503,3 +503,86 @@ class TestGoldWriterToArrowTable:
         result = gold_writer._to_arrow_table(records)
 
         assert result.num_rows == 1
+
+
+@pytest.mark.unit
+class TestGoldWriterDeterministicBackoff:
+    """Tests for deterministic backoff behavior (ADR-014)."""
+
+    @patch("bioetl.infrastructure.storage.gold_writer.asyncio.sleep")
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_gold_writer_deterministic_backoff(
+        self, mock_write_deltalake, mock_sleep, gold_writer, valid_records, strict_schema
+    ):
+        """Test that backoff uses fixed delay (0.05s jitter) instead of random.
+
+        Verifies REQ-DETERM-001: GoldWriter must use deterministic backoff
+        for reproducible retry behavior. The delay formula is:
+        delay = 0.5 * (2 ** attempt) + 0.05
+
+        For attempt 0: 0.5 * 1 + 0.05 = 0.55s
+        For attempt 1: 0.5 * 2 + 0.05 = 1.05s
+        """
+        # Simulate failure on first two attempts, success on third
+        mock_write_deltalake.side_effect = [
+            Exception("Transient error 1"),
+            Exception("Transient error 2"),
+            None,  # Success on third attempt
+        ]
+
+        await gold_writer.write_gold(
+            table_name="test.table",
+            records=valid_records,
+            schema=strict_schema,
+            mode="overwrite",
+        )
+
+        # Verify deterministic backoff delays were used
+        assert mock_sleep.call_count == 2
+        sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
+
+        # Attempt 0: 0.5 * (2**0) + 0.05 = 0.55
+        assert sleep_calls[0] == 0.55
+        # Attempt 1: 0.5 * (2**1) + 0.05 = 1.05
+        assert sleep_calls[1] == 1.05
+
+    @patch("bioetl.infrastructure.storage.gold_writer.asyncio.sleep")
+    @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_gold_writer_scd2_deterministic_backoff(
+        self, mock_write_deltalake, mock_delta_table, mock_sleep, gold_writer, valid_records, strict_schema
+    ):
+        """Test that SCD2 mode also uses deterministic backoff.
+
+        SCD2 writes should use the same deterministic backoff formula
+        as simple writes for consistency.
+        """
+        # Simulate table not found, then transient errors
+        mock_delta_table.side_effect = TableNotFoundError("Not found")
+        mock_write_deltalake.side_effect = [
+            Exception("Transient error 1"),
+            Exception("Transient error 2"),
+            None,  # Success on third attempt
+        ]
+
+        scd_config = {
+            "business_key": "entity_id",
+            "version_col": "version",
+            "valid_from_col": "valid_from",
+            "valid_to_col": "valid_to",
+            "current_flag_col": "is_current",
+        }
+
+        await gold_writer.write_gold(
+            table_name="test.table",
+            records=valid_records,
+            schema=strict_schema,
+            mode="scd2",
+            scd_config=scd_config,
+        )
+
+        # Verify deterministic backoff delays
+        assert mock_sleep.call_count == 2
+        sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
+        assert sleep_calls[0] == 0.55
+        assert sleep_calls[1] == 1.05
