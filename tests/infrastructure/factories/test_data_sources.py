@@ -45,6 +45,6 @@ def test_create_uniprot_adapter(mock_http_client, mock_logger):
 
 
 def test_create_unknown_provider(mock_http_client):
-    """Test creating unknown provider raises error."""
-    with pytest.raises((ValueError, KeyError)):
+    """Test creating unknown provider raises ValueError."""
+    with pytest.raises(ValueError, match="Unknown provider: unknown"):
         DataSourceFactory.create("unknown", http_client=mock_http_client)
