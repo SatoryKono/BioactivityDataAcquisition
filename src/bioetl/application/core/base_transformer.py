@@ -171,17 +171,32 @@ class BaseTransformer(ABC):
         """Serialize complex values (dict/list) to JSON string.
 
         Used for storing nested structures in Silver layer as JSON strings.
+        - Empty collections ([], {}) are treated as None for semantic consistency
+        - Single-element lists are unwrapped: [x] → x
 
         Args:
             value: Value to serialize.
 
         Returns:
-            JSON string for dict/list, str(value) for other types, None for None.
+            JSON string for non-empty dict/list, str(value) for other types,
+            None for None or empty collections.
 
         """
         if value is None:
             return None
-        if isinstance(value, (dict, list)):
+        if isinstance(value, dict):
+            if len(value) == 0:
+                return None
+            return json.dumps(value, ensure_ascii=False)
+        if isinstance(value, list):
+            if len(value) == 0:
+                return None
+            # Unwrap single-element lists
+            if len(value) == 1:
+                item = value[0]
+                if isinstance(item, dict):
+                    return json.dumps(item, ensure_ascii=False)
+                return str(item)
             return json.dumps(value, ensure_ascii=False)
         return str(value)
 

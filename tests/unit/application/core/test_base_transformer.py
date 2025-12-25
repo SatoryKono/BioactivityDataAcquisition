@@ -297,3 +297,78 @@ class TestTemplateMethodPattern:
         mock_context.logger.warning.assert_called_once()
         call_args = mock_context.logger.warning.call_args
         assert "entity_validation_failed" in call_args[0]
+
+
+@pytest.mark.unit
+class TestSerializeJson:
+    """Tests for serialize_json static method."""
+
+    def test_returns_none_for_none(self) -> None:
+        """Test returns None for None input."""
+        result = BaseTransformer.serialize_json(None)
+        assert result is None
+
+    def test_returns_none_for_empty_list(self) -> None:
+        """Test returns None for empty list (semantic consistency)."""
+        result = BaseTransformer.serialize_json([])
+        assert result is None
+
+    def test_returns_none_for_empty_dict(self) -> None:
+        """Test returns None for empty dict (semantic consistency)."""
+        result = BaseTransformer.serialize_json({})
+        assert result is None
+
+    def test_unwraps_single_element_list_with_dict(self) -> None:
+        """Test unwraps single-element list containing dict."""
+        data = [{"type": "Ki", "value": 5.0}]
+        result = BaseTransformer.serialize_json(data)
+        # Single dict in list is unwrapped
+        assert result == '{"type": "Ki", "value": 5.0}'
+
+    def test_unwraps_single_element_list_with_string(self) -> None:
+        """Test unwraps single-element list containing string."""
+        data = ["PROTEIN"]
+        result = BaseTransformer.serialize_json(data)
+        assert result == "PROTEIN"
+
+    def test_keeps_multi_element_list(self) -> None:
+        """Test keeps multi-element list as array."""
+        data = [{"type": "Ki"}, {"type": "IC50"}]
+        result = BaseTransformer.serialize_json(data)
+        assert result == '[{"type": "Ki"}, {"type": "IC50"}]'
+
+    def test_serializes_non_empty_dict(self) -> None:
+        """Test serializes non-empty dict to JSON string."""
+        data = {"key": "value", "number": 42}
+        result = BaseTransformer.serialize_json(data)
+        assert result == '{"key": "value", "number": 42}'
+
+    def test_preserves_unicode(self) -> None:
+        """Test preserves unicode characters without escaping."""
+        data = {"name": "Ацетаминофен", "formula": "C₈H₉NO₂"}
+        result = BaseTransformer.serialize_json(data)
+        assert "Ацетаминофен" in result
+        assert "C₈H₉NO₂" in result
+
+    def test_converts_string_to_string(self) -> None:
+        """Test returns string as-is for string input."""
+        result = BaseTransformer.serialize_json("test string")
+        assert result == "test string"
+
+    def test_converts_number_to_string(self) -> None:
+        """Test converts number to string."""
+        result = BaseTransformer.serialize_json(42)
+        assert result == "42"
+
+    def test_serializes_nested_structure(self) -> None:
+        """Test serializes nested structures correctly."""
+        data = {
+            "properties": [
+                {"type": "DOSE", "value": 0.0, "units": "mg/kg"},
+                {"type": "TIME", "value": 3.0, "units": "hr"},
+            ]
+        }
+        result = BaseTransformer.serialize_json(data)
+        assert '"properties"' in result
+        assert '"DOSE"' in result
+        assert '"TIME"' in result
