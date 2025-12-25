@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -20,8 +21,6 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
-
-    import structlog
 
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
     from bioetl.infrastructure.config import Settings
@@ -506,7 +505,7 @@ class StorageFactory:
     def create(
         settings: Settings,
         config: PipelineYamlConfig,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -584,7 +583,7 @@ class StorageFactory:
 
     @staticmethod
     def _log_export_status(
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         json_path: str | None,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,

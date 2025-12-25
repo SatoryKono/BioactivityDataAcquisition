@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.composition.factories.storage_factory import StorageContext, StorageFactory
+from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
@@ -17,8 +18,6 @@ from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMet
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
 if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
-
     from bioetl.domain.ports import (
         CheckpointPort,
         DataSourcePort,
@@ -35,7 +34,7 @@ if TYPE_CHECKING:
 class DataSourceFactory(Protocol):
     """Protocol for data source creation."""
 
-    def create(self, settings: Settings, logger: BoundLogger) -> DataSourcePort: ...
+    def create(self, settings: Settings, logger: LoggerPort) -> DataSourcePort: ...
 
 
 class BaseServicesFactory:
@@ -45,7 +44,7 @@ class BaseServicesFactory:
     def create_common_services(
         cls,
         settings: Settings,
-        logger: BoundLogger,
+        logger: LoggerPort,
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
         tracer: TracingPort | None = None,
