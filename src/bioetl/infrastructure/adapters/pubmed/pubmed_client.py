@@ -74,7 +74,8 @@ class PubMedAdapter:
         try:
             response = await self.http_client.get(search_url, params=params)
             data = response.json()
-            return data.get("esearchresult", {}).get("idlist", [])
+            idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
+            return idlist
         except Exception as e:
             self.logger.error("Failed to fetch PMIDs", error=str(e))
             raise ApiError(f"PubMed search failed: {e}") from e

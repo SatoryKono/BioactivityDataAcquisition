@@ -116,6 +116,17 @@ def extract_list_field(
     return values if values else None
 
 
+def _extract_nested_values(items: list[dict[str, Any]], field: str) -> list[Any]:
+    """Extract all nested list values from a field across items."""
+    values: list[Any] = []
+    for item in items:
+        if isinstance(item, dict):
+            nested = item.get(field)
+            if isinstance(nested, list):
+                values.extend(nested)
+    return values
+
+
 def aggregate_nested_lists(
     items: list[dict[str, Any]] | None,
     field: str,
@@ -144,28 +155,24 @@ def aggregate_nested_lists(
         ['a', 'b', 'c']
 
     """
-    if not items or not isinstance(items, list):
+    if not isinstance(items, list) or not items:
         return None
 
-    aggregated: list[Any] = []
-    seen: set[str] = set()
+    values = _extract_nested_values(items, field)
+    if not values:
+        return None
 
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        nested = item.get(field)
-        if nested and isinstance(nested, list):
-            for val in nested:
-                if deduplicate:
-                    # Convert to string/canonical for hashing if complex
-                    val_str = str(val)
-                    if val_str not in seen:
-                        aggregated.append(val)
-                        seen.add(val_str)
-                else:
-                    aggregated.append(val)
+    if deduplicate:
+        seen: set[str] = set()
+        unique: list[Any] = []
+        for val in values:
+            key = str(val)
+            if key not in seen:
+                seen.add(key)
+                unique.append(val)
+        return unique if unique else None
 
-    return aggregated if aggregated else None
+    return values
 
 
 def normalize_string(value: str | None) -> str | None:
