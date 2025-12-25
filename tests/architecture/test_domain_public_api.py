@@ -148,3 +148,35 @@ def test_domain_no_infrastructure_types_in_all() -> None:
                 f"Symbol '{symbol}' appears to be infrastructure type "
                 f"(contains '{pattern}') - should not be in domain.__all__"
             )
+
+
+def test_domain_exports_all_submodule_symbols() -> None:
+    """Validate domain.__all__ includes all public submodule exports.
+
+    REQ-ARCH-031: Domain facade must re-export all public symbols from submodules.
+    This ensures that `from bioetl.domain import X` works for any public symbol X
+    defined in exceptions, ports, or entities submodules.
+    """
+    from bioetl import domain
+    from bioetl.domain import exceptions, ports, entities
+
+    domain_all = set(domain.__all__)
+
+    # Submodules with __all__ that should be fully exported
+    submodules = [
+        ("exceptions", exceptions),
+        ("ports", ports),
+        ("entities", entities),
+    ]
+
+    missing_symbols: list[str] = []
+
+    for submodule_name, submodule in submodules:
+        for symbol in submodule.__all__:
+            if symbol not in domain_all:
+                missing_symbols.append(f"{submodule_name}.{symbol}")
+
+    assert not missing_symbols, (
+        "Submodule symbols missing from domain.__all__:\n"
+        + "\n".join(f"  - {s}" for s in sorted(missing_symbols))
+    )
