@@ -564,3 +564,48 @@ class TestStorageWriterLoggerContract:
             f"{writer_name}.__init__() 'logger' MUST be required (no default). "
             "Optional loggers violate DI principles per RULES.md."
         )
+
+
+# ============================================================================
+# HTTP Adapter LoggerPort Contract Tests
+# ============================================================================
+
+
+class TestHttpAdapterLoggerContract:
+    """Tests for HTTP adapter LoggerPort requirements.
+
+    BaseHttpAdapter MUST require LoggerPort as a constructor parameter
+    to ensure all HTTP adapters have proper observability.
+    Per RULES.md: Dependencies MUST be injected through constructor.
+    No hidden fallbacks (like NoOpLogger) are allowed.
+    """
+
+    HTTP_ADAPTERS = [
+        ("BaseHttpAdapter", "bioetl.infrastructure.adapters.base"),
+    ]
+
+    @pytest.mark.parametrize("adapter_name,module_path", HTTP_ADAPTERS)
+    def test_http_adapter_has_required_logger_parameter(
+        self, adapter_name: str, module_path: str
+    ) -> None:
+        """HTTP adapters MUST have LoggerPort as required parameter."""
+        import importlib
+        import inspect
+
+        module = importlib.import_module(module_path)
+        adapter_class = getattr(module, adapter_name)
+
+        sig = inspect.signature(adapter_class.__init__)
+        params = sig.parameters
+
+        assert "logger" in params, (
+            f"{adapter_name}.__init__() MUST have 'logger' parameter. "
+            "All adapters require LoggerPort for observability."
+        )
+
+        # Check that logger is a required parameter (no default value)
+        logger_param = params["logger"]
+        assert logger_param.default is inspect.Parameter.empty, (
+            f"{adapter_name}.__init__() 'logger' MUST be required (no default). "
+            "Optional loggers with fallback to NoOpLogger violate DI principles per RULES.md."
+        )
