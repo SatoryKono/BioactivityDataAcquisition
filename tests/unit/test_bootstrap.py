@@ -501,17 +501,20 @@ class TestBootstrapMetrics:
 
         assert result is mock_metrics
 
-    @patch("bioetl.composition.bootstrap.PrometheusMetrics")
-    def test_bootstrap_metrics_disabled_returns_none(
-        self, mock_prometheus: MagicMock
-    ) -> None:
-        """Test that disabled metrics returns None without starting server."""
+    def test_bootstrap_metrics_disabled_returns_noop_metrics(self) -> None:
+        """Test that disabled metrics returns NoOpMetrics (not None).
+
+        Per Unified Observability Contract, bootstrap_metrics() always
+        returns a valid MetricsPort implementation. When metrics are
+        disabled, NoOpMetrics is used as a silent fallback.
+        """
         from bioetl.composition.bootstrap import bootstrap_metrics
+        from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
 
         result = bootstrap_metrics(settings)
 
-        assert result is None
-        mock_prometheus.assert_not_called()
+        assert result is not None
+        assert isinstance(result, NoOpMetrics)
