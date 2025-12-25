@@ -2,10 +2,15 @@
 
 Application Service that orchestrates pipeline execution lifecycle.
 Coordinates locking, checkpointing, and execution.
+
+Records health-check metrics per Unified Observability Contract:
+- pipeline_health_check_passed: Per-component health status
+- infrastructure_validated: Overall infrastructure validation status
 """
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.health_aggregator import HealthAggregator
@@ -156,6 +161,11 @@ class PipelineRunner:
         """Validate infrastructure health before pipeline execution.
 
         Performs health checks on storage and data source components.
+        Records metrics per Unified Observability Contract:
+        - pipeline_health_check_passed: Per-component health status (1=passed, 0=failed)
+        - infrastructure_validated: Overall validation status
+        - health_check_duration_seconds: Total health check duration
+
         Raises InfrastructureError if critical components are unhealthy.
         """
         self._logger.info(
@@ -163,7 +173,12 @@ class PipelineRunner:
             extra={"stage": "health_check"},
         )
 
+        start_time = time.perf_counter()
         report = await self._health_aggregator.check_all(self._services)
+        duration = time.perf_counter() - start_time
+
+        # Record per-component health check metrics
+        self._record_health_check_metrics(report, duration)
 
         # Log overall health status
         self._logger.info(
@@ -173,6 +188,7 @@ class PipelineRunner:
                 "overall_status": report.overall_status.value,
                 "is_healthy": report.is_healthy,
                 "components_checked": len(report.results),
+                "duration_seconds": round(duration, 4),
             },
         )
 
@@ -294,3 +310,49 @@ class PipelineRunner:
                     1,
                     {"pipeline": self._config.pipeline_name, "metric": metric_name},
                 )
+
+    def _record_health_check_metrics(
+        self,
+        report: Any,
+        duration: float,
+    ) -> None:
+        """Record health-check metrics per Unified Observability Contract.
+
+        Records:
+        - pipeline_health_check_passed: Per-component status (1=passed, 0=failed)
+        - infrastructure_validated: Overall validation status
+        - health_check_duration_seconds: Total duration
+
+        Args:
+            report: HealthReport from health aggregator.
+            duration: Total health check duration in seconds.
+        """
+        from bioetl.domain.types import HealthStatus
+
+        metrics = self._services.metrics
+        pipeline = self._config.pipeline_name
+        run_id = str(self._context.run_id)
+
+        # Record per-component health check passed status
+        for result in report.results:
+            passed = 1.0 if result.status == HealthStatus.HEALTHY else 0.0
+            metrics.set_gauge(
+                "pipeline_health_check_passed",
+                passed,
+                {"pipeline": pipeline, "component": result.component},
+            )
+
+        # Record overall infrastructure validation status
+        validated = 1.0 if report.is_healthy else 0.0
+        metrics.set_gauge(
+            "infrastructure_validated",
+            validated,
+            {"pipeline": pipeline, "run_id": run_id},
+        )
+
+        # Record health check duration
+        metrics.observe_histogram(
+            "health_check_duration_seconds",
+            duration,
+            {"pipeline": pipeline},
+        )

@@ -2,6 +2,13 @@
 
 Contains bootstrap functions for logging, tracing, metrics, and data quality
 monitoring. These functions configure the observability stack for the pipeline.
+
+Unified Observability Contract:
+- bootstrap_observability() always returns valid implementations
+- Logger: StructlogLogger (always valid)
+- Metrics: PrometheusMetrics or NoOpMetrics (never None)
+- Tracer: OpenTelemetryTracer or NoOpTracer (never None)
+- DQMonitor: DataQualityMonitor or None (optional)
 """
 
 from __future__ import annotations
@@ -13,6 +20,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.server import start_metrics_server
 from bioetl.infrastructure.observability.tracing import NoOpTracer, OpenTelemetryTracer
@@ -57,8 +65,11 @@ def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
     return NoOpTracer()
 
 
-def bootstrap_metrics(settings: Settings) -> MetricsPort | None:
+def bootstrap_metrics(settings: Settings) -> MetricsPort:
     """Bootstrap metrics with optional server start.
+
+    Unified Observability Contract: Always returns a valid MetricsPort.
+    When metrics are disabled, returns NoOpMetrics (silent fallback).
 
     Server is started only if explicitly enabled in settings.
     Supports fail_fast mode for strict startup validation.
@@ -67,13 +78,15 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort | None:
         settings: Application settings.
 
     Returns:
-        MetricsPort instance or None if metrics are disabled.
+        MetricsPort instance (PrometheusMetrics or NoOpMetrics).
+        Never returns None - uses NoOpMetrics as fallback.
 
     Raises:
         MetricsServerError: If fail_fast=True and server fails to start.
     """
     if not settings.observability.metrics_enabled:
-        return None
+        # Silent fallback - no warning since explicitly disabled
+        return NoOpMetrics(warn_on_use=False)
 
     metrics = PrometheusMetrics()
 
@@ -150,6 +163,11 @@ def bootstrap_observability(
 ) -> ObservabilityBundle:
     """Bootstrap all observability components.
 
+    Unified Observability Contract:
+    - Always returns a valid ObservabilityBundle with non-None logger and metrics
+    - Fallback to StructlogLogger + NoOpMetrics when Prometheus is disabled
+    - Tracer and DQ monitor remain optional
+
     Creates a unified observability bundle containing logger, tracer, metrics,
     and data quality monitor.
 
@@ -159,16 +177,33 @@ def bootstrap_observability(
         settings: Application settings.
 
     Returns:
-        Configured ObservabilityBundle instance.
+        Configured ObservabilityBundle instance with valid implementations.
+        Logger and metrics are guaranteed to be non-None.
+
+    Raises:
+        ObservabilityContractError: If bundle creation fails validation.
     """
     logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
     tracer = bootstrap_tracer()
     metrics = bootstrap_metrics(settings)
     dq_monitor = bootstrap_dq_monitor(settings)
 
-    return ObservabilityBundle(
+    bundle = ObservabilityBundle(
         logger=logger,
-        tracer=tracer,
         metrics=metrics,
+        tracer=tracer,
         dq_monitor=dq_monitor,
     )
+
+    # Log observability initialization status
+    logger.info(
+        "observability_initialized",
+        extra={
+            "stage": "bootstrap",
+            "metrics_type": type(metrics).__name__,
+            "tracer_type": type(tracer).__name__,
+            "dq_monitor_enabled": dq_monitor is not None,
+        },
+    )
+
+    return bundle

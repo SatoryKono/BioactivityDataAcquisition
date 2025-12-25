@@ -70,7 +70,7 @@ def mock_services(mock_storage, mock_quarantine):
     """Create mock pipeline services."""
     services = MagicMock(spec=PipelineServices)
     services.storage = mock_storage
-    services.metrics = None
+    services.metrics = MagicMock()  # Per Unified Observability Contract, metrics is never None
     services.quarantine = mock_quarantine
     return services
 

@@ -129,6 +129,29 @@ DQ_BASELINE_SAMPLES = Gauge(
     ["pipeline", "metric"],
 )
 
+# =============================================================================
+# Health Check metrics (Unified Observability Contract)
+# =============================================================================
+
+PIPELINE_HEALTH_CHECK_PASSED = Gauge(
+    "bioetl_pipeline_health_check_passed",
+    "Health check status for pipeline components (1=passed, 0=failed)",
+    ["pipeline", "component"],
+)
+
+INFRASTRUCTURE_VALIDATED = Gauge(
+    "bioetl_infrastructure_validated",
+    "Infrastructure validation status (1=validated, 0=not validated)",
+    ["pipeline", "run_id"],
+)
+
+HEALTH_CHECK_DURATION_SECONDS = Histogram(
+    "bioetl_health_check_duration_seconds",
+    "Duration of health check operations in seconds",
+    ["pipeline"],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
+)
+
 
 class MetricsCollector:
     """Collector for pipeline metrics.
