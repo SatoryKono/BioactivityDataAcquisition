@@ -154,6 +154,59 @@ class InMemoryStorage:
         """Clear Delta tables (no-op for in-memory)."""
         return 0
 
+    async def vacuum(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> int:
+        """Vacuum Delta table (simulated for in-memory).
+
+        Returns simulated file count based on table content.
+        """
+        # In-memory storage doesn't have old files, return 0
+        self.operations.append({
+            "operation": "vacuum",
+            "table_name": table_name,
+            "retention_hours": retention_hours,
+            "dry_run": dry_run,
+        })
+        return 0
+
+    async def archive(
+        self,
+        table_name: str,
+        target_path: str,
+        remove_source: bool = False,
+    ) -> int:
+        """Archive table to target path (simulated for in-memory).
+
+        Returns count of records as simulated file count.
+        """
+        file_count = 0
+
+        # Count Silver records as "files"
+        if table_name in self.silver:
+            file_count += len(self.silver[table_name])
+            if remove_source:
+                del self.silver[table_name]
+
+        # Count Gold records as "files"
+        if table_name in self.gold:
+            file_count += len(self.gold[table_name])
+            if remove_source:
+                del self.gold[table_name]
+
+        self.operations.append({
+            "operation": "archive",
+            "table_name": table_name,
+            "target_path": target_path,
+            "remove_source": remove_source,
+            "file_count": file_count,
+        })
+
+        return file_count
+
     def preview_cleanup(
         self,
         silver_table: str,

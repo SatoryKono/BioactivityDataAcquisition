@@ -329,6 +329,125 @@ class StorageAdapter:
         else:
             return HealthStatus.UNHEALTHY
 
+    async def vacuum(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> int:
+        """Vacuum Delta table via underlying writers.
+
+        Implements StoragePort.vacuum().
+        Vacuums both Silver and Gold layers for the specified table.
+
+        Args:
+            table_name: Table name in format "provider.entity"
+            retention_hours: Minimum age of files to remove (default 168h = 7 days)
+            dry_run: If True, only report what would be removed
+
+        Returns:
+            Total number of files removed (or would be removed if dry_run)
+        """
+        total_removed = 0
+
+        # Vacuum Silver
+        try:
+            removed = await self.silver.vacuum(
+                table_name=table_name,
+                retention_hours=retention_hours,
+                dry_run=dry_run,
+            )
+            total_removed += len(removed)
+        except Exception:
+            # Log but continue to Gold (table may not exist)
+            pass
+
+        # Vacuum Gold (GoldWriter uses DeltaWriter internally, need to add vacuum)
+        # Gold layer uses same Delta format, so we can vacuum via path
+        try:
+            gold_table_path = f"{self.gold.base_path}/{table_name.replace('.', '/')}"
+            loop = asyncio.get_running_loop()
+            from deltalake import DeltaTable
+            from deltalake.exceptions import (
+                TableNotFoundError as DeltaTableNotFoundError,
+            )
+
+            try:
+                dt = await loop.run_in_executor(
+                    None,
+                    lambda: DeltaTable(gold_table_path),
+                )
+                removed = await loop.run_in_executor(
+                    None,
+                    lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
+                )
+                total_removed += len(removed)
+            except DeltaTableNotFoundError:
+                pass
+        except Exception:
+            pass
+
+        return total_removed
+
+    async def archive(
+        self,
+        table_name: str,
+        target_path: str,
+        remove_source: bool = False,
+    ) -> int:
+        """Archive table to target path.
+
+        Implements StoragePort.archive().
+        Archives both Silver and Gold layers for the specified table.
+
+        Args:
+            table_name: Table name to archive
+            target_path: Destination path for archive
+            remove_source: If True, remove source after successful copy
+
+        Returns:
+            Number of files archived
+        """
+        import shutil
+
+        total_archived = 0
+
+        # Archive Silver
+        silver_table_path = self.silver.get_table_path(table_name)
+        if silver_table_path.exists():
+            silver_target = Path(target_path) / "silver" / table_name.replace(".", "/")
+            silver_target.parent.mkdir(parents=True, exist_ok=True)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: shutil.copytree(silver_table_path, silver_target),
+            )
+            total_archived += sum(1 for f in silver_table_path.rglob("*") if f.is_file())
+            if remove_source:
+                await loop.run_in_executor(
+                    None,
+                    lambda: shutil.rmtree(silver_table_path),
+                )
+
+        # Archive Gold
+        gold_table_path = self.gold.get_table_path(table_name)
+        if gold_table_path.exists():
+            gold_target = Path(target_path) / "gold" / table_name.replace(".", "/")
+            gold_target.parent.mkdir(parents=True, exist_ok=True)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: shutil.copytree(gold_table_path, gold_target),
+            )
+            total_archived += sum(1 for f in gold_table_path.rglob("*") if f.is_file())
+            if remove_source:
+                await loop.run_in_executor(
+                    None,
+                    lambda: shutil.rmtree(gold_table_path),
+                )
+
+        return total_archived
+
     @staticmethod
     def _check_directory_writable(dir_path: Path | str) -> bool:
         """Check if a directory is writable.

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
+    ARCHIVE_DURATION_SECONDS,
+    ARCHIVE_FILES_TOTAL,
     BATCH_SIZE_RECORDS,
     CIRCUIT_BREAKER_FAILURE_TOTAL,
     CIRCUIT_BREAKER_STATE,
@@ -19,12 +21,16 @@ from bioetl.infrastructure.observability.metrics import (
     FILTER_IDS_LOADED_TOTAL,
     PIPELINE_DURATION_SECONDS,
     RECORDS_PROCESSED_TOTAL,
+    VACUUM_DURATION_SECONDS,
+    VACUUM_FILES_REMOVED_TOTAL,
 )
 
 # Registry of histogram metrics
 HISTOGRAMS = {
     "pipeline_duration_seconds": PIPELINE_DURATION_SECONDS,
     "batch_size_records": BATCH_SIZE_RECORDS,
+    "vacuum_duration_seconds": VACUUM_DURATION_SECONDS,
+    "archive_duration_seconds": ARCHIVE_DURATION_SECONDS,
 }
 
 # Registry of counter metrics
@@ -37,6 +43,8 @@ COUNTERS = {
     "circuit_breaker_trips_total": CIRCUIT_BREAKER_TRIPS_TOTAL,
     "circuit_breaker_success_total": CIRCUIT_BREAKER_SUCCESS_TOTAL,
     "circuit_breaker_failure_total": CIRCUIT_BREAKER_FAILURE_TOTAL,
+    "vacuum_files_removed_total": VACUUM_FILES_REMOVED_TOTAL,
+    "archive_files_total": ARCHIVE_FILES_TOTAL,
 }
 
 # Registry of gauge metrics

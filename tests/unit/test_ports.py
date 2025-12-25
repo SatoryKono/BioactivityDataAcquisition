@@ -171,6 +171,22 @@ class TestStoragePortProtocol:
             async def clear_delta(self, table_name: str | None = None) -> int:
                 return 0
 
+            async def vacuum(
+                self,
+                table_name: str,
+                retention_hours: int = 168,
+                dry_run: bool = False,
+            ) -> int:
+                return 0
+
+            async def archive(
+                self,
+                table_name: str,
+                target_path: str,
+                remove_source: bool = False,
+            ) -> int:
+                return 0
+
             async def health_check(self) -> Any:
                 from bioetl.domain.types import HealthStatus
                 return HealthStatus.HEALTHY
