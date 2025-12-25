@@ -160,7 +160,11 @@ class TestUniProtProteinPipelineTransform:
         uniprot_runtime,
         mock_uniprot_services,
     ):
-        """Тест трансформации минимальной записи."""
+        """Тест трансформации минимальной записи с обязательными полями.
+
+        Protein entity requires: accession, entry_name.
+        Optional fields: protein_name, gene_names, organism_id, sequence_length.
+        """
         run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
@@ -175,10 +179,11 @@ class TestUniProtProteinPipelineTransform:
             logger=mock_uniprot_services.logger,
         )
 
-        # Minimal record
+        # Minimal valid record with only required fields (accession, entry_name)
         bronze_record = {
             "primaryAccession": "Q99999",
             "uniProtkbId": "TEST_HUMAN",
+            # No proteinDescription - protein_name is optional
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
@@ -224,13 +229,17 @@ class TestUniProtProteinPipelineTransform:
 
         assert silver_record is None
 
-    async def test_transform_bronze_to_silver_missing_protein_description(
+    async def test_transform_bronze_to_silver_missing_protein_description_accepted(
         self,
         uniprot_config,
         uniprot_runtime,
         mock_uniprot_services,
     ):
-        """Тест трансформации записи без proteinDescription."""
+        """Тест: запись без proteinDescription успешно обрабатывается.
+
+        protein_name is optional, so records without
+        proteinDescription.recommendedName.fullName.value are accepted.
+        """
         run_id = uuid4()
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
@@ -251,6 +260,7 @@ class TestUniProtProteinPipelineTransform:
             "genes": [{"geneName": {"value": "GENE1"}}],
             "organism": {"taxonId": 9606},
             "sequence": {"length": 100},
+            # Missing: proteinDescription - this is OK, protein_name is optional
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
@@ -287,6 +297,9 @@ class TestUniProtProteinPipelineTransform:
         bronze_record = {
             "primaryAccession": "B0B000",
             "uniProtkbId": "NOGENE_HUMAN",
+            "proteinDescription": {
+                "recommendedName": {"fullName": {"value": "No Gene Protein"}}
+            },
             "genes": [],
         }
 
@@ -348,9 +361,13 @@ class TestUniProtProteinPipelineEdgeCases:
             logger=mock_uniprot_services.logger,
         )
 
-        # Malformed genes - missing geneName
+        # Malformed genes - some missing geneName
         bronze_record = {
             "primaryAccession": "X00001",
+            "uniProtkbId": "MALFORM_HUMAN",
+            "proteinDescription": {
+                "recommendedName": {"fullName": {"value": "Malformed Genes Protein"}}
+            },
             "genes": [
                 {"geneName": {"value": "VALID"}},
                 {"otherField": "no geneName"},
@@ -389,6 +406,10 @@ class TestUniProtProteinPipelineEdgeCases:
 
         bronze_record = {
             "primaryAccession": "Y00001",
+            "uniProtkbId": "NOORG_HUMAN",
+            "proteinDescription": {
+                "recommendedName": {"fullName": {"value": "No Organism Protein"}}
+            },
             "organism": None,
         }
 
