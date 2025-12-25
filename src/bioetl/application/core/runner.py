@@ -144,6 +144,9 @@ class PipelineRunner:
                 # Check data quality after execution
                 await self._check_data_quality()
 
+                # Run VACUUM if enabled (Phase 1 refactoring)
+                await self._run_vacuum_if_enabled()
+
                 await self._checkpoint_manager.delete_checkpoint()
 
             # Add extra info to logs if needed, though observer handles success/failure logging
@@ -294,3 +297,89 @@ class PipelineRunner:
                     1,
                     {"pipeline": self._config.pipeline_name, "metric": metric_name},
                 )
+
+    async def _run_vacuum_if_enabled(self) -> None:
+        """Run VACUUM on Silver and Gold tables if enabled.
+
+        Executes VACUUM using MedallionLifecycleService when:
+        - runtime.vacuum_after_run is True
+        - runtime.dry_run is False (no vacuum in dry-run mode)
+
+        Uses runtime.vacuum_retention_days for retention policy (default: 7 days).
+        """
+        if not self._runtime.vacuum_after_run:
+            return
+
+        if self._runtime.dry_run:
+            self._logger.info(
+                "VACUUM skipped in dry-run mode",
+                extra={"stage": "vacuum"},
+            )
+            return
+
+        self._logger.info(
+            "Starting VACUUM operation",
+            extra={
+                "stage": "vacuum",
+                "retention_days": self._runtime.vacuum_retention_days,
+            },
+        )
+
+        gold_table = (
+            self._config.gold_table
+            or f"{self._config.provider}.{self._config.entity_type}"
+        )
+
+        # VACUUM Silver table
+        try:
+            silver_files_removed = await self._lifecycle_service.vacuum(
+                table=self._config.silver_table,
+                retention_days=self._runtime.vacuum_retention_days,
+                dry_run=False,
+            )
+            self._logger.info(
+                "VACUUM completed for Silver table",
+                extra={
+                    "table": self._config.silver_table,
+                    "files_removed": silver_files_removed,
+                },
+            )
+
+            if self._services.metrics:
+                self._services.metrics.increment_counter(
+                    "vacuum_files_removed",
+                    silver_files_removed,
+                    {"pipeline": self._config.pipeline_name, "layer": "silver"},
+                )
+        except Exception as e:
+            self._logger.warning(
+                "VACUUM failed for Silver table",
+                extra={"table": self._config.silver_table, "error": str(e)},
+            )
+
+        # VACUUM Gold table
+        try:
+            gold_files_removed = await self._lifecycle_service.vacuum(
+                table=gold_table,
+                retention_days=self._runtime.vacuum_retention_days,
+                dry_run=False,
+            )
+            self._logger.info(
+                "VACUUM completed for Gold table",
+                extra={
+                    "table": gold_table,
+                    "files_removed": gold_files_removed,
+                },
+            )
+
+            if self._services.metrics:
+                self._services.metrics.increment_counter(
+                    "vacuum_files_removed",
+                    gold_files_removed,
+                    {"pipeline": self._config.pipeline_name, "layer": "gold"},
+                )
+        except Exception as e:
+            self._logger.warning(
+                "VACUUM failed for Gold table",
+                extra={"table": gold_table, "error": str(e)},
+            )

@@ -1,28 +1,55 @@
 # src/bioetl/application/pipelines/pubmed/publications.py
+"""PubMed Publications Pipeline.
+
+Updated: Transformer injection via DI (Phase 1 refactoring).
+"""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.types import RunID
 
 
 class PubMedPublicationsPipeline(BasePipeline):
-    """Пайплайн для данных о публикациях из PubMed."""
+    """Пайплайн для данных о публикациях из PubMed.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize PubMed publications pipeline."""
-        super().__init__(*args, **kwargs)
-        self._transformer = PubMedPublicationTransformer(provider=self.provider)
+    Transformer is injected via DI from GenericPipelineFactory.
+    Fallback to local creation for backward compatibility with tests.
+    """
 
-    async def transform_bronze_to_silver(
+    def __init__(
         self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Трансформирует сырую XML-запись в формат Silver."""
-        return await self._transformer.transform(context, record)
+        config: PipelineConfig,
+        runtime: RuntimeConfig,
+        services: PipelineServices,
+        run_id: RunID,
+        transformer: "BaseTransformer | None" = None,
+    ) -> None:
+        """Initialize PubMed publications pipeline.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Injected services (ports).
+            run_id: Unique identifier for this pipeline run.
+            transformer: Injected transformer (DI). If None, creates fallback.
+
+        """
+        # Create fallback transformer if not injected (backward compatibility)
+        if transformer is None:
+            from bioetl.application.pipelines.pubmed.transformer import (
+                PubMedPublicationTransformer,
+            )
+
+            transformer = PubMedPublicationTransformer(provider=config.provider)
+
+        super().__init__(config, runtime, services, run_id, transformer=transformer)
+
+    # transform_bronze_to_silver() is inherited from BasePipeline

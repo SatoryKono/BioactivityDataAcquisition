@@ -169,6 +169,11 @@ class RuntimeConfig:
     query: str | None = None
     dry_run: bool = False
 
+    # VACUUM automation (Phase 1 refactoring)
+    # When enabled, VACUUM is executed after successful pipeline run
+    vacuum_after_run: bool = False
+    vacuum_retention_days: int = 7
+
     def __post_init__(self) -> None:
         """Validate runtime config."""
         if self.limit is not None and self.limit <= 0:
@@ -180,6 +185,10 @@ class RuntimeConfig:
         if self.lock_wait_timeout <= 0:
             raise ValueError(
                 f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}"
+            )
+        if self.vacuum_retention_days <= 0:
+            raise ValueError(
+                f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}"
             )
 
     @property

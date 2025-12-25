@@ -2,6 +2,8 @@
 
 Provides a configurable factory that eliminates the need for boilerplate subclasses.
 Pipelines can be registered declaratively using configuration rather than class inheritance.
+
+Updated: Transformer injection via DI (Phase 1 refactoring).
 """
 
 from __future__ import annotations
@@ -29,6 +31,7 @@ if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
@@ -76,6 +79,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         silver_schema: pa.Schema | None = None,
         gold_schema: Any = None,
         data_source_creator: DataSourceCreator | None = None,
+        transformer_class: type["BaseTransformer"] | None = None,
     ) -> None:
         """Initialize the factory.
 
@@ -87,6 +91,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             gold_schema: Pandera schema for Gold layer validation (required)
             data_source_creator: Optional custom creator function. If not provided,
                 uses DataSourceRegistry.get(provider)
+            transformer_class: Transformer class for Bronze→Silver transformation.
+                If provided, factory will create and inject transformer into pipeline.
+                This is the preferred DI approach.
 
         Raises:
             ValueError: If gold_schema is not provided
@@ -101,11 +108,22 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.provider = provider
         self.silver_schema = silver_schema
         self.gold_schema = gold_schema
+        self.transformer_class = transformer_class
 
         # Use custom creator or look up from registry
         self._create_data_source = data_source_creator or DataSourceRegistry.get(
             provider
         )
+
+    def create_transformer(self) -> "BaseTransformer | None":
+        """Create transformer instance if transformer_class is configured.
+
+        Returns:
+            Transformer instance or None if no transformer_class configured.
+        """
+        if self.transformer_class is None:
+            return None
+        return self.transformer_class(provider=self.provider)
 
     def create_data_source(
         self,
@@ -179,6 +197,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         """Create pipeline instance.
 
         Loads config once and reuses it for both services and pipeline.
+        If transformer_class is configured, creates and injects transformer via DI.
 
         Args:
             run_id: Unique identifier for this pipeline run (from CLI/orchestrator)
@@ -206,11 +225,15 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
         domain_config = yaml_config_to_domain(yaml_config)
 
+        # Create transformer via DI if configured
+        transformer = self.create_transformer()
+
         return self.pipeline_class.create(
             run_id=run_id,
             runtime=runtime,
             services=services,
             config=domain_config,
+            transformer=transformer,
         )
 
     def create_runner(
@@ -354,6 +377,7 @@ def create_pipeline_factory(
     provider: str,
     silver_schema: pa.Schema | None = None,
     gold_schema: Any = None,
+    transformer_class: type["BaseTransformer"] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories.
 
@@ -363,6 +387,7 @@ def create_pipeline_factory(
         provider: Data source provider name
         silver_schema: Optional Silver layer schema
         gold_schema: Pandera schema for Gold layer validation (required)
+        transformer_class: Transformer class for Bronze→Silver transformation (DI)
 
     Returns:
         Configured GenericPipelineFactory
@@ -373,6 +398,7 @@ def create_pipeline_factory(
         ...     pipeline_class=ChEMBLActivityPipeline,
         ...     provider="chembl",
         ...     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+        ...     transformer_class=ActivityTransformer,
         ... )
     """
     return GenericPipelineFactory(
@@ -381,4 +407,5 @@ def create_pipeline_factory(
         provider=provider,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
+        transformer_class=transformer_class,
     )

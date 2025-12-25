@@ -41,6 +41,14 @@ from bioetl.composition.factories.storage_factory import (
     StorageFactory,
 )
 
+# Transformer factory (DI for transformers)
+from bioetl.composition.factories.transformer_factory import (
+    create_transformer,
+    get_transformer_class,
+    register_all_transformers,
+    register_transformer,
+)
+
 __all__ = [
     "DataSourceCreator",
     "DataSourceFactory",
@@ -51,7 +59,11 @@ __all__ = [
     "StorageFactory",
     "chembl_activity_factory",
     "create_pipeline_factory",
+    "create_transformer",
+    "get_transformer_class",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
+    "register_all_transformers",
+    "register_transformer",
     "uniprot_protein_factory",
 ]

@@ -4,22 +4,36 @@
 This module creates all pipeline factories using the GenericPipelineFactory
 pattern. Registration is explicit via register_all_pipelines().
 
+Updated: Transformer injection via DI (Phase 1 refactoring).
+All factories now include transformer_class for proper DI.
+
 Usage:
     >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
     >>> register_all_pipelines()  # Call once at application startup
 """
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
+from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
+from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
 from bioetl.application.pipelines.chembl.target_component import (
     ChEMBLTargetComponentPipeline,
 )
+from bioetl.application.pipelines.chembl.target_component_transformer import (
+    TargetComponentTransformer,
+)
+from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.gold import (
@@ -55,6 +69,7 @@ chembl_activity_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
     gold_schema=ChEMBLActivityGoldSchema,
+    transformer_class=ActivityTransformer,
 )
 
 # ChEMBL Assay Pipeline
@@ -64,6 +79,7 @@ chembl_assay_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_ASSAY_SCHEMA,
     gold_schema=ChEMBLAssayGoldSchema,
+    transformer_class=AssayTransformer,
 )
 
 # ChEMBL Document Pipeline
@@ -73,6 +89,7 @@ chembl_document_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_DOCUMENT_SCHEMA,
     gold_schema=ChEMBLDocumentGoldSchema,
+    transformer_class=DocumentTransformer,
 )
 
 # ChEMBL Target Pipeline
@@ -82,6 +99,7 @@ chembl_target_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_TARGET_SCHEMA,
     gold_schema=ChEMBLTargetGoldSchema,
+    transformer_class=TargetTransformer,
 )
 
 # ChEMBL Target Component Pipeline
@@ -91,6 +109,7 @@ chembl_target_component_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
     gold_schema=ChEMBLTargetComponentGoldSchema,
+    transformer_class=TargetComponentTransformer,
 )
 
 # ChEMBL Molecule Pipeline
@@ -100,6 +119,7 @@ chembl_molecule_factory = GenericPipelineFactory(
     provider="chembl",
     silver_schema=CHEMBL_MOLECULE_SCHEMA,
     gold_schema=ChEMBLMoleculeGoldSchema,
+    transformer_class=MoleculeTransformer,
 )
 
 # PubChem Compound Pipeline
@@ -109,6 +129,7 @@ pubchem_compound_factory = GenericPipelineFactory(
     provider="pubchem",
     silver_schema=PUBCHEM_COMPOUND_SCHEMA,
     gold_schema=PubChemCompoundGoldSchema,
+    transformer_class=PubChemCompoundTransformer,
 )
 
 # UniProt Protein Pipeline
@@ -118,6 +139,7 @@ uniprot_protein_factory = GenericPipelineFactory(
     provider="uniprot",
     silver_schema=UNIPROT_PROTEIN_SCHEMA,
     gold_schema=UniProtProteinGoldSchema,
+    transformer_class=UniProtProteinTransformer,
 )
 
 # PubMed Publications Pipeline
@@ -127,6 +149,7 @@ pubmed_publications_factory = GenericPipelineFactory(
     provider="pubmed",
     silver_schema=PUBMED_PUBLICATION_SCHEMA,
     gold_schema=PubMedPublicationGoldSchema,
+    transformer_class=PubMedPublicationTransformer,
 )
 
 
