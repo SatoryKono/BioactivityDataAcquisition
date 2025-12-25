@@ -78,8 +78,8 @@ class GoldWriter:
         self,
         table_name: str,
         records: list[dict[str, Any]],
+        schema: DataFrameSchema,
         primary_keys: list[str] | None = None,
-        schema: DataFrameSchema | None = None,
         mode: str = "overwrite",
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
@@ -89,8 +89,8 @@ class GoldWriter:
         Args:
             table_name: Target table name
             records: List of records to write
+            schema: Pandera schema for validation (must have strict=True)
             primary_keys: Primary key columns for deterministic sorting
-            schema: Optional Pandera schema (must have strict=True)
             mode: Write mode - 'overwrite', 'append', or 'scd2'
             partition_cols: Optional partition columns
             scd_config: Required config for SCD2 mode
@@ -114,16 +114,15 @@ class GoldWriter:
         if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
             raise ValueError("scd_config required for SCD Type 2 mode")
 
-        if schema is not None:
-            if not schema.strict:
-                raise ValueError("Gold layer requires strict=True schema validation")
-            import polars as pl
+        if not schema.strict:
+            raise ValueError("Gold layer requires strict=True schema validation")
+        import polars as pl
 
-            df = pl.DataFrame(records)
-            try:
-                await self._run_in_executor(lambda: schema.validate(df, lazy=False))
-            except pandera_pa.errors.SchemaError as e:
-                raise ValueError(f"Schema validation failed: {e}") from e
+        df = pl.DataFrame(records)
+        try:
+            await self._run_in_executor(lambda: schema.validate(df, lazy=False))
+        except pandera_pa.errors.SchemaError as e:
+            raise ValueError(f"Schema validation failed: {e}") from e
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 

@@ -16,6 +16,6 @@ class RecordProcessorConfig:
     provider: str
     entity_type: str
     silver_schema: Any
-    gold_schema: Any | None = None
+    gold_schema: Any
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
