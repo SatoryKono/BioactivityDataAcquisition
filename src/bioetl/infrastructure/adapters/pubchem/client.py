@@ -18,6 +18,7 @@ from typing import Any
 
 import pubchempy as pcp
 
+from bioetl.composition.providers import register_provider
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
@@ -26,6 +27,12 @@ from bioetl.infrastructure.adapters.http.health import (
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 
+@register_provider(
+    "pubchem",
+    http_rate=5.0,
+    http_capacity=10,
+    requires_http_client=False,
+)
 class PubChemAdapter(BaseSyncAdapter):
     """PubChem API adapter implementing DataSourcePort.
 

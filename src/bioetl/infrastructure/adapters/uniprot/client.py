@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 from typing_extensions import override
 
+from bioetl.composition.providers import register_provider
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -27,6 +28,12 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 
+@register_provider(
+    "uniprot",
+    http_rate=10.0,
+    http_capacity=20,
+    rate_overrides={"uniprot_api_key": 100.0},
+)
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
 
