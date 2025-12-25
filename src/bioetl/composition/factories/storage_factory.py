@@ -326,21 +326,24 @@ class StorageAdapter:
             return HealthStatus.UNHEALTHY
 
     @staticmethod
-    def _check_directory_writable(dir_path: Path) -> bool:
+    def _check_directory_writable(dir_path: Path | str) -> bool:
         """Check if a directory is writable.
 
         Args:
-            dir_path: Directory path to check.
+            dir_path: Directory path to check (accepts Path or str).
 
         Returns:
             True if directory is writable, False otherwise.
         """
         try:
+            # Convert to Path if string
+            path = Path(dir_path) if isinstance(dir_path, str) else dir_path
+
             # Ensure directory exists
-            dir_path.mkdir(parents=True, exist_ok=True)
+            path.mkdir(parents=True, exist_ok=True)
 
             # Try to create and delete a temporary file
-            temp_file = dir_path / ".health_check_probe"
+            temp_file = path / ".health_check_probe"
             temp_file.touch()
             temp_file.unlink()
             return True

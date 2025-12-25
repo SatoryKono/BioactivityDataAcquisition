@@ -412,4 +412,70 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=821311%40gmail.com
+  response:
+    body:
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"7746716","retmax":"1","retstart":"0","idlist":["41442815"],"translationset":[{"from":"health","to":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health''s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}],"querytranslation":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}}
+
+        '
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 25 Dec 2025 06:06:55 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D322EDE934297D5000035034C7C9F9F.1.1.m_1
+      NCBI-SID:
+      - 3AA339BAC45DC1B9_5CB5SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '1'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '529'
+    status:
+      code: 200
+      message: OK
 version: 1
