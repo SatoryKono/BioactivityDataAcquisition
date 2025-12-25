@@ -111,6 +111,11 @@ class TestBootstrapPipeline:
         mock_settings.observability.metrics_retry_count = 3
         mock_settings.observability.metrics_retry_delay = 1.0
         mock_settings.observability.tracing_enabled = False
+        mock_settings.observability.dq_baseline_window = 7
+        mock_settings.observability.dq_z_score_threshold = 2.5
+        mock_settings.observability.dq_min_baseline_samples = 3
+        mock_settings.observability.dq_error_rate_max = 0.10
+        mock_settings.observability.dq_quality_score_min = 0.80
 
         mock_get_settings.return_value = mock_settings
         mock_bootstrap_logger.return_value = mock_logger
@@ -161,6 +166,11 @@ class TestBootstrapPipeline:
         test_settings.observability.metrics_retry_count = 3
         test_settings.observability.metrics_retry_delay = 1.0
         test_settings.observability.tracing_enabled = False
+        test_settings.observability.dq_baseline_window = 7
+        test_settings.observability.dq_z_score_threshold = 2.5
+        test_settings.observability.dq_min_baseline_samples = 3
+        test_settings.observability.dq_error_rate_max = 0.10
+        test_settings.observability.dq_quality_score_min = 0.80
 
         mock_get_settings.return_value = test_settings
         mock_bootstrap_logger.return_value = mock_logger
