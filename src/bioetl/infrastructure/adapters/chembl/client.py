@@ -327,10 +327,29 @@ class ChemblAdapter(BaseHttpAdapter):
         entity_type: str,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Perform standard paginated fetch."""
+        """Perform standard paginated fetch with client-side deduplication.
+
+        ChEMBL API pagination can return duplicate records across pages
+        due to unstable sorting or data changes between requests.
+        This method deduplicates records by primary key field.
+        """
         total_fetched = 0
+        seen_ids: set[str] = set()
+        pk_field = self._get_primary_key_field(entity_type)
+
         async for records in self._page_iterator(entity_type, limit):
             for record in records:
+                record_id = str(record.get(pk_field, ""))
+                if record_id and record_id in seen_ids:
+                    self.logger.debug(
+                        "skipping_duplicate_record",
+                        entity_type=entity_type,
+                        pk_field=pk_field,
+                        record_id=record_id,
+                    )
+                    continue
+                if record_id:
+                    seen_ids.add(record_id)
                 yield record
                 total_fetched += 1
                 if limit and total_fetched >= limit:

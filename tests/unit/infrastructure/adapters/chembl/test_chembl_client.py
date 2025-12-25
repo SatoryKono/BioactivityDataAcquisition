@@ -77,6 +77,74 @@ async def test_fetch_pagination(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
+async def test_fetch_deduplicates_across_pages(adapter, mock_http_client):
+    """Test that duplicate records across pages are deduplicated.
+
+    ChEMBL API can return duplicate records across pages due to unstable
+    pagination. The adapter should deduplicate by primary key field.
+    """
+    # First page: activity_id 1 and 2
+    resp1 = MagicMock()
+    resp1.json.return_value = {
+        "activities": [{"activity_id": 1}, {"activity_id": 2}],
+        "page_meta": {"next": "page2"},
+    }
+    # Second page: activity_id 2 (duplicate!) and 3
+    resp2 = MagicMock()
+    resp2.json.return_value = {
+        "activities": [{"activity_id": 2}, {"activity_id": 3}],
+        "page_meta": {"next": None},
+    }
+
+    mock_http_client.get.side_effect = [resp1, resp2]
+
+    records = []
+    async for record in adapter.fetch("activity"):
+        records.append(record)
+
+    # Should have 3 unique records, not 4
+    assert len(records) == 3
+    activity_ids = [r["activity_id"] for r in records]
+    assert activity_ids == [1, 2, 3]
+
+
+@pytest.mark.asyncio
+async def test_fetch_deduplicates_assay_by_chembl_id(adapter, mock_http_client):
+    """Test deduplication for assay entity type using assay_chembl_id."""
+    # First page
+    resp1 = MagicMock()
+    resp1.json.return_value = {
+        "assays": [
+            {"assay_chembl_id": "CHEMBL1234567"},
+            {"assay_chembl_id": "CHEMBL1234568"},
+        ],
+        "page_meta": {"next": "page2"},
+    }
+    # Second page with duplicate
+    resp2 = MagicMock()
+    resp2.json.return_value = {
+        "assays": [
+            {"assay_chembl_id": "CHEMBL1234567"},  # Duplicate!
+            {"assay_chembl_id": "CHEMBL1234569"},
+        ],
+        "page_meta": {"next": None},
+    }
+
+    mock_http_client.get.side_effect = [resp1, resp2]
+
+    records = []
+    async for record in adapter.fetch("assay"):
+        records.append(record)
+
+    # Should have 3 unique assays
+    assert len(records) == 3
+    chembl_ids = [r["assay_chembl_id"] for r in records]
+    assert "CHEMBL1234567" in chembl_ids
+    assert "CHEMBL1234568" in chembl_ids
+    assert "CHEMBL1234569" in chembl_ids
+
+
+@pytest.mark.asyncio
 async def test_fetch_error(adapter, mock_http_client):
     """Test API error handling."""
     mock_http_client.get.side_effect = Exception("API Error")
