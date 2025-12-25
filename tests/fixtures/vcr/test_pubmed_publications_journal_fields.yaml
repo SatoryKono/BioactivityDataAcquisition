@@ -478,4 +478,475 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=default%40example.com
+  response:
+    body:
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"7748364","retmax":"1","retstart":"0","idlist":["41447041"],"translationset":[{"from":"health","to":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health''s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}],"querytranslation":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}}
+
+        '
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      cache-control:
+      - private
+      content-length:
+      - '529'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Thu, 25 Dec 2025 14:26:49 GMT
+      ncbi-phid:
+      - 1D322EDE934297D500005A8ACB8834FB.1.1.m_1
+      ncbi-sid:
+      - 6B550594518F8425_6308SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '2'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=10021918%2C10021922%2C10052961%2C10052966%2C10052969&retmode=xml&rettype=abstract&email=default%40example.com
+  response:
+    body:
+      string: '<?xml version="1.0" ?>
+
+        <!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January
+        2025//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd">
+
+        <PubmedArticleSet>
+
+        <PubmedArticle><MedlineCitation Status="MEDLINE" Owner="NLM" IndexingMethod="Manual"><PMID
+        Version="1">10021918</PMID><DateCompleted><Year>1999</Year><Month>05</Month><Day>11</Day></DateCompleted><DateRevised><Year>2019</Year><Month>08</Month><Day>19</Day></DateRevised><Article
+        PubModel="Print"><Journal><ISSN IssnType="Print">0960-894X</ISSN><JournalIssue
+        CitedMedium="Print"><Volume>9</Volume><Issue>2</Issue><PubDate><Year>1999</Year><Month>Jan</Month><Day>18</Day></PubDate></JournalIssue><Title>Bioorganic
+        &amp; medicinal chemistry letters</Title><ISOAbbreviation>Bioorg Med Chem
+        Lett</ISOAbbreviation></Journal><ArticleTitle>Substituted heterocyclic analogs
+        as selective COX-2 inhibitors in the flosulide class.</ArticleTitle><Pagination><StartPage>151</StartPage><EndPage>156</EndPage><MedlinePgn>151-6</MedlinePgn></Pagination><Abstract><AbstractText>Substituted
+        heterocyclic analogs in the Flosulide class were investigated as potential
+        selective cyclooxygenase-2 inhibitors. 6-(4-Ethyl-2-thiazolylthio)-5-methanesulfonamido-3H-isobe
+        nzofuran-1-one 14 was found to be the optimal compound in the series with
+        superior in vitro and in vivo activities.</AbstractText></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Ouimet</LastName><ForeName>N</ForeName><Initials>N</Initials><AffiliationInfo><Affiliation>Merck
+        Frosst Centre for Therapeutic Research, Merck Frosst Canada Inc., Pointe Claire-Dorval,
+        Qu&#xe9;bec, Canada.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Chan</LastName><ForeName>C
+        C</ForeName><Initials>CC</Initials></Author><Author ValidYN="Y"><LastName>Charleson</LastName><ForeName>S</ForeName><Initials>S</Initials></Author><Author
+        ValidYN="Y"><LastName>Claveau</LastName><ForeName>D</ForeName><Initials>D</Initials></Author><Author
+        ValidYN="Y"><LastName>Gordon</LastName><ForeName>R</ForeName><Initials>R</Initials></Author><Author
+        ValidYN="Y"><LastName>Guay</LastName><ForeName>D</ForeName><Initials>D</Initials></Author><Author
+        ValidYN="Y"><LastName>Li</LastName><ForeName>C S</ForeName><Initials>CS</Initials></Author><Author
+        ValidYN="Y"><LastName>Ouellet</LastName><ForeName>M</ForeName><Initials>M</Initials></Author><Author
+        ValidYN="Y"><LastName>Percival</LastName><ForeName>D M</ForeName><Initials>DM</Initials></Author><Author
+        ValidYN="Y"><LastName>Riendeau</LastName><ForeName>D</ForeName><Initials>D</Initials></Author><Author
+        ValidYN="Y"><LastName>Wong</LastName><ForeName>E</ForeName><Initials>E</Initials></Author><Author
+        ValidYN="Y"><LastName>Zamboni</LastName><ForeName>R</ForeName><Initials>R</Initials></Author><Author
+        ValidYN="Y"><LastName>Prasit</LastName><ForeName>P</ForeName><Initials>P</Initials></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D003160">Comparative Study</PublicationType><PublicationType UI="D016428">Journal
+        Article</PublicationType></PublicationTypeList></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Bioorg
+        Med Chem Lett</MedlineTA><NlmUniqueID>9107377</NlmUniqueID><ISSNLinking>0960-894X</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D052246">Cyclooxygenase 2 Inhibitors</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D016861">Cyclooxygenase Inhibitors</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D007189">Indans</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D007527">Isoenzymes</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="C093700">L 745337</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D008565">Membrane Proteins</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D013449">Sulfonamides</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        1.14.99.1</RegistryNumber><NameOfSubstance UI="D051546">Cyclooxygenase 2</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        1.14.99.1</RegistryNumber><NameOfSubstance UI="C496540">PTGS2 protein, human</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        1.14.99.1</RegistryNumber><NameOfSubstance UI="D011451">Prostaglandin-Endoperoxide
+        Synthases</NameOfSubstance></Chemical><Chemical><RegistryNumber>GVR41S4ZHJ</RegistryNumber><NameOfSubstance
+        UI="C059178">flosulide</NameOfSubstance></Chemical></ChemicalList><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D000818" MajorTopicYN="N">Animals</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D016466" MajorTopicYN="N">CHO Cells</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006224" MajorTopicYN="N">Cricetinae</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D051546" MajorTopicYN="N">Cyclooxygenase 2</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D052246" MajorTopicYN="N">Cyclooxygenase 2 Inhibitors</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D016861" MajorTopicYN="N">Cyclooxygenase Inhibitors</DescriptorName><QualifierName
+        UI="Q000737" MajorTopicYN="Y">chemistry</QualifierName><QualifierName UI="Q000494"
+        MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006801" MajorTopicYN="N">Humans</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D007189" MajorTopicYN="N">Indans</DescriptorName><QualifierName UI="Q000494"
+        MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D020128" MajorTopicYN="N">Inhibitory Concentration 50</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D007527" MajorTopicYN="N">Isoenzymes</DescriptorName><QualifierName UI="Q000737"
+        MajorTopicYN="Y">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008565" MajorTopicYN="N">Membrane Proteins</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008861" MajorTopicYN="N">Microsomes</DescriptorName><QualifierName UI="Q000737"
+        MajorTopicYN="N">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011451" MajorTopicYN="N">Prostaglandin-Endoperoxide Synthases</DescriptorName><QualifierName
+        UI="Q000737" MajorTopicYN="Y">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013449" MajorTopicYN="N">Sulfonamides</DescriptorName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D020298" MajorTopicYN="N">U937 Cells</DescriptorName></MeshHeading></MeshHeadingList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="pubmed"><Year>1999</Year><Month>2</Month><Day>18</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>1999</Year><Month>2</Month><Day>18</Day><Hour>0</Hour><Minute>1</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>1999</Year><Month>2</Month><Day>18</Day><Hour>0</Hour><Minute>0</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">10021918</ArticleId><ArticleId IdType="doi">10.1016/s0960-894x(98)00705-7</ArticleId><ArticleId
+        IdType="pii">S0960894X98007057</ArticleId></ArticleIdList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="MEDLINE" Owner="NLM" IndexingMethod="Manual"><PMID Version="1">10021922</PMID><DateCompleted><Year>1999</Year><Month>05</Month><Day>11</Day></DateCompleted><DateRevised><Year>2019</Year><Month>08</Month><Day>19</Day></DateRevised><Article
+        PubModel="Print"><Journal><ISSN IssnType="Print">0960-894X</ISSN><JournalIssue
+        CitedMedium="Print"><Volume>9</Volume><Issue>2</Issue><PubDate><Year>1999</Year><Month>Jan</Month><Day>18</Day></PubDate></JournalIssue><Title>Bioorganic
+        &amp; medicinal chemistry letters</Title><ISOAbbreviation>Bioorg Med Chem
+        Lett</ISOAbbreviation></Journal><ArticleTitle>Synthesis, computer modeling
+        and biological evaluation of novel protein kinase C agonists based on a 7-membered
+        lactam moiety.</ArticleTitle><Pagination><StartPage>173</StartPage><EndPage>178</EndPage><MedlinePgn>173-8</MedlinePgn></Pagination><Abstract><AbstractText>4-Hydroxymethyl-5a-methyl-1,3,4,5,5a
+        beta,6,7,8,9,9a alpha-decahydro-2H-benz[d]azepin-2-ones (4-12), which were
+        designed to mimic the biologically active conformation of teleocidins and
+        benzolactams, were synthesized and evaluated for the ability to compete with
+        [3H]phorbol 12,13-dibutyrate in a PKC delta binding assay. Among the compounds,
+        10-12 showed potent binding affinity, with inhibition constants (Ki) of low
+        nanomolar order. Computational docking simulation also indicates that the
+        relative positions of the hydrogen-bonding sites and hydrophobic regions of
+        the compounds are well matched to the PKC delta binding site.</AbstractText></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Endo</LastName><ForeName>Y</ForeName><Initials>Y</Initials><AffiliationInfo><Affiliation>Graduate
+        School of Pharmaceutical Sciences, University of Tokyo, Japan.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Shimazu</LastName><ForeName>M</ForeName><Initials>M</Initials></Author><Author
+        ValidYN="Y"><LastName>Fukasawa</LastName><ForeName>H</ForeName><Initials>H</Initials></Author><Author
+        ValidYN="Y"><LastName>Driedger</LastName><ForeName>P E</ForeName><Initials>PE</Initials></Author><Author
+        ValidYN="Y"><LastName>Kimura</LastName><ForeName>K</ForeName><Initials>K</Initials></Author><Author
+        ValidYN="Y"><LastName>Tomioka</LastName><ForeName>N</ForeName><Initials>N</Initials></Author><Author
+        ValidYN="Y"><LastName>Itai</LastName><ForeName>A</ForeName><Initials>A</Initials></Author><Author
+        ValidYN="Y"><LastName>Shudo</LastName><ForeName>K</ForeName><Initials>K</Initials></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType><PublicationType UI="D013485">Research
+        Support, Non-U.S. Gov''t</PublicationType></PublicationTypeList></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Bioorg
+        Med Chem Lett</MedlineTA><NlmUniqueID>9107377</NlmUniqueID><ISSNLinking>0960-894X</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D001552">Benzazepines</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D007769">Lactams</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D008235">Lyngbya Toxins</NameOfSubstance></Chemical><Chemical><RegistryNumber>27974YJ83L</RegistryNumber><NameOfSubstance
+        UI="C022176">teleocidins</NameOfSubstance></Chemical><Chemical><RegistryNumber>37558-16-0</RegistryNumber><NameOfSubstance
+        UI="D015240">Phorbol 12,13-Dibutyrate</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        2.7.11.13</RegistryNumber><NameOfSubstance UI="D011493">Protein Kinase C</NameOfSubstance></Chemical></ChemicalList><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D001552" MajorTopicYN="N">Benzazepines</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D001667" MajorTopicYN="N">Binding, Competitive</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D003198" MajorTopicYN="N">Computer Simulation</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D007769" MajorTopicYN="Y">Lactams</DescriptorName><QualifierName UI="Q000737"
+        MajorTopicYN="N">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008235" MajorTopicYN="N">Lyngbya Toxins</DescriptorName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008958" MajorTopicYN="N">Models, Molecular</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D015240" MajorTopicYN="N">Phorbol 12,13-Dibutyrate</DescriptorName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011493" MajorTopicYN="N">Protein Kinase C</DescriptorName><QualifierName
+        UI="Q000737" MajorTopicYN="Y">chemistry</QualifierName></MeshHeading></MeshHeadingList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="pubmed"><Year>1999</Year><Month>2</Month><Day>18</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>1999</Year><Month>2</Month><Day>18</Day><Hour>0</Hour><Minute>1</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>1999</Year><Month>2</Month><Day>18</Day><Hour>0</Hour><Minute>0</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">10021922</ArticleId><ArticleId IdType="doi">10.1016/s0960-894x(98)00724-0</ArticleId><ArticleId
+        IdType="pii">S0960894X98007240</ArticleId></ArticleIdList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="MEDLINE" Owner="NLM" IndexingMethod="Manual"><PMID Version="1">10052961</PMID><DateCompleted><Year>1999</Year><Month>03</Month><Day>16</Day></DateCompleted><DateRevised><Year>2012</Year><Month>11</Month><Day>15</Day></DateRevised><Article
+        PubModel="Print"><Journal><ISSN IssnType="Print">0022-2623</ISSN><JournalIssue
+        CitedMedium="Print"><Volume>42</Volume><Issue>4</Issue><PubDate><Year>1999</Year><Month>Feb</Month><Day>25</Day></PubDate></JournalIssue><Title>Journal
+        of medicinal chemistry</Title><ISOAbbreviation>J Med Chem</ISOAbbreviation></Journal><ArticleTitle>Dual
+        inhibition of phosphodiesterase 4 and matrix metalloproteinases by an (arylsulfonyl)hydroxamic
+        acid template.</ArticleTitle><Pagination><StartPage>541</StartPage><EndPage>544</EndPage><MedlinePgn>541-4</MedlinePgn></Pagination><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Groneberg</LastName><ForeName>R
+        D</ForeName><Initials>RD</Initials><AffiliationInfo><Affiliation>Rh&#xf4;ne-Poulenc
+        Rorer, SW8, 500 Arcola Road, Collegeville, Pennsylvania 19426, USA. robert.groneberg@rp-rorer.com</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Burns</LastName><ForeName>C J</ForeName><Initials>CJ</Initials></Author><Author
+        ValidYN="Y"><LastName>Morrissette</LastName><ForeName>M M</ForeName><Initials>MM</Initials></Author><Author
+        ValidYN="Y"><LastName>Ullrich</LastName><ForeName>J W</ForeName><Initials>JW</Initials></Author><Author
+        ValidYN="Y"><LastName>Morris</LastName><ForeName>R L</ForeName><Initials>RL</Initials></Author><Author
+        ValidYN="Y"><LastName>Darnbrough</LastName><ForeName>S</ForeName><Initials>S</Initials></Author><Author
+        ValidYN="Y"><LastName>Djuric</LastName><ForeName>S W</ForeName><Initials>SW</Initials></Author><Author
+        ValidYN="Y"><LastName>Condon</LastName><ForeName>S M</ForeName><Initials>SM</Initials></Author><Author
+        ValidYN="Y"><LastName>McGeehan</LastName><ForeName>G M</ForeName><Initials>GM</Initials></Author><Author
+        ValidYN="Y"><LastName>Labaudiniere</LastName><ForeName>R</ForeName><Initials>R</Initials></Author><Author
+        ValidYN="Y"><LastName>Neuenschwander</LastName><ForeName>K</ForeName><Initials>K</Initials></Author><Author
+        ValidYN="Y"><LastName>Scotese</LastName><ForeName>A C</ForeName><Initials>AC</Initials></Author><Author
+        ValidYN="Y"><LastName>Kline</LastName><ForeName>J A</ForeName><Initials>JA</Initials></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList></Article><MedlineJournalInfo><Country>United
+        States</Country><MedlineTA>J Med Chem</MedlineTA><NlmUniqueID>9716531</NlmUniqueID><ISSNLinking>0022-2623</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D006877">Hydroxamic Acids</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D061965">Matrix Metalloproteinase Inhibitors</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D010726">Phosphodiesterase Inhibitors</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D011480">Protease Inhibitors</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D013450">Sulfones</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        3.1.4.17</RegistryNumber><NameOfSubstance UI="D015105">3'',5''-Cyclic-AMP
+        Phosphodiesterases</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        3.1.4.17</RegistryNumber><NameOfSubstance UI="D054703">Cyclic Nucleotide Phosphodiesterases,
+        Type 4</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC 3.4.24.-</RegistryNumber><NameOfSubstance
+        UI="D018093">Gelatinases</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        3.4.24.-</RegistryNumber><NameOfSubstance UI="D008666">Metalloendopeptidases</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        3.4.24.24</RegistryNumber><NameOfSubstance UI="D020778">Matrix Metalloproteinase
+        2</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC 3.4.24.7</RegistryNumber><NameOfSubstance
+        UI="D020781">Matrix Metalloproteinase 1</NameOfSubstance></Chemical></ChemicalList><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D015105" MajorTopicYN="N">3'',5''-Cyclic-AMP Phosphodiesterases</DescriptorName><QualifierName
+        UI="Q000037" MajorTopicYN="Y">antagonists &amp; inhibitors</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D000818" MajorTopicYN="N">Animals</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D054703" MajorTopicYN="N">Cyclic Nucleotide Phosphodiesterases, Type 4</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D005347" MajorTopicYN="N">Fibroblasts</DescriptorName><QualifierName UI="Q000201"
+        MajorTopicYN="N">enzymology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D018093" MajorTopicYN="N">Gelatinases</DescriptorName><QualifierName UI="Q000037"
+        MajorTopicYN="N">antagonists &amp; inhibitors</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006168" MajorTopicYN="N">Guinea Pigs</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006877" MajorTopicYN="N">Hydroxamic Acids</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000494" MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008264" MajorTopicYN="N">Macrophages</DescriptorName><QualifierName UI="Q000201"
+        MajorTopicYN="N">enzymology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D020781" MajorTopicYN="N">Matrix Metalloproteinase 1</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D020778" MajorTopicYN="N">Matrix Metalloproteinase 2</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D061965" MajorTopicYN="N">Matrix Metalloproteinase Inhibitors</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008666" MajorTopicYN="N">Metalloendopeptidases</DescriptorName><QualifierName
+        UI="Q000037" MajorTopicYN="Y">antagonists &amp; inhibitors</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D010726" MajorTopicYN="N">Phosphodiesterase Inhibitors</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000494" MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011480" MajorTopicYN="N">Protease Inhibitors</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000494" MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013329" MajorTopicYN="N">Structure-Activity Relationship</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013450" MajorTopicYN="N">Sulfones</DescriptorName><QualifierName UI="Q000138"
+        MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName UI="Q000494"
+        MajorTopicYN="N">pharmacology</QualifierName></MeshHeading></MeshHeadingList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="pubmed"><Year>1999</Year><Month>3</Month><Day>3</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>1999</Year><Month>3</Month><Day>3</Day><Hour>0</Hour><Minute>1</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>1999</Year><Month>3</Month><Day>3</Day><Hour>0</Hour><Minute>0</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">10052961</ArticleId><ArticleId IdType="doi">10.1021/jm980567e</ArticleId><ArticleId
+        IdType="pii">jm980567e</ArticleId></ArticleIdList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="MEDLINE" Owner="NLM" IndexingMethod="Manual"><PMID Version="1">10052966</PMID><DateCompleted><Year>1999</Year><Month>03</Month><Day>16</Day></DateCompleted><DateRevised><Year>2014</Year><Month>11</Month><Day>20</Day></DateRevised><Article
+        PubModel="Print"><Journal><ISSN IssnType="Print">0022-2623</ISSN><JournalIssue
+        CitedMedium="Print"><Volume>42</Volume><Issue>4</Issue><PubDate><Year>1999</Year><Month>Feb</Month><Day>25</Day></PubDate></JournalIssue><Title>Journal
+        of medicinal chemistry</Title><ISOAbbreviation>J Med Chem</ISOAbbreviation></Journal><ArticleTitle>Development
+        of chiral N-alkylcarbamates as new leads for potent and selective H3-receptor
+        antagonists: synthesis, capillary electrophoresis, and in vitro and oral in
+        vivo activity.</ArticleTitle><Pagination><StartPage>593</StartPage><EndPage>600</EndPage><MedlinePgn>593-600</MedlinePgn></Pagination><Abstract><AbstractText>Novel
+        carbamates as derivatives of 3-(1H-imidazol-4-yl)propanol with an N-alkyl
+        chain were prepared as histamine H3-receptor antagonists. Branching of the
+        N-alkyl side chain with methyl groups led to chiral compounds which were synthesized
+        stereospecifically by a Mitsunobu protocol adapted Gabriel synthesis. The
+        optical purity of some of the chiral compounds was determined (ee &gt; 95%)
+        by capillary electrophoresis (CE). The investigated compounds showed pronounced
+        to high antagonist activity (Ki values of 4.1-316 nM) in a functional test
+        for histamine H3 receptors on rat cerebral cortex synaptosomes. Similar H3-receptor
+        antagonist activities were observed in a peripheral model on guinea pig ileum.
+        No stereoselective discrimination for the H3 receptor for the chiral antagonists
+        was found with the in vitro assays. All compounds were also screened for central
+        H3-receptor antagonist activity in vivo in mice after po administration. Most
+        compounds were potent agents of the H3-receptor-mediated enhancement of brain
+        Ntau-methylhistamine levels. The enantiomers of the N-2-heptylcarbamate showed
+        a stereoselective differentiation in their pharmacological effect in vivo
+        (ED50 of 0.39 mg/kg for the (S)-derivative vs 1.5 mg/kg for the (R)-derivative)
+        most probably caused by differences in pharmacokinetic parameters. H1- and
+        H2-receptor activities were determined for some of the novel carbamates, demonstrating
+        that they have a highly selective action at the histamine H3 receptor.</AbstractText></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Sasse</LastName><ForeName>A</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>Institut
+        f&#xfc;r Pharmazie I, Freie Universit&#xe4;t Berlin, K&#xf6;nigin-Luise-Strasse
+        2+4, D-14195 Berlin, Germany.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Kiec-Kononowicz</LastName><ForeName>K</ForeName><Initials>K</Initials></Author><Author
+        ValidYN="Y"><LastName>Stark</LastName><ForeName>H</ForeName><Initials>H</Initials></Author><Author
+        ValidYN="Y"><LastName>Motyl</LastName><ForeName>M</ForeName><Initials>M</Initials></Author><Author
+        ValidYN="Y"><LastName>Reidemeister</LastName><ForeName>S</ForeName><Initials>S</Initials></Author><Author
+        ValidYN="Y"><LastName>Ganellin</LastName><ForeName>C R</ForeName><Initials>CR</Initials></Author><Author
+        ValidYN="Y"><LastName>Ligneau</LastName><ForeName>X</ForeName><Initials>X</Initials></Author><Author
+        ValidYN="Y"><LastName>Schwartz</LastName><ForeName>J C</ForeName><Initials>JC</Initials></Author><Author
+        ValidYN="Y"><LastName>Schunack</LastName><ForeName>W</ForeName><Initials>W</Initials></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType><PublicationType UI="D013485">Research
+        Support, Non-U.S. Gov''t</PublicationType></PublicationTypeList></Article><MedlineJournalInfo><Country>United
+        States</Country><MedlineTA>J Med Chem</MedlineTA><NlmUniqueID>9716531</NlmUniqueID><ISSNLinking>0022-2623</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D002219">Carbamates</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D006633">Histamine Antagonists</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D011969">Receptors, Histamine H1</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D011970">Receptors, Histamine H2</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D018100">Receptors, Histamine H3</NameOfSubstance></Chemical></ChemicalList><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D000284" MajorTopicYN="N">Administration, Oral</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D000818" MajorTopicYN="N">Animals</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D002219" MajorTopicYN="N">Carbamates</DescriptorName><QualifierName UI="Q000138"
+        MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName UI="Q000737"
+        MajorTopicYN="N">chemistry</QualifierName><QualifierName UI="Q000494" MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D002540" MajorTopicYN="N">Cerebral Cortex</DescriptorName><QualifierName
+        UI="Q000187" MajorTopicYN="N">drug effects</QualifierName><QualifierName UI="Q000378"
+        MajorTopicYN="N">metabolism</QualifierName><QualifierName UI="Q000648" MajorTopicYN="N">ultrastructure</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D004353" MajorTopicYN="N">Drug Evaluation, Preclinical</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D019075" MajorTopicYN="N">Electrophoresis, Capillary</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006168" MajorTopicYN="N">Guinea Pigs</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006325" MajorTopicYN="N">Heart Atria</DescriptorName><QualifierName UI="Q000187"
+        MajorTopicYN="N">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006633" MajorTopicYN="N">Histamine Antagonists</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName><QualifierName UI="Q000494"
+        MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D007082" MajorTopicYN="N">Ileum</DescriptorName><QualifierName UI="Q000187"
+        MajorTopicYN="N">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D066298" MajorTopicYN="N">In Vitro Techniques</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D051379" MajorTopicYN="N">Mice</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D051381" MajorTopicYN="N">Rats</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011969" MajorTopicYN="N">Receptors, Histamine H1</DescriptorName><QualifierName
+        UI="Q000187" MajorTopicYN="N">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011970" MajorTopicYN="N">Receptors, Histamine H2</DescriptorName><QualifierName
+        UI="Q000187" MajorTopicYN="N">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D018100" MajorTopicYN="N">Receptors, Histamine H3</DescriptorName><QualifierName
+        UI="Q000187" MajorTopicYN="Y">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013237" MajorTopicYN="N">Stereoisomerism</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013329" MajorTopicYN="N">Structure-Activity Relationship</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013574" MajorTopicYN="N">Synaptosomes</DescriptorName><QualifierName
+        UI="Q000187" MajorTopicYN="N">drug effects</QualifierName></MeshHeading></MeshHeadingList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="pubmed"><Year>1999</Year><Month>3</Month><Day>3</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>1999</Year><Month>3</Month><Day>3</Day><Hour>0</Hour><Minute>1</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>1999</Year><Month>3</Month><Day>3</Day><Hour>0</Hour><Minute>0</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">10052966</ArticleId><ArticleId IdType="doi">10.1021/jm9804376</ArticleId><ArticleId
+        IdType="pii">jm9804376</ArticleId></ArticleIdList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="MEDLINE" Owner="NLM" IndexingMethod="Manual"><PMID Version="1">10052969</PMID><DateCompleted><Year>1999</Year><Month>03</Month><Day>16</Day></DateCompleted><DateRevised><Year>2007</Year><Month>11</Month><Day>15</Day></DateRevised><Article
+        PubModel="Print"><Journal><ISSN IssnType="Print">0022-2623</ISSN><JournalIssue
+        CitedMedium="Print"><Volume>42</Volume><Issue>4</Issue><PubDate><Year>1999</Year><Month>Feb</Month><Day>25</Day></PubDate></JournalIssue><Title>Journal
+        of medicinal chemistry</Title><ISOAbbreviation>J Med Chem</ISOAbbreviation></Journal><ArticleTitle>5-Alkyl-2-(alkylthio)-6-(2,6-dihalophenylmethyl)-3,
+        4-dihydropyrimidin-4(3H)-ones: novel potent and selective dihydro-alkoxy-benzyl-oxopyrimidine
+        derivatives.</ArticleTitle><Pagination><StartPage>619</StartPage><EndPage>627</EndPage><MedlinePgn>619-27</MedlinePgn></Pagination><Abstract><AbstractText>Molecular
+        modeling analysis of compounds belonging to the recently published series
+        of dihydro-alkoxy-benzyl-oxopyrimidines (DABOs), such as S-DABOs and DATNOs,
+        gave support to the design of new 2, 6-disubstituted benzyl-DABO derivatives
+        as highly potent and specific inhibitors of the HIV-1 reverse transcriptase
+        (RT). To follow up on the novel DABO derivatives, we decided to investigate
+        the effect of electron-withdrawing substituents in the benzyl unit of the
+        S-DABO skeleton versus their anti-HIV-1 activity. Such chemical modifications
+        impacted the inhibitory activity, especially when two halogen units were introduced
+        at positions 2 and 6 in the phenyl portion of the benzyl group bound to C-6
+        of the pyrimidine ring. Various 5-alkyl-2-(alkyl(or cycloalkyl)thio)-6-(2,
+        6-dichloro(or 2,6-difluoro)phenylmethyl)-3, 4-dihydropyrimidin-4(3H)-ones
+        were then synthesized and tested as anti-HIV-1 agents in both cell-based and
+        enzyme (recombinant reverse transcriptase, rRT) assays. Among the various
+        mono- and disubstituted phenyl derivatives, the most potent were those containing
+        a 6-(2,6-difluorophenylmethyl) substituent (F-DABOs), which showed EC50''s
+        ranging between 40 and 90 nM and selectivity indexes up to &gt;/=5000. An
+        excellent correlation was found between EC50 and IC50 values which confirmed
+        that these compounds act as inhibitors of the HIV-1 RT. The structure-activity
+        relationships of the newly synthesized pyrimidinones are presented herein.</AbstractText></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Mai</LastName><ForeName>A</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>Dipartimento
+        di Studi Farmaceutici, Istituto Pasteur-Fondazione Cenci Bolognetti, Universit&#xe0;
+        degli Studi di Roma "La Sapienza", P. le A. Moro 5, I-00185 Roma, Italy.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Artico</LastName><ForeName>M</ForeName><Initials>M</Initials></Author><Author
+        ValidYN="Y"><LastName>Sbardella</LastName><ForeName>G</ForeName><Initials>G</Initials></Author><Author
+        ValidYN="Y"><LastName>Massa</LastName><ForeName>S</ForeName><Initials>S</Initials></Author><Author
+        ValidYN="Y"><LastName>Novellino</LastName><ForeName>E</ForeName><Initials>E</Initials></Author><Author
+        ValidYN="Y"><LastName>Greco</LastName><ForeName>G</ForeName><Initials>G</Initials></Author><Author
+        ValidYN="Y"><LastName>Loi</LastName><ForeName>A G</ForeName><Initials>AG</Initials></Author><Author
+        ValidYN="Y"><LastName>Tramontano</LastName><ForeName>E</ForeName><Initials>E</Initials></Author><Author
+        ValidYN="Y"><LastName>Marongiu</LastName><ForeName>M E</ForeName><Initials>ME</Initials></Author><Author
+        ValidYN="Y"><LastName>La Colla</LastName><ForeName>P</ForeName><Initials>P</Initials></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType><PublicationType UI="D013485">Research
+        Support, Non-U.S. Gov''t</PublicationType></PublicationTypeList></Article><MedlineJournalInfo><Country>United
+        States</Country><MedlineTA>J Med Chem</MedlineTA><NlmUniqueID>9716531</NlmUniqueID><ISSNLinking>0022-2623</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D019380">Anti-HIV Agents</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D011743">Pyrimidines</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D011994">Recombinant Proteins</NameOfSubstance></Chemical><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
+        UI="D018894">Reverse Transcriptase Inhibitors</NameOfSubstance></Chemical><Chemical><RegistryNumber>EC
+        2.7.7.49</RegistryNumber><NameOfSubstance UI="D054303">HIV Reverse Transcriptase</NameOfSubstance></Chemical></ChemicalList><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D000818" MajorTopicYN="N">Animals</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D019380" MajorTopicYN="N">Anti-HIV Agents</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName><QualifierName UI="Q000494"
+        MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D002460" MajorTopicYN="N">Cell Line</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D002470" MajorTopicYN="N">Cell Survival</DescriptorName><QualifierName
+        UI="Q000187" MajorTopicYN="N">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D015195" MajorTopicYN="N">Drug Design</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D054303" MajorTopicYN="N">HIV Reverse Transcriptase</DescriptorName><QualifierName
+        UI="Q000037" MajorTopicYN="Y">antagonists &amp; inhibitors</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D015497" MajorTopicYN="N">HIV-1</DescriptorName><QualifierName UI="Q000187"
+        MajorTopicYN="N">drug effects</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D051379" MajorTopicYN="N">Mice</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D008958" MajorTopicYN="N">Models, Molecular</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011743" MajorTopicYN="N">Pyrimidines</DescriptorName><QualifierName UI="Q000138"
+        MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName UI="Q000737"
+        MajorTopicYN="N">chemistry</QualifierName><QualifierName UI="Q000494" MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D011994" MajorTopicYN="N">Recombinant Proteins</DescriptorName><QualifierName
+        UI="Q000037" MajorTopicYN="N">antagonists &amp; inhibitors</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D018894" MajorTopicYN="N">Reverse Transcriptase Inhibitors</DescriptorName><QualifierName
+        UI="Q000138" MajorTopicYN="Y">chemical synthesis</QualifierName><QualifierName
+        UI="Q000737" MajorTopicYN="N">chemistry</QualifierName><QualifierName UI="Q000494"
+        MajorTopicYN="N">pharmacology</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D013329" MajorTopicYN="N">Structure-Activity Relationship</DescriptorName></MeshHeading></MeshHeadingList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="pubmed"><Year>1999</Year><Month>3</Month><Day>3</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>1999</Year><Month>3</Month><Day>3</Day><Hour>0</Hour><Minute>1</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>1999</Year><Month>3</Month><Day>3</Day><Hour>0</Hour><Minute>0</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">10052969</ArticleId><ArticleId IdType="doi">10.1021/jm980260f</ArticleId><ArticleId
+        IdType="pii">jm980260f</ArticleId></ArticleIdList></PubmedData></PubmedArticle></PubmedArticleSet>'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      cache-control:
+      - private
+      content-length:
+      - '37258'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - text/xml; charset=UTF-8
+      date:
+      - Thu, 25 Dec 2025 14:26:49 GMT
+      ncbi-phid:
+      - 1D332C3497C1E08500003E9AD14FBA91.1.1.m_6
+      ncbi-sid:
+      - 6B550594518F8425_6308SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '2'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
 version: 1
