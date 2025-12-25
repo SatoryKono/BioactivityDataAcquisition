@@ -74,44 +74,22 @@ class MoleculeTransformer(BaseTransformer):
     """Transforms ChEMBL bronze molecule records to silver."""
 
     def __init__(self, provider: str = "chembl"):
-        """Initialize ChEMBL molecule transformer.
-
-        Args:
-            provider: Data provider identifier.
-
-        """
+        """Initialize ChEMBL molecule transformer."""
         super().__init__(provider)
 
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-    ) -> SilverRecord | None:
-        """Transform raw ChEMBL molecule to normalized format using Domain Entity."""
-        # Validate required field
-        molecule_chembl_id = self._get_required_field(record, "molecule_chembl_id")
-
-        entity_id = generate_entity_id(
-            record={"molecule_chembl_id": str(molecule_chembl_id)},
-            provider=self.provider,
-            id_field="molecule_chembl_id",
-        )
-
-        # Extract and flatten complex fields via module-level functions
-        hierarchy = _extract_hierarchy(record.get("molecule_hierarchy"))
-        properties = _extract_properties(record.get("molecule_properties"))
-        structures = _extract_structures(record.get("molecule_structures"))
-
-        business_data: dict[str, Any] = {
-            # Primary identifier
-            "molecule_chembl_id": str(molecule_chembl_id),
-            # Core metadata
+    def _map_core_metadata(self, record: BronzeRecord) -> dict[str, Any]:
+        """Map core molecule metadata fields."""
+        return {
             "pref_name": record.get("pref_name"),
             "molecule_type": record.get("molecule_type"),
             "structure_type": record.get("structure_type"),
             "max_phase": safe_int(record.get("max_phase")),
             "first_approval": safe_int(record.get("first_approval")),
-            # Flags
+        }
+
+    def _map_molecule_flags(self, record: BronzeRecord) -> dict[str, Any]:
+        """Map molecule boolean/flag fields."""
+        return {
             "oral": record.get("oral"),
             "parenteral": record.get("parenteral"),
             "topical": record.get("topical"),
@@ -126,42 +104,62 @@ class MoleculeTransformer(BaseTransformer):
             "chirality": safe_int(record.get("chirality")),
             "dosed_ingredient": safe_int(record.get("dosed_ingredient")),
             "availability_type": safe_int(record.get("availability_type")),
-            # Note: withdrawn_year, withdrawn_country, withdrawn_reason are not available
-            # in the /molecule endpoint. Use /drug_warning endpoint for detailed info.
-            # USAN naming
+        }
+
+    def _map_additional_metadata(self, record: BronzeRecord) -> dict[str, Any]:
+        """Map USAN naming and other metadata fields."""
+        return {
             "usan_stem": record.get("usan_stem"),
             "usan_stem_definition": record.get("usan_stem_definition"),
             "usan_substem": record.get("usan_substem"),
             "usan_year": safe_int(record.get("usan_year")),
-            # Other metadata
             "helm_notation": record.get("helm_notation"),
             "molecule_species": record.get("molecule_species"),
-            # Complex fields (JSON serialized for history)
-            "molecule_hierarchy": self.serialize_json(
-                record.get("molecule_hierarchy")
-            ),
+        }
+
+    def _map_complex_fields(self, record: BronzeRecord) -> dict[str, Any]:
+        """Map complex JSON-serialized fields."""
+        return {
+            "molecule_hierarchy": self.serialize_json(record.get("molecule_hierarchy")),
             "molecule_properties": self.serialize_json(
                 record.get("molecule_properties")
             ),
             "molecule_structures": self.serialize_json(
                 record.get("molecule_structures")
             ),
-            "molecule_synonyms": self.serialize_json(
-                record.get("molecule_synonyms")
-            ),
+            "molecule_synonyms": self.serialize_json(record.get("molecule_synonyms")),
             "cross_references": self.serialize_json(record.get("cross_references")),
             "atc_classifications": self.serialize_json(
                 record.get("atc_classifications")
             ),
-            # Flattened fields
-            **hierarchy,
-            **properties,
-            **structures,
+        }
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+    ) -> SilverRecord | None:
+        """Transform raw ChEMBL molecule to normalized format."""
+        molecule_chembl_id = self._get_required_field(record, "molecule_chembl_id")
+
+        entity_id = generate_entity_id(
+            record={"molecule_chembl_id": str(molecule_chembl_id)},
+            provider=self.provider,
+            id_field="molecule_chembl_id",
+        )
+
+        business_data: dict[str, Any] = {
+            "molecule_chembl_id": str(molecule_chembl_id),
+            **self._map_core_metadata(record),
+            **self._map_molecule_flags(record),
+            **self._map_additional_metadata(record),
+            **self._map_complex_fields(record),
+            **_extract_hierarchy(record.get("molecule_hierarchy")),
+            **_extract_properties(record.get("molecule_properties")),
+            **_extract_structures(record.get("molecule_structures")),
         }
 
         content_hash = self.compute_content_hash(business_data, exclude_none=True)
-
-        # Create entity using helper method
         entity = self._create_entity(
             Molecule,
             context,
@@ -170,5 +168,4 @@ class MoleculeTransformer(BaseTransformer):
             **business_data,
         )
 
-        # Convert Entity to SilverRecord for storage
         return cast("SilverRecord", self.entity_to_silver_record(entity))

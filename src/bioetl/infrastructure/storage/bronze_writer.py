@@ -68,39 +68,8 @@ class BronzeWriter:
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
 
-    async def write_bronze(
-        self,
-        records: Iterator[bytes],
-        provider: str,
-        entity: str,
-        date: datetime,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime | None = None,
-    ) -> Path:
-        """Write raw records to Bronze layer (JSONL + zstd).
-
-        If save_json is enabled, also writes uncompressed JSONL file.
-
-        Args:
-            records: Iterator of JSONL bytes to write.
-            provider: Data provider name (e.g., 'chembl').
-            entity: Entity type (e.g., 'activity').
-            date: Ingestion timestamp for date partitioning.
-            batch_id: Unique batch identifier.
-            run_id: Pipeline run ID for traceability.
-            run_type: Type of run (incremental, backfill, rebuild).
-            ingestion_ts: Ingestion timestamp from application layer.
-                         If None, uses date parameter (backward compat).
-
-        Returns:
-            Path to the written file (relative to base_path).
-
-        Raises:
-            ValueError: If provider or entity names are invalid.
-        """
-        # Validate provider/entity format (alphanumeric + underscores only)
+    def _validate_bronze_names(self, provider: str, entity: str) -> None:
+        """Validate provider and entity names (alphanumeric + underscores/hyphens)."""
         if not provider or not provider.replace("_", "").replace("-", "").isalnum():
             raise ValueError(
                 f"Invalid provider name: '{provider}'. "
@@ -112,16 +81,17 @@ class BronzeWriter:
                 "Use alphanumeric characters, underscores, or hyphens only."
             )
 
-        date_str = date.strftime("%Y-%m-%d")
-        # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
-        relative_path = (
-            f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
-        )
-        # Use provided ingestion_ts or fall back to date (backward compat)
-        effective_ts = ingestion_ts or date
-
-        # Build metadata for lineage tracking
-        metadata = {
+    def _build_bronze_metadata(
+        self,
+        run_id: RunID,
+        run_type: RunType,
+        effective_ts: datetime,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+    ) -> dict[str, str]:
+        """Build metadata dict for lineage tracking."""
+        return {
             "run_id": str(run_id),
             "run_type": run_type.value,
             "ingestion_ts": effective_ts.isoformat(),
@@ -130,49 +100,63 @@ class BronzeWriter:
             "batch_id": str(batch_id),
         }
 
+    def _write_atomic_bronze(
+        self, data: bytes, path: Path, metadata: dict[str, str], meta_path: Path
+    ) -> None:
+        """Write data and metadata atomically using temp files + rename."""
+        with AtomicWriteGroup() as group:
+            group.add(path, data)
+            group.add(meta_path, json.dumps(metadata).encode("utf-8"))
+            group.commit()
+
+    async def write_bronze(
+        self,
+        records: Iterator[bytes],
+        provider: str,
+        entity: str,
+        date: datetime,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime | None = None,
+    ) -> Path:
+        """Write raw records to Bronze layer (JSONL + zstd)."""
+        self._validate_bronze_names(provider, entity)
+
+        date_str = date.strftime("%Y-%m-%d")
+        relative_path = (
+            f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+        )
+        effective_ts = ingestion_ts or date
+        metadata = self._build_bronze_metadata(
+            run_id, run_type, effective_ts, provider, entity, batch_id
+        )
+
         loop = asyncio.get_running_loop()
 
-        # Optimize memory usage: Only buffer if we need to write both formats.
-        # If save_json is False (default), we stream directly to compression.
         if self.save_json:
-            # Buffer records since iterator can only be consumed once
-            # and we may need it for both compressed and JSON output
             record_list = list(records)
             records_iter = iter(record_list)
         else:
-            record_list = []  # Not used
+            record_list = []
             records_iter = records
 
         compressed_data = await loop.run_in_executor(
             None, self._compress_records, records_iter
         )
-
         if not compressed_data:
             raise ValueError("No records to write")
 
-        # Write compressed file to local filesystem using atomic write
         full_path = self.base_path / relative_path
         meta_path = full_path.with_suffix(".zst.meta.json")
 
-        def _write_local_atomic(
-            data: bytes, path: Path, meta: dict, m_path: Path
-        ) -> None:
-            """Write data and metadata atomically using temp files + rename.
-
-            Both files are written to temp locations first, then atomically
-            replaced together. If any step fails, both temp files are cleaned up.
-            """
-            with AtomicWriteGroup() as group:
-                group.add(path, data)
-                group.add(m_path, json.dumps(meta).encode("utf-8"))
-                group.commit()
-
         await loop.run_in_executor(
             None,
-            lambda: _write_local_atomic(compressed_data, full_path, metadata, meta_path),
+            lambda: self._write_atomic_bronze(
+                compressed_data, full_path, metadata, meta_path
+            ),
         )
 
-        # Log successful write with run_id for traceability
         self.logger.info(
             "bronze_write_complete",
             path=relative_path,
@@ -183,7 +167,6 @@ class BronzeWriter:
             run_type=run_type.value,
         )
 
-        # Optionally write uncompressed JSON
         if self.save_json:
             await self._write_json_copy(
                 record_list, provider, entity, date_str, batch_id
