@@ -1,90 +1,69 @@
 """Provider loader module.
 
-Обеспечивает явную загрузку и регистрацию всех провайдеров.
-Вызывается из bootstrap.py для инициализации ProviderRegistry.
+Ensures all providers are registered in ProviderRegistry.
+Called from bootstrap.py for initialization.
 """
 
 from __future__ import annotations
 
-import importlib
-
 from bioetl.composition.providers.provider_registry import ProviderRegistry
-
-# Список модулей адаптеров для загрузки
-# При импорте модуля декоратор @register_provider автоматически
-# регистрирует провайдера в ProviderRegistry
-_PROVIDER_MODULES = [
-    "bioetl.infrastructure.adapters.chembl.client",
-    "bioetl.infrastructure.adapters.pubchem.client",
-    "bioetl.infrastructure.adapters.uniprot.client",
-    "bioetl.infrastructure.adapters.pubmed.pubmed_client",
-]
+from bioetl.composition.providers.registration import register_all_providers
 
 _loaded = False
 
 
 def load_providers(force: bool = False) -> None:
-    """Загружает все зарегистрированные провайдеры.
+    """Load and register all providers.
 
-    Эта функция должна вызываться один раз при старте приложения
-    (например, в bootstrap.py) для инициализации ProviderRegistry.
+    This function should be called once at application startup
+    (e.g., in bootstrap.py) to initialize ProviderRegistry.
 
-    Функция идемпотентна — повторные вызовы безопасны (если force=False).
+    Idempotent - repeated calls are safe (if force=False).
 
     Args:
-        force: Если True, перезагружает модули даже если они уже загружены.
-            Используется в тестах для сброса состояния.
+        force: If True, re-register providers even if already loaded.
+            Used in tests to reset state.
 
     Example:
         >>> from bioetl.composition.providers import load_providers
         >>> load_providers()
-        >>> # Теперь можно использовать ProviderRegistry
+        >>> # Now ProviderRegistry is ready
         >>> from bioetl.composition.providers import ProviderRegistry
         >>> config = ProviderRegistry.get("chembl")
 
     """
     global _loaded
-    import sys
 
     if _loaded and not force:
         return
 
-    for module_path in _PROVIDER_MODULES:
-        try:
-            if force and module_path in sys.modules:
-                # Перезагружаем модуль для повторной регистрации
-                importlib.reload(sys.modules[module_path])
-            else:
-                importlib.import_module(module_path)
-        except ImportError as e:
-            # Логируем ошибку, но не падаем — провайдер может быть опциональным
-            import warnings
+    if force:
+        # Clear registry before re-registration
+        ProviderRegistry.clear()
 
-            warnings.warn(
-                f"Failed to load provider module {module_path}: {e}",
-                stacklevel=2,
-            )
+    # Explicit registration of all providers
+    register_all_providers()
 
     _loaded = True
 
 
 def ensure_providers_loaded() -> None:
-    """Гарантирует, что провайдеры загружены.
+    """Ensure providers are loaded.
 
-    Удобная функция для использования в местах, где нужно быть уверенным,
-    что ProviderRegistry инициализирован.
+    Convenience function for use in places where ProviderRegistry
+    must be initialized.
     """
     if not _loaded:
         load_providers()
 
 
 def get_loaded_status() -> bool:
-    """Возвращает статус загрузки провайдеров."""
+    """Return provider loading status."""
     return _loaded
 
 
 def reset_loader() -> None:
-    """Сбрасывает статус загрузки. Только для тестов."""
+    """Reset loading status. Only for tests."""
     global _loaded
     _loaded = False
     ProviderRegistry.clear()

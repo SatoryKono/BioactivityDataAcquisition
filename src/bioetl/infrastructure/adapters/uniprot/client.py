@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
-from bioetl.composition.providers import register_provider
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -33,12 +32,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
-@register_provider(
-    "uniprot",
-    http_rate=10.0,
-    http_capacity=20,
-    rate_overrides={"uniprot_api_key": 100.0},
-)
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
 
