@@ -316,6 +316,7 @@ class RecordProcessor:
         await self._storage.write_gold(
             table_name=table_name,
             records=records,
+            schema=self._config.gold_schema,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )
