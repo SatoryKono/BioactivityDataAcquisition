@@ -39,18 +39,25 @@ def register_provider(
 
     Args:
         name: Уникальное имя провайдера (например, "chembl", "pubchem")
-        http_rate: Rate limit для HTTP клиента (requests/second)
-        http_capacity: Ёмкость token bucket
+        http_rate: Rate limit для HTTP клиента (requests/second).
+            MUST NOT быть указан если requires_http_client=False.
+        http_capacity: Ёмкость token bucket.
+            MUST NOT быть указан если requires_http_client=False.
         requires_http_client: Нужен ли HTTP клиент для инициализации
         requires_logger: Нужен ли логгер для инициализации
         rate_overrides: Условные переопределения rate limit.
             Ключ — имя атрибута Settings, значение — новый rate.
+            MUST NOT быть указан если requires_http_client=False.
         custom_creator: Кастомная функция создания адаптера.
             Если указана, используется вместо стандартной логики.
         **default_kwargs: Дефолтные kwargs для конструктора адаптера
 
     Returns:
         Декоратор класса
+
+    Raises:
+        ValueError: Если HTTP параметры (http_rate, http_capacity, rate_overrides)
+            указаны при requires_http_client=False
 
     Example:
         >>> @register_provider(
@@ -78,6 +85,24 @@ def register_provider(
     """
 
     def decorator(cls: type[T]) -> type[T]:
+        # Валидация: HTTP параметры не должны передаваться если HTTP клиент не требуется
+        if not requires_http_client:
+            http_params_provided = []
+            if http_rate != 5.0:  # default value
+                http_params_provided.append("http_rate")
+            if http_capacity != 10:  # default value
+                http_params_provided.append("http_capacity")
+            if rate_overrides is not None:
+                http_params_provided.append("rate_overrides")
+
+            if http_params_provided:
+                params_str = ", ".join(http_params_provided)
+                raise ValueError(
+                    f"HTTP parameters ({params_str}) provided but "
+                    f"requires_http_client=False for provider '{name}'. "
+                    "Remove these parameters or set requires_http_client=True."
+                )
+
         # Создаём HTTP конфигурацию
         http_config: HttpConfig | None = None
         if requires_http_client:

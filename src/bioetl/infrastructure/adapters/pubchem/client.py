@@ -32,8 +32,6 @@ if TYPE_CHECKING:
 
 @register_provider(
     "pubchem",
-    http_rate=5.0,
-    http_capacity=10,
     requires_http_client=False,
 )
 class PubChemAdapter(BaseSyncAdapter):

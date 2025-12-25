@@ -426,6 +426,73 @@ class TestRegisterProviderDecorator:
         adapter = ReturnTestAdapter(http_client=None, logger=None)
         assert isinstance(adapter, ReturnTestAdapter)
 
+    def test_decorator_raises_on_http_rate_without_http_client(self):
+        """Verify decorator raises ValueError when http_rate provided with requires_http_client=False."""
+        with pytest.raises(
+            ValueError,
+            match=r"HTTP parameters \(http_rate\) provided but requires_http_client=False",
+        ):
+
+            @register_provider(
+                "invalid_http_rate",
+                http_rate=10.0,
+                requires_http_client=False,
+            )
+            @dataclass
+            class InvalidHttpRateAdapter:
+                logger: Any = None
+
+    def test_decorator_raises_on_http_capacity_without_http_client(self):
+        """Verify decorator raises ValueError when http_capacity provided with requires_http_client=False."""
+        with pytest.raises(
+            ValueError,
+            match=r"HTTP parameters \(http_capacity\) provided but requires_http_client=False",
+        ):
+
+            @register_provider(
+                "invalid_http_capacity",
+                http_capacity=20,
+                requires_http_client=False,
+            )
+            @dataclass
+            class InvalidHttpCapacityAdapter:
+                logger: Any = None
+
+    def test_decorator_raises_on_rate_overrides_without_http_client(self):
+        """Verify decorator raises ValueError when rate_overrides provided with requires_http_client=False."""
+        with pytest.raises(
+            ValueError,
+            match=r"HTTP parameters \(rate_overrides\) provided but requires_http_client=False",
+        ):
+
+            @register_provider(
+                "invalid_rate_overrides",
+                rate_overrides={"api_key": 100.0},
+                requires_http_client=False,
+            )
+            @dataclass
+            class InvalidRateOverridesAdapter:
+                logger: Any = None
+
+    def test_decorator_raises_on_multiple_http_params_without_http_client(self):
+        """Verify decorator raises ValueError when multiple HTTP params provided with requires_http_client=False."""
+        with pytest.raises(
+            ValueError,
+            match=r"HTTP parameters \(http_rate, http_capacity, rate_overrides\) provided but requires_http_client=False",
+        ):
+
+            @register_provider(
+                "invalid_multiple_http",
+                http_rate=10.0,
+                http_capacity=20,
+                rate_overrides={"api_key": 100.0},
+                requires_http_client=False,
+            )
+            @dataclass
+            class InvalidMultipleHttpAdapter:
+                logger: Any = None
+
+
 
 class TestProviderLoader:
     """Tests for provider loader functions."""
