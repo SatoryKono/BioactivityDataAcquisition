@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 # src/bioetl/composition/factories/__init__.py
 """Pipeline factories module.
 

@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
 from bioetl.composition.providers.provider_registry import (
@@ -16,6 +15,8 @@ from bioetl.composition.providers.provider_registry import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from bioetl.domain.ports import DataSourcePort
 
 T = TypeVar("T", bound="DataSourcePort")

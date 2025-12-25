@@ -22,7 +22,6 @@ from bioetl.composition.providers.loader import (
     load_providers,
     reset_loader,
 )
-from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.types import HealthStatus
 
 
