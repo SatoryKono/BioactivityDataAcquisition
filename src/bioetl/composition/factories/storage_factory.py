@@ -56,9 +56,21 @@ class StorageAdapter:
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
-        ingestion_ts: datetime | None = None,
+        ingestion_ts: datetime,
     ) -> None:
-        """Write raw records to Bronze layer."""
+        """Write raw records to Bronze layer.
+
+        Args:
+            records: Iterator of JSON-encoded record bytes.
+            provider: Provider name.
+            entity: Entity type.
+            date: Date for path partitioning.
+            batch_id: Unique batch identifier.
+            run_id: Pipeline run identifier.
+            run_type: Type of run.
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014). Required.
+        """
         await self.bronze.write_bronze(
             records=records,
             provider=provider,
