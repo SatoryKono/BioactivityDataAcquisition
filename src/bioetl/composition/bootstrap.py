@@ -8,7 +8,12 @@ Bootstrap functions are organized into submodules:
 - bootstrap.storage: storage adapters, cleanup, lifecycle services
 - bootstrap.checkpoint: checkpoint and quarantine management
 
-All functions are re-exported here for backward compatibility.
+All bootstrap functions are re-exported here for convenience.
+
+Note:
+    Infrastructure types (BronzeWriter, DeltaWriter, etc.) are NOT exported
+    from this module. Import them directly from infrastructure modules or
+    use composition/types.py for type annotations.
 """
 
 from __future__ import annotations
@@ -31,33 +36,12 @@ from bioetl.composition._bootstrap import (
 )
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.factories.storage_factory import StorageAdapter
-from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
-from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.server import MetricsServerError
-from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 __all__ = [
-    # Infrastructure components (re-exports for convenience)
-    "BronzeWriter",
-    "DeltaWriter",
-    "GoldWriter",
-    "LocalCheckpoint",
-    "MemoryLock",
-    "MetricsServerError",
-    "ObservabilityBundle",
-    "PrometheusMetrics",
-    "StorageAdapter",
-    "UnifiedQuarantine",
     # Bootstrap functions (from submodules)
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
