@@ -60,7 +60,12 @@ class TestDeltaWriterExceptions:
         self, mock_delta_table, valid_record, noop_logger
     ):
         """Test that SchemaViolationError is raised on merge."""
-        mock_delta_table.side_effect = SchemaMismatchError("Invalid schema")
+        # First call (schema check) raises TableNotFoundError, second call raises
+        # SchemaMismatchError
+        mock_delta_table.side_effect = [
+            TableNotFoundError("Not found"),  # Schema check
+            SchemaMismatchError("Invalid schema"),  # Write attempt
+        ]
         writer = DeltaWriter(base_path="/fake/path", logger=noop_logger)
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
@@ -89,12 +94,17 @@ class TestDeltaWriterExceptions:
     ):
         """Test that MergeConflictError is raised."""
         mock_table_instance = MagicMock()
-        mock_delta_table.return_value = mock_table_instance
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update_all.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
         mock_merge.execute.side_effect = DeltaError("Merge-conflict")
+
+        # First call (schema check) raises TableNotFoundError, second call returns mock
+        mock_delta_table.side_effect = [
+            TableNotFoundError("Not found"),  # Schema check
+            mock_table_instance,  # Write attempt
+        ]
 
         writer = DeltaWriter(base_path="/fake/path", logger=noop_logger)
         # Make run_in_executor execute synchronously for testing

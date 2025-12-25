@@ -48,3 +48,29 @@ class TableNotFoundError(StorageError):
     def __init__(self, table_path: str) -> None:
         self.table_path = table_path
         super().__init__(f"Table not found: '{table_path}'")
+
+
+class SchemaEvolutionError(StorageError):
+    """Raised when schema drift is detected and on_schema_mismatch='error'.
+
+    This error indicates that the incoming records have different fields
+    compared to the existing table schema.
+    """
+
+    error_type = ErrorType.SCHEMA_EVOLUTION
+
+    def __init__(
+        self,
+        table: str,
+        new_fields: set[str] | None = None,
+        removed_fields: set[str] | None = None,
+    ) -> None:
+        self.table = table
+        self.new_fields = new_fields or set()
+        self.removed_fields = removed_fields or set()
+        parts = [f"Schema drift detected for '{table}'"]
+        if self.new_fields:
+            parts.append(f"new fields: {sorted(self.new_fields)}")
+        if self.removed_fields:
+            parts.append(f"removed fields: {sorted(self.removed_fields)}")
+        super().__init__(", ".join(parts))
