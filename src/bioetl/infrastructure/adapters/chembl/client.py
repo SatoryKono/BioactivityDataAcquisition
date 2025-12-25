@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from bioetl.composition.providers import register_provider
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
 from bioetl.domain.types import ErrorType, HealthStatus
@@ -67,6 +68,11 @@ ENTITY_PLURAL = {
 }
 
 
+@register_provider(
+    "chembl",
+    http_rate=10.0,
+    http_capacity=20,
+)
 @dataclass
 class ChemblAdapter(BaseHttpAdapter):
     """ChEMBL data source adapter.
@@ -289,7 +295,7 @@ class ChemblAdapter(BaseHttpAdapter):
         """Perform filtered fetch using ID batches with client-side deduplication."""
         total_fetched = 0
         seen_ids: set[str] = set()
-        
+
         # Primary key field name for deduplication
         pk_field = ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
         if entity_type == "molecule" or entity_type == "compound":

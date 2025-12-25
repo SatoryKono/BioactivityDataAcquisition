@@ -13,19 +13,29 @@ Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
-from bioetl.domain.ports import LoggerPort
+from bioetl.composition.providers import register_provider
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
+    from bioetl.domain.ports import LoggerPort
+
+
+@register_provider(
+    "pubchem",
+    http_rate=5.0,
+    http_capacity=10,
+    requires_http_client=False,
+)
 class PubChemAdapter(BaseSyncAdapter):
     """PubChem API adapter implementing DataSourcePort.
 
