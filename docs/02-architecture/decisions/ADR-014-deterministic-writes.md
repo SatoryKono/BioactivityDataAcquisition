@@ -91,6 +91,14 @@ await quarantine.write(..., ingestion_ts=ingestion_ts)
 |------|------|
 | `test_no_random_in_writers` | Блокирует `import random` в `infrastructure/storage/` |
 | `test_no_datetime_now_in_infrastructure` | Блокирует `datetime.now()` в `infrastructure/` |
+| `test_no_structlog_in_application_interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/` |
+
+### 5. Изоляция логирования
+
+Application и interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать абстракцию `LoggerPort` из `domain.ports`. Это обеспечивает:
+- Тестируемость (можно подменить логгер в тестах)
+- Независимость от конкретной реализации
+- Единообразие обработки ошибок
 
 ## Justification
 
@@ -126,6 +134,7 @@ await quarantine.write(..., ingestion_ts=ingestion_ts)
 
 - `tests/architecture/test_no_random_in_writers.py`
 - `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+- `tests/architecture/test_no_structlog_in_application_interfaces.py`
 
 ## Alternatives Considered
 
@@ -169,3 +178,5 @@ with frozen_time(timestamp):
 - RULES.md §4.3 Детерминизм и Воспроизводимость
 - `tests/architecture/test_no_random_in_writers.py`
 - `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+- `tests/architecture/test_no_structlog_in_application_interfaces.py`
+- ADR-006 Logger and Metrics Ports

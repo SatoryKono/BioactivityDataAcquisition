@@ -1,4 +1,9 @@
-"""Processes a batch of records through the Bronze, Silver, and Gold layers."""
+"""Processes a batch of records through the Bronze, Silver, and Gold layers.
+
+Observability (O2):
+- Nested spans for each stage: transform → write_bronze → write_silver → write_gold
+- Span attributes include record counts and batch metadata
+"""
 
 from __future__ import annotations
 
@@ -21,7 +26,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.ports import GoldValidatorPort
+    from bioetl.domain.ports import GoldValidatorPort, TracingPort
     from bioetl.domain.types import BatchID
 
 
@@ -39,6 +44,10 @@ class RecordProcessor:
     """Handles the transformation and writing of a single batch of records.
 
     This class contains the core ETL logic for a batch.
+
+    Observability (O2):
+    - Nested spans for transform, write_bronze, write_silver, write_gold
+    - Each span includes relevant record counts and status
     """
 
     def __init__(
@@ -51,6 +60,7 @@ class RecordProcessor:
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
+        tracer: TracingPort | None = None,
     ):
         """Initialize record processor.
 
@@ -63,6 +73,7 @@ class RecordProcessor:
             gold_filter_callback: Callback for filtering Silver records.
             gold_transform_callback: Callback for Silver -> Gold transformation.
             gold_validator: Validator for Gold layer records.
+            tracer: Optional tracing port for distributed tracing.
 
         """
         self._storage = services.storage
@@ -77,6 +88,7 @@ class RecordProcessor:
         self._gold_filter = gold_filter_callback
         self._gold_transform = gold_transform_callback
         self._gold_validator = gold_validator
+        self._tracer = tracer
 
         # Convenience properties
         self._provider = config.provider
@@ -104,6 +116,37 @@ class RecordProcessor:
             batch_id=str(batch_id),
         )
         self._batch_metrics.track_error(f"{layer}_write", error_type)
+
+    def _start_span(self, name: str, **attributes: Any) -> Any:
+        """Start a tracing span if tracer is available.
+
+        Args:
+            name: Name of the span.
+            **attributes: Span attributes.
+
+        Returns:
+            Span object or None if tracer not available.
+        """
+        if not self._tracer:
+            return None
+        otel_tracer = self._tracer.get_tracer("bioetl.processor")
+        span = otel_tracer.start_as_current_span(name, attributes=attributes)
+        span.__enter__()
+        return span
+
+    def _end_span(self, span: Any, error: Exception | None = None) -> None:
+        """End a tracing span.
+
+        Args:
+            span: Span object to end.
+            error: Optional exception to record.
+        """
+        if not span:
+            return
+        if error:
+            span.set_attribute("error", True)
+            span.record_exception(error)
+        span.__exit__(None, None, None)
 
     async def _transform_records_batch(
         self, records: list[dict[str, Any]], batch_id: BatchID
@@ -148,14 +191,30 @@ class RecordProcessor:
         records: list[dict[str, Any]],
         batch_id: BatchID,
     ) -> BatchResult:
-        """Process a batch of records through Bronze -> Silver -> Gold."""
+        """Process a batch of records through Bronze -> Silver -> Gold.
+
+        Creates nested spans for each stage:
+        - write_bronze: Writing raw records to Bronze layer
+        - transform: Transforming records to Silver/Gold formats
+        - write_silver: Writing to Silver Delta Lake
+        - write_gold: Writing to Gold Delta Lake
+        """
         # Use context.started_at as single source of time (see ADR-014)
         ingestion_ts = self._context.started_at
 
-        # 1. Write to Bronze
+        # 1. Write to Bronze with span
+        span = self._start_span(
+            "write_bronze",
+            **{
+                "bioetl.batch_id": str(batch_id),
+                "bioetl.record_count": len(records),
+            },
+        )
         try:
             await self._write_bronze_batch(records, batch_id, ingestion_ts)
+            self._end_span(span)
         except Exception as e:
+            self._end_span(span, e)
             self._log_and_track_write_error("bronze", e, batch_id)
             raise
 
@@ -163,10 +222,27 @@ class RecordProcessor:
         self._batch_metrics.track_batch_size("bronze", records_bronze)
         self._batch_metrics.track_processed_records("bronze", records_bronze)
 
-        # 2. Transform and collect Silver/Gold
-        silver_records, gold_records, records_quarantined = (
-            await self._transform_records_batch(records, batch_id)
+        # 2. Transform and collect Silver/Gold with span
+        span = self._start_span(
+            "transform",
+            **{
+                "bioetl.batch_id": str(batch_id),
+                "bioetl.input_count": len(records),
+            },
         )
+        try:
+            silver_records, gold_records, records_quarantined = (
+                await self._transform_records_batch(records, batch_id)
+            )
+            if span:
+                span.set_attribute("bioetl.silver_count", len(silver_records))
+                span.set_attribute("bioetl.gold_count", len(gold_records))
+                span.set_attribute("bioetl.quarantined_count", records_quarantined)
+            self._end_span(span)
+        except Exception as e:
+            self._end_span(span, e)
+            raise
+
         self._collect_dq_stats(records, records_quarantined)
 
         # Update metrics
@@ -174,19 +250,37 @@ class RecordProcessor:
         self._batch_metrics.track_processed_records("silver", len(silver_records))
         self._batch_metrics.track_processed_records("gold", len(gold_records))
 
-        # 3. Write to Silver
+        # 3. Write to Silver with span
         if silver_records:
+            span = self._start_span(
+                "write_silver",
+                **{
+                    "bioetl.batch_id": str(batch_id),
+                    "bioetl.record_count": len(silver_records),
+                },
+            )
             try:
                 await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
+                self._end_span(span)
             except Exception as e:
+                self._end_span(span, e)
                 self._log_and_track_write_error("silver", e, batch_id)
                 raise
 
-        # 4. Write to Gold
+        # 4. Write to Gold with span
         if gold_records:
+            span = self._start_span(
+                "write_gold",
+                **{
+                    "bioetl.batch_id": str(batch_id),
+                    "bioetl.record_count": len(gold_records),
+                },
+            )
             try:
                 await self._write_gold_batch(gold_records)
+                self._end_span(span)
             except Exception as e:
+                self._end_span(span, e)
                 self._log_and_track_write_error("gold", e, batch_id)
                 raise
 

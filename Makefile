@@ -226,6 +226,9 @@ quality: lint arch-lint complexity typecheck ## Run all quality checks
 	@echo "$(GREEN)All quality checks passed!$(NC)"
 
 # CI/CD targets
+ci: lint test arch-all ## Run complete CI pipeline (lint + test + architecture)
+	@echo "$(GREEN)CI checks complete!$(NC)"
+
 ci-lint: lint security arch-lint ## Run all CI linting checks
 
 ci-test: test arch-all ## Run all tests for CI (includes architecture checks)
