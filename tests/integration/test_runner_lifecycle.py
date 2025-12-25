@@ -60,6 +60,8 @@ def call_recorder():
 @pytest.fixture
 def mock_services_with_recorder(call_recorder):
     """Create services that record all calls."""
+    from bioetl.domain.types import HealthStatus
+
     services = MagicMock()
 
     # Lock methods
@@ -81,6 +83,12 @@ def mock_services_with_recorder(call_recorder):
     services.storage.clear_gold = AsyncMock(
         side_effect=lambda *a, **kw: (call_recorder.record("storage.clear_gold"), 0)[1]
     )
+    # Health check must be async and return HealthStatus
+    services.storage.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+
+    # Data source methods (needed for health checks)
+    services.data_source = MagicMock()
+    services.data_source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
 
     # Context manager support (self is passed when called as a method)
     async def services_aenter(self):

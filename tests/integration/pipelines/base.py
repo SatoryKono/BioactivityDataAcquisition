@@ -96,12 +96,14 @@ class IntegrationPipelineTestCase:
             ),
         )
 
+        from pathlib import Path
+
         return StorageContext(
             adapter=adapter,
-            bronze_path=self.bronze_path,
-            silver_path=self.silver_path,
-            gold_path=self.gold_path,
-            checkpoints_path=self.checkpoints_path,
+            bronze_path=Path(self.bronze_path),
+            silver_path=Path(self.silver_path),
+            gold_path=Path(self.gold_path),
+            checkpoints_path=Path(self.checkpoints_path),
         )
 
     @pytest.fixture
