@@ -3,6 +3,10 @@
 Centralizes data source creation logic, eliminating duplication across pipeline factories.
 Each provider registers a creator function that knows how to instantiate the appropriate
 DataSourcePort implementation.
+
+Note: This module works in conjunction with ProviderRegistry. The creator functions
+use DataSourceFactory and HttpClientFactory, which now delegate to ProviderRegistry
+for provider lookup and configuration.
 """
 
 from __future__ import annotations
@@ -12,6 +16,7 @@ from typing import TYPE_CHECKING, ClassVar, Protocol
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.factories.data_sources import DataSourceFactory
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
+from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 
 if TYPE_CHECKING:
@@ -214,5 +219,11 @@ class DataSourceRegistry:
 
     @classmethod
     def list_providers(cls) -> list[str]:
-        """List all registered providers."""
-        return list(cls._creators.keys())
+        """List all registered providers.
+
+        Returns providers from both this registry and ProviderRegistry.
+        """
+        ensure_providers_loaded()
+        registry_providers = set(ProviderRegistry.list_providers())
+        local_providers = set(cls._creators.keys())
+        return sorted(registry_providers | local_providers)

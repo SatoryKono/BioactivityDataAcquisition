@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from bioetl.composition.providers import register_provider
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
 from bioetl.domain.types import ErrorType, HealthStatus
@@ -67,6 +68,11 @@ ENTITY_PLURAL = {
 }
 
 
+@register_provider(
+    "chembl",
+    http_rate=10.0,
+    http_capacity=20,
+)
 @dataclass
 class ChemblAdapter(BaseHttpAdapter):
     """ChEMBL data source adapter.
