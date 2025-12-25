@@ -342,7 +342,7 @@ class TestDeltaWriterGetTableInfo:
         mock_table_instance.version.return_value = 10
         mock_table_instance.files.return_value = ["file1.parquet", "file2.parquet"]
         mock_schema = MagicMock()
-        mock_schema.to_pyarrow.return_value = {"fields": []}
+        mock_schema.to_arrow.return_value = {"fields": []}
         mock_table_instance.schema.return_value = mock_schema
         mock_table_instance.metadata.return_value = {"id": "test-table"}
 
@@ -682,7 +682,7 @@ class TestDeltaWriterSchemaDrift:
 
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = existing_schema
+        mock_delta_schema.to_arrow.return_value = existing_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
@@ -707,7 +707,7 @@ class TestDeltaWriterSchemaDrift:
 
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = existing_schema
+        mock_delta_schema.to_arrow.return_value = existing_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
@@ -740,7 +740,7 @@ class TestDeltaWriterSchemaDrift:
             pa.field("_ingestion_ts", pa.string()),
         ])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = existing_schema
+        mock_delta_schema.to_arrow.return_value = existing_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
@@ -781,7 +781,7 @@ class TestDeltaWriterSchemaDrift:
 
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
-        mock_delta_schema.to_pyarrow.return_value = existing_schema
+        mock_delta_schema.to_arrow.return_value = existing_schema
 
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
