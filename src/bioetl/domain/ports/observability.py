@@ -136,3 +136,77 @@ class LoggerPort(Protocol):
     def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback."""
         ...
+
+
+@runtime_checkable
+class DQMonitorPort(Protocol):
+    """Port for data quality monitoring and anomaly detection.
+
+    Monitors pipeline metrics for statistical anomalies using
+    Z-score analysis and configurable thresholds.
+
+    Example:
+        >>> monitor = DataQualityMonitor(z_score_threshold=2.5)
+        >>> anomalies = monitor.check_quality({
+        ...     "record_count": 1000,
+        ...     "error_rate": 0.15,
+        ... })
+        >>> for a in anomalies:
+        ...     print(f"{a.severity}: {a.message}")
+    """
+
+    def add_metric(
+        self,
+        metric_name: str,
+        baseline: Any,  # Sequence[float]
+        min_threshold: float | None = None,
+        max_threshold: float | None = None,
+    ) -> None:
+        """Register metric with historical baseline and thresholds.
+
+        Args:
+            metric_name: Name of the metric (e.g., "record_count", "error_rate")
+            baseline: Historical values for baseline calculation
+            min_threshold: Absolute minimum threshold (optional)
+            max_threshold: Absolute maximum threshold (optional)
+        """
+        ...
+
+    def check_quality(
+        self,
+        metrics: dict[str, float],
+    ) -> list[Any]:
+        """Check current metrics against baseline for anomalies.
+
+        Args:
+            metrics: Current metric values to check
+
+        Returns:
+            List of detected anomalies (empty if none detected)
+        """
+        ...
+
+    def update_baseline_from_metrics(
+        self,
+        metrics: dict[str, float],
+    ) -> None:
+        """Update baseline with current metrics.
+
+        Skips update if critical anomalies were detected to avoid
+        polluting baseline with bad data.
+
+        Args:
+            metrics: Current metric values to add to baseline
+        """
+        ...
+
+    def get_baseline_stats(
+        self,
+        metric_name: str,
+    ) -> tuple[float, float, int] | None:
+        """Get baseline statistics for a metric.
+
+        Returns:
+            Tuple of (mean, stddev, sample_count) or None if no baseline
+        """
+        ...

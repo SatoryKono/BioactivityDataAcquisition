@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         CheckpointPort,
         DataSourcePort,
+        DQMonitorPort,
         LockPort,
         MetricsPort,
         QuarantinePort,
@@ -48,6 +49,7 @@ class BaseServicesFactory:
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
         tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -57,6 +59,7 @@ class BaseServicesFactory:
             data_source: Data source port implementation
             pipeline_config: Pipeline YAML configuration
             tracer: Optional tracer (defaults to NoOpTracing if not provided)
+            dq_monitor: Optional data quality monitor for anomaly detection
 
         Returns:
             PipelineServices with all dependencies configured
@@ -84,6 +87,7 @@ class BaseServicesFactory:
             metrics=metrics,
             tracing=tracer,
             logger=logger,
+            dq_monitor=dq_monitor,
         )
 
     @staticmethod

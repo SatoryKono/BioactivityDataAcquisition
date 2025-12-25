@@ -103,6 +103,32 @@ ARCHIVE_DURATION_SECONDS = Histogram(
     ["table"],
 )
 
+# Data Quality Monitor metrics
+DQ_ANOMALY_DETECTED = Counter(
+    "bioetl_dq_anomaly_detected",
+    "Total number of data quality anomalies detected",
+    ["pipeline", "metric", "severity", "anomaly_type"],
+)
+
+DQ_CHECK_DURATION_MS = Histogram(
+    "bioetl_dq_check_duration_ms",
+    "Duration of data quality check in milliseconds",
+    ["pipeline"],
+    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000],
+)
+
+DQ_BASELINE_UPDATED = Counter(
+    "bioetl_dq_baseline_updated",
+    "Number of times DQ monitor baseline was updated",
+    ["pipeline", "metric"],
+)
+
+DQ_BASELINE_SAMPLES = Gauge(
+    "bioetl_dq_baseline_samples",
+    "Current number of samples in DQ baseline",
+    ["pipeline", "metric"],
+)
+
 
 class MetricsCollector:
     """Collector for pipeline metrics.
