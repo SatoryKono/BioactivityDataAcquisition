@@ -74,6 +74,8 @@ class TableConfig:
     silver_write_mode: Literal["merge", "append", "overwrite"] = "merge"
     gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
     partition_cols: list[str] = field(default_factory=list)
+    # Schema drift handling for Silver layer
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
 
 @dataclass(frozen=True)
