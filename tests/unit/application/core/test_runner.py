@@ -492,3 +492,281 @@ class TestPipelineRunnerClearViaLifecycle:
 
         # Should not call lifecycle service for incremental
         lifecycle_service.clear.assert_not_called()
+
+
+@pytest.mark.unit
+class TestPipelineRunnerCheckDataQuality:
+    """Tests for PipelineRunner._check_data_quality method."""
+
+    @pytest.fixture
+    def mock_dq_monitor(self):
+        """Create a mock DQ monitor."""
+        monitor = MagicMock()
+        monitor.check_quality = MagicMock(return_value=[])
+        monitor.update_baseline_from_metrics = MagicMock()
+        monitor.get_baseline_stats = MagicMock(return_value=None)
+        return monitor
+
+    @pytest.mark.asyncio
+    async def test_check_data_quality_skips_without_monitor(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_lifecycle_service,
+    ):
+        """Test _check_data_quality skips when dq_monitor is None."""
+        services = create_mock_services()
+        services.dq_monitor = None
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        # Should not raise and should return early
+        await runner._check_data_quality()
+
+        # No metrics should be recorded for dq_check
+        dq_calls = [
+            c
+            for c in services.metrics.observe_histogram.call_args_list
+            if "dq_check" in str(c)
+        ]
+        assert len(dq_calls) == 0
+
+    @pytest.mark.asyncio
+    async def test_check_data_quality_no_anomalies(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_lifecycle_service,
+        mock_dq_monitor,
+    ):
+        """Test _check_data_quality with no anomalies detected."""
+        services = create_mock_services()
+        services.dq_monitor = mock_dq_monitor
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        await runner._check_data_quality()
+
+        # Should call check_quality with batch metrics
+        mock_dq_monitor.check_quality.assert_called_once()
+
+        # Should update baseline
+        mock_dq_monitor.update_baseline_from_metrics.assert_called_once()
+
+        # Should not log warning (no anomalies)
+        warning_calls = list(mock_logger.warning.call_args_list)
+        dq_warnings = [c for c in warning_calls if "dq_anomaly" in str(c)]
+        assert len(dq_warnings) == 0
+
+    @pytest.mark.asyncio
+    async def test_check_data_quality_logs_anomalies(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_lifecycle_service,
+        mock_dq_monitor,
+    ):
+        """Test _check_data_quality logs detected anomalies."""
+        from datetime import UTC, datetime
+
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        anomaly = Anomaly(
+            metric_name="error_rate",
+            current_value=0.25,
+            baseline_mean=0.05,
+            baseline_stddev=0.02,
+            anomaly_type=AnomalyType.SPIKE,
+            severity=AnomalySeverity.HIGH,
+            z_score=10.0,
+            timestamp=datetime.now(UTC),
+            message="Error rate spike detected",
+        )
+
+        mock_dq_monitor.check_quality.return_value = [anomaly]
+
+        services = create_mock_services()
+        services.dq_monitor = mock_dq_monitor
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        await runner._check_data_quality()
+
+        # Should log warning
+        mock_logger.warning.assert_called()
+        call_kwargs = mock_logger.warning.call_args.kwargs
+        assert call_kwargs.get("severity") == "high"
+        assert call_kwargs.get("metric") == "error_rate"
+
+    @pytest.mark.asyncio
+    async def test_check_data_quality_publishes_metrics(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_lifecycle_service,
+        mock_dq_monitor,
+    ):
+        """Test _check_data_quality publishes Prometheus metrics."""
+        from datetime import UTC, datetime
+
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        anomaly = Anomaly(
+            metric_name="record_count",
+            current_value=100,
+            baseline_mean=1000,
+            baseline_stddev=50,
+            anomaly_type=AnomalyType.DROP,
+            severity=AnomalySeverity.CRITICAL,
+            z_score=18.0,
+            timestamp=datetime.now(UTC),
+            message="Record count drop",
+        )
+
+        mock_dq_monitor.check_quality.return_value = [anomaly]
+
+        services = create_mock_services()
+        services.dq_monitor = mock_dq_monitor
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        await runner._check_data_quality()
+
+        # Should increment counter
+        counter_calls = [
+            c
+            for c in services.metrics.increment_counter.call_args_list
+            if c[0][0] == "dq_anomaly_detected"
+        ]
+        assert len(counter_calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_check_data_quality_logs_critical_at_error_level(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_lifecycle_service,
+        mock_dq_monitor,
+    ):
+        """Test _check_data_quality logs critical anomalies at error level."""
+        from datetime import UTC, datetime
+
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        anomaly = Anomaly(
+            metric_name="error_rate",
+            current_value=0.50,
+            baseline_mean=0.05,
+            baseline_stddev=0.02,
+            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
+            severity=AnomalySeverity.CRITICAL,
+            z_score=22.5,
+            timestamp=datetime.now(UTC),
+            message="Error rate exceeds threshold",
+        )
+
+        mock_dq_monitor.check_quality.return_value = [anomaly]
+
+        services = create_mock_services()
+        services.dq_monitor = mock_dq_monitor
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        await runner._check_data_quality()
+
+        # Should log at error level for critical
+        mock_logger.error.assert_called()
+        call_args = mock_logger.error.call_args
+        assert call_args[0][0] == "critical_dq_anomaly"

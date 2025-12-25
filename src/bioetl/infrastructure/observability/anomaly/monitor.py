@@ -91,3 +91,14 @@ class DataQualityMonitor:
 
         for metric_name, value in metrics.items():
             self.detector.add_baseline_value(metric_name, value)
+
+    def get_baseline_stats(
+        self,
+        metric_name: str,
+    ) -> tuple[float, float, int] | None:
+        """Get baseline statistics for a metric.
+
+        Returns:
+            Tuple of (mean, stddev, sample_count) or None if no baseline
+        """
+        return self.detector.get_baseline_stats(metric_name)

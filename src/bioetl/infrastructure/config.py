@@ -328,6 +328,28 @@ class ObservabilitySettings(BaseSettings):
     tracing_enabled: bool = Field(default=False)
     """Enable OpenTelemetry tracing."""
 
+    # Data Quality Monitor settings
+    dq_monitor_enabled: bool = Field(default=False)
+    """Enable data quality monitoring. Disabled by default."""
+
+    dq_baseline_window: int = Field(default=7, ge=1, le=30)
+    """Number of recent runs to use for baseline calculation."""
+
+    dq_z_score_threshold: float = Field(default=2.5, ge=1.5, le=5.0)
+    """Z-score threshold for anomaly detection."""
+
+    dq_min_baseline_samples: int = Field(default=3, ge=1, le=10)
+    """Minimum samples before anomaly detection activates."""
+
+    dq_cold_start_runs: int = Field(default=5, ge=0, le=20)
+    """Skip first N runs while building baseline."""
+
+    dq_error_rate_max: float = Field(default=0.10, ge=0.0, le=1.0)
+    """Maximum allowed error rate (10% default)."""
+
+    dq_quality_score_min: float = Field(default=0.80, ge=0.0, le=1.0)
+    """Minimum quality score threshold (80% default)."""
+
 
 class PipelineSettings(BaseSettings):
     """Pipeline execution configuration."""

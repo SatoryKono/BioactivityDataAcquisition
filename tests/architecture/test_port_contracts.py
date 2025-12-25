@@ -140,6 +140,7 @@ class TestPortRuntimeCheckable:
         "MetricsPort",
         "LoggerPort",
         "GoldValidatorPort",
+        "DQMonitorPort",
     ]
 
     @pytest.mark.parametrize("port_name", ALL_PORTS)
@@ -176,6 +177,7 @@ class TestPortExportsComplete:
         expected_ports = {
             "TracingPort",
             "DataSourcePort",
+            "DQMonitorPort",
             "FilterableDataSourcePort",
             "InputFilterPort",
             "StoragePort",
@@ -441,4 +443,54 @@ class TestPortDefinitionQuality:
         assert not implementations_found, (
             "Ports should not contain implementations (use ... only):\n"
             + "\n".join(f"  - {m}" for m in implementations_found)
+        )
+
+
+# ============================================================================
+# DQ Monitor Port Contract Tests
+# ============================================================================
+
+
+class TestDQMonitorPortContract:
+    """Tests for DQMonitorPort specific contracts."""
+
+    REQUIRED_DQ_METHODS = [
+        "add_metric",
+        "check_quality",
+        "update_baseline_from_metrics",
+        "get_baseline_stats",
+    ]
+
+    @pytest.mark.parametrize("method_name", REQUIRED_DQ_METHODS)
+    def test_dq_monitor_port_has_required_methods(self, method_name: str) -> None:
+        """DQMonitorPort MUST have all required methods for anomaly detection."""
+        assert hasattr(ports.DQMonitorPort, method_name), (
+            f"DQMonitorPort MUST define {method_name}() for data quality monitoring"
+        )
+
+    def test_dq_monitor_port_check_quality_returns_list(self) -> None:
+        """DQMonitorPort.check_quality() MUST return list of anomalies."""
+        import inspect
+
+        sig = inspect.signature(ports.DQMonitorPort.check_quality)
+        params = sig.parameters
+
+        assert "metrics" in params, "check_quality() MUST have metrics parameter"
+
+    def test_dq_monitor_port_is_runtime_checkable(self) -> None:
+        """DQMonitorPort MUST be @runtime_checkable for isinstance() checks."""
+
+        class DummyMonitor:
+            """Dummy class for testing isinstance()."""
+
+            pass
+
+        try:
+            isinstance(DummyMonitor(), ports.DQMonitorPort)
+            is_runtime_checkable = True
+        except TypeError:
+            is_runtime_checkable = False
+
+        assert is_runtime_checkable, (
+            "DQMonitorPort MUST be decorated with @runtime_checkable"
         )
