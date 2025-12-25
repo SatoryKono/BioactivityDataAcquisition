@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Legacy Cleanup Path**: Удалён `PipelineRunner._clear_exports_legacy()` (~60 строк кода)
+- **Cleanup Service from Runner**: Удалён `PipelineRunner._clear_via_cleanup_service()` и параметр `cleanup_service`
+  - `CleanupService` остаётся для CLI (`bioetl cleanup preview`)
+
+### Changed
+
+- **lifecycle_service обязателен**: Параметр `lifecycle_service` теперь обязателен в `PipelineRunner.__init__`
+  - Ранее был опциональным с fallback на legacy код
+  - `MedallionLifecycleService` — единственный способ очистки данных в Runner
+
 ### Added
 
 - **Port Contract Tests**: Добавлено 51 контрактный тест для проверки портов (`tests/architecture/test_port_contracts.py`)
