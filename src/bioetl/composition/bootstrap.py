@@ -13,6 +13,7 @@ from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -367,6 +368,7 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         ctx: Pipeline run context containing launch parameters
     """
     # Explicit registration (idempotent)
+    register_all_providers()
     register_all_pipelines()
 
     settings = get_settings()

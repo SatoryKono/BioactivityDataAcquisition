@@ -326,32 +326,3 @@ def _create_pubmed_adapter(
     )
 
 
-# Регистрация провайдера
-# Используем отложенную регистрацию, чтобы избежать circular imports
-def _register_pubmed() -> None:
-    """Регистрирует PubMed провайдера в ProviderRegistry."""
-    from bioetl.composition.providers.provider_registry import (
-        HttpConfig,
-        ProviderConfig,
-        ProviderRegistry,
-    )
-
-    if ProviderRegistry.is_registered("pubmed"):
-        return
-
-    config = ProviderConfig(
-        adapter_class=PubMedAdapter,
-        http_config=HttpConfig(
-            rate=3.0,
-            capacity=6,
-            rate_overrides={"pubmed_api_key": 10.0},
-        ),
-        requires_http_client=True,
-        requires_logger=True,
-        custom_creator=_create_pubmed_adapter,
-    )
-    ProviderRegistry.register("pubmed", config)
-
-
-# Выполняем регистрацию при импорте модуля
-_register_pubmed()

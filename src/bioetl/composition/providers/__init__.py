@@ -5,20 +5,19 @@ Provides unified API for registering data source providers.
 Example:
     >>> from bioetl.composition.providers import (
     ...     ProviderRegistry,
-    ...     register_provider,
     ...     load_providers,
+    ...     register_all_providers,
     ... )
     >>>
-    >>> # Загрузка всех провайдеров
+    >>> # Load all providers
     >>> load_providers()
     >>>
-    >>> # Получение конфигурации провайдера
+    >>> # Get provider configuration
     >>> config = ProviderRegistry.get("chembl")
     >>> print(config.http_config.rate)
     10.0
 """
 
-from bioetl.composition.providers.decorators import register_provider
 from bioetl.composition.providers.loader import (
     ensure_providers_loaded,
     load_providers,
@@ -28,6 +27,7 @@ from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
     ProviderRegistry,
 )
+from bioetl.composition.providers.registration import register_all_providers
 
 __all__ = [
     "HttpConfig",
@@ -35,5 +35,5 @@ __all__ = [
     "ProviderRegistry",
     "ensure_providers_loaded",
     "load_providers",
-    "register_provider",
+    "register_all_providers",
 ]
