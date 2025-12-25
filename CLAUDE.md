@@ -269,7 +269,7 @@ await loop.run_in_executor(None, func, *args)
 
 | Артефакт | Путь |
 |----------|------|
-| Domain Ports | `src/bioetl/domain/ports.py` |
+| Domain Ports | `src/bioetl/domain/ports/` (пакет с фасадом `__init__.py`) |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
 | Pipeline Core | `src/bioetl/application/core/` |
@@ -375,7 +375,7 @@ git commit -m "..."
 
 ### 14.1. Новый Адаптер
 
-1. **Порт:** Убедись, что в `domain/ports.py` есть подходящий `Protocol`
+1. **Порт:** Убедись, что в `domain/ports/` есть подходящий `Protocol` (импортируй из фасада: `from bioetl.domain.ports import ...`)
 2. **Адаптер:** Создай класс в `src/bioetl/infrastructure/adapters/{provider}/`
 3. **Требования:**
    - **MUST** реализовывать порт

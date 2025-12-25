@@ -32,8 +32,7 @@
 - Документация: kebab-case с NN- префиксом; пайплайны в `docs/application/pipelines/<provider>/<entity>/`.
 - **Инварианты**: одна сущность → один публичный пайплайн; строгая последовательность
   `extract→transform→validate→export`.
-- **Контракты (§1.1.1)**: Интерфейсы через `typing.Protocol` в `domain/ports.py`. Design-time: `mypy --strict`. Runtime:
-  `@runtime_checkable` только для критичных адаптеров.
+- **Контракты (§1.1.1)**: Интерфейсы через `typing.Protocol` в пакете `domain/ports/`. Импорт из фасада: `from bioetl.domain.ports import ...`. Design-time: `mypy --strict`. Runtime: `@runtime_checkable` только для критичных адаптеров.
 
 ## 2. Именование
 

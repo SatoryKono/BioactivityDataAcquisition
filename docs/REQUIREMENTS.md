@@ -19,8 +19,8 @@
 
 ### REQ-ARCH-001
 - **Уровень**: MUST
-- **Описание**: Интерфейсы (Ports) определяются в `domain/ports.py` через `typing.Protocol`
-- **Проверка**: Статический анализ — проверить наличие файла и использование Protocol
+- **Описание**: Интерфейсы (Ports) определяются в пакете `domain/ports/` через `typing.Protocol`. Импорт **MUST** быть из фасада (`from bioetl.domain.ports import ...`).
+- **Проверка**: Статический анализ — проверить наличие пакета и использование Protocol. Архитектурный тест `test_ports_imported_only_from_facade`.
 
 ### REQ-ARCH-002
 - **Уровень**: MUST
