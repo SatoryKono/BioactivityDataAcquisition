@@ -4,10 +4,14 @@
 This module creates all pipeline factories using the GenericPipelineFactory
 pattern. Registration is explicit via register_all_pipelines().
 
+Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.
+
 Usage:
     >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
     >>> register_all_pipelines()  # Call once at application startup
 """
+
+import threading
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
@@ -45,7 +49,8 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
-# Flag to track if registration has been performed
+# Thread-safe registration state
+_registration_lock = threading.Lock()
 _factories_registered = False
 
 # ChEMBL Activity Pipeline
@@ -133,36 +138,61 @@ pubmed_publications_factory = GenericPipelineFactory(
 def register_all_pipelines() -> None:
     """Explicitly register all pipeline factories with PipelineRegistry.
 
-    This function is idempotent - calling it multiple times has no effect
-    after the first call.
+    This function is idempotent and thread-safe - calling it multiple times
+    or from multiple threads has no effect after the first successful call.
+
+    Uses double-checked locking pattern to minimize lock contention while
+    ensuring thread-safe initialization.
 
     Should be called once at application startup (e.g., in cli.py or bootstrap.py).
     """
     global _factories_registered
 
+    # Fast path: already registered (no lock needed)
     if _factories_registered:
         return
 
-    PipelineRegistry.register_factory(chembl_activity_factory)
-    PipelineRegistry.register_factory(chembl_assay_factory)
-    PipelineRegistry.register_factory(chembl_document_factory)
-    PipelineRegistry.register_factory(chembl_target_factory)
-    PipelineRegistry.register_factory(chembl_target_component_factory)
-    PipelineRegistry.register_factory(chembl_molecule_factory)
-    PipelineRegistry.register_factory(pubchem_compound_factory)
-    PipelineRegistry.register_factory(uniprot_protein_factory)
-    PipelineRegistry.register_factory(pubmed_publications_factory)
+    # Slow path: acquire lock and double-check
+    with _registration_lock:
+        # Double-check after acquiring lock (TOCTOU prevention)
+        if _factories_registered:
+            return
 
-    _factories_registered = True
+        PipelineRegistry.register_factory(chembl_activity_factory)
+        PipelineRegistry.register_factory(chembl_assay_factory)
+        PipelineRegistry.register_factory(chembl_document_factory)
+        PipelineRegistry.register_factory(chembl_target_factory)
+        PipelineRegistry.register_factory(chembl_target_component_factory)
+        PipelineRegistry.register_factory(chembl_molecule_factory)
+        PipelineRegistry.register_factory(pubchem_compound_factory)
+        PipelineRegistry.register_factory(uniprot_protein_factory)
+        PipelineRegistry.register_factory(pubmed_publications_factory)
+
+        _factories_registered = True
 
 
 def is_registered() -> bool:
     """Check if factories have been registered.
 
+    Thread-safe check of registration state.
+
     Returns:
         True if register_all_pipelines() has been called.
     """
+    # Reading a bool is atomic in Python, no lock needed for read
     return _factories_registered
+
+
+def reset_registration() -> None:
+    """Reset registration state (for testing only).
+
+    Thread-safe reset of registration flag. Also clears the PipelineRegistry.
+    WARNING: Only use in tests. Not for production.
+    """
+    global _factories_registered
+    with _registration_lock:
+        PipelineRegistry.clear()
+        _factories_registered = False
 
 
 __all__ = [
@@ -176,5 +206,6 @@ __all__ = [
     "pubchem_compound_factory",
     "pubmed_publications_factory",
     "register_all_pipelines",
+    "reset_registration",
     "uniprot_protein_factory",
 ]
