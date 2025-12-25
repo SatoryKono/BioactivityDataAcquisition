@@ -206,14 +206,32 @@ class PubMedAdapter:
             yield record
 
     async def health_check(self) -> HealthStatus:
-        """Проверка доступности PubMed API.
+        """Check API health status using Template Method pattern.
+
+        Calls _probe_health() for PubMed-specific probe, falling back
+        to _fallback_health_status() on any exception.
+
+        Returns:
+            HealthStatus from probe or fallback.
+
+        """
+        try:
+            return await self._probe_health()
+        except Exception:
+            return self._fallback_health_status()
+
+    async def _probe_health(self) -> HealthStatus:
+        """Perform PubMed-specific health probe.
 
         Выполняет lightweight запрос к esearch endpoint.
 
         Returns:
             HealthStatus.HEALTHY — API доступен
             HealthStatus.DEGRADED — медленный отклик (>5 сек)
-            HealthStatus.UNHEALTHY — ошибка или timeout
+            HealthStatus.UNHEALTHY — non-200 response
+
+        Raises:
+            Exception: On request failure (logged before raising).
 
         """
         try:
@@ -256,7 +274,18 @@ class PubMedAdapter:
                 "pubmed_health_check_failed",
                 error=str(e),
             )
-            return HealthStatus.UNHEALTHY
+            raise  # Let health_check() return _fallback_health_status()
+
+    def _fallback_health_status(self) -> HealthStatus:
+        """Get fallback health status on probe failure.
+
+        PubMed doesn't use circuit breaker assessment, so returns UNHEALTHY.
+
+        Returns:
+            HealthStatus.UNHEALTHY
+
+        """
+        return HealthStatus.UNHEALTHY
 
     async def aclose(self) -> None:
         """Close adapter resources.

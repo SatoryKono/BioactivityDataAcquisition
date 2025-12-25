@@ -2,6 +2,10 @@
 
 Provides common functionality for adapters interacting with HTTP APIs,
 including lifecycle management (context manager) and health checks.
+
+Uses Template Method pattern for health checks: subclasses implement
+_probe_health() for provider-specific probes, with automatic fallback
+to circuit breaker assessment on failure.
 """
 
 from __future__ import annotations
@@ -22,6 +26,11 @@ class BaseHttpAdapter(DataSourcePort):
     """Base class for HTTP adapters.
 
     Enforces usage of UnifiedHTTPClient and standardizes lifecycle management.
+
+    Uses Template Method pattern for health checks:
+    - health_check(): Template method that handles try/except
+    - _probe_health(): Override for provider-specific health probe
+    - _fallback_health_status(): Fallback using circuit breaker state
 
     Attributes:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
@@ -71,10 +80,40 @@ class BaseHttpAdapter(DataSourcePort):
         pass
 
     async def health_check(self) -> HealthStatus:
-        """Check API health status.
+        """Check API health status using Template Method pattern.
 
-        Default implementation uses the circuit breaker state from the HTTP client.
+        Calls _probe_health() for provider-specific probe, falling back
+        to _fallback_health_status() on any exception.
+
+        Returns:
+            HealthStatus from probe or fallback.
+
+        """
+        try:
+            return await self._probe_health()
+        except Exception:
+            return self._fallback_health_status()
+
+    async def _probe_health(self) -> HealthStatus:
+        """Perform provider-specific health probe.
+
         Subclasses SHOULD override this with a specific API call (e.g. /health).
+        Default implementation returns fallback health status.
+
+        Returns:
+            HealthStatus from the health probe.
+
+        """
+        return self._fallback_health_status()
+
+    def _fallback_health_status(self) -> HealthStatus:
+        """Get health status from circuit breaker state.
+
+        Used as fallback when _probe_health() fails or is not implemented.
+
+        Returns:
+            HealthStatus based on circuit breaker state.
+
         """
         try:
             return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)

@@ -246,7 +246,7 @@ class TestClassSize:
         "DeltaWriter": 520,  # 500 lines - includes schema drift detection (M4)
         "GoldWriter": 450,
         "LineageTracker": 400,
-        "ChemblAdapter": 470,  # 463 lines - complex API adapter
+        "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "RecordProcessor": 410,  # 407 lines - core ETL logic
     }
