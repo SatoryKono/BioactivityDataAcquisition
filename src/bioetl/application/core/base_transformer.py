@@ -202,7 +202,7 @@ class BaseTransformer(ABC):
             SilverRecord dictionary with renamed lineage fields.
 
         """
-        silver_record = entity.__dict__.copy()
+        silver_record: dict[str, Any] = entity.__dict__.copy()
 
         # Handle lineage fields renaming and formatting
         silver_record["_run_id"] = str(silver_record.pop("run_id"))

@@ -128,8 +128,9 @@ class StorageAdapter:
 
         # Clear Silver CSV if exporter is configured
         if self.silver.csv_exporter and not dry_run:
+            exporter = self.silver.csv_exporter
             deleted = await loop.run_in_executor(
-                None, lambda: self.silver.csv_exporter.clear(table_name)
+                None, lambda: exporter.clear(table_name)
             )
             cleared_count += len(deleted)
 
@@ -159,8 +160,9 @@ class StorageAdapter:
 
         # Clear Gold CSV if exporter is configured
         if self.gold.csv_exporter and not dry_run:
+            exporter = self.gold.csv_exporter
             deleted = await loop.run_in_executor(
-                None, lambda: self.gold.csv_exporter.clear(table_name)
+                None, lambda: exporter.clear(table_name)
             )
             cleared_count += len(deleted)
 
@@ -182,14 +184,16 @@ class StorageAdapter:
         cleared_count = 0
 
         if self.silver.csv_exporter:
+            exporter = self.silver.csv_exporter
             deleted = await loop.run_in_executor(
-                None, lambda: self.silver.csv_exporter.clear(table_name)
+                None, lambda: exporter.clear(table_name)
             )
             cleared_count += len(deleted) if isinstance(deleted, list) else deleted
 
         if self.gold.csv_exporter:
+            exporter = self.gold.csv_exporter
             deleted = await loop.run_in_executor(
-                None, lambda: self.gold.csv_exporter.clear(table_name)
+                None, lambda: exporter.clear(table_name)
             )
             cleared_count += len(deleted) if isinstance(deleted, list) else deleted
 

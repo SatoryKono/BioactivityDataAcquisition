@@ -326,7 +326,7 @@ class TestLineageTrackerQueryBatchHistory:
                 "timestamp": ["2025-01-01", "2025-01-02"],
             }
         )
-        mock_table.to_polars.return_value = mock_df
+        mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
         result = lineage_tracker.query_batch_history(
@@ -346,7 +346,7 @@ class TestLineageTrackerQueryBatchHistory:
                 "timestamp": [f"2025-01-{i:02d}" for i in range(1, 151)],
             }
         )
-        mock_table.to_polars.return_value = mock_df
+        mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
         result = lineage_tracker.query_batch_history()
@@ -383,7 +383,7 @@ class TestLineageTrackerQueryTransformationHistory:
                 "timestamp": ["2025-01-01"],
             }
         )
-        mock_table.to_polars.return_value = mock_df
+        mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
         result = lineage_tracker.query_transformation_history(
@@ -423,7 +423,7 @@ class TestLineageTrackerGetEntityLineage:
                 "timestamp": ["2025-01-01", "2025-01-02"],
             }
         )
-        mock_table.to_polars.return_value = mock_df
+        mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
         result = lineage_tracker.get_entity_lineage(entity_id="entity-001")
@@ -460,7 +460,7 @@ class TestLineageTrackerGetBatchStatistics:
                 "record_count": pl.Series([], dtype=pl.Int64),
             }
         )
-        mock_table.to_polars.return_value = mock_df
+        mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
         result = lineage_tracker.get_batch_statistics(layer="bronze")
@@ -488,7 +488,7 @@ class TestLineageTrackerGetBatchStatistics:
                 "record_count": [100, 200, 300],
             }
         )
-        mock_table.to_polars.return_value = mock_df
+        mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
         result = lineage_tracker.get_batch_statistics(layer="bronze", days=7)

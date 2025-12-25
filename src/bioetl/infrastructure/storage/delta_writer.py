@@ -166,6 +166,55 @@ class DeltaWriter:
         except DeltaTableNotFoundError:
             await self._write_append(table_path, data, partition_cols)
 
+    def _validate_write_mode(self, mode: str) -> SilverWriteMode:
+        """Validate and convert write mode string to enum."""
+        try:
+            return SilverWriteMode(mode)
+        except ValueError:
+            valid_modes = [m.value for m in SilverWriteMode]
+            raise ValueError(
+                f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
+            ) from None
+
+    def _validate_records(
+        self, records: list[dict[str, Any]], table_name: str, schema: pa.Schema
+    ) -> None:
+        """Validate records have required metadata fields."""
+        if not records:
+            raise ValueError("No records to write")
+
+        required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
+        if missing_fields := required_fields - set(records[0].keys()):
+            raise ValueError(
+                f"Records missing required metadata fields: {missing_fields}"
+            )
+
+        if self.logger:
+            keys = set(records[0].keys())
+            optional_missing = [k for k in schema.names if k not in keys]
+            if optional_missing:
+                self.logger.debug(
+                    "Optional fields missing in batch",
+                    table=table_name,
+                    missing=optional_missing,
+                )
+
+    async def _dispatch_write(
+        self,
+        validated_mode: SilverWriteMode,
+        table_path: str,
+        arrow_data: pa.Table,
+        primary_keys: list[str],
+        partition_cols: list[str] | None,
+    ) -> None:
+        """Dispatch write to appropriate method based on mode."""
+        if validated_mode == SilverWriteMode.OVERWRITE:
+            await self._write_overwrite(table_path, arrow_data, partition_cols)
+        elif validated_mode == SilverWriteMode.APPEND:
+            await self._write_append(table_path, arrow_data, partition_cols)
+        else:  # SilverWriteMode.MERGE
+            await self._write_merge(table_path, arrow_data, primary_keys, partition_cols)
+
     async def write_silver(
         self,
         table_name: str,
@@ -188,48 +237,16 @@ class DeltaWriter:
         Raises:
             ValueError: If mode is invalid or records are missing required fields
         """
-        # Validate write mode
-        try:
-            validated_mode = SilverWriteMode(mode)
-        except ValueError:
-            valid_modes = [m.value for m in SilverWriteMode]
-            raise ValueError(
-                f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
-            ) from None
-
-        if not records:
-            raise ValueError("No records to write")
-
-        # Validate required metadata fields
-        required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-        if missing_fields := required_fields - set(records[0].keys()):
-            raise ValueError(
-                f"Records missing required metadata fields: {missing_fields}"
-            )
-
-        if self.logger:
-            # Debug logging for optional fields/record structure
-            keys = set(records[0].keys())
-            optional_missing = [k for k in schema.names if k not in keys]
-            if optional_missing:
-                self.logger.debug(
-                    "Optional fields missing in batch",
-                    table=table_name,
-                    missing=optional_missing,
-                )
+        validated_mode = self._validate_write_mode(mode)
+        self._validate_records(records, table_name, schema)
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
 
         try:
-            if validated_mode == SilverWriteMode.OVERWRITE:
-                await self._write_overwrite(table_path, arrow_data, partition_cols)
-            elif validated_mode == SilverWriteMode.APPEND:
-                await self._write_append(table_path, arrow_data, partition_cols)
-            else:  # SilverWriteMode.MERGE
-                await self._write_merge(
-                    table_path, arrow_data, primary_keys, partition_cols
-                )
+            await self._dispatch_write(
+                validated_mode, table_path, arrow_data, primary_keys, partition_cols
+            )
         except (SchemaMismatchError, ArrowTypeError) as e:
             raise SchemaViolationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
@@ -413,7 +430,7 @@ class DeltaWriter:
             return {
                 "version": dt.version(),
                 "num_files": len(dt.files()),
-                "schema": dt.schema().to_pyarrow(),
+                "schema": dt.schema().to_arrow(),
                 "metadata": dt.metadata(),
             }
         except DeltaTableNotFoundError as e:

@@ -314,7 +314,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
-            df = dt.to_polars()
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
 
             # Filter by pipeline
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -355,7 +355,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
-            df = dt.to_polars()
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
 
             # Filter by pipeline
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -394,7 +394,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
-            df = dt.to_polars()
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
 
             # Filter by pipeline and entity_id
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -426,7 +426,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
-            df = dt.to_polars()
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
 
             # Filter by pipeline and layer
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -449,8 +449,8 @@ class LineageTracker:
 
             return {
                 "total_batches": total_batches,
-                "total_records": int(total_records),
-                "avg_batch_size": float(avg_batch_size),
+                "total_records": int(total_records or 0),
+                "avg_batch_size": float(avg_batch_size or 0.0),
             }
 
         except Exception as e:
