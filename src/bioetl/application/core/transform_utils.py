@@ -118,6 +118,7 @@ def extract_list_field(
 def aggregate_nested_lists(
     items: list[dict[str, Any]] | None,
     field: str,
+    deduplicate: bool = True,
 ) -> list[Any] | None:
     """Агрегирует вложенные списки из списка словарей.
 
@@ -127,6 +128,7 @@ def aggregate_nested_lists(
     Args:
         items: Список словарей, каждый из которых может содержать вложенный список.
         field: Имя поля со вложенным списком.
+        deduplicate: Если True, удаляет дубликаты из результирующего списка (по умолчанию True).
 
     Returns:
         Объединённый список или None, если результат пустой.
@@ -134,7 +136,7 @@ def aggregate_nested_lists(
     Example:
         >>> items = [
         ...     {"synonyms": ["a", "b"]},
-        ...     {"synonyms": ["c"]},
+        ...     {"synonyms": ["c", "a"]},
         ...     {"other": "data"}
         ... ]
         >>> aggregate_nested_lists(items, "synonyms")
@@ -145,12 +147,22 @@ def aggregate_nested_lists(
         return None
 
     aggregated: list[Any] = []
+    seen: set[str] = set()
+
     for item in items:
         if not isinstance(item, dict):
             continue
         nested = item.get(field)
         if nested and isinstance(nested, list):
-            aggregated.extend(nested)
+            for val in nested:
+                if deduplicate:
+                    # Convert to string/canonical for hashing if complex
+                    val_str = str(val)
+                    if val_str not in seen:
+                        aggregated.append(val)
+                        seen.add(val_str)
+                else:
+                    aggregated.append(val)
 
     return aggregated if aggregated else None
 
