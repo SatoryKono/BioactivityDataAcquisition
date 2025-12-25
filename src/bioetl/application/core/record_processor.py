@@ -299,6 +299,16 @@ class RecordProcessor:
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
+        # Get schema column names for filtering (strict mode requires exact columns)
+        gold_schema = self._config.gold_schema
+        schema_columns = self._get_schema_columns(gold_schema)
+
+        # Filter records to only include columns defined in Gold schema
+        if schema_columns:
+            records = [
+                {k: v for k, v in r.items() if k in schema_columns} for r in records
+            ]
+
         # Validate Gold records using dedicated validator (SRP)
         result = self._gold_validator.validate(records)
         if not result.valid:
@@ -316,7 +326,30 @@ class RecordProcessor:
         await self._storage.write_gold(
             table_name=table_name,
             records=records,
-            schema=self._config.gold_schema,
+            schema=gold_schema,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
         )
+
+    def _get_schema_columns(self, schema: Any) -> set[str] | None:
+        """Extract column names from Pandera schema.
+
+        Args:
+            schema: Pandera DataFrameModel or DataFrameSchema.
+
+        Returns:
+            Set of column names, or None if schema is not recognized.
+
+        """
+        # Handle Pandera DataFrameModel (class with to_schema method)
+        # Use to_schema() to get actual column names including aliases
+        if hasattr(schema, "to_schema"):
+            try:
+                converted = schema.to_schema()
+                return set(converted.columns.keys())
+            except Exception:
+                pass
+        # Handle Pandera DataFrameSchema (instance with columns dict)
+        if hasattr(schema, "columns"):
+            return set(schema.columns.keys())
+        return None

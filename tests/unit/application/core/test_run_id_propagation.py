@@ -126,6 +126,7 @@ class TestRunIdPropagation:
             provider="test",
             entity_type="entity",
             silver_schema=silver_schema,
+            gold_schema=MagicMock(),
             dq_config=DQConfig(),
             table_config=TableConfig(primary_keys=["id"]),
         )
@@ -185,6 +186,7 @@ class TestRunIdPropagation:
             provider="test",
             entity_type="entity",
             silver_schema=silver_schema,
+            gold_schema=MagicMock(),
             dq_config=DQConfig(),
             table_config=TableConfig(primary_keys=["id"]),
         )
@@ -251,6 +253,7 @@ class TestRunIdPropagation:
                 provider="test",
                 entity_type="entity",
                 silver_schema=silver_schema,
+                gold_schema=MagicMock(),
                 dq_config=DQConfig(),
                 table_config=TableConfig(primary_keys=["id"]),
             )

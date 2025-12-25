@@ -74,6 +74,7 @@ def record_processor(
         provider="test",
         entity_type="entity",
         silver_schema=MagicMock(),
+        gold_schema=MagicMock(),
     )
     return RecordProcessor(
         services=mock_services,
