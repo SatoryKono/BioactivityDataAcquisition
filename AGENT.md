@@ -153,7 +153,7 @@ src/bioetl/
 
 | Уровень | Директория | Правила |
 |---------|------------|---------|
-| **Unit** | `tests/unit/` | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
+| **Unit** | `tests/unit/` | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
 | **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
 | **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
 | **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
@@ -205,7 +205,7 @@ flowchart TD
 - **Игнорирование Rate Limits:** Отсутствие `TokenBucket` или аналога в адаптерах.
 
 ### 6.3. Тестирование
-- **Мокинг доменных сущностей:** `mock_activity = Mock(spec=Activity)`. **MUST** использовать реальные Value Objects.
+- **Мокинг доменных сущностей:** Реальные Value Objects предпочтительны, MagicMock допустим.
 - **Тесты без VCR для HTTP:** `real_api_call()`. **MUST** записывать HTTP-ответы в VCR-кассеты.
 - **Секреты в кассетах:** Забыть очистить `Authorization` или `X-API-Key` из фикстур.
 
