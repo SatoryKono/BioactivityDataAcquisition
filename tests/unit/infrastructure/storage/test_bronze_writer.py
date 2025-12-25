@@ -447,8 +447,6 @@ class TestBronzeWriterAtomicWrite:
         date = datetime(2024, 1, 15)
 
         # Mock AtomicWriteGroup.commit to fail
-        original_commit = AtomicWriteGroup.commit
-
         def failing_commit(self):
             # Call rollback to simulate proper cleanup
             self.rollback()

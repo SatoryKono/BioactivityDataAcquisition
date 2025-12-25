@@ -101,7 +101,7 @@ class PipelineConfig:
     partition_cols: list[str] = field(default_factory=list)
 
     # Processing
-    gold_filters: "GoldFilterConfig | None" = None  # Configurable Gold layer filters
+    gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: list[str] = field(default_factory=list)
