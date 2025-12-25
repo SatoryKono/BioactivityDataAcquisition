@@ -121,5 +121,59 @@ class PipelineRegistry:
 
     @classmethod
     def list_pipelines(cls) -> list[str]:
-        """List all registered pipeline names."""
+        """List all registered pipeline names.
+
+        Legacy alias for list_keys().
+        """
         return list(cls._registry.keys())
+
+    @classmethod
+    def register(
+        cls,
+        key: str,
+        value: PipelineFactoryProtocol,
+    ) -> None:
+        """Register a pipeline factory (unified API).
+
+        This method provides a unified API consistent with other registries.
+        For backward compatibility, use register_factory() which extracts
+        the key from factory.pipeline_name.
+
+        Args:
+            key: Pipeline name (must match factory.pipeline_name)
+            value: Pipeline factory instance
+        """
+        gold_schema = getattr(value, "gold_schema", None)
+        cls._registry[key] = PipelineDefinition(
+            factory=value,
+            silver_schema=value.silver_schema,
+            gold_schema=gold_schema,
+        )
+
+    @classmethod
+    def list_keys(cls) -> list[str]:
+        """List all registered pipeline names (unified API).
+
+        Alias for list_pipelines().
+        """
+        return cls.list_pipelines()
+
+    @classmethod
+    def contains(cls, key: str) -> bool:
+        """Check if pipeline is registered.
+
+        Args:
+            key: Pipeline name to check
+
+        Returns:
+            True if pipeline is registered, False otherwise
+        """
+        return key in cls._registry
+
+    @classmethod
+    def clear(cls) -> None:
+        """Clear all registrations (for testing).
+
+        WARNING: Only use in tests. Not for production.
+        """
+        cls._registry.clear()
