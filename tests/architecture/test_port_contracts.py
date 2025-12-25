@@ -9,7 +9,6 @@ Implements the refactoring plan: "Расширение контрактных т
 from __future__ import annotations
 
 import ast
-import inspect
 from pathlib import Path
 from typing import get_type_hints
 
@@ -48,7 +47,7 @@ class TestAsyncPortLifecycle:
         )
 
         # Check that aclose is async
-        aclose_method = getattr(port_class, "aclose")
+        aclose_method = port_class.aclose
         # For Protocol classes, we check the annotation
         hints = get_type_hints(aclose_method) if hasattr(aclose_method, "__annotations__") else {}
 
@@ -402,6 +401,6 @@ class TestPortDefinitionQuality:
                         implementations_found.append(f"{node.name}.{item.name}")
 
         assert not implementations_found, (
-            f"Ports should not contain implementations (use ... only):\n"
+            "Ports should not contain implementations (use ... only):\n"
             + "\n".join(f"  - {m}" for m in implementations_found)
         )

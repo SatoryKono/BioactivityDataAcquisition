@@ -274,7 +274,7 @@ class TestCliCommands:
         mock_runner.shutdown_signal = MagicMock()
         mock_bootstrap.return_value = mock_runner
 
-        result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+        cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
         # Should have called bootstrap_pipeline
         mock_bootstrap.assert_called_once()
@@ -291,7 +291,7 @@ class TestCliCommands:
         mock_runner.shutdown_signal = MagicMock()
         mock_bootstrap.return_value = mock_runner
 
-        result = cli_runner.invoke(
+        cli_runner.invoke(
             cli, ["run", "--pipeline", "chembl_activity", "--limit", "100"]
         )
 
@@ -312,7 +312,7 @@ class TestCliCommands:
         mock_runner.shutdown_signal = MagicMock()
         mock_bootstrap.return_value = mock_runner
 
-        result = cli_runner.invoke(
+        cli_runner.invoke(
             cli, ["run", "--pipeline", "chembl_activity", "--resume"]
         )
 

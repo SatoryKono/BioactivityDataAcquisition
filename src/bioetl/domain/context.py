@@ -39,7 +39,7 @@ class PipelineContext:
         run_type: RunType,
         logger: LoggerPort,
         started_at: datetime | None = None,
-    ) -> "PipelineContext":
+    ) -> PipelineContext:
         """Create a new PipelineContext with optional automatic timestamp.
 
         Args:
@@ -58,7 +58,7 @@ class PipelineContext:
             started_at=started_at or datetime.now(UTC),
         )
 
-    def bind_logger(self, **kwargs: Any) -> "PipelineContext":
+    def bind_logger(self, **kwargs: Any) -> PipelineContext:
         """Bind additional context to the logger.
 
         Returns a new context with the bound logger.
