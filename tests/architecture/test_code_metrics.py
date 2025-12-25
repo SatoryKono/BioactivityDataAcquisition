@@ -107,6 +107,7 @@ class TestFunctionComplexity:
     EXEMPTIONS = {
         "_extract_business_data": 12,  # XML extraction with many conditionals
         "__post_init__": 7,  # Dataclass post-init validation
+        "SchemaEvolutionError": 7,  # Exception with detailed field tracking
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:

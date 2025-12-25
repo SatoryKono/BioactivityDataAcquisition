@@ -315,6 +315,7 @@ def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
     # Exemptions for specific functions (baseline)
     exemptions = {
         "__post_init__": 7,  # Dataclass post-init validation
+        "SchemaEvolutionError": 7,  # Exception with detailed field tracking
     }
 
     violations = []

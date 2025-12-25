@@ -234,7 +234,7 @@ class DeltaWriter:
                 None,
                 lambda: DeltaTable(table_path),
             )
-            return dt.schema().to_pyarrow()
+            return dt.schema().to_arrow()
         except DeltaTableNotFoundError:
             return None
 
