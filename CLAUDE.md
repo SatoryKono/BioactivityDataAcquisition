@@ -167,7 +167,7 @@ sha256(provider + canonical_json(record))
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~1294 | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
+| **Unit** | `tests/unit/` | ~1294 | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
 | **Integration** | `tests/integration/` | ~80 | VCR.py для HTTP. Очистка секретов из кассет. |
 | **E2E** | `tests/e2e/` | - | `@pytest.mark.e2e`, Local-Only архитектура |
 | **Architecture** | `tests/architecture/` | 97 | Проверка слоёв, imports, контракты портов |
@@ -344,7 +344,7 @@ await self._run_in_executor(sync_func, *args)
 - ❌ `print()` → `structlog` с `run_id`
 
 ### Тесты
-- ❌ Мокинг доменных сущностей → Реальные Value Objects
+- ⚠️ Мокинг доменных сущностей → Реальные Value Objects предпочтительны, MagicMock допустим
 - ❌ HTTP без VCR → VCR-кассеты обязательны
 - ❌ Секреты в кассетах → Очистка в `before_record`
 
