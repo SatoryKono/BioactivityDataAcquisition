@@ -33,10 +33,16 @@
 ### 2.4. Architecture Tests (`tests/architecture/`)
 Автоматизированный контроль за соблюдением архитектурных правил проекта.
 - **Layer Separation**: Проверка отсутствия импортов `infrastructure` в `domain/application` через `import-linter`.
-- **Rules Enforcement**: 
-    - `test_no_random_in_writers`: Запрет на использование `random` в слое хранилища для детерминизма.
+- **Rules Enforcement**:
+    - `test_no_random_in_writers` (REQ-ARCH-030): Запрет на использование `random` в слое хранилища для детерминизма.
+      - Проверяет: `import random`, `from random import`, `random.uniform()`, `random.choice()`
+      - Область: `src/bioetl/infrastructure/storage/*.py`
     - `test_no_datetime_now_in_infrastructure`: Запрет на создание временных меток в инфраструктурном слое.
+      - Проверяет: `datetime.now()`, `datetime.datetime.now()`
+      - Область: `src/bioetl/infrastructure/**/*.py` (с исключениями)
     - `test_all_ports_have_implementations`: Проверка наличия реализаций для всех протоколов (портов).
+
+**Документация:** См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для обоснования детерминизма.
 
 ### 2.5. Security Tests (`tests/security/`)
 - Проверка санитизации секретов в VCR-кассетах.
