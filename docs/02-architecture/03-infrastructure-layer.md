@@ -43,11 +43,22 @@
 
 **Расположение:** `src/bioetl/infrastructure/locking/`
 
-Содержит реализацию `LockPort` с использованием Redis. Класс `RedisLockAdapter` использует команды `SETNX` и `EXPIRE` для создания распределённых блокировок, необходимых для предотвращения одновременного запуска одних и тех же пайплайнов.
+Содержит реализацию `LockPort` для координации пайплайнов.
+
+**Текущая реализация (Local-Only):**
+- **`MemoryLock`**: In-memory блокировка для локального развёртывания
+- Однопроцессная изоляция (не распределённая)
+- Поддержка exclusive-режима для backfill/rebuild
+
+> **Note:** Redis-блокировки (ADR-003) superseded в пользу local-only стратегии.
+> См. [ADR-010](decisions/ADR-010-local-only-deployment.md) для обоснования.
+
+**Расширяемость:** Порт `LockPort` остаётся неизменным — при необходимости можно добавить
+Redis-адаптер без изменения domain/application слоёв.
 
 ### 2.4. `checkpoint/` и `quarantine/`
 
-- **`checkpoint/`**: Реализация `CheckpointPort` для сохранения состояния пайплайнов (например, в S3 или Redis).
+- **`checkpoint/`**: Реализация `CheckpointPort` для сохранения состояния пайплайнов. Текущая реализация использует локальную файловую систему (`LocalCheckpoint`). См. [ADR-010](decisions/ADR-010-local-only-deployment.md).
 - **`quarantine/`**: Реализация `QuarantinePort` для записи "плохих" данных в отдельное хранилище для последующего анализа.
 
 ### 2.5. `observability/` — Наблюдаемость
