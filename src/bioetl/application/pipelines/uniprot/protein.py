@@ -1,27 +1,54 @@
-"""UniProt Protein Pipeline Implementation."""
+"""UniProt Protein Pipeline Implementation.
+
+Updated: Transformer injection via DI (Phase 1 refactoring).
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.types import RunID
 
 
 class UniProtProteinPipeline(BasePipeline):
-    """Pipeline for processing UniProt proteins."""
+    """Pipeline for processing UniProt proteins.
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize UniProt protein pipeline."""
-        super().__init__(*args, **kwargs)
-        self._transformer = UniProtProteinTransformer(provider=self.provider)
+    Transformer is injected via DI from GenericPipelineFactory.
+    Fallback to local creation for backward compatibility with tests.
+    """
 
-    async def transform_bronze_to_silver(
-        self, context: PipelineContext, record: BronzeRecord
-    ) -> SilverRecord | None:
-        """Transform raw UniProt record to Silver format."""
-        return await self._transformer.transform(context, record)
+    def __init__(
+        self,
+        config: PipelineConfig,
+        runtime: RuntimeConfig,
+        services: PipelineServices,
+        run_id: RunID,
+        transformer: "BaseTransformer | None" = None,
+    ) -> None:
+        """Initialize UniProt protein pipeline.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            services: Injected services (ports).
+            run_id: Unique identifier for this pipeline run.
+            transformer: Injected transformer (DI). If None, creates fallback.
+
+        """
+        # Create fallback transformer if not injected (backward compatibility)
+        if transformer is None:
+            from bioetl.application.pipelines.uniprot.transformer import (
+                UniProtProteinTransformer,
+            )
+
+            transformer = UniProtProteinTransformer(provider=config.provider)
+
+        super().__init__(config, runtime, services, run_id, transformer=transformer)
+
+    # transform_bronze_to_silver() is inherited from BasePipeline
