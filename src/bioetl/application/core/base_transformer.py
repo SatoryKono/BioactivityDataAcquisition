@@ -6,6 +6,7 @@ Provides common functionality for all entity transformers:
 - Entity to SilverRecord conversion with lineage field renaming
 - Template Method pattern for unified error handling
 - Helper methods for field extraction and entity creation
+- Tracing and metrics for observability (O1)
 
 Implements DRY principle by extracting shared logic from entity transformers.
 """
@@ -13,6 +14,7 @@ Implements DRY principle by extracting shared logic from entity transformers.
 from __future__ import annotations
 
 import json
+import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -21,6 +23,7 @@ from bioetl.domain.transformations import generate_content_hash
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, ContentHash, SilverRecord
 
 T = TypeVar("T", bound="BaseEntity")
@@ -61,18 +64,35 @@ class BaseTransformer(ABC):
     - `_extract_nested()`: Safe extraction of nested dictionary values
     - `_create_entity()`: Unified entity creation with lineage metadata
 
+    Observability (O1):
+    - Tracing spans for transform operations
+    - Duration histograms by entity_type
+    - Error counters by error_type
+
     Subclasses MUST implement:
     - `_transform_impl()`: Entity-specific transformation logic
     """
 
-    def __init__(self, provider: str) -> None:
-        """Initialize transformer with provider name.
+    def __init__(
+        self,
+        provider: str,
+        entity_type: str | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+    ) -> None:
+        """Initialize transformer with provider name and optional observability.
 
         Args:
             provider: Data provider identifier (e.g., 'chembl', 'pubchem').
+            entity_type: Entity type for metrics labels (e.g., 'activity', 'compound').
+            tracer: Optional tracing port for distributed tracing.
+            metrics: Optional metrics port for duration/error tracking.
 
         """
         self.provider = provider
+        self.entity_type = entity_type or "unknown"
+        self._tracer = tracer
+        self._metrics = metrics
 
     async def transform(
         self,
@@ -85,6 +105,11 @@ class BaseTransformer(ABC):
         Handles common error handling and logging, delegating actual
         transformation to `_transform_impl()`.
 
+        Observability (O1):
+        - Creates tracing span "transform_record" with provider/entity attributes
+        - Records transform_duration_seconds histogram by entity_type
+        - Increments transform_errors_total counter by error_type on failure
+
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
@@ -93,23 +118,79 @@ class BaseTransformer(ABC):
             SilverRecord if transformation successful, None if record should be skipped.
 
         """
+        start_time = time.perf_counter()
+        span = None
+        error_type: str | None = None
+
+        # Start tracing span if tracer is available
+        if self._tracer:
+            otel_tracer = self._tracer.get_tracer("bioetl.transformer")
+            span = otel_tracer.start_as_current_span(
+                "transform_record",
+                attributes={
+                    "bioetl.provider": self.provider,
+                    "bioetl.entity_type": self.entity_type,
+                    "bioetl.run_id": str(context.run_id),
+                },
+            )
+            span.__enter__()
+
         try:
-            return await self._transform_impl(context, record)
+            result = await self._transform_impl(context, record)
+            return result
         except TransformationError as e:
+            error_type = "transformation_error"
             context.logger.warning(
                 "transformation_skipped",
                 reason=str(e),
                 field=e.field,
                 provider=self.provider,
             )
+            if span:
+                span.set_attribute("error", True)
+                span.set_attribute("error.type", error_type)
             return None
         except ValueError as e:
+            error_type = "validation_error"
             context.logger.warning(
                 "entity_validation_failed",
                 error=str(e),
                 provider=self.provider,
             )
+            if span:
+                span.set_attribute("error", True)
+                span.set_attribute("error.type", error_type)
             return None
+        finally:
+            duration = time.perf_counter() - start_time
+
+            # Record duration histogram
+            if self._metrics:
+                self._metrics.observe_histogram(
+                    "transform_duration_seconds",
+                    duration,
+                    labels={
+                        "provider": self.provider,
+                        "entity_type": self.entity_type,
+                    },
+                )
+
+                # Record error counter if error occurred
+                if error_type:
+                    self._metrics.increment_counter(
+                        "transform_errors_total",
+                        1,
+                        labels={
+                            "provider": self.provider,
+                            "entity_type": self.entity_type,
+                            "error_type": error_type,
+                        },
+                    )
+
+            # End tracing span
+            if span:
+                span.set_attribute("bioetl.duration_ms", duration * 1000)
+                span.__exit__(None, None, None)
 
     @abstractmethod
     async def _transform_impl(
