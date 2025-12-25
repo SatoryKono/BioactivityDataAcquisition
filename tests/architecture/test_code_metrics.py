@@ -40,6 +40,7 @@ class TestFileSizeLimits:
         "exceptions.py": 550,  # 513 LOC
         # Composition layer exemptions
         "storage_factory.py": 650,  # 599 LOC
+        "bootstrap.py": 450,  # 420 LOC - main DI wiring
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
