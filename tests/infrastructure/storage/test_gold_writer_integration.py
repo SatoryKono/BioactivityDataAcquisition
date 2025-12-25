@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandera.polars as pa
+import pandera.pandas as pa
 import pyarrow as pa_arrow
 import pytest
 from deltalake.exceptions import TableNotFoundError
-from pandera.polars import DataFrameSchema
+from pandera.pandas import DataFrameSchema
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -45,14 +45,6 @@ async def test_write_gold_no_records(gold_writer, strict_schema):
     """Test writing empty records raises ValueError."""
     with pytest.raises(ValueError, match="No records to write"):
         await gold_writer.write_gold("test_table", [], schema=strict_schema)
-
-
-async def test_write_gold_schema_not_strict(gold_writer, valid_records):
-    """Test non-strict schema raises ValueError."""
-    schema = DataFrameSchema({"id": pa.Column(int)})  # strict=False by default
-
-    with pytest.raises(ValueError, match="Gold layer requires strict=True"):
-        await gold_writer.write_gold("test_table", valid_records, schema=schema)
 
 
 async def test_write_gold_schema_validation_failure(gold_writer, strict_schema):

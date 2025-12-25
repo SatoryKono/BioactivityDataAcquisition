@@ -139,7 +139,12 @@ class TestDataSourceCreators:
 class TestGenericPipelineFactory:
     """Tests for GenericPipelineFactory."""
 
-    def test_init_with_provider(self):
+    @pytest.fixture
+    def mock_gold_schema(self):
+        """Create a mock gold schema."""
+        return MagicMock()
+
+    def test_init_with_provider(self, mock_gold_schema):
         """Test factory initialization with provider name."""
         mock_pipeline_class = MagicMock()
 
@@ -147,6 +152,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
+            gold_schema=mock_gold_schema,
         )
 
         assert factory.pipeline_name == "test_pipeline"
@@ -154,7 +160,7 @@ class TestGenericPipelineFactory:
         assert factory.provider == "chembl"
         assert factory.silver_schema is None
 
-    def test_init_with_custom_creator(self):
+    def test_init_with_custom_creator(self, mock_gold_schema):
         """Test factory initialization with custom data source creator."""
         mock_pipeline_class = MagicMock()
         custom_creator = MagicMock()
@@ -163,13 +169,14 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            gold_schema=mock_gold_schema,
             data_source_creator=custom_creator,
         )
 
         assert factory._create_data_source is custom_creator
 
     def test_create_data_source(
-        self, mock_settings, mock_pipeline_config, mock_logger
+        self, mock_settings, mock_pipeline_config, mock_logger, mock_gold_schema
     ):
         """Test data source creation through factory."""
         mock_pipeline_class = MagicMock()
@@ -180,6 +187,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            gold_schema=mock_gold_schema,
             data_source_creator=custom_creator,
         )
 
@@ -201,6 +209,7 @@ class TestGenericPipelineFactory:
         mock_settings,
         mock_pipeline_config,
         mock_logger,
+        mock_gold_schema,
     ):
         """Test services building."""
         mock_pipeline_class = MagicMock()
@@ -214,6 +223,7 @@ class TestGenericPipelineFactory:
             pipeline_name="test_pipeline",
             pipeline_class=mock_pipeline_class,
             provider="custom",
+            gold_schema=mock_gold_schema,
             data_source_creator=custom_creator,
         )
 
@@ -230,12 +240,14 @@ class TestCreatePipelineFactory:
         """Test that function creates GenericPipelineFactory."""
         mock_pipeline_class = MagicMock()
         mock_schema = MagicMock()
+        mock_gold_schema = MagicMock()
 
         factory = create_pipeline_factory(
             pipeline_name="test",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
             silver_schema=mock_schema,
+            gold_schema=mock_gold_schema,
         )
 
         assert isinstance(factory, GenericPipelineFactory)
@@ -252,12 +264,14 @@ class TestPipelineRegistryIntegration:
         """Test registering factory instance with registry."""
         mock_pipeline_class = MagicMock()
         mock_schema = MagicMock()
+        mock_gold_schema = MagicMock()
 
         factory = GenericPipelineFactory(
             pipeline_name="test_generic",
             pipeline_class=mock_pipeline_class,
             provider="chembl",
             silver_schema=mock_schema,
+            gold_schema=mock_gold_schema,
             data_source_creator=MagicMock(),
         )
 

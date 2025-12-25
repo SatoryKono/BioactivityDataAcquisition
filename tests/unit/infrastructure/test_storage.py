@@ -389,7 +389,7 @@ class TestGoldWriter:
 
     async def test_gold_writer_sorts_columns(self, mock_gold_writer_deps, noop_logger):
         """Test that GoldWriter sorts columns alphabetically in _to_arrow_table."""
-        from pandera.polars import Column, DataFrameSchema
+        from pandera.pandas import Column, DataFrameSchema
 
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 

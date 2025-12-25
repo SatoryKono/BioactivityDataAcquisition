@@ -165,8 +165,12 @@ class BasePipeline(ABC):
         """Transform a raw record from Bronze to Silver format."""
         pass
 
-    # Fields to exclude from Gold layer (JSON strings retained only in Silver)
+    # Fields to exclude from Gold layer (system fields and JSON strings for forensics)
     GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset({
+        # Silver-layer system fields (not needed in Gold)
+        "entity_id",
+        "content_hash",
+        # JSON strings retained only in Silver for forensic purposes
         "molecule_hierarchy",
         "molecule_properties",
         "molecule_structures",

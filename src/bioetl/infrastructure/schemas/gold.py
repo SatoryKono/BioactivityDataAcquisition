@@ -24,6 +24,10 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     standard_units: Series[str] = pa.Field(nullable=True)
     pchembl_value: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
 
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
+
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
@@ -42,10 +46,18 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     molecular_weight: Series[str] = pa.Field(nullable=True)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
 
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
     class Config:
         """Pandera configuration."""
 
-        strict = False
+        strict = False  # Allow extra columns
 
 
 class UniProtProteinGoldSchema(pa.DataFrameModel):
@@ -56,10 +68,18 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     protein_name: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[int] = pa.Field(nullable=True, ge=0, coerce=True)
 
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
     class Config:
         """Pandera configuration."""
 
-        strict = False
+        strict = False  # Allow extra columns
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
@@ -99,10 +119,18 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
 
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns (authors, keywords, mesh_terms, etc.)
+        strict = False  # Allow extra columns
 
 
 class ChEMBLAssayGoldSchema(pa.DataFrameModel):
@@ -126,6 +154,10 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
 
     # Quality indicators
     confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9, coerce=True)
+
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
@@ -153,6 +185,10 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
     # Note: protein_classifications not available in /target endpoint
     # Use ChEMBLTargetComponentGoldSchema for protein classification data
+
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
@@ -183,6 +219,10 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     # Flattened fields (extracted from protein_classifications)
     protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
+
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
@@ -210,6 +250,10 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # External identifiers (float due to pandas NaN handling)
     pubmed_id: Series[float] = pa.Field(nullable=True, coerce=True)
     doi: Series[str] = pa.Field(nullable=True)
+
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
@@ -274,6 +318,10 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     structure_standard_inchi: Series[str] = pa.Field(nullable=True)
     structure_standard_inchi_key: Series[str] = pa.Field(nullable=True)
 
+    # Run type for idempotency
+    _run_type: Series[str] = pa.Field(nullable=True)
+    _source_batch_id: Series[str] = pa.Field(nullable=True)
+
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
@@ -281,4 +329,4 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow transition period
+        strict = False  # Allow extra columns

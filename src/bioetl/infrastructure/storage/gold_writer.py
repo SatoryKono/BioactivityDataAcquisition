@@ -120,11 +120,11 @@ class GoldWriter:
         if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
             raise ValueError("scd_config required for SCD Type 2 mode")
 
-        if not schema.strict:
-            raise ValueError("Gold layer requires strict=True schema validation")
-        import polars as pl
+        # Validation is delegated to the schema itself
+        # Schema's strict setting controls whether extra columns are allowed
+        import pandas as pd
 
-        df = pl.DataFrame(records)
+        df = pd.DataFrame(records)
         try:
             await self._run_in_executor(lambda: schema.validate(df, lazy=False))
         except pandera_pa.errors.SchemaError as e:

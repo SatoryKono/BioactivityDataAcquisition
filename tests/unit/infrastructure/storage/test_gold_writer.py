@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pyarrow as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError
-from pandera.polars import Column, DataFrameSchema
+from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -93,18 +93,6 @@ class TestGoldWriterValidation:
                 table_name="test.table",
                 records=[],
                 schema=strict_schema,
-                mode="overwrite",
-            )
-
-    async def test_write_gold_non_strict_schema_raises(
-        self, gold_writer, non_strict_schema, valid_records
-    ):
-        """Test write_gold raises ValueError for non-strict schema."""
-        with pytest.raises(ValueError, match="strict=True"):
-            await gold_writer.write_gold(
-                table_name="test.table",
-                records=valid_records,
-                schema=non_strict_schema,
                 mode="overwrite",
             )
 
@@ -249,7 +237,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
-        self, mock_delta_table, gold_writer, strict_schema
+        self, mock_delta_table, gold_writer
     ):
         """Test SCD2 write with list of business keys."""
         mock_table_instance = MagicMock()
@@ -258,6 +246,16 @@ class TestGoldWriterSCD2:
         mock_table_instance.merge.return_value = mock_merge
         mock_merge.when_matched_update.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
+
+        # Schema that includes 'provider' column for composite business key
+        multi_key_schema = DataFrameSchema(
+            {
+                "provider": Column(str, nullable=False),
+                "entity_id": Column(str, nullable=False),
+                "value": Column(float, nullable=False),
+            },
+            strict=True,
+        )
 
         scd_config = {
             "business_key": ["provider", "entity_id"],
@@ -270,7 +268,7 @@ class TestGoldWriterSCD2:
         await gold_writer.write_gold(
             table_name="test.table",
             records=records,
-            schema=strict_schema,
+            schema=multi_key_schema,
             mode="scd2",
             scd_config=scd_config,
         )

@@ -229,6 +229,10 @@ class TestTransformForGold:
     def test_gold_exclude_fields_constant(self, mock_pipeline):
         """Test that GOLD_EXCLUDE_FIELDS contains expected fields."""
         expected_fields = {
+            # Silver-layer system fields (not needed in Gold)
+            "entity_id",
+            "content_hash",
+            # JSON strings retained only in Silver for forensic purposes
             "molecule_hierarchy",
             "molecule_properties",
             "molecule_structures",
