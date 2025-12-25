@@ -408,10 +408,13 @@ class TestPipelineRunnerRun:
 
 @pytest.mark.unit
 class TestPipelineRunnerClearViaLifecycle:
-    """Tests for PipelineRunner._clear_via_lifecycle method with lifecycle service."""
+    """Tests for PipelineRunner._clear_via_lifecycle method with lifecycle service.
+
+    Verifies Single Source of Truth pattern: clear decision delegated to MedallionPolicy.
+    """
 
     @pytest.mark.asyncio
-    async def test_clear_via_lifecycle_uses_service(
+    async def test_clear_via_lifecycle_uses_service_for_rebuild(
         self,
         pipeline_config,
         mock_context,
@@ -421,17 +424,17 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_logger,
         mock_lock_manager,
     ):
-        """Test _clear_via_lifecycle uses injected lifecycle service."""
+        """Test _clear_via_lifecycle uses injected lifecycle service for REBUILD."""
         from bioetl.application.services.medallion_lifecycle import (
             ClearResult,
             MedallionLifecycleService,
         )
+        from bioetl.domain.medallion import ClearPolicy
 
         rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
 
         services = create_mock_services()
 
-        # Mock lifecycle service
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
         lifecycle_service.clear = AsyncMock(
             return_value=ClearResult(silver_cleared=5, gold_cleared=3, dry_run=False)
@@ -451,11 +454,12 @@ class TestPipelineRunnerClearViaLifecycle:
 
         await runner._clear_via_lifecycle()
 
-        # Should use lifecycle service
         lifecycle_service.clear.assert_called_once()
+        call_kwargs = lifecycle_service.clear.call_args.kwargs
+        assert call_kwargs["policy"].clear_policy == ClearPolicy.SILVER_AND_GOLD
 
     @pytest.mark.asyncio
-    async def test_clear_via_lifecycle_skips_for_incremental(
+    async def test_clear_via_lifecycle_uses_service_for_backfill(
         self,
         pipeline_config,
         mock_context,
@@ -465,16 +469,69 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_logger,
         mock_lock_manager,
     ):
-        """Test _clear_via_lifecycle skips for incremental runs."""
+        """Test _clear_via_lifecycle uses injected lifecycle service for BACKFILL."""
         from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
             MedallionLifecycleService,
         )
+        from bioetl.domain.medallion import ClearPolicy
+
+        backfill_runtime = RuntimeConfig(run_type=RunType.BACKFILL, limit=None)
+
+        services = create_mock_services()
+
+        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=10, gold_cleared=8, dry_run=False)
+        )
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=backfill_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=lifecycle_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        lifecycle_service.clear.assert_called_once()
+        call_kwargs = lifecycle_service.clear.call_args.kwargs
+        assert call_kwargs["policy"].clear_policy == ClearPolicy.SILVER_AND_GOLD
+
+    @pytest.mark.asyncio
+    async def test_clear_via_lifecycle_passes_never_policy_for_incremental(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_via_lifecycle passes NEVER policy for incremental runs.
+
+        Policy-based approach: service is always called, policy decides behavior.
+        """
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+            MedallionLifecycleService,
+        )
+        from bioetl.domain.medallion import ClearPolicy
 
         incremental_runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
 
         services = create_mock_services()
 
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
+        )
 
         runner = PipelineRunner(
             config=pipeline_config,
@@ -490,8 +547,105 @@ class TestPipelineRunnerClearViaLifecycle:
 
         await runner._clear_via_lifecycle()
 
-        # Should not call lifecycle service for incremental
-        lifecycle_service.clear.assert_not_called()
+        # Service is called with NEVER policy (policy decides not to clear)
+        lifecycle_service.clear.assert_called_once()
+        call_kwargs = lifecycle_service.clear.call_args.kwargs
+        assert call_kwargs["policy"].clear_policy == ClearPolicy.NEVER
+
+    @pytest.mark.asyncio
+    async def test_clear_via_lifecycle_uses_default_gold_table(
+        self,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test gold_table defaults to provider.entity_type when not configured."""
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+            MedallionLifecycleService,
+        )
+
+        config_without_gold = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            gold_table=None,
+        )
+
+        rebuild_runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+        services = create_mock_services()
+
+        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
+        )
+
+        runner = PipelineRunner(
+            config=config_without_gold,
+            runtime=rebuild_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=lifecycle_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        call_kwargs = lifecycle_service.clear.call_args.kwargs
+        assert call_kwargs["gold_table"] == "chembl.activity"
+
+    @pytest.mark.asyncio
+    async def test_clear_via_lifecycle_passes_dry_run_flag(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+    ):
+        """Test _clear_via_lifecycle passes dry_run flag to service."""
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+            MedallionLifecycleService,
+        )
+
+        dry_run_runtime = RuntimeConfig(
+            run_type=RunType.REBUILD, limit=None, dry_run=True
+        )
+
+        services = create_mock_services()
+
+        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=True)
+        )
+
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=dry_run_runtime,
+            services=services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lifecycle_service=lifecycle_service,
+        )
+
+        await runner._clear_via_lifecycle()
+
+        call_kwargs = lifecycle_service.clear.call_args.kwargs
+        assert call_kwargs["dry_run"] is True
 
 
 @pytest.mark.unit

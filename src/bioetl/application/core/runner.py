@@ -180,28 +180,13 @@ class PipelineRunner:
         self._health_aggregator.assert_healthy(report)
 
     async def _clear_via_lifecycle(self) -> None:
-        """Clear exports using MedallionLifecycleService.
+        """Clear exports using MedallionLifecycleService (policy-based).
 
-        Enforces Medallion architecture invariants:
-        - Only clears data for rebuild/backfill runs
-        - Incremental runs use merge/upsert and should NOT clear existing data
+        Delegates clear decision to MedallionPolicy (Single Source of Truth).
+        The policy determines which layers to clear based on run type:
+        - REBUILD/BACKFILL: Clear both Silver and Gold
+        - INCREMENTAL: Never clear (merge/upsert behavior)
         """
-        from bioetl.domain.types import RunType
-
-        # Medallion invariant: only clear for destructive run types
-        should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
-
-        if not should_clear:
-            self._logger.debug(
-                "Skipping clear for incremental run",
-                extra={"run_type": self._runtime.run_type.value},
-            )
-            return
-
-        await self._clear_via_lifecycle_service()
-
-    async def _clear_via_lifecycle_service(self) -> None:
-        """Clear using MedallionLifecycleService (policy-based)."""
         from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy.for_run_type(self._runtime.run_type)
@@ -211,11 +196,21 @@ class PipelineRunner:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        await self._lifecycle_service.clear(
+        result = await self._lifecycle_service.clear(
             policy=policy,
             silver_table=self._config.silver_table,
             gold_table=gold_table,
             dry_run=self._runtime.dry_run,
+        )
+
+        self._logger.debug(
+            "Medallion clear completed",
+            extra={
+                "run_type": self._runtime.run_type.value,
+                "clear_policy": policy.clear_policy.value,
+                "silver_cleared": result.silver_cleared,
+                "gold_cleared": result.gold_cleared,
+            },
         )
 
     def _collect_batch_metrics(self) -> dict[str, float]:
