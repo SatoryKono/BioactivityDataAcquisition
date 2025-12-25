@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
     from pandera.polars import DataFrameSchema
 
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -62,16 +63,21 @@ class GoldWriter:
     def __init__(
         self,
         base_path: str | Path,
+        logger: LoggerPort,
         csv_exporter: CsvExporter | None = None,
     ) -> None:
         """Initialize Gold writer.
 
         Args:
             base_path: Base path for Gold tables (local filesystem)
+            logger: Structured logger for observability (MUST be injected)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
 
+        Note: LoggerPort is required per RULES.md DI requirements. All dependencies
+        MUST be injected through constructor without fallback defaults.
         """
         self.base_path = str(base_path).rstrip("/")
+        self.logger = logger
         self.csv_exporter = csv_exporter
 
     async def write_gold(
