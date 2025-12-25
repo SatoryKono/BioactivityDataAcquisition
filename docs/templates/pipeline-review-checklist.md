@@ -11,7 +11,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Pipeline follows Ports & Adapters pattern
 - [ ] Code located in `src/bioetl/application/pipelines/{provider}/{entity}/`
 - [ ] Stage files present: `extract.py`, `transform.py`, `validate.py`, `export.py`
-- [ ] Interfaces defined via `typing.Protocol` in `domain/ports.py`
+- [ ] Interfaces defined via `typing.Protocol` in `domain/ports/` package (import from facade)
 - [ ] No I/O operations in domain layer
 
 ## 2. Configuration (RULES.md App D)

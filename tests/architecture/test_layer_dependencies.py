@@ -1360,3 +1360,45 @@ def test_bootstrap_no_direct_adapter_imports(src_dir: Path) -> None:
         "Use ProviderRegistry and factories (DataSourceFactory, HttpClientFactory) instead.\n"
         "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
     )
+
+
+def test_ports_imported_only_from_facade(src_dir: Path) -> None:
+    """Все слои MUST импортировать порты из фасада, не из внутренних модулей.
+
+    REQ-ARCH-027: Порты доступны только через bioetl.domain.ports,
+    а не через bioetl.domain.ports.storage и т.д.
+    Это обеспечивает единую точку входа и упрощает навигацию.
+    """
+    # Запрещённые паттерны импорта (внутренние модули пакета ports)
+    internal_port_modules = [
+        "bioetl.domain.ports.storage",
+        "bioetl.domain.ports.locking",
+        "bioetl.domain.ports.checkpoint",
+        "bioetl.domain.ports.quarantine",
+        "bioetl.domain.ports.observability",
+        "bioetl.domain.ports.data_source",
+        "bioetl.domain.ports.validation",
+        "bioetl.domain.ports.filtering",
+    ]
+
+    violations = []
+
+    # Проверить все слои кроме самого пакета ports
+    for layer in ["application", "composition", "infrastructure", "interfaces"]:
+        layer_path = src_dir / "bioetl" / layer
+        if not layer_path.exists():
+            continue
+
+        for py_file in layer_path.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for module in internal_port_modules:
+                if f"from {module}" in content:
+                    relative_path = py_file.relative_to(src_dir)
+                    violations.append(f"{relative_path}: imports from {module}")
+
+    assert not violations, (
+        "Порты должны импортироваться только из фасада bioetl.domain.ports.\n"
+        "Правильно: from bioetl.domain.ports import StoragePort\n"
+        "Неправильно: from bioetl.domain.ports.storage import StoragePort\n\n"
+        "Нарушения:\n" + "\n".join(f"  - {v}" for v in violations)
+    )

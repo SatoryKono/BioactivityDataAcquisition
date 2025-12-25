@@ -40,7 +40,7 @@
 │       │   └── pipelines/      # {provider}/{entity}/
 │       ├── domain/             # Чистая логика, Protocols
 │       │   ├── configs/        # Pydantic-модели конфигов
-│       │   ├── ports.py        # Интерфейсы (typing.Protocol)
+│       │   ├── ports/          # Интерфейсы (typing.Protocol) — пакет с фасадом
 │       │   └── schemas/        # Pandera-схемы
 │       ├── infrastructure/     # Адаптеры
 │       │   ├── clients/        # HTTP клиенты по провайдерам
