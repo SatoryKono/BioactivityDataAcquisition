@@ -162,8 +162,8 @@ class TestUniProtProteinPipelineTransform:
     ):
         """Тест трансформации минимальной записи с обязательными полями.
 
-        Protein entity requires: accession, entry_name, protein_name.
-        Optional fields: gene_names, organism_id, sequence_length.
+        Protein entity requires: accession, entry_name.
+        Optional fields: protein_name, gene_names, organism_id, sequence_length.
         """
         run_id = uuid4()
         pipeline = UniProtProteinPipeline(
@@ -179,13 +179,11 @@ class TestUniProtProteinPipelineTransform:
             logger=mock_uniprot_services.logger,
         )
 
-        # Minimal valid record with required fields
+        # Minimal valid record with only required fields (accession, entry_name)
         bronze_record = {
             "primaryAccession": "Q99999",
             "uniProtkbId": "TEST_HUMAN",
-            "proteinDescription": {
-                "recommendedName": {"fullName": {"value": "Minimal Test Protein"}}
-            },
+            # No proteinDescription - protein_name is optional
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
@@ -195,7 +193,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record is not None
         assert silver_record["accession"] == "Q99999"
         assert silver_record["entry_name"] == "TEST_HUMAN"
-        assert silver_record["protein_name"] == "Minimal Test Protein"
+        assert silver_record["protein_name"] is None
         assert silver_record["gene_names"] == []
         assert silver_record["organism_id"] is None
         assert silver_record["sequence_length"] is None
@@ -231,16 +229,16 @@ class TestUniProtProteinPipelineTransform:
 
         assert silver_record is None
 
-    async def test_transform_bronze_to_silver_missing_protein_description_returns_none(
+    async def test_transform_bronze_to_silver_missing_protein_description_accepted(
         self,
         uniprot_config,
         uniprot_runtime,
         mock_uniprot_services,
     ):
-        """Тест: запись без proteinDescription возвращает None.
+        """Тест: запись без proteinDescription успешно обрабатывается.
 
-        Protein entity requires protein_name, so records without
-        proteinDescription.recommendedName.fullName.value are rejected.
+        protein_name is optional, so records without
+        proteinDescription.recommendedName.fullName.value are accepted.
         """
         run_id = uuid4()
         pipeline = UniProtProteinPipeline(
@@ -262,14 +260,18 @@ class TestUniProtProteinPipelineTransform:
             "genes": [{"geneName": {"value": "GENE1"}}],
             "organism": {"taxonId": 9606},
             "sequence": {"length": 100},
-            # Missing: proteinDescription
+            # Missing: proteinDescription - this is OK, protein_name is optional
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
             context, bronze_record
         )
 
-        assert silver_record is None
+        assert silver_record is not None
+        assert silver_record["accession"] == "A0A000"
+        assert silver_record["protein_name"] is None
+        assert silver_record["gene_names"] == ["GENE1"]
+        assert "entity_id" in silver_record
 
     async def test_transform_bronze_to_silver_empty_genes(
         self,

@@ -24,8 +24,8 @@ class UniProtProteinTransformer(BaseTransformer):
     """Transformer for UniProt protein records.
 
     Uses Protein domain entity for validation and lineage tracking.
-    Records without required fields (accession, entry_name, protein_name)
-    are skipped per entity contract.
+    Records without required fields (accession, entry_name) are skipped.
+    protein_name is optional and may be None.
     """
 
     def __init__(self, provider: str = "uniprot"):
@@ -59,13 +59,13 @@ class UniProtProteinTransformer(BaseTransformer):
         # Step 1: Validate required fields
         accession = self._get_required_field(record, "primaryAccession")
         entry_name = self._get_entry_name(record)
-        protein_name = self._get_protein_name(record)
 
         # Step 2: Build business data dictionary
+        # protein_name is optional - may be None
         business_data: dict[str, Any] = {
             "accession": accession,
             "entry_name": entry_name,
-            "protein_name": protein_name,
+            "protein_name": self._extract_protein_name(record),
             "gene_names": self._extract_gene_names(record),
             "organism_id": self._extract_nested(record, "organism.taxonId"),
             "sequence_length": self._extract_nested(record, "sequence.length"),
@@ -113,29 +113,21 @@ class UniProtProteinTransformer(BaseTransformer):
             )
         return str(entry_name)
 
-    def _get_protein_name(self, record: BronzeRecord) -> str:
-        """Extract protein name as required field.
+    def _extract_protein_name(self, record: BronzeRecord) -> str | None:
+        """Extract protein name (optional field).
 
         Args:
             record: Bronze record dictionary.
 
         Returns:
-            Protein name string.
-
-        Raises:
-            TransformationError: If protein_name is missing.
+            Protein name string or None if not found.
 
         """
         protein_name = self._extract_nested(
             record,
             "proteinDescription.recommendedName.fullName.value",
         )
-        if not protein_name:
-            raise TransformationError(
-                "Missing required field: proteinDescription.recommendedName.fullName.value",
-                field="protein_name",
-            )
-        return str(protein_name)
+        return str(protein_name) if protein_name else None
 
     def _extract_gene_names(self, record: BronzeRecord) -> list[str]:
         """Extract gene names from genes list.

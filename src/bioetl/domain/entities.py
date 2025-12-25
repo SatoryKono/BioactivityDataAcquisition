@@ -181,11 +181,15 @@ class Compound(BaseEntity):
 
 @dataclass(frozen=True, kw_only=True)
 class Protein(BaseEntity):
-    """Represents a protein target (UniProt)."""
+    """Represents a protein target (UniProt).
+
+    Required fields: accession, entry_name
+    Optional fields: protein_name, gene_names, organism_id, sequence_length
+    """
 
     accession: str
     entry_name: str
-    protein_name: str
+    protein_name: str | None = None
     gene_names: list[str] = field(default_factory=list)
     organism_id: int | None = None
     sequence_length: int | None = None
@@ -194,6 +198,8 @@ class Protein(BaseEntity):
         super().__post_init__()
         if not self.accession:
             raise ValueError("Protein accession is required")
+        if not self.entry_name:
+            raise ValueError("Protein entry_name is required")
 
         if self.sequence_length is not None and self.sequence_length <= 0:
             raise ValueError(

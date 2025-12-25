@@ -97,8 +97,13 @@ class TestUniProtProteinTransformer:
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_transform_missing_protein_name(self, transformer, mock_context):
-        """Test transformation returns None when protein name path is missing."""
+    async def test_transform_missing_protein_name_accepted(
+        self, transformer, mock_context
+    ):
+        """Test transformation succeeds when protein name is missing.
+
+        protein_name is optional - records without it should still be processed.
+        """
         record = {
             "primaryAccession": "P12345",
             "uniProtkbId": "TEST_HUMAN",
@@ -107,20 +112,23 @@ class TestUniProtProteinTransformer:
 
         result = await transformer.transform(mock_context, record)
 
-        assert result is None
-        mock_context.logger.warning.assert_called()
+        assert result is not None
+        assert result["accession"] == "P12345"
+        assert result["entry_name"] == "TEST_HUMAN"
+        assert result["protein_name"] is None
 
     @pytest.mark.asyncio
     async def test_transform_with_minimal_valid_record(
         self, transformer, mock_context
     ):
-        """Test transformation with minimal valid record (required fields only)."""
+        """Test transformation with minimal valid record (required fields only).
+
+        Only accession and entry_name are required. protein_name is optional.
+        """
         record = {
             "primaryAccession": "Q99999",
             "uniProtkbId": "MIN_HUMAN",
-            "proteinDescription": {
-                "recommendedName": {"fullName": {"value": "Minimal Protein"}}
-            },
+            # No proteinDescription - protein_name will be None
         }
 
         result = await transformer.transform(mock_context, record)
@@ -128,7 +136,7 @@ class TestUniProtProteinTransformer:
         assert result is not None
         assert result["accession"] == "Q99999"
         assert result["entry_name"] == "MIN_HUMAN"
-        assert result["protein_name"] == "Minimal Protein"
+        assert result["protein_name"] is None
         assert result["gene_names"] == []
         assert result.get("organism_id") is None
         assert result.get("sequence_length") is None
