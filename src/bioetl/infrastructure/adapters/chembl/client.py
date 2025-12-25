@@ -428,8 +428,16 @@ class ChemblAdapter(BaseHttpAdapter):
         ):
             yield record
 
-    async def health_check(self) -> HealthStatus:
-        """Check ChEMBL API health status."""
+    async def _probe_health(self) -> HealthStatus:
+        """Perform ChEMBL-specific health probe.
+
+        Overrides BaseHttpAdapter._probe_health() to use ChEMBL status endpoint
+        and internal health state tracking.
+
+        Returns:
+            HealthStatus based on status endpoint response or error count.
+
+        """
         try:
             response = await self.http_client.get(CHEMBL_STATUS_URL)
             self._handle_health_response(response)
@@ -444,6 +452,18 @@ class ChemblAdapter(BaseHttpAdapter):
                 error=str(e),
             )
 
+        return self._cached_health
+
+    def _fallback_health_status(self) -> HealthStatus:
+        """Return cached health status.
+
+        Overrides BaseHttpAdapter._fallback_health_status() to use
+        ChEMBL's internal health state rather than circuit breaker.
+
+        Returns:
+            Cached HealthStatus based on consecutive error count.
+
+        """
         return self._cached_health
 
     def _handle_health_response(self, response: Response) -> None:

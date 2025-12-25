@@ -275,8 +275,16 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         return records
 
     @override
-    async def health_check(self) -> HealthStatus:
-        """Check UniProt API health status using a lightweight search query."""
+    async def _probe_health(self) -> HealthStatus:
+        """Perform UniProt-specific health probe.
+
+        Overrides BaseHttpAdapter._probe_health() to use lightweight
+        search query (Ubiquitin P62988) for health assessment.
+
+        Returns:
+            HealthStatus based on probe response or circuit breaker state.
+
+        """
         try:
             # Lightweight search probe: Ubiquitin (P62988)
             params = {"query": "accession:P62988", "size": 1, "format": "json"}
@@ -291,6 +299,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                     status_code=resp.status_code,
                 )
                 return HealthStatus.DEGRADED
+            # On success, return circuit breaker assessment (original behavior)
+            return self._fallback_health_status()
         except Exception as e:
             error_classifier = ErrorClassifier()
             error_type = error_classifier.classify(e)
@@ -300,9 +310,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 error_type=error_type.value,
                 error=str(e),
             )
-            # Fallback to circuit breaker check
-
-        return await super().health_check()
+            raise  # Base class catches and returns _fallback_health_status()
 
     def __repr__(self) -> str:
         """Return string representation."""
