@@ -237,18 +237,32 @@ assert_silver_table_has_records(data_dir, "chembl_activity", expected_min=1)
 
 | Категория | Инструмент | Назначение |
 |-----------|------------|------------|
-| **HTTP** | httpx (async) | HTTP-клиент |
+| **HTTP** | `UnifiedHTTPClient` (httpx) | Унифицированный HTTP-клиент для всех адаптеров |
 | **Data** | Polars, Delta Lake | Обработка, хранение |
 | **Storage** | Локальная ФС | Bronze/Silver/Gold/Checkpoints |
 | **Validation** | Pandera | Валидация схем |
 | **Linting** | Ruff + mypy | Код и типы |
 | **CLI** | Click | Командный интерфейс |
 
+### Унифицированный HTTP-клиент
+
+**Все адаптеры используют единую HTTP-инфраструктуру:**
+
+| Адаптер | Базовый класс | HTTP-клиент |
+|---------|---------------|-------------|
+| ChemblAdapter | `BaseHttpAdapter` | `UnifiedHTTPClient` |
+| UniProtAdapter | `BaseHttpAdapter` | `UnifiedHTTPClient` |
+| PubMedAdapter | `@dataclass` | `UnifiedHTTPClient` |
+| PubChemAdapter | `BaseSyncAdapter` | `pubchempy` + ThreadPool |
+
+**Компоненты:** Rate Limiter, Circuit Breaker, Retry Logic, Metrics.
+
 ### Legacy Wrappers (MUST)
 
-Библиотеки без async (pubchempy, biopython):
+Библиотеки без async (pubchempy) используют `BaseSyncAdapter`:
 ```python
-await loop.run_in_executor(None, func, *args)
+# BaseSyncAdapter автоматически оборачивает sync-вызовы
+await self._run_in_executor(sync_func, *args)
 ```
 
 **Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
