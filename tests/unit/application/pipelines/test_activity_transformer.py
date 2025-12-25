@@ -189,8 +189,8 @@ class TestActivityTransformerTransform:
         assert result["potential_duplicate"] == 0
 
     @pytest.mark.asyncio
-    async def test_transform_with_json_fields(self, transformer, mock_context):
-        """Test transformation serializes complex fields as JSON."""
+    async def test_transform_with_json_fields_single(self, transformer, mock_context):
+        """Test transformation unwraps single-element activity_properties."""
         record = {
             "activity_id": 12345,
             "molecule_chembl_id": "CHEMBL25",
@@ -200,8 +200,38 @@ class TestActivityTransformerTransform:
         result = await transformer.transform(mock_context, record)
 
         assert result is not None
-        # activity_properties should be serialized as JSON string
-        assert isinstance(result.get("activity_properties"), str)
+        # Single-element list is unwrapped to just the dict
+        assert result.get("activity_properties") == '{"type": "Ki", "value": 5.0}'
+
+    @pytest.mark.asyncio
+    async def test_transform_with_json_fields_multiple(self, transformer, mock_context):
+        """Test transformation keeps multi-element activity_properties as array."""
+        record = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            "activity_properties": [{"type": "Ki"}, {"type": "IC50"}],
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        # Multi-element list stays as array
+        assert result.get("activity_properties") == '[{"type": "Ki"}, {"type": "IC50"}]'
+
+    @pytest.mark.asyncio
+    async def test_transform_with_empty_activity_properties(self, transformer, mock_context):
+        """Test transformation returns None for empty activity_properties."""
+        record = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            "activity_properties": [],  # Empty array from ChEMBL API
+        }
+
+        result = await transformer.transform(mock_context, record)
+
+        assert result is not None
+        # Empty collections are treated as None for semantic consistency
+        assert result.get("activity_properties") is None
 
     @pytest.mark.asyncio
     async def test_transform_with_action_type(self, transformer, mock_context):
