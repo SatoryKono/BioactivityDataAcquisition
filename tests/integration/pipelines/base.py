@@ -18,6 +18,7 @@ from bioetl.composition.factories.storage_factory import StorageAdapter, Storage
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.tracing import NoOpTracer
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -161,10 +162,11 @@ class IntegrationPipelineTestCase:
             pipeline_config = pipeline_config.model_copy(update=config_overrides)
 
         # Create observability bundle for testing
+        # Per Unified Observability Contract, metrics must be non-None
         observability = ObservabilityBundle(
             logger=structlog.get_logger(),
+            metrics=NoOpMetrics(warn_on_use=False),
             tracer=NoOpTracer(),
-            metrics=None,
         )
 
         # Create runner
