@@ -15,6 +15,10 @@ from bioetl.infrastructure.observability.metrics import (
     CIRCUIT_BREAKER_STATE,
     CIRCUIT_BREAKER_SUCCESS_TOTAL,
     CIRCUIT_BREAKER_TRIPS_TOTAL,
+    DQ_ANOMALY_DETECTED,
+    DQ_BASELINE_SAMPLES,
+    DQ_BASELINE_UPDATED,
+    DQ_CHECK_DURATION_MS,
     DQ_RECORDS_QUARANTINED_TOTAL,
     ERRORS_TOTAL,
     FILTER_IDS_DUPLICATES_TOTAL,
@@ -31,6 +35,7 @@ HISTOGRAMS = {
     "batch_size_records": BATCH_SIZE_RECORDS,
     "vacuum_duration_seconds": VACUUM_DURATION_SECONDS,
     "archive_duration_seconds": ARCHIVE_DURATION_SECONDS,
+    "dq_check_duration_ms": DQ_CHECK_DURATION_MS,
 }
 
 # Registry of counter metrics
@@ -45,11 +50,14 @@ COUNTERS = {
     "circuit_breaker_failure_total": CIRCUIT_BREAKER_FAILURE_TOTAL,
     "vacuum_files_removed_total": VACUUM_FILES_REMOVED_TOTAL,
     "archive_files_total": ARCHIVE_FILES_TOTAL,
+    "dq_anomaly_detected": DQ_ANOMALY_DETECTED,
+    "dq_baseline_updated": DQ_BASELINE_UPDATED,
 }
 
 # Registry of gauge metrics
 GAUGES = {
     "circuit_breaker_state": CIRCUIT_BREAKER_STATE,
+    "dq_baseline_samples": DQ_BASELINE_SAMPLES,
 }
 
 

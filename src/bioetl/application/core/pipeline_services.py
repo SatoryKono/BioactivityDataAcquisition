@@ -15,6 +15,7 @@ from typing import Self
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
+    DQMonitorPort,
     LockPort,
     LoggerPort,
     MetricsPort,
@@ -43,6 +44,7 @@ class PipelineServices:
         metrics: Port for observability metrics collection.
         tracing: Port for distributed tracing.
         logger: Structured logger for pipeline events.
+        dq_monitor: Optional data quality monitor for anomaly detection.
 
     Example:
         >>> services = PipelineServices(
@@ -65,6 +67,7 @@ class PipelineServices:
     metrics: MetricsPort
     tracing: TracingPort
     logger: LoggerPort
+    dq_monitor: DQMonitorPort | None = None
 
     def __post_init__(self) -> None:
         """Validate that all services are provided."""
