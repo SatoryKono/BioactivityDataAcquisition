@@ -6,7 +6,7 @@ Coordinates locking, checkpointing, and execution.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.health_aggregator import HealthAggregator
 from bioetl.application.core.lock_manager import LockManager
@@ -218,21 +218,10 @@ class PipelineRunner:
             dry_run=self._runtime.dry_run,
         )
 
-    async def _check_data_quality(self) -> None:
-        """Check data quality metrics and report anomalies.
-
-        Collects metrics from executor, runs anomaly detection,
-        logs warnings for detected issues, and updates baseline.
-        """
-        if self._services.dq_monitor is None:
-            return
-
-        import time
-
-        # Collect metrics from executor
+    def _collect_batch_metrics(self) -> dict[str, float]:
+        """Collect batch metrics from executor."""
         total_records = max(1, self._executor.records_fetched)
-
-        batch_metrics = {
+        return {
             "record_count": float(self._executor.records_fetched),
             "bronze_count": float(self._executor.records_bronze),
             "silver_count": float(self._executor.records_silver),
@@ -243,12 +232,52 @@ class PipelineRunner:
             "gold_yield": self._executor.records_gold / total_records,
         }
 
-        # Run anomaly detection
+    def _process_anomaly(self, anomaly: Any) -> None:
+        """Log and track a single anomaly."""
+        self._logger.warning(
+            "dq_anomaly_detected",
+            anomaly_type=anomaly.anomaly_type.value,
+            severity=anomaly.severity.value,
+            metric=anomaly.metric_name,
+            current_value=anomaly.current_value,
+            baseline_mean=anomaly.baseline_mean,
+            baseline_stddev=anomaly.baseline_stddev,
+            z_score=anomaly.z_score,
+            message=anomaly.message,
+        )
+
+        if self._services.metrics:
+            self._services.metrics.increment_counter(
+                "dq_anomaly_detected",
+                1,
+                {
+                    "pipeline": self._config.pipeline_name,
+                    "metric": anomaly.metric_name,
+                    "severity": anomaly.severity.value,
+                    "anomaly_type": anomaly.anomaly_type.value,
+                },
+            )
+
+        if anomaly.severity.value == "critical":
+            self._logger.error(
+                "critical_dq_anomaly",
+                metric=anomaly.metric_name,
+                message=anomaly.message,
+            )
+
+    async def _check_data_quality(self) -> None:
+        """Check data quality metrics and report anomalies."""
+        if self._services.dq_monitor is None:
+            return
+
+        import time
+
+        batch_metrics = self._collect_batch_metrics()
+
         start_time = time.monotonic()
         anomalies = self._services.dq_monitor.check_quality(batch_metrics)
         check_duration_ms = (time.monotonic() - start_time) * 1000
 
-        # Track check duration metric
         if self._services.metrics:
             self._services.metrics.observe_histogram(
                 "dq_check_duration_ms",
@@ -256,45 +285,11 @@ class PipelineRunner:
                 {"pipeline": self._config.pipeline_name},
             )
 
-        # Process detected anomalies
         for anomaly in anomalies:
-            self._logger.warning(
-                "dq_anomaly_detected",
-                anomaly_type=anomaly.anomaly_type.value,
-                severity=anomaly.severity.value,
-                metric=anomaly.metric_name,
-                current_value=anomaly.current_value,
-                baseline_mean=anomaly.baseline_mean,
-                baseline_stddev=anomaly.baseline_stddev,
-                z_score=anomaly.z_score,
-                message=anomaly.message,
-            )
+            self._process_anomaly(anomaly)
 
-            # Publish Prometheus metric
-            if self._services.metrics:
-                self._services.metrics.increment_counter(
-                    "dq_anomaly_detected",
-                    1,
-                    {
-                        "pipeline": self._config.pipeline_name,
-                        "metric": anomaly.metric_name,
-                        "severity": anomaly.severity.value,
-                        "anomaly_type": anomaly.anomaly_type.value,
-                    },
-                )
-
-            # Log critical anomalies at error level
-            if anomaly.severity.value == "critical":
-                self._logger.error(
-                    "critical_dq_anomaly",
-                    metric=anomaly.metric_name,
-                    message=anomaly.message,
-                )
-
-        # Update baseline with current metrics (skips if critical anomalies)
         self._services.dq_monitor.update_baseline_from_metrics(batch_metrics)
 
-        # Log baseline update for non-critical runs
         if self._services.metrics and not any(
             a.severity.value == "critical" for a in anomalies
         ):
