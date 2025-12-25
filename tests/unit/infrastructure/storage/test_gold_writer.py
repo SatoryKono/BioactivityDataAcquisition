@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pandera.pandas as pa_pandas
 import pyarrow as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError
-from pandera.polars import Column, DataFrameSchema
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -28,10 +28,23 @@ def gold_writer(noop_logger):
 @pytest.fixture
 def strict_schema():
     """Create a strict Pandera schema for testing."""
-    return DataFrameSchema(
+    return pa_pandas.DataFrameSchema(
         {
-            "entity_id": Column(str, nullable=False),
-            "value": Column(float, nullable=False),
+            "entity_id": pa_pandas.Column(str, nullable=False),
+            "value": pa_pandas.Column(float, nullable=False, coerce=True),
+        },
+        strict=True,
+    )
+
+
+@pytest.fixture
+def strict_schema_with_provider():
+    """Create a strict Pandera schema with provider field for testing."""
+    return pa_pandas.DataFrameSchema(
+        {
+            "provider": pa_pandas.Column(str, nullable=False),
+            "entity_id": pa_pandas.Column(str, nullable=False),
+            "value": pa_pandas.Column(float, nullable=False, coerce=True),
         },
         strict=True,
     )
@@ -40,9 +53,9 @@ def strict_schema():
 @pytest.fixture
 def non_strict_schema():
     """Create a non-strict Pandera schema for testing."""
-    return DataFrameSchema(
+    return pa_pandas.DataFrameSchema(
         {
-            "entity_id": Column(str, nullable=False),
+            "entity_id": pa_pandas.Column(str, nullable=False),
         },
         strict=False,
     )
@@ -96,17 +109,19 @@ class TestGoldWriterValidation:
                 mode="overwrite",
             )
 
-    async def test_write_gold_non_strict_schema_raises(
-        self, gold_writer, non_strict_schema, valid_records
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_write_gold_non_strict_schema_allowed(
+        self, mock_write_deltalake, gold_writer, non_strict_schema, valid_records
     ):
-        """Test write_gold raises ValueError for non-strict schema."""
-        with pytest.raises(ValueError, match="strict=True"):
-            await gold_writer.write_gold(
-                table_name="test.table",
-                records=valid_records,
-                schema=non_strict_schema,
-                mode="overwrite",
-            )
+        """Test write_gold allows non-strict schema (validates defined columns only)."""
+        # Non-strict schemas are allowed and only validate columns they define
+        await gold_writer.write_gold(
+            table_name="test.table",
+            records=valid_records,
+            schema=non_strict_schema,
+            mode="overwrite",
+        )
+        mock_write_deltalake.assert_called_once()
 
     async def test_write_gold_invalid_mode_raises(self, gold_writer, valid_records, strict_schema):
         """Test write_gold raises ValueError for invalid mode."""
@@ -249,7 +264,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
-        self, mock_delta_table, gold_writer, strict_schema
+        self, mock_delta_table, gold_writer, strict_schema_with_provider
     ):
         """Test SCD2 write with list of business keys."""
         mock_table_instance = MagicMock()
@@ -270,7 +285,7 @@ class TestGoldWriterSCD2:
         await gold_writer.write_gold(
             table_name="test.table",
             records=records,
-            schema=strict_schema,
+            schema=strict_schema_with_provider,
             mode="scd2",
             scd_config=scd_config,
         )

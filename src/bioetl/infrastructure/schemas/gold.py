@@ -13,6 +13,10 @@ from pandera.typing import Series
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Activity in Gold layer."""
 
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     # Core identifiers
     activity_id: Series[str] = pa.Field(nullable=False)
     molecule_chembl_id: Series[str] = pa.Field(nullable=False)
@@ -26,21 +30,33 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = False
 
 
 class PubChemCompoundGoldSchema(pa.DataFrameModel):
     """Schema for PubChem Compound in Gold layer."""
 
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     cid: Series[str] = pa.Field(nullable=False)
     molecular_formula: Series[str] = pa.Field(nullable=True)
     molecular_weight: Series[str] = pa.Field(nullable=True)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
@@ -51,10 +67,20 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
 class UniProtProteinGoldSchema(pa.DataFrameModel):
     """Schema for UniProt Protein in Gold layer."""
 
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
     protein_name: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[int] = pa.Field(nullable=True, ge=0, coerce=True)
+
+    # Metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
@@ -68,6 +94,10 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     Fields match Publication entity from domain/entities.py.
     See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
     """
+
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifiers
     pmid: Series[str] = pa.Field(nullable=False)
@@ -99,10 +129,16 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
 
+    # Pipeline metadata
+    _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
+    _ingestion_ts: Series[str] = pa.Field(nullable=False)
+
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns (authors, keywords, mesh_terms, etc.)
+        strict = False
 
 
 class ChEMBLAssayGoldSchema(pa.DataFrameModel):
@@ -110,6 +146,10 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
 
     Validated fields for high-quality assay data export.
     """
+
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Core identifiers
     assay_chembl_id: Series[str] = pa.Field(nullable=False)
@@ -129,12 +169,14 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = False
 
 
 class ChEMBLTargetGoldSchema(pa.DataFrameModel):
@@ -142,6 +184,10 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
 
     Validated fields for high-quality target data export.
     """
+
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
     target_chembl_id: Series[str] = pa.Field(nullable=False)
@@ -156,12 +202,14 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = False
 
 
 class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
@@ -169,6 +217,10 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
 
     Validated fields for high-quality target component data export.
     """
+
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
     component_id: Series[int] = pa.Field(nullable=False)
@@ -185,12 +237,14 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = False
 
 
 class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
@@ -198,6 +252,10 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     Validated fields for high-quality document data export.
     """
+
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
     document_chembl_id: Series[str] = pa.Field(nullable=False)
@@ -213,12 +271,14 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow extra columns
+        strict = False
 
 
 class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
@@ -229,6 +289,10 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     molecule_synonyms, cross_references, atc_classifications) are excluded
     from Gold and retained only in Silver for forensic purposes.
     """
+
+    # System identifiers (from BaseEntity)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
     molecule_chembl_id: Series[str] = pa.Field(nullable=False)
@@ -276,9 +340,11 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
 
     # Metadata
     _run_id: Series[str] = pa.Field(nullable=False)
+    _run_type: Series[str] = pa.Field(nullable=False)
+    _source_batch_id: Series[str] = pa.Field(nullable=False)
     _ingestion_ts: Series[str] = pa.Field(nullable=False)
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow transition period
+        strict = False

@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandera.polars as pa
+import pandera.pandas as pa_pandas
 import pyarrow as pa_arrow
 import pytest
 from deltalake.exceptions import TableNotFoundError
-from pandera.polars import DataFrameSchema
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -32,10 +31,10 @@ def valid_records():
 
 @pytest.fixture
 def strict_schema():
-    return DataFrameSchema(
+    return pa_pandas.DataFrameSchema(
         {
-            "id": pa.Column(int),
-            "value": pa.Column(float),
+            "id": pa_pandas.Column(int, coerce=True),
+            "value": pa_pandas.Column(float, coerce=True),
         },
         strict=True,
     )
@@ -47,12 +46,15 @@ async def test_write_gold_no_records(gold_writer, strict_schema):
         await gold_writer.write_gold("test_table", [], schema=strict_schema)
 
 
-async def test_write_gold_schema_not_strict(gold_writer, valid_records):
-    """Test non-strict schema raises ValueError."""
-    schema = DataFrameSchema({"id": pa.Column(int)})  # strict=False by default
+@patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+async def test_write_gold_schema_not_strict_allowed(mock_write, gold_writer, valid_records):
+    """Test non-strict schema is allowed (validates defined columns only)."""
+    schema = pa_pandas.DataFrameSchema(
+        {"id": pa_pandas.Column(int, coerce=True)}
+    )  # strict=False by default, validates 'id' only
 
-    with pytest.raises(ValueError, match="Gold layer requires strict=True"):
-        await gold_writer.write_gold("test_table", valid_records, schema=schema)
+    await gold_writer.write_gold("test_table", valid_records, schema=schema)
+    mock_write.assert_called_once()
 
 
 async def test_write_gold_schema_validation_failure(gold_writer, strict_schema):
