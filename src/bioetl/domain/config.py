@@ -101,6 +101,7 @@ class PipelineConfig:
     write_mode: Literal["merge", "append", "overwrite"] = "merge"
     gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
     partition_cols: list[str] = field(default_factory=list)
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     # Processing
     gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
