@@ -1029,13 +1029,29 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
     """
     import ast
 
+    # Support both single file and package structure
+    exceptions_dir = src_dir / "bioetl" / "domain" / "exceptions"
     exceptions_file = src_dir / "bioetl" / "domain" / "exceptions.py"
-    if not exceptions_file.exists():
-        pytest.skip("Domain exceptions file not found")
 
-    with exceptions_file.open(encoding="utf-8") as f:
-        content = f.read()
-        tree = ast.parse(content)
+    exception_files: list[Path] = []
+    if exceptions_dir.is_dir():
+        # New package structure: scan all .py files except __init__.py
+        exception_files = [
+            f for f in exceptions_dir.glob("*.py")
+            if f.name != "__init__.py"
+        ]
+    elif exceptions_file.exists():
+        # Legacy single file structure
+        exception_files = [exceptions_file]
+    else:
+        pytest.skip("Domain exceptions not found")
+
+    # Parse all exception files and collect AST trees
+    trees: list[ast.AST] = []
+    for f in exception_files:
+        with f.open(encoding="utf-8") as fp:
+            content = fp.read()
+            trees.append(ast.parse(content))
 
     # Base classes that don't need error_type (they provide defaults)
     base_classes = {"BioETLError", "CriticalError", "RecoverableError", "DataQualityError"}
@@ -1052,45 +1068,46 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
 
     missing_error_type = []
 
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef):
-            # Skip base classes
-            if node.name in base_classes:
-                continue
+    for tree in trees:
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                # Skip base classes
+                if node.name in base_classes:
+                    continue
 
-            # Check if inherits from exception hierarchy
-            bases = []
-            for base in node.bases:
-                if isinstance(base, ast.Name):
-                    bases.append(base.id)
-                elif isinstance(base, ast.Attribute):
-                    bases.append(base.attr)
+                # Check if inherits from exception hierarchy
+                bases = []
+                for base in node.bases:
+                    if isinstance(base, ast.Name):
+                        bases.append(base.id)
+                    elif isinstance(base, ast.Attribute):
+                        bases.append(base.attr)
 
-            if not any(b in exception_bases for b in bases):
-                continue
+                if not any(b in exception_bases for b in bases):
+                    continue
 
-            # Check for error_type class attribute
-            has_error_type = False
-            for stmt in node.body:
-                # Check for error_type assignment
-                if isinstance(stmt, ast.Assign):
-                    for target in stmt.targets:
-                        if isinstance(target, ast.Name) and target.id == "error_type":
+                # Check for error_type class attribute
+                has_error_type = False
+                for stmt in node.body:
+                    # Check for error_type assignment
+                    if isinstance(stmt, ast.Assign):
+                        for target in stmt.targets:
+                            if isinstance(target, ast.Name) and target.id == "error_type":
+                                has_error_type = True
+                                break
+                    # Check for annotated assignment
+                    if isinstance(stmt, ast.AnnAssign):
+                        if isinstance(stmt.target, ast.Name) and stmt.target.id == "error_type":
                             has_error_type = True
-                            break
-                # Check for annotated assignment
-                if isinstance(stmt, ast.AnnAssign):
-                    if isinstance(stmt.target, ast.Name) and stmt.target.id == "error_type":
-                        has_error_type = True
-                # Check for Import statement (class-level import for error_type)
-                if isinstance(stmt, ast.ImportFrom):
-                    for alias in stmt.names:
-                        if alias.name == "ErrorType":
-                            # Next statement should be error_type assignment
-                            pass
+                    # Check for Import statement (class-level import for error_type)
+                    if isinstance(stmt, ast.ImportFrom):
+                        for alias in stmt.names:
+                            if alias.name == "ErrorType":
+                                # Next statement should be error_type assignment
+                                pass
 
-            if not has_error_type:
-                missing_error_type.append(node.name)
+                if not has_error_type:
+                    missing_error_type.append(node.name)
 
     assert not missing_error_type, (
         "BioETLError subclasses must have explicit error_type attribute.\n"
