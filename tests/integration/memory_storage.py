@@ -12,13 +12,16 @@ class MemoryStorage(StoragePort):
         self.data = defaultdict(list)
         self.bronze_metadata = {}  # Store run metadata for verification
 
-    def write_bronze(self, records, provider, entity, date, batch_id, run_id, run_type):
+    def write_bronze(
+        self, records, provider, entity, date, batch_id, run_id, run_type, ingestion_ts
+    ):
         key = f"bronze/{provider}/{entity}/{date}/{batch_id}.jsonl.zst"
         self.data[key].extend(records)
         # Store metadata for test verification
         self.bronze_metadata[key] = {
             "run_id": str(run_id),
             "run_type": run_type.value if hasattr(run_type, "value") else str(run_type),
+            "ingestion_ts": ingestion_ts.isoformat() if ingestion_ts else None,
         }
 
     def write_silver(self, table_name, records, _primary_keys):

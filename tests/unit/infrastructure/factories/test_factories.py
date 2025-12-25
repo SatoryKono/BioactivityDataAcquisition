@@ -66,15 +66,18 @@ class TestStorageAdapter:
         run_id = uuid4()
         run_type = RunType.INCREMENTAL
         records = iter([b"record1", b"record2"])
+        # Fixed timestamp for deterministic tests (ADR-014)
+        ingestion_ts = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
 
         await storage_adapter.write_bronze(
             records=records,
             provider="chembl",
             entity="activity",
-            date=datetime.now(),
+            date=datetime(2024, 1, 15),
             batch_id=batch_id,
             run_id=run_id,
             run_type=run_type,
+            ingestion_ts=ingestion_ts,
         )
 
         mock_bronze_writer.write_bronze.assert_called_once()

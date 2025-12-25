@@ -40,7 +40,8 @@ class QuarantineManager:
         error_type: ErrorType,
         batch_id: BatchID,
         error_details: str,
-        ingestion_ts: datetime | None = None,
+        *,
+        ingestion_ts: datetime,
     ) -> None:
         """Write a record to the quarantine.
 
@@ -49,7 +50,8 @@ class QuarantineManager:
             error_type: Classification of the error.
             batch_id: ID of the batch containing this record.
             error_details: Human-readable error description.
-            ingestion_ts: Ingestion timestamp from context (single source of time).
+            ingestion_ts: Ingestion timestamp from context
+                         (single source of time per ADR-014). Required.
 
         """
         await self._quarantine.write(
