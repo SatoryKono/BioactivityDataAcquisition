@@ -206,6 +206,7 @@ class TestStoragePortContract:
 
     REQUIRED_WRITE_METHODS = ["write_bronze", "write_silver", "write_gold"]
     REQUIRED_CLEAR_METHODS = ["clear_silver", "clear_gold", "clear_csv", "clear_delta"]
+    REQUIRED_MAINTENANCE_METHODS = ["vacuum", "archive"]
 
     @pytest.mark.parametrize("method_name", REQUIRED_WRITE_METHODS)
     def test_storage_port_has_write_methods(self, method_name: str) -> None:
@@ -221,12 +222,41 @@ class TestStoragePortContract:
             f"StoragePort MUST define {method_name}() for data cleanup"
         )
 
+    @pytest.mark.parametrize("method_name", REQUIRED_MAINTENANCE_METHODS)
+    def test_storage_port_has_maintenance_methods(self, method_name: str) -> None:
+        """StoragePort MUST have vacuum and archive methods for Delta Lake maintenance."""
+        assert hasattr(ports.StoragePort, method_name), (
+            f"StoragePort MUST define {method_name}() for Delta Lake maintenance"
+        )
+
     def test_storage_port_has_preview_cleanup(self) -> None:
         """StoragePort MUST have preview_cleanup for CLI dry-run mode."""
         assert hasattr(ports.StoragePort, "preview_cleanup"), (
             "StoragePort MUST define preview_cleanup() for CLI dry-run. "
             "See architecture test: test_storage_port_has_preview_cleanup"
         )
+
+    def test_storage_port_vacuum_has_correct_signature(self) -> None:
+        """StoragePort.vacuum() MUST have table_name, retention_hours, dry_run params."""
+        import inspect
+
+        sig = inspect.signature(ports.StoragePort.vacuum)
+        params = sig.parameters
+
+        assert "table_name" in params, "vacuum() MUST have table_name parameter"
+        assert "retention_hours" in params, "vacuum() MUST have retention_hours parameter"
+        assert "dry_run" in params, "vacuum() MUST have dry_run parameter"
+
+    def test_storage_port_archive_has_correct_signature(self) -> None:
+        """StoragePort.archive() MUST have table_name, target_path, remove_source params."""
+        import inspect
+
+        sig = inspect.signature(ports.StoragePort.archive)
+        params = sig.parameters
+
+        assert "table_name" in params, "archive() MUST have table_name parameter"
+        assert "target_path" in params, "archive() MUST have target_path parameter"
+        assert "remove_source" in params, "archive() MUST have remove_source parameter"
 
 
 # ============================================================================

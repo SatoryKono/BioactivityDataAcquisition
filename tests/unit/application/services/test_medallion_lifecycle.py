@@ -220,19 +220,173 @@ class TestMedallionLifecycleServiceClear:
 class TestMedallionLifecycleServiceVacuum:
     """Test MedallionLifecycleService.vacuum method."""
 
+    @pytest.fixture
+    def mock_storage_with_vacuum(self):
+        """Create a mock storage port with vacuum support."""
+        storage = MagicMock()
+        storage.clear_silver = AsyncMock(return_value=0)
+        storage.clear_gold = AsyncMock(return_value=0)
+        storage.vacuum = AsyncMock(return_value=42)
+        storage.archive = AsyncMock(return_value=100)
+        return storage
+
+    @pytest.fixture
+    def lifecycle_service_with_vacuum(self, mock_storage_with_vacuum, mock_logger):
+        """Create a MedallionLifecycleService instance with vacuum support."""
+        return MedallionLifecycleService(
+            storage=mock_storage_with_vacuum,
+            logger=mock_logger,
+        )
+
     @pytest.mark.asyncio
-    async def test_vacuum_not_implemented(self, lifecycle_service):
-        """Test vacuum raises NotImplementedError."""
-        with pytest.raises(NotImplementedError, match="Vacuum not yet implemented"):
-            await lifecycle_service.vacuum("test_table")
+    async def test_vacuum_delegates_to_storage(
+        self, lifecycle_service_with_vacuum, mock_storage_with_vacuum
+    ):
+        """vacuum() should call storage.vacuum() with correct params."""
+        result = await lifecycle_service_with_vacuum.vacuum(
+            "chembl.activity", retention_days=7
+        )
+
+        assert result == 42
+        mock_storage_with_vacuum.vacuum.assert_called_once_with(
+            table_name="chembl.activity",
+            retention_hours=168,
+            dry_run=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_vacuum_dry_run(
+        self, lifecycle_service_with_vacuum, mock_storage_with_vacuum
+    ):
+        """vacuum() dry_run should pass flag to storage."""
+        mock_storage_with_vacuum.vacuum.return_value = 10
+
+        result = await lifecycle_service_with_vacuum.vacuum(
+            "chembl.activity", retention_days=7, dry_run=True
+        )
+
+        assert result == 10
+        mock_storage_with_vacuum.vacuum.assert_called_once_with(
+            table_name="chembl.activity",
+            retention_hours=168,
+            dry_run=True,
+        )
+
+    @pytest.mark.asyncio
+    async def test_vacuum_custom_retention(
+        self, lifecycle_service_with_vacuum, mock_storage_with_vacuum
+    ):
+        """vacuum() should convert retention_days to hours."""
+        await lifecycle_service_with_vacuum.vacuum(
+            "chembl.activity", retention_days=30
+        )
+
+        mock_storage_with_vacuum.vacuum.assert_called_once_with(
+            table_name="chembl.activity",
+            retention_hours=720,  # 30 * 24
+            dry_run=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_vacuum_logs_operation(
+        self, lifecycle_service_with_vacuum, mock_logger
+    ):
+        """vacuum() should log start and completion."""
+        await lifecycle_service_with_vacuum.vacuum("chembl.activity")
+
+        # Should have at least 2 log calls (start and complete)
+        assert mock_logger.info.call_count >= 2
+
+    @pytest.mark.asyncio
+    async def test_vacuum_propagates_exception(
+        self, lifecycle_service_with_vacuum, mock_storage_with_vacuum, mock_logger
+    ):
+        """vacuum() should propagate exceptions from storage."""
+        mock_storage_with_vacuum.vacuum.side_effect = RuntimeError("Storage error")
+
+        with pytest.raises(RuntimeError, match="Storage error"):
+            await lifecycle_service_with_vacuum.vacuum("chembl.activity")
+
+        # Should log error
+        mock_logger.error.assert_called_once()
 
 
 @pytest.mark.unit
 class TestMedallionLifecycleServiceArchive:
     """Test MedallionLifecycleService.archive method."""
 
+    @pytest.fixture
+    def mock_storage_with_archive(self):
+        """Create a mock storage port with archive support."""
+        storage = MagicMock()
+        storage.clear_silver = AsyncMock(return_value=0)
+        storage.clear_gold = AsyncMock(return_value=0)
+        storage.vacuum = AsyncMock(return_value=0)
+        storage.archive = AsyncMock(return_value=100)
+        return storage
+
+    @pytest.fixture
+    def lifecycle_service_with_archive(self, mock_storage_with_archive, mock_logger):
+        """Create a MedallionLifecycleService instance with archive support."""
+        return MedallionLifecycleService(
+            storage=mock_storage_with_archive,
+            logger=mock_logger,
+        )
+
     @pytest.mark.asyncio
-    async def test_archive_not_implemented(self, lifecycle_service):
-        """Test archive raises NotImplementedError."""
-        with pytest.raises(NotImplementedError, match="Archive not yet implemented"):
-            await lifecycle_service.archive("test_table", "/archive/path")
+    async def test_archive_delegates_to_storage(
+        self, lifecycle_service_with_archive, mock_storage_with_archive
+    ):
+        """archive() should call storage.archive()."""
+        result = await lifecycle_service_with_archive.archive(
+            "chembl.activity", "/archive/2025"
+        )
+
+        assert result == 100
+        mock_storage_with_archive.archive.assert_called_once_with(
+            table_name="chembl.activity",
+            target_path="/archive/2025",
+            remove_source=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_archive_with_remove_source(
+        self, lifecycle_service_with_archive, mock_storage_with_archive
+    ):
+        """archive() should pass remove_source flag."""
+        await lifecycle_service_with_archive.archive(
+            "chembl.activity", "/archive/2025", remove_source=True
+        )
+
+        mock_storage_with_archive.archive.assert_called_once_with(
+            table_name="chembl.activity",
+            target_path="/archive/2025",
+            remove_source=True,
+        )
+
+    @pytest.mark.asyncio
+    async def test_archive_logs_operation(
+        self, lifecycle_service_with_archive, mock_logger
+    ):
+        """archive() should log start and completion."""
+        await lifecycle_service_with_archive.archive(
+            "chembl.activity", "/archive/2025"
+        )
+
+        # Should have at least 2 log calls (start and complete)
+        assert mock_logger.info.call_count >= 2
+
+    @pytest.mark.asyncio
+    async def test_archive_propagates_exception(
+        self, lifecycle_service_with_archive, mock_storage_with_archive, mock_logger
+    ):
+        """archive() should propagate exceptions from storage."""
+        mock_storage_with_archive.archive.side_effect = RuntimeError("Archive failed")
+
+        with pytest.raises(RuntimeError, match="Archive failed"):
+            await lifecycle_service_with_archive.archive(
+                "chembl.activity", "/archive/2025"
+            )
+
+        # Should log error
+        mock_logger.error.assert_called_once()
