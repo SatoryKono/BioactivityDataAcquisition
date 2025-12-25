@@ -155,16 +155,27 @@ def test_application_layer_no_infrastructure_implementation_imports(
 def test_ports_defined_in_domain_layer(src_dir: Path) -> None:
     """Ports (interfaces) must be defined in the domain layer.
 
-    REQ-ARCH-005: All port definitions should live in domain/ports.py
+    REQ-ARCH-005: All port definitions should live in domain/ports/ package
     """
-    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-    assert ports_file.exists(), "Domain ports file (domain/ports.py) not found"
+    ports_dir = src_dir / "bioetl" / "domain" / "ports"
+    assert ports_dir.exists(), "Domain ports package (domain/ports/) not found"
+    assert ports_dir.is_dir(), "domain/ports should be a directory (package)"
 
-    with ports_file.open(encoding="utf-8") as f:
-        content = f.read()
+    # Verify __init__.py exists (proper package)
+    init_file = ports_dir / "__init__.py"
+    assert init_file.exists(), "domain/ports/__init__.py not found"
 
-    # Verify Protocol is used for port definitions
-    assert "Protocol" in content, "Ports should be defined using typing.Protocol"
+    # Verify Protocol is used in at least one port file
+    protocol_found = False
+    for port_file in ports_dir.glob("*.py"):
+        if port_file.name == "__init__.py":
+            continue
+        with port_file.open(encoding="utf-8") as f:
+            if "Protocol" in f.read():
+                protocol_found = True
+                break
+
+    assert protocol_found, "Ports should be defined using typing.Protocol"
 
 
 def test_infrastructure_imports_domain_ports(src_dir: Path) -> None:
@@ -262,22 +273,28 @@ def test_domain_layer_uses_protocol_for_ports(src_dir: Path) -> None:
     REQ-ARCH-009: Ports should be defined using typing.Protocol
     for structural subtyping (duck typing with type safety).
     """
-    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-    if not ports_file.exists():
-        pytest.skip("ports.py not found")
+    ports_dir = src_dir / "bioetl" / "domain" / "ports"
+    if not ports_dir.exists():
+        pytest.skip("ports/ package not found")
 
-    with ports_file.open(encoding="utf-8") as f:
-        content = f.read()
+    # Check at least one port file uses Protocol
+    protocol_import_found = False
+    protocol_class_found = False
 
-    # Check for Protocol usage
-    assert (
-        "from typing" in content and "Protocol" in content
-    ), "Domain ports should use typing.Protocol for interface definitions"
+    for port_file in ports_dir.glob("*.py"):
+        if port_file.name == "__init__.py":
+            continue
+        with port_file.open(encoding="utf-8") as f:
+            content = f.read()
+            if "from typing" in content and "Protocol" in content:
+                protocol_import_found = True
+            if "class" in content and "(Protocol)" in content:
+                protocol_class_found = True
+            if protocol_import_found and protocol_class_found:
+                break
 
-    # Check that Protocol classes are defined
-    assert (
-        "class" in content and "(Protocol)" in content
-    ), "Port interfaces should be classes inheriting from Protocol"
+    assert protocol_import_found, "Domain ports should use typing.Protocol for interface definitions"
+    assert protocol_class_found, "Port interfaces should be classes inheriting from Protocol"
 
 
 def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
@@ -796,7 +813,7 @@ def test_no_hasattr_duck_typing_in_application(src_dir: Path) -> None:
 
     assert not violations, (
         "Found hasattr duck-typing in application layer. "
-        "Add missing methods to port contracts in domain/ports.py:\n"
+        "Add missing methods to port contracts in domain/ports/ package:\n"
         + "\n".join(f"  - {v}" for v in violations)
     )
 
@@ -1086,11 +1103,11 @@ def test_observability_ports_have_close_method(src_dir: Path) -> None:
 
     REQ-ARCH-021: Proper lifecycle management for observability resources.
     """
-    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-    if not ports_file.exists():
-        pytest.skip("Domain ports file not found")
+    observability_file = src_dir / "bioetl" / "domain" / "ports" / "observability.py"
+    if not observability_file.exists():
+        pytest.skip("Domain ports observability file not found")
 
-    with ports_file.open(encoding="utf-8") as f:
+    with observability_file.open(encoding="utf-8") as f:
         content = f.read()
 
     import ast
@@ -1115,11 +1132,11 @@ def test_storage_port_has_preview_cleanup(src_dir: Path) -> None:
 
     REQ-ARCH-022: CLI delegates all storage operations to port.
     """
-    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
-    if not ports_file.exists():
-        pytest.skip("Domain ports file not found")
+    storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage.py"
+    if not storage_file.exists():
+        pytest.skip("Domain ports storage file not found")
 
-    with ports_file.open(encoding="utf-8") as f:
+    with storage_file.open(encoding="utf-8") as f:
         content = f.read()
 
     assert "def preview_cleanup(" in content, (
