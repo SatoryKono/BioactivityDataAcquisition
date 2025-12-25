@@ -502,9 +502,11 @@ class TestTargetTransformer:
         import json
 
         xrefs = json.loads(result["cross_references"])
-        assert len(xrefs) == 1
-        assert xrefs[0]["xref_id"] == "P12345"
-        assert xrefs[0]["xref_src_db"] == "UniProt"
+        # Single-element lists are unwrapped by serialize_json
+        # So xrefs is a dict, not a list
+        assert isinstance(xrefs, dict)
+        assert xrefs["xref_id"] == "P12345"
+        assert xrefs["xref_src_db"] == "UniProt"
 
     @pytest.mark.asyncio
     async def test_transform_aggregates_xrefs_from_multiple_components(
@@ -627,7 +629,9 @@ class TestTargetTransformer:
         import json
 
         stages = json.loads(result["pipeline_stages"])
-        assert stages[0]["stage"] == "Phase 1"
+        # Single-element lists are unwrapped by serialize_json
+        assert isinstance(stages, dict)
+        assert stages["stage"] == "Phase 1"
 
     @pytest.mark.asyncio
     async def test_transform_extracts_component_organisms_and_tax_ids(
