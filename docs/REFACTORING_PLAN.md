@@ -20,6 +20,7 @@
 | **Обработка ошибок ChEMBL** | `client.py:223-267` | `_handle_error()` ВСЕГДА кидает исключения (CriticalError/ChemblApiError) |
 | **UnifiedHTTPClient lifecycle** | `client.py:138-162` | Корректный async context manager (`__aenter__`/`__aexit__`) |
 | **D1: Детерминистичный HTTP jitter** | `domain/resilience.py:45-84` | MD5-based jitter в `RetryPolicy.calculate_delay()`, 11 тестов в `test_http_client.py` |
+| **PipelineRunner DI** | `runner.py:43-88`, `runner_services.py` | RunnerServices bundle инжектируется через конструктор; `build_runner_services()` создаёт сервисы в composition |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -36,7 +37,7 @@
 
 | Проблема | Файл:строки | Описание |
 |----------|-------------|----------|
-| **PipelineRunner создаёт сервисы** | `runner.py:90-126` | LockManager, PreflightService, PostrunService, LifecycleOrchestrator создаются внутри конструктора |
+| ~~**PipelineRunner создаёт сервисы**~~ | ~~`runner.py:90-126`~~ | ✅ ВЫПОЛНЕНО: DI через `RunnerServices` bundle (2025-12-26) |
 | **CLI вызывает bootstrap напрямую** | `cli.py:224,265,337` | Смешение interfaces и composition слоёв |
 | ~~**Мёртвый код в ChemblAdapter**~~ | ~~`client.py:147`~~ | ✅ ВЫПОЛНЕНО: Удалён в коммите `9214cfb` |
 
@@ -1122,28 +1123,24 @@ ci: lint test arch-all
 
 ### Приоритет 1: КРИТИЧЕСКИЕ
 
-#### 1.1 Вынести сервисы из PipelineRunner в composition
+#### 1.1 ~~Вынести сервисы из PipelineRunner в composition~~ ✅ ВЫПОЛНЕНО
 
-**Проблема**: `runner.py:90-126` — создание сервисов внутри конструктора.
+**Статус**: Реализовано (2025-12-26)
 
-**Решение**:
-```python
-# composition/factories/runner_services.py (новый)
-@dataclass
-class RunnerServices:
-    lock_manager: LockManager
-    preflight: PreflightService
-    postrun: PostrunService
-    lifecycle_orch: LifecycleOrchestrator
+**Реализация**:
+- `RunnerServices` bundle в `application/core/runner_services.py:19-33`
+- `build_runner_services()` фабрика в `composition/factories/runner_services.py:33-103`
+- `PipelineRunner` принимает `runner_services` в конструкторе (`runner.py:53`)
+- Сервисы извлекаются из bundle (`runner.py:84-88`)
 
-# runner.py — только принимает
-def __init__(self, ..., runner_services: RunnerServices) -> None:
-    self._lock_manager = runner_services.lock_manager
-```
+**Тесты**:
+- `tests/architecture/test_di_discipline.py` (1 тест) — проверяет отсутствие создания сервисов в application
+- `tests/architecture/test_di_compliance.py` (9 тестов) — проверяет DI паттерн
+- `tests/unit/application/core/test_runner.py` (17 тестов) — unit тесты runner
 
 **Критерии готовности**:
-- [ ] PipelineRunner не создаёт сервисы
-- [ ] `make arch-test` проходит
+- [x] PipelineRunner не создаёт сервисы
+- [x] `make arch-test` проходит (187 passed)
 
 #### 1.2 Разнести CLI и composition root
 
@@ -1165,11 +1162,17 @@ def __init__(self, ..., runner_services: RunnerServices) -> None:
 
 ### Приоритет 3: ЖЕЛАТЕЛЬНО
 
-#### 3.1 Arch-тест на DI дисциплину
+#### 3.1 ~~Arch-тест на DI дисциплину~~ ✅ ВЫПОЛНЕНО
 
-**Файл**: `tests/architecture/test_di_discipline.py` (новый)
+**Файл**: `tests/architecture/test_di_discipline.py`
 
-Проверять отсутствие прямых конструкторов сервисов в application layer.
+**Статус**: Реализовано. Тест `test_no_service_creation_in_application` проверяет отсутствие:
+- `LockManager.create`
+- `PreflightService(`
+- `PostrunService(`
+- `LifecycleOrchestrator(`
+
+в application layer.
 
 ---
 
