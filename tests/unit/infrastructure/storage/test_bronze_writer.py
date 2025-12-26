@@ -60,6 +60,107 @@ def sample_records() -> list[bytes]:
 
 
 @pytest.mark.unit
+class TestBronzeWriterNameValidation:
+    """Tests for BronzeWriter provider/entity name validation."""
+
+    def test_validate_bronze_names_valid(self, tmp_path, noop_logger) -> None:
+        """Test valid provider and entity names pass validation."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        # Should not raise for valid names
+        writer._validate_bronze_names("chembl", "activity")
+        writer._validate_bronze_names("pub_chem", "compound_data")
+        writer._validate_bronze_names("uniprot-kb", "protein-entry")
+        writer._validate_bronze_names("Test123", "Entity456")
+
+    def test_validate_bronze_names_invalid_provider(self, tmp_path, noop_logger) -> None:
+        """Test invalid provider names raise ValueError."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        with pytest.raises(ValueError, match="Invalid provider name"):
+            writer._validate_bronze_names("", "activity")
+
+        with pytest.raises(ValueError, match="Invalid provider name"):
+            writer._validate_bronze_names("provider/path", "activity")
+
+        with pytest.raises(ValueError, match="Invalid provider name"):
+            writer._validate_bronze_names("provider name", "activity")
+
+        with pytest.raises(ValueError, match="Invalid provider name"):
+            writer._validate_bronze_names("provider.name", "activity")
+
+    def test_validate_bronze_names_invalid_entity(self, tmp_path, noop_logger) -> None:
+        """Test invalid entity names raise ValueError."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        with pytest.raises(ValueError, match="Invalid entity name"):
+            writer._validate_bronze_names("chembl", "")
+
+        with pytest.raises(ValueError, match="Invalid entity name"):
+            writer._validate_bronze_names("chembl", "entity/path")
+
+        with pytest.raises(ValueError, match="Invalid entity name"):
+            writer._validate_bronze_names("chembl", "entity name")
+
+        with pytest.raises(ValueError, match="Invalid entity name"):
+            writer._validate_bronze_names("chembl", "entity.name")
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_invalid_provider_raises(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze raises ValueError for invalid provider."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        date = datetime(2024, 1, 15)
+
+        with pytest.raises(ValueError, match="Invalid provider name"):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="invalid/provider",
+                entity="activity",
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_invalid_entity_raises(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze raises ValueError for invalid entity."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        date = datetime(2024, 1, 15)
+
+        with pytest.raises(ValueError, match="Invalid entity name"):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="chembl",
+                entity="invalid entity",
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+
+
+@pytest.mark.unit
 class TestBronzeWriterInit:
     """Tests for BronzeWriter initialization."""
 
