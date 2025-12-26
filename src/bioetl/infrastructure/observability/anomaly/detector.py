@@ -6,7 +6,7 @@ Main entry point for anomaly detection functionality.
 from __future__ import annotations
 
 import statistics
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.zscore import ZScoreDetector
@@ -91,42 +91,47 @@ class AnomalyDetector:
         self._thresholds[metric_name] = (min_val, max_val)
 
     def detect(
-        self, metric_name: str, current_value: float, now: datetime | None = None
+        self, metric_name: str, current_value: float, timestamp: datetime | None = None
     ) -> Anomaly | None:
         """Detect anomaly in current value.
 
         Args:
             metric_name: Name of metric being analyzed
             current_value: Current observed value
-            now: Optional timestamp for testing (defaults to current UTC time)
+            timestamp: Timestamp for the anomaly (should be created in application layer)
 
         Returns:
             Anomaly if detected, None otherwise
         """
-        if anomaly := self._check_thresholds(metric_name, current_value, now):
+        if anomaly := self._check_thresholds(metric_name, current_value, timestamp):
             return anomaly
 
         baseline = self._baselines.get(metric_name, [])
         if len(baseline) < self.min_baseline_samples:
             return None
 
+        if timestamp is None:
+            return None  # No anomaly without timestamp from application layer
+
         return self.strategy.detect(
-            metric_name, current_value, baseline, self.z_score_threshold, now
+            metric_name, current_value, baseline, self.z_score_threshold, timestamp
         )
 
     def _check_thresholds(
-        self, metric_name: str, current_value: float, now: datetime | None = None
+        self, metric_name: str, current_value: float, timestamp: datetime | None = None
     ) -> Anomaly | None:
         """Check if the current value exceeds configured thresholds."""
         if metric_name not in self._thresholds:
             return None
+        if timestamp is None:
+            return None  # No anomaly without timestamp from application layer
 
         min_val, max_val = self._thresholds[metric_name]
         if min_val <= current_value <= max_val:
             return None
 
         return self._create_threshold_anomaly(
-            metric_name, current_value, min_val, max_val, now
+            metric_name, current_value, min_val, max_val, timestamp
         )
 
     def _create_threshold_anomaly(
@@ -135,7 +140,7 @@ class AnomalyDetector:
         current_value: float,
         min_val: float,
         max_val: float,
-        now: datetime | None = None,
+        timestamp: datetime,
     ) -> Anomaly:
         """Create anomaly for threshold breach."""
         baseline_mean = (min_val + max_val) / 2
@@ -162,7 +167,7 @@ class AnomalyDetector:
             anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
             severity=AnomalySeverity.CRITICAL,
             z_score=z_score,
-            timestamp=now or datetime.now(UTC),
+            timestamp=timestamp,
             message=message,
         )
 

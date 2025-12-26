@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
@@ -171,9 +171,9 @@ class LineageTracker:
         entity_type: str,
         record_count: int,
         file_path: str,
+        timestamp: datetime,
         watermark: str | None = None,
         metadata: dict[str, Any] | None = None,
-        now: datetime | None = None,
     ) -> None:
         """Record bronze layer batch ingestion.
 
@@ -184,9 +184,9 @@ class LineageTracker:
             entity_type: Entity type
             record_count: Number of records
             file_path: Storage location
+            timestamp: Ingestion timestamp (created in application layer)
             watermark: Optional position marker (deprecated)
             metadata: Additional metadata
-            now: Optional timestamp for testing (defaults to current UTC time)
 
         """
         batch = BatchLineage(
@@ -200,7 +200,7 @@ class LineageTracker:
             file_path=file_path,
             watermark=watermark,
             metadata=metadata or {},
-            timestamp=now or datetime.now(UTC),
+            timestamp=timestamp,
         )
 
         self._write_batch_lineage(batch)
@@ -216,8 +216,8 @@ class LineageTracker:
         record_count: int,
         success_count: int,
         failure_count: int,
+        timestamp: datetime,
         metadata: dict[str, Any] | None = None,
-        now: datetime | None = None,
     ) -> None:
         """Record data transformation between layers.
 
@@ -231,8 +231,8 @@ class LineageTracker:
             record_count: Total records processed
             success_count: Successful transformations
             failure_count: Failed transformations
+            timestamp: Transformation timestamp (created in application layer)
             metadata: Additional metadata
-            now: Optional timestamp for testing (defaults to current UTC time)
 
         """
         lineage = LineageRecord(
@@ -248,7 +248,7 @@ class LineageTracker:
             success_count=success_count,
             failure_count=failure_count,
             metadata=metadata or {},
-            timestamp=now or datetime.now(UTC),
+            timestamp=timestamp,
         )
 
         self._write_transformation_lineage(lineage)
@@ -318,7 +318,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
-            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())
 
             # Filter by pipeline
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -359,7 +359,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
-            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())
 
             # Filter by pipeline
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -398,7 +398,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
-            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())
 
             # Filter by pipeline and entity_id
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -416,15 +416,15 @@ class LineageTracker:
     def get_batch_statistics(
         self,
         layer: str,
+        timestamp: datetime,
         days: int = 7,
-        now: datetime | None = None,
     ) -> dict[str, Any]:
         """Get batch statistics for a layer.
 
         Args:
             layer: Data layer (bronze, silver, gold)
+            timestamp: Current timestamp for calculating date range (created in application layer)
             days: Number of days to analyze
-            now: Optional timestamp for testing (defaults to current UTC time)
 
         Returns:
             Dictionary with statistics (total_batches, total_records, avg_batch_size)
@@ -432,14 +432,13 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
-            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())  # type: ignore[assignment]
+            df: pl.DataFrame = pl.from_arrow(dt.to_pyarrow_table())
 
             # Filter by pipeline and layer
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
             df = df.filter(pl.col("layer") == layer)
 
             # Filter by date range
-            timestamp = now or datetime.now(UTC)
             cutoff = timestamp.timestamp() - (days * 86400)
             df = df.filter(pl.col("timestamp") >= cutoff)
 

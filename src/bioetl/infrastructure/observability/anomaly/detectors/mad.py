@@ -6,7 +6,7 @@ Uses median and MAD for robust outlier detection.
 from __future__ import annotations
 
 import statistics
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
@@ -42,11 +42,13 @@ class MADDetector(DetectorStrategy):
         current_value: float,
         baseline: Sequence[float],
         threshold: float = 2.0,
-        now: datetime | None = None,
+        timestamp: datetime | None = None,
     ) -> Anomaly | None:
         """Detect anomaly using MAD method."""
         if len(baseline) < self.MIN_SAMPLES:
             return None
+        if timestamp is None:
+            return None  # No anomaly without timestamp from application layer
 
         median = statistics.median(baseline)
         mad = self._calculate_mad(baseline, median)
@@ -60,7 +62,7 @@ class MADDetector(DetectorStrategy):
 
         mean = statistics.mean(baseline)
         stddev = statistics.stdev(baseline) if len(baseline) >= 2 else 0.0
-        return self._create_anomaly(metric_name, current_value, mean, stddev, score, now)
+        return self._create_anomaly(metric_name, current_value, mean, stddev, score, timestamp)
 
     def _calculate_mad(self, data: Sequence[float], median: float) -> float:
         """Calculate Median Absolute Deviation."""
@@ -80,7 +82,7 @@ class MADDetector(DetectorStrategy):
         mean: float,
         stddev: float,
         score: float,
-        now: datetime | None = None,
+        timestamp: datetime,
     ) -> Anomaly:
         """Create Anomaly object from detection results."""
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
@@ -98,7 +100,7 @@ class MADDetector(DetectorStrategy):
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=score,
-            timestamp=now or datetime.now(UTC),
+            timestamp=timestamp,
             message=message,
         )
 
