@@ -339,8 +339,8 @@ class TestPipelineRunnerLifecycle:
             "postrun.vacuum",
             "checkpoint.delete",
             "lock_manager.__aexit__",
-            "postrun.cleanup",
             "services.__aexit__",
+            "postrun.cleanup",
         )
 
     @pytest.mark.asyncio
@@ -350,7 +350,6 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
-        mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
         mock_logger,
@@ -374,6 +373,10 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
 
+        # Orchestrator that does NOT clear for incremental runs
+        orchestrator_no_clear = MagicMock(spec=LifecycleOrchestrator)
+        orchestrator_no_clear.clear_for_run = AsyncMock(return_value=None)
+
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
             lock_manager = MagicMock()
             lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
@@ -389,7 +392,7 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
+                lifecycle_orchestrator=orchestrator_no_clear,
                 preflight_service=mock_preflight_service,
                 postrun_service=mock_postrun_service,
                 lock_manager=lock_manager,
