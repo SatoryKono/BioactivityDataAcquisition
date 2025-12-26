@@ -1,8 +1,7 @@
 """Command-line interface for BioETL.
 
 This is the primary entry point for running pipelines from the command line.
-It acts as the "Composition Root" for the application, where dependencies
-are assembled and the pipeline is executed.
+It delegates to composition/entrypoints.py for all pipeline operations.
 """
 
 from __future__ import annotations
@@ -10,23 +9,20 @@ from __future__ import annotations
 import asyncio
 import sys
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.composition.bootstrap import (
-    bootstrap_checkpoint_manager,
-    bootstrap_cleanup,
-    bootstrap_lifecycle_service,
-    bootstrap_pipeline,
-    bootstrap_quarantine_manager,
-    load_pipeline_config,
+from bioetl.composition.entrypoints import (
+    RunOptions,
+    create_pipeline_runner,
+    get_checkpoint_manager,
+    get_lifecycle_service,
+    get_quarantine_manager,
+    preview_cleanup,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry
-from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.types import RunType
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
@@ -38,37 +34,35 @@ if TYPE_CHECKING:
 async def _preview_cleanup_async(pipeline: str) -> None:
     """Preview what data would be cleared in dry-run mode.
 
-    Delegates to CleanupService.preview() for clean architecture.
+    Delegates to entrypoints.preview_cleanup() for clean architecture.
 
     Args:
         pipeline: Pipeline name
     """
-    config = load_pipeline_config(pipeline)
-    cleanup_service = bootstrap_cleanup()
-
-    preview = await cleanup_service.preview(
-        silver_table=config.silver_table,
-        gold_table=config.gold_table,
-    )
+    preview_result = await preview_cleanup(pipeline)
 
     click.echo("\nFiles/directories that would be cleared:")
 
     # Display Silver info
-    if preview.silver.exists:
+    if preview_result.silver.exists:
         click.echo(
-            f"  Silver: {preview.silver.path} ({preview.silver.file_count} files)"
+            f"  Silver: {preview_result.silver.path} "
+            f"({preview_result.silver.file_count} files)"
         )
     else:
-        click.echo(f"  Silver: {preview.silver.path} (does not exist)")
+        click.echo(f"  Silver: {preview_result.silver.path} (does not exist)")
 
     # Display Gold info
-    if preview.gold:
-        if preview.gold.exists:
-            click.echo(f"  Gold: {preview.gold.path} ({preview.gold.file_count} files)")
+    if preview_result.gold:
+        if preview_result.gold.exists:
+            click.echo(
+                f"  Gold: {preview_result.gold.path} "
+                f"({preview_result.gold.file_count} files)"
+            )
         else:
-            click.echo(f"  Gold: {preview.gold.path} (does not exist)")
+            click.echo(f"  Gold: {preview_result.gold.path} (does not exist)")
 
-    click.echo(f"\nTotal items that would be cleared: ~{preview.total_files}")
+    click.echo(f"\nTotal items that would be cleared: ~{preview_result.total_files}")
     click.echo("\nNo changes were made (dry-run mode).")
 
 
@@ -207,13 +201,9 @@ def run(
     if not _handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
         return
 
-    run_id = uuid4()
-
     try:
-        ctx = PipelineRunContext(
-            pipeline_name=pipeline,
-            run_id=run_id,
-            run_type=RunType(run_type),
+        options = RunOptions(
+            run_type=run_type,
             resume=resume,
             limit=limit,
             input_csv=input_csv,
@@ -221,7 +211,7 @@ def run(
             filter_field=filter_field,
             dry_run=dry_run,
         )
-        runner = bootstrap_pipeline(ctx)
+        runner = create_pipeline_runner(pipeline, options)
     except (ValueError, FileNotFoundError) as e:
         click.echo(f"Configuration error: {e}", err=True)
         sys.exit(1)
@@ -261,8 +251,8 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
     """Inspect quarantined records."""
     click.echo(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
-    # Use application-layer QuarantineManager via bootstrap
-    quarantine_manager = bootstrap_quarantine_manager(pipeline)
+    # Use application-layer QuarantineManager via entrypoints
+    quarantine_manager = get_quarantine_manager(pipeline)
 
     # Run async inspection
     async def _inspect() -> None:
@@ -291,8 +281,8 @@ def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints."""
     click.echo(f"Listing checkpoints for {pipeline}...")
 
-    # Use application-layer CheckpointManager via bootstrap
-    checkpoint_manager = bootstrap_checkpoint_manager(pipeline)
+    # Use application-layer CheckpointManager via entrypoints
+    checkpoint_manager = get_checkpoint_manager(pipeline)
 
     async def _list() -> None:
         checkpoints = await checkpoint_manager.list_all()
@@ -334,7 +324,7 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
 
         bioetl maintenance vacuum chembl.activity -r 30
     """
-    lifecycle = bootstrap_lifecycle_service()
+    lifecycle = get_lifecycle_service()
 
     async def _run() -> None:
         if dry_run:
@@ -369,7 +359,7 @@ def archive_command(table: str, target_path: str, remove_source: bool) -> None:
 
     TARGET_PATH: Destination path for archive
     """
-    lifecycle = bootstrap_lifecycle_service()
+    lifecycle = get_lifecycle_service()
 
     async def _run() -> None:
         files_archived = await lifecycle.archive(
