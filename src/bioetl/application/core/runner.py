@@ -3,7 +3,8 @@
 Application Service that orchestrates pipeline execution lifecycle.
 Coordinates locking, checkpointing, and execution.
 
-Delegates to specialized services:
+Delegates to specialized services (injected via RunnerServices):
+- LockManager: Distributed locking
 - PreflightService: Infrastructure health validation
 - PostrunService: DQ checks, VACUUM, cleanup
 - LifecycleOrchestrator: Medallion layer clearing
@@ -13,21 +14,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
-from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.postrun_service import PostrunService
-from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.observability.observer import PipelineObserver
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
+    from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
+    from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.postrun_service import PostrunService
+    from bioetl.application.core.preflight_service import PreflightService
     from bioetl.application.core.shutdown import ShutdownSignal
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
@@ -55,7 +53,10 @@ class PipelineRunner:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: LoggerPort,
-        lifecycle_service: MedallionLifecycleService,
+        lock_manager: LockManager,
+        preflight_service: PreflightService,
+        postrun_service: PostrunService,
+        lifecycle_orchestrator: LifecycleOrchestrator,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
     ) -> None:
@@ -70,7 +71,10 @@ class PipelineRunner:
             checkpoint_manager: Checkpoint manager.
             shutdown_signal: Shutdown signal for graceful termination.
             logger: Structured logger.
-            lifecycle_service: Medallion lifecycle service for data clearing.
+            lock_manager: Lock manager for distributed locking.
+            preflight_service: Pre-flight infrastructure validation service.
+            postrun_service: Post-run DQ checks and VACUUM service.
+            lifecycle_orchestrator: Lifecycle orchestrator for medallion layer.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
         """
@@ -82,48 +86,14 @@ class PipelineRunner:
         self._checkpoint_manager = checkpoint_manager
         self.shutdown_signal = shutdown_signal
         self._logger = logger
-        self._lifecycle_service = lifecycle_service
         self.pipeline = pipeline
         self._tracer = tracer
 
-        # The runner is responsible for creating application services
-        self._lock_manager = LockManager.create(
-            lock_port=self._services.lock,
-            run_id=self._context.run_id,
-            provider=self._config.provider,
-            entity_type=self._config.entity_type,
-            run_type=self._runtime.run_type,
-            lock_ttl=self._runtime.effective_lock_ttl,
-            wait_for_lock=self._runtime.wait_for_lock,
-            wait_timeout=self._runtime.lock_wait_timeout,
-            heartbeat_interval=self._runtime.heartbeat_interval,
-            logger=self._logger,
-            shutdown_signal=self.shutdown_signal,
-            checkpoint_manager=self._checkpoint_manager,
-        )
-
-        # Specialized services
-        self._preflight_service = PreflightService(
-            config=self._config,
-            context=self._context,
-            logger=self._logger,
-            metrics=self._services.metrics,
-        )
-
-        self._postrun_service = PostrunService(
-            config=self._config,
-            runtime=self._runtime,
-            services=self._services,
-            logger=self._logger,
-            lifecycle_service=self._lifecycle_service,
-        )
-
-        self._lifecycle_orchestrator = LifecycleOrchestrator(
-            config=self._config,
-            runtime=self._runtime,
-            logger=self._logger,
-            lifecycle_service=self._lifecycle_service,
-        )
+        # Injected application services (created in composition layer)
+        self._lock_manager = lock_manager
+        self._preflight_service = preflight_service
+        self._postrun_service = postrun_service
+        self._lifecycle_orchestrator = lifecycle_orchestrator
 
     @property
     def logger(self) -> LoggerPort:
