@@ -21,8 +21,18 @@ from bioetl.application.core.cleanup_service import (
     LayerInfo,
 )
 from bioetl.application.core.health_aggregator import HealthAggregator
+from bioetl.application.core.lifecycle_orchestrator import (
+    ClearDecision,
+    LifecycleOrchestrator,
+)
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.postrun_service import (
+    DQResult,
+    PostrunService,
+    VacuumResult,
+)
+from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.core.transform_utils import (
@@ -34,31 +44,30 @@ from bioetl.application.core.transform_utils import (
     safe_extract,
     validate_smiles,
 )
-
-# Re-exports from consolidated domain location
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 __all__ = [
-    # Base classes
     "BasePipeline",
     "BaseTransformer",
-    # Components
     "CheckpointManager",
     "CleanupPreview",
     "CleanupResult",
     "CleanupService",
+    "ClearDecision",
+    "DQResult",
     "HealthAggregator",
     "LayerInfo",
+    "LifecycleOrchestrator",
     "LockManager",
-    # Decomposed config (ADR-0005) - consolidated in domain.config
     "PipelineConfig",
     "PipelineServices",
     "PipelineShutdownError",
+    "PostrunService",
+    "PreflightService",
     "QuarantineManager",
     "RuntimeConfig",
-    # Shutdown coordination (ADR-0005)
     "ShutdownSignal",
-    # Transform utilities
+    "VacuumResult",
     "aggregate_nested_lists",
     "extract_list_field",
     "flatten_nested_dict",
