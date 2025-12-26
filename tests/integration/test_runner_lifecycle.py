@@ -19,6 +19,10 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -194,6 +198,55 @@ def mock_lifecycle_service_with_recorder(call_recorder, mock_services_with_recor
         )
 
     service.clear = AsyncMock(side_effect=clear_with_recording)
+    service.vacuum = AsyncMock()
+    return service
+
+
+@pytest.fixture
+def mock_orchestrator(call_recorder, mock_lifecycle_service_with_recorder):
+    """Create a mock orchestrator."""
+    orchestrator = MagicMock(spec=LifecycleOrchestrator)
+
+    async def clear_for_run():
+        call_recorder.record("lifecycle.clear")
+        return await mock_lifecycle_service_with_recorder.clear(
+            policy=MagicMock(),  # Simplified for test
+        )
+
+    orchestrator.clear_for_run = AsyncMock(side_effect=clear_for_run)
+    return orchestrator
+
+
+@pytest.fixture
+def mock_preflight_service(call_recorder):
+    """Create a mock preflight service."""
+    service = MagicMock(spec=PreflightService)
+
+    async def validate_infrastructure(services):
+        call_recorder.record("preflight.validate_infrastructure")
+
+    service.validate_infrastructure = AsyncMock(side_effect=validate_infrastructure)
+    service.validate_medallion_config = MagicMock()
+    return service
+
+
+@pytest.fixture
+def mock_postrun_service(call_recorder):
+    """Create a mock postrun service."""
+    service = MagicMock(spec=PostrunService)
+
+    async def run_dq_checks(executor):
+        call_recorder.record("postrun.dq_checks")
+
+    async def run_vacuum_if_enabled():
+        call_recorder.record("postrun.vacuum")
+
+    async def cleanup(tracer):
+        call_recorder.record("postrun.cleanup")
+
+    service.run_dq_checks = AsyncMock(side_effect=run_dq_checks)
+    service.run_vacuum_if_enabled = AsyncMock(side_effect=run_vacuum_if_enabled)
+    service.cleanup = AsyncMock(side_effect=cleanup)
     return service
 
 
@@ -208,7 +261,9 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify call order for REBUILD run type.
@@ -216,13 +271,16 @@ class TestPipelineRunnerLifecycle:
         Expected order:
         1. services.__aenter__ (context manager entry)
         2. lock_manager.__aenter__ (acquire lock)
-        3. storage.clear_silver
-        4. storage.clear_gold
+        3. preflight.validate_infrastructure
+        4. lifecycle.clear
         5. checkpoint.load
         6. executor.execute
-        7. checkpoint.delete
-        8. lock_manager.__aexit__
-        9. services.__aexit__
+        7. postrun.dq_checks
+        8. postrun.vacuum
+        9. checkpoint.delete
+        10. postrun.cleanup
+        11. lock_manager.__aexit__
+        12. services.__aexit__
         """
         config = PipelineConfig(
             pipeline_name="test_lifecycle",
@@ -261,7 +319,9 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
             )
 
             await runner.run()
@@ -270,11 +330,14 @@ class TestPipelineRunnerLifecycle:
         call_recorder.assert_order(
             "services.__aenter__",
             "lock_manager.__aenter__",
-            "storage.clear_silver",
-            "storage.clear_gold",
+            "preflight.validate_infrastructure",
+            "lifecycle.clear",
             "checkpoint.load",
             "executor.execute",
+            "postrun.dq_checks",
+            "postrun.vacuum",
             "checkpoint.delete",
+            "postrun.cleanup",
             "lock_manager.__aexit__",
             "services.__aexit__",
         )
