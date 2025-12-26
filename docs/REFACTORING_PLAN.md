@@ -48,7 +48,9 @@
 | "BaseTransformer без DQ-валидации" | By design: Template Method, DQ — ответственность конкретных трансформеров | `base_transformer.py` |
 | "MedallionLifecycleService без политик" | Использует `MedallionPolicy.should_clear_*` | `medallion_lifecycle.py:71-112` |
 | "BronzeWriter без observability" | Имеет структурированное логирование | `bronze_writer.py:197-205` |
-| "BasePipeline с методами should_write_gold/transform_for_gold" | **Класс не существует**. Выдуманные методы | `find . -name "*.py" -exec grep -l "class BasePipeline" {} \;` → пусто |
+| "CLI плотно связан с composition" | CLI использует `entrypoints.py` — это фасад, правильный паттерн | `cli.py:17-24`, `entrypoints.py:7-8` |
+| "bootstrap_pipeline агрегирует слишком много" | ~100 строк, делегирует специализированным функциям | `bootstrap.py:68-167` |
+| "PipelineRunner.run() концентрирует этапы" | Делегирует: `preflight_service`, `lifecycle_orchestrator`, `postrun_service` | `runner.py:126-142` |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
@@ -1198,181 +1200,99 @@ ci: lint test arch-all
 
 ---
 
-## Фаза 5: Улучшение Архитектуры (Верифицированный План) 🔵
+## 📝 Протокол Предотвращения Ложных Утверждений
 
-> **Дата верификации**: 2025-12-26
-> **Статус**: Актуальный план после проверки кодовой базы
+> **ПРИЧИНА**: Анализ 2025-12-26 выявил ~60% ложных утверждений в 4 планах рефакторинга.
+> Этот протокол обязателен для исполнения.
 
-### ❌ Отклонённые Предложения (Ложные Утверждения)
+### Правило 1: Никаких Утверждений Без Кода
 
-| Предложение | Причина Отклонения |
-|-------------|-------------------|
-| "Decompose Gold Logic from BasePipeline" | ❌ `BasePipeline` **не существует**. Методы `should_write_gold`, `transform_for_gold` выдуманы |
-| "D2: random в gold_writer" | ✅ Уже исправлено. `gold_writer.py:286,359` используют фиксированный `0.5 * (2**attempt) + 0.05` |
-| "M1: SilverWriteMode Enum" | ✅ Уже реализовано в `delta_writer.py:53-64` |
-| "M2: GoldWriteMode Enum" | ✅ Уже реализовано в `gold_writer.py:42-54` |
-| "M4: Schema drift handling" | ✅ Уже реализовано в `delta_writer.py:303-349` (параметр `on_schema_mismatch`) |
+**ЗАПРЕЩЕНО** предлагать рефакторинг без верификации:
 
-### Приоритет 1: Желательные Улучшения 🟡
+| ❌ Неверно | ✅ Верно |
+|-----------|----------|
+| "PipelineRunner — god object" | "PipelineRunner (`runner.py`, 173 строки, 8 методов) делегирует `preflight_service`, `postrun_service`" |
+| "bootstrap_pipeline перегружен" | "bootstrap_pipeline (`bootstrap.py:68-167`, 100 строк) вызывает 3 специализированные функции" |
+| "CLI связан с composition" | "CLI (`cli.py:17-24`) импортирует из `entrypoints.py` — это фасад" |
 
-#### 5.1 Config Mapping — Вынос в Composition (Optional)
+### Правило 2: Обязательные Проверки
 
-**Текущее состояние**: `infrastructure/config.py:185-228` содержит `yaml_config_to_domain()` и helpers.
-
-**Предложение**: Вынести в `composition/mappers/pipeline_config_mapper.py`.
-
-**Оценка**:
-- ❓ **Спорное**. Infrastructure имеет право знать о domain моделях для маппинга.
-- Текущая реализация не нарушает архитектуру (infrastructure → domain — разрешённый импорт).
-- Вынос может быть полезен для consistency, но не является критичным.
-
-**Рекомендация**: Отложить до появления конкретной проблемы.
-
-#### 5.2 M3: Валидация Bronze Provider/Entity (Low Priority)
-
-**Файл**: `src/bioetl/infrastructure/storage/bronze_writer.py`
-
-**Предложение**: Добавить валидацию формата provider/entity:
-```python
-if not provider or not provider.replace("_", "").isalnum():
-    raise ValueError(f"Invalid provider name: '{provider}'")
-```
-
-**Риск**: Низкий. Простое добавление без breaking changes.
-
-**Приоритет**: 🟢 Низкий — полезно, но не критично.
-
-### Приоритет 2: Observability Улучшения 🟢
-
-#### 5.3 O1-O4: Расширение Tracing (Уже Частично Реализовано)
-
-**Текущее состояние**:
-- `BaseTransformer` уже имеет tracing spans (`base_transformer.py:125-134`)
-- `BaseTransformer` уже имеет metrics: duration histogram, error counters (`base_transformer.py:164-183`)
-
-**Оставшиеся задачи**:
-- [ ] O2: Добавить root span для batch в `executor.py`
-- [ ] O3: Graceful shutdown для tracer в `runner.py`
-
-**Риск**: Низкий. Добавление observability без изменения логики.
-
-### Приоритет 3: Документация 🔵
-
-#### 5.4 ~~A1: Обновить RULES.md секцией Determinism~~ ✅ ВЫПОЛНЕНО
-
-**Статус**: Реализовано (2025-12-24)
-
-**Секция**: `RULES.md §4.3 Детерминизм и Воспроизводимость`
-
-**Changelog запись**: v5.3 — "Determinism and Reproducibility (ADR-014)"
-
-#### 5.5 ~~A2: ADR-014 Детерминистичные записи~~ ✅ ВЫПОЛНЕНО
-
-**Статус**: Создан (2025-12-24)
-
-**Файл**: `docs/02-architecture/decisions/ADR-014-deterministic-writes.md`
-
-**Содержание**:
-- Детерминистичный retry jitter (hash-based)
-- Запрет random в storage writers
-- Единый источник времени (PipelineContext.started_at)
-- Архитектурные тесты
-- Список исключений для datetime.now()
-
----
-
-### Метрики и Контроль Качества
-
-| Метрика | Инструмент | Цель |
-|---------|------------|------|
-| Maintainability Index (MI) | radon/wily | > 85 для новых модулей |
-| Cyclomatic Complexity | ruff (C901) | < 10 для transform методов |
-| Layer Dependency Violations | import-linter, pytest-archon | 0 (Блокирующий) |
-| Test Coverage | pytest-cov | > 80% line coverage |
-
----
-
-### Чек-лист Готовности Фазы 5
-
-**Обязательно (✅ Выполнено):**
-- [x] A1: RULES.md обновлён секцией §4.3 Детерминизм (2025-12-24)
-- [x] A2: ADR-014 создан (2025-12-24)
-
-**Опционально (оставшиеся задачи):**
-- [ ] O2: Root span для batch в executor
-- [ ] O3: Graceful shutdown tracer
-- [ ] 5.2: Валидация Bronze provider/entity
-
-> **Статус Фазы 5**: ~90% выполнено. Критические задачи завершены.
-
----
-
-## 📝 Инструкция по Обновлению Верификации
-
-### Когда обновлять
-
-| Триггер | Действие |
-|---------|----------|
-| Предложен рефакторинг | **ДО начала работы** — проверить статус |
-| Обнаружено ложное утверждение | Добавить в таблицу "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" |
-| Реализована задача из плана | Отметить как ✅ ВЫПОЛНЕНО с датой |
-| Найден реализованный компонент | Добавить в "УЖЕ РЕАЛИЗОВАНО" |
-
-### Шаги верификации (ОБЯЗАТЕЛЬНО)
+Перед созданием задачи рефакторинга:
 
 ```bash
-# 1. Проверить существование класса/метода
-grep -r "class ClassName" src/bioetl/
-grep -r "def method_name" src/bioetl/
+# 1. Проверить секцию "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" в этом документе
+grep -A3 "Ложное утверждение" docs/REFACTORING_PLAN.md
 
-# 2. Проверить архитектурные тесты
-ls tests/architecture/
+# 2. Прочитать целевой файл
+cat src/bioetl/path/to/file.py | head -100
 
-# 3. Найти реализацию фичи
-grep -r "SilverWriteMode\|GoldWriteMode\|schema_mismatch" src/bioetl/
+# 3. Измерить размер и структуру
+wc -l src/bioetl/path/to/file.py
+grep -c "def \|async def " src/bioetl/path/to/file.py
 
-# 4. Проверить VCR кассеты
-ls tests/fixtures/vcr/ | grep -E "(pubchem|uniprot|chembl)"
+# 4. Проверить делегирование
+grep -n "self\._" src/bioetl/path/to/file.py | head -20
 
-# 5. Прочитать код (НЕ ПОЛАГАТЬСЯ НА ПАМЯТЬ!)
-cat src/bioetl/infrastructure/storage/delta_writer.py | head -100
+# 5. Найти существующие тесты
+find tests -name "*.py" -exec grep -l "ClassName" {} \;
 ```
 
-### 🚨 Красные флаги (требуют перепроверки)
+### Правило 3: Формат Верифицированного Предложения
 
-| Фраза в плане/предложении | Что проверить |
-|---------------------------|---------------|
-| "Класс X не существует" | `grep -r "class X" src/` |
-| "Метод Y не реализован" | `grep -r "def Y" src/` + прочитать файл |
-| "Нет валидации Z" | Прочитать **весь** файл |
-| "Нет тестов для W" | `ls tests/` + `grep -r "test.*W" tests/` |
-| "God object" / "Много ответственностей" | `wc -l файл.py` + проверить делегирование |
-| "BasePipeline" / "BaseClass" | Проверить существование класса! |
+Каждое предложение MUST содержать:
 
-### Формат записей
-
-**Для "УЖЕ РЕАЛИЗОВАНО":**
 ```markdown
-| **Название** | `файл.py:строки` | Краткое доказательство |
+## Задача: [Название]
+
+### Верификация
+- **Файл**: `path/to/file.py:строки` (N строк, M методов)
+- **Проверено**: Нет в "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" ✅
+- **Дата верификации**: YYYY-MM-DD
+
+### Текущее Состояние
+[Описание с ссылками `файл:строка`]
+
+### Проблема
+[Конкретное описание проблемы с доказательствами]
+
+### Решение
+[Предлагаемое решение]
 ```
 
-**Для "ЛОЖНЫЕ УТВЕРЖДЕНИЯ":**
-```markdown
-| "Ложное утверждение в кавычках" | Почему ложно | Как верифицировать |
-```
+### Правило 4: Обновление Этого Документа
 
-### После верификации
+При обнаружении ложного утверждения:
 
-1. ✅ Обновить секцию в начале этого документа
-2. ✅ Указать дату верификации
-3. ✅ Синхронизировать с `CLAUDE.md` секция 2.3 (если нужно)
-4. ✅ Закоммитить: `docs: verify [component] implementation status`
+1. **Добавить** в таблицу "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+2. **Указать** причину, почему утверждение ложно
+3. **Добавить** ссылку на код (`файл:строка`)
+4. **Обновить** дату верификации
+5. **Закоммитить** изменения
+
+При реализации функционала:
+
+1. **Переместить** задачу в "✅ УЖЕ РЕАЛИЗОВАНО"
+2. **Добавить** ссылку на коммит или файл
+3. **Указать** дату реализации
+
+### Команды Быстрой Верификации
 
 ```bash
-git add docs/REFACTORING_PLAN.md CLAUDE.md AGENT.md
-git commit -m "docs: verify [component] implementation status"
+# Структура компонента
+wc -l src/bioetl/application/core/runner.py  # 173 строки
+grep -c "def " src/bioetl/application/core/runner.py  # 12 методов
+
+# Делегирование (ищем вызовы сервисов)
+grep -o "self\._[a-z_]*\." src/bioetl/application/core/runner.py | sort -u
+
+# Импорты в CLI
+grep "^from\|^import" src/bioetl/interfaces/cli.py | head -20
+
+# Тесты для компонента
+ls tests/unit/application/core/test_runner*.py
+ls tests/architecture/test_di_*.py
 ```
 
 ---
 
-*Строй надёжно. Документируй честно. Тестируй тщательно.*
+*Строй надёжно. Верифицируй перед предложением. Документируй с доказательствами.*
