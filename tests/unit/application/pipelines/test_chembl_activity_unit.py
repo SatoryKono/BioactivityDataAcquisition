@@ -52,6 +52,7 @@ def chembl_pipeline():
     return pipeline
 
 
+@pytest.mark.asyncio
 async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
     """Test the transform_bronze_to_silver method with a valid record."""
     record = {
@@ -74,6 +75,7 @@ async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
     assert transformed["standard_value"] == 10.5
 
 
+@pytest.mark.asyncio
 async def test_chembl_transform_bronze_to_silver_no_activity_id(chembl_pipeline):
     """Test that records with no activity_id are skipped."""
     record = {"molecule_chembl_id": "CHEMBL1"}

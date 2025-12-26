@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
 
@@ -36,7 +37,8 @@ def mock_runtime():
 @pytest.fixture
 def pipeline(mock_config, mock_runtime, mock_services):
     run_id = uuid4()
-    return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services, run_id)
+    transformer = PubMedPublicationTransformer(provider="pubmed")
+    return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services, run_id, transformer=transformer)
 
 
 @pytest.fixture

@@ -441,7 +441,11 @@ class TestCryptographyUsage:
     """Tests for proper cryptography usage."""
 
     def test_uses_secure_hash_algorithms(self) -> None:
-        """Verify secure hash algorithms are used."""
+        """Verify secure hash algorithms are used.
+
+        Note: MD5/SHA1 with usedforsecurity=False is allowed for non-cryptographic
+        purposes like deterministic jitter (see ADR-014).
+        """
         weak_hashes = ["md5", "sha1"]
         violations = []
 
@@ -449,9 +453,12 @@ class TestCryptographyUsage:
             content = py_file.read_text(encoding="utf-8")
             for weak_hash in weak_hashes:
                 # Check for hashlib usage of weak algorithms
-                if re.search(rf'hashlib\.{weak_hash}\s*\(', content):
-                    rel_path = py_file.relative_to(PROJECT_ROOT)
-                    violations.append(f"{rel_path}: Uses weak hash {weak_hash}")
+                matches = re.finditer(rf'hashlib\.{weak_hash}\s*\([^)]*\)', content)
+                for match in matches:
+                    # Allow if usedforsecurity=False is explicitly set
+                    if "usedforsecurity=False" not in match.group(0):
+                        rel_path = py_file.relative_to(PROJECT_ROOT)
+                        violations.append(f"{rel_path}: Uses weak hash {weak_hash} without usedforsecurity=False")
 
         assert not violations, "Weak hash algorithms:\n" + "\n".join(violations)
 
