@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.cleanup_service import (
     CleanupPreview,
@@ -49,6 +51,8 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig
 __all__ = [
     "BasePipeline",
     "BaseTransformer",
+    "BatchTransformer",
+    "BatchWriter",
     "CheckpointManager",
     "CleanupPreview",
     "CleanupResult",
@@ -67,6 +71,7 @@ __all__ = [
     "QuarantineManager",
     "RuntimeConfig",
     "ShutdownSignal",
+    "TransformResult",
     "VacuumResult",
     "aggregate_nested_lists",
     "extract_list_field",
