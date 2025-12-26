@@ -94,8 +94,6 @@ class PubChemAdapter(BaseSyncAdapter):
         # Note: filter_ids and filter_field are ignored for PubChem -
         # filtering should be done via query parameter
         _ = filter_ids, filter_field  # Mark as intentionally unused
-        # Apply rate limiting
-        await self.rate_limiter.acquire()
 
         strategy = self._fetch_strategies.get(entity_type)
         if not strategy:

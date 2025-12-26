@@ -202,3 +202,75 @@ async def test_circuit_breaker(pubchem_adapter):
         with pytest.raises(CircuitBreakerOpenError):
             async for _ in pubchem_adapter.fetch("compound", query="fail"):
                 pass
+
+
+async def test_rate_limiter_called_once_per_compound_fetch(
+    pubchem_adapter, mock_pcp_compound
+):
+    """Test rate limiter acquire() is called exactly once per fetch (no double limiting).
+
+    Verifies fix for double rate limiting issue where fetch() called acquire()
+    and then internal methods called acquire() again, reducing throughput
+    from 5 req/sec to ~2.5 req/sec.
+    """
+    with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]):
+        # Replace rate limiter with a mock to count calls
+        original_acquire = pubchem_adapter.rate_limiter.acquire
+        call_count = 0
+
+        async def counting_acquire():
+            nonlocal call_count
+            call_count += 1
+            return await original_acquire()
+
+        pubchem_adapter.rate_limiter.acquire = counting_acquire
+
+        # Fetch compounds
+        results = []
+        async for record in pubchem_adapter.fetch("compound", query="aspirin"):
+            results.append(record)
+
+        # Should be exactly 1 acquire() call per logical request
+        assert call_count == 1, f"Expected 1 acquire() call, got {call_count}"
+
+
+async def test_rate_limiter_called_once_per_substance_fetch(
+    pubchem_adapter, mock_pcp_substance
+):
+    """Test rate limiter is called exactly once for substance fetch."""
+    with patch("pubchempy.get_substances", return_value=[mock_pcp_substance]):
+        original_acquire = pubchem_adapter.rate_limiter.acquire
+        call_count = 0
+
+        async def counting_acquire():
+            nonlocal call_count
+            call_count += 1
+            return await original_acquire()
+
+        pubchem_adapter.rate_limiter.acquire = counting_acquire
+
+        results = []
+        async for record in pubchem_adapter.fetch("substance", query="aspirin"):
+            results.append(record)
+
+        assert call_count == 1, f"Expected 1 acquire() call, got {call_count}"
+
+
+async def test_rate_limiter_called_once_per_assay_fetch(pubchem_adapter, mock_pcp_assay):
+    """Test rate limiter is called exactly once for assay fetch."""
+    with patch("pubchempy.get_assays", return_value=[mock_pcp_assay]):
+        original_acquire = pubchem_adapter.rate_limiter.acquire
+        call_count = 0
+
+        async def counting_acquire():
+            nonlocal call_count
+            call_count += 1
+            return await original_acquire()
+
+        pubchem_adapter.rate_limiter.acquire = counting_acquire
+
+        results = []
+        async for record in pubchem_adapter.fetch("assay", query="12345"):
+            results.append(record)
+
+        assert call_count == 1, f"Expected 1 acquire() call, got {call_count}"
