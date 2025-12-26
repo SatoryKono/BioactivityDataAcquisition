@@ -339,7 +339,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             lifecycle_service=lifecycle_service,
         )
 
-        # Assemble Runner with injected services
+        # Assemble Runner with injected RunnerServices bundle (DI pattern)
         return PipelineRunner(
             config=pipeline.config,
             runtime=pipeline.runtime,
@@ -349,10 +349,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=pipeline.shutdown_signal,
             logger=observability.logger,
-            lock_manager=runner_services.lock_manager,
-            preflight_service=runner_services.preflight,
-            postrun_service=runner_services.postrun,
-            lifecycle_orchestrator=runner_services.lifecycle_orch,
+            runner_services=runner_services,
             pipeline=pipeline,
             tracer=observability.tracer,
         )
