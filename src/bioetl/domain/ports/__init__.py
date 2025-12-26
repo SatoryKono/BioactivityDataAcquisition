@@ -12,6 +12,7 @@ This package contains all port definitions organized by domain:
 - validation: GoldValidatorPort for Gold layer validation
 - filtering: InputFilterPort for CSV filter loading
 - resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
+- serialization: JsonEncoderPort for JSON encoding
 """
 
 from bioetl.domain.ports.checkpoint import CheckpointPort

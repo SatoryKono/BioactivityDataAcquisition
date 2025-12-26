@@ -158,7 +158,6 @@ class TestBootstrapPipeline:
         test_settings.metrics_port = 8000
         test_settings.pipeline = MagicMock()
         test_settings.pipeline.heartbeat_interval = 30
-        test_settings.pipeline.vacuum_retention_days = 7
         # Add observability settings for bootstrap_metrics()
         test_settings.observability = MagicMock()
         test_settings.observability.metrics_enabled = True

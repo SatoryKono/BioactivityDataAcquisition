@@ -101,15 +101,15 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
 
     settings = get_settings()
 
+    # Load validated YAML config first to check for existence
+    yaml_config = load_pipeline_config(ctx.pipeline_name)
+
     # Bootstrap unified observability (includes metrics server start if enabled)
     observability = bootstrap_observability(
         pipeline=ctx.pipeline_name,
         run_id=ctx.run_id,
         settings=settings,
     )
-
-    # Load validated YAML config
-    yaml_config = load_pipeline_config(ctx.pipeline_name)
 
     # Merge YAML maintenance config with CLI overrides
     # CLI flags take precedence over YAML config
