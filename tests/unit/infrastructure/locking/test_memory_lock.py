@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -11,6 +13,12 @@ from bioetl.infrastructure.locking.memory_lock import MemoryLock
 def memory_lock():
     """Create a MemoryLock instance."""
     return MemoryLock()
+
+
+@pytest.fixture
+def fast_ttl_lock():
+    """Create a MemoryLock with fast TTL checking for tests."""
+    return MemoryLock(ttl_check_interval=0.05)
 
 
 @pytest.mark.unit
@@ -115,3 +123,181 @@ class TestMemoryLock:
             owner_id="owner_1",
         )
         assert result is False
+
+    @pytest.mark.asyncio
+    async def test_aclose_releases_locks(self, memory_lock):
+        """Test aclose releases all locks."""
+        await memory_lock.acquire(key="key1", owner_id="owner_1")
+        await memory_lock.acquire(key="key2", owner_id="owner_2")
+
+        await memory_lock.aclose()
+
+        # Locks should be cleared
+        assert len(memory_lock._locks) == 0
+
+
+@pytest.mark.unit
+class TestMemoryLockTTL:
+    """Tests for MemoryLock TTL expiration functionality."""
+
+    @pytest.mark.asyncio
+    async def test_lock_expires_after_ttl(self, fast_ttl_lock):
+        """Test that lock is automatically released after TTL expires."""
+        # Acquire lock with short TTL
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            ttl=1,  # 1 second TTL
+        )
+        assert result is True
+
+        # Another owner cannot acquire immediately
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is False
+
+        # Wait for TTL to expire (TTL + check interval buffer)
+        await asyncio.sleep(1.2)
+
+        # Now another owner should be able to acquire
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is True
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_extends_ttl(self, fast_ttl_lock):
+        """Test that heartbeat extends the lock TTL."""
+        # Acquire lock with short TTL
+        await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            ttl=1,  # 1 second TTL
+        )
+
+        # Wait half the TTL
+        await asyncio.sleep(0.5)
+
+        # Heartbeat to extend TTL
+        result = await fast_ttl_lock.heartbeat(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is True
+
+        # Wait another 0.7 seconds (original TTL would have expired)
+        await asyncio.sleep(0.7)
+
+        # Lock should still be held because heartbeat extended it
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is False
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_ttl_checker_starts_only_when_needed(self):
+        """Test that TTL checker task starts only when acquiring with TTL."""
+        lock = MemoryLock(ttl_check_interval=0.1)
+
+        # No TTL checker before any acquire
+        assert lock._ttl_checker_task is None
+
+        # Acquire without TTL - no checker started
+        await lock.acquire(key="key1", owner_id="owner_1")
+        assert lock._ttl_checker_task is None
+
+        # Acquire with TTL - checker should start
+        await lock.acquire(key="key2", owner_id="owner_1", ttl=10)
+        assert lock._ttl_checker_task is not None
+        assert not lock._ttl_checker_task.done()
+
+        await lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_aclose_stops_ttl_checker(self, fast_ttl_lock):
+        """Test that aclose stops the TTL checker task."""
+        # Acquire with TTL to start the checker
+        await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            ttl=10,
+        )
+
+        # Checker should be running
+        assert fast_ttl_lock._ttl_checker_task is not None
+
+        await fast_ttl_lock.aclose()
+
+        # Checker should be stopped and cleared
+        assert fast_ttl_lock._ttl_checker_task is None
+        assert fast_ttl_lock._closed is True
+
+    @pytest.mark.asyncio
+    async def test_lock_without_ttl_does_not_expire(self, fast_ttl_lock):
+        """Test that lock without TTL never expires automatically."""
+        # Acquire lock without TTL
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is True
+
+        # Wait some time (would have expired if TTL was set)
+        await asyncio.sleep(0.3)
+
+        # Lock should still be held
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is False
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_multiple_locks_with_different_ttl(self, fast_ttl_lock):
+        """Test multiple locks with different TTL values."""
+        # Acquire two locks with different TTLs
+        await fast_ttl_lock.acquire(
+            key="short_ttl",
+            owner_id="owner_1",
+            ttl=1,  # 1 second
+        )
+        await fast_ttl_lock.acquire(
+            key="long_ttl",
+            owner_id="owner_1",
+            ttl=5,  # 5 seconds
+        )
+
+        # Wait for short TTL to expire
+        await asyncio.sleep(1.2)
+
+        # Short TTL lock should be available
+        result = await fast_ttl_lock.acquire(
+            key="short_ttl",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is True
+
+        # Long TTL lock should still be held
+        result = await fast_ttl_lock.acquire(
+            key="long_ttl",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is False
+
+        await fast_ttl_lock.aclose()
