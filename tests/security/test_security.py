@@ -454,7 +454,8 @@ class TestCryptographyUsage:
             for weak_hash in weak_hashes:
                 # Check for hashlib usage of weak algorithms
                 # Skip comments and multi-line strings for detection
-                matches = re.finditer(rf'hashlib\.{weak_hash}\s*\([^)]*\)', content)
+                # Using a more robust regex that handles one level of nested parentheses
+                matches = re.finditer(rf'hashlib\.{weak_hash}\s*\((?:[^()]|\([^()]*\))*\)', content)
                 for match in matches:
                     call = match.group(0)
                     # Allow if usedforsecurity=False is explicitly set
