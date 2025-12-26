@@ -17,6 +17,7 @@ from bioetl.composition.factories.generic_factory import GenericPipelineFactory
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
