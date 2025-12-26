@@ -183,6 +183,7 @@ class TestBootstrapPipeline:
 
         # Setup pipeline registry mock
         mock_config = MagicMock()
+        mock_config.maintenance.vacuum_retention_days = 7
         mock_load_config.return_value = mock_config
         mock_factory = MagicMock()
         mock_runner = MagicMock()
