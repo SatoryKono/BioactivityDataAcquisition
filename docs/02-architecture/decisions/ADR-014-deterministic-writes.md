@@ -136,6 +136,29 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 - `tests/architecture/test_no_datetime_now_in_infrastructure.py`
 - `tests/architecture/test_no_structlog_in_application_interfaces.py`
 
+### Исключения для datetime.now() (ALLOWED_FILES)
+
+Следующие файлы имеют **обоснованные исключения** для использования `datetime.now()`.
+Исключения определены в `tests/architecture/test_no_datetime_now_in_infrastructure.py`:
+
+| Файл | Модуль | Обоснование | Использование |
+|------|--------|-------------|---------------|
+| `operations.py` | `infrastructure/quarantine/` | Вычисление retention cutoff для cleanup | `datetime.now(UTC) - timedelta(days=max_age_days)` для определения записей на удаление |
+| `gold_writer.py` | `infrastructure/storage/` | SCD2 `valid_from`/`valid_to` timestamps | Установка временных меток при merge-операциях для Slowly Changing Dimensions Type 2 |
+| `lineage.py` | `infrastructure/observability/` | Provenance tracking | Real-time timestamps для `record_run_start()`, `record_run_end()`, и фильтрации по дате |
+| `detector.py` | `infrastructure/observability/anomaly/` | Anomaly detection monitoring | Timestamp в `AnomalyResult` при обнаружении критических аномалий |
+| `iqr.py` | `infrastructure/observability/anomaly/detectors/` | IQR-based anomaly detection | Timestamp в результате детекции при обнаружении аномалии |
+| `mad.py` | `infrastructure/observability/anomaly/detectors/` | MAD-based anomaly detection | Timestamp в результате детекции при обнаружении аномалии |
+| `zscore.py` | `infrastructure/observability/anomaly/detectors/` | Z-score anomaly detection | Timestamp в результате детекции при обнаружении аномалии |
+| `client.py` | `infrastructure/adapters/` | Caching logic (reserved) | Зарезервировано для TTL-based кэширования HTTP-ответов |
+
+**Критерии для исключения:**
+1. Timestamp не влияет на детерминизм batch-операций
+2. Timestamp необходим для real-time мониторинга/операций
+3. Timestamp не используется в данных Bronze/Silver/Gold
+
+**TODO:** Рассмотреть передачу timestamp для SCD2 в `gold_writer.py` как параметр (см. комментарий в коде).
+
 ## Alternatives Considered
 
 ### 1. Глобальная фиксация времени через context manager
