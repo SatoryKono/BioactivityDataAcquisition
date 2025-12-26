@@ -30,6 +30,7 @@ from bioetl.domain.ports.observability import (
 )
 from bioetl.domain.ports.quarantine import QuarantinePort
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
+from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort
 
@@ -41,6 +42,7 @@ __all__ = [
     "FilterableDataSourcePort",
     "GoldValidatorPort",
     "InputFilterPort",
+    "JsonEncoderPort",
     "LockPort",
     "LoggerPort",
     "MetricsPort",

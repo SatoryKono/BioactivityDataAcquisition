@@ -46,6 +46,9 @@ tracing = [
     "opentelemetry-sdk>=1.20",
     "opentelemetry-exporter-otlp>=1.20",
 ]
+performance = [
+    "orjson>=3.9",  # High-performance JSON serialization (2-10x faster than stdlib)
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",
@@ -55,6 +58,8 @@ dev = [
     "respx>=0.21",
     "mypy>=1.10",
     "ruff>=0.4",
+    # Performance testing
+    "orjson>=3.9",
     # Security tools (RULES.md - SAST)
     "pip-audit>=2.7",
     "bandit[toml]>=1.7",
@@ -187,6 +192,8 @@ module = [
     "pandas",
     "pandas.*",
     "opentelemetry.*",
+    "orjson",
+    "orjson.*",
 ]
 ignore_missing_imports = true
 
