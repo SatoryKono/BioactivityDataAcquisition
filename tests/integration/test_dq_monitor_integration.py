@@ -55,7 +55,7 @@ class TestDQMonitorAnomalyDetection:
         monitor = DataQualityMonitor()
         monitor.detector.set_threshold("error_rate", min_value=0.0, max_value=0.10)
 
-        anomalies = monitor.check_quality({"error_rate": 0.25})
+        anomalies = monitor.check_quality({"error_rate": 0.25}, timestamp=datetime.now(timezone.utc))
 
         assert len(anomalies) == 1
         assert anomalies[0].anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
@@ -70,7 +70,7 @@ class TestDQMonitorAnomalyDetection:
             monitor.update_baseline_from_metrics({"record_count": 1000.0})
 
         # Check with value close to baseline
-        anomalies = monitor.check_quality({"record_count": 1050.0})
+        anomalies = monitor.check_quality({"record_count": 1050.0}, timestamp=datetime.now(timezone.utc))
 
         assert len(anomalies) == 0
 
@@ -112,7 +112,7 @@ class TestDQMonitorSeverityLevels:
 
         # Value that gives z-score ~2.5 (between 2.0 and 3.0 for LOW severity)
         # z = |104 - 100| / 1.58 ≈ 2.53
-        anomalies = monitor.check_quality({"metric": 104.0})
+        anomalies = monitor.check_quality({"metric": 104.0}, timestamp=datetime.now(timezone.utc))
 
         assert len(anomalies) == 1
         assert anomalies[0].severity == AnomalySeverity.LOW
@@ -126,7 +126,7 @@ class TestDQMonitorSeverityLevels:
             monitor.detector.add_baseline_value("metric", value)
 
         # Extreme value (z-score > 5)
-        anomalies = monitor.check_quality({"metric": 200.0})
+        anomalies = monitor.check_quality({"metric": 200.0}, timestamp=datetime.now(timezone.utc))
 
         assert len(anomalies) == 1
         assert anomalies[0].severity == AnomalySeverity.CRITICAL
@@ -150,7 +150,7 @@ class TestDQMonitorBaselineManagement:
         initial_count = initial_stats[2] if initial_stats else 0
 
         # Update with critical violation
-        monitor.update_baseline_from_metrics({"error_rate": 0.50})
+        monitor.update_baseline_from_metrics({"error_rate": 0.50}, timestamp=datetime.now(timezone.utc))
 
         # Baseline should not be updated
         final_stats = monitor.get_baseline_stats("error_rate")

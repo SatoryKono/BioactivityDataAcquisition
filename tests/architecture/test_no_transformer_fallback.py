@@ -164,10 +164,12 @@ class TestTransformerInjectionPath:
     """Tests verifying the transformer injection path through factories."""
 
     def test_generic_factory_creates_transformer(self) -> None:
-        """GenericPipelineFactory must create and inject transformer.
+        """GenericPipelineFactory must delegate transformer creation properly.
 
-        Verify that the factory has create_transformer() method and
-        uses it in create_with_services().
+        Verify that:
+        1. Factory has create_transformer() method (public API)
+        2. create_with_services() passes transformer_class to runner_assembly
+        3. runner_assembly creates transformer and injects it into pipeline
         """
         factory_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
@@ -178,17 +180,28 @@ class TestTransformerInjectionPath:
 
         content = factory_file.read_text(encoding="utf-8")
 
-        # Check for create_transformer method
+        # Check for create_transformer method (public API for direct usage)
         assert "def create_transformer" in content, (
             "GenericPipelineFactory must have create_transformer() method"
         )
 
-        # Check that create_with_services calls create_transformer
-        assert "self.create_transformer(" in content, (
-            "GenericPipelineFactory.create_with_services must call create_transformer()"
+        # Check that create_with_services passes transformer_class to runner_assembly
+        assert "transformer_class=self.transformer_class" in content, (
+            "GenericPipelineFactory.create_with_services must pass "
+            "transformer_class to create_pipeline_with_services()"
         )
 
-        # Check that transformer is passed to pipeline
-        assert "transformer=transformer" in content, (
-            "GenericPipelineFactory must pass transformer to pipeline constructor"
+        # Verify runner_assembly handles actual transformer creation
+        runner_file = (
+            _get_base_path(Path("src/bioetl/composition/factories"))
+            / "runner_assembly.py"
         )
+        if runner_file.exists():
+            runner_content = runner_file.read_text(encoding="utf-8")
+            # Check that runner_assembly creates transformer and passes to pipeline
+            assert "transformer_class(" in runner_content, (
+                "runner_assembly must create transformer from transformer_class"
+            )
+            assert "transformer=transformer" in runner_content, (
+                "runner_assembly must pass transformer to pipeline constructor"
+            )
