@@ -19,7 +19,7 @@ Health-Aware Fetching:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NoReturn
 
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
@@ -144,7 +144,6 @@ class ChemblAdapter(BaseHttpAdapter):
             return records, has_next
         except Exception as e:
             self._handle_error(e)
-            raise  # explicit re-raise для линтеров (handle_error всегда raises)
 
     async def _page_iterator(
         self, entity_type: str, limit: int | None = None
@@ -220,7 +219,7 @@ class ChemblAdapter(BaseHttpAdapter):
             if limit and offset >= limit:
                 break
 
-    def _handle_error(self, e: Exception, context: str = "fetch") -> None:
+    def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
         """Handle fetch errors with classification and metrics.
 
         Args:
