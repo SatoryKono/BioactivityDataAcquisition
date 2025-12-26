@@ -187,7 +187,7 @@ class TestBatchWriterSilver:
 
         call_kwargs = mock_storage.write_silver.call_args[1]
         assert call_kwargs["table_name"] == "custom_silver_table"
-        assert call_kwargs["primary_keys"] == ["entity_id"]
+        assert list(call_kwargs["primary_keys"]) == ["entity_id"]
 
 
 @pytest.mark.unit
