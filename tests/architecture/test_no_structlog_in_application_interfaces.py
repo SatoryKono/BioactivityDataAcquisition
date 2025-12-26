@@ -17,12 +17,6 @@ INTERFACES_DIR = Path("src/bioetl/interfaces")
 # Baseline exemptions for existing files (technical debt)
 # These files need refactoring to use LoggerPort instead of direct structlog
 EXEMPTED_FILES = {
-    # Application layer baseline
-    "bioetl/application/core/base.py",
-    "bioetl/application/core/checkpoint_manager.py",
-    "bioetl/application/core/lock_manager.py",
-    "bioetl/application/observability/observer.py",
-    "bioetl/application/services/medallion_lifecycle.py",
     # Interfaces layer baseline
     "bioetl/interfaces/cli.py",
     "bioetl/interfaces/orchestration/signals.py",
@@ -134,4 +128,57 @@ def test_no_structlog_parametrized(layer_name: str, layer_dir: Path) -> None:
         f"Direct structlog imports found in {layer_name} layer:\n"
         + "\n".join(f"  - {v}" for v in violations)
         + f"\n\nThe {layer_name} layer MUST use LoggerPort abstraction. See ADR-006."
+    )
+
+
+def _check_structlog_boundlogger_usage(directory: Path) -> list[str]:
+    """Check for structlog.BoundLogger type annotations in source code.
+
+    Scans Python files for usage of 'structlog.BoundLogger' as type annotation.
+    This catches cases where structlog types are used even inside TYPE_CHECKING blocks.
+
+    Args:
+        directory: Directory to scan for Python files.
+
+    Returns:
+        List of violation messages with file path and line number.
+    """
+    violations = []
+
+    if not directory.exists():
+        return violations
+
+    for py_file in directory.rglob("*.py"):
+        rel_path = py_file.relative_to(Path("src"))
+
+        try:
+            source = py_file.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+
+        # Check for structlog.BoundLogger usage in source
+        for lineno, line in enumerate(source.splitlines(), start=1):
+            if "structlog.BoundLogger" in line:
+                violations.append(f"{rel_path}:{lineno}: {line.strip()}")
+
+    return violations
+
+
+def test_no_structlog_boundlogger_in_application() -> None:
+    """Application layer MUST use LoggerPort, not structlog.BoundLogger.
+
+    REQ-ARCH-032: The application layer should be decoupled from
+    concrete logging implementations. Use LoggerPort from domain.ports.
+
+    This test ensures that structlog.BoundLogger is not used as a type
+    annotation anywhere in the application layer, including in
+    TYPE_CHECKING blocks.
+    """
+    violations = _check_structlog_boundlogger_usage(APPLICATION_DIR)
+
+    assert not violations, (
+        "structlog.BoundLogger usage found in application layer:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+        + "\n\nApplication layer MUST use LoggerPort, not structlog.BoundLogger."
+        + "\nImport LoggerPort from bioetl.domain.ports instead."
     )
