@@ -38,7 +38,7 @@
 |----------|-------------|----------|
 | **PipelineRunner создаёт сервисы** | `runner.py:90-126` | LockManager, PreflightService, PostrunService, LifecycleOrchestrator создаются внутри конструктора |
 | **CLI вызывает bootstrap напрямую** | `cli.py:224,265,337` | Смешение interfaces и composition слоёв |
-| **Мёртвый код в ChemblAdapter** | `client.py:147` | `return [], False` недостижим после `_handle_error()` |
+| ~~**Мёртвый код в ChemblAdapter**~~ | ~~`client.py:147`~~ | ✅ ВЫПОЛНЕНО: Удалён в коммите `9214cfb` |
 
 ---
 
@@ -1157,11 +1157,11 @@ def __init__(self, ..., runner_services: RunnerServices) -> None:
 
 ### Приоритет 2: ВЫСОКИЙ
 
-#### 2.1 Удалить мёртвый код в ChemblAdapter
+#### 2.1 ~~Удалить мёртвый код в ChemblAdapter~~ ✅ ВЫПОЛНЕНО
 
-**Файл**: `client.py:147` — `return [], False` недостижим.
+**Файл**: `client.py:147` — `return [], False` был недостижим.
 
-**Решение**: Удалить или заменить на `raise`.
+**Статус**: ✅ Удалён в коммите `9214cfb` (refactor(chembl): remove unreachable code after _handle_error).
 
 ### Приоритет 3: ЖЕЛАТЕЛЬНО
 
