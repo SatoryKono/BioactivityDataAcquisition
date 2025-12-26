@@ -251,15 +251,14 @@ class PubChemAdapter(BaseSyncAdapter):
         Overrides BaseSyncAdapter._probe_health() to use lightweight
         compound query (water, CID 962) for health assessment.
 
-        Unlike other adapters, PubChem handles exceptions internally
-        to return UNHEALTHY directly rather than using circuit breaker
-        fallback (preserving original behavior).
-
         Returns:
             HealthStatus based on probe response:
             - HEALTHY/DEGRADED: Based on circuit breaker state if compound found
             - DEGRADED: Empty response
-            - UNHEALTHY: Any exception or circuit breaker open
+            - UNHEALTHY: Circuit breaker is open
+
+        Raises:
+            Exception: On request failure (base class handles via _fallback_health_status).
 
         Example:
             >>> adapter = PubChemAdapter()
@@ -289,6 +288,7 @@ class PubChemAdapter(BaseSyncAdapter):
             return HealthStatus.DEGRADED
 
         except CircuitBreakerOpenError:
+            # Circuit breaker open - return UNHEALTHY directly
             self.logger.warning(
                 "health_check_circuit_open",
                 provider=self.provider_name,
@@ -304,7 +304,7 @@ class PubChemAdapter(BaseSyncAdapter):
                 error_type=error_type.value,
                 error=str(e),
             )
-            return HealthStatus.UNHEALTHY
+            raise  # Let base class handle via _fallback_health_status()
 
     def __repr__(self) -> str:
         """Return string representation."""
