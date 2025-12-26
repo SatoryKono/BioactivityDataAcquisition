@@ -191,6 +191,7 @@ class TestLineageTrackerRecordBronze:
             entity_type="activity",
             record_count=1000,
             file_path="s3://bucket/bronze/file.jsonl.zst",
+            timestamp=datetime.now(UTC),
         )
 
         mock_write_deltalake.assert_called_once()
@@ -206,6 +207,7 @@ class TestLineageTrackerRecordBronze:
             entity_type="activity",
             record_count=500,
             file_path="path",
+            timestamp=datetime.now(UTC),
             watermark="2025-01-15T00:00:00Z",
         )
 
@@ -220,6 +222,7 @@ class TestLineageTrackerRecordBronze:
             entity_type="activity",
             record_count=100,
             file_path="path",
+            timestamp=datetime.now(UTC),
             metadata={"source_url": "https://api.chembl.com"},
         )
 
@@ -239,6 +242,7 @@ class TestLineageTrackerRecordBronze:
                 entity_type="test",
                 record_count=100,
                 file_path="path",
+                timestamp=datetime.now(UTC),
             )
 
 
@@ -258,6 +262,7 @@ class TestLineageTrackerRecordTransformation:
             record_count=100,
             success_count=95,
             failure_count=5,
+            timestamp=datetime.now(UTC),
         )
 
         mock_write_deltalake.assert_called_once()
@@ -276,6 +281,7 @@ class TestLineageTrackerRecordTransformation:
             record_count=50,
             success_count=50,
             failure_count=0,
+            timestamp=datetime.now(UTC),
             metadata={"enrichment_source": "pubchem"},
         )
 
@@ -295,6 +301,7 @@ class TestLineageTrackerRecordTransformation:
             record_count=3,
             success_count=3,
             failure_count=0,
+            timestamp=datetime.now(UTC),
         )
 
         mock_write_deltalake.assert_called_once()
@@ -441,7 +448,7 @@ class TestLineageTrackerGetBatchStatistics:
         """Test get_batch_statistics returns zeros on error."""
         mock_delta_table.side_effect = Exception("Error")
 
-        result = lineage_tracker.get_batch_statistics(layer="bronze", days=7)
+        result = lineage_tracker.get_batch_statistics(layer="bronze", timestamp=datetime.now(UTC), days=7)
 
         assert result["total_batches"] == 0
         assert result["total_records"] == 0
@@ -463,7 +470,7 @@ class TestLineageTrackerGetBatchStatistics:
         mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
-        result = lineage_tracker.get_batch_statistics(layer="bronze")
+        result = lineage_tracker.get_batch_statistics(layer="bronze", timestamp=datetime.now(UTC))
 
         assert result["total_batches"] == 0
 
@@ -491,7 +498,7 @@ class TestLineageTrackerGetBatchStatistics:
         mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
-        result = lineage_tracker.get_batch_statistics(layer="bronze", days=7)
+        result = lineage_tracker.get_batch_statistics(layer="bronze", timestamp=datetime.now(UTC), days=7)
 
         assert result["total_batches"] == 3
         assert result["total_records"] == 600
