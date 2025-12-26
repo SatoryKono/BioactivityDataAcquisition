@@ -62,9 +62,12 @@ class TestAdapterHealthCheck:
             if "class " not in content:
                 continue
 
-            # Check for health_check method definition
+            # Check for health_check method definition OR inheritance from BaseHttpAdapter
+            # BaseHttpAdapter provides health_check() via Template Method pattern
             has_health_check = (
-                "def health_check" in content or "async def health_check" in content
+                "def health_check" in content
+                or "async def health_check" in content
+                or "(BaseHttpAdapter)" in content  # Inherits health_check from base
             )
 
             if not has_health_check:

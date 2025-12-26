@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Self
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import ApiError
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
@@ -22,8 +23,11 @@ ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 
 
 @dataclass
-class PubMedAdapter:
+class PubMedAdapter(BaseHttpAdapter):
     """PubMed adapter using UnifiedHTTPClient.
+
+    Inherits from BaseHttpAdapter for standardized lifecycle management
+    and Template Method pattern for health checks.
 
     Implements DataSourcePort and FilterableDataSourcePort for PubMed data extraction
     with optional server-side filtering by PMID lists.
@@ -34,6 +38,7 @@ class PubMedAdapter:
         email: Email address for NCBI API (required).
         api_key: Optional NCBI API key for higher rate limits.
         batch_size: Number of records to fetch per batch.
+        metrics: Optional MetricsPort for recording adapter metrics.
 
     """
 
@@ -44,26 +49,13 @@ class PubMedAdapter:
     batch_size: int = 200
     metrics: MetricsPort | None = None
 
-    provider_name: str = "pubmed"
+    provider_name: str = field(init=False, default="pubmed")
+    """Provider identifier (required by DataSourcePort)."""
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics after dataclass init."""
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
-
-    async def __aenter__(self) -> Self:
-        """Enter async context manager."""
-        await self.http_client.__aenter__()
-        return self
-
-    async def __aexit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: Any,
-    ) -> None:
-        """Exit async context manager."""
-        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
 
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
         """Get PMIDs for a search term."""
@@ -200,23 +192,10 @@ class PubMedAdapter:
         async for record in self._yield_articles_from_pmids(pmids, limit):
             yield record
 
-    async def health_check(self) -> HealthStatus:
-        """Check API health status using Template Method pattern.
-
-        Calls _probe_health() for PubMed-specific probe, falling back
-        to _fallback_health_status() on any exception.
-
-        Returns:
-            HealthStatus from probe or fallback.
-
-        """
-        try:
-            return await self._probe_health()
-        except Exception:
-            return self._fallback_health_status()
-
     async def _probe_health(self) -> HealthStatus:
         """Perform PubMed-specific health probe.
+
+        Overrides BaseHttpAdapter._probe_health() to use PubMed esearch endpoint.
 
         Выполняет lightweight запрос к esearch endpoint.
 
@@ -275,6 +254,7 @@ class PubMedAdapter:
     def _fallback_health_status(self) -> HealthStatus:
         """Get fallback health status on probe failure.
 
+        Overrides BaseHttpAdapter._fallback_health_status().
         PubMed doesn't use circuit breaker assessment, so returns UNHEALTHY.
 
         Returns:
@@ -286,7 +266,8 @@ class PubMedAdapter:
     async def aclose(self) -> None:
         """Close adapter resources.
 
-        Safely closes the HTTP client via its public context manager interface.
+        Overrides BaseHttpAdapter.aclose() to properly close the HTTP client.
+        Safely closes via the public context manager interface.
         Idempotent - safe to call multiple times.
         """
         if self.http_client:
