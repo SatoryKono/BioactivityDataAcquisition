@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
     import structlog
 
+    from bioetl.domain.ports import MetricsPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -59,6 +60,7 @@ class StorageFactory:
         settings: Settings,
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
+        metrics: MetricsPort | None = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -66,6 +68,7 @@ class StorageFactory:
             settings: Application settings with data_dir
             config: Pipeline YAML configuration
             logger: Structured logger
+            metrics: Optional metrics port for Bronze observability (O1 metrics).
 
         Returns:
             StorageContext with adapter and paths
@@ -113,6 +116,7 @@ class StorageFactory:
                 logger=logger,
                 save_json=save_json,
                 json_path=json_path,
+                metrics=metrics,
             ),
             silver_writer=DeltaWriter(
                 base_path=silver_path,

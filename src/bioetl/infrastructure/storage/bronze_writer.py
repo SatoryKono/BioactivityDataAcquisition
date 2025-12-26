@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 from collections.abc import AsyncIterator, Iterator
 from datetime import datetime
 from io import BytesIO
@@ -28,7 +29,7 @@ from typing import TYPE_CHECKING, Any
 import zstandard as zstd
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
@@ -53,6 +54,7 @@ class BronzeWriter:
         logger: LoggerPort,
         save_json: bool = False,
         json_path: str | None = None,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -61,12 +63,17 @@ class BronzeWriter:
             logger: Structured logger for observability (MUST be injected)
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
+            metrics: Optional metrics port for observability (O1 metrics).
+                     If None, uses NoOpMetrics for null object pattern.
 
         """
+        from bioetl.domain.ports.noop import NoOpMetrics
+
         self.base_path = Path(base_path)
         self.logger = logger
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
+        self._metrics = metrics or NoOpMetrics()
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -158,6 +165,8 @@ class BronzeWriter:
             Relative path to the written file.
 
         """
+        start_time = time.perf_counter()
+
         self._validate_bronze_names(provider, entity)
         self._validate_records_iterator(records)
 
@@ -178,12 +187,13 @@ class BronzeWriter:
             record_list = []
             records_iter = records
 
-        compressed_data = await loop.run_in_executor(
+        compressed_data, record_count, uncompressed_size = await loop.run_in_executor(
             None, self._compress_records, records_iter
         )
         if not compressed_data:
             raise ValueError("No records to write")
 
+        compressed_size = len(compressed_data)
         full_path = self.base_path / relative_path
         meta_path = full_path.with_suffix(".zst.meta.json")
 
@@ -194,6 +204,26 @@ class BronzeWriter:
             ),
         )
 
+        # Record metrics
+        duration = time.perf_counter() - start_time
+        labels = {"provider": provider, "entity": entity}
+
+        self._metrics.observe_histogram(
+            "bronze_write_duration_seconds",
+            duration,
+            labels,
+        )
+        self._metrics.increment_counter(
+            "bronze_records_written_total",
+            record_count,
+            labels,
+        )
+        self._metrics.increment_counter(
+            "bronze_bytes_written_total",
+            compressed_size,
+            labels,
+        )
+
         self.logger.info(
             "bronze_write_complete",
             path=relative_path,
@@ -202,6 +232,10 @@ class BronzeWriter:
             batch_id=str(batch_id),
             run_id=str(run_id),
             run_type=run_type.value,
+            record_count=record_count,
+            compressed_bytes=compressed_size,
+            uncompressed_bytes=uncompressed_size,
+            duration_seconds=round(duration, 3),
         )
 
         if self.save_json:
@@ -236,8 +270,12 @@ class BronzeWriter:
             lambda: atomic_write_bytes(json_full_path, jsonl_content),
         )
 
-    def _compress_records(self, records: Iterator[bytes]) -> bytes:
-        """Compress JSONL records using zstandard with streaming."""
+    def _compress_records(self, records: Iterator[bytes]) -> tuple[bytes, int, int]:
+        """Compress JSONL records using zstandard with streaming.
+
+        Returns:
+            Tuple of (compressed_data, record_count, uncompressed_size).
+        """
         output = BytesIO()
         compressor = zstd.ZstdCompressor(
             level=self.COMPRESSION_LEVEL,
@@ -247,6 +285,7 @@ class BronzeWriter:
 
         chunk_buffer = bytearray()
         record_count = 0
+        uncompressed_size = 0
 
         with compressor.stream_writer(
             output, closefd=False, write_size=self.COMPRESSION_CHUNK_SIZE
@@ -254,6 +293,7 @@ class BronzeWriter:
             for record in records:
                 chunk_buffer.extend(record)
                 record_count += 1
+                uncompressed_size += len(record)
 
                 if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
                     # Pass bytearray directly to avoid memory copy
@@ -266,7 +306,7 @@ class BronzeWriter:
             if record_count == 0:
                 raise ValueError("No records provided for compression")
 
-        return output.getvalue()
+        return output.getvalue(), record_count, uncompressed_size
 
     async def read_bronze(self, path: str) -> AsyncIterator[dict[str, Any]]:
         """Read and decompress Bronze file (for testing/debugging)."""
