@@ -29,9 +29,9 @@ from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from bioetl.application.checkpoint.manager import CheckpointManager
+    from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.application.quarantine.manager import QuarantineManager
+    from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.application.services.cleanup_service import CleanupPreview
     from bioetl.application.services.lifecycle_service import LifecycleService
 
