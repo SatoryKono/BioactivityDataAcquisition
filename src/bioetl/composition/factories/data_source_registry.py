@@ -57,6 +57,7 @@ class DataSourceCreator(Protocol):
 def _wrap_with_filter(
     data_source: DataSourcePort,
     filter_config: InputFilterConfig | None,
+    logger: LoggerPort | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
@@ -65,6 +66,7 @@ def _wrap_with_filter(
     Args:
         data_source: Base data source to wrap
         filter_config: Optional filter configuration
+        logger: Optional LoggerPort for CsvFilterReader logging
         metrics: Optional metrics port for recording filter statistics
         pipeline_name: Pipeline name for metrics labels
 
@@ -74,7 +76,7 @@ def _wrap_with_filter(
     if filter_config and filter_config.enabled:
         return FilteredDataSource(
             data_source=data_source,
-            filter_reader=CsvFilterReader(),
+            filter_reader=CsvFilterReader(logger=logger),
             filter_config=filter_config,
             metrics=metrics,
             pipeline_name=pipeline_name,
@@ -95,7 +97,7 @@ def create_chembl_data_source(
     base_adapter = DataSourceFactory.create(
         "chembl", http_client=http_client, logger=logger
     )
-    return _wrap_with_filter(base_adapter, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(base_adapter, filter_config, logger, metrics, pipeline_name)
 
 
 def create_pubchem_data_source(
@@ -115,7 +117,7 @@ def create_pubchem_data_source(
         rate=5.0,
         strict_error_handling=settings.strict_error_handling,
     )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 def create_uniprot_data_source(
@@ -136,7 +138,7 @@ def create_uniprot_data_source(
         base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
         strict_error_handling=settings.strict_error_handling,
     )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 def create_pubmed_data_source(
@@ -167,7 +169,7 @@ def create_pubmed_data_source(
         email=email,
         api_key=api_key,
     )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 class DataSourceRegistry:
