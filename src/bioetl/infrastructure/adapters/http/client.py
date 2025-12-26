@@ -10,7 +10,6 @@ Implements RULES.md Section 4.1 HTTP client requirements:
 from __future__ import annotations
 
 import asyncio
-import random
 from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -45,7 +44,7 @@ class RetryConfig:
     max_delay: float = 60.0
     multiplier: float = 2.0
     jitter: float = 0.1
-    deterministic: bool = False
+    deterministic: bool = True
     jitter_seed: int | None = None
 
     def calculate_delay(self, attempt: int, url: str = "") -> float:
@@ -63,12 +62,22 @@ class RetryConfig:
 
         jitter_range = delay * self.jitter
         if self.deterministic:
-            # Hash-based deterministic jitter for reproducibility
+            # Hash-based deterministic jitter for reproducibility (ADR-014)
             hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
             jitter_factor = (hash(hash_input) % 1000) / 1000.0
             # Map 0.0-1.0 to -1.0 to +1.0
             delay += jitter_range * (jitter_factor * 2 - 1)
         else:
+            # Non-deterministic jitter (deprecated, use deterministic=True)
+            import random
+            import warnings
+
+            warnings.warn(
+                "Non-deterministic jitter is deprecated per ADR-014. "
+                "Use deterministic=True for reproducibility.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
             delay += random.uniform(-jitter_range, jitter_range)
 
         return max(0.0, delay)
