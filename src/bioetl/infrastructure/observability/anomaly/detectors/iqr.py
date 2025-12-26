@@ -41,6 +41,7 @@ class IQRDetector(DetectorStrategy):
         current_value: float,
         baseline: Sequence[float],
         threshold: float = 1.5,
+        now: datetime | None = None,
     ) -> Anomaly | None:
         """Detect anomaly using IQR method."""
         if len(baseline) < self.MIN_SAMPLES:
@@ -58,7 +59,7 @@ class IQRDetector(DetectorStrategy):
 
         mean = statistics.mean(baseline)
         stddev = statistics.stdev(baseline) if len(baseline) >= 2 else 0.0
-        return self._create_anomaly(metric_name, current_value, mean, stddev, score)
+        return self._create_anomaly(metric_name, current_value, mean, stddev, score, now)
 
     def _calculate_quartiles(self, data: Sequence[float]) -> tuple[float, float]:
         """Calculate Q1 and Q3 quartiles."""
@@ -85,6 +86,7 @@ class IQRDetector(DetectorStrategy):
         mean: float,
         stddev: float,
         score: float,
+        now: datetime | None = None,
     ) -> Anomaly:
         """Create Anomaly object from detection results."""
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
@@ -102,7 +104,7 @@ class IQRDetector(DetectorStrategy):
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=score,
-            timestamp=datetime.now(UTC),
+            timestamp=now or datetime.now(UTC),
             message=message,
         )
 
