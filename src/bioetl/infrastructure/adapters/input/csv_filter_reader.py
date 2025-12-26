@@ -6,19 +6,28 @@ Uses Polars for efficient CSV parsing.
 
 from __future__ import annotations
 
-import logging
 from collections import Counter
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import polars as pl
 
 from bioetl.domain.filter_config import FilterLoadResult
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 
 class CsvFilterReader:
     """Reads filter IDs from CSV files using Polars."""
+
+    def __init__(self, logger: LoggerPort | None = None) -> None:
+        """Initialize CSV filter reader.
+
+        Args:
+            logger: Optional LoggerPort for structured logging.
+        """
+        self._logger = logger
 
     def _read_csv_dataframe(self, source_path: str) -> pl.DataFrame:
         """Read CSV file and return DataFrame."""
@@ -73,17 +82,15 @@ class CsvFilterReader:
             self._compute_duplicate_stats(all_ids)
         )
 
-        if duplicate_count > 0:
-            logger.warning(
+        if duplicate_count > 0 and self._logger:
+            self._logger.warning(
                 "filter_ids_duplicates_found",
-                extra={
-                    "source_path": source_path,
-                    "column_name": column_name,
-                    "total_count": len(all_ids),
-                    "unique_count": unique_count,
-                    "duplicate_count": duplicate_count,
-                    "sample_duplicates": list(duplicates)[:10],
-                },
+                source_path=source_path,
+                column_name=column_name,
+                total_count=len(all_ids),
+                unique_count=unique_count,
+                duplicate_count=duplicate_count,
+                sample_duplicates=list(duplicates)[:10],
             )
 
         return FilterLoadResult(

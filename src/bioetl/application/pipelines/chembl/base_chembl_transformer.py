@@ -21,6 +21,7 @@ from bioetl.domain.transformations import generate_entity_id
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -51,14 +52,21 @@ class BaseChemblTransformer(BaseTransformer):
     entity_class: ClassVar[type[BaseEntity]]
     primary_id_field: ClassVar[str]
 
-    def __init__(self, provider: str = "chembl") -> None:
+    def __init__(
+        self,
+        provider: str = "chembl",
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+    ) -> None:
         """Initialize ChEMBL transformer.
 
         Args:
             provider: Data provider identifier. Defaults to 'chembl'.
+            tracer: Optional tracing port for distributed tracing (O1 observability).
+            metrics: Optional metrics port for duration/error tracking (O1 observability).
 
         """
-        super().__init__(provider)
+        super().__init__(provider, tracer=tracer, metrics=metrics)
 
     async def _transform_impl(
         self,

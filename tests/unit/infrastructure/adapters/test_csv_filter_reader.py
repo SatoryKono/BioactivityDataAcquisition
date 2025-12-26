@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -12,9 +13,21 @@ from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterRead
 
 
 @pytest.fixture
+def mock_logger() -> MagicMock:
+    """Create a mock LoggerPort."""
+    return MagicMock()
+
+
+@pytest.fixture
 def csv_reader():
-    """Create a CsvFilterReader instance."""
+    """Create a CsvFilterReader instance without logger."""
     return CsvFilterReader()
+
+
+@pytest.fixture
+def csv_reader_with_logger(mock_logger: MagicMock) -> CsvFilterReader:
+    """Create a CsvFilterReader instance with mock logger."""
+    return CsvFilterReader(logger=mock_logger)
 
 
 @pytest.fixture
@@ -229,3 +242,56 @@ class TestCsvFilterReaderEdgeCases:
             assert "DUPLICATE_ID" in result.duplicates
         finally:
             Path(path).unlink(missing_ok=True)
+
+
+@pytest.mark.unit
+class TestCsvFilterReaderLogging:
+    """Tests for CsvFilterReader logging functionality."""
+
+    async def test_logs_warning_when_duplicates_found(
+        self, csv_reader_with_logger: CsvFilterReader, mock_logger: MagicMock
+    ):
+        """Test that warning is logged when duplicates are detected."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("id\n")
+            f.write("DUPLICATE\n")
+            f.write("DUPLICATE\n")
+            f.write("UNIQUE\n")
+            path = f.name
+
+        try:
+            await csv_reader_with_logger.load_filter_ids(path, "id")
+
+            mock_logger.warning.assert_called_once()
+            call_args = mock_logger.warning.call_args
+            assert call_args[0][0] == "filter_ids_duplicates_found"
+            assert call_args[1]["duplicate_count"] == 1
+            assert call_args[1]["unique_count"] == 2
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+    async def test_no_warning_when_no_duplicates(
+        self, csv_reader_with_logger: CsvFilterReader, mock_logger: MagicMock
+    ):
+        """Test that no warning is logged when there are no duplicates."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("id\n")
+            f.write("ID1\n")
+            f.write("ID2\n")
+            f.write("ID3\n")
+            path = f.name
+
+        try:
+            await csv_reader_with_logger.load_filter_ids(path, "id")
+
+            mock_logger.warning.assert_not_called()
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+    async def test_works_without_logger(self, csv_reader, sample_csv_file):
+        """Test that CsvFilterReader works correctly without a logger."""
+        # Should not raise any exception
+        result = await csv_reader.load_filter_ids(sample_csv_file, "molecule_id")
+
+        assert result.has_duplicates is True
+        assert result.unique_count == 3

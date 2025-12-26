@@ -125,6 +125,76 @@ class TestRetryConfig:
         for delay in delays:
             assert 9.0 <= delay <= 11.0
 
+    def test_deterministic_jitter_cross_process_stability(self):
+        """Test deterministic jitter produces stable values across processes.
+
+        This test verifies that the jitter calculation uses MD5 (not Python's
+        hash()) which is stable across different Python processes. Python's
+        built-in hash() uses PYTHONHASHSEED and produces different values in
+        different processes.
+
+        The expected values are pre-computed using MD5 and will remain constant
+        regardless of which Python process runs this test.
+        """
+        import hashlib
+
+        config = RetryConfig(
+            base_delay=10.0,
+            jitter=0.1,
+            deterministic=True,
+            jitter_seed=42,
+        )
+        url = "https://api.example.com/test"
+
+        # Compute expected delay using MD5 directly (cross-process stable)
+        hash_input = f"0:{url}:42"
+        digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+        jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
+        base_delay = 10.0
+        jitter_range = base_delay * 0.1
+        expected_delay = base_delay + jitter_range * (jitter_factor * 2 - 1)
+
+        # Verify implementation matches our expectation
+        actual_delay = config.calculate_delay(attempt=0, url=url)
+
+        assert actual_delay == expected_delay, (
+            f"Jitter calculation mismatch. Expected {expected_delay}, got {actual_delay}. "
+            "This may indicate the implementation uses Python's hash() instead of MD5."
+        )
+
+        # Also verify the value is deterministic (same value on repeated calls)
+        assert config.calculate_delay(attempt=0, url=url) == expected_delay
+        assert config.calculate_delay(attempt=0, url=url) == expected_delay
+
+    def test_deterministic_jitter_known_values(self):
+        """Test deterministic jitter produces known stable values.
+
+        These values are pre-computed and serve as a regression test.
+        If this test fails, it means the jitter algorithm has changed.
+        """
+        config = RetryConfig(
+            base_delay=1.0,
+            jitter=0.5,
+            deterministic=True,
+            jitter_seed=123,
+        )
+
+        # Pre-computed expected values using MD5
+        # These should remain constant across all Python processes
+        test_cases = [
+            (0, "https://example.com/a", 0.6598315358068402),
+            (1, "https://example.com/a", 1.2365159788719648),
+            (0, "https://example.com/b", 1.0166028722926517),
+            (2, "https://example.com/c", 3.1987770072181654),
+        ]
+
+        for attempt, url, expected in test_cases:
+            actual = config.calculate_delay(attempt=attempt, url=url)
+            assert abs(actual - expected) < 1e-10, (
+                f"Delay mismatch for attempt={attempt}, url={url}. "
+                f"Expected {expected}, got {actual}"
+            )
+
 
 @pytest.mark.unit
 class TestIsRetryableStatus:
