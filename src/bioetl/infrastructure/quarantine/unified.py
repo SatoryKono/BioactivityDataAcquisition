@@ -146,16 +146,42 @@ class UnifiedQuarantine:
         pipeline: str,
         error_code: str | None = None,
         max_age_days: int = 7,
+        *,
+        now: datetime,
     ) -> Iterator[dict[str, Any]]:
-        """Replay quarantine records for reprocessing."""
+        """Replay quarantine records for reprocessing.
+
+        Args:
+            pipeline: Pipeline name to filter by.
+            error_code: Optional error code to filter by.
+            max_age_days: Maximum age of records to replay (default 7).
+            now: Current timestamp from application layer
+                 (single source of time per ADR-014). Required.
+        """
         return replay_records(
-            self.base_path, None, pipeline, error_code, max_age_days
+            self.base_path, None, pipeline, error_code, max_age_days, now=now
         )
 
-    def purge(self, pipeline: str, older_than_days: int = 30) -> int:
-        """Purge old quarantine records."""
+    def purge(
+        self,
+        pipeline: str,
+        older_than_days: int = 30,
+        *,
+        now: datetime,
+    ) -> int:
+        """Purge old quarantine records.
+
+        Args:
+            pipeline: Pipeline name to filter by.
+            older_than_days: Delete records older than this (default 30).
+            now: Current timestamp from application layer
+                 (single source of time per ADR-014). Required.
+
+        Returns:
+            Count of deleted records.
+        """
         return purge_records(
-            self.base_path, None, pipeline, older_than_days
+            self.base_path, None, pipeline, older_than_days, now=now
         )
 
     def update_status(self, payload_hash: str, new_status: DQStatus) -> bool:

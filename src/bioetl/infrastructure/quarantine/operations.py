@@ -58,18 +58,30 @@ def inspect_records(
 
 def replay_records(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
     error_code: str | None = None,
     max_age_days: int = 7,
+    *,
+    now: datetime,
 ) -> Iterator[dict[str, Any]]:
-    """Replay quarantine records for reprocessing."""
+    """Replay quarantine records for reprocessing.
+
+    Args:
+        base_path: Path to the quarantine Delta table.
+        storage_options: Storage options for Delta table access.
+        pipeline: Pipeline name to filter by.
+        error_code: Optional error code to filter by.
+        max_age_days: Maximum age of records to replay (default 7).
+        now: Current timestamp from application layer
+             (single source of time per ADR-014). Required.
+    """
     try:
         dt = DeltaTable(base_path, storage_options=storage_options)
     except TableNotFoundError:
         return
 
-    cutoff_date = datetime.now(UTC) - timedelta(days=max_age_days)
+    cutoff_date = now - timedelta(days=max_age_days)
     arrow_table = dt.to_pyarrow_table(
         partitions=[("pipeline", "=", pipeline)],
         filters=[
@@ -141,17 +153,31 @@ def get_statistics(
 
 def purge_records(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
     older_than_days: int = 30,
+    *,
+    now: datetime,
 ) -> int:
-    """Purge old quarantine records, returns count of deleted records."""
+    """Purge old quarantine records, returns count of deleted records.
+
+    Args:
+        base_path: Path to the quarantine Delta table.
+        storage_options: Storage options for Delta table access.
+        pipeline: Pipeline name to filter by.
+        older_than_days: Delete records older than this (default 30).
+        now: Current timestamp from application layer
+             (single source of time per ADR-014). Required.
+
+    Returns:
+        Count of deleted records.
+    """
     try:
         dt = DeltaTable(base_path, storage_options=storage_options)
     except TableNotFoundError:
         return 0
 
-    cutoff_date = (datetime.now(UTC) - timedelta(days=older_than_days)).isoformat()
+    cutoff_date = (now - timedelta(days=older_than_days)).isoformat()
 
     predicate = (
         f"pipeline = {quote_literal(pipeline)} AND "

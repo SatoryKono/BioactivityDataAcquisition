@@ -319,7 +319,7 @@ class TestUnifiedQuarantineReplay:
 
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        result = list(quarantine.replay(pipeline="test"))
+        result = list(quarantine.replay(pipeline="test", now=TEST_INGESTION_TS))
 
         assert result == []
 
@@ -347,7 +347,10 @@ class TestUnifiedQuarantineReplay:
         ):
             result = list(
                 quarantine.replay(
-                    pipeline="test", error_code="INVALID_DATA", max_age_days=3
+                    pipeline="test",
+                    error_code="INVALID_DATA",
+                    max_age_days=3,
+                    now=TEST_INGESTION_TS,
                 )
             )
 
@@ -369,7 +372,7 @@ class TestUnifiedQuarantinePurge:
 
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        result = quarantine.purge(pipeline="test")
+        result = quarantine.purge(pipeline="test", now=TEST_INGESTION_TS)
 
         assert result == 0
 
@@ -381,7 +384,9 @@ class TestUnifiedQuarantinePurge:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = quarantine.purge(pipeline="test", older_than_days=30)
+        result = quarantine.purge(
+            pipeline="test", older_than_days=30, now=TEST_INGESTION_TS
+        )
 
         assert result == 5
         mock_table.delete.assert_called_once()
@@ -394,7 +399,7 @@ class TestUnifiedQuarantinePurge:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = quarantine.purge(pipeline="test")
+        result = quarantine.purge(pipeline="test", now=TEST_INGESTION_TS)
 
         assert result == 0
         mock_table.delete.assert_not_called()
