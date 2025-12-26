@@ -13,21 +13,24 @@ from __future__ import annotations
 import asyncio
 import weakref
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.ports import DataSourcePort, LoggerPort
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
 class BaseSyncAdapter(DataSourcePort):
     """Base class for adapters using synchronous libraries.
 
     Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreaker.
+    All dependencies are injected via constructor (Composition Root pattern).
 
     Uses Template Method pattern for health checks:
     - health_check(): Template method that handles try/except
@@ -37,9 +40,9 @@ class BaseSyncAdapter(DataSourcePort):
     Attributes:
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
-        rate_limiter: Token bucket rate limiter.
-        circuit_breaker: Circuit breaker for fault tolerance.
-        thread_pool: Thread pool for executing sync code.
+        rate_limiter: Token bucket rate limiter (injected).
+        circuit_breaker: Circuit breaker for fault tolerance (injected).
+        thread_pool: Thread pool for executing sync code (injected).
 
     """
 
@@ -51,35 +54,29 @@ class BaseSyncAdapter(DataSourcePort):
 
     def __init__(
         self,
-        rate: float,
         logger: LoggerPort,
-        circuit_breaker_threshold: int = 5,
-        circuit_breaker_timeout: int = 300,
-        max_workers: int = 4,
+        rate_limiter: TokenBucket,
+        circuit_breaker: CircuitBreaker,
+        thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
     ) -> None:
         """Initialize Sync Adapter resources.
 
+        All infrastructure components are injected from Composition Root.
+
         Args:
-            rate: Requests per second.
             logger: LoggerPort instance for structured logging.
-            circuit_breaker_threshold: Failures before opening circuit.
-            circuit_breaker_timeout: Recovery timeout in seconds.
-            max_workers: Thread pool size.
+            rate_limiter: Pre-configured token bucket rate limiter.
+            circuit_breaker: Pre-configured circuit breaker.
+            thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
 
         """
         self.logger = logger
+        self.rate_limiter = rate_limiter
+        self.circuit_breaker = circuit_breaker
+        self.thread_pool = thread_pool
         self.strict_error_handling = strict_error_handling
-
-        # Common infrastructure components
-        self.rate_limiter = TokenBucket(rate=rate, capacity=int(rate * 2))
-        self.circuit_breaker = CircuitBreaker(
-            provider=self.provider_name,
-            failure_threshold=circuit_breaker_threshold,
-            recovery_timeout=circuit_breaker_timeout,
-        )
-        self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
 
         # Safety: ensure shutdown if aclose/context manager is misused
         self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
