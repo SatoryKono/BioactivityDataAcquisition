@@ -6,6 +6,7 @@ Defines interface that all detection algorithms must implement.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -34,6 +35,7 @@ class DetectorStrategy(ABC):
         current_value: float,
         baseline: Sequence[float],
         threshold: float,
+        now: datetime | None = None,
     ) -> Anomaly | None:
         """Detect anomaly in current value.
 
@@ -42,6 +44,7 @@ class DetectorStrategy(ABC):
             current_value: Current observed value
             baseline: Historical values for comparison
             threshold: Detection threshold (interpretation varies by strategy)
+            now: Optional timestamp for testing (defaults to current UTC time)
 
         Returns:
             Anomaly if detected, None otherwise

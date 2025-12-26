@@ -38,6 +38,7 @@ class ZScoreDetector(DetectorStrategy):
         current_value: float,
         baseline: Sequence[float],
         threshold: float = 2.0,
+        now: datetime | None = None,
     ) -> Anomaly | None:
         """Detect anomaly using Z-score method."""
         if len(baseline) < self.MIN_SAMPLES:
@@ -50,7 +51,7 @@ class ZScoreDetector(DetectorStrategy):
         if z_score is None or z_score < threshold:
             return None
 
-        return self._create_anomaly(metric_name, current_value, mean, stddev, z_score)
+        return self._create_anomaly(metric_name, current_value, mean, stddev, z_score, now)
 
     def _calculate_z_score(
         self, value: float, mean: float, stddev: float
@@ -70,6 +71,7 @@ class ZScoreDetector(DetectorStrategy):
         mean: float,
         stddev: float,
         z_score: float,
+        now: datetime | None = None,
     ) -> Anomaly:
         """Create Anomaly object from detection results."""
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
@@ -87,7 +89,7 @@ class ZScoreDetector(DetectorStrategy):
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=z_score,
-            timestamp=datetime.now(UTC),
+            timestamp=now or datetime.now(UTC),
             message=message,
         )
 
