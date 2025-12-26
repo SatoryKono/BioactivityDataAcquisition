@@ -72,29 +72,81 @@ class TestPubChemAdapter:
         """Create a mock logger."""
         return MagicMock()
 
-    def test_adapter_creation(self, mock_logger):
-        """Test PubChem adapter can be created."""
-        adapter = PubChemAdapter(logger=mock_logger)
+    @pytest.fixture
+    def rate_limiter(self):
+        """Create a rate limiter for testing."""
+        return TokenBucket(rate=5.0, capacity=10, provider="pubchem")
+
+    @pytest.fixture
+    def circuit_breaker(self):
+        """Create a circuit breaker for testing."""
+        return CircuitBreaker(provider="pubchem", failure_threshold=5)
+
+    @pytest.fixture
+    def thread_pool(self):
+        """Create a thread pool for testing."""
+        from concurrent.futures import ThreadPoolExecutor
+
+        pool = ThreadPoolExecutor(max_workers=4)
+        yield pool
+        pool.shutdown(wait=False)
+
+    def test_adapter_creation(
+        self, mock_logger, rate_limiter, circuit_breaker, thread_pool
+    ):
+        """Test PubChem adapter can be created with DI."""
+        adapter = PubChemAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+        )
 
         assert adapter.provider_name == "pubchem"
         assert adapter.rate_limiter.rate == 5.0  # 5 req/sec per RULES.md
 
-    def test_adapter_with_custom_rate(self, mock_logger):
-        """Test PubChem adapter with custom rate limit."""
-        adapter = PubChemAdapter(rate=10.0, logger=mock_logger)
+    def test_adapter_with_custom_rate(self, mock_logger, circuit_breaker, thread_pool):
+        """Test PubChem adapter with custom rate limit via injected rate limiter."""
+        custom_rate_limiter = TokenBucket(rate=10.0, capacity=20, provider="pubchem")
+        adapter = PubChemAdapter(
+            logger=mock_logger,
+            rate_limiter=custom_rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+        )
 
         assert adapter.rate_limiter.rate == 10.0
 
-    def test_thread_pool_created(self, mock_logger):
-        """Test thread pool is created for sync operations."""
-        adapter = PubChemAdapter(max_workers=2, logger=mock_logger)
+    def test_thread_pool_injected(
+        self, mock_logger, rate_limiter, circuit_breaker
+    ):
+        """Test thread pool is properly injected for sync operations."""
+        from concurrent.futures import ThreadPoolExecutor
 
-        assert adapter.thread_pool is not None
-        assert adapter.thread_pool._max_workers == 2
+        custom_pool = ThreadPoolExecutor(max_workers=2)
+        try:
+            adapter = PubChemAdapter(
+                logger=mock_logger,
+                rate_limiter=rate_limiter,
+                circuit_breaker=circuit_breaker,
+                thread_pool=custom_pool,
+            )
 
-    async def test_compound_to_dict(self, mock_logger):
+            assert adapter.thread_pool is not None
+            assert adapter.thread_pool._max_workers == 2
+        finally:
+            custom_pool.shutdown(wait=False)
+
+    async def test_compound_to_dict(
+        self, mock_logger, rate_limiter, circuit_breaker, thread_pool
+    ):
         """Test compound conversion to dictionary."""
-        adapter = PubChemAdapter(logger=mock_logger)
+        adapter = PubChemAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+        )
 
         # Mock compound object
         class MockCompound:

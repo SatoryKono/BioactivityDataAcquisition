@@ -398,12 +398,22 @@ class NewProviderAdapter(BaseHttpAdapter):
         self.provider_name = "new_provider"
 ```
 
-**Для sync-библиотек** используйте `BaseSyncAdapter`:
+**Для sync-библиотек** используйте `BaseSyncAdapter` с DI:
 ```python
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 class LegacyAdapter(BaseSyncAdapter):
     provider_name = "legacy"
+
+    def __init__(
+        self,
+        logger: LoggerPort,
+        rate_limiter: TokenBucket,
+        circuit_breaker: CircuitBreaker,
+        thread_pool: ThreadPoolExecutor,
+    ):
+        # Все зависимости инжектируются из Composition Root
+        super().__init__(logger, rate_limiter, circuit_breaker, thread_pool)
 
     async def fetch(self, ...):
         # Sync call wrapped in executor
