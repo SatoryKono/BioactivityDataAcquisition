@@ -308,6 +308,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pipeline=pipeline,
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
+            strict_gold_validation=runtime.strict_gold_validation,
         )
 
         # Create Executor

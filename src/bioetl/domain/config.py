@@ -205,6 +205,12 @@ class RuntimeConfig:
     # When False, violations are logged as warnings
     strict_validation: bool = False
 
+    # Gold layer schema validation (strict mode)
+    # When True, pipelines fail if Gold schema is not provided
+    # When False (default), missing Gold schema skips validation
+    # Use False during migration, True for production readiness
+    strict_gold_validation: bool = False
+
     def __post_init__(self) -> None:
         """Validate runtime config."""
         if self.limit is not None and self.limit <= 0:
