@@ -11,6 +11,7 @@ This package contains all port definitions organized by domain:
 - observability: TracingPort, MetricsPort, LoggerPort, DQMonitorPort
 - validation: GoldValidatorPort for Gold layer validation
 - filtering: InputFilterPort for CSV filter loading
+- resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
 """
 
 from bioetl.domain.ports.checkpoint import CheckpointPort
@@ -27,11 +28,13 @@ from bioetl.domain.ports.observability import (
     TracingPort,
 )
 from bioetl.domain.ports.quarantine import QuarantinePort
+from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort
 
 __all__ = [
     "CheckpointPort",
+    "CircuitBreakerPort",
     "DQMonitorPort",
     "DataSourcePort",
     "FilterableDataSourcePort",
@@ -41,6 +44,7 @@ __all__ = [
     "LoggerPort",
     "MetricsPort",
     "QuarantinePort",
+    "RateLimiterPort",
     "StoragePort",
     "TracingPort",
 ]

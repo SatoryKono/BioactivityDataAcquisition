@@ -274,7 +274,7 @@ def http_client(mock_rate_limiter, mock_circuit_breaker):
     return UnifiedHTTPClient(
         rate_limiter=mock_rate_limiter,
         circuit_breaker=mock_circuit_breaker,
-        retry_config=RetryConfig(max_attempts=2, jitter=0.0),
+        retry_policy=RetryConfig(max_attempts=2, jitter=0.0),
         timeout=10.0,
     )
 
