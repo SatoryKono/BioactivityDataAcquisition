@@ -39,6 +39,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "events",
         "exceptions",
         "filter_config",
+        "filtering",
         "medallion",
         "ports",
         "resilience",
