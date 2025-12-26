@@ -45,6 +45,9 @@ from bioetl.domain.entities import (
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
 
+# Events
+from bioetl.domain.events import PipelineEvent
+
 # Exceptions
 from bioetl.domain.exceptions import (
     ApiError,
@@ -179,6 +182,8 @@ __all__ = [
     "TargetComponent",
     # Error classifier
     "ErrorClassifier",
+    # Events
+    "PipelineEvent",
     # Exceptions - Base
     "ApiError",
     "AuthFailureError",
