@@ -1,0 +1,706 @@
+....FFFFFF.FFF.                                                          [100%]
+================================== FAILURES ===================================
+__________________ test_domain_exports_all_submodule_symbols __________________
+    def test_domain_exports_all_submodule_symbols() -> None:
+        """Validate domain.__all__ includes all public submodule exports.
+
+        REQ-ARCH-031: Domain facade must re-export all public symbols from submodules.
+        This ensures that `from bioetl.domain import X` works for any public symbol X
+        defined in exceptions, ports, or entities submodules.
+        """
+        from bioetl import domain
+        from bioetl.domain import exceptions, ports, entities
+
+        domain_all = set(domain.__all__)
+
+        # Submodules with __all__ that should be fully exported
+        submodules = [
+            ("exceptions", exceptions),
+            ("ports", ports),
+            ("entities", entities),
+        ]
+
+        missing_symbols: list[str] = []
+
+        for submodule_name, submodule in submodules:
+            for symbol in submodule.__all__:
+                if symbol not in domain_all:
+                    missing_symbols.append(f"{submodule_name}.{symbol}")
+
+>       assert not missing_symbols, (
+            "Submodule symbols missing from domain.__all__:\n"
+            + "\n".join(f"  - {s}" for s in sorted(missing_symbols))
+        )
+E       AssertionError: Submodule symbols missing from domain.__all__:
+E           - exceptions.PolicyViolationError
+E       assert not ['exceptions.PolicyViolationError']
+tests\architecture\test_domain_public_api.py:179: AssertionError
+__________ TestPipelineRunnerLifecycle.test_rebuild_lifecycle_order ___________
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315A39090>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525096173920'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525096184336'>
+mock_executor_with_recorder = <AsyncMock id='1525096185008'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525097496656'>
+mock_logger = <MagicMock id='1525097497664'>
+    @pytest.mark.asyncio
+    async def test_rebuild_lifecycle_order(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify call order for REBUILD run type.
+
+        Expected order:
+        1. services.__aenter__ (context manager entry)
+        2. lock_manager.__aenter__ (acquire lock)
+        3. storage.clear_silver
+        4. storage.clear_gold
+        5. checkpoint.load
+        6. executor.execute
+        7. checkpoint.delete
+        8. lock_manager.__aexit__
+        9. services.__aexit__
+        """
+        config = PipelineConfig(
+            pipeline_name="test_lifecycle",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.REBUILD,
+            logger=mock_logger,
+        )
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:241:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x0000016316E51550>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+__________ TestPipelineRunnerLifecycle.test_incremental_skips_clear ___________
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315A38F50>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525097502368'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525097510768'>
+mock_executor_with_recorder = <AsyncMock id='1525097511440'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525097512112'>
+mock_logger = <MagicMock id='1525098004896'>
+    @pytest.mark.asyncio
+    async def test_incremental_skips_clear(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify INCREMENTAL run does NOT clear storage.
+
+        Medallion architecture invariant: incremental runs use merge/upsert
+        and must NOT delete existing data.
+        """
+        config = PipelineConfig(
+            pipeline_name="test_incremental",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:311:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x0000016316E78E10>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+___________ TestPipelineRunnerLifecycle.test_lock_released_on_error ___________
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315876B10>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525097506736'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525098013632'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525098014304'>
+mock_logger = <MagicMock id='1525098015312'>
+    @pytest.mark.asyncio
+    async def test_lock_released_on_error(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify lock is released even when executor raises.
+
+        Critical invariant: lock MUST be released in finally block
+        to prevent deadlocks.
+        """
+        config = PipelineConfig(
+            pipeline_name="test_error",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Executor that raises
+        failing_executor = AsyncMock()
+        failing_executor.execute = AsyncMock(side_effect=RuntimeError("Test error"))
+        failing_executor.records_fetched = 0
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:371:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x0000016316E79A90>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+__________ TestPipelineRunnerLifecycle.test_backfill_clears_storage ___________
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315A1BE10>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525097512112'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525097506064'>
+mock_executor_with_recorder = <AsyncMock id='1525097504384'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525097502704'>
+mock_logger = <MagicMock id='1525097500352'>
+    @pytest.mark.asyncio
+    async def test_backfill_clears_storage(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify BACKFILL run clears storage (same as REBUILD)."""
+        config = PipelineConfig(
+            pipeline_name="test_backfill",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.BACKFILL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.BACKFILL,
+            logger=mock_logger,
+        )
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:434:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x0000016316D80770>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+____ TestPipelineRunnerLifecycle.test_preflight_validation_failure_aborts _____
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315A60290>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525097508752'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525096180640'>
+mock_executor_with_recorder = <AsyncMock id='1525096179296'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525096178288'>
+mock_logger = <MagicMock id='1525096176272'>
+    @pytest.mark.asyncio
+    async def test_preflight_validation_failure_aborts(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify pipeline aborts when infrastructure health check fails.
+
+        Preflight validation is critical for fail-fast behavior.
+        If storage or data source is unhealthy, we must abort before
+        any data operations to prevent partial writes.
+        """
+        from bioetl.domain.exceptions import InfrastructureError
+        from bioetl.domain.types import HealthStatus
+
+        config = PipelineConfig(
+            pipeline_name="test_health_fail",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Make storage health check return UNHEALTHY
+        mock_services_with_recorder.storage.health_check = AsyncMock(
+            return_value=HealthStatus.UNHEALTHY
+        )
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:497:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x0000016316D82650>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+______ TestPipelineRunnerLifecycle.test_checkpoint_resume_after_failure _______
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315987AC0>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525098485072'>
+mock_executor_with_recorder = <AsyncMock id='1525098489440'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525098483392'>
+mock_logger = <MagicMock id='1525098483728'>
+    @pytest.mark.asyncio
+    async def test_checkpoint_resume_after_failure(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify pipeline resumes from checkpoint after previous failure.
+
+        Checkpoint management is critical for long-running pipelines.
+        When resume=True, the checkpoint manager must:
+        1. Load previous checkpoint metadata
+        2. Log the resume state
+        3. Continue from saved offset
+        """
+        config = PipelineConfig(
+            pipeline_name="test_resume",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Create checkpoint manager with resume=True that returns saved state
+        checkpoint_loaded = False
+        saved_metadata = {"records_processed": 500, "last_id": "abc123"}
+
+        checkpoint_manager = AsyncMock()
+
+        async def load_checkpoint():
+            nonlocal checkpoint_loaded
+            checkpoint_loaded = True
+            call_recorder.record("checkpoint.load")
+            return saved_metadata
+
+        async def delete_checkpoint():
+            call_recorder.record("checkpoint.delete")
+
+        checkpoint_manager.load_checkpoint = load_checkpoint
+        checkpoint_manager.delete_checkpoint = delete_checkpoint
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:660:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x0000016317088290>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+_____ TestPipelineRunnerLifecycle.test_dq_threshold_exceeded_logs_anomaly _____
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315A11750>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525098494480'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525099863008'>
+mock_executor_with_recorder = <AsyncMock id='1525099863680'>
+mock_lifecycle_service_with_recorder = <MagicMock spec='MedallionLifecycleService' id='1525099864352'>
+mock_logger = <MagicMock id='1525099865360'>
+    @pytest.mark.asyncio
+    async def test_dq_threshold_exceeded_logs_anomaly(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify data quality anomalies are detected and logged.
+
+        Per RULES.md §4.2:
+        - Soft threshold (>5% DQ errors): Warning
+        - Hard threshold (>20% DQ errors): Fail Batch
+
+        DQ monitoring provides observability into data quality drift.
+        """
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        config = PipelineConfig(
+            pipeline_name="test_dq_threshold",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Configure DQ monitor to return critical anomaly
+        critical_anomaly = Anomaly(
+            metric_name="error_rate",
+            current_value=0.25,  # 25% error rate
+            baseline_mean=0.02,
+            baseline_stddev=0.01,
+            z_score=23.0,
+            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
+            severity=AnomalySeverity.CRITICAL,
+            timestamp=datetime.now(UTC),
+            message="Error rate 25% exceeds threshold 20%",
+        )
+
+        dq_monitor = MagicMock()
+        dq_monitor.check_quality = MagicMock(return_value=[critical_anomaly])
+        dq_monitor.update_baseline_from_metrics = MagicMock()
+
+        # Replace services with one that has DQ monitor
+        services_with_dq = MagicMock()
+        # Copy attributes from original mock
+        services_with_dq.lock = mock_services_with_recorder.lock
+        services_with_dq.storage = mock_services_with_recorder.storage
+        services_with_dq.data_source = mock_services_with_recorder.data_source
+        services_with_dq.metrics = mock_services_with_recorder.metrics
+        services_with_dq.logger = mock_services_with_recorder.logger
+        services_with_dq.dq_monitor = dq_monitor
+
+        # Properly set up async context manager
+        async def services_dq_aenter(self):
+            return services_with_dq
+
+        async def services_dq_aexit(self, *args):
+            pass
+
+        services_with_dq.__aenter__ = services_dq_aenter
+        services_with_dq.__aexit__ = services_dq_aexit
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:764:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x000001631748CE20>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+_________ TestPipelineRunnerLifecycle.test_vacuum_runs_after_success __________
+self = <tests.integration.test_runner_lifecycle.TestPipelineRunnerLifecycle object at 0x0000016315A11850>
+call_recorder = CallRecorder(calls=deque([]))
+mock_services_with_recorder = <MagicMock id='1525098017328'>
+mock_checkpoint_manager_with_recorder = <AsyncMock id='1525096180976'>
+mock_executor_with_recorder = <AsyncMock id='1525096184672'>
+mock_logger = <MagicMock id='1525096182656'>
+    @pytest.mark.asyncio
+    async def test_vacuum_runs_after_success(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_logger,
+    ):
+        """Verify VACUUM runs on Silver and Gold tables after successful run.
+
+        Per RULES.md §3.2: VACUUM weekly, retention_period=7 days.
+        When runtime.vacuum_after_run=True, lifecycle service must call vacuum.
+        """
+        config = PipelineConfig(
+            pipeline_name="test_vacuum",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+            gold_table="test.gold",
+        )
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            vacuum_after_run=True,
+            vacuum_retention_days=7,
+        )
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Create lifecycle service that tracks vacuum calls
+        vacuum_calls = []
+
+        async def mock_vacuum(table, retention_days, dry_run):
+            vacuum_calls.append({
+                "table": table,
+                "retention_days": retention_days,
+                "dry_run": dry_run,
+            })
+            return 5  # 5 files removed
+
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+        )
+
+        lifecycle_service = MagicMock()
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
+        )
+        lifecycle_service.vacuum = mock_vacuum
+
+>       with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_runner_lifecycle.py:846:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <unittest.mock._patch object at 0x000001631748DD00>
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+
+        original = DEFAULT
+        local = False
+
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\runner.py'> does not have the attribute 'LockManager'
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1467: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_domain_public_api.py::test_domain_exports_all_submodule_symbols - AssertionError: Submodule symbols missing from domain.__all__:
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_rebuild_lifecycle_order - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_incremental_skips_clear - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_lock_released_on_error - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_backfill_clears_storage - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_preflight_validation_failure_aborts - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_checkpoint_resume_after_failure - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_dq_threshold_exceeded_logs_anomaly - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+FAILED tests/integration/test_runner_lifecycle.py::TestPipelineRunnerLifecycle::test_vacuum_runs_after_success - AttributeError: <module 'bioetl.application.core.runner' from 'E:\\google_d...
+9 failed, 6 passed in 1.15s
