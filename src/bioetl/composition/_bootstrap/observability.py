@@ -98,7 +98,10 @@ def bootstrap_logger(
     )
 
 
-def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
+def bootstrap_tracer(
+    settings: Settings,
+    service_name: str = "bioetl",
+) -> TracingPort:
     """Bootstrap distributed tracing.
 
     Unified Observability Contract: Always returns a valid TracingPort.
@@ -106,15 +109,13 @@ def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
     returns NoOpTracing (silent fallback).
 
     Args:
+        settings: Application settings (MUST be injected, not loaded globally).
         service_name: Name of the service for tracing context.
 
     Returns:
         TracingPort instance (OpenTelemetryTracer or NoOpTracing).
         Never returns None - uses NoOpTracing as fallback.
     """
-    from bioetl.infrastructure.config import get_settings
-
-    settings = get_settings()
     if settings.observability.tracing_enabled:
         try:
             return OpenTelemetryTracer(service_name=service_name)
@@ -243,7 +244,7 @@ def bootstrap_observability(
         ObservabilityContractError: If bundle creation fails validation.
     """
     logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
-    tracer = bootstrap_tracer()
+    tracer = bootstrap_tracer(settings)
     metrics = bootstrap_metrics(settings)
     dq_monitor = bootstrap_dq_monitor(settings)
 
