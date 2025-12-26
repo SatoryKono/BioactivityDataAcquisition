@@ -25,6 +25,10 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
 from bioetl.domain.types import ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+    CHEMBL_STATUS_URL,
+    ChemblEntityMapper,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
@@ -34,36 +38,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
-
-# ChEMBL API base URL
-CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
-CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status.json"
-
-# Entity type to ChEMBL resource mapping
-ENTITY_MAPPING = {
-    "activity": "activity",
-    "assay": "assay",
-    "compound": "molecule",
-    "molecule": "molecule",
-    "target": "target",
-    "target_component": "target_component",
-    "document": "document",
-    "cell_line": "cell_line",
-    "tissue": "tissue",
-}
-
-# Plural forms for API response keys (ChEMBL uses irregular plurals)
-ENTITY_PLURAL = {
-    "activity": "activities",
-    "assay": "assays",
-    "molecule": "molecules",
-    "target": "targets",
-    "target_component": "target_components",
-    "document": "documents",
-    "cell_line": "cell_lines",
-    "tissue": "tissues",
-}
 
 
 @dataclass
@@ -102,13 +76,10 @@ class ChemblAdapter(BaseHttpAdapter):
     _total_errors: int = field(init=False, default=0)
     _error_counts: dict[ErrorType, int] = field(init=False, default_factory=dict)
 
-    def _get_resource_url(self, entity_type: str) -> str:
-        """Get ChEMBL API URL for entity type."""
-        resource = ENTITY_MAPPING.get(entity_type)
-        if resource is None:
-            msg = f"Unknown entity type: {entity_type}"
-            raise ValueError(msg)
-        return f"{CHEMBL_API_BASE}/{resource}.json"
+    # Entity mapper for URL and key resolution
+    _mapper: ChemblEntityMapper = field(
+        init=False, default_factory=ChemblEntityMapper
+    )
 
     def _get_effective_batch_size(self) -> int:
         """Get batch size adjusted for current health status.
@@ -151,8 +122,7 @@ class ChemblAdapter(BaseHttpAdapter):
     ) -> tuple[list[dict[str, Any]], bool]:
         """Process API response, extract records and pagination info."""
         data = response.json()
-        resource = ENTITY_MAPPING.get(entity_type, entity_type)
-        plural_key = ENTITY_PLURAL.get(resource, resource + "s")
+        plural_key = self._mapper.get_plural_key(entity_type)
         records = data.get(plural_key, [])
         page_meta = data.get("page_meta", {})
         has_next = page_meta.get("next") is not None
@@ -180,7 +150,7 @@ class ChemblAdapter(BaseHttpAdapter):
         self, entity_type: str, limit: int | None = None
     ) -> AsyncIterator[list[dict[str, Any]]]:
         """Yield pages of records."""
-        url = self._get_resource_url(entity_type)
+        url = self._mapper.get_resource_url(entity_type)
         offset = 0
         while True:
             params = self._build_params(offset)
@@ -214,10 +184,10 @@ class ChemblAdapter(BaseHttpAdapter):
         when using filter parameters (e.g., assay_chembl_id__in).
         This method deduplicates records by primary key field.
         """
-        url = self._get_resource_url(entity_type)
+        url = self._mapper.get_resource_url(entity_type)
         offset = 0
         seen_ids: set[str] = set()
-        pk_field = self._get_primary_key_field(entity_type)
+        pk_field = self._mapper.get_primary_key_field(entity_type)
 
         while True:
             params = self._build_params(offset)
@@ -296,22 +266,6 @@ class ChemblAdapter(BaseHttpAdapter):
         # Wrap in ChemblApiError for consistent handling
         raise ChemblApiError(str(e)) from e
 
-    def _get_primary_key_field(self, entity_type: str) -> str:
-        """Get the primary key field name for deduplication."""
-        pk_overrides = {
-            "assay": "assay_chembl_id",
-            "molecule": "molecule_chembl_id",
-            "compound": "molecule_chembl_id",
-            "document": "document_chembl_id",
-            "target": "target_chembl_id",
-            "target_component": "component_id",
-            "cell_line": "cell_chembl_id",
-            "tissue": "tissue_chembl_id",
-        }
-        return pk_overrides.get(
-            entity_type, ENTITY_MAPPING.get(entity_type, entity_type) + "_id"
-        )
-
     async def _fetch_filtered(
         self,
         entity_type: str,
@@ -322,7 +276,7 @@ class ChemblAdapter(BaseHttpAdapter):
         """Perform filtered fetch using ID batches with client-side deduplication."""
         total_fetched = 0
         seen_ids: set[str] = set()
-        pk_field = self._get_primary_key_field(entity_type)
+        pk_field = self._mapper.get_primary_key_field(entity_type)
 
         for id_batch in self._batch_ids(filter_ids, batch_size=100):
             async for record in self._fetch_with_filter(
@@ -350,7 +304,7 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         total_fetched = 0
         seen_ids: set[str] = set()
-        pk_field = self._get_primary_key_field(entity_type)
+        pk_field = self._mapper.get_primary_key_field(entity_type)
 
         async for records in self._page_iterator(entity_type, limit):
             for record in records:
@@ -541,7 +495,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities."""
-        url = self._get_resource_url(entity_type)
+        url = self._mapper.get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}
         response = await self.http_client.get(url, params=params)
         data = response.json()
