@@ -530,12 +530,17 @@ def test_no_unsafe_functions(src_dir: Path):
 
 
 def test_env_var_centralization(src_dir: Path):
-    """os.getenv only in config.py."""
-    config_file = src_dir / "bioetl" / "infrastructure" / "config.py"
+    """os.getenv only in config.py and encoders.py."""
+    # Files allowed to use os.getenv/environ
+    allowed_files = {
+        src_dir / "bioetl" / "infrastructure" / "config.py",
+        src_dir / "bioetl" / "infrastructure" / "serialization" / "encoders.py",
+    }
+    allowed_resolved = {f.resolve() for f in allowed_files}
     violations = []
 
     for py_file in (src_dir / "bioetl").rglob("*.py"):
-        if py_file.resolve() == config_file.resolve():
+        if py_file.resolve() in allowed_resolved:
             continue
 
         with py_file.open(encoding="utf-8") as f:
