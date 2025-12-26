@@ -143,6 +143,7 @@ class TestPortRuntimeCheckable:
         "DQMonitorPort",
         "RateLimiterPort",
         "CircuitBreakerPort",
+        "JsonEncoderPort",
     ]
 
     @pytest.mark.parametrize("port_name", ALL_PORTS)
@@ -191,6 +192,7 @@ class TestPortExportsComplete:
             "GoldValidatorPort",
             "RateLimiterPort",
             "CircuitBreakerPort",
+            "JsonEncoderPort",
         }
 
         actual_exports = set(ports.__all__) if hasattr(ports, "__all__") else set()
@@ -762,5 +764,89 @@ class TestResilienceImplementationContract:
 
         assert isinstance(breaker, ports.CircuitBreakerPort), (
             "CircuitBreaker MUST implement CircuitBreakerPort protocol. "
+            "Check that all required methods are present."
+        )
+
+
+# ============================================================================
+# JSON Encoder Port Contract Tests
+# ============================================================================
+
+
+class TestJsonEncoderPortContract:
+    """Tests for JsonEncoderPort specific contracts.
+
+    JsonEncoderPort defines the contract for JSON serialization.
+    Implementations MUST guarantee deterministic output for reproducibility.
+    See RULES.md §2.8 - Content Hashing and REQ-ARCH-030 - Deterministic Writes.
+    """
+
+    REQUIRED_METHODS = ["dumps", "dumps_canonical", "loads"]
+
+    @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
+    def test_json_encoder_port_has_required_methods(self, method_name: str) -> None:
+        """JsonEncoderPort MUST have all required serialization methods."""
+        assert hasattr(ports.JsonEncoderPort, method_name), (
+            f"JsonEncoderPort MUST define {method_name}() for JSON serialization"
+        )
+
+    def test_json_encoder_port_dumps_has_sort_keys_param(self) -> None:
+        """JsonEncoderPort.dumps() MUST have sort_keys parameter for determinism."""
+        import inspect
+
+        sig = inspect.signature(ports.JsonEncoderPort.dumps)
+        params = sig.parameters
+
+        assert "sort_keys" in params, (
+            "JsonEncoderPort.dumps() MUST have sort_keys parameter for deterministic output"
+        )
+
+    def test_json_encoder_port_is_runtime_checkable(self) -> None:
+        """JsonEncoderPort MUST be @runtime_checkable for isinstance() checks."""
+
+        class DummyEncoder:
+            """Dummy class for testing isinstance()."""
+
+            pass
+
+        try:
+            isinstance(DummyEncoder(), ports.JsonEncoderPort)
+            is_runtime_checkable = True
+        except TypeError:
+            is_runtime_checkable = False
+
+        assert is_runtime_checkable, (
+            "JsonEncoderPort MUST be decorated with @runtime_checkable"
+        )
+
+
+class TestJsonEncoderImplementationContract:
+    """Tests that JSON encoder implementations satisfy port contracts."""
+
+    def test_stdlib_encoder_implements_json_encoder_port(self) -> None:
+        """StdLibJsonEncoder MUST satisfy JsonEncoderPort contract."""
+        from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
+
+        encoder = StdLibJsonEncoder()
+
+        assert isinstance(encoder, ports.JsonEncoderPort), (
+            "StdLibJsonEncoder MUST implement JsonEncoderPort protocol. "
+            "Check that all required methods are present."
+        )
+
+    def test_orjson_encoder_implements_json_encoder_port(self) -> None:
+        """OrjsonEncoder MUST satisfy JsonEncoderPort contract (if installed)."""
+        from bioetl.infrastructure.serialization.encoders import (
+            ORJSON_AVAILABLE,
+            OrjsonEncoder,
+        )
+
+        if not ORJSON_AVAILABLE:
+            pytest.skip("orjson not installed")
+
+        encoder = OrjsonEncoder()
+
+        assert isinstance(encoder, ports.JsonEncoderPort), (
+            "OrjsonEncoder MUST implement JsonEncoderPort protocol. "
             "Check that all required methods are present."
         )
