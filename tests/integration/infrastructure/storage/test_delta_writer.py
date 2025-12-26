@@ -148,36 +148,19 @@ async def test_write_silver_delete_mode(
     delta_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test delete mode (replaces all existing data)."""
-    await delta_writer.write_silver(
-        table_name="test_overwrite",
-        records=sample_records,
-        primary_keys=["id"],
-        schema=sample_schema,
-    )
+    # Silver layer does not support 'delete' mode (overwrite).
+    # It only supports 'append' and 'merge'.
+    # This test verifies that PolicyViolationError is raised.
+    from bioetl.domain.exceptions import PolicyViolationError
 
-    new_records = [
-        {
-            "id": "3",
-            "val": "C",
-            "_run_id": "run3",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch3",
-            "_ingestion_ts": "2023-01-03T00:00:00",
-        }
-    ]
-
-    await delta_writer.write_silver(
-        table_name="test_overwrite",
-        records=new_records,
-        primary_keys=["id"],
-        schema=sample_schema,
-        mode="delete",
-    )
-
-    dt = DeltaTable(f"{temp_delta_path}/test_overwrite")
-    df = dt.to_pandas()
-    assert len(df) == 1
-    assert df.iloc[0]["id"] == "3"
+    with pytest.raises(PolicyViolationError, match="silver does not allow overwrite"):
+        await delta_writer.write_silver(
+            table_name="test_overwrite",
+            records=sample_records,
+            primary_keys=["id"],
+            schema=sample_schema,
+            mode="delete",
+        )
 
 
 @pytest.mark.asyncio
@@ -185,12 +168,13 @@ async def test_write_silver_partitioning(
     delta_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test partitioning."""
+    # Silver layer does not support 'delete' mode, so we use 'append' for partitioning test
     await delta_writer.write_silver(
         table_name="test_partition",
         records=sample_records,
         primary_keys=["id"],
         schema=sample_schema,
-        mode="delete",
+        mode="append",
         partition_cols=["val"],
     )
 
