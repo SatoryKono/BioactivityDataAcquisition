@@ -20,6 +20,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -84,7 +85,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             self.span.__enter__()
 
         # 2. Log Start
-        self.logger.info("pipeline_started", run_type=self.run_type)
+        self.logger.info(PipelineEvent.START, run_type=self.run_type)
 
         return self
 
@@ -135,15 +136,15 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         }
         if status == "failed":
             self.logger.error(
-                "pipeline_failed",
+                PipelineEvent.ERROR,
                 **log_ctx,
                 error=str(exc_val),
                 error_type=type(exc_val).__name__,
             )
         elif status == "shutdown":
-            self.logger.warning("pipeline_shutdown", **log_ctx)
+            self.logger.warning(PipelineEvent.SHUTDOWN, **log_ctx)
         else:
-            self.logger.info("pipeline_finished", **log_ctx)
+            self.logger.info(PipelineEvent.COMPLETE, **log_ctx)
 
         # 3. End Trace Span (O3: handle close errors gracefully)
         if self.span:
@@ -280,7 +281,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         )
 
         self.metrics.set_gauge(
-            "pipeline_health_check_passed",
+            PipelineEvent.HEALTH_CHECK_PASSED,
             1.0 if healthy else 0.0,
             {"pipeline": self.pipeline_name, "component": component},
         )

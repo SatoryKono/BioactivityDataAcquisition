@@ -10,6 +10,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.health_aggregator import HealthAggregator
+from bioetl.domain.events import PipelineEvent
 from bioetl.domain.medallion import MedallionPolicy
 from bioetl.domain.types import (
     ConfigValidationError,
@@ -132,7 +133,7 @@ class PreflightService:
         for result in report.results:
             passed = 1.0 if result.status == HealthStatus.HEALTHY else 0.0
             self._metrics.set_gauge(
-                "pipeline_health_check_passed",
+                PipelineEvent.HEALTH_CHECK_PASSED,
                 passed,
                 {"pipeline": pipeline, "component": result.component},
             )
