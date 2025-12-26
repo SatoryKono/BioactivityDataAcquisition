@@ -64,12 +64,16 @@ class BaseServicesFactory:
         Returns:
             PipelineServices with all dependencies configured
         """
-        storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
+        # Create metrics first so it can be passed to storage factory
+        metrics = cls._create_metrics(settings)
+
+        storage_ctx = StorageFactory.create(
+            settings, pipeline_config, logger, metrics=metrics
+        )
 
         lock = cls._create_lock()
         checkpoint = cls._create_checkpoint(storage_ctx)
         quarantine = cls._create_quarantine(storage_ctx)
-        metrics = cls._create_metrics(settings)
 
         # Use provided tracer or fallback to NoOpTracing
         # Tracer should be created via bootstrap_tracer() for consistent configuration
