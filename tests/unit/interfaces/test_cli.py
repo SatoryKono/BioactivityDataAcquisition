@@ -228,9 +228,11 @@ class TestCliCommands:
 
     def test_cli_version(self, cli_runner):
         """Test that --version shows version."""
+        from bioetl import __version__
+
         result = cli_runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
-        assert "0.1.0" in result.output
+        assert __version__ in result.output
 
     def test_run_help(self, cli_runner):
         """Test that run --help works."""
