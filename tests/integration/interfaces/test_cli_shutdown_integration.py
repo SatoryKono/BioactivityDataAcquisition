@@ -267,13 +267,11 @@ class TestRunnerShutdownIntegration:
 
         # The mock_shutdown_signal is retrieved from the runner instance
         # which is created by create_pipeline_runner.
-        # However, in cli.py, we do:
-        # runner = create_pipeline_runner(...)
-        # setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
+        # In cli.py, setup_shutdown_handlers is called with shutdown_signal and logger.
 
         # So we expect setup_shutdown_handlers to be called with the mock_shutdown_signal
-        # that we attached to the mock_runner.
-        mock_setup.assert_called_once_with(mock_shutdown_signal)
+        # and the logger that we attached to the mock_runner.
+        mock_setup.assert_called_once_with(mock_shutdown_signal, mock_runner.logger)
 
 
 class TestLockReleaseOnShutdown:
