@@ -98,6 +98,89 @@ class TestPipelineContext:
             assert ctx.run_type == run_type
 
 
+class TestPipelineContextStartedAt:
+    """Tests for PipelineContext.started_at field."""
+
+    def test_context_started_at_has_default(self) -> None:
+        """Context should have started_at with automatic default."""
+        run_id = uuid4()
+        logger = MagicMock()
+        before = datetime.now(UTC)
+
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+        )
+
+        after = datetime.now(UTC)
+        assert ctx.started_at is not None
+        assert before <= ctx.started_at <= after
+        assert ctx.started_at.tzinfo == UTC
+
+    def test_context_started_at_explicit(self) -> None:
+        """Context should accept explicit started_at value."""
+        run_id = uuid4()
+        logger = MagicMock()
+        explicit_time = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
+
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            started_at=explicit_time,
+        )
+
+        assert ctx.started_at == explicit_time
+
+    def test_context_create_factory_auto_timestamp(self) -> None:
+        """create() factory should auto-generate started_at when not provided."""
+        run_id = uuid4()
+        logger = MagicMock()
+        before = datetime.now(UTC)
+
+        ctx = PipelineContext.create(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+        )
+
+        after = datetime.now(UTC)
+        assert before <= ctx.started_at <= after
+
+    def test_context_create_factory_explicit_timestamp(self) -> None:
+        """create() factory should use provided started_at."""
+        run_id = uuid4()
+        logger = MagicMock()
+        explicit_time = datetime(2025, 6, 1, 10, 30, 0, tzinfo=UTC)
+
+        ctx = PipelineContext.create(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            started_at=explicit_time,
+        )
+
+        assert ctx.started_at == explicit_time
+
+    def test_bind_logger_preserves_started_at(self) -> None:
+        """bind_logger should preserve started_at in new context."""
+        run_id = uuid4()
+        logger = MagicMock()
+        logger.bind.return_value = MagicMock()
+        explicit_time = datetime(2025, 3, 20, 8, 0, 0, tzinfo=UTC)
+
+        ctx = PipelineContext(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            started_at=explicit_time,
+        )
+        new_ctx = ctx.bind_logger(entity="test")
+
+        assert new_ctx.started_at == explicit_time
+
+
 class TestPipelineContextEquality:
     """Tests for PipelineContext equality and hashing."""
 
