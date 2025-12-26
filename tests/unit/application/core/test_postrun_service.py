@@ -1,0 +1,485 @@
+"""Unit tests for the PostrunService class."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from bioetl.application.core.postrun_service import (
+    DQResult,
+    PostrunService,
+    VacuumResult,
+)
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.types import RunType
+
+
+@pytest.fixture
+def mock_logger():
+    """Create a mock logger."""
+    logger = MagicMock()
+    logger.bind = MagicMock(return_value=logger)
+    logger.info = MagicMock()
+    logger.warning = MagicMock()
+    logger.error = MagicMock()
+    logger.debug = MagicMock()
+    return logger
+
+
+@pytest.fixture
+def mock_metrics():
+    """Create a mock metrics port."""
+    metrics = MagicMock()
+    metrics.set_gauge = MagicMock()
+    metrics.observe_histogram = MagicMock()
+    metrics.increment_counter = MagicMock()
+    return metrics
+
+
+@pytest.fixture
+def pipeline_config():
+    """Create a pipeline config."""
+    return PipelineConfig(
+        pipeline_name="test_postrun_pipeline",
+        provider="chembl",
+        entity_type="activity",
+        primary_keys=["activity_id"],
+        silver_table="test_silver",
+    )
+
+
+@pytest.fixture
+def runtime_config():
+    """Create a runtime config."""
+    return RuntimeConfig(
+        run_type=RunType.INCREMENTAL,
+        limit=None,
+    )
+
+
+@pytest.fixture
+def mock_services(mock_metrics):
+    """Create mock pipeline services."""
+    services = MagicMock()
+    services.metrics = mock_metrics
+    services.dq_monitor = None
+    return services
+
+
+@pytest.fixture
+def mock_executor():
+    """Create a mock executor."""
+    executor = MagicMock()
+    executor.records_fetched = 100
+    executor.records_bronze = 100
+    executor.records_silver = 95
+    executor.records_gold = 90
+    executor.records_quarantined = 5
+    return executor
+
+
+@pytest.fixture
+def mock_lifecycle_service():
+    """Create a mock lifecycle service."""
+    service = MagicMock()
+    service.vacuum = AsyncMock(return_value=10)
+    return service
+
+
+@pytest.fixture
+def postrun_service(
+    pipeline_config, runtime_config, mock_services, mock_logger, mock_lifecycle_service
+):
+    """Create a PostrunService instance."""
+    return PostrunService(
+        config=pipeline_config,
+        runtime=runtime_config,
+        services=mock_services,
+        logger=mock_logger,
+        lifecycle_service=mock_lifecycle_service,
+    )
+
+
+@pytest.mark.unit
+class TestPostrunServiceInit:
+    """Tests for PostrunService initialization."""
+
+    def test_initialization(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_services,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test postrun service initializes correctly."""
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        assert service._config == pipeline_config
+        assert service._runtime == runtime_config
+        assert service._services == mock_services
+        assert service._logger == mock_logger
+        assert service._lifecycle_service == mock_lifecycle_service
+
+
+@pytest.mark.unit
+class TestPostrunServiceDQChecks:
+    """Tests for PostrunService.run_dq_checks method."""
+
+    @pytest.mark.asyncio
+    async def test_dq_checks_skips_without_monitor(
+        self, postrun_service, mock_executor
+    ):
+        """Test run_dq_checks returns early when dq_monitor is None."""
+        result = await postrun_service.run_dq_checks(mock_executor)
+
+        assert result.anomalies_count == 0
+        assert result.has_critical is False
+        assert result.check_duration_ms == 0
+
+    @pytest.mark.asyncio
+    async def test_dq_checks_with_no_anomalies(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+        mock_executor,
+        mock_metrics,
+    ):
+        """Test run_dq_checks with no anomalies detected."""
+        mock_dq_monitor = MagicMock()
+        mock_dq_monitor.check_quality = MagicMock(return_value=[])
+        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
+
+        services = MagicMock()
+        services.dq_monitor = mock_dq_monitor
+        services.metrics = mock_metrics
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        result = await service.run_dq_checks(mock_executor)
+
+        assert result.anomalies_count == 0
+        assert result.has_critical is False
+        mock_dq_monitor.check_quality.assert_called_once()
+        mock_dq_monitor.update_baseline_from_metrics.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_dq_checks_with_anomalies(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+        mock_executor,
+        mock_metrics,
+    ):
+        """Test run_dq_checks with anomalies detected."""
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        anomaly = Anomaly(
+            metric_name="error_rate",
+            current_value=0.25,
+            baseline_mean=0.05,
+            baseline_stddev=0.02,
+            anomaly_type=AnomalyType.SPIKE,
+            severity=AnomalySeverity.HIGH,
+            z_score=10.0,
+            timestamp=datetime.now(UTC),
+            message="Error rate spike detected",
+        )
+
+        mock_dq_monitor = MagicMock()
+        mock_dq_monitor.check_quality = MagicMock(return_value=[anomaly])
+        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
+
+        services = MagicMock()
+        services.dq_monitor = mock_dq_monitor
+        services.metrics = mock_metrics
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        result = await service.run_dq_checks(mock_executor)
+
+        assert result.anomalies_count == 1
+        assert result.has_critical is False
+        mock_logger.warning.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_dq_checks_with_critical_anomaly(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+        mock_executor,
+        mock_metrics,
+    ):
+        """Test run_dq_checks with critical anomaly."""
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        critical_anomaly = Anomaly(
+            metric_name="error_rate",
+            current_value=0.50,
+            baseline_mean=0.05,
+            baseline_stddev=0.02,
+            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
+            severity=AnomalySeverity.CRITICAL,
+            z_score=22.5,
+            timestamp=datetime.now(UTC),
+            message="Error rate critical",
+        )
+
+        mock_dq_monitor = MagicMock()
+        mock_dq_monitor.check_quality = MagicMock(return_value=[critical_anomaly])
+        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
+
+        services = MagicMock()
+        services.dq_monitor = mock_dq_monitor
+        services.metrics = mock_metrics
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        result = await service.run_dq_checks(mock_executor)
+
+        assert result.anomalies_count == 1
+        assert result.has_critical is True
+        mock_logger.error.assert_called()
+
+
+@pytest.mark.unit
+class TestPostrunServiceVacuum:
+    """Tests for PostrunService.run_vacuum_if_enabled method."""
+
+    @pytest.mark.asyncio
+    async def test_vacuum_skipped_when_disabled(self, postrun_service):
+        """Test vacuum is skipped when vacuum_after_run is False."""
+        result = await postrun_service.run_vacuum_if_enabled()
+
+        assert result.skipped is True
+        assert result.silver_files_removed == 0
+        assert result.gold_files_removed == 0
+
+    @pytest.mark.asyncio
+    async def test_vacuum_skipped_in_dry_run(
+        self,
+        pipeline_config,
+        mock_services,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test vacuum is skipped in dry-run mode."""
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            vacuum_after_run=True,
+            dry_run=True,
+        )
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        result = await service.run_vacuum_if_enabled()
+
+        assert result.skipped is True
+        mock_logger.info.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_vacuum_runs_when_enabled(
+        self,
+        pipeline_config,
+        mock_services,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test vacuum runs when enabled and not dry-run."""
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            vacuum_after_run=True,
+            dry_run=False,
+        )
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        result = await service.run_vacuum_if_enabled()
+
+        assert result.skipped is False
+        assert result.silver_files_removed == 10
+        assert result.gold_files_removed == 10
+        assert mock_lifecycle_service.vacuum.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_vacuum_handles_error_gracefully(
+        self,
+        pipeline_config,
+        mock_services,
+        mock_logger,
+    ):
+        """Test vacuum handles errors gracefully."""
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            vacuum_after_run=True,
+            dry_run=False,
+        )
+
+        failing_lifecycle = MagicMock()
+        failing_lifecycle.vacuum = AsyncMock(side_effect=Exception("Vacuum failed"))
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=failing_lifecycle,
+        )
+
+        result = await service.run_vacuum_if_enabled()
+
+        assert result.skipped is False
+        assert result.silver_files_removed == 0
+        assert result.gold_files_removed == 0
+        mock_logger.warning.assert_called()
+
+
+@pytest.mark.unit
+class TestPostrunServiceCleanup:
+    """Tests for PostrunService.cleanup method."""
+
+    @pytest.mark.asyncio
+    async def test_cleanup_with_tracer(self, postrun_service):
+        """Test cleanup closes tracer."""
+        mock_tracer = MagicMock()
+        mock_tracer.close = MagicMock()
+
+        await postrun_service.cleanup(mock_tracer)
+
+        mock_tracer.close.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_without_tracer(self, postrun_service):
+        """Test cleanup handles None tracer."""
+        # Should not raise
+        await postrun_service.cleanup(None)
+
+    @pytest.mark.asyncio
+    async def test_cleanup_handles_tracer_error(self, postrun_service, mock_logger):
+        """Test cleanup handles tracer close error gracefully."""
+        mock_tracer = MagicMock()
+        mock_tracer.close = MagicMock(side_effect=Exception("Close failed"))
+
+        # Should not raise
+        await postrun_service.cleanup(mock_tracer)
+
+        mock_logger.warning.assert_called()
+
+
+@pytest.mark.unit
+class TestPostrunServiceBatchMetrics:
+    """Tests for PostrunService._collect_batch_metrics method."""
+
+    def test_collect_batch_metrics(self, postrun_service, mock_executor):
+        """Test batch metrics collection."""
+        metrics = postrun_service._collect_batch_metrics(mock_executor)
+
+        assert metrics["record_count"] == 100.0
+        assert metrics["bronze_count"] == 100.0
+        assert metrics["silver_count"] == 95.0
+        assert metrics["gold_count"] == 90.0
+        assert metrics["quarantined_count"] == 5.0
+        assert metrics["error_rate"] == 0.05
+        assert metrics["silver_yield"] == 0.95
+        assert metrics["gold_yield"] == 0.90
+
+    def test_collect_batch_metrics_handles_zero_records(self, postrun_service):
+        """Test batch metrics collection with zero records."""
+        zero_executor = MagicMock()
+        zero_executor.records_fetched = 0
+        zero_executor.records_bronze = 0
+        zero_executor.records_silver = 0
+        zero_executor.records_gold = 0
+        zero_executor.records_quarantined = 0
+
+        metrics = postrun_service._collect_batch_metrics(zero_executor)
+
+        # Should use max(1, total) to avoid division by zero
+        assert metrics["record_count"] == 0.0
+        assert metrics["error_rate"] == 0.0
+
+
+@pytest.mark.unit
+class TestDQResult:
+    """Tests for DQResult dataclass."""
+
+    def test_dq_result_creation(self):
+        """Test DQResult creation."""
+        result = DQResult(
+            anomalies_count=2,
+            has_critical=True,
+            check_duration_ms=123.45,
+        )
+
+        assert result.anomalies_count == 2
+        assert result.has_critical is True
+        assert result.check_duration_ms == 123.45
+
+
+@pytest.mark.unit
+class TestVacuumResult:
+    """Tests for VacuumResult dataclass."""
+
+    def test_vacuum_result_creation(self):
+        """Test VacuumResult creation."""
+        result = VacuumResult(
+            silver_files_removed=10,
+            gold_files_removed=5,
+            skipped=False,
+        )
+
+        assert result.silver_files_removed == 10
+        assert result.gold_files_removed == 5
+        assert result.skipped is False

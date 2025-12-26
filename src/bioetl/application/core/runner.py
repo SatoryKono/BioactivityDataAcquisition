@@ -3,18 +3,20 @@
 Application Service that orchestrates pipeline execution lifecycle.
 Coordinates locking, checkpointing, and execution.
 
-Records health-check metrics per Unified Observability Contract:
-- pipeline_health_check_passed: Per-component health status
-- infrastructure_validated: Overall infrastructure validation status
+Delegates to specialized services:
+- PreflightService: Infrastructure health validation
+- PostrunService: DQ checks, VACUUM, cleanup
+- LifecycleOrchestrator: Medallion layer clearing
 """
 
 from __future__ import annotations
 
-import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.application.core.health_aggregator import HealthAggregator
+from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.observability.observer import PipelineObserver
 
 if TYPE_CHECKING:
@@ -36,6 +38,11 @@ class PipelineRunner:
 
     It coordinates application services like locking and checkpointing,
     but remains decoupled from the core business logic of the pipeline itself.
+
+    Delegates specialized operations to:
+    - PreflightService: Pre-flight infrastructure validation
+    - PostrunService: Post-run DQ checks, VACUUM, cleanup
+    - LifecycleOrchestrator: Medallion layer clear policies
     """
 
     def __init__(
@@ -66,7 +73,6 @@ class PipelineRunner:
             lifecycle_service: Medallion lifecycle service for data clearing.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
-
         """
         self._config = config
         self._runtime = runtime
@@ -93,13 +99,30 @@ class PipelineRunner:
             heartbeat_interval=self._runtime.heartbeat_interval,
             logger=self._logger,
             shutdown_signal=self.shutdown_signal,
-            checkpoint_manager=self._checkpoint_manager,  # Inject dependency
+            checkpoint_manager=self._checkpoint_manager,
         )
 
-        # Health aggregator for pre-flight infrastructure validation
-        self._health_aggregator = HealthAggregator(
+        # Specialized services
+        self._preflight_service = PreflightService(
+            config=self._config,
+            context=self._context,
+            logger=self._logger,
             metrics=self._services.metrics,
-            logger=self._services.logger,
+        )
+
+        self._postrun_service = PostrunService(
+            config=self._config,
+            runtime=self._runtime,
+            services=self._services,
+            logger=self._logger,
+            lifecycle_service=self._lifecycle_service,
+        )
+
+        self._lifecycle_orchestrator = LifecycleOrchestrator(
+            config=self._config,
+            runtime=self._runtime,
+            logger=self._logger,
+            lifecycle_service=self._lifecycle_service,
         )
 
     @property
@@ -125,7 +148,6 @@ class PipelineRunner:
             extra={"stage": "startup", "run_type": self._runtime.run_type.value},
         )
 
-        # Initialize observer for automated metrics collection
         observer = PipelineObserver(
             pipeline_name=self._config.pipeline_name,
             run_id=self._context.run_id,
@@ -137,339 +159,52 @@ class PipelineRunner:
 
         try:
             with observer:
-                # Observer handles ShutdownSignal suppression and status recording
                 async with self._services, self._lock_manager:
-                    # Pre-flight health check: validate infrastructure before execution
-                    await self._validate_infrastructure()
+                    # Pre-flight: validate infrastructure
+                    await self._preflight_service.validate_infrastructure(
+                        self._services
+                    )
 
-                    # Clear data exports at the start of the run
-                    # to avoid appending to stale data from previous runs
-                    await self._clear_via_lifecycle()
+                    # Lifecycle: clear data exports
+                    await self._lifecycle_orchestrator.clear_for_run()
 
-                    # Load checkpoint metadata (for logging purposes)
+                    # Execute pipeline
                     await self._checkpoint_manager.load_checkpoint()
                     await self._executor.execute(
                         limit=self._runtime.limit,
                         query=self._runtime.query,
                     )
 
-                    # Check data quality after execution
-                    await self._check_data_quality()
-
-                    # Run VACUUM if enabled (Phase 1 refactoring)
-                    await self._run_vacuum_if_enabled()
+                    # Post-run: DQ checks and VACUUM
+                    await self._postrun_service.run_dq_checks(self._executor)
+                    await self._postrun_service.run_vacuum_if_enabled()
 
                     await self._checkpoint_manager.delete_checkpoint()
 
-                # Add extra info to logs if needed, though observer handles success/failure logging
                 self._logger.debug(
                     "Pipeline execution finished",
                     extra={"records_fetched": self._executor.records_fetched},
                 )
         finally:
-            await self._cleanup()
+            await self._postrun_service.cleanup(self._tracer)
 
-    async def _cleanup(self) -> None:
-        """Cleanup all resources including observability.
-
-        Ensures tracer spans are flushed before shutdown (O3).
-        Handles errors gracefully to avoid masking pipeline exceptions.
-        """
-        # Flush tracer spans - explicit cleanup for graceful shutdown
-        if self._tracer is not None:
-            try:
-                self._tracer.close()
-                self._logger.debug("Tracer closed successfully")
-            except Exception as e:
-                self._logger.warning(
-                    "Failed to close tracer",
-                    error=str(e),
-                )
-
+    # Backward-compatible private methods (delegate to services)
     async def _validate_infrastructure(self) -> None:
-        """Validate infrastructure health before pipeline execution.
-
-        Performs health checks on storage and data source components.
-        Records metrics per Unified Observability Contract:
-        - pipeline_health_check_passed: Per-component health status (1=passed, 0=failed)
-        - infrastructure_validated: Overall validation status
-        - health_check_duration_seconds: Total health check duration
-
-        Raises InfrastructureError if critical components are unhealthy.
-        """
-        self._logger.info(
-            "Validating infrastructure health",
-            extra={"stage": "health_check"},
-        )
-
-        start_time = time.perf_counter()
-        report = await self._health_aggregator.check_all(self._services)
-        duration = time.perf_counter() - start_time
-
-        # Record per-component health check metrics
-        self._record_health_check_metrics(report, duration)
-
-        # Log overall health status
-        self._logger.info(
-            "Infrastructure health check completed",
-            extra={
-                "stage": "health_check",
-                "overall_status": report.overall_status.value,
-                "is_healthy": report.is_healthy,
-                "components_checked": len(report.results),
-                "duration_seconds": round(duration, 4),
-            },
-        )
-
-        # Fail-fast if any critical component is unhealthy
-        self._health_aggregator.assert_healthy(report)
+        """Validate infrastructure health before pipeline execution."""
+        await self._preflight_service.validate_infrastructure(self._services)
 
     async def _clear_via_lifecycle(self) -> None:
-        """Clear exports using MedallionLifecycleService (policy-based).
-
-        Delegates clear decision to MedallionPolicy (Single Source of Truth).
-        The policy determines which layers to clear based on run type:
-        - REBUILD/BACKFILL: Clear both Silver and Gold
-        - INCREMENTAL: Never clear (merge/upsert behavior)
-        """
-        from bioetl.domain.medallion import MedallionPolicy
-
-        policy = MedallionPolicy.for_run_type(self._runtime.run_type)
-
-        gold_table = (
-            self._config.gold_table
-            or f"{self._config.provider}.{self._config.entity_type}"
-        )
-
-        result = await self._lifecycle_service.clear(
-            policy=policy,
-            silver_table=self._config.silver_table,
-            gold_table=gold_table,
-            dry_run=self._runtime.dry_run,
-        )
-
-        self._logger.debug(
-            "Medallion clear completed",
-            extra={
-                "run_type": self._runtime.run_type.value,
-                "clear_policy": policy.clear_policy.value,
-                "silver_cleared": result.silver_cleared,
-                "gold_cleared": result.gold_cleared,
-            },
-        )
-
-    def _collect_batch_metrics(self) -> dict[str, float]:
-        """Collect batch metrics from executor."""
-        total_records = max(1, self._executor.records_fetched)
-        return {
-            "record_count": float(self._executor.records_fetched),
-            "bronze_count": float(self._executor.records_bronze),
-            "silver_count": float(self._executor.records_silver),
-            "gold_count": float(self._executor.records_gold),
-            "quarantined_count": float(self._executor.records_quarantined),
-            "error_rate": self._executor.records_quarantined / total_records,
-            "silver_yield": self._executor.records_silver / total_records,
-            "gold_yield": self._executor.records_gold / total_records,
-        }
-
-    def _process_anomaly(self, anomaly: Any) -> None:
-        """Log and track a single anomaly."""
-        self._logger.warning(
-            "dq_anomaly_detected",
-            anomaly_type=anomaly.anomaly_type.value,
-            severity=anomaly.severity.value,
-            metric=anomaly.metric_name,
-            current_value=anomaly.current_value,
-            baseline_mean=anomaly.baseline_mean,
-            baseline_stddev=anomaly.baseline_stddev,
-            z_score=anomaly.z_score,
-            message=anomaly.message,
-        )
-
-        if self._services.metrics:
-            self._services.metrics.increment_counter(
-                "dq_anomaly_detected",
-                1,
-                {
-                    "pipeline": self._config.pipeline_name,
-                    "metric": anomaly.metric_name,
-                    "severity": anomaly.severity.value,
-                    "anomaly_type": anomaly.anomaly_type.value,
-                },
-            )
-
-        if anomaly.severity.value == "critical":
-            self._logger.error(
-                "critical_dq_anomaly",
-                metric=anomaly.metric_name,
-                message=anomaly.message,
-            )
+        """Clear exports using MedallionLifecycleService (policy-based)."""
+        await self._lifecycle_orchestrator.clear_for_run()
 
     async def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""
-        if self._services.dq_monitor is None:
-            return
-
-        import time
-
-        batch_metrics = self._collect_batch_metrics()
-
-        start_time = time.monotonic()
-        anomalies = self._services.dq_monitor.check_quality(batch_metrics)
-        check_duration_ms = (time.monotonic() - start_time) * 1000
-
-        if self._services.metrics:
-            self._services.metrics.observe_histogram(
-                "dq_check_duration_ms",
-                check_duration_ms,
-                {"pipeline": self._config.pipeline_name},
-            )
-
-        for anomaly in anomalies:
-            self._process_anomaly(anomaly)
-
-        self._services.dq_monitor.update_baseline_from_metrics(batch_metrics)
-
-        if self._services.metrics and not any(
-            a.severity.value == "critical" for a in anomalies
-        ):
-            for metric_name in batch_metrics:
-                self._services.metrics.increment_counter(
-                    "dq_baseline_updated",
-                    1,
-                    {"pipeline": self._config.pipeline_name, "metric": metric_name},
-                )
-
-
-    def _record_health_check_metrics(
-        self,
-        report: Any,
-        duration: float,
-    ) -> None:
-        """Record health-check metrics per Unified Observability Contract.
-
-        Records:
-        - pipeline_health_check_passed: Per-component status (1=passed, 0=failed)
-        - infrastructure_validated: Overall validation status
-        - health_check_duration_seconds: Total duration
-
-        Args:
-            report: HealthReport from health aggregator.
-            duration: Total health check duration in seconds.
-        """
-        from bioetl.domain.types import HealthStatus
-
-        metrics = self._services.metrics
-        pipeline = self._config.pipeline_name
-        run_id = str(self._context.run_id)
-
-        # Record per-component health check passed status
-        for result in report.results:
-            passed = 1.0 if result.status == HealthStatus.HEALTHY else 0.0
-            metrics.set_gauge(
-                "pipeline_health_check_passed",
-                passed,
-                {"pipeline": pipeline, "component": result.component},
-            )
-
-        # Record overall infrastructure validation status
-        validated = 1.0 if report.is_healthy else 0.0
-        metrics.set_gauge(
-            "infrastructure_validated",
-            validated,
-            {"pipeline": pipeline, "run_id": run_id},
-        )
-
-        # Record health check duration
-        metrics.observe_histogram(
-            "health_check_duration_seconds",
-            duration,
-            {"pipeline": pipeline},
-        )
+        await self._postrun_service.run_dq_checks(self._executor)
 
     async def _run_vacuum_if_enabled(self) -> None:
-        """Run VACUUM on Silver and Gold tables if enabled.
+        """Run VACUUM on Silver and Gold tables if enabled."""
+        await self._postrun_service.run_vacuum_if_enabled()
 
-        Executes VACUUM using MedallionLifecycleService when:
-        - runtime.vacuum_after_run is True
-        - runtime.dry_run is False (no vacuum in dry-run mode)
-
-        Uses runtime.vacuum_retention_days for retention policy (default: 7 days).
-        """
-        if not self._runtime.vacuum_after_run:
-            return
-
-        if self._runtime.dry_run:
-            self._logger.info(
-                "VACUUM skipped in dry-run mode",
-                extra={"stage": "vacuum"},
-            )
-            return
-
-        self._logger.info(
-            "Starting VACUUM operation",
-            extra={
-                "stage": "vacuum",
-                "retention_days": self._runtime.vacuum_retention_days,
-            },
-        )
-
-        gold_table = (
-            self._config.gold_table
-            or f"{self._config.provider}.{self._config.entity_type}"
-        )
-
-        # VACUUM Silver table
-        try:
-            silver_files_removed = await self._lifecycle_service.vacuum(
-                table=self._config.silver_table,
-                retention_days=self._runtime.vacuum_retention_days,
-                dry_run=False,
-            )
-            self._logger.info(
-                "VACUUM completed for Silver table",
-                extra={
-                    "table": self._config.silver_table,
-                    "files_removed": silver_files_removed,
-                },
-            )
-
-            if self._services.metrics:
-                self._services.metrics.increment_counter(
-                    "vacuum_files_removed",
-                    silver_files_removed,
-                    {"pipeline": self._config.pipeline_name, "layer": "silver"},
-                )
-        except Exception as e:
-            self._logger.warning(
-                "VACUUM failed for Silver table",
-                extra={"table": self._config.silver_table, "error": str(e)},
-            )
-
-        # VACUUM Gold table
-        try:
-            gold_files_removed = await self._lifecycle_service.vacuum(
-                table=gold_table,
-                retention_days=self._runtime.vacuum_retention_days,
-                dry_run=False,
-            )
-            self._logger.info(
-                "VACUUM completed for Gold table",
-                extra={
-                    "table": gold_table,
-                    "files_removed": gold_files_removed,
-                },
-            )
-
-            if self._services.metrics:
-                self._services.metrics.increment_counter(
-                    "vacuum_files_removed",
-                    gold_files_removed,
-                    {"pipeline": self._config.pipeline_name, "layer": "gold"},
-                )
-        except Exception as e:
-            self._logger.warning(
-                "VACUUM failed for Gold table",
-                extra={"table": gold_table, "error": str(e)},
-            )
-
+    async def _cleanup(self) -> None:
+        """Cleanup all resources including observability."""
+        await self._postrun_service.cleanup(self._tracer)
