@@ -36,6 +36,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "context",
         "entities",
         "error_classifier",
+        "events",
         "exceptions",
         "filter_config",
         "medallion",

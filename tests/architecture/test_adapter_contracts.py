@@ -37,6 +37,7 @@ class TestAdapterHealthCheck:
         # Exclude HTTP infrastructure utilities that are not DataSourcePort adapters
         excluded_files = {
             "base.py",
+            "base_metrics.py",  # Base class for metrics adapters
             "types.py",
             "exceptions.py",
             "client.py",  # HTTP client utility, not a DataSourcePort adapter
