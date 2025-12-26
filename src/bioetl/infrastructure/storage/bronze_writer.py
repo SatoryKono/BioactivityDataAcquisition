@@ -122,7 +122,12 @@ class BronzeWriter:
         """Write data and metadata atomically using temp files + rename."""
         with AtomicWriteGroup() as group:
             group.add(path, data)
-            group.add(meta_path, json.dumps(metadata).encode("utf-8"))
+            group.add(
+                meta_path,
+                json.dumps(metadata, sort_keys=True, separators=(",", ":")).encode(
+                    "utf-8"
+                ),
+            )
             group.commit()
 
     async def write_bronze(
