@@ -217,10 +217,12 @@ class TestCliVersion:
 
     def test_version_option(self, runner):
         """Test --version option."""
+        from bioetl import __version__
+
         result = runner.invoke(cli, ["--version"])
 
         assert result.exit_code == 0
-        assert "0.1.0" in result.output
+        assert __version__ in result.output
 
 
 class TestCliHelp:

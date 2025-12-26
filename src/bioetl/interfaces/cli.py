@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl import __version__
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.composition.entrypoints import (
     RunOptions,
@@ -138,7 +139,7 @@ def _get_runner_logger(runner: PipelineRunner) -> structlog.BoundLogger | None:
 
 
 @click.group()
-@click.version_option(version="0.1.0")
+@click.version_option(version=__version__)
 def cli() -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
     pass
