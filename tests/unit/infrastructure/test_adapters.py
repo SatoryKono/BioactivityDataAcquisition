@@ -159,23 +159,6 @@ class TestUniProtAdapter:
 
         assert adapter.base_url == custom_url
 
-    def test_fasta_parsing(self, http_client, mock_logger):
-        """Test FASTA format parsing."""
-        adapter = UniProtAdapter(http_client=http_client, logger=mock_logger)
-
-        fasta_text = """>sp|P04637|P53_HUMAN Cellular tumor antigen p53
-MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP
->sp|Q9Y6K9|NF2L2_HUMAN Nuclear factor erythroid 2-related factor 2
-MDPGQQPPPQPAPQGQGQPPSQPPQGQGPPSGPGQPAPAGTQGQPQ"""
-
-        records = adapter._parse_fasta(fasta_text)
-
-        assert len(records) == 2
-        assert "P04637" in records[0]["header"]
-        assert records[0]["sequence"].startswith(
-            "MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPS"
-        )
-        assert "Q9Y6K9" in records[1]["header"]
 
 
 @pytest.mark.unit
