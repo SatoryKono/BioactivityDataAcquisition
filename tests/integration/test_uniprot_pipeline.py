@@ -12,6 +12,7 @@ import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -117,6 +118,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(
@@ -171,6 +173,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(
@@ -213,6 +216,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(
@@ -246,6 +250,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(
@@ -286,6 +291,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(

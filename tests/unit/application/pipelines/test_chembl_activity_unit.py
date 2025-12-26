@@ -8,6 +8,7 @@ import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from uuid import uuid4
 
 from bioetl.domain.config import RuntimeConfig
@@ -40,8 +41,13 @@ def chembl_pipeline():
     )
     config = get_pipeline_config("chembl_activity")
     run_id = uuid4()
+    transformer = ActivityTransformer(provider="chembl")
     pipeline = ChEMBLActivityPipeline.create(
-        run_id=run_id, runtime=runtime, services=services, config=config
+        run_id=run_id,
+        runtime=runtime,
+        services=services,
+        config=config,
+        transformer=transformer,
     )
     return pipeline
 
