@@ -266,8 +266,10 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
 
     # Extract on_schema_mismatch from silver sink config
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
-    if yaml_config.sink and yaml_config.sink.silver:
-        on_schema_mismatch = yaml_config.sink.silver.on_schema_mismatch
+    if yaml_config.sink:
+        silver_sink = yaml_config.sink.get("silver")
+        if silver_sink:
+            on_schema_mismatch = silver_sink.on_schema_mismatch
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
