@@ -42,30 +42,24 @@ def adapter(mock_http_client, mock_logger):
 @pytest.mark.asyncio
 async def test_aclose_closes_http_client(adapter, mock_http_client):
     """Test that aclose() properly closes the HTTP client."""
-    # Save reference to inner client before aclose sets it to None
-    inner_client = mock_http_client._client
-
     await adapter.aclose()
 
-    inner_client.aclose.assert_called_once()
-    assert mock_http_client._client is None
+    # aclose uses __aexit__ for cleanup
+    mock_http_client.__aexit__.assert_called_once_with(None, None, None)
 
 
 @pytest.mark.asyncio
 async def test_aclose_idempotent(adapter, mock_http_client):
     """Test that aclose() can be called multiple times safely."""
-    # Save reference to inner client before aclose sets it to None
-    inner_client = mock_http_client._client
-
     # First call should close
     await adapter.aclose()
-    inner_client.aclose.assert_called_once()
+    mock_http_client.__aexit__.assert_called_once_with(None, None, None)
 
-    # Second call should not raise (client is None now)
+    # Second call should also work (still has http_client reference)
     await adapter.aclose()
 
-    # aclose was only called once (on first invocation)
-    inner_client.aclose.assert_called_once()
+    # __aexit__ was called twice (once per invocation)
+    assert mock_http_client.__aexit__.call_count == 2
 
 
 @pytest.mark.asyncio
