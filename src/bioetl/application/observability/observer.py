@@ -18,9 +18,7 @@ from bioetl.application.core.shutdown import PipelineShutdownError
 if TYPE_CHECKING:
     from types import TracebackType
 
-    import structlog
-
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
 
 
@@ -33,7 +31,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         run_id: RunID,
         run_type: RunType,
         metrics: MetricsPort,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         tracer: TracingPort | None = None,
     ) -> None:
         """Initialize observer."""
