@@ -86,3 +86,13 @@ repos:
         types: [python]
         # Only run when Python files in src/ change
         files: ^src/
+
+      - id: pip-audit
+        name: Check for known vulnerabilities in dependencies
+        entry: pip-audit
+        language: system
+        pass_filenames: false
+        # Only run on commit, not on every file change
+        stages: [pre-commit]
+        # Skip if pip-audit not installed (CI will handle this)
+        verbose: true
