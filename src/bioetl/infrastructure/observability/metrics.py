@@ -152,6 +152,12 @@ HEALTH_CHECK_DURATION_SECONDS = Histogram(
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
 )
 
+HEALTH_CHECK_FAILURES_TOTAL = Counter(
+    "bioetl_health_check_failures_total",
+    "Total number of health check failures",
+    ["provider"],
+)
+
 
 class MetricsCollector:
     """Collector for pipeline metrics.

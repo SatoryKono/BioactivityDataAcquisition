@@ -23,6 +23,7 @@ from bioetl.infrastructure.observability.metrics import (
     ERRORS_TOTAL,
     FILTER_IDS_DUPLICATES_TOTAL,
     FILTER_IDS_LOADED_TOTAL,
+    HEALTH_CHECK_FAILURES_TOTAL,
     PIPELINE_DURATION_SECONDS,
     RECORDS_PROCESSED_TOTAL,
     VACUUM_DURATION_SECONDS,
@@ -52,6 +53,7 @@ COUNTERS = {
     "archive_files_total": ARCHIVE_FILES_TOTAL,
     "dq_anomaly_detected": DQ_ANOMALY_DETECTED,
     "dq_baseline_updated": DQ_BASELINE_UPDATED,
+    "health_check_failures_total": HEALTH_CHECK_FAILURES_TOTAL,
 }
 
 # Registry of gauge metrics

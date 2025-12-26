@@ -15,7 +15,8 @@ import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Self
 
-from bioetl.domain.ports import DataSourcePort, LoggerPort
+from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.health import (
@@ -45,6 +46,7 @@ class BaseSyncAdapter(DataSourcePort):
 
     provider_name: str
     logger: LoggerPort
+    metrics: MetricsPort
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
@@ -57,6 +59,7 @@ class BaseSyncAdapter(DataSourcePort):
         circuit_breaker_timeout: int = 300,
         max_workers: int = 4,
         strict_error_handling: bool = False,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize Sync Adapter resources.
 
@@ -67,9 +70,11 @@ class BaseSyncAdapter(DataSourcePort):
             circuit_breaker_timeout: Recovery timeout in seconds.
             max_workers: Thread pool size.
             strict_error_handling: Whether to raise exceptions or log warnings.
+            metrics: Optional MetricsPort for recording metrics.
 
         """
         self.logger = logger
+        self.metrics = metrics or NoOpMetrics()
         self.strict_error_handling = strict_error_handling
 
         # Common infrastructure components
@@ -117,7 +122,18 @@ class BaseSyncAdapter(DataSourcePort):
         """
         try:
             return await self._probe_health()
-        except Exception:
+        except Exception as e:
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            self.metrics.increment_counter(
+                "health_check_failures_total",
+                1,
+                {"provider": self.provider_name},
+            )
             return self._fallback_health_status()
 
     async def _probe_health(self) -> HealthStatus:
