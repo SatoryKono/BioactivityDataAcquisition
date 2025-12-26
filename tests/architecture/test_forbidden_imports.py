@@ -232,3 +232,48 @@ class TestInterfacesFilesystemAccess:
             "Delegate to StoragePort instead.\n"
             "Violations:\n" + "\n".join(f"  - {e}" for e in errors)
         )
+
+
+class TestInterfacesBootstrapIsolation:
+    """Tests ensuring interfaces layer doesn't import bootstrap directly."""
+
+    def test_cli_no_bootstrap_import(self, src_dir: Path) -> None:
+        """Interfaces layer MUST NOT import from bootstrap.py directly.
+
+        REQ-ARCH-C1: CLI должен использовать entrypoints, не bootstrap.
+        The CLI should only import from composition/entrypoints.py,
+        which acts as a facade for all composition operations.
+
+        This separation ensures:
+        - Clean layer boundaries (interfaces → entrypoints → bootstrap)
+        - Easier testing of CLI without full bootstrap machinery
+        - Single entry point for orchestration layers (CLI, Prefect, REST)
+        """
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        if not interfaces_path.exists():
+            pytest.skip("Interfaces layer not found")
+
+        forbidden_patterns = [
+            r"from bioetl\.composition\.bootstrap import",
+            r"from bioetl\.composition\.bootstrap\s+import",
+            r"import bioetl\.composition\.bootstrap",
+        ]
+
+        violations = []
+        for py_file in interfaces_path.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for pattern in forbidden_patterns:
+                if re.search(pattern, content):
+                    relative_path = py_file.relative_to(src_dir)
+                    violations.append(f"{relative_path}: imports from bootstrap directly")
+                    break
+
+        assert not violations, (
+            "Interfaces layer must not import from bootstrap.py directly.\n"
+            "Use bioetl.composition.entrypoints instead.\n\n"
+            "Correct:\n"
+            "  from bioetl.composition.entrypoints import create_pipeline_runner\n\n"
+            "Wrong:\n"
+            "  from bioetl.composition.bootstrap import bootstrap_pipeline\n\n"
+            "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
+        )
