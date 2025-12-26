@@ -233,6 +233,8 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 ## 3. Обработка Ошибок и Наблюдаемость
 
 ### 3.1. Стратегия Обработки Ошибок
+См. [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md).
+
 Вместо тотального подхода "Fail Fast" используем дифференцированный подход.
 
 ### 3.1.1. Классификация Ошибок 
@@ -261,7 +263,9 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open +5 мин.
 - **Observability**: Метрики `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open), `trips_total`. Алерт при зависании в Open > 10 мин. 
  
-### 3.2. Наблюдаемость (Observability) 
+### 3.2. Наблюдаемость (Observability)
+См. [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md).
+
 - **Correlation ID**: `run_id` обязателен во всех логах, метриках и блокировках. 
 - **Retention**: Логи хранятся 30 дней, метрики — 90 дней. 
 - **Логи**: Структурированный JSON. 
@@ -797,6 +801,8 @@ fields:
 | [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md) | Async Storage Cleanup | Accepted | 2025-12-24 |
 | [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) | Deterministic Writes and Retries | Accepted | 2025-12-24 |
 | [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Pipeline Services Lifecycle | Accepted | 2025-12-24 |
+| [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md) | Error Handling Strategy | Accepted | 2025-12-26 |
+| [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
 
 ## История Изменений (Changelog)
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
