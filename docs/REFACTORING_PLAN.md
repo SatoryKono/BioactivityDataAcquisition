@@ -7,7 +7,7 @@
 ## ⚠️ ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ
 
 > **ВАЖНО**: Перед постановкой задач сверьтесь с этой секцией!
-> Последняя верификация: 2025-12-26
+> Последняя верификация: 2025-12-26 (обновлено: Phase 5 проверен и исправлен)
 
 ### ✅ УЖЕ РЕАЛИЗОВАНО (не требует работы)
 
@@ -21,6 +21,14 @@
 | **UnifiedHTTPClient lifecycle** | `client.py:138-162` | Корректный async context manager (`__aenter__`/`__aexit__`) |
 | **D1: Детерминистичный HTTP jitter** | `domain/resilience.py:45-84` | MD5-based jitter в `RetryPolicy.calculate_delay()`, 11 тестов в `test_http_client.py` |
 | **PipelineRunner DI** | `runner.py:43-88`, `runner_services.py` | RunnerServices bundle инжектируется через конструктор; `build_runner_services()` создаёт сервисы в composition |
+| **CLI → Entrypoints** | `cli.py:17-27`, `entrypoints.py` | CLI импортирует только из `composition/entrypoints.py`, не из `bootstrap_*` |
+| **D2: Gold Writer детерминизм** | `gold_writer.py:286,359` | Фиксированный backoff `0.5 * (2**attempt) + 0.05` вместо `random.uniform()` |
+| **D3: Arch test random** | `tests/architecture/test_no_random_in_writers.py` | 3 теста: import, uniform, choice |
+| **M1: SilverWriteMode Enum** | `delta_writer.py:53-64` | `MERGE`, `APPEND`, `DELETE` + валидация в `_validate_write_mode()` |
+| **M2: GoldWriteMode Enum** | `gold_writer.py:42-54` | `OVERWRITE`, `APPEND`, `SCD2` + валидация |
+| **M4: Schema drift** | `delta_writer.py:303-349` | `_check_schema_drift()` с параметром `on_schema_mismatch: Literal["error", "evolve", "ignore"]` |
+| **T5: Arch test datetime.now** | `tests/architecture/test_no_datetime_now_in_infrastructure.py` | 2 теста + список разрешённых исключений |
+| **O1: BaseTransformer tracing** | `base_transformer.py:125-187` | Tracing spans, duration histogram, error counters |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -40,14 +48,17 @@
 | "BaseTransformer без DQ-валидации" | By design: Template Method, DQ — ответственность конкретных трансформеров | `base_transformer.py` |
 | "MedallionLifecycleService без политик" | Использует `MedallionPolicy.should_clear_*` | `medallion_lifecycle.py:71-112` |
 | "BronzeWriter без observability" | Имеет структурированное логирование | `bronze_writer.py:197-205` |
+| "BasePipeline с методами should_write_gold/transform_for_gold" | **Класс не существует**. Выдуманные методы | `find . -name "*.py" -exec grep -l "class BasePipeline" {} \;` → пусто |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
 | Проблема | Файл:строки | Описание |
 |----------|-------------|----------|
 | ~~**PipelineRunner создаёт сервисы**~~ | ~~`runner.py:90-126`~~ | ✅ ВЫПОЛНЕНО: DI через `RunnerServices` bundle (2025-12-26) |
-| **CLI вызывает bootstrap напрямую** | `cli.py:224,265,337` | Смешение interfaces и composition слоёв |
+| ~~**CLI вызывает bootstrap напрямую**~~ | ~~`cli.py:224,265,337`~~ | ✅ ВЫПОЛНЕНО: CLI использует `composition/entrypoints.py` (верифицировано 2025-12-26) |
 | ~~**Мёртвый код в ChemblAdapter**~~ | ~~`client.py:147`~~ | ✅ ВЫПОЛНЕНО: Удалён в коммите `9214cfb` |
+
+> **Все критические проблемы решены.** Актуальный план см. в "Фаза 5" ниже.
 
 ---
 
@@ -1150,15 +1161,18 @@ ci: lint test arch-all
 - [x] PipelineRunner не создаёт сервисы
 - [x] `make arch-test` проходит (187 passed)
 
-#### 1.2 Разнести CLI и composition root
+#### 1.2 ~~Разнести CLI и composition root~~ ✅ ВЫПОЛНЕНО
 
-**Проблема**: `cli.py:224,265,337` — прямые вызовы `bootstrap_*`.
+**Статус**: Реализовано (верифицировано 2025-12-26)
 
-**Решение**: Создать `composition/entrypoints.py`, CLI вызывает только entrypoints.
+**Реализация**:
+- `composition/entrypoints.py` создан с публичным API
+- `cli.py:17-27` импортирует только из entrypoints: `RunOptions`, `create_pipeline_runner`, `get_checkpoint_manager`, `get_lifecycle_service`, `get_quarantine_manager`, `preview_cleanup`
+- CLI не импортирует `bootstrap_*` напрямую
 
 **Критерии готовности**:
-- [ ] CLI не импортирует `bootstrap_*`
-- [ ] Entrypoints доступны для Prefect/REST
+- [x] CLI не импортирует `bootstrap_*`
+- [x] Entrypoints доступны для Prefect/REST
 
 ### Приоритет 2: ВЫСОКИЙ
 
@@ -1184,20 +1198,179 @@ ci: lint test arch-all
 
 ---
 
+## Фаза 5: Улучшение Архитектуры (Верифицированный План) 🔵
+
+> **Дата верификации**: 2025-12-26
+> **Статус**: Актуальный план после проверки кодовой базы
+
+### ❌ Отклонённые Предложения (Ложные Утверждения)
+
+| Предложение | Причина Отклонения |
+|-------------|-------------------|
+| "Decompose Gold Logic from BasePipeline" | ❌ `BasePipeline` **не существует**. Методы `should_write_gold`, `transform_for_gold` выдуманы |
+| "D2: random в gold_writer" | ✅ Уже исправлено. `gold_writer.py:286,359` используют фиксированный `0.5 * (2**attempt) + 0.05` |
+| "M1: SilverWriteMode Enum" | ✅ Уже реализовано в `delta_writer.py:53-64` |
+| "M2: GoldWriteMode Enum" | ✅ Уже реализовано в `gold_writer.py:42-54` |
+| "M4: Schema drift handling" | ✅ Уже реализовано в `delta_writer.py:303-349` (параметр `on_schema_mismatch`) |
+
+### Приоритет 1: Желательные Улучшения 🟡
+
+#### 5.1 Config Mapping — Вынос в Composition (Optional)
+
+**Текущее состояние**: `infrastructure/config.py:185-228` содержит `yaml_config_to_domain()` и helpers.
+
+**Предложение**: Вынести в `composition/mappers/pipeline_config_mapper.py`.
+
+**Оценка**:
+- ❓ **Спорное**. Infrastructure имеет право знать о domain моделях для маппинга.
+- Текущая реализация не нарушает архитектуру (infrastructure → domain — разрешённый импорт).
+- Вынос может быть полезен для consistency, но не является критичным.
+
+**Рекомендация**: Отложить до появления конкретной проблемы.
+
+#### 5.2 M3: Валидация Bronze Provider/Entity (Low Priority)
+
+**Файл**: `src/bioetl/infrastructure/storage/bronze_writer.py`
+
+**Предложение**: Добавить валидацию формата provider/entity:
+```python
+if not provider or not provider.replace("_", "").isalnum():
+    raise ValueError(f"Invalid provider name: '{provider}'")
+```
+
+**Риск**: Низкий. Простое добавление без breaking changes.
+
+**Приоритет**: 🟢 Низкий — полезно, но не критично.
+
+### Приоритет 2: Observability Улучшения 🟢
+
+#### 5.3 O1-O4: Расширение Tracing (Уже Частично Реализовано)
+
+**Текущее состояние**:
+- `BaseTransformer` уже имеет tracing spans (`base_transformer.py:125-134`)
+- `BaseTransformer` уже имеет metrics: duration histogram, error counters (`base_transformer.py:164-183`)
+
+**Оставшиеся задачи**:
+- [ ] O2: Добавить root span для batch в `executor.py`
+- [ ] O3: Graceful shutdown для tracer в `runner.py`
+
+**Риск**: Низкий. Добавление observability без изменения логики.
+
+### Приоритет 3: Документация 🔵
+
+#### 5.4 ~~A1: Обновить RULES.md секцией Determinism~~ ✅ ВЫПОЛНЕНО
+
+**Статус**: Реализовано (2025-12-24)
+
+**Секция**: `RULES.md §4.3 Детерминизм и Воспроизводимость`
+
+**Changelog запись**: v5.3 — "Determinism and Reproducibility (ADR-014)"
+
+#### 5.5 ~~A2: ADR-014 Детерминистичные записи~~ ✅ ВЫПОЛНЕНО
+
+**Статус**: Создан (2025-12-24)
+
+**Файл**: `docs/02-architecture/decisions/ADR-014-deterministic-writes.md`
+
+**Содержание**:
+- Детерминистичный retry jitter (hash-based)
+- Запрет random в storage writers
+- Единый источник времени (PipelineContext.started_at)
+- Архитектурные тесты
+- Список исключений для datetime.now()
+
+---
+
+### Метрики и Контроль Качества
+
+| Метрика | Инструмент | Цель |
+|---------|------------|------|
+| Maintainability Index (MI) | radon/wily | > 85 для новых модулей |
+| Cyclomatic Complexity | ruff (C901) | < 10 для transform методов |
+| Layer Dependency Violations | import-linter, pytest-archon | 0 (Блокирующий) |
+| Test Coverage | pytest-cov | > 80% line coverage |
+
+---
+
+### Чек-лист Готовности Фазы 5
+
+**Обязательно (✅ Выполнено):**
+- [x] A1: RULES.md обновлён секцией §4.3 Детерминизм (2025-12-24)
+- [x] A2: ADR-014 создан (2025-12-24)
+
+**Опционально (оставшиеся задачи):**
+- [ ] O2: Root span для batch в executor
+- [ ] O3: Graceful shutdown tracer
+- [ ] 5.2: Валидация Bronze provider/entity
+
+> **Статус Фазы 5**: ~90% выполнено. Критические задачи завершены.
+
+---
+
 ## 📝 Инструкция по Обновлению Верификации
 
-При обнаружении новых ложных утверждений или реализованных компонентов:
+### Когда обновлять
 
-1. **Верифицировать** через код (grep, read файлов)
-2. **Обновить** секцию "ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ" в начале документа
-3. **Добавить** в таблицу "УЖЕ РЕАЛИЗОВАНО" или "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
-4. **Указать** дату верификации
-5. **Закоммитить** изменения
+| Триггер | Действие |
+|---------|----------|
+| Предложен рефакторинг | **ДО начала работы** — проверить статус |
+| Обнаружено ложное утверждение | Добавить в таблицу "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" |
+| Реализована задача из плана | Отметить как ✅ ВЫПОЛНЕНО с датой |
+| Найден реализованный компонент | Добавить в "УЖЕ РЕАЛИЗОВАНО" |
+
+### Шаги верификации (ОБЯЗАТЕЛЬНО)
 
 ```bash
-# Пример верификации
-grep -r "def health_check" src/bioetl/infrastructure/adapters/
-ls tests/fixtures/vcr/ | grep -E "(pubchem|uniprot)"
+# 1. Проверить существование класса/метода
+grep -r "class ClassName" src/bioetl/
+grep -r "def method_name" src/bioetl/
+
+# 2. Проверить архитектурные тесты
+ls tests/architecture/
+
+# 3. Найти реализацию фичи
+grep -r "SilverWriteMode\|GoldWriteMode\|schema_mismatch" src/bioetl/
+
+# 4. Проверить VCR кассеты
+ls tests/fixtures/vcr/ | grep -E "(pubchem|uniprot|chembl)"
+
+# 5. Прочитать код (НЕ ПОЛАГАТЬСЯ НА ПАМЯТЬ!)
+cat src/bioetl/infrastructure/storage/delta_writer.py | head -100
+```
+
+### 🚨 Красные флаги (требуют перепроверки)
+
+| Фраза в плане/предложении | Что проверить |
+|---------------------------|---------------|
+| "Класс X не существует" | `grep -r "class X" src/` |
+| "Метод Y не реализован" | `grep -r "def Y" src/` + прочитать файл |
+| "Нет валидации Z" | Прочитать **весь** файл |
+| "Нет тестов для W" | `ls tests/` + `grep -r "test.*W" tests/` |
+| "God object" / "Много ответственностей" | `wc -l файл.py` + проверить делегирование |
+| "BasePipeline" / "BaseClass" | Проверить существование класса! |
+
+### Формат записей
+
+**Для "УЖЕ РЕАЛИЗОВАНО":**
+```markdown
+| **Название** | `файл.py:строки` | Краткое доказательство |
+```
+
+**Для "ЛОЖНЫЕ УТВЕРЖДЕНИЯ":**
+```markdown
+| "Ложное утверждение в кавычках" | Почему ложно | Как верифицировать |
+```
+
+### После верификации
+
+1. ✅ Обновить секцию в начале этого документа
+2. ✅ Указать дату верификации
+3. ✅ Синхронизировать с `CLAUDE.md` секция 2.3 (если нужно)
+4. ✅ Закоммитить: `docs: verify [component] implementation status`
+
+```bash
+git add docs/REFACTORING_PLAN.md CLAUDE.md AGENT.md
+git commit -m "docs: verify [component] implementation status"
 ```
 
 ---
