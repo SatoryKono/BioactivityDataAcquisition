@@ -173,6 +173,7 @@ class LineageTracker:
         file_path: str,
         watermark: str | None = None,
         metadata: dict[str, Any] | None = None,
+        now: datetime | None = None,
     ) -> None:
         """Record bronze layer batch ingestion.
 
@@ -185,6 +186,7 @@ class LineageTracker:
             file_path: Storage location
             watermark: Optional position marker (deprecated)
             metadata: Additional metadata
+            now: Optional timestamp for testing (defaults to current UTC time)
 
         """
         batch = BatchLineage(
@@ -198,7 +200,7 @@ class LineageTracker:
             file_path=file_path,
             watermark=watermark,
             metadata=metadata or {},
-            timestamp=datetime.now(UTC),
+            timestamp=now or datetime.now(UTC),
         )
 
         self._write_batch_lineage(batch)
@@ -215,6 +217,7 @@ class LineageTracker:
         success_count: int,
         failure_count: int,
         metadata: dict[str, Any] | None = None,
+        now: datetime | None = None,
     ) -> None:
         """Record data transformation between layers.
 
@@ -229,6 +232,7 @@ class LineageTracker:
             success_count: Successful transformations
             failure_count: Failed transformations
             metadata: Additional metadata
+            now: Optional timestamp for testing (defaults to current UTC time)
 
         """
         lineage = LineageRecord(
@@ -244,7 +248,7 @@ class LineageTracker:
             success_count=success_count,
             failure_count=failure_count,
             metadata=metadata or {},
-            timestamp=datetime.now(UTC),
+            timestamp=now or datetime.now(UTC),
         )
 
         self._write_transformation_lineage(lineage)
@@ -413,12 +417,14 @@ class LineageTracker:
         self,
         layer: str,
         days: int = 7,
+        now: datetime | None = None,
     ) -> dict[str, Any]:
         """Get batch statistics for a layer.
 
         Args:
             layer: Data layer (bronze, silver, gold)
             days: Number of days to analyze
+            now: Optional timestamp for testing (defaults to current UTC time)
 
         Returns:
             Dictionary with statistics (total_batches, total_records, avg_batch_size)
@@ -433,7 +439,8 @@ class LineageTracker:
             df = df.filter(pl.col("layer") == layer)
 
             # Filter by date range
-            cutoff = datetime.now(UTC).timestamp() - (days * 86400)
+            timestamp = now or datetime.now(UTC)
+            cutoff = timestamp.timestamp() - (days * 86400)
             df = df.filter(pl.col("timestamp") >= cutoff)
 
             if df.height == 0:
