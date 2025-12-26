@@ -76,7 +76,7 @@ class TestTableConfig:
         """Test default configuration values."""
         config = TableConfig()
 
-        assert config.primary_keys == ["entity_id"]
+        assert config.primary_keys == ("entity_id",)
         assert config.silver_table is None
         assert config.gold_table is None
 
@@ -84,7 +84,8 @@ class TestTableConfig:
         """Test custom primary keys."""
         config = TableConfig(primary_keys=["id", "version"])
 
-        assert config.primary_keys == ["id", "version"]
+        # Lists are converted to tuples
+        assert config.primary_keys == ("id", "version")
 
     def test_custom_table_names(self) -> None:
         """Test custom table names."""
@@ -112,26 +113,58 @@ class TestTableConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_not_hashable_due_to_list(self) -> None:
-        """Test that TableConfig is not hashable due to list field."""
-        config = TableConfig(silver_table="test")
+    def test_hashable_with_tuple(self) -> None:
+        """Test that TableConfig is hashable with tuple fields."""
+        config1 = TableConfig(silver_table="test")
+        config2 = TableConfig(silver_table="test")
 
-        # Lists are not hashable, so frozen dataclass with list field isn't hashable
-        with pytest.raises(TypeError, match="unhashable"):
-            hash(config)
+        # Tuples are hashable, so frozen dataclass with tuple field is hashable
+        assert hash(config1) == hash(config2)
+
+        # Can be used in sets/dicts
+        config_set = {config1, config2}
+        assert len(config_set) == 1
+
+    def test_immutable_primary_keys(self) -> None:
+        """Test that primary_keys tuple cannot be mutated."""
+        config = TableConfig(primary_keys=["id", "version"])
+
+        # Tuples don't support item assignment - raises TypeError
+        with pytest.raises(TypeError):
+            config.primary_keys[0] = "new_key"  # type: ignore[index]
+
+    def test_immutable_partition_cols(self) -> None:
+        """Test that partition_cols tuple cannot be mutated."""
+        config = TableConfig(partition_cols=["col1", "col2"])
+
+        # Tuples don't support item assignment - raises TypeError
+        with pytest.raises(TypeError):
+            config.partition_cols[0] = "col3"  # type: ignore[index]
+
+    def test_list_to_tuple_conversion(self) -> None:
+        """Test that incoming lists are converted to tuples."""
+        config = TableConfig(
+            primary_keys=["id", "version"],
+            partition_cols=["col1"],
+        )
+
+        assert isinstance(config.primary_keys, tuple)
+        assert isinstance(config.partition_cols, tuple)
+        assert config.primary_keys == ("id", "version")
+        assert config.partition_cols == ("col1",)
 
     def test_empty_primary_keys(self) -> None:
-        """Test with empty primary keys list."""
+        """Test with empty primary keys."""
         config = TableConfig(primary_keys=[])
 
-        assert config.primary_keys == []
+        assert config.primary_keys == ()
 
     def test_multiple_primary_keys(self) -> None:
         """Test with multiple primary keys."""
         keys = ["org_id", "entity_id", "version"]
         config = TableConfig(primary_keys=keys)
 
-        assert config.primary_keys == keys
+        assert config.primary_keys == ("org_id", "entity_id", "version")
         assert len(config.primary_keys) == 3
 
     def test_full_configuration(self) -> None:
@@ -142,6 +175,6 @@ class TestTableConfig:
             gold_table="chembl_activity_gold",
         )
 
-        assert config.primary_keys == ["activity_id", "assay_chembl_id"]
+        assert config.primary_keys == ("activity_id", "assay_chembl_id")
         assert config.silver_table == "chembl_activity_silver"
         assert config.gold_table == "chembl_activity_gold"

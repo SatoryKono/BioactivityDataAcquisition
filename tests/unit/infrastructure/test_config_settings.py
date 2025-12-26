@@ -168,7 +168,7 @@ class TestYamlConfigToDomain:
         assert result.pipeline_name == "test_pipeline"
         assert result.provider == "test"
         assert result.entity_type == "entity"
-        assert result.primary_keys == ["id"]
+        assert result.primary_keys == ("id",)  # Lists converted to tuples
         assert result.silver_table == "silver_table"
         assert result.gold_table == "gold_table"
         assert result.batch_size == 200
@@ -201,7 +201,7 @@ class TestYamlConfigToDomain:
 
         result = yaml_config_to_domain(yaml_config)
 
-        assert result.fields == ["field1", "field2", "field3"]
+        assert result.fields == ("field1", "field2", "field3")
 
     def test_dq_config_mapping(self) -> None:
         """Test DQ config mapping."""
