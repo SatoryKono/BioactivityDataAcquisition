@@ -453,3 +453,260 @@ class TestSchemaImmutability:
         assert list(CHEMBL_ACTIVITY_SCHEMA.names) == original_names
         assert "test" in new_schema.names
         assert "test" not in CHEMBL_ACTIVITY_SCHEMA.names
+
+
+class TestSilverSchemaValidation:
+    """Tests for Silver schema data validation."""
+
+    def test_silver_schema_valid(self):
+        """Silver schema должна валидировать корректные данные."""
+        # Create valid data according to CHEMBL_ACTIVITY_SCHEMA
+        valid_record = {
+            "entity_id": "ACT_12345",
+            "content_hash": "abc123def456",
+            "activity_id": "12345",
+            "molecule_chembl_id": "CHEMBL25",
+            "target_chembl_id": "CHEMBL1824",
+            "assay_chembl_id": "CHEMBL829232",
+            "document_chembl_id": "CHEMBL1122334",
+            "record_id": 1001,
+            "src_id": 1,
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "molecule_pref_name": "ASPIRIN",
+            "parent_molecule_chembl_id": "CHEMBL25",
+            "target_pref_name": "Cyclooxygenase-2",
+            "target_organism": "Homo sapiens",
+            "target_tax_id": "9606",
+            "assay_type": "B",
+            "assay_description": "Binding assay",
+            "assay_variant_accession": None,
+            "assay_variant_mutation": None,
+            "bao_endpoint": "BAO_0000190",
+            "bao_format": "BAO_0000357",
+            "bao_label": "single protein format",
+            "type": "IC50",
+            "value": 50.0,
+            "units": "nM",
+            "relation": "=",
+            "upper_value": None,
+            "text_value": None,
+            "standard_type": "IC50",
+            "standard_value": 50.0,
+            "standard_units": "nM",
+            "standard_relation": "=",
+            "standard_upper_value": None,
+            "standard_text_value": None,
+            "standard_flag": 1,
+            "pchembl_value": 7.3,
+            "ligand_efficiency_bei": 15.2,
+            "ligand_efficiency_le": 0.35,
+            "ligand_efficiency_lle": 4.1,
+            "ligand_efficiency_sei": 8.5,
+            "qudt_units": "nM",
+            "uo_units": "UO:0000065",
+            "document_journal": "J Med Chem",
+            "document_year": 2020,
+            "activity_comment": None,
+            "data_validity_comment": None,
+            "data_validity_description": None,
+            "potential_duplicate": 0,
+            "action_type_action_type": "INHIBITOR",
+            "action_type_description": "Enzyme inhibitor",
+            "action_type_parent_type": "INHIBITOR",
+            "activity_properties": "[]",
+            "toid": None,
+            "_run_id": "run_001",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch_001",
+            "_ingestion_ts": "2024-01-15T10:30:00Z",
+        }
+
+        # Create PyArrow table from valid data - should succeed without exception
+        table = pa.Table.from_pylist([valid_record], schema=CHEMBL_ACTIVITY_SCHEMA)
+
+        assert table.num_rows == 1
+        assert table.num_columns == len(CHEMBL_ACTIVITY_SCHEMA)
+
+    def test_silver_schema_valid_pubchem(self):
+        """PUBCHEM_COMPOUND_SCHEMA должна валидировать корректные данные."""
+        valid_record = {
+            "entity_id": "CID_2244",
+            "cid": "2244",
+            "molecular_formula": "C9H8O4",
+            "molecular_weight": "180.16",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
+            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "iupac_name": "2-acetoxybenzoic acid",
+            "content_hash": "xyz789",
+            "_run_id": "run_002",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch_002",
+            "_ingestion_ts": "2024-01-15T11:00:00Z",
+        }
+
+        table = pa.Table.from_pylist([valid_record], schema=PUBCHEM_COMPOUND_SCHEMA)
+
+        assert table.num_rows == 1
+        assert table.num_columns == len(PUBCHEM_COMPOUND_SCHEMA)
+
+    def test_silver_schema_valid_uniprot(self):
+        """UNIPROT_PROTEIN_SCHEMA должна валидировать корректные данные."""
+        valid_record = {
+            "entity_id": "P00533",
+            "accession": "P00533",
+            "entry_name": "EGFR_HUMAN",
+            "protein_name": "Epidermal growth factor receptor",
+            "gene_names": ["EGFR", "ERBB1"],
+            "organism_id": 9606,
+            "sequence_length": 1210,
+            "content_hash": "hash123",
+            "_run_id": "run_003",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch_003",
+            "_ingestion_ts": "2024-01-15T12:00:00Z",
+        }
+
+        table = pa.Table.from_pylist([valid_record], schema=UNIPROT_PROTEIN_SCHEMA)
+
+        assert table.num_rows == 1
+        assert table.num_columns == len(UNIPROT_PROTEIN_SCHEMA)
+
+    def test_silver_schema_rejects_invalid(self):
+        """Silver schema должна отклонять некорректные данные."""
+        # Invalid record: wrong types for numeric fields
+        invalid_record = {
+            "entity_id": "ACT_12345",
+            "content_hash": "abc123",
+            "activity_id": "12345",
+            "molecule_chembl_id": "CHEMBL25",
+            "target_chembl_id": "CHEMBL1824",
+            "assay_chembl_id": "CHEMBL829232",
+            "document_chembl_id": "CHEMBL1122334",
+            "record_id": "not_an_integer",  # Should be int64
+            "src_id": "not_an_integer",  # Should be int64
+            "value": "not_a_float",  # Should be float64
+            "standard_value": "not_a_float",  # Should be float64
+            "_run_id": "run_001",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch_001",
+            "_ingestion_ts": "2024-01-15T10:30:00Z",
+        }
+
+        with pytest.raises((pa.ArrowInvalid, pa.ArrowTypeError)):
+            pa.Table.from_pylist([invalid_record], schema=CHEMBL_ACTIVITY_SCHEMA)
+
+    def test_silver_schema_rejects_wrong_list_type(self):
+        """Silver schema должна отклонять некорректный тип списка."""
+        # Invalid: gene_names should be list of strings, not list of ints
+        invalid_record = {
+            "entity_id": "P00533",
+            "accession": "P00533",
+            "entry_name": "EGFR_HUMAN",
+            "protein_name": "Epidermal growth factor receptor",
+            "gene_names": [123, 456],  # Should be list of strings
+            "organism_id": 9606,
+            "sequence_length": 1210,
+            "content_hash": "hash123",
+            "_run_id": "run_003",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch_003",
+            "_ingestion_ts": "2024-01-15T12:00:00Z",
+        }
+
+        with pytest.raises((pa.ArrowInvalid, pa.ArrowTypeError)):
+            pa.Table.from_pylist([invalid_record], schema=UNIPROT_PROTEIN_SCHEMA)
+
+    def test_silver_schema_allows_null_values(self):
+        """Silver schema должна допускать NULL значения для необязательных полей."""
+        # Record with many null values - should be valid
+        minimal_record = {
+            "entity_id": "ACT_12345",
+            "content_hash": "abc123",
+            "activity_id": "12345",
+            "molecule_chembl_id": None,
+            "target_chembl_id": None,
+            "assay_chembl_id": None,
+            "document_chembl_id": None,
+            "record_id": None,
+            "src_id": None,
+            "canonical_smiles": None,
+            "molecule_pref_name": None,
+            "parent_molecule_chembl_id": None,
+            "target_pref_name": None,
+            "target_organism": None,
+            "target_tax_id": None,
+            "assay_type": None,
+            "assay_description": None,
+            "assay_variant_accession": None,
+            "assay_variant_mutation": None,
+            "bao_endpoint": None,
+            "bao_format": None,
+            "bao_label": None,
+            "type": None,
+            "value": None,
+            "units": None,
+            "relation": None,
+            "upper_value": None,
+            "text_value": None,
+            "standard_type": None,
+            "standard_value": None,
+            "standard_units": None,
+            "standard_relation": None,
+            "standard_upper_value": None,
+            "standard_text_value": None,
+            "standard_flag": None,
+            "pchembl_value": None,
+            "ligand_efficiency_bei": None,
+            "ligand_efficiency_le": None,
+            "ligand_efficiency_lle": None,
+            "ligand_efficiency_sei": None,
+            "qudt_units": None,
+            "uo_units": None,
+            "document_journal": None,
+            "document_year": None,
+            "activity_comment": None,
+            "data_validity_comment": None,
+            "data_validity_description": None,
+            "potential_duplicate": None,
+            "action_type_action_type": None,
+            "action_type_description": None,
+            "action_type_parent_type": None,
+            "activity_properties": None,
+            "toid": None,
+            "_run_id": "run_001",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch_001",
+            "_ingestion_ts": "2024-01-15T10:30:00Z",
+        }
+
+        # Should succeed with null values
+        table = pa.Table.from_pylist([minimal_record], schema=CHEMBL_ACTIVITY_SCHEMA)
+        assert table.num_rows == 1
+
+    @pytest.mark.parametrize(
+        "schema,primary_key,invalid_pk_value",
+        [
+            (CHEMBL_ACTIVITY_SCHEMA, "activity_id", 12345),  # Should be string
+            (CHEMBL_ASSAY_SCHEMA, "assay_chembl_id", 12345),  # Should be string
+            (PUBCHEM_COMPOUND_SCHEMA, "cid", 2244),  # Should be string
+        ],
+    )
+    def test_silver_schema_rejects_invalid_primary_key_type(
+        self, schema, primary_key, invalid_pk_value
+    ):
+        """Silver schema должна отклонять некорректный тип первичного ключа."""
+        # Build minimal record with required system fields
+        record = {
+            "entity_id": "test",
+            "content_hash": "hash",
+            primary_key: invalid_pk_value,  # Wrong type - should be string
+            "_run_id": "run",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch",
+            "_ingestion_ts": "2024-01-01T00:00:00Z",
+        }
+
+        with pytest.raises((pa.ArrowInvalid, pa.ArrowTypeError)):
+            pa.Table.from_pylist([record], schema=schema)
