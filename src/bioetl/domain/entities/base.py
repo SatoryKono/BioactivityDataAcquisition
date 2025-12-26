@@ -25,7 +25,7 @@ class BaseEntity:
     run_id: RunID
     run_type: RunType
     source_batch_id: BatchID | None = None  # None when batch context unavailable
-    ingestion_ts: datetime = field(default_factory=lambda: datetime.now(UTC))
+    ingestion_ts: datetime  # Required: pass context.started_at (ADR-014)
 
     def __post_init__(self) -> None:
         if not self.entity_id:
