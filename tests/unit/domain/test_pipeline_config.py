@@ -24,7 +24,7 @@ class TestPipelineConfig:
         assert config.pipeline_name == "test_pipeline"
         assert config.provider == "test_provider"
         assert config.entity_type == "test_entity"
-        assert config.primary_keys == ["id"]
+        assert config.primary_keys == ("id",)  # Lists converted to tuples
         assert config.silver_table == "test_silver"
 
     def test_default_values(self) -> None:
@@ -40,7 +40,7 @@ class TestPipelineConfig:
         assert config.gold_table is None
         assert config.batch_size == 100
         assert config.checkpoint_interval == 1000
-        assert config.fields == []
+        assert config.fields == ()  # Empty tuple
         assert isinstance(config.dq, DQConfig)
 
     def test_custom_batch_size(self) -> None:
@@ -84,8 +84,8 @@ class TestPipelineConfig:
         assert config.dq.soft_fail_threshold == 0.10
         assert config.dq.hard_fail_threshold == 0.50
 
-    def test_fields_list(self) -> None:
-        """Test fields configuration."""
+    def test_fields_tuple(self) -> None:
+        """Test fields configuration (converted to tuple)."""
         config = PipelineConfig(
             pipeline_name="test",
             provider="test",
@@ -95,7 +95,8 @@ class TestPipelineConfig:
             fields=["field1", "field2", "field3"],
         )
 
-        assert config.fields == ["field1", "field2", "field3"]
+        assert config.fields == ("field1", "field2", "field3")
+        assert isinstance(config.fields, tuple)
 
     def test_lock_key_property(self) -> None:
         """Test lock_key property generation."""
@@ -255,7 +256,7 @@ class TestPipelineConfig:
         assert config.pipeline_name == "chembl_activity"
         assert config.provider == "chembl"
         assert config.entity_type == "activity"
-        assert config.primary_keys == ["activity_id", "assay_chembl_id"]
+        assert config.primary_keys == ("activity_id", "assay_chembl_id")
         assert config.silver_table == "chembl_activity_silver"
         assert config.gold_table == "chembl_activity_gold"
         assert config.batch_size == 250
@@ -291,9 +292,16 @@ class TestPipelineConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_not_hashable_due_to_list(self) -> None:
-        """Test that PipelineConfig is not hashable due to list fields."""
-        config = PipelineConfig(
+    def test_hashable_with_tuple(self) -> None:
+        """Test that PipelineConfig is hashable with tuple fields."""
+        config1 = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+        )
+        config2 = PipelineConfig(
             pipeline_name="test",
             provider="test",
             entity_type="test",
@@ -301,6 +309,57 @@ class TestPipelineConfig:
             silver_table="silver",
         )
 
-        # Lists (primary_keys, fields) are not hashable
-        with pytest.raises(TypeError, match="unhashable"):
-            hash(config)
+        # Tuples are hashable, so frozen dataclass with tuple field is hashable
+        assert hash(config1) == hash(config2)
+
+        # Can be used in sets/dicts
+        config_set = {config1, config2}
+        assert len(config_set) == 1
+
+    def test_immutable_primary_keys(self) -> None:
+        """Test that primary_keys tuple cannot be mutated."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id", "version"],
+            silver_table="silver",
+        )
+
+        # Tuples don't support item assignment - raises TypeError
+        with pytest.raises(TypeError):
+            config.primary_keys[0] = "new_key"  # type: ignore[index]
+
+    def test_immutable_fields(self) -> None:
+        """Test that fields tuple cannot be mutated."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+            fields=["field1", "field2"],
+        )
+
+        # Tuples don't support item assignment - raises TypeError
+        with pytest.raises(TypeError):
+            config.fields[0] = "field3"  # type: ignore[index]
+
+    def test_list_to_tuple_conversion(self) -> None:
+        """Test that incoming lists are converted to tuples."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id", "version"],
+            silver_table="silver",
+            partition_cols=["col1"],
+            fields=["f1", "f2"],
+        )
+
+        assert isinstance(config.primary_keys, tuple)
+        assert isinstance(config.partition_cols, tuple)
+        assert isinstance(config.fields, tuple)
+        assert config.primary_keys == ("id", "version")
+        assert config.partition_cols == ("col1",)
+        assert config.fields == ("f1", "f2")

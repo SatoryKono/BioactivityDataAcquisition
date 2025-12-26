@@ -145,6 +145,8 @@ def test_gold_filters_loading(setup_configs):
     (pipelines_dir / "chembl" / "filters.yaml").write_text(yaml.dump(config_data))
 
     config = load_pipeline_config("chembl_filters")
+    # Note: load_pipeline_config returns PipelineYamlConfig (infrastructure layer)
+    # which uses lists. Use get_pipeline_config for domain PipelineConfig with tuples.
     assert config.gold_filters.columns == {"standard_type": ["IC50", "Ki"]}
     assert config.gold_filters.required_fields == ["value"]
     assert config.gold_filters.exclude_if_present == ["invalid"]
