@@ -19,8 +19,10 @@ from typing import TYPE_CHECKING, Any
 from typing_extensions import override
 
 from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
 
@@ -29,7 +31,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -48,6 +50,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         api_key: str | None = None,
         base_url: str = "https://rest.uniprot.org",
         strict_error_handling: bool = False,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize UniProt client.
 
@@ -57,12 +60,15 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             api_key: UniProt API key (optional)
             base_url: UniProt REST API base URL
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
+            metrics: MetricsPort instance for recording SLA metrics
 
         """
         super().__init__(http_client, logger)
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.strict_error_handling = strict_error_handling
+        metrics_port = metrics if metrics is not None else NoOpMetrics()
+        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
         self._fetch_strategies = {
             "protein": self._fetch_proteins,
             "feature": self._fetch_features,
@@ -149,9 +155,10 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 query, size, fetched, limit, cursor
             )
             try:
-                response = await self.http_client.get(
-                    f"{self.base_url}/uniprotkb/search", params=params
-                )
+                with self._adapter_metrics.measure_request("/uniprotkb/search"):
+                    response = await self.http_client.get(
+                        f"{self.base_url}/uniprotkb/search", params=params
+                    )
                 return self._parse_response(response)
             except Exception:
                 self._handle_fetch_error("protein", query, cursor)
@@ -177,9 +184,10 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _get_features_json(self, query: str) -> list[dict[str, Any]]:
         """Retrieve features JSON."""
         try:
-            response = await self.http_client.get(
-                f"{self.base_url}/uniprotkb/{query}.json"
-            )
+            with self._adapter_metrics.measure_request("/uniprotkb/features"):
+                response = await self.http_client.get(
+                    f"{self.base_url}/uniprotkb/{query}.json"
+                )
             if response.status_code == 200:
                 features: list[dict[str, Any]] = response.json().get("features", [])
                 return features
@@ -215,10 +223,11 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _get_sequence_fasta(self, query: str) -> str | None:
         """Retrieve FASTA sequence."""
         try:
-            response = await self.http_client.get(
-                f"{self.base_url}/uniprotkb/stream",
-                params={"query": query, "format": "fasta"},
-            )
+            with self._adapter_metrics.measure_request("/uniprotkb/stream"):
+                response = await self.http_client.get(
+                    f"{self.base_url}/uniprotkb/stream",
+                    params={"query": query, "format": "fasta"},
+                )
             if response.status_code == 200:
                 return response.text
             return None
@@ -265,9 +274,10 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         try:
             # Lightweight search probe: Ubiquitin (P62988)
             params = {"query": "accession:P62988", "size": 1, "format": "json"}
-            resp = await self.http_client.get(
-                f"{self.base_url}/uniprotkb/search", params=params
-            )
+            with self._adapter_metrics.measure_request("/health"):
+                resp = await self.http_client.get(
+                    f"{self.base_url}/uniprotkb/search", params=params
+                )
             if resp.status_code != 200:
                 self.logger.warning(
                     "health_check_degraded",

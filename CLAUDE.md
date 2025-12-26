@@ -171,6 +171,40 @@ src/bioetl/
    - Ответственность interfaces слоя
    - Другие интерфейсы имеют свои механизмы
 
+### 2.4. 🛡️ Протокол Верификации (ОБЯЗАТЕЛЬНО)
+
+> **КРИТИЧЕСКИ ВАЖНО**: Перед любым утверждением о коде — **ПРОВЕРЬ КОД**!
+
+**MUST выполнять перед предложением рефакторинга:**
+
+```bash
+# 1. Проверить существование класса/метода
+grep -r "class ClassName" src/bioetl/
+grep -r "def method_name" src/bioetl/
+
+# 2. Проверить реализованность фичи
+grep -r "SilverWriteMode\|GoldWriteMode" src/bioetl/
+
+# 3. Проверить архитектурные тесты
+ls tests/architecture/
+
+# 4. Сверить с REFACTORING_PLAN.md
+cat docs/REFACTORING_PLAN.md | head -60
+```
+
+**Чек-лист перед утверждением:**
+
+| Утверждение | Верификация |
+|-------------|-------------|
+| "Класс X существует" | `grep -r "class X" src/` |
+| "Метод Y не реализован" | `grep -r "def Y" src/` + прочитать код |
+| "Нет теста для Z" | `grep -r "test_Z\|Z" tests/` |
+| "Нет валидации W" | Прочитать файл и найти validation logic |
+
+**При обнаружении расхождения:**
+1. Обновить `docs/REFACTORING_PLAN.md` → секция "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+2. Обновить `CLAUDE.md` → секция 2.3 "Архитектурные Пояснения"
+
 ---
 
 ## 3. Medallion Architecture
@@ -183,10 +217,10 @@ src/bioetl/
 
 ### 3.1. Silver → Gold Transformation
 
-- **Исключение JSON полей**: `GOLD_EXCLUDE_FIELDS` в `BasePipeline`
+- **Исключение JSON полей**: Конфигурируется в YAML (`gold_filters`)
 - **Плоская структура**: Gold содержит только scalar поля
 - **Forensic**: Silver сохраняет JSON для расследований
-- **Метод**: `BasePipeline.transform_for_gold(context, silver_record)`
+- **Реализация**: `GoldWriter.write_gold()` в `infrastructure/storage/gold_writer.py`
 
 ### 3.2. Delta Lake (MUST)
 

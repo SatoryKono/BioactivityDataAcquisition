@@ -6,13 +6,15 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import ApiError
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -40,8 +42,14 @@ class PubMedAdapter:
     email: str
     api_key: str | None = None
     batch_size: int = 200
+    metrics: MetricsPort | None = None
 
     provider_name: str = "pubmed"
+
+    def __post_init__(self) -> None:
+        """Initialize adapter metrics after dataclass init."""
+        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
+        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
     async def __aenter__(self) -> Self:
         """Enter async context manager."""
@@ -72,7 +80,8 @@ class PubMedAdapter:
             params["api_key"] = self.api_key
 
         try:
-            response = await self.http_client.get(search_url, params=params)
+            with self._adapter_metrics.measure_request("/esearch"):
+                response = await self.http_client.get(search_url, params=params)
             data = response.json()
             idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
             return idlist
@@ -97,9 +106,10 @@ class PubMedAdapter:
         """Fetch a batch of articles and return parsed records."""
         params = self._build_fetch_params(id_batch)
         try:
-            response = await self.http_client.get(
-                f"{ENTREZ_API_BASE}efetch.fcgi", params=params
-            )
+            with self._adapter_metrics.measure_request("/efetch"):
+                response = await self.http_client.get(
+                    f"{ENTREZ_API_BASE}efetch.fcgi", params=params
+                )
             root = PubMedXmlProcessor.parse_response(response.text)
             if root is None:
                 self.logger.error("XML parse error in batch fetch")
@@ -232,9 +242,10 @@ class PubMedAdapter:
                 params["api_key"] = self.api_key
 
             start_time = time.monotonic()
-            response = await self.http_client.get(
-                f"{ENTREZ_API_BASE}esearch.fcgi", params=params
-            )
+            with self._adapter_metrics.measure_request("/health"):
+                response = await self.http_client.get(
+                    f"{ENTREZ_API_BASE}esearch.fcgi", params=params
+                )
             elapsed = time.monotonic() - start_time
 
             if response.status_code != 200:
@@ -296,7 +307,7 @@ def _create_pubmed_adapter(
         http_client: HTTP клиент
         logger: Логгер
         settings: Настройки приложения
-        **kwargs: Дополнительные параметры (email, api_key)
+        **kwargs: Дополнительные параметры (email, api_key, metrics)
 
     Returns:
         Инициализированный PubMedAdapter
@@ -332,4 +343,5 @@ def _create_pubmed_adapter(
         email=email,
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),
+        metrics=kwargs.get("metrics"),
     )

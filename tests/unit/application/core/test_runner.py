@@ -391,12 +391,13 @@ class TestPipelineRunnerRun:
 
     @pytest.mark.asyncio
     async def test_run_logs_start_message(self, runner, mock_logger):
-        """Test run logs start message."""
+        """Test run logs start message using PipelineEvent.START constant."""
         await runner.run()
 
         mock_logger.info.assert_called()
         calls = [str(call) for call in mock_logger.info.call_args_list]
-        assert any("Starting pipeline" in call for call in calls)
+        # Runner now uses PipelineEvent.START = "pipeline_started"
+        assert any("pipeline_started" in call for call in calls)
 
     @pytest.mark.asyncio
     async def test_run_logs_completion_message(self, runner, mock_logger):

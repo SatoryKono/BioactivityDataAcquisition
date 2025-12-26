@@ -23,8 +23,10 @@ from typing import TYPE_CHECKING, Any, NoReturn
 
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
@@ -36,7 +38,7 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -64,6 +66,7 @@ class ChemblAdapter(BaseHttpAdapter):
     logger: LoggerPort
     batch_size: int = 1000
     thread_pool: ThreadPoolExecutor | None = None
+    metrics: MetricsPort | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
@@ -80,6 +83,11 @@ class ChemblAdapter(BaseHttpAdapter):
     _mapper: ChemblEntityMapper = field(
         init=False, default_factory=ChemblEntityMapper
     )
+
+    def __post_init__(self) -> None:
+        """Initialize adapter metrics after dataclass init."""
+        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
+        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
     def _get_effective_batch_size(self) -> int:
         """Get batch size adjusted for current health status.
@@ -138,7 +146,8 @@ class ChemblAdapter(BaseHttpAdapter):
     ) -> tuple[list[dict[str, Any]], bool]:
         """Fetch a single page and handle errors."""
         try:
-            response = await self.http_client.get(url, params=params)
+            with self._adapter_metrics.measure_request(f"/{entity_type}"):
+                response = await self.http_client.get(url, params=params)
             records, has_next = self._process_response(response, entity_type)
             self._consecutive_errors = 0
             return records, has_next
@@ -395,7 +404,8 @@ class ChemblAdapter(BaseHttpAdapter):
 
         """
         try:
-            response = await self.http_client.get(CHEMBL_STATUS_URL)
+            with self._adapter_metrics.measure_request("/status"):
+                response = await self.http_client.get(CHEMBL_STATUS_URL)
             self._handle_health_response(response)
             return self._cached_health
         except Exception as e:
@@ -499,7 +509,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """Get total count of entities."""
         url = self._mapper.get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}
-        response = await self.http_client.get(url, params=params)
+        with self._adapter_metrics.measure_request(f"/{entity_type}/count"):
+            response = await self.http_client.get(url, params=params)
         data = response.json()
         page_meta = data.get("page_meta", {})
         total_count: int = page_meta.get("total_count", 0)

@@ -7,7 +7,7 @@
 ## ⚠️ ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ
 
 > **ВАЖНО**: Перед постановкой задач сверьтесь с этой секцией!
-> Последняя верификация: 2025-12-26
+> Последняя верификация: 2025-12-26 (обновлено: Phase 5 проверен и исправлен)
 
 ### ✅ УЖЕ РЕАЛИЗОВАНО (не требует работы)
 
@@ -21,6 +21,14 @@
 | **UnifiedHTTPClient lifecycle** | `client.py:138-162` | Корректный async context manager (`__aenter__`/`__aexit__`) |
 | **D1: Детерминистичный HTTP jitter** | `domain/resilience.py:45-84` | MD5-based jitter в `RetryPolicy.calculate_delay()`, 11 тестов в `test_http_client.py` |
 | **PipelineRunner DI** | `runner.py:43-88`, `runner_services.py` | RunnerServices bundle инжектируется через конструктор; `build_runner_services()` создаёт сервисы в composition |
+| **CLI → Entrypoints** | `cli.py:17-27`, `entrypoints.py` | CLI импортирует только из `composition/entrypoints.py`, не из `bootstrap_*` |
+| **D2: Gold Writer детерминизм** | `gold_writer.py:286,359` | Фиксированный backoff `0.5 * (2**attempt) + 0.05` вместо `random.uniform()` |
+| **D3: Arch test random** | `tests/architecture/test_no_random_in_writers.py` | 3 теста: import, uniform, choice |
+| **M1: SilverWriteMode Enum** | `delta_writer.py:53-64` | `MERGE`, `APPEND`, `DELETE` + валидация в `_validate_write_mode()` |
+| **M2: GoldWriteMode Enum** | `gold_writer.py:42-54` | `OVERWRITE`, `APPEND`, `SCD2` + валидация |
+| **M4: Schema drift** | `delta_writer.py:303-349` | `_check_schema_drift()` с параметром `on_schema_mismatch: Literal["error", "evolve", "ignore"]` |
+| **T5: Arch test datetime.now** | `tests/architecture/test_no_datetime_now_in_infrastructure.py` | 2 теста + список разрешённых исключений |
+| **O1: BaseTransformer tracing** | `base_transformer.py:125-187` | Tracing spans, duration histogram, error counters |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -49,8 +57,10 @@
 | Проблема | Файл:строки | Описание |
 |----------|-------------|----------|
 | ~~**PipelineRunner создаёт сервисы**~~ | ~~`runner.py:90-126`~~ | ✅ ВЫПОЛНЕНО: DI через `RunnerServices` bundle (2025-12-26) |
-| **CLI вызывает bootstrap напрямую** | `cli.py:224,265,337` | Смешение interfaces и composition слоёв |
+| ~~**CLI вызывает bootstrap напрямую**~~ | ~~`cli.py:224,265,337`~~ | ✅ ВЫПОЛНЕНО: CLI использует `composition/entrypoints.py` (верифицировано 2025-12-26) |
 | ~~**Мёртвый код в ChemblAdapter**~~ | ~~`client.py:147`~~ | ✅ ВЫПОЛНЕНО: Удалён в коммите `9214cfb` |
+
+> **Все критические проблемы решены.** Актуальный план см. в "Фаза 5" ниже.
 
 ---
 
@@ -1153,15 +1163,18 @@ ci: lint test arch-all
 - [x] PipelineRunner не создаёт сервисы
 - [x] `make arch-test` проходит (187 passed)
 
-#### 1.2 Разнести CLI и composition root
+#### 1.2 ~~Разнести CLI и composition root~~ ✅ ВЫПОЛНЕНО
 
-**Проблема**: `cli.py:224,265,337` — прямые вызовы `bootstrap_*`.
+**Статус**: Реализовано (верифицировано 2025-12-26)
 
-**Решение**: Создать `composition/entrypoints.py`, CLI вызывает только entrypoints.
+**Реализация**:
+- `composition/entrypoints.py` создан с публичным API
+- `cli.py:17-27` импортирует только из entrypoints: `RunOptions`, `create_pipeline_runner`, `get_checkpoint_manager`, `get_lifecycle_service`, `get_quarantine_manager`, `preview_cleanup`
+- CLI не импортирует `bootstrap_*` напрямую
 
 **Критерии готовности**:
-- [ ] CLI не импортирует `bootstrap_*`
-- [ ] Entrypoints доступны для Prefect/REST
+- [x] CLI не импортирует `bootstrap_*`
+- [x] Entrypoints доступны для Prefect/REST
 
 ### Приоритет 2: ВЫСОКИЙ
 
