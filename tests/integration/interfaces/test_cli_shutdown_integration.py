@@ -93,7 +93,7 @@ class TestCliGracefulShutdownExitCode:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_pipeline",
+            "bioetl.interfaces.cli.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -115,7 +115,7 @@ class TestCliGracefulShutdownExitCode:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_pipeline",
+            "bioetl.interfaces.cli.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -137,7 +137,7 @@ class TestCliGracefulShutdownExitCode:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_pipeline",
+            "bioetl.interfaces.cli.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -224,7 +224,7 @@ class TestRunnerShutdownIntegration:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_pipeline",
+            "bioetl.interfaces.cli.create_pipeline_runner",
             return_value=mock_runner,
         ):
             cli_runner.invoke(
@@ -253,7 +253,7 @@ class TestRunnerShutdownIntegration:
 
         with (
             patch(
-                "bioetl.interfaces.cli.bootstrap_pipeline",
+                "bioetl.interfaces.cli.create_pipeline_runner",
                 return_value=mock_runner,
             ),
             patch(
@@ -288,7 +288,7 @@ class TestLockReleaseOnShutdown:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_pipeline",
+            "bioetl.interfaces.cli.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
