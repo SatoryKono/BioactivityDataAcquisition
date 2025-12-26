@@ -48,25 +48,19 @@ class TestChemblAdapter:
 
     def test_entity_mapping(self, mock_logger):
         """Test entity type to resource URL mapping."""
-        bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="chembl")
-        http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
 
-        # Valid entity types
-        assert "activity" in adapter._get_resource_url("activity")
-        assert "molecule" in adapter._get_resource_url("compound")
-        assert "target" in adapter._get_resource_url("target")
+        # Valid entity types via entity mapper
+        assert "activity" in ChemblEntityMapper.get_resource_url("activity")
+        assert "molecule" in ChemblEntityMapper.get_resource_url("compound")
+        assert "target" in ChemblEntityMapper.get_resource_url("target")
 
     def test_invalid_entity_type(self, mock_logger):
         """Test error handling for invalid entity type."""
-        bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="chembl")
-        http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
 
         with pytest.raises(ValueError, match="Unknown entity type"):
-            adapter._get_resource_url("invalid_entity")
+            ChemblEntityMapper.get_resource_url("invalid_entity")
 
 
 @pytest.mark.unit
