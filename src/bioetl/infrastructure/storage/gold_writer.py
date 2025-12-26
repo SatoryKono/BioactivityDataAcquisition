@@ -18,7 +18,7 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
@@ -89,6 +89,7 @@ class GoldWriter:
         mode: str = "overwrite",
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
+        ingestion_ts: datetime | None = None,
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -100,6 +101,8 @@ class GoldWriter:
             mode: Write mode - 'overwrite', 'append', or 'scd2'
             partition_cols: Optional partition columns
             scd_config: Required config for SCD2 mode
+            ingestion_ts: Timestamp for SCD2 versioning (Single Source of Time).
+                         Required if mode is SCD2.
 
         Raises:
             ValueError: If mode is invalid, records empty, or schema not strict
@@ -116,9 +119,12 @@ class GoldWriter:
         if not records:
             raise ValueError("No records to write")
 
-        # SCD2 requires scd_config
-        if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
-            raise ValueError("scd_config required for SCD Type 2 mode")
+        # SCD2 requires scd_config and ingestion_ts
+        if validated_mode == GoldWriteMode.SCD2:
+            if scd_config is None:
+                raise ValueError("scd_config required for SCD Type 2 mode")
+            if ingestion_ts is None:
+                raise ValueError("ingestion_ts required for SCD Type 2 mode")
 
         # Check strict attribute - supports both DataFrameSchema and DataFrameModel
         # DataFrameSchema: schema.strict directly
@@ -140,7 +146,11 @@ class GoldWriter:
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
         if validated_mode == GoldWriteMode.SCD2:
-            await self._write_scd2(table_path, records, scd_config, partition_cols)
+            # We already validated scd_config and ingestion_ts are not None above
+            assert ingestion_ts is not None
+            await self._write_scd2(
+                table_path, records, scd_config, partition_cols, ingestion_ts
+            )
         else:  # OVERWRITE or APPEND
             await self._write_simple(
                 table_path,
@@ -282,6 +292,7 @@ class GoldWriter:
         records: list[dict[str, Any]],
         scd_config: dict[str, Any],
         partition_cols: list[str] | None,
+        ingestion_ts: datetime,
     ) -> None:
         """Write records using SCD Type 2 (history tracking)."""
         business_key = scd_config["business_key"]
@@ -296,7 +307,7 @@ class GoldWriter:
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
         current_flag_col = scd_config.get("current_flag_col", "is_current")
 
-        now = datetime.now(UTC).isoformat()
+        now = ingestion_ts.isoformat()
         for record in records:
             record[valid_from_col] = now
             record[valid_to_col] = None
@@ -309,7 +320,7 @@ class GoldWriter:
                     dt = await self._run_in_executor(
                         lambda table_path=table_path: DeltaTable(table_path)
                     )
-                    await self._merge_scd2(dt, records, business_key, scd_config)
+                    await self._merge_scd2(dt, records, business_key, scd_config, now)
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
@@ -336,6 +347,7 @@ class GoldWriter:
         records: list[dict[str, Any]],
         business_key: str | list[str],
         scd_config: dict[str, Any],
+        ingestion_ts_iso: str,
     ) -> None:
         """Merge records using SCD Type 2 logic."""
         if isinstance(business_key, str):
@@ -350,7 +362,6 @@ class GoldWriter:
             f"target.{key} = source.{key}" for key in business_keys
         )
         merge_condition += f" AND target.{current_flag_col} = true"
-        now = datetime.now(UTC).isoformat()
 
         await self._run_in_executor(
             lambda: (
@@ -364,7 +375,7 @@ class GoldWriter:
                 )
                 .when_matched_update(
                     updates={
-                        valid_to_col: f"'{now}'",
+                        valid_to_col: f"'{ingestion_ts_iso}'",
                         current_flag_col: "false",
                     }
                 )

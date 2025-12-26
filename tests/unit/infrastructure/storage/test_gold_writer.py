@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pyarrow as pa
@@ -55,6 +56,12 @@ def valid_records():
         {"entity_id": "CHEMBL123", "value": 5.5},
         {"entity_id": "CHEMBL456", "value": 7.2},
     ]
+
+
+@pytest.fixture
+def test_ingestion_ts():
+    """Provide a fixed timestamp for tests."""
+    return datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit
@@ -128,6 +135,22 @@ class TestGoldWriterValidation:
                 records=valid_records,
                 schema=strict_schema,
                 mode="scd2",
+                ingestion_ts=datetime.now(UTC),
+            )
+
+    async def test_write_gold_scd2_without_ingestion_ts_raises(
+        self, gold_writer, valid_records, strict_schema
+    ):
+        """Test write_gold raises ValueError for SCD2 mode without ingestion_ts."""
+        scd_config = {"business_key": "entity_id"}
+        with pytest.raises(ValueError, match="ingestion_ts required"):
+            await gold_writer.write_gold(
+                table_name="test.table",
+                records=valid_records,
+                schema=strict_schema,
+                mode="scd2",
+                scd_config=scd_config,
+                ingestion_ts=None,
             )
 
 
@@ -193,7 +216,7 @@ class TestGoldWriterSCD2:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_scd2_creates_new_table(
-        self, mock_write_deltalake, mock_delta_table, gold_writer, valid_records, strict_schema
+        self, mock_write_deltalake, mock_delta_table, gold_writer, valid_records, strict_schema, test_ingestion_ts
     ):
         """Test SCD2 write creates new table when table doesn't exist."""
         mock_delta_table.side_effect = TableNotFoundError("Not found")
@@ -212,6 +235,7 @@ class TestGoldWriterSCD2:
             schema=strict_schema,
             mode="scd2",
             scd_config=scd_config,
+            ingestion_ts=test_ingestion_ts,
         )
 
         mock_write_deltalake.assert_called_once()
@@ -221,7 +245,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_merge_existing_table(
-        self, mock_delta_table, gold_writer, valid_records, strict_schema
+        self, mock_delta_table, gold_writer, valid_records, strict_schema, test_ingestion_ts
     ):
         """Test SCD2 write merges into existing table."""
         mock_table_instance = MagicMock()
@@ -241,6 +265,7 @@ class TestGoldWriterSCD2:
             schema=strict_schema,
             mode="scd2",
             scd_config=scd_config,
+            ingestion_ts=test_ingestion_ts,
         )
 
         mock_table_instance.merge.assert_called_once()
@@ -249,7 +274,7 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
-        self, mock_delta_table, gold_writer
+        self, mock_delta_table, gold_writer, test_ingestion_ts
     ):
         """Test SCD2 write with list of business keys."""
         mock_table_instance = MagicMock()
@@ -283,6 +308,7 @@ class TestGoldWriterSCD2:
             schema=multi_key_schema,
             mode="scd2",
             scd_config=scd_config,
+            ingestion_ts=test_ingestion_ts,
         )
 
         mock_table_instance.merge.assert_called_once()
@@ -550,7 +576,7 @@ class TestGoldWriterDeterministicBackoff:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_gold_writer_scd2_deterministic_backoff(
-        self, mock_write_deltalake, mock_delta_table, mock_sleep, gold_writer, valid_records, strict_schema
+        self, mock_write_deltalake, mock_delta_table, mock_sleep, gold_writer, valid_records, strict_schema, test_ingestion_ts
     ):
         """Test that SCD2 mode also uses deterministic backoff.
 
@@ -579,6 +605,7 @@ class TestGoldWriterDeterministicBackoff:
             schema=strict_schema,
             mode="scd2",
             scd_config=scd_config,
+            ingestion_ts=test_ingestion_ts,
         )
 
         # Verify deterministic backoff delays

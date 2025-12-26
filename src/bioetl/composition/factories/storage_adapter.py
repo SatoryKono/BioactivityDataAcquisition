@@ -104,6 +104,7 @@ class StorageAdapter:
         schema: Any,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+        ingestion_ts: datetime | None = None,
     ) -> None:
         """Write aggregated records to Gold layer."""
         await self.gold.write_gold(
@@ -112,6 +113,7 @@ class StorageAdapter:
             schema=schema,
             primary_keys=primary_keys,
             mode=mode,
+            ingestion_ts=ingestion_ts,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:

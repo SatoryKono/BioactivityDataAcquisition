@@ -140,6 +140,7 @@ class TestStoragePortProtocol:
                 schema: Any,
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
+                on_schema_mismatch: Literal["error", "evolve"] | None = None,
             ) -> None:
                 pass
 
@@ -150,6 +151,7 @@ class TestStoragePortProtocol:
                 schema: Any,
                 primary_keys: list[str] | None = None,
                 mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+                ingestion_ts: Any | None = None,
             ) -> None:
                 pass
 

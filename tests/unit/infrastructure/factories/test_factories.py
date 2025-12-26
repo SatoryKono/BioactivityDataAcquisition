@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, ANY
 from uuid import uuid4
 
 import pyarrow as pa
@@ -146,9 +146,9 @@ class TestStorageAdapter:
             schema=mock_schema,
             primary_keys=None,
             mode="overwrite",
+            ingestion_ts=None,
         )
 
     async def test_aclose_completes(self, storage_adapter):
         """Test aclose completes without error."""
         await storage_adapter.aclose()
-        # Should not raise

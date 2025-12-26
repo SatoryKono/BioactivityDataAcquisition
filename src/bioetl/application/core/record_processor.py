@@ -118,7 +118,7 @@ class RecordProcessor:
         if result.gold_records:
             await self._execute_with_span(
                 "write_gold",
-                self._writer.write_gold(result.gold_records),
+                self._writer.write_gold(result.gold_records, ingestion_ts),
                 batch_id, len(result.gold_records),
                 on_error=lambda e: self._writer.log_and_track_write_error("gold", e, batch_id),
             )

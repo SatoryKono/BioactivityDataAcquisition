@@ -199,8 +199,9 @@ class TestBatchWriterGold:
     ):
         """Test that Gold records are validated."""
         records = [{"entity_id": "1", "value": 10}]
+        ingestion_ts = datetime.now(timezone.utc)
 
-        await batch_writer.write_gold(records)
+        await batch_writer.write_gold(records, ingestion_ts)
 
         mock_gold_validator.validate.assert_called_once()
         mock_storage.write_gold.assert_called_once()
@@ -232,9 +233,10 @@ class TestBatchWriterGold:
         )
 
         records = [{"entity_id": "1", "value": "invalid"}]
+        ingestion_ts = datetime.now(timezone.utc)
 
         with pytest.raises(SchemaViolationError):
-            await writer.write_gold(records)
+            await writer.write_gold(records, ingestion_ts)
 
         mock_storage.write_gold.assert_not_called()
 
@@ -270,8 +272,9 @@ class TestBatchWriterGold:
         )
 
         records = [{"entity_id": "1", "value": 10, "extra_field": "should_be_removed"}]
+        ingestion_ts = datetime.now(timezone.utc)
 
-        await writer.write_gold(records)
+        await writer.write_gold(records, ingestion_ts)
 
         call_kwargs = mock_storage.write_gold.call_args[1]
         gold_records = call_kwargs["records"]

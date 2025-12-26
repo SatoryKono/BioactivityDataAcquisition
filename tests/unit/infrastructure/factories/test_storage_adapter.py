@@ -183,12 +183,14 @@ class TestStorageAdapterWriteGold:
         """Test that write_gold delegates to gold writer."""
         records = [{"id": 1, "aggregated_value": 100}]
         mock_schema = MagicMock()
+        ingestion_ts = datetime.now(UTC)
 
         await storage_adapter.write_gold(
             table_name="gold_table",
             records=records,
             schema=mock_schema,
             mode="overwrite",
+            ingestion_ts=ingestion_ts,
         )
 
         mock_gold_writer.write_gold.assert_called_once()
@@ -197,6 +199,7 @@ class TestStorageAdapterWriteGold:
         assert call_kwargs["records"] == records
         assert call_kwargs["schema"] == mock_schema
         assert call_kwargs["mode"] == "overwrite"
+        assert call_kwargs["ingestion_ts"] == ingestion_ts
 
     @pytest.mark.asyncio
     async def test_write_gold_append_mode(
@@ -206,11 +209,13 @@ class TestStorageAdapterWriteGold:
     ) -> None:
         """Test write_gold with append mode."""
         mock_schema = MagicMock()
+        ingestion_ts = datetime.now(UTC)
         await storage_adapter.write_gold(
             table_name="gold_table",
             records=[{"id": 1}],
             schema=mock_schema,
             mode="append",
+            ingestion_ts=ingestion_ts,
         )
 
         call_kwargs = mock_gold_writer.write_gold.call_args[1]

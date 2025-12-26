@@ -177,16 +177,26 @@ class TestTransformerInjectionPath:
             pytest.skip("generic_factory.py not found")
 
         content = factory_file.read_text(encoding="utf-8")
+        tree = ast.parse(content)
 
         # Check for create_transformer method
-        assert "def create_transformer" in content, (
-            "GenericPipelineFactory must have create_transformer() method"
-        )
+        has_create_method = False
+        calls_create_method = False
 
-        # Check that create_with_services calls create_transformer
-        assert "self.create_transformer()" in content, (
-            "GenericPipelineFactory.create_with_services must call create_transformer()"
-        )
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "create_transformer":
+                has_create_method = True
+
+            if isinstance(node, ast.FunctionDef) and node.name == "create_with_services":
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Call):
+                        # Check for self.create_transformer(...) call
+                        if isinstance(child.func, ast.Attribute) and child.func.attr == "create_transformer":
+                             if isinstance(child.func.value, ast.Name) and child.func.value.id == "self":
+                                 calls_create_method = True
+
+        assert has_create_method, "GenericPipelineFactory must have create_transformer() method"
+        assert calls_create_method, "GenericPipelineFactory.create_with_services must call create_transformer()"
 
         # Check that transformer is passed to pipeline
         assert "transformer=transformer" in content, (

@@ -139,13 +139,16 @@ class BatchWriter:
             on_schema_mismatch=self._table_config.on_schema_mismatch,
         )
 
-    async def write_gold(self, records: list[dict[str, Any]]) -> None:
+    async def write_gold(
+        self, records: list[dict[str, Any]], ingestion_ts: datetime
+    ) -> None:
         """Write records to Gold layer with validation.
 
         Filters columns to match Gold schema, validates records.
 
         Args:
             records: Transformed Gold records.
+            ingestion_ts: Ingestion timestamp from context (Single Source of Time).
 
         Raises:
             SchemaViolationError: If validation fails.
@@ -180,6 +183,7 @@ class BatchWriter:
             schema=gold_schema,
             primary_keys=self._table_config.primary_keys,
             mode=write_mode,
+            ingestion_ts=ingestion_ts,
         )
 
     def _get_schema_columns(self, schema: Any) -> set[str] | None:

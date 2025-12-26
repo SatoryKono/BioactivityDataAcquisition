@@ -949,4 +949,54 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=default%40example.com&api_key=REDACTED
+  response:
+    body:
+      string: '{"error":"API key invalid","api-key":"your_ncbi_api_key_here","type":"invalid",
+
+        "status":"unknown"}'
+    headers:
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 26 Dec 2025 10:25:31 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '3'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '99'
+    status:
+      code: 400
+      message: Bad Request
 version: 1
