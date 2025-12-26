@@ -1,4 +1,4 @@
-"""Unit tests for MedallionPolicy write mode validation.
+"""Unit tests for WriteModePolicy write mode validation.
 
 Tests all layer/mode combinations per RULES.md §3 (Medallion Architecture):
 - Bronze: APPEND only
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.core.medallion_policy import Layer, MedallionPolicy, WriteMode
+from bioetl.application.core.medallion_policy import Layer, WriteModePolicy, WriteMode
 from bioetl.domain.exceptions import PolicyViolationError
 
 
@@ -59,47 +59,47 @@ class TestWriteMode:
 
 
 @pytest.mark.unit
-class TestMedallionPolicyAllowedModes:
-    """Tests for MedallionPolicy.ALLOWED_MODES configuration."""
+class TestWriteModePolicyAllowedModes:
+    """Tests for WriteModePolicy.ALLOWED_MODES configuration."""
 
     def test_bronze_allowed_modes(self):
         """Test Bronze layer allows only APPEND."""
-        assert MedallionPolicy.ALLOWED_MODES[Layer.BRONZE] == {WriteMode.APPEND}
+        assert WriteModePolicy.ALLOWED_MODES[Layer.BRONZE] == {WriteMode.APPEND}
 
     def test_silver_allowed_modes(self):
         """Test Silver layer allows APPEND and MERGE."""
-        assert MedallionPolicy.ALLOWED_MODES[Layer.SILVER] == {
+        assert WriteModePolicy.ALLOWED_MODES[Layer.SILVER] == {
             WriteMode.APPEND,
             WriteMode.MERGE,
         }
 
     def test_gold_allowed_modes(self):
         """Test Gold layer allows MERGE and OVERWRITE."""
-        assert MedallionPolicy.ALLOWED_MODES[Layer.GOLD] == {
+        assert WriteModePolicy.ALLOWED_MODES[Layer.GOLD] == {
             WriteMode.MERGE,
             WriteMode.OVERWRITE,
         }
 
     def test_all_layers_have_policies(self):
         """Test that all layers have defined policies."""
-        defined_layers = set(MedallionPolicy.ALLOWED_MODES.keys())
+        defined_layers = set(WriteModePolicy.ALLOWED_MODES.keys())
         all_layers = set(Layer)
         assert defined_layers == all_layers
 
 
 @pytest.mark.unit
-class TestMedallionPolicyValidateBronze:
+class TestWriteModePolicyValidateBronze:
     """Tests for Bronze layer validation."""
 
     def test_bronze_append_allowed(self):
         """Test Bronze APPEND is allowed."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         # Should not raise
         policy.validate(Layer.BRONZE, WriteMode.APPEND)
 
     def test_bronze_merge_rejected(self):
         """Test Bronze MERGE is rejected."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.BRONZE, WriteMode.MERGE)
         assert "bronze does not allow merge" in str(exc_info.value)
@@ -107,7 +107,7 @@ class TestMedallionPolicyValidateBronze:
 
     def test_bronze_overwrite_rejected(self):
         """Test Bronze OVERWRITE is rejected (critical criterion)."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
         assert "bronze does not allow overwrite" in str(exc_info.value)
@@ -115,55 +115,55 @@ class TestMedallionPolicyValidateBronze:
 
 
 @pytest.mark.unit
-class TestMedallionPolicyValidateSilver:
+class TestWriteModePolicyValidateSilver:
     """Tests for Silver layer validation."""
 
     def test_silver_append_allowed(self):
         """Test Silver APPEND is allowed."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         # Should not raise
         policy.validate(Layer.SILVER, WriteMode.APPEND)
 
     def test_silver_merge_allowed(self):
         """Test Silver MERGE is allowed."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         # Should not raise
         policy.validate(Layer.SILVER, WriteMode.MERGE)
 
     def test_silver_overwrite_rejected(self):
         """Test Silver OVERWRITE is rejected."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.SILVER, WriteMode.OVERWRITE)
         assert "silver does not allow overwrite" in str(exc_info.value)
 
 
 @pytest.mark.unit
-class TestMedallionPolicyValidateGold:
+class TestWriteModePolicyValidateGold:
     """Tests for Gold layer validation."""
 
     def test_gold_merge_allowed(self):
         """Test Gold MERGE is allowed."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         # Should not raise
         policy.validate(Layer.GOLD, WriteMode.MERGE)
 
     def test_gold_overwrite_allowed(self):
         """Test Gold OVERWRITE is allowed."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         # Should not raise
         policy.validate(Layer.GOLD, WriteMode.OVERWRITE)
 
     def test_gold_append_rejected(self):
         """Test Gold APPEND is rejected."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.GOLD, WriteMode.APPEND)
         assert "gold does not allow append" in str(exc_info.value)
 
 
 @pytest.mark.unit
-class TestMedallionPolicyValidateAllCombinations:
+class TestWriteModePolicyValidateAllCombinations:
     """Parametrized tests for all layer/mode combinations."""
 
     @pytest.mark.parametrize(
@@ -178,7 +178,7 @@ class TestMedallionPolicyValidateAllCombinations:
     )
     def test_allowed_combinations(self, layer: Layer, mode: WriteMode):
         """Test all allowed layer/mode combinations."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         # Should not raise
         policy.validate(layer, mode)
 
@@ -193,7 +193,7 @@ class TestMedallionPolicyValidateAllCombinations:
     )
     def test_disallowed_combinations(self, layer: Layer, mode: WriteMode):
         """Test all disallowed layer/mode combinations."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError):
             policy.validate(layer, mode)
 
@@ -204,21 +204,21 @@ class TestPolicyViolationErrorMessage:
 
     def test_error_message_contains_layer_name(self):
         """Test error message contains layer name."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
         assert "bronze" in str(exc_info.value)
 
     def test_error_message_contains_mode_name(self):
         """Test error message contains mode name."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
         assert "overwrite" in str(exc_info.value)
 
     def test_error_message_contains_allowed_modes(self):
         """Test error message contains allowed modes."""
-        policy = MedallionPolicy()
+        policy = WriteModePolicy()
         with pytest.raises(PolicyViolationError) as exc_info:
             policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
         # Bronze only allows append
