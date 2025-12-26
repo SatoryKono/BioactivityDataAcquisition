@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.4 (2025-12-25)*
+*Синхронизировано с RULES.md v5.4 (2025-12-26)*
 
 ---
 
@@ -73,6 +73,36 @@ src/bioetl/
 - **MUST**: Зависимости передаются в конструктор.
 - **MUST NOT**: Создание зависимостей внутри классов (`S3Storage()`, `httpx.AsyncClient()`).
 - **Composition Root**: `src/bioetl/composition/bootstrap.py`.
+
+### 2.3. ⚠️ Архитектурные Пояснения (Избегай Ложных Выводов)
+
+> **КРИТИЧЕСКИ ВАЖНО**: Эти утверждения часто делаются ошибочно.
+> Перед предложением рефакторинга — **ОБЯЗАТЕЛЬНО проверь код**!
+
+| Компонент | ❌ Ложное утверждение | ✅ Реальность |
+|-----------|----------------------|---------------|
+| **PipelineRunner** | "God object, слишком много ответственностей" | **173 строки**, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
+| **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
+| **ChEMBL Adapter** | "Размытые границы, много ответственностей" | Когезивная ответственность: health-aware HTTP fetching (~350 строк) |
+| **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя |
+| **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
+| **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
+| **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
+| **BronzeWriter** | "Нет observability" | Имеет структурированное логирование (`bronze_writer.py:197-205`) |
+
+**Паттерны, которые НЕ являются нарушениями:**
+
+1. **Optional parameters с defaults** (`policy: Policy | None = None`):
+   - Валидный DI паттерн для конфигурационных value objects
+   - Аналогично `timeout: float = 30.0`
+
+2. **NoOp implementations** (`NoOpTracing`, `NoOpMetrics`):
+   - Null Object Pattern для опциональной observability
+   - Позволяет domain слою не зависеть от конкретных реализаций
+
+3. **Подтверждения в CLI** (dry-run, confirmation prompts):
+   - Ответственность interfaces слоя
+   - Другие интерфейсы имеют свои механизмы
 
 ---
 

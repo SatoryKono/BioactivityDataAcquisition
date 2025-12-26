@@ -1,7 +1,7 @@
 # BioETL: Контекст Проекта для Claude
 
-*Синхронизировано с CLAUDE.md и RULES.md v5.2*
-*Последнее обновление: 2025-12-24*
+*Синхронизировано с CLAUDE.md и RULES.md v5.4*
+*Последнее обновление: 2025-12-26*
 
 ---
 
@@ -53,6 +53,35 @@ src/bioetl/
 - **MUST**: Зависимости передаются в конструктор
 - **MUST NOT**: Создание зависимостей внутри классов
 - **Composition Root**: `src/bioetl/composition/bootstrap.py`
+
+### 1.3. Архитектурные Пояснения (Избегай Ложных Выводов)
+
+> **ВАЖНО**: Следующие утверждения часто делаются ошибочно.
+> Перед предложением рефакторинга — проверь актуальный код!
+
+| Компонент | ❌ Ложное утверждение | ✅ Реальность |
+|-----------|----------------------|---------------|
+| **PipelineRunner** | "God object, слишком много ответственностей" | 173 строки, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
+| **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
+| **ChEMBL Adapter** | "Размытые границы, много ответственностей" | Когезивная ответственность: health-aware HTTP fetching (~350 строк) |
+| **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — законная ответственность interfaces слоя |
+| **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
+| **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
+| **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
+
+**Паттерны, которые НЕ являются проблемами:**
+
+1. **Optional parameters с defaults** (`write_policy: WriteModePolicy | None = None`):
+   - Это **валидный DI паттерн** для конфигурационных value objects
+   - Аналогично `timeout: float = 30.0` — не нарушение DI
+
+2. **NoOp implementations в domain** (`NoOpTracing`, `NoOpMetrics`):
+   - Это **Null Object Pattern** для опциональной observability
+   - Позволяет domain слою не зависеть от конкретных реализаций
+
+3. **Подтверждения в CLI**:
+   - Это ответственность **interfaces слоя**
+   - Другие интерфейсы (Prefect, REST) имеют свои механизмы
 
 ---
 
