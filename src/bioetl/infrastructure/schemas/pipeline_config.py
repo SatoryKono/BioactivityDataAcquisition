@@ -89,6 +89,28 @@ class InputFilterConfig(BaseModel):
     )
 
 
+class MaintenanceConfig(BaseModel):
+    """Configuration for automated maintenance operations.
+
+    Controls automatic VACUUM and other maintenance tasks after pipeline runs.
+
+    Attributes:
+        auto_vacuum: Enable automatic VACUUM after successful run.
+        vacuum_retention_days: Minimum age of files to remove (days).
+    """
+
+    auto_vacuum: bool = Field(
+        default=False,
+        description="Enable automatic VACUUM after successful pipeline run",
+    )
+    vacuum_retention_days: int = Field(
+        default=7,
+        ge=1,
+        le=365,
+        description="Minimum age of files to remove during VACUUM (days)",
+    )
+
+
 class ApiConfig(BaseModel):
     """Configuration for API connection details."""
 
@@ -205,6 +227,7 @@ class PipelineYamlConfig(BaseModel):
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
     source: SourceConfig = Field(default_factory=SourceConfig)
     input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
+    maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
 
     @field_validator("batch_size")
     @classmethod
