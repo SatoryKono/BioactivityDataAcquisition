@@ -511,3 +511,156 @@ class TestBootstrapMetrics:
 
         assert result is not None
         assert isinstance(result, NoOpMetrics)
+
+
+@pytest.mark.unit
+class TestBootstrapVacuumConfig:
+    """Tests for bootstrap_pipeline vacuum configuration merging."""
+
+    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
+    @patch("bioetl.composition.bootstrap.load_pipeline_config")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
+    @patch("bioetl.composition.bootstrap.bootstrap_logger")
+    @patch("bioetl.composition.bootstrap.get_settings")
+    def test_bootstrap_uses_yaml_vacuum_config_when_cli_not_set(
+        self,
+        mock_get_settings: MagicMock,
+        mock_bootstrap_logger: MagicMock,
+        mock_bootstrap_tracer: MagicMock,
+        mock_start_metrics: MagicMock,
+        mock_load_config: MagicMock,
+        mock_filter_builder: MagicMock,
+        mock_registry: MagicMock,
+    ) -> None:
+        """Test that YAML auto_vacuum config is used when CLI doesn't override."""
+        from bioetl.composition.bootstrap import bootstrap_pipeline
+
+        # Create settings with all required observability attributes
+        settings = MagicMock()
+        settings.metrics_port = 8000
+        settings.pipeline.heartbeat_interval = 30
+        settings.observability.metrics_enabled = False
+        settings.observability.metrics_server_enabled = False
+        settings.observability.metrics_fail_fast = False
+        settings.observability.metrics_retry_count = 3
+        settings.observability.metrics_retry_delay = 1.0
+        settings.observability.tracing_enabled = False
+        settings.observability.dq_baseline_window = 7
+        settings.observability.dq_z_score_threshold = 2.5
+        settings.observability.dq_min_baseline_samples = 3
+        settings.observability.dq_error_rate_max = 0.10
+        settings.observability.dq_quality_score_min = 0.80
+        mock_get_settings.return_value = settings
+
+        # Create logger
+        logger = MagicMock()
+        logger.bind.return_value = logger
+        mock_bootstrap_logger.return_value = logger
+        mock_bootstrap_tracer.return_value = MagicMock()
+        mock_filter_builder.build.return_value = None
+
+        # Setup YAML config with auto_vacuum enabled
+        yaml_config = MagicMock()
+        yaml_config.maintenance.auto_vacuum = True
+        yaml_config.maintenance.vacuum_retention_days = 14
+        yaml_config.input_filter = MagicMock()
+        mock_load_config.return_value = yaml_config
+
+        # Setup pipeline registry
+        mock_factory = MagicMock()
+        mock_runner = MagicMock()
+        mock_factory.create_runner.return_value = mock_runner
+        mock_registry.get.return_value.factory = mock_factory
+
+        # Context without CLI vacuum options (None)
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+        )
+
+        bootstrap_pipeline(ctx)
+
+        # Verify runtime config was passed with YAML values
+        call_args = mock_factory.create_runner.call_args
+        runtime = call_args.kwargs.get("runtime") or call_args[1].get("runtime")
+        assert runtime.vacuum_after_run is True
+        assert runtime.vacuum_retention_days == 14
+
+    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
+    @patch("bioetl.composition.bootstrap.load_pipeline_config")
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
+    @patch("bioetl.composition.bootstrap.bootstrap_logger")
+    @patch("bioetl.composition.bootstrap.get_settings")
+    def test_bootstrap_cli_vacuum_overrides_yaml_config(
+        self,
+        mock_get_settings: MagicMock,
+        mock_bootstrap_logger: MagicMock,
+        mock_bootstrap_tracer: MagicMock,
+        mock_start_metrics: MagicMock,
+        mock_load_config: MagicMock,
+        mock_filter_builder: MagicMock,
+        mock_registry: MagicMock,
+    ) -> None:
+        """Test that CLI vacuum options override YAML config."""
+        from bioetl.composition.bootstrap import bootstrap_pipeline
+
+        # Create settings with all required observability attributes
+        settings = MagicMock()
+        settings.metrics_port = 8000
+        settings.pipeline.heartbeat_interval = 30
+        settings.observability.metrics_enabled = False
+        settings.observability.metrics_server_enabled = False
+        settings.observability.metrics_fail_fast = False
+        settings.observability.metrics_retry_count = 3
+        settings.observability.metrics_retry_delay = 1.0
+        settings.observability.tracing_enabled = False
+        settings.observability.dq_baseline_window = 7
+        settings.observability.dq_z_score_threshold = 2.5
+        settings.observability.dq_min_baseline_samples = 3
+        settings.observability.dq_error_rate_max = 0.10
+        settings.observability.dq_quality_score_min = 0.80
+        mock_get_settings.return_value = settings
+
+        # Create logger
+        logger = MagicMock()
+        logger.bind.return_value = logger
+        mock_bootstrap_logger.return_value = logger
+        mock_bootstrap_tracer.return_value = MagicMock()
+        mock_filter_builder.build.return_value = None
+
+        # Setup YAML config with auto_vacuum enabled
+        yaml_config = MagicMock()
+        yaml_config.maintenance.auto_vacuum = True
+        yaml_config.maintenance.vacuum_retention_days = 14
+        yaml_config.input_filter = MagicMock()
+        mock_load_config.return_value = yaml_config
+
+        # Setup pipeline registry
+        mock_factory = MagicMock()
+        mock_runner = MagicMock()
+        mock_factory.create_runner.return_value = mock_runner
+        mock_registry.get.return_value.factory = mock_factory
+
+        # Context with CLI overrides (explicit False and 30 days)
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            vacuum_after_run=False,  # CLI override
+            vacuum_retention_days=30,  # CLI override
+        )
+
+        bootstrap_pipeline(ctx)
+
+        # Verify runtime config was passed with CLI values (overriding YAML)
+        call_args = mock_factory.create_runner.call_args
+        runtime = call_args.kwargs.get("runtime") or call_args[1].get("runtime")
+        assert runtime.vacuum_after_run is False
+        assert runtime.vacuum_retention_days == 30

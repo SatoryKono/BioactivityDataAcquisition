@@ -111,6 +111,19 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
     # Load validated YAML config
     yaml_config = load_pipeline_config(ctx.pipeline_name)
 
+    # Merge YAML maintenance config with CLI overrides
+    # CLI flags take precedence over YAML config
+    vacuum_after_run = (
+        ctx.vacuum_after_run
+        if ctx.vacuum_after_run is not None
+        else yaml_config.maintenance.auto_vacuum
+    )
+    vacuum_retention_days = (
+        ctx.vacuum_retention_days
+        if ctx.vacuum_retention_days is not None
+        else yaml_config.maintenance.vacuum_retention_days
+    )
+
     runtime_config = RuntimeConfig(
         run_type=ctx.run_type,
         resume=ctx.resume,
@@ -118,6 +131,8 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         query=ctx.query,
         dry_run=ctx.dry_run,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
     )
 
     # Build filter config using the dedicated builder
