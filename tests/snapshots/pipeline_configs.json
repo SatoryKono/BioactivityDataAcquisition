@@ -65,6 +65,7 @@
     },
     "gold_table": null,
     "gold_write_mode": "overwrite",
+    "on_schema_mismatch": "error",
     "partition_cols": [],
     "pipeline_name": "chembl_activity",
     "primary_keys": [
@@ -204,6 +205,7 @@
     },
     "gold_table": "pubchem_compound",
     "gold_write_mode": "overwrite",
+    "on_schema_mismatch": "error",
     "partition_cols": [],
     "pipeline_name": "pubchem_compound",
     "primary_keys": [
@@ -236,6 +238,7 @@
     },
     "gold_table": "pubmed_publications",
     "gold_write_mode": "overwrite",
+    "on_schema_mismatch": "error",
     "partition_cols": [],
     "pipeline_name": "pubmed_publications",
     "primary_keys": [
@@ -276,6 +279,7 @@
     },
     "gold_table": "uniprot_protein",
     "gold_write_mode": "overwrite",
+    "on_schema_mismatch": "error",
     "partition_cols": [],
     "pipeline_name": "uniprot_protein",
     "primary_keys": [
