@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import time
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import ApiError
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -93,30 +93,18 @@ class PubMedAdapter:
             params["api_key"] = self.api_key
         return params
 
-    @staticmethod
-    def _extract_record_from_article(article_node: ET.Element) -> dict[str, Any]:
-        """Extract record dict from a PubmedArticle XML node."""
-        pmid_node = article_node.find(".//PMID")
-        title_node = article_node.find(".//ArticleTitle")
-        return {
-            "pmid": pmid_node.text if pmid_node is not None else None,
-            "article_title": (
-                title_node.text if title_node is not None else "No title found"
-            ),
-            "_raw_xml": ET.tostring(article_node, encoding="unicode"),
-        }
-
-    async def _fetch_batch(self, id_batch: list[str]) -> ET.Element | None:
-        """Fetch a batch of articles and return parsed XML root."""
+    async def _fetch_batch(self, id_batch: list[str]) -> list[dict[str, Any]]:
+        """Fetch a batch of articles and return parsed records."""
         params = self._build_fetch_params(id_batch)
         try:
             response = await self.http_client.get(
                 f"{ENTREZ_API_BASE}efetch.fcgi", params=params
             )
-            return ET.fromstring(response.text)
-        except ET.ParseError as e:
-            self.logger.error("XML parse error", error=str(e))
-            return None
+            root = PubMedXmlProcessor.parse_response(response.text)
+            if root is None:
+                self.logger.error("XML parse error in batch fetch")
+                return []
+            return PubMedXmlProcessor.extract_all_records(root)
         except Exception as e:
             self.logger.error("Batch fetch failed", error=str(e))
             raise ApiError(f"PubMed fetch failed: {e}") from e
@@ -127,12 +115,9 @@ class PubMedAdapter:
         """Yield article records from a list of PMIDs."""
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):
-            root = await self._fetch_batch(pmids[i : i + self.batch_size])
-            if root is None:
-                continue
-
-            for article_node in root.findall(".//PubmedArticle"):
-                yield self._extract_record_from_article(article_node)
+            records = await self._fetch_batch(pmids[i : i + self.batch_size])
+            for record in records:
+                yield record
                 total_fetched += 1
                 if limit and total_fetched >= limit:
                     return
@@ -348,5 +333,3 @@ def _create_pubmed_adapter(
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),
     )
-
-
