@@ -23,6 +23,7 @@ from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
+from bioetl.application.core.runner_services import RunnerServices
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -296,36 +297,38 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
+        lock_manager = MagicMock()
 
-            async def lm_aenter(self):
-                call_recorder.record("lock_manager.__aenter__")
-                return lock_manager
+        async def lm_aenter(self):
+            call_recorder.record("lock_manager.__aenter__")
+            return lock_manager
 
-            async def lm_aexit(self, *args):
-                call_recorder.record("lock_manager.__aexit__")
+        async def lm_aexit(self, *args):
+            call_recorder.record("lock_manager.__aexit__")
 
-            lock_manager.__aenter__ = lm_aenter
-            lock_manager.__aexit__ = lm_aexit
-            mock_lm.create.return_value = lock_manager
+        lock_manager.__aenter__ = lm_aenter
+        lock_manager.__aexit__ = lm_aexit
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        await runner.run()
 
         # Verify invariants - order matters!
         call_recorder.assert_order(
@@ -377,28 +380,30 @@ class TestPipelineRunnerLifecycle:
         orchestrator_no_clear = MagicMock(spec=LifecycleOrchestrator)
         orchestrator_no_clear.clear_for_run = AsyncMock(return_value=None)
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
-            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
-            lock_manager.__aexit__ = AsyncMock()
-            mock_lm.create.return_value = lock_manager
+        lock_manager = MagicMock()
+        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+        lock_manager.__aexit__ = AsyncMock()
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=orchestrator_no_clear,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=orchestrator_no_clear,
+        )
 
-            await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        await runner.run()
 
         # Verify clear was NOT called
         calls = list(call_recorder.calls)
@@ -442,37 +447,39 @@ class TestPipelineRunnerLifecycle:
         failing_executor.execute = AsyncMock(side_effect=RuntimeError("Test error"))
         failing_executor.records_fetched = 0
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
+        lock_manager = MagicMock()
 
-            async def lm_aenter(self):
-                call_recorder.record("lock_manager.__aenter__")
-                return lock_manager
+        async def lm_aenter(self):
+            call_recorder.record("lock_manager.__aenter__")
+            return lock_manager
 
-            async def lm_aexit(self, *args):
-                call_recorder.record("lock_manager.__aexit__")
+        async def lm_aexit(self, *args):
+            call_recorder.record("lock_manager.__aexit__")
 
-            lock_manager.__aenter__ = lm_aenter
-            lock_manager.__aexit__ = lm_aexit
-            mock_lm.create.return_value = lock_manager
+        lock_manager.__aenter__ = lm_aenter
+        lock_manager.__aexit__ = lm_aexit
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=failing_executor,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            with pytest.raises(RuntimeError, match="Test error"):
-                await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=failing_executor,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        with pytest.raises(RuntimeError, match="Test error"):
+            await runner.run()
 
         # Verify lock was released despite error
         calls = list(call_recorder.calls)
@@ -518,28 +525,30 @@ class TestPipelineRunnerLifecycle:
 
         mock_orchestrator.clear_for_run = AsyncMock(side_effect=clear_for_run)
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
-            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
-            lock_manager.__aexit__ = AsyncMock()
-            mock_lm.create.return_value = lock_manager
+        lock_manager = MagicMock()
+        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+        lock_manager.__aexit__ = AsyncMock()
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        await runner.run()
 
         # Verify clear WAS called for backfill
         calls = list(call_recorder.calls)
@@ -586,40 +595,42 @@ class TestPipelineRunnerLifecycle:
             side_effect=InfrastructureError("health check failed")
         )
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
+        lock_manager = MagicMock()
 
-            async def lm_aenter(self):
-                call_recorder.record("lock_manager.__aenter__")
-                return lock_manager
+        async def lm_aenter(self):
+            call_recorder.record("lock_manager.__aenter__")
+            return lock_manager
 
-            async def lm_aexit(self, *args):
-                call_recorder.record("lock_manager.__aexit__")
+        async def lm_aexit(self, *args):
+            call_recorder.record("lock_manager.__aexit__")
 
-            lock_manager.__aenter__ = lm_aenter
-            lock_manager.__aexit__ = lm_aexit
-            mock_lm.create.return_value = lock_manager
+        lock_manager.__aenter__ = lm_aenter
+        lock_manager.__aexit__ = lm_aexit
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            with pytest.raises(InfrastructureError) as exc_info:
-                await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
 
-            # Verify the error message indicates health check failure
-            assert "health check failed" in str(exc_info.value).lower()
+        with pytest.raises(InfrastructureError) as exc_info:
+            await runner.run()
+
+        # Verify the error message indicates health check failure
+        assert "health check failed" in str(exc_info.value).lower()
 
         # Verify executor was NEVER called
         calls = list(call_recorder.calls)
@@ -753,28 +764,30 @@ class TestPipelineRunnerLifecycle:
         checkpoint_manager.load_checkpoint = load_checkpoint
         checkpoint_manager.delete_checkpoint = delete_checkpoint
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
-            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
-            lock_manager.__aexit__ = AsyncMock()
-            mock_lm.create.return_value = lock_manager
+        lock_manager = MagicMock()
+        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+        lock_manager.__aexit__ = AsyncMock()
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=checkpoint_manager,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=checkpoint_manager,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        await runner.run()
 
         # Verify checkpoint was loaded
         assert checkpoint_loaded, "Checkpoint must be loaded for resume"
@@ -872,28 +885,30 @@ class TestPipelineRunnerLifecycle:
 
         mock_postrun_service.run_dq_checks = AsyncMock(side_effect=run_dq_checks)
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
-            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
-            lock_manager.__aexit__ = AsyncMock()
-            mock_lm.create.return_value = lock_manager
+        lock_manager = MagicMock()
+        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+        lock_manager.__aexit__ = AsyncMock()
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=services_with_dq,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=services_with_dq,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        await runner.run()
 
         # Verify DQ check was called
         dq_monitor.check_quality.assert_called_once()
@@ -943,28 +958,30 @@ class TestPipelineRunnerLifecycle:
 
         mock_postrun_service.run_vacuum_if_enabled = AsyncMock(side_effect=run_vacuum_if_enabled)
 
-        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
-            lock_manager = MagicMock()
-            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
-            lock_manager.__aexit__ = AsyncMock()
-            mock_lm.create.return_value = lock_manager
+        lock_manager = MagicMock()
+        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+        lock_manager.__aexit__ = AsyncMock()
 
-            runner = PipelineRunner(
-                config=config,
-                runtime=runtime,
-                services=mock_services_with_recorder,
-                context=context,
-                executor=mock_executor_with_recorder,
-                checkpoint_manager=mock_checkpoint_manager_with_recorder,
-                shutdown_signal=MagicMock(),
-                logger=mock_logger,
-                lifecycle_orchestrator=mock_orchestrator,
-                preflight_service=mock_preflight_service,
-                postrun_service=mock_postrun_service,
-                lock_manager=lock_manager,
-            )
+        runner_services = RunnerServices(
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+        )
 
-            await runner.run()
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            runner_services=runner_services,
+        )
+
+        await runner.run()
 
         # Verify vacuum was called
         assert "postrun.vacuum" in list(call_recorder.calls)

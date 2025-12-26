@@ -13,6 +13,7 @@ Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
@@ -26,6 +27,8 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
 class PubChemAdapter(BaseSyncAdapter):
@@ -34,14 +37,21 @@ class PubChemAdapter(BaseSyncAdapter):
     Provides access to chemical compound data from PubChem database.
     Uses pubchempy library which is synchronous, so runs in ThreadPoolExecutor.
 
+    All dependencies are injected via constructor (Composition Root pattern).
+
     Example:
-        >>> adapter = PubChemAdapter()
-        >>> # Search compounds by name
+        >>> # Dependencies created in Composition Root
+        >>> rate_limiter = TokenBucket(rate=5.0, capacity=10)
+        >>> circuit_breaker = CircuitBreaker(provider="pubchem")
+        >>> thread_pool = ThreadPoolExecutor(max_workers=4)
+        >>> adapter = PubChemAdapter(
+        ...     logger=logger,
+        ...     rate_limiter=rate_limiter,
+        ...     circuit_breaker=circuit_breaker,
+        ...     thread_pool=thread_pool,
+        ... )
         >>> async for compound in adapter.fetch("compound", query="aspirin", limit=10):
         ...     print(f"Compound: {compound['cid']}")
-        >>> # Check health
-        >>> status = await adapter.health_check()
-        >>> print(f"PubChem is {status}")
 
     """
 
@@ -50,29 +60,28 @@ class PubChemAdapter(BaseSyncAdapter):
     def __init__(
         self,
         logger: LoggerPort,
-        rate: float = 5.0,  # 5 req/sec per RULES.md
-        circuit_breaker_threshold: int = 5,
-        circuit_breaker_timeout: int = 300,
-        max_workers: int = 4,
+        rate_limiter: TokenBucket,
+        circuit_breaker: CircuitBreaker,
+        thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
     ) -> None:
         """Initialize PubChem client.
 
+        All infrastructure components are injected from Composition Root.
+
         Args:
             logger: LoggerPort instance for structured logging.
-            rate: Requests per second (default: 5.0 per RULES.md).
-            circuit_breaker_threshold: Failures before opening circuit.
-            circuit_breaker_timeout: Recovery timeout in seconds.
-            max_workers: Thread pool size.
+            rate_limiter: Pre-configured token bucket rate limiter.
+            circuit_breaker: Pre-configured circuit breaker.
+            thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
 
         """
         super().__init__(
-            rate=rate,
             logger=logger,
-            circuit_breaker_threshold=circuit_breaker_threshold,
-            circuit_breaker_timeout=circuit_breaker_timeout,
-            max_workers=max_workers,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
             strict_error_handling=strict_error_handling,
         )
 
@@ -259,7 +268,6 @@ class PubChemAdapter(BaseSyncAdapter):
             Exception: On request failure (base class handles via _fallback_health_status).
 
         Example:
-            >>> adapter = PubChemAdapter()
             >>> status = await adapter.health_check()
             >>> print(f"PubChem is {status.value}")
 
