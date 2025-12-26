@@ -257,6 +257,8 @@ class TestClassSize:
         "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "PreflightService": 320,  # 307 lines - preflight validation service
+        # Test classes exemptions
+        "TestCliCommands": 350, # Test class with many test cases
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
