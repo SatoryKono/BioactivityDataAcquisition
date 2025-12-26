@@ -75,13 +75,39 @@ class TestDeltaWriterValidation:
     """Tests for DeltaWriter validation."""
 
     @pytest.mark.asyncio
+    async def test_write_silver_invalid_mode_raises(self, noop_logger, valid_records):
+        """Test write_silver raises ValueError for invalid mode."""
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        import pyarrow as pa
+
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
+        schema = pa.schema([
+            pa.field("entity_id", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
+
+        with pytest.raises(ValueError, match="Invalid Silver write mode 'invalid'"):
+            await writer.write_silver(
+                table_name="test.table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="invalid",
+            )
+
+    @pytest.mark.asyncio
     async def test_write_silver_empty_records_raises(self, noop_logger):
         """Test write_silver raises ValueError for empty records."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
-
         import pyarrow as pa
+
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
@@ -139,6 +165,53 @@ class TestDeltaWriterValidation:
                 primary_keys=["entity_id"],
                 schema=dummy_schema,
             )
+
+
+@pytest.mark.unit
+class TestDeltaWriterWriteModeEnum:
+    """Tests for SilverWriteMode enum."""
+
+    def test_silver_write_mode_values(self):
+        """Test all valid SilverWriteMode values."""
+        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+
+        assert SilverWriteMode.MERGE.value == "merge"
+        assert SilverWriteMode.APPEND.value == "append"
+        assert SilverWriteMode.DELETE.value == "delete"
+
+    def test_silver_write_mode_from_string(self):
+        """Test creating SilverWriteMode from string."""
+        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+
+        assert SilverWriteMode("merge") == SilverWriteMode.MERGE
+        assert SilverWriteMode("append") == SilverWriteMode.APPEND
+        assert SilverWriteMode("delete") == SilverWriteMode.DELETE
+
+    def test_silver_write_mode_invalid_raises(self):
+        """Test invalid mode string raises ValueError."""
+        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+
+        with pytest.raises(ValueError):
+            SilverWriteMode("invalid")
+
+        with pytest.raises(ValueError):
+            SilverWriteMode("MERGE")  # Case sensitive
+
+    def test_validate_write_mode_method(self, noop_logger):
+        """Test _validate_write_mode returns correct enum."""
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+
+        assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
+        assert writer._validate_write_mode("append") == SilverWriteMode.APPEND
+        assert writer._validate_write_mode("delete") == SilverWriteMode.DELETE
+
+        with pytest.raises(ValueError, match="Invalid Silver write mode 'invalid'"):
+            writer._validate_write_mode("invalid")
+
+        with pytest.raises(ValueError, match="Allowed"):
+            writer._validate_write_mode("overwrite")  # Valid for Gold, not Silver
 
 
 @pytest.mark.unit
