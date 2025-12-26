@@ -1,0 +1,231 @@
+"""Unit tests for MedallionPolicy write mode validation.
+
+Tests all layer/mode combinations per RULES.md §3 (Medallion Architecture):
+- Bronze: APPEND only
+- Silver: APPEND or MERGE
+- Gold: MERGE or OVERWRITE
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from bioetl.application.core.medallion_policy import Layer, MedallionPolicy, WriteMode
+from bioetl.domain.exceptions import PolicyViolationError
+
+
+@pytest.mark.unit
+class TestLayer:
+    """Tests for Layer enum."""
+
+    def test_bronze_value(self):
+        """Test Bronze layer value."""
+        assert Layer.BRONZE.value == "bronze"
+
+    def test_silver_value(self):
+        """Test Silver layer value."""
+        assert Layer.SILVER.value == "silver"
+
+    def test_gold_value(self):
+        """Test Gold layer value."""
+        assert Layer.GOLD.value == "gold"
+
+    def test_all_layers_defined(self):
+        """Test that all expected layers are defined."""
+        layers = {layer.value for layer in Layer}
+        assert layers == {"bronze", "silver", "gold"}
+
+
+@pytest.mark.unit
+class TestWriteMode:
+    """Tests for WriteMode enum."""
+
+    def test_append_value(self):
+        """Test APPEND mode value."""
+        assert WriteMode.APPEND.value == "append"
+
+    def test_merge_value(self):
+        """Test MERGE mode value."""
+        assert WriteMode.MERGE.value == "merge"
+
+    def test_overwrite_value(self):
+        """Test OVERWRITE mode value."""
+        assert WriteMode.OVERWRITE.value == "overwrite"
+
+    def test_all_modes_defined(self):
+        """Test that all expected modes are defined."""
+        modes = {mode.value for mode in WriteMode}
+        assert modes == {"append", "merge", "overwrite"}
+
+
+@pytest.mark.unit
+class TestMedallionPolicyAllowedModes:
+    """Tests for MedallionPolicy.ALLOWED_MODES configuration."""
+
+    def test_bronze_allowed_modes(self):
+        """Test Bronze layer allows only APPEND."""
+        assert MedallionPolicy.ALLOWED_MODES[Layer.BRONZE] == {WriteMode.APPEND}
+
+    def test_silver_allowed_modes(self):
+        """Test Silver layer allows APPEND and MERGE."""
+        assert MedallionPolicy.ALLOWED_MODES[Layer.SILVER] == {
+            WriteMode.APPEND,
+            WriteMode.MERGE,
+        }
+
+    def test_gold_allowed_modes(self):
+        """Test Gold layer allows MERGE and OVERWRITE."""
+        assert MedallionPolicy.ALLOWED_MODES[Layer.GOLD] == {
+            WriteMode.MERGE,
+            WriteMode.OVERWRITE,
+        }
+
+    def test_all_layers_have_policies(self):
+        """Test that all layers have defined policies."""
+        defined_layers = set(MedallionPolicy.ALLOWED_MODES.keys())
+        all_layers = set(Layer)
+        assert defined_layers == all_layers
+
+
+@pytest.mark.unit
+class TestMedallionPolicyValidateBronze:
+    """Tests for Bronze layer validation."""
+
+    def test_bronze_append_allowed(self):
+        """Test Bronze APPEND is allowed."""
+        policy = MedallionPolicy()
+        # Should not raise
+        policy.validate(Layer.BRONZE, WriteMode.APPEND)
+
+    def test_bronze_merge_rejected(self):
+        """Test Bronze MERGE is rejected."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.BRONZE, WriteMode.MERGE)
+        assert "bronze does not allow merge" in str(exc_info.value)
+        assert "append" in str(exc_info.value)
+
+    def test_bronze_overwrite_rejected(self):
+        """Test Bronze OVERWRITE is rejected (critical criterion)."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
+        assert "bronze does not allow overwrite" in str(exc_info.value)
+        assert "append" in str(exc_info.value)
+
+
+@pytest.mark.unit
+class TestMedallionPolicyValidateSilver:
+    """Tests for Silver layer validation."""
+
+    def test_silver_append_allowed(self):
+        """Test Silver APPEND is allowed."""
+        policy = MedallionPolicy()
+        # Should not raise
+        policy.validate(Layer.SILVER, WriteMode.APPEND)
+
+    def test_silver_merge_allowed(self):
+        """Test Silver MERGE is allowed."""
+        policy = MedallionPolicy()
+        # Should not raise
+        policy.validate(Layer.SILVER, WriteMode.MERGE)
+
+    def test_silver_overwrite_rejected(self):
+        """Test Silver OVERWRITE is rejected."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.SILVER, WriteMode.OVERWRITE)
+        assert "silver does not allow overwrite" in str(exc_info.value)
+
+
+@pytest.mark.unit
+class TestMedallionPolicyValidateGold:
+    """Tests for Gold layer validation."""
+
+    def test_gold_merge_allowed(self):
+        """Test Gold MERGE is allowed."""
+        policy = MedallionPolicy()
+        # Should not raise
+        policy.validate(Layer.GOLD, WriteMode.MERGE)
+
+    def test_gold_overwrite_allowed(self):
+        """Test Gold OVERWRITE is allowed."""
+        policy = MedallionPolicy()
+        # Should not raise
+        policy.validate(Layer.GOLD, WriteMode.OVERWRITE)
+
+    def test_gold_append_rejected(self):
+        """Test Gold APPEND is rejected."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.GOLD, WriteMode.APPEND)
+        assert "gold does not allow append" in str(exc_info.value)
+
+
+@pytest.mark.unit
+class TestMedallionPolicyValidateAllCombinations:
+    """Parametrized tests for all layer/mode combinations."""
+
+    @pytest.mark.parametrize(
+        ("layer", "mode"),
+        [
+            (Layer.BRONZE, WriteMode.APPEND),
+            (Layer.SILVER, WriteMode.APPEND),
+            (Layer.SILVER, WriteMode.MERGE),
+            (Layer.GOLD, WriteMode.MERGE),
+            (Layer.GOLD, WriteMode.OVERWRITE),
+        ],
+    )
+    def test_allowed_combinations(self, layer: Layer, mode: WriteMode):
+        """Test all allowed layer/mode combinations."""
+        policy = MedallionPolicy()
+        # Should not raise
+        policy.validate(layer, mode)
+
+    @pytest.mark.parametrize(
+        ("layer", "mode"),
+        [
+            (Layer.BRONZE, WriteMode.MERGE),
+            (Layer.BRONZE, WriteMode.OVERWRITE),
+            (Layer.SILVER, WriteMode.OVERWRITE),
+            (Layer.GOLD, WriteMode.APPEND),
+        ],
+    )
+    def test_disallowed_combinations(self, layer: Layer, mode: WriteMode):
+        """Test all disallowed layer/mode combinations."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError):
+            policy.validate(layer, mode)
+
+
+@pytest.mark.unit
+class TestPolicyViolationErrorMessage:
+    """Tests for error message formatting."""
+
+    def test_error_message_contains_layer_name(self):
+        """Test error message contains layer name."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
+        assert "bronze" in str(exc_info.value)
+
+    def test_error_message_contains_mode_name(self):
+        """Test error message contains mode name."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
+        assert "overwrite" in str(exc_info.value)
+
+    def test_error_message_contains_allowed_modes(self):
+        """Test error message contains allowed modes."""
+        policy = MedallionPolicy()
+        with pytest.raises(PolicyViolationError) as exc_info:
+            policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)
+        # Bronze only allows append
+        assert "append" in str(exc_info.value)
+
+    def test_error_is_critical_error(self):
+        """Test that PolicyViolationError is a CriticalError."""
+        from bioetl.domain.exceptions.base import CriticalError
+
+        assert issubclass(PolicyViolationError, CriticalError)
