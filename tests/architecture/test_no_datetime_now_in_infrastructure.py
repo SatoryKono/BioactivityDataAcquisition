@@ -15,21 +15,40 @@ import pytest
 # Path relative to project root
 INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 
-# Files allowed to use datetime.now() - with justification
+# Files allowed to use datetime.now() - with justification.
+# Full documentation in ADR-014: docs/02-architecture/decisions/ADR-014-deterministic-writes.md
+#
+# Criteria for exceptions:
+# 1. Timestamp does not affect determinism of batch operations
+# 2. Timestamp is required for real-time monitoring/operations
+# 3. Timestamp is not used in Bronze/Silver/Gold data
 ALLOWED_FILES: set[str] = {
-    # Operations use datetime.now() for calculating retention periods (cleanup)
+    # infrastructure/quarantine/operations.py
+    # Uses datetime.now(UTC) for calculating retention cutoff during cleanup.
+    # Example: cutoff_date = datetime.now(UTC) - timedelta(days=max_age_days)
     "operations.py",
-    # Gold writer uses datetime.now() for SCD2 valid_from/valid_to columns
-    # TODO (#arch-review): Consider passing timestamp for SCD2 as well
+    # infrastructure/storage/gold_writer.py
+    # Uses datetime.now() for SCD2 valid_from/valid_to columns during merge operations.
+    # TODO (#arch-review): Consider passing timestamp for SCD2 as parameter
     "gold_writer.py",
-    # Lineage tracking needs real-time timestamps for provenance
+    # infrastructure/observability/lineage.py
+    # Uses datetime.now(UTC) for provenance tracking in record_run_start(),
+    # record_run_end(), and for filtering lineage records by date range.
     "lineage.py",
-    # Anomaly detectors need real-time timestamps for monitoring
+    # infrastructure/observability/anomaly/detector.py
+    # Uses datetime.now(UTC) for timestamp in AnomalyResult when critical anomalies detected.
     "detector.py",
+    # infrastructure/observability/anomaly/detectors/iqr.py
+    # IQR-based anomaly detector: timestamp in detection result for monitoring.
     "iqr.py",
+    # infrastructure/observability/anomaly/detectors/mad.py
+    # MAD-based anomaly detector: timestamp in detection result for monitoring.
     "mad.py",
+    # infrastructure/observability/anomaly/detectors/zscore.py
+    # Z-score anomaly detector: timestamp in detection result for monitoring.
     "zscore.py",
-    # ChEMBL client uses timestamps for caching logic
+    # infrastructure/adapters/**/client.py
+    # Reserved for TTL-based HTTP response caching logic.
     "client.py",
 }
 
