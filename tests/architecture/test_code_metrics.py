@@ -242,6 +242,7 @@ class TestClassSize:
         "BasePipeline": 400,
         "PipelineRunner": 450,  # 441 lines - includes vacuum + health check methods
         "UnifiedHTTPClient": 350,
+        "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 500,
         "BaseTransformer": 410,  # 407 lines - complex base with hooks
