@@ -115,40 +115,5 @@ class PrometheusMetrics(MetricsPort):
         self._closed = True
 
 
-class NoOpMetrics(MetricsPort):
-    """Null object pattern for metrics (used when Prometheus is disabled)."""
-
-    def __init__(self) -> None:
-        """Initialize no-op metrics."""
-        self._closed = False
-
-    def observe_histogram(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op histogram observation."""
-        pass
-
-    def increment_counter(
-        self,
-        name: str,
-        value: int,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op counter increment."""
-        pass
-
-    def set_gauge(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op gauge set."""
-        pass
-
-    def close(self) -> None:
-        """No-op close. Idempotent."""
-        self._closed = True
+# NOTE: NoOpMetrics has been removed from this module to eliminate duplication.
+# Use bioetl.infrastructure.observability.noop_metrics.NoOpMetrics instead.

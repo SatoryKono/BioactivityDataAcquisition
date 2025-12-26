@@ -7,7 +7,7 @@ Unified Observability Contract:
 - bootstrap_observability() always returns valid implementations
 - Logger: StructlogLogger (always valid)
 - Metrics: PrometheusMetrics or NoOpMetrics (never None)
-- Tracer: OpenTelemetryTracer or NoOpTracer (never None)
+- Tracer: OpenTelemetryTracer or NoOpTracing (never None)
 - DQMonitor: DataQualityMonitor or None (optional)
 """
 
@@ -21,9 +21,10 @@ from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.server import start_metrics_server
-from bioetl.infrastructure.observability.tracing import NoOpTracer, OpenTelemetryTracer
+from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -52,7 +53,19 @@ def bootstrap_logger(
 
 
 def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
-    """Bootstrap distributed tracing."""
+    """Bootstrap distributed tracing.
+
+    Unified Observability Contract: Always returns a valid TracingPort.
+    When tracing is disabled or OpenTelemetry is not installed,
+    returns NoOpTracing (silent fallback).
+
+    Args:
+        service_name: Name of the service for tracing context.
+
+    Returns:
+        TracingPort instance (OpenTelemetryTracer or NoOpTracing).
+        Never returns None - uses NoOpTracing as fallback.
+    """
     from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
@@ -62,7 +75,7 @@ def bootstrap_tracer(service_name: str = "bioetl") -> TracingPort:
         except ImportError:
             # OpenTelemetry not installed, fall back to no-op
             pass
-    return NoOpTracer()
+    return NoOpTracing()
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
