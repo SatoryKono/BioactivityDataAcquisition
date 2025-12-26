@@ -61,36 +61,13 @@ class _NoOpOtelTracer:
     Returns _NoOpSpan instances that implement the span interface.
     """
 
-    def start_as_current_span(
-        self,
-        name: str,
-        context: Any | None = None,
-        kind: Any | None = None,
-        attributes: dict[str, Any] | None = None,
-        links: Any | None = None,
-        start_time: Any | None = None,
-        record_exception: bool = True,
-        set_status_on_exception: bool = True,
-        end_on_exit: bool = True,
-        **kwargs: Any,
-    ) -> _NoOpSpan:
+    def start_as_current_span(self, *args: Any, **kwargs: Any) -> _NoOpSpan:
         """Start a new span (no-op).
 
-        Args:
-            name: Span name.
-            context: Context (ignored).
-            kind: Span kind (ignored).
-            attributes: Span attributes (ignored).
-            links: Span links (ignored).
-            start_time: Start time (ignored).
-            record_exception: Whether to record exception (ignored).
-            set_status_on_exception: Whether to set status on exception (ignored).
-            end_on_exit: Whether to end span on exit (ignored).
-            **kwargs: Additional arguments - ignored.
+        Accepts any arguments to be compatible with OpenTelemetry tracer.
 
         Returns:
             A no-op span context manager.
-
         """
         return _NoOpSpan()
 
