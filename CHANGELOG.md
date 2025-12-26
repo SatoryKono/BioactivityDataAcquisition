@@ -7,7 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Transformer DI Required**: Пайплайны теперь требуют инъекцию трансформеров через DI
+  - `BasePipeline.__init__` принимает опциональный `transformer: BaseTransformer`
+  - Если трансформер не передан, `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
+  - `GenericPipelineFactory` создаёт и инжектирует трансформеры автоматически
+  - Обновлены тесты для передачи трансформеров (46 файлов)
+
+- **DataSourceRegistry Refactored**: Делегирует создание data source в `ProviderRegistry`
+  - `DataSourceRegistry.get(provider)` возвращает замыкание, делегирующее в `ProviderRegistry`
+  - `register()` помечен как deprecated — новые регистрации через `ProviderRegistry`
+  - `list_providers()` возвращает провайдеров из `ProviderRegistry`
+
 ### Removed
+
+- **Data Source Creator Functions**: Удалены standalone функции создания data source
+  - `create_chembl_data_source()` — использовать `DataSourceRegistry.get("chembl")`
+  - `create_pubchem_data_source()` — использовать `DataSourceRegistry.get("pubchem")`
+  - `create_uniprot_data_source()` — использовать `DataSourceRegistry.get("uniprot")`
+  - `create_pubmed_data_source()` — использовать `DataSourceRegistry.get("pubmed")`
 
 - **Legacy Cleanup Path**: Удалён `PipelineRunner._clear_exports_legacy()` (~60 строк кода)
 - **Cleanup Service from Runner**: Удалён `PipelineRunner._clear_via_cleanup_service()` и параметр `cleanup_service`
