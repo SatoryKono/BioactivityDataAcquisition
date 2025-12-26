@@ -359,6 +359,7 @@ class TestUniProtProteinPipelineEdgeCases:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(
@@ -402,6 +403,7 @@ class TestUniProtProteinPipelineEdgeCases:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
         context = PipelineContext(
