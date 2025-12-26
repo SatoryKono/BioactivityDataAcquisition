@@ -66,6 +66,7 @@ class StoragePort(Protocol):
         schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
     ) -> None:
         """Write transformed records to the Silver layer.
 
@@ -76,6 +77,13 @@ class StoragePort(Protocol):
             schema: The PyArrow schema definition for the records (ArrowSchema alias).
             mode: The write mode (e.g., 'merge', 'append', 'delete').
             partition_cols: Optional list of columns to partition by.
+            on_schema_mismatch: How to handle schema drift:
+                - 'error': Raise SchemaEvolutionError (default)
+                - 'evolve': Allow schema evolution (add new columns)
+                - 'ignore': Proceed without changes (filter to existing schema)
+
+        Raises:
+            SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
         """
         ...
 
