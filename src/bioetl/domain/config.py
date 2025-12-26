@@ -178,6 +178,11 @@ class RuntimeConfig:
     vacuum_after_run: bool = False
     vacuum_retention_days: int = 7
 
+    # Medallion invariants validation (REQ-CONF-001)
+    # When True, Medallion config violations fail the pipeline
+    # When False, violations are logged as warnings
+    strict_validation: bool = False
+
     def __post_init__(self) -> None:
         """Validate runtime config."""
         if self.limit is not None and self.limit <= 0:

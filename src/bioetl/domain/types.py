@@ -267,6 +267,25 @@ class ValidationResult:
 
 
 @dataclass(frozen=True, slots=True)
+class ConfigValidationError:
+    """Single configuration validation error.
+
+    Used by PreflightService to report Medallion invariant violations.
+
+    Attributes:
+        field: Configuration field path that failed validation.
+        expected: Expected value or constraint description.
+        actual: Actual value found in configuration.
+        rule: Reference to RULES.md section defining this constraint.
+    """
+
+    field: str
+    expected: str
+    actual: str
+    rule: str
+
+
+@dataclass(frozen=True, slots=True)
 class ComponentHealthResult:
     """Result of a single component health check.
 

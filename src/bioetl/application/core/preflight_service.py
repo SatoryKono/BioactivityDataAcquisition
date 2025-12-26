@@ -10,11 +10,17 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.health_aggregator import HealthAggregator
-from bioetl.domain.types import HealthReport, HealthStatus
+from bioetl.domain.medallion import MedallionPolicy
+from bioetl.domain.types import (
+    ConfigValidationError,
+    HealthReport,
+    HealthStatus,
+    RunType,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.domain.config import PipelineConfig
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
@@ -145,6 +151,187 @@ class PreflightService:
             duration,
             {"pipeline": pipeline},
         )
+
+    def validate_medallion_config(
+        self,
+        runtime: RuntimeConfig,
+        bronze_path: str,
+        silver_path: str,
+        gold_path: str,
+        silver_format: str | None = None,
+        gold_format: str | None = None,
+    ) -> list[ConfigValidationError]:
+        """Validate Medallion architecture invariants before pipeline execution.
+
+        Проверяет соблюдение архитектурных инвариантов Medallion:
+        - Silver format MUST be "delta" (RULES §4.1)
+        - Gold format MUST be "delta" or "parquet" (RULES §4.1)
+        - Bronze path != Silver path != Gold path (путь уникальности)
+        - MedallionPolicy согласована с RunType
+
+        Args:
+            runtime: Runtime configuration with run type.
+            bronze_path: Base path for Bronze layer storage.
+            silver_path: Base path for Silver layer storage.
+            gold_path: Base path for Gold layer storage.
+            silver_format: Format of Silver layer (e.g., "delta", "parquet").
+            gold_format: Format of Gold layer (e.g., "delta", "parquet").
+
+        Returns:
+            List of ConfigValidationError objects. Empty list means validation passed.
+
+        Example:
+            >>> errors = service.validate_medallion_config(
+            ...     runtime, "/bronze", "/silver", "/gold",
+            ...     silver_format="delta", gold_format="delta"
+            ... )
+            >>> if errors and runtime.strict_validation:
+            ...     raise ValueError(f"Medallion invariant violations: {errors}")
+        """
+        errors: list[ConfigValidationError] = []
+
+        # Validate Silver format
+        if silver_format is not None and silver_format != "delta":
+            errors.append(
+                ConfigValidationError(
+                    field="sink.silver.format",
+                    expected="delta",
+                    actual=silver_format,
+                    rule="RULES §4.1: Silver MUST use Delta Lake",
+                )
+            )
+
+        # Validate Gold format
+        if gold_format is not None and gold_format not in ("delta", "parquet"):
+            errors.append(
+                ConfigValidationError(
+                    field="sink.gold.format",
+                    expected="delta or parquet",
+                    actual=gold_format,
+                    rule="RULES §4.1: Gold MUST use Delta Lake or Parquet",
+                )
+            )
+
+        # Validate path uniqueness
+        paths = {bronze_path, silver_path, gold_path}
+        if len(paths) < 3:
+            # Some paths are duplicated
+            if bronze_path == silver_path:
+                errors.append(
+                    ConfigValidationError(
+                        field="storage.paths",
+                        expected="unique paths for each layer",
+                        actual=f"bronze_path == silver_path ({bronze_path})",
+                        rule="Medallion Architecture: layers MUST have distinct paths",
+                    )
+                )
+            if silver_path == gold_path:
+                errors.append(
+                    ConfigValidationError(
+                        field="storage.paths",
+                        expected="unique paths for each layer",
+                        actual=f"silver_path == gold_path ({silver_path})",
+                        rule="Medallion Architecture: layers MUST have distinct paths",
+                    )
+                )
+            if bronze_path == gold_path:
+                errors.append(
+                    ConfigValidationError(
+                        field="storage.paths",
+                        expected="unique paths for each layer",
+                        actual=f"bronze_path == gold_path ({bronze_path})",
+                        rule="Medallion Architecture: layers MUST have distinct paths",
+                    )
+                )
+
+        # Validate MedallionPolicy consistency with RunType
+        policy = MedallionPolicy.for_run_type(runtime.run_type)
+        errors.extend(
+            self._validate_medallion_policy_consistency(runtime.run_type, policy)
+        )
+
+        # Log validation results
+        if errors:
+            self._logger.warning(
+                "Medallion config validation found issues",
+                extra={
+                    "error_count": len(errors),
+                    "errors": [
+                        {"field": e.field, "rule": e.rule} for e in errors
+                    ],
+                    "strict_mode": runtime.strict_validation,
+                },
+            )
+        else:
+            self._logger.debug(
+                "Medallion config validation passed",
+                extra={"run_type": runtime.run_type.value},
+            )
+
+        return errors
+
+    def _validate_medallion_policy_consistency(
+        self,
+        run_type: RunType,
+        policy: MedallionPolicy,
+    ) -> list[ConfigValidationError]:
+        """Validate that MedallionPolicy is consistent with RunType.
+
+        Проверяет соответствие политики очистки типу запуска:
+        - REBUILD/BACKFILL: should_clear_silver and should_clear_gold MUST be True
+        - INCREMENTAL: should NOT clear any layers
+
+        Args:
+            run_type: The type of pipeline run.
+            policy: The MedallionPolicy derived from run_type.
+
+        Returns:
+            List of ConfigValidationError if inconsistencies found.
+        """
+        errors: list[ConfigValidationError] = []
+
+        if run_type in (RunType.REBUILD, RunType.BACKFILL):
+            # For REBUILD/BACKFILL, policy should clear both layers
+            if not policy.should_clear_silver:
+                errors.append(
+                    ConfigValidationError(
+                        field="medallion_policy.should_clear_silver",
+                        expected="True",
+                        actual="False",
+                        rule=f"RULES §2.1: {run_type.value} MUST clear Silver layer",
+                    )
+                )
+            if not policy.should_clear_gold:
+                errors.append(
+                    ConfigValidationError(
+                        field="medallion_policy.should_clear_gold",
+                        expected="True",
+                        actual="False",
+                        rule=f"RULES §2.1: {run_type.value} MUST clear Gold layer",
+                    )
+                )
+        elif run_type == RunType.INCREMENTAL:
+            # For INCREMENTAL, policy should NOT clear any layers
+            if policy.should_clear_silver:
+                errors.append(
+                    ConfigValidationError(
+                        field="medallion_policy.should_clear_silver",
+                        expected="False",
+                        actual="True",
+                        rule="RULES §2.1: INCREMENTAL MUST NOT clear Silver layer",
+                    )
+                )
+            if policy.should_clear_gold:
+                errors.append(
+                    ConfigValidationError(
+                        field="medallion_policy.should_clear_gold",
+                        expected="False",
+                        actual="True",
+                        rule="RULES §2.1: INCREMENTAL MUST NOT clear Gold layer",
+                    )
+                )
+
+        return errors
 
 
 __all__ = ["PreflightService"]
