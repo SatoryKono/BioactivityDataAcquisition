@@ -8,25 +8,33 @@ ShutdownSignal request.
 from __future__ import annotations
 
 import signal
-from typing import Any
-
-import structlog
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import ShutdownSignal
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
-def setup_shutdown_handlers(shutdown_signal: ShutdownSignal) -> None:
+
+def setup_shutdown_handlers(
+    shutdown_signal: ShutdownSignal,
+    logger: LoggerPort | None = None,
+) -> None:
     """Setup signal handlers to trigger the application's shutdown signal.
 
     Args:
         shutdown_signal: The application's shared shutdown signal instance.
+        logger: Logger port for logging signal events. If None, signals are
+            handled silently (useful for testing).
     """
-    logger = structlog.get_logger("signal_handler")
 
     def signal_handler(signum: int, _: Any) -> None:
-        logger.warning(
-            f"Received signal {signal.strsignal(signum)}, initiating graceful shutdown"
-        )
+        if logger is not None:
+            logger.warning(
+                "Received signal, initiating graceful shutdown",
+                signal_name=signal.strsignal(signum),
+                signal_num=signum,
+            )
         shutdown_signal.request()
 
     try:
@@ -34,4 +42,5 @@ def setup_shutdown_handlers(shutdown_signal: ShutdownSignal) -> None:
         signal.signal(signal.SIGINT, signal_handler)
     except ValueError:
         # This can happen if not in the main thread
-        logger.warning("Cannot set signal handlers in a non-main thread.")
+        if logger is not None:
+            logger.warning("Cannot set signal handlers in a non-main thread")

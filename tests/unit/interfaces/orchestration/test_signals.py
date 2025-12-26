@@ -77,14 +77,19 @@ class TestSetupShutdownHandlers:
     def test_logs_warning_on_value_error(self):
         """Test that a warning is logged when signal setup fails."""
         shutdown_signal = ShutdownSignal()
+        mock_logger = MagicMock()
 
         with patch.object(signal, "signal", side_effect=ValueError("Not main thread")):
-            with patch(
-                "bioetl.interfaces.orchestration.signals.structlog"
-            ) as mock_structlog:
-                mock_logger = MagicMock()
-                mock_structlog.get_logger.return_value = mock_logger
+            setup_shutdown_handlers(shutdown_signal, logger=mock_logger)
 
-                setup_shutdown_handlers(shutdown_signal)
+            mock_logger.warning.assert_called_with(
+                "Cannot set signal handlers in a non-main thread"
+            )
 
-                mock_logger.warning.assert_called()
+    def test_works_without_logger(self):
+        """Test that setup works without logger (silent mode)."""
+        shutdown_signal = ShutdownSignal()
+
+        with patch.object(signal, "signal", side_effect=ValueError("Not main thread")):
+            # Should not raise even without logger
+            setup_shutdown_handlers(shutdown_signal, logger=None)
