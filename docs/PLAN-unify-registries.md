@@ -374,18 +374,25 @@ self._create_data_source = data_source_creator or DataSourceRegistry.get(provide
 
 ## Критерии Завершения
 
-- [ ] `make lint` проходит без ошибок
-- [ ] `make test` проходит (1471+ тестов)
-- [ ] CsvFilterReader использует LoggerPort
-- [ ] DataSourceRegistry делегирует в ProviderRegistry
-- [ ] Все архитектурные тесты проходят
-- [ ] Коммит с описательным сообщением
-- [ ] Push в ветку `claude/unify-registries-zgEJN`
+- [x] `make lint` проходит без ошибок
+- [x] `make test` проходит (1471+ тестов)
+- [x] CsvFilterReader использует LoggerPort
+- [x] DataSourceRegistry делегирует в ProviderRegistry
+- [x] Все архитектурные тесты проходят
+- [x] Коммит с описательным сообщением
+- [x] Push в ветку
 
 ---
 
-## Рекомендация
+## Статус: ЗАВЕРШЕНО
 
-**Рекомендую начать с Фазы 1 (CSV Filter Reader Logger)** как менее рискового изменения. После успешного завершения можно перейти к Фазе 2.
+План полностью выполнен. Основные изменения:
 
-Фаза 2 является опциональной оптимизацией — система работает корректно и без неё. Решение о её выполнении следует принять после Фазы 1.
+1. **DataSourceRegistry** теперь является thin facade над ProviderRegistry
+2. **ProviderRegistry.create_data_source()** — основной способ создания data sources
+3. Standalone creator functions (`create_chembl_data_source`, etc.) удалены
+4. Документация обновлена в:
+   - `docs/03-guides/registry-pattern.md`
+   - `docs/03-guides/add-new-source.md`
+   - `docs/02-architecture/05-composition-layer.md`
+   - `CHANGELOG.md`
