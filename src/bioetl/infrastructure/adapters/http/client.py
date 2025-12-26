@@ -2,15 +2,20 @@
 
 Implements RULES.md Section 4.1 HTTP client requirements:
 - Async support (httpx)
-- Rate limiting (TokenBucket)
-- Circuit breaker (fault tolerance)
-- Exponential backoff with jitter
+- Rate limiting (RateLimiterPort)
+- Circuit breaker (CircuitBreakerPort)
+- Exponential backoff with jitter (RetryPolicy)
+
+SRP Compliance:
+- RateLimiterPort: Handles rate limiting (injected)
+- CircuitBreakerPort: Handles fault tolerance (injected)
+- RetryPolicy: Handles retry configuration (domain value object)
+- UnifiedHTTPClient: Coordinates HTTP communication
 """
 
 from __future__ import annotations
 
 import asyncio
-import hashlib
 from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -18,72 +23,15 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
+from bioetl.domain.resilience import RetryPolicy
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import CircuitBreakerPort, RateLimiterPort
     from bioetl.domain.types import RunID
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
-@dataclass
-class RetryConfig:
-    """Configuration for exponential backoff retry.
-
-    Args:
-        max_attempts: Maximum number of attempts (default: 3)
-        base_delay: Base delay in seconds (default: 1.0)
-        max_delay: Maximum delay in seconds (default: 60.0)
-        multiplier: Delay multiplier per attempt (default: 2.0)
-        jitter: Random jitter factor 0-1 (default: 0.1)
-        deterministic: Use hash-based jitter for reproducibility (default: False)
-        jitter_seed: Seed for deterministic jitter (default: None)
-
-    """
-
-    max_attempts: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 60.0
-    multiplier: float = 2.0
-    jitter: float = 0.1
-    deterministic: bool = True
-    jitter_seed: int | None = None
-
-    def calculate_delay(self, attempt: int, url: str = "") -> float:
-        """Calculate delay for given attempt number (0-indexed).
-
-        Args:
-            attempt: Attempt number (0-indexed)
-            url: Request URL for deterministic jitter calculation
-
-        Returns:
-            Delay in seconds
-        """
-        delay = self.base_delay * (self.multiplier**attempt)
-        delay = min(delay, self.max_delay)
-
-        jitter_range = delay * self.jitter
-        if self.deterministic:
-            # MD5-based deterministic jitter for cross-process reproducibility (ADR-014)
-            # Note: hash() is not stable across Python processes due to PYTHONHASHSEED
-            hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
-            digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
-            jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
-            # Map 0.0-1.0 to -1.0 to +1.0
-            delay += jitter_range * (jitter_factor * 2 - 1)
-        else:
-            # Non-deterministic jitter (deprecated, use deterministic=True)
-            import random
-            import warnings
-
-            warnings.warn(
-                "Non-deterministic jitter is deprecated per ADR-014. "
-                "Use deterministic=True for reproducibility.",
-                DeprecationWarning,
-                stacklevel=3,
-            )
-            delay += random.uniform(-jitter_range, jitter_range)
-
-        return max(0.0, delay)
+# Backward compatibility alias (deprecated)
+RetryConfig = RetryPolicy
 
 
 def _is_retryable_status(status_code: int) -> bool:
@@ -104,19 +52,20 @@ def _is_retryable_error(exc: Exception) -> bool:
 class UnifiedHTTPClient:
     """Async HTTP client with rate limiting and circuit breaker.
 
-    Combines httpx, TokenBucket rate limiter, and CircuitBreaker for
-    resilient HTTP communication.
+    Coordinates HTTP communication using injected resilience components
+    (SRP-compliant design).
 
     Args:
-        rate_limiter: TokenBucket for rate limiting
-        circuit_breaker: CircuitBreaker for fault tolerance
-        retry_config: RetryConfig for exponential backoff
+        rate_limiter: RateLimiterPort implementation for rate limiting
+        circuit_breaker: CircuitBreakerPort implementation for fault tolerance
+        retry_policy: RetryPolicy for exponential backoff configuration
         timeout: Request timeout in seconds (default: 30.0)
         run_id: Current run ID for correlation header
         user_agent: User-Agent string (default: "BioETL/5.0.0")
         contact_email: Optional contact email to append to User-Agent
 
     Example:
+        >>> from bioetl.infrastructure.adapters.http import TokenBucket, CircuitBreaker
         >>> bucket = TokenBucket(rate=5.0, capacity=5)
         >>> cb = CircuitBreaker(provider="chembl")
         >>> client = UnifiedHTTPClient(rate_limiter=bucket, circuit_breaker=cb)
@@ -125,9 +74,9 @@ class UnifiedHTTPClient:
 
     """
 
-    rate_limiter: TokenBucket
-    circuit_breaker: CircuitBreaker
-    retry_config: RetryConfig = field(default_factory=RetryConfig)
+    rate_limiter: RateLimiterPort
+    circuit_breaker: CircuitBreakerPort
+    retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
     timeout: float = 30.0
     run_id: RunID | None = None
     user_agent: str = "BioETL/5.0.0"
@@ -176,7 +125,7 @@ class UnifiedHTTPClient:
         response: httpx.Response | None = None,
     ) -> None:
         """Calculate and sleep for the appropriate retry delay."""
-        delay = self.retry_config.calculate_delay(attempt, url)
+        delay = self.retry_policy.calculate_delay(attempt, url)
         if response:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
@@ -194,7 +143,7 @@ class UnifiedHTTPClient:
         client = self._get_client()
         last_error: Exception | None = None
 
-        for attempt in range(self.retry_config.max_attempts):
+        for attempt in range(self.retry_policy.max_attempts):
             try:
                 await self.rate_limiter.acquire()
                 response = await self.circuit_breaker.call(
@@ -203,7 +152,7 @@ class UnifiedHTTPClient:
 
                 if (
                     _is_retryable_status(response.status_code)
-                    and attempt < self.retry_config.max_attempts - 1
+                    and not self.retry_policy.is_last_attempt(attempt)
                 ):
                     await self._handle_retry_delay(attempt, url, response)
                     continue
@@ -219,10 +168,10 @@ class UnifiedHTTPClient:
                 if not _is_retryable_error(exc):
                     raise
 
-                if attempt < self.retry_config.max_attempts - 1:
+                if not self.retry_policy.is_last_attempt(attempt):
                     await self._handle_retry_delay(attempt, url)
 
-        raise RetryExhaustedError(url, self.retry_config.max_attempts, last_error)
+        raise RetryExhaustedError(url, self.retry_policy.max_attempts, last_error)
 
     async def get(
         self,

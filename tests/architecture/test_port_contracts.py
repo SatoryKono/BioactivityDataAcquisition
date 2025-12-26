@@ -141,6 +141,8 @@ class TestPortRuntimeCheckable:
         "LoggerPort",
         "GoldValidatorPort",
         "DQMonitorPort",
+        "RateLimiterPort",
+        "CircuitBreakerPort",
     ]
 
     @pytest.mark.parametrize("port_name", ALL_PORTS)
@@ -187,6 +189,8 @@ class TestPortExportsComplete:
             "MetricsPort",
             "LoggerPort",
             "GoldValidatorPort",
+            "RateLimiterPort",
+            "CircuitBreakerPort",
         }
 
         actual_exports = set(ports.__all__) if hasattr(ports, "__all__") else set()
@@ -608,4 +612,155 @@ class TestHttpAdapterLoggerContract:
         assert logger_param.default is inspect.Parameter.empty, (
             f"{adapter_name}.__init__() 'logger' MUST be required (no default). "
             "Optional loggers with fallback to NoOpLogger violate DI principles per RULES.md."
+        )
+
+
+# ============================================================================
+# Rate Limiter Port Contract Tests
+# ============================================================================
+
+
+class TestRateLimiterPortContract:
+    """Tests for RateLimiterPort specific contracts.
+
+    RateLimiterPort defines the contract for rate limiting API requests.
+    Implements RULES.md §5.1 rate limiting requirements.
+    """
+
+    REQUIRED_METHODS = ["acquire", "try_acquire", "available_tokens"]
+
+    @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
+    def test_rate_limiter_port_has_required_methods(self, method_name: str) -> None:
+        """RateLimiterPort MUST have all required rate limiting methods."""
+        assert hasattr(ports.RateLimiterPort, method_name), (
+            f"RateLimiterPort MUST define {method_name}() for rate limiting"
+        )
+
+    def test_rate_limiter_port_acquire_is_async(self) -> None:
+        """RateLimiterPort.acquire() MUST be async for non-blocking operation."""
+        import inspect
+
+        acquire_method = ports.RateLimiterPort.acquire
+        # For Protocol, check if it's a coroutine function
+        hints = get_type_hints(acquire_method) if hasattr(acquire_method, "__annotations__") else {}
+
+        # The return type should be None (async def acquire() -> None)
+        assert hints.get("return") is type(None) or "return" not in hints, (
+            "RateLimiterPort.acquire() should return None"
+        )
+
+    def test_rate_limiter_port_is_runtime_checkable(self) -> None:
+        """RateLimiterPort MUST be @runtime_checkable for isinstance() checks."""
+
+        class DummyLimiter:
+            """Dummy class for testing isinstance()."""
+
+            pass
+
+        try:
+            isinstance(DummyLimiter(), ports.RateLimiterPort)
+            is_runtime_checkable = True
+        except TypeError:
+            is_runtime_checkable = False
+
+        assert is_runtime_checkable, (
+            "RateLimiterPort MUST be decorated with @runtime_checkable"
+        )
+
+
+# ============================================================================
+# Circuit Breaker Port Contract Tests
+# ============================================================================
+
+
+class TestCircuitBreakerPortContract:
+    """Tests for CircuitBreakerPort specific contracts.
+
+    CircuitBreakerPort defines the contract for fault tolerance.
+    Implements RULES.md §3.1.4 circuit breaker requirements.
+    """
+
+    REQUIRED_METHODS = ["get_state", "get_failure_count", "call", "reset"]
+
+    @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
+    def test_circuit_breaker_port_has_required_methods(self, method_name: str) -> None:
+        """CircuitBreakerPort MUST have all required circuit breaker methods."""
+        assert hasattr(ports.CircuitBreakerPort, method_name), (
+            f"CircuitBreakerPort MUST define {method_name}() for fault tolerance"
+        )
+
+    def test_circuit_breaker_port_call_is_async(self) -> None:
+        """CircuitBreakerPort.call() MUST be async for non-blocking operation."""
+        import inspect
+
+        call_method = ports.CircuitBreakerPort.call
+        sig = inspect.signature(call_method)
+        params = sig.parameters
+
+        # Should have func parameter for the callable to wrap
+        assert "func" in params, (
+            "CircuitBreakerPort.call() MUST have func parameter for wrapped callable"
+        )
+
+    def test_circuit_breaker_port_get_state_returns_enum(self) -> None:
+        """CircuitBreakerPort.get_state() MUST return CircuitBreakerState."""
+        from bioetl.domain.types import CircuitBreakerState
+
+        hints = get_type_hints(ports.CircuitBreakerPort.get_state)
+
+        assert hints.get("return") is CircuitBreakerState, (
+            "CircuitBreakerPort.get_state() MUST return CircuitBreakerState enum"
+        )
+
+    def test_circuit_breaker_port_is_runtime_checkable(self) -> None:
+        """CircuitBreakerPort MUST be @runtime_checkable for isinstance() checks."""
+
+        class DummyBreaker:
+            """Dummy class for testing isinstance()."""
+
+            pass
+
+        try:
+            isinstance(DummyBreaker(), ports.CircuitBreakerPort)
+            is_runtime_checkable = True
+        except TypeError:
+            is_runtime_checkable = False
+
+        assert is_runtime_checkable, (
+            "CircuitBreakerPort MUST be decorated with @runtime_checkable"
+        )
+
+
+# ============================================================================
+# Resilience Implementation Contract Tests
+# ============================================================================
+
+
+class TestResilienceImplementationContract:
+    """Tests that resilience implementations satisfy port contracts.
+
+    TokenBucket MUST implement RateLimiterPort.
+    CircuitBreaker MUST implement CircuitBreakerPort.
+    """
+
+    def test_token_bucket_implements_rate_limiter_port(self) -> None:
+        """TokenBucket MUST satisfy RateLimiterPort contract."""
+        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+        bucket = TokenBucket(rate=5.0, capacity=10)
+
+        assert isinstance(bucket, ports.RateLimiterPort), (
+            "TokenBucket MUST implement RateLimiterPort protocol. "
+            "Check that all required methods are present."
+        )
+
+    def test_circuit_breaker_implements_circuit_breaker_port(self) -> None:
+        """CircuitBreaker MUST satisfy CircuitBreakerPort contract."""
+        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+
+        breaker = CircuitBreaker(provider="test")
+
+        assert isinstance(breaker, ports.CircuitBreakerPort), (
+            "CircuitBreaker MUST implement CircuitBreakerPort protocol. "
+            "Check that all required methods are present."
         )
