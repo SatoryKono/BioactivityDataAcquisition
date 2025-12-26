@@ -13,7 +13,9 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import (
     ConfigValidationError,
+    HealthReport,
     HealthStatus,
+    PreflightReport,
     RunType,
 )
 
@@ -666,3 +668,379 @@ class TestRuntimeConfigStrictValidation:
         assert runtime.strict_validation is True
         assert runtime.dry_run is True
         assert runtime.limit == 100
+
+
+@pytest.mark.unit
+class TestValidateWriteModes:
+    """Tests for PreflightService.validate_write_modes method."""
+
+    def test_valid_write_modes_returns_empty_errors(
+        self, preflight_service
+    ):
+        """Test that valid write modes return no errors."""
+        errors = preflight_service.validate_write_modes()
+        assert errors == []
+
+    def test_silver_merge_mode_is_valid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Silver 'merge' mode is valid."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            write_mode="merge",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        assert len([e for e in errors if e.field == "write_mode"]) == 0
+
+    def test_silver_append_mode_is_valid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Silver 'append' mode is valid."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            write_mode="append",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        assert len([e for e in errors if e.field == "write_mode"]) == 0
+
+    def test_silver_overwrite_mode_is_invalid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Silver 'overwrite' mode is invalid."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            write_mode="overwrite",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        silver_errors = [e for e in errors if e.field == "write_mode"]
+        assert len(silver_errors) == 1
+        assert "RULES §2.1" in silver_errors[0].rule
+
+    def test_gold_merge_mode_is_valid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Gold 'merge' mode is valid."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_write_mode="merge",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
+
+    def test_gold_overwrite_mode_is_valid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Gold 'overwrite' mode is valid."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_write_mode="overwrite",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
+
+    def test_gold_scd2_mode_is_valid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Gold 'scd2' mode is valid (maps to merge)."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_write_mode="scd2",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
+
+    def test_gold_append_mode_is_invalid(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that Gold 'append' mode is invalid."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_write_mode="append",
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        errors = service.validate_write_modes()
+        gold_errors = [e for e in errors if e.field == "gold_write_mode"]
+        assert len(gold_errors) == 1
+        assert "RULES §2.1" in gold_errors[0].rule
+
+    def test_logs_warning_on_invalid_modes(
+        self, mock_context, mock_logger, mock_metrics
+    ):
+        """Test that invalid write modes are logged as warnings."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            write_mode="overwrite",  # Invalid
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+        service.validate_write_modes()
+        mock_logger.warning.assert_called()
+
+    def test_logs_debug_on_valid_modes(
+        self, preflight_service, mock_logger
+    ):
+        """Test that valid write modes are logged as debug."""
+        preflight_service.validate_write_modes()
+        mock_logger.debug.assert_called()
+
+
+@pytest.mark.unit
+class TestValidatePreflight:
+    """Tests for PreflightService.validate_preflight method."""
+
+    @pytest.mark.asyncio
+    async def test_validate_preflight_returns_report(
+        self, preflight_service, mock_services, incremental_runtime
+    ):
+        """Test validate_preflight returns a PreflightReport."""
+        report = await preflight_service.validate_preflight(
+            services=mock_services,
+            runtime=incremental_runtime,
+            bronze_path="/data/bronze",
+            silver_path="/data/silver",
+            gold_path="/data/gold",
+            silver_format="delta",
+            gold_format="delta",
+        )
+
+        assert isinstance(report, PreflightReport)
+        assert report.medallion_policy_valid is True
+        assert report.health_report is not None
+        assert len(report.config_errors) == 0
+
+    @pytest.mark.asyncio
+    async def test_validate_preflight_with_config_errors(
+        self, preflight_service, mock_services, incremental_runtime
+    ):
+        """Test validate_preflight with configuration errors."""
+        report = await preflight_service.validate_preflight(
+            services=mock_services,
+            runtime=incremental_runtime,
+            bronze_path="/data/bronze",
+            silver_path="/data/silver",
+            gold_path="/data/gold",
+            silver_format="parquet",  # Invalid!
+            gold_format="delta",
+        )
+
+        assert report.medallion_policy_valid is False
+        assert len(report.config_errors) > 0
+        assert report.should_block_startup is True
+
+    @pytest.mark.asyncio
+    async def test_validate_preflight_strict_mode_raises(
+        self, preflight_service, mock_services
+    ):
+        """Test validate_preflight raises in strict mode on errors."""
+        strict_runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            strict_validation=True,
+        )
+
+        with pytest.raises(ValueError, match="Preflight validation failed"):
+            await preflight_service.validate_preflight(
+                services=mock_services,
+                runtime=strict_runtime,
+                bronze_path="/data/bronze",
+                silver_path="/data/silver",
+                gold_path="/data/gold",
+                silver_format="parquet",  # Invalid!
+                gold_format="delta",
+            )
+
+    @pytest.mark.asyncio
+    async def test_validate_preflight_non_strict_mode_returns_report(
+        self, preflight_service, mock_services, incremental_runtime
+    ):
+        """Test validate_preflight returns report in non-strict mode with errors."""
+        report = await preflight_service.validate_preflight(
+            services=mock_services,
+            runtime=incremental_runtime,
+            bronze_path="/data/bronze",
+            silver_path="/data/silver",
+            gold_path="/data/gold",
+            silver_format="parquet",  # Invalid!
+            gold_format="delta",
+        )
+
+        # Should not raise, should return report
+        assert report.medallion_policy_valid is False
+
+    @pytest.mark.asyncio
+    async def test_validate_preflight_records_metrics(
+        self, preflight_service, mock_services, incremental_runtime, mock_metrics
+    ):
+        """Test validate_preflight records metrics."""
+        await preflight_service.validate_preflight(
+            services=mock_services,
+            runtime=incremental_runtime,
+            bronze_path="/data/bronze",
+            silver_path="/data/silver",
+            gold_path="/data/gold",
+            silver_format="delta",
+            gold_format="delta",
+        )
+
+        # Check metrics were recorded
+        gauge_calls = [
+            call for call in mock_metrics.set_gauge.call_args_list
+            if call[0][0] == "preflight_medallion_policy_valid"
+        ]
+        assert len(gauge_calls) == 1
+        assert gauge_calls[0][0][1] == 1.0  # Valid
+
+    @pytest.mark.asyncio
+    async def test_validate_preflight_includes_write_mode_errors(
+        self, mock_context, mock_logger, mock_metrics, mock_services, incremental_runtime
+    ):
+        """Test validate_preflight includes write mode validation errors."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["id"],
+            silver_table="silver",
+            write_mode="overwrite",  # Invalid for Silver
+        )
+        service = PreflightService(
+            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+        )
+
+        report = await service.validate_preflight(
+            services=mock_services,
+            runtime=incremental_runtime,
+            bronze_path="/data/bronze",
+            silver_path="/data/silver",
+            gold_path="/data/gold",
+            silver_format="delta",
+            gold_format="delta",
+        )
+
+        assert report.medallion_policy_valid is False
+        write_mode_errors = [e for e in report.config_errors if e.field == "write_mode"]
+        assert len(write_mode_errors) == 1
+
+
+@pytest.mark.unit
+class TestPreflightReportDataclass:
+    """Tests for PreflightReport dataclass."""
+
+    def test_preflight_report_creation(self):
+        """Test PreflightReport can be created with required fields."""
+        health_report = HealthReport(results=[])
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=True,
+        )
+
+        assert report.health_report == health_report
+        assert report.medallion_policy_valid is True
+        assert report.config_errors == []
+
+    def test_preflight_report_with_errors(self):
+        """Test PreflightReport with config errors."""
+        health_report = HealthReport(results=[])
+        error = ConfigValidationError(
+            field="test", expected="a", actual="b", rule="test rule"
+        )
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=False,
+            config_errors=[error],
+        )
+
+        assert report.medallion_policy_valid is False
+        assert len(report.config_errors) == 1
+
+    def test_preflight_report_is_valid_when_all_pass(self):
+        """Test is_valid returns True when all validations pass."""
+        health_report = HealthReport(results=[])
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=True,
+        )
+
+        assert report.is_valid is True
+
+    def test_preflight_report_is_valid_false_on_policy_error(self):
+        """Test is_valid returns False on policy errors."""
+        health_report = HealthReport(results=[])
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=False,
+        )
+
+        assert report.is_valid is False
+
+    def test_preflight_report_should_block_startup(self):
+        """Test should_block_startup returns True on policy errors."""
+        health_report = HealthReport(results=[])
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=False,
+        )
+
+        assert report.should_block_startup is True
+
+    def test_preflight_report_should_not_block_when_valid(self):
+        """Test should_block_startup returns False when valid."""
+        health_report = HealthReport(results=[])
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=True,
+        )
+
+        assert report.should_block_startup is False

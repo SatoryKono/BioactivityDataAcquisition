@@ -16,6 +16,8 @@ from __future__ import annotations
 import contextlib
 from typing import TYPE_CHECKING
 
+import structlog
+
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
@@ -29,8 +31,6 @@ from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 if TYPE_CHECKING:
     from uuid import UUID
 
-    import structlog
-
     from bioetl.domain.ports import DQMonitorPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
 
@@ -40,7 +40,53 @@ __all__ = [
     "bootstrap_metrics",
     "bootstrap_observability",
     "bootstrap_tracer",
+    "validate_observability_preflight",
 ]
+
+
+def validate_observability_preflight(
+    tracer: TracingPort,
+    metrics: MetricsPort,
+    environment: str,
+    logger: structlog.BoundLogger,
+) -> None:
+    """Validate observability components for production readiness.
+
+    Performs preflight validation to detect NoOp implementations in production.
+    Emits warnings when observability data will be lost due to NoOp fallbacks.
+
+    This function helps prevent silent data loss in production environments
+    where NoOpTracing or NoOpMetrics would discard traces/metrics without
+    any visible indication.
+
+    Args:
+        tracer: The tracing port implementation (may be NoOpTracing).
+        metrics: The metrics port implementation (may be NoOpMetrics).
+        environment: Environment name from settings (e.g., "dev", "staging", "prod").
+        logger: Logger for emitting warnings.
+
+    Note:
+        In non-production environments, NoOp implementations are acceptable
+        and no warnings are emitted.
+    """
+    if environment != "prod":
+        return
+
+    if isinstance(tracer, NoOpTracing):
+        logger.warning(
+            "noop_tracing_in_production",
+            message="NoOpTracing in production - traces will be lost",
+            recommendation="Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
+            "and configure OpenTelemetry endpoint",
+        )
+
+    if isinstance(metrics, NoOpMetrics):
+        logger.warning(
+            "noop_metrics_in_production",
+            message="NoOpMetrics in production - metrics will be lost",
+            recommendation="Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
+            "to enable Prometheus metrics collection",
+        )
 
 
 def bootstrap_logger(
@@ -217,6 +263,14 @@ def bootstrap_observability(
             "tracer_type": type(tracer).__name__,
             "dq_monitor_enabled": dq_monitor is not None,
         },
+    )
+
+    # Preflight validation: warn if NoOp implementations in production
+    validate_observability_preflight(
+        tracer=tracer,
+        metrics=metrics,
+        environment=settings.env,
+        logger=logger,
     )
 
     return bundle
