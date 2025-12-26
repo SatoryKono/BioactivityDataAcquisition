@@ -34,6 +34,12 @@ from bioetl.composition.factories.pipeline_factories import (
     uniprot_protein_factory,
 )
 
+# Runner assembly functions (extracted from GenericPipelineFactory)
+from bioetl.composition.factories.runner_assembly import (
+    assemble_runner,
+    build_pipeline_services,
+)
+
 # Runner services factory (DI for PipelineRunner)
 from bioetl.composition.factories.runner_services import (
     RunnerServices,
@@ -64,6 +70,8 @@ __all__ = [
     "StorageAdapter",
     "StorageContext",
     "StorageFactory",
+    "assemble_runner",
+    "build_pipeline_services",
     "build_runner_services",
     "chembl_activity_factory",
     "create_pipeline_factory",
