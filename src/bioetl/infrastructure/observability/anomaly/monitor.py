@@ -6,6 +6,7 @@ Combines multiple detectors to monitor data quality metrics.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
@@ -65,20 +66,32 @@ class DataQualityMonitor:
         if min_threshold is not None or max_threshold is not None:
             self.detector.set_threshold(metric_name, min_threshold, max_threshold)
 
-    def check_quality(self, metrics: dict[str, float]) -> list[Anomaly]:
-        """Check metrics for quality issues."""
+    def check_quality(
+        self, metrics: dict[str, float], timestamp: datetime | None = None
+    ) -> list[Anomaly]:
+        """Check metrics for quality issues.
+
+        Args:
+            metrics: Dictionary of metric names to values
+            timestamp: Timestamp for anomalies (should be created in application layer)
+
+        Returns:
+            List of detected anomalies
+        """
         anomalies: list[Anomaly] = []
 
         for metric_name, current_value in metrics.items():
-            anomaly = self.detector.detect(metric_name, current_value)
+            anomaly = self.detector.detect(metric_name, current_value, timestamp)
             if anomaly:
                 anomalies.append(anomaly)
 
         return anomalies
 
-    def update_baseline_from_metrics(self, metrics: dict[str, float]) -> None:
+    def update_baseline_from_metrics(
+        self, metrics: dict[str, float], timestamp: datetime | None = None
+    ) -> None:
         """Update baseline with current metrics (if no anomalies)."""
-        anomalies = self.check_quality(metrics)
+        anomalies = self.check_quality(metrics, timestamp)
         critical_anomalies = [
             a for a in anomalies if a.severity == AnomalySeverity.CRITICAL
         ]

@@ -35,7 +35,7 @@ class DetectorStrategy(ABC):
         current_value: float,
         baseline: Sequence[float],
         threshold: float,
-        now: datetime | None = None,
+        timestamp: datetime,
     ) -> Anomaly | None:
         """Detect anomaly in current value.
 
@@ -44,7 +44,7 @@ class DetectorStrategy(ABC):
             current_value: Current observed value
             baseline: Historical values for comparison
             threshold: Detection threshold (interpretation varies by strategy)
-            now: Optional timestamp for testing (defaults to current UTC time)
+            timestamp: Timestamp for the anomaly (created in application layer)
 
         Returns:
             Anomaly if detected, None otherwise

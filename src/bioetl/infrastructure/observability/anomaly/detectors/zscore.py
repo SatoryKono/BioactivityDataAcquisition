@@ -6,7 +6,7 @@ Uses standard deviation to identify outliers.
 from __future__ import annotations
 
 import statistics
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
@@ -38,11 +38,13 @@ class ZScoreDetector(DetectorStrategy):
         current_value: float,
         baseline: Sequence[float],
         threshold: float = 2.0,
-        now: datetime | None = None,
+        timestamp: datetime | None = None,
     ) -> Anomaly | None:
         """Detect anomaly using Z-score method."""
         if len(baseline) < self.MIN_SAMPLES:
             return None
+        if timestamp is None:
+            return None  # No anomaly without timestamp from application layer
 
         mean = statistics.mean(baseline)
         stddev = statistics.stdev(baseline)
@@ -51,7 +53,7 @@ class ZScoreDetector(DetectorStrategy):
         if z_score is None or z_score < threshold:
             return None
 
-        return self._create_anomaly(metric_name, current_value, mean, stddev, z_score, now)
+        return self._create_anomaly(metric_name, current_value, mean, stddev, z_score, timestamp)
 
     def _calculate_z_score(
         self, value: float, mean: float, stddev: float
@@ -71,7 +73,7 @@ class ZScoreDetector(DetectorStrategy):
         mean: float,
         stddev: float,
         z_score: float,
-        now: datetime | None = None,
+        timestamp: datetime,
     ) -> Anomaly:
         """Create Anomaly object from detection results."""
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
@@ -89,7 +91,7 @@ class ZScoreDetector(DetectorStrategy):
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=z_score,
-            timestamp=now or datetime.now(UTC),
+            timestamp=timestamp,
             message=message,
         )
 
