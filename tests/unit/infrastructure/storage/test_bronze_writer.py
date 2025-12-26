@@ -272,13 +272,17 @@ class TestBronzeWriterCompress:
     def test_compress_records(
         self, tmp_path, noop_logger, sample_records: list[bytes]
     ) -> None:
-        """Test record compression."""
+        """Test record compression returns data, count, and size."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
-        compressed = writer._compress_records(iter(sample_records))
+        compressed, record_count, uncompressed_size = writer._compress_records(
+            iter(sample_records)
+        )
 
         assert compressed is not None
         assert len(compressed) > 0
+        assert record_count == len(sample_records)
+        assert uncompressed_size == sum(len(r) for r in sample_records)
 
         # Verify we can decompress (use streaming for robustness)
         decompressor = zstd.ZstdDecompressor()
@@ -302,7 +306,12 @@ class TestBronzeWriterCompress:
         large_record = {"data": "x" * 500_000}
         records = [json.dumps(large_record).encode("utf-8") + b"\n" for _ in range(5)]
 
-        compressed = writer._compress_records(iter(records))
+        compressed, record_count, uncompressed_size = writer._compress_records(
+            iter(records)
+        )
+
+        assert record_count == 5
+        assert uncompressed_size == sum(len(r) for r in records)
 
         # Compression should reduce size
         original_size = sum(len(r) for r in records)
@@ -1003,3 +1012,236 @@ class TestBronzeWriterMetadataDeterminism:
         # Verify keys are sorted
         keys = list(json.loads(serialized).keys())
         assert keys == sorted(keys), "Keys should be alphabetically sorted"
+
+
+@pytest.mark.unit
+class TestBronzeWriterMetrics:
+    """Tests for BronzeWriter metrics collection (O1 observability)."""
+
+    def test_init_with_metrics(self, tmp_path, noop_logger) -> None:
+        """Test initialization with custom metrics port."""
+        mock_metrics = MagicMock()
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
+        )
+
+        assert writer._metrics is mock_metrics
+
+    def test_init_without_metrics_uses_noop(self, tmp_path, noop_logger) -> None:
+        """Test initialization without metrics uses NoOpMetrics."""
+        from bioetl.domain.ports.noop import NoOpMetrics
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        assert isinstance(writer._metrics, NoOpMetrics)
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_records_duration_metric(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that write_bronze records duration histogram."""
+        mock_metrics = MagicMock()
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
+        )
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify observe_histogram was called with duration metric
+        histogram_calls = [
+            call
+            for call in mock_metrics.observe_histogram.call_args_list
+            if call[0][0] == "bronze_write_duration_seconds"
+        ]
+        assert len(histogram_calls) == 1
+
+        call_args = histogram_calls[0]
+        assert call_args[0][0] == "bronze_write_duration_seconds"
+        assert isinstance(call_args[0][1], float)
+        assert call_args[0][1] >= 0  # Duration should be non-negative
+        assert call_args[0][2] == {"provider": "chembl", "entity": "activity"}
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_records_count_metric(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that write_bronze records count counter."""
+        mock_metrics = MagicMock()
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
+        )
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="pubchem",
+            entity="compound",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify increment_counter was called with records count metric
+        counter_calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call[0][0] == "bronze_records_written_total"
+        ]
+        assert len(counter_calls) == 1
+
+        call_args = counter_calls[0]
+        assert call_args[0][0] == "bronze_records_written_total"
+        assert call_args[0][1] == len(sample_records)  # 3 records
+        assert call_args[0][2] == {"provider": "pubchem", "entity": "compound"}
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_records_bytes_metric(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that write_bronze records bytes counter."""
+        mock_metrics = MagicMock()
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
+        )
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="uniprot",
+            entity="protein",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify increment_counter was called with bytes metric
+        counter_calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call[0][0] == "bronze_bytes_written_total"
+        ]
+        assert len(counter_calls) == 1
+
+        call_args = counter_calls[0]
+        assert call_args[0][0] == "bronze_bytes_written_total"
+        assert call_args[0][1] > 0  # Should have written some bytes
+        assert call_args[0][2] == {"provider": "uniprot", "entity": "protein"}
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_all_metrics_recorded(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that all 3 metrics are recorded on write."""
+        mock_metrics = MagicMock()
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
+        )
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify histogram was called once (duration)
+        assert mock_metrics.observe_histogram.call_count == 1
+
+        # Verify counter was called twice (records + bytes)
+        assert mock_metrics.increment_counter.call_count == 2
+
+        # Verify all expected metrics were recorded
+        histogram_names = [
+            call[0][0] for call in mock_metrics.observe_histogram.call_args_list
+        ]
+        counter_names = [
+            call[0][0] for call in mock_metrics.increment_counter.call_args_list
+        ]
+
+        assert "bronze_write_duration_seconds" in histogram_names
+        assert "bronze_records_written_total" in counter_names
+        assert "bronze_bytes_written_total" in counter_names
+
+    @pytest.mark.asyncio
+    async def test_logger_includes_metrics_info(
+        self,
+        tmp_path,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that logger call includes record count and byte size."""
+        mock_logger = MagicMock()
+        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
+        date = datetime(2024, 1, 15)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify logger includes new metrics fields
+        call_kwargs = mock_logger.info.call_args[1]
+        assert "record_count" in call_kwargs
+        assert call_kwargs["record_count"] == len(sample_records)
+        assert "compressed_bytes" in call_kwargs
+        assert call_kwargs["compressed_bytes"] > 0
+        assert "uncompressed_bytes" in call_kwargs
+        assert call_kwargs["uncompressed_bytes"] > 0
+        assert "duration_seconds" in call_kwargs
+        assert call_kwargs["duration_seconds"] >= 0
