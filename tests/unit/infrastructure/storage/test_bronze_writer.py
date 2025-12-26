@@ -67,10 +67,10 @@ class TestBronzeWriterNameValidation:
         """Test valid provider and entity names pass validation."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
 
-        # Should not raise for valid names
+        # Should not raise for valid names (alphanumeric + underscore only)
         writer._validate_bronze_names("chembl", "activity")
         writer._validate_bronze_names("pub_chem", "compound_data")
-        writer._validate_bronze_names("uniprot-kb", "protein-entry")
+        writer._validate_bronze_names("uniprot_kb", "protein_entry")
         writer._validate_bronze_names("Test123", "Entity456")
 
     def test_validate_bronze_names_invalid_provider(self, tmp_path, noop_logger) -> None:
@@ -89,6 +89,10 @@ class TestBronzeWriterNameValidation:
         with pytest.raises(ValueError, match="Invalid provider name"):
             writer._validate_bronze_names("provider.name", "activity")
 
+        # Hyphens are not allowed (alphanumeric + underscore only)
+        with pytest.raises(ValueError, match="Invalid provider name"):
+            writer._validate_bronze_names("provider-name", "activity")
+
     def test_validate_bronze_names_invalid_entity(self, tmp_path, noop_logger) -> None:
         """Test invalid entity names raise ValueError."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
@@ -104,6 +108,10 @@ class TestBronzeWriterNameValidation:
 
         with pytest.raises(ValueError, match="Invalid entity name"):
             writer._validate_bronze_names("chembl", "entity.name")
+
+        # Hyphens are not allowed (alphanumeric + underscore only)
+        with pytest.raises(ValueError, match="Invalid entity name"):
+            writer._validate_bronze_names("chembl", "entity-name")
 
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_provider_raises(
@@ -152,6 +160,66 @@ class TestBronzeWriterNameValidation:
                 records=iter(sample_records),
                 provider="chembl",
                 entity="invalid entity",
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+
+    def test_validate_records_iterator_valid(self, tmp_path, noop_logger) -> None:
+        """Test valid iterator passes validation."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        # Should not raise for valid iterators
+        writer._validate_records_iterator(iter([b"test"]))
+        writer._validate_records_iterator(iter([]))
+        writer._validate_records_iterator(x for x in [b"a", b"b"])
+
+    def test_validate_records_iterator_none_raises(self, tmp_path, noop_logger) -> None:
+        """Test None records raises TypeError."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        with pytest.raises(TypeError, match="records cannot be None"):
+            writer._validate_records_iterator(None)  # type: ignore[arg-type]
+
+    def test_validate_records_iterator_not_iterator_raises(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test non-iterator types raise TypeError."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        # List is not an iterator (has __iter__ but no __next__)
+        with pytest.raises(TypeError, match="records must be an Iterator"):
+            writer._validate_records_iterator([b"test"])  # type: ignore[arg-type]
+
+        # String is not an iterator
+        with pytest.raises(TypeError, match="records must be an Iterator"):
+            writer._validate_records_iterator("test")  # type: ignore[arg-type]
+
+        # Dict is not an iterator
+        with pytest.raises(TypeError, match="records must be an Iterator"):
+            writer._validate_records_iterator({"key": b"value"})  # type: ignore[arg-type]
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_invalid_records_type_raises(
+        self,
+        tmp_path,
+        noop_logger,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze raises TypeError for invalid records type."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        date = datetime(2024, 1, 15)
+
+        with pytest.raises(TypeError, match="records must be an Iterator"):
+            await writer.write_bronze(
+                records=[b"test"],  # type: ignore[arg-type]
+                provider="chembl",
+                entity="activity",
                 date=date,
                 batch_id=batch_id,
                 run_id=run_id,
