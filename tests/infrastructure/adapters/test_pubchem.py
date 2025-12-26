@@ -156,8 +156,30 @@ async def test_health_check_healthy(pubchem_adapter, mock_pcp_compound):
         assert status == HealthStatus.HEALTHY
 
 
-async def test_health_check_unhealthy(pubchem_adapter):
-    """Test health check returns UNHEALTHY on exception."""
+async def test_health_check_degraded_on_probe_failure(pubchem_adapter):
+    """Test health check returns DEGRADED on single probe failure.
+
+    Uses Template Method pattern: exception in _probe_health() triggers
+    _fallback_health_status() which uses circuit breaker assessment.
+    With 1 failure (<=2 threshold), returns DEGRADED.
+    """
+    with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
+        status = await pubchem_adapter.health_check()
+        assert status == HealthStatus.DEGRADED
+
+
+async def test_health_check_unhealthy_after_multiple_failures(pubchem_adapter):
+    """Test health check returns UNHEALTHY after multiple failures.
+
+    Circuit breaker records failures, and after threshold (>2),
+    assess_health_from_circuit_breaker returns UNHEALTHY.
+    """
+    # Trigger 3 failures to exceed the threshold (>2 for UNHEALTHY)
+    for _ in range(3):
+        with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
+            await pubchem_adapter.health_check()
+
+    # Now health check should return UNHEALTHY
     with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
         status = await pubchem_adapter.health_check()
         assert status == HealthStatus.UNHEALTHY
