@@ -58,6 +58,40 @@ def valid_records():
 
 
 @pytest.mark.unit
+class TestGoldWriterWriteModeEnum:
+    """Tests for GoldWriteMode enum."""
+
+    def test_gold_write_mode_values(self):
+        """Test all valid GoldWriteMode values."""
+        from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
+
+        assert GoldWriteMode.OVERWRITE.value == "overwrite"
+        assert GoldWriteMode.APPEND.value == "append"
+        assert GoldWriteMode.SCD2.value == "scd2"
+
+    def test_gold_write_mode_from_string(self):
+        """Test creating GoldWriteMode from string."""
+        from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
+
+        assert GoldWriteMode("overwrite") == GoldWriteMode.OVERWRITE
+        assert GoldWriteMode("append") == GoldWriteMode.APPEND
+        assert GoldWriteMode("scd2") == GoldWriteMode.SCD2
+
+    def test_gold_write_mode_invalid_raises(self):
+        """Test invalid mode string raises ValueError."""
+        from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
+
+        with pytest.raises(ValueError):
+            GoldWriteMode("invalid")
+
+        with pytest.raises(ValueError):
+            GoldWriteMode("merge")  # Valid for Silver, not Gold
+
+        with pytest.raises(ValueError):
+            GoldWriteMode("OVERWRITE")  # Case sensitive
+
+
+@pytest.mark.unit
 class TestGoldWriterInit:
     """Tests for GoldWriter initialization."""
 
