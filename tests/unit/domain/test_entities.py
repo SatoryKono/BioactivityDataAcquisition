@@ -20,6 +20,7 @@ def base_entity_kwargs():
         "run_id": uuid4(),
         "run_type": RunType.INCREMENTAL,
         "source_batch_id": uuid4(),
+        "ingestion_ts": datetime.now(UTC),
     }
 
 
@@ -51,8 +52,23 @@ class TestBaseEntity:
                 assay_chembl_id="CHEMBL789",
             )
 
-    def test_base_entity_default_ingestion_ts(self, base_entity_kwargs):
-        """Test that ingestion_ts has a default value."""
+    def test_base_entity_requires_ingestion_ts(self, base_entity_kwargs):
+        """Test that ingestion_ts is required (no default) per ADR-014."""
+        # Remove ingestion_ts to verify it's required
+        kwargs_without_ts = {
+            k: v for k, v in base_entity_kwargs.items() if k != "ingestion_ts"
+        }
+        with pytest.raises(TypeError, match="ingestion_ts"):
+            Activity(
+                **kwargs_without_ts,
+                activity_id="ACT1",
+                molecule_chembl_id="CHEMBL123",
+                target_chembl_id="CHEMBL456",
+                assay_chembl_id="CHEMBL789",
+            )
+
+    def test_base_entity_accepts_explicit_ingestion_ts(self, base_entity_kwargs):
+        """Test that explicitly passed ingestion_ts is used."""
         activity = Activity(
             **base_entity_kwargs,
             activity_id="ACT1",

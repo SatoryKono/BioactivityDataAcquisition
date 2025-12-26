@@ -35,16 +35,18 @@ from pyarrow import ArrowTypeError
 
 from bioetl.domain.exceptions import (
     MergeConflictError,
+    PolicyViolationError,
     SchemaEvolutionError,
     SchemaViolationError,
     TableNotFoundError,
 )
+from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
 
 if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -74,6 +76,8 @@ class DeltaWriter:
         base_path: str | Path,
         logger: LoggerPort,
         csv_exporter: CsvExporter | None = None,
+        write_policy: WriteModePolicy | None = None,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize Delta writer.
 
@@ -81,6 +85,9 @@ class DeltaWriter:
             base_path: Base path for Delta tables (local filesystem)
             logger: Structured logger for observability (MUST be injected)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
+            write_policy: Optional WriteModePolicy for medallion layer validation.
+                If None, a default WriteModePolicy is created.
+            metrics: Optional MetricsPort for recording policy violation metrics.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -88,6 +95,8 @@ class DeltaWriter:
         self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
         self.logger = logger
+        self._write_policy = write_policy or WriteModePolicy()
+        self._metrics = metrics
 
     def _prepare_arrow_data(
         self,
@@ -178,6 +187,59 @@ class DeltaWriter:
             raise ValueError(
                 f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
             ) from None
+
+    def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
+        """Map SilverWriteMode to WriteMode for policy validation.
+
+        Args:
+            mode: The SilverWriteMode to convert.
+
+        Returns:
+            The corresponding WriteMode for policy validation.
+
+        Note:
+            SilverWriteMode.DELETE maps to WriteMode.OVERWRITE because
+            the delete operation replaces all existing data.
+        """
+        mapping = {
+            SilverWriteMode.MERGE: WriteMode.MERGE,
+            SilverWriteMode.APPEND: WriteMode.APPEND,
+            SilverWriteMode.DELETE: WriteMode.OVERWRITE,
+        }
+        return mapping[mode]
+
+    def _enforce_write_policy(
+        self,
+        mode: SilverWriteMode,
+        table_name: str,
+    ) -> None:
+        """Enforce write mode policy for Silver layer.
+
+        Args:
+            mode: The validated SilverWriteMode.
+            table_name: Target table name for logging/metrics context.
+
+        Raises:
+            PolicyViolationError: If mode is not allowed for Silver layer.
+        """
+        policy_mode = self._to_policy_write_mode(mode)
+        try:
+            self._write_policy.validate(Layer.SILVER, policy_mode)
+        except PolicyViolationError:
+            self.logger.error(
+                "Write mode policy violation",
+                layer="silver",
+                mode=mode.value,
+                policy_mode=policy_mode.value,
+                table=table_name,
+            )
+            if self._metrics:
+                self._metrics.increment_counter(
+                    "policy_violations_total",
+                    1,
+                    {"layer": "silver", "mode": policy_mode.value},
+                )
+            raise
 
     def _validate_records(
         self, records: list[dict[str, Any]], table_name: str, schema: pa.Schema
@@ -311,9 +373,14 @@ class DeltaWriter:
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
+            PolicyViolationError: If mode is not allowed for Silver layer
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
         """
         validated_mode = self._validate_write_mode(mode)
+
+        # Enforce medallion layer write mode policy (Silver allows only merge/append)
+        self._enforce_write_policy(validated_mode, table_name)
+
         self._validate_records(records, table_name, schema)
 
         # Check for schema drift before writing

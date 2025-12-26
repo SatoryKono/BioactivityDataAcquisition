@@ -13,8 +13,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 from uuid import uuid4
 
-from bioetl.domain.types import RunID
-
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint_manager,
     bootstrap_cleanup,
@@ -26,12 +24,12 @@ from bioetl.composition.bootstrap import (
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.core.quarantine_manager import QuarantineManager
+    from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.cleanup_service import CleanupPreview
     from bioetl.application.services.lifecycle_service import LifecycleService
 
@@ -51,6 +49,8 @@ class RunOptions:
         filter_column: Column name in CSV containing filter IDs.
         filter_field: API field name to filter by.
         dry_run: Preview mode without execution.
+        vacuum_after_run: Enable automatic VACUUM after successful run (CLI override).
+        vacuum_retention_days: Minimum age of files to remove during VACUUM (CLI override).
     """
 
     run_type: str = "incremental"
@@ -60,6 +60,8 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     dry_run: bool = False
+    vacuum_after_run: bool | None = None
+    vacuum_retention_days: int | None = None
 
 
 @dataclass(frozen=True)
@@ -117,6 +119,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         filter_column=options.filter_column,
         filter_field=options.filter_field,
         dry_run=options.dry_run,
+        vacuum_after_run=options.vacuum_after_run,
+        vacuum_retention_days=options.vacuum_retention_days,
     )
 
 
