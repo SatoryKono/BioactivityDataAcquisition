@@ -42,11 +42,26 @@ class TestGoldValidatorInit:
         mock_schema = MagicMock()
         validator = GoldValidator(mock_schema)
         assert validator._schema is mock_schema
+        assert validator._strict is False
 
     def test_init_without_schema(self):
         """Test initialization without a schema."""
         validator = GoldValidator(None)
         assert validator._schema is None
+        assert validator._strict is False
+
+    def test_init_with_strict_mode(self):
+        """Test initialization with strict mode enabled."""
+        mock_schema = MagicMock()
+        validator = GoldValidator(mock_schema, strict=True)
+        assert validator._schema is mock_schema
+        assert validator._strict is True
+
+    def test_init_without_schema_strict_mode(self):
+        """Test initialization without schema but with strict mode."""
+        validator = GoldValidator(None, strict=True)
+        assert validator._schema is None
+        assert validator._strict is True
 
 
 @pytest.mark.unit
@@ -54,11 +69,31 @@ class TestGoldValidatorValidate:
     """Tests for GoldValidator.validate method."""
 
     def test_validate_without_schema_returns_valid(self):
-        """Test that validation without schema always returns valid."""
+        """Test that validation without schema always returns valid (non-strict)."""
         validator = GoldValidator(None)
         records = [{"id": 1, "value": "test"}]
 
         result = validator.validate(records)
+
+        assert result.valid is True
+        assert result.errors == []
+
+    def test_validate_without_schema_strict_mode_fails(self):
+        """Test that validation without schema in strict mode fails."""
+        validator = GoldValidator(None, strict=True)
+        records = [{"id": 1, "value": "test"}]
+
+        result = validator.validate(records)
+
+        assert result.valid is False
+        assert len(result.errors) == 1
+        assert "Gold schema is required but not provided" in result.errors[0]
+
+    def test_validate_empty_records_strict_mode_returns_valid(self):
+        """Test that validation of empty records returns valid even in strict mode."""
+        validator = GoldValidator(None, strict=True)
+
+        result = validator.validate([])
 
         assert result.valid is True
         assert result.errors == []
@@ -184,3 +219,64 @@ class TestGoldValidatorIntegration:
 
         assert result.valid is False
         assert len(result.errors) > 0
+
+
+@pytest.mark.unit
+class TestPanderaGoldValidatorStrictMode:
+    """Tests for PanderaGoldValidator strict mode."""
+
+    def test_pandera_validator_without_schema_non_strict(self):
+        """Test PanderaGoldValidator without schema (non-strict) returns valid."""
+        from bioetl.infrastructure.validation import PanderaGoldValidator
+
+        validator = PanderaGoldValidator(None, strict=False)
+        records = [{"id": 1, "value": "test"}]
+
+        result = validator.validate(records)
+
+        assert result.valid is True
+        assert result.errors == []
+
+    def test_pandera_validator_without_schema_strict(self):
+        """Test PanderaGoldValidator without schema (strict) returns invalid."""
+        from bioetl.infrastructure.validation import PanderaGoldValidator
+
+        validator = PanderaGoldValidator(None, strict=True)
+        records = [{"id": 1, "value": "test"}]
+
+        result = validator.validate(records)
+
+        assert result.valid is False
+        assert len(result.errors) == 1
+        assert "Gold schema is required but not provided" in result.errors[0]
+
+    def test_pandera_validator_empty_records_strict(self):
+        """Test PanderaGoldValidator with empty records in strict mode."""
+        from bioetl.infrastructure.validation import PanderaGoldValidator
+
+        validator = PanderaGoldValidator(None, strict=True)
+
+        result = validator.validate([])
+
+        assert result.valid is True
+        assert result.errors == []
+
+    def test_pandera_validator_with_schema_strict(self):
+        """Test PanderaGoldValidator with schema in strict mode validates normally."""
+        import pandera.pandas as pa
+
+        from bioetl.infrastructure.validation import PanderaGoldValidator
+
+        schema = pa.DataFrameSchema(
+            {
+                "id": pa.Column(int),
+                "name": pa.Column(str),
+            }
+        )
+        validator = PanderaGoldValidator(schema, strict=True)
+        records = [{"id": 1, "name": "test"}]
+
+        result = validator.validate(records)
+
+        assert result.valid is True
+        assert result.errors == []
