@@ -1,0 +1,194 @@
+"""Architecture tests: No transformer fallback in BasePipeline.
+
+REQ-ARCH-DI-007: BasePipeline MUST NOT create transformers internally.
+Transformers MUST be injected via DI from GenericPipelineFactory.
+
+This ensures all dependency creation is centralized in the composition root.
+
+See CLAUDE.md §2.2 Dependency Injection.
+"""
+
+from __future__ import annotations
+
+import ast
+import re
+from pathlib import Path
+
+import pytest
+
+# Paths relative to project root
+APPLICATION_DIR = Path("src/bioetl/application")
+PIPELINES_DIR = Path("src/bioetl/application/pipelines")
+
+
+def _get_base_path(relative_path: Path) -> Path:
+    """Resolve path - works from project root or tests directory."""
+    if relative_path.exists():
+        return relative_path
+    # Try from tests directory context
+    return Path(__file__).parent.parent.parent / relative_path
+
+
+class TestNoTransformerFallback:
+    """Tests ensuring transformer fallback is not used in pipelines."""
+
+    def test_no_default_transformer_class_in_basepipeline(self) -> None:
+        """BasePipeline must not have default_transformer_class attribute.
+
+        REQ-ARCH-DI-007: Transformers must be injected via DI.
+        BasePipeline should not have fallback transformer creation.
+        """
+        base_file = _get_base_path(APPLICATION_DIR) / "core" / "base.py"
+        if not base_file.exists():
+            pytest.skip("BasePipeline file not found")
+
+        content = base_file.read_text(encoding="utf-8")
+
+        # Check for class variable definition
+        pattern = r"default_transformer_class\s*[=:]"
+        matches = list(re.finditer(pattern, content))
+
+        assert not matches, (
+            "BasePipeline must not define default_transformer_class.\n"
+            "Transformers must be injected via DI from GenericPipelineFactory.\n"
+            f"Found: {len(matches)} occurrences in base.py\n"
+            "See REQ-ARCH-DI-007 and CLAUDE.md §2.2"
+        )
+
+    def test_basepipeline_init_does_not_create_transformer(self) -> None:
+        """BasePipeline.__init__ must not create transformers internally.
+
+        REQ-ARCH-DI-007: All transformers must be injected via constructor,
+        not created inside __init__.
+        """
+        base_file = _get_base_path(APPLICATION_DIR) / "core" / "base.py"
+        if not base_file.exists():
+            pytest.skip("BasePipeline file not found")
+
+        content = base_file.read_text(encoding="utf-8")
+
+        try:
+            tree = ast.parse(content)
+        except SyntaxError:
+            pytest.fail("Failed to parse base.py")
+
+        # Find BasePipeline class
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef) and node.name == "BasePipeline":
+                # Find __init__ method
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                        init_source = ast.get_source_segment(content, item)
+                        if init_source:
+                            # Check for patterns that indicate transformer creation
+                            forbidden_patterns = [
+                                r"self\.default_transformer_class\(",
+                                r"Transformer\(\)",  # Any Transformer() call
+                                r"transformer_class\(",  # transformer_class() call
+                            ]
+                            for pattern in forbidden_patterns:
+                                if re.search(pattern, init_source):
+                                    pytest.fail(
+                                        f"BasePipeline.__init__ contains forbidden pattern: {pattern}\n"
+                                        "Transformers must be injected via DI, not created internally.\n"
+                                        "See REQ-ARCH-DI-007"
+                                    )
+                        return
+
+        pytest.fail("Could not find BasePipeline.__init__ method")
+
+    def test_no_default_transformer_class_in_pipeline_subclasses(self) -> None:
+        """Pipeline subclasses must not define default_transformer_class.
+
+        REQ-ARCH-DI-007: All transformers are provided via GenericPipelineFactory.
+        Pipeline classes should be simple containers without transformer fallbacks.
+        """
+        pipelines_path = _get_base_path(PIPELINES_DIR)
+        if not pipelines_path.exists():
+            pytest.skip("Pipelines directory not found")
+
+        violations = []
+
+        for py_file in pipelines_path.rglob("*.py"):
+            # Skip transformers and other non-pipeline files
+            if "transformer" in py_file.name.lower():
+                continue
+            if py_file.name.startswith("_"):
+                continue
+
+            content = py_file.read_text(encoding="utf-8")
+
+            # Check for default_transformer_class assignment
+            pattern = r"default_transformer_class\s*="
+            if re.search(pattern, content):
+                relative = py_file.relative_to(_get_base_path(PIPELINES_DIR))
+                violations.append(str(relative))
+
+        assert not violations, (
+            "Pipeline subclasses must not define default_transformer_class.\n"
+            "Transformers are injected via GenericPipelineFactory.\n\n"
+            "Violations found:\n" + "\n".join(f"  - {v}" for v in violations)
+            + "\n\nSee REQ-ARCH-DI-007 and CLAUDE.md §2.2"
+        )
+
+    def test_all_factories_have_transformer_class(self) -> None:
+        """All pipeline factories must have transformer_class configured.
+
+        REQ-ARCH-DI-007: Since BasePipeline has no fallback, factories
+        must provide transformer_class for proper DI.
+        """
+        factories_file = (
+            _get_base_path(Path("src/bioetl/composition/factories"))
+            / "pipeline_factories.py"
+        )
+        if not factories_file.exists():
+            pytest.skip("pipeline_factories.py not found")
+
+        content = factories_file.read_text(encoding="utf-8")
+
+        # Find all GenericPipelineFactory instantiations
+        factory_pattern = r"GenericPipelineFactory\([^)]+\)"
+
+        # Check that each factory has transformer_class parameter
+        for match in re.finditer(factory_pattern, content, re.DOTALL):
+            factory_def = match.group(0)
+            if "transformer_class=" not in factory_def:
+                pytest.fail(
+                    f"Factory missing transformer_class:\n{factory_def[:200]}...\n"
+                    "All factories must specify transformer_class for DI.\n"
+                    "See REQ-ARCH-DI-007"
+                )
+
+
+class TestTransformerInjectionPath:
+    """Tests verifying the transformer injection path through factories."""
+
+    def test_generic_factory_creates_transformer(self) -> None:
+        """GenericPipelineFactory must create and inject transformer.
+
+        Verify that the factory has create_transformer() method and
+        uses it in create_with_services().
+        """
+        factory_file = (
+            _get_base_path(Path("src/bioetl/composition/factories"))
+            / "generic_factory.py"
+        )
+        if not factory_file.exists():
+            pytest.skip("generic_factory.py not found")
+
+        content = factory_file.read_text(encoding="utf-8")
+
+        # Check for create_transformer method
+        assert "def create_transformer" in content, (
+            "GenericPipelineFactory must have create_transformer() method"
+        )
+
+        # Check that create_with_services calls create_transformer
+        assert "self.create_transformer()" in content, (
+            "GenericPipelineFactory.create_with_services must call create_transformer()"
+        )
+
+        # Check that transformer is passed to pipeline
+        assert "transformer=transformer" in content, (
+            "GenericPipelineFactory must pass transformer to pipeline constructor"
+        )
