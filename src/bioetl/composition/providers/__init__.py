@@ -24,6 +24,7 @@ from bioetl.composition.providers.loader import (
     load_providers,
 )
 from bioetl.composition.providers.provider_registry import (
+    DataSourceCreator,
     HttpConfig,
     ProviderConfig,
     ProviderRegistry,
@@ -31,6 +32,7 @@ from bioetl.composition.providers.provider_registry import (
 from bioetl.composition.providers.registration import register_all_providers
 
 __all__ = [
+    "DataSourceCreator",
     "HttpConfig",
     "ProviderConfig",
     "ProviderRegistry",
