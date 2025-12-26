@@ -51,7 +51,7 @@ class StorageAdapter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> None:
+    ) -> Path:
         """Write raw records to Bronze layer.
 
         Args:
@@ -64,8 +64,11 @@ class StorageAdapter:
             run_type: Type of run.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+
+        Returns:
+            Path: Relative path to the written file.
         """
-        await self.bronze.write_bronze(
+        return await self.bronze.write_bronze(
             records=records,
             provider=provider,
             entity=entity,

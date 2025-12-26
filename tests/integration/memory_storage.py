@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import Path
 
 from bioetl.domain.ports import StoragePort
 
@@ -14,7 +15,7 @@ class MemoryStorage(StoragePort):
 
     def write_bronze(
         self, records, provider, entity, date, batch_id, run_id, run_type, ingestion_ts
-    ):
+    ) -> Path:
         key = f"bronze/{provider}/{entity}/{date}/{batch_id}.jsonl.zst"
         self.data[key].extend(records)
         # Store metadata for test verification
@@ -23,6 +24,7 @@ class MemoryStorage(StoragePort):
             "run_type": run_type.value if hasattr(run_type, "value") else str(run_type),
             "ingestion_ts": ingestion_ts.isoformat() if ingestion_ts else None,
         }
+        return Path(key)
 
     def write_silver(self, table_name, records, _primary_keys):
         self.data[table_name].extend(records)
