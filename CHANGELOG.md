@@ -118,6 +118,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   содержит реализации, а не Protocol-определения
 - **Vulture Whitelist**: Добавлены параметры NoOpTracer (`kind`, `attributes`, `links`,
   `set_status_on_exception`, `end_on_exit`) в whitelist dead code анализа
+- **Code Metrics Exemptions**: Обновлены лимиты для разросшихся классов:
+  - `DeltaWriter`: 520 → 570 строк (schema drift detection)
+  - `delta_writer.py`: добавлен в exemptions (631 LOC)
+  - `run_dq_checks`: добавлен в complexity exemptions (CC=12)
+- **Env Var Centralization**: Добавлен `encoders.py` в список файлов, разрешённых использовать
+  `os.environ` (выбор JSON encoder по переменной `BIOETL_JSON_ENCODER`)
+- **Bootstrap Test**: Исправлен mock `load_pipeline_config` — добавлен
+  `maintenance.vacuum_retention_days` для прохождения валидации `RuntimeConfig`
+- **Batch Writer Test**: Исправлено сравнение `primary_keys` — использован `list()` для
+  совместимости tuple/list
 
 ### Changed
 
