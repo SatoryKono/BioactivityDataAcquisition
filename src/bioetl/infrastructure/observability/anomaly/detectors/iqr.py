@@ -6,7 +6,7 @@ Uses quartiles to identify outliers, robust to non-normal distributions.
 from __future__ import annotations
 
 import statistics
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
@@ -41,11 +41,13 @@ class IQRDetector(DetectorStrategy):
         current_value: float,
         baseline: Sequence[float],
         threshold: float = 1.5,
-        now: datetime | None = None,
+        timestamp: datetime | None = None,
     ) -> Anomaly | None:
         """Detect anomaly using IQR method."""
         if len(baseline) < self.MIN_SAMPLES:
             return None
+        if timestamp is None:
+            return None  # No anomaly without timestamp from application layer
 
         q1, q3 = self._calculate_quartiles(baseline)
         iqr = q3 - q1
@@ -59,7 +61,7 @@ class IQRDetector(DetectorStrategy):
 
         mean = statistics.mean(baseline)
         stddev = statistics.stdev(baseline) if len(baseline) >= 2 else 0.0
-        return self._create_anomaly(metric_name, current_value, mean, stddev, score, now)
+        return self._create_anomaly(metric_name, current_value, mean, stddev, score, timestamp)
 
     def _calculate_quartiles(self, data: Sequence[float]) -> tuple[float, float]:
         """Calculate Q1 and Q3 quartiles."""
@@ -86,7 +88,7 @@ class IQRDetector(DetectorStrategy):
         mean: float,
         stddev: float,
         score: float,
-        now: datetime | None = None,
+        timestamp: datetime,
     ) -> Anomaly:
         """Create Anomaly object from detection results."""
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
@@ -104,7 +106,7 @@ class IQRDetector(DetectorStrategy):
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=score,
-            timestamp=now or datetime.now(UTC),
+            timestamp=timestamp,
             message=message,
         )
 
