@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
@@ -38,7 +39,7 @@ class StoragePort(Protocol):
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> None:
+    ) -> Path:
         """Write raw records to the Bronze layer.
 
         Args:
@@ -51,6 +52,9 @@ class StoragePort(Protocol):
             run_type: The type of pipeline run (incremental, backfill, rebuild).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+
+        Returns:
+            Path: Relative path to the written file.
         """
         ...
 
