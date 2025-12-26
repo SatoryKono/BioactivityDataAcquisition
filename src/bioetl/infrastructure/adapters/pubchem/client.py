@@ -20,9 +20,6 @@ import pubchempy as pcp
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.health import (
-    assess_health_from_circuit_breaker,
-)
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
@@ -248,15 +245,21 @@ class PubChemAdapter(BaseSyncAdapter):
             "target": assay.get("target"),
         }
 
-    async def health_check(self) -> HealthStatus:
-        """Check PubChem API health status.
+    async def _probe_health(self) -> HealthStatus:
+        """Perform PubChem-specific health probe.
 
-        Implements DataSourcePort.health_check() interface.
+        Overrides BaseSyncAdapter._probe_health() to use lightweight
+        compound query (water, CID 962) for health assessment.
 
-        Performs lightweight query (fetch single compound) to test API availability.
+        Unlike other adapters, PubChem handles exceptions internally
+        to return UNHEALTHY directly rather than using circuit breaker
+        fallback (preserving original behavior).
 
         Returns:
-            HealthStatus enum value
+            HealthStatus based on probe response:
+            - HEALTHY/DEGRADED: Based on circuit breaker state if compound found
+            - DEGRADED: Empty response
+            - UNHEALTHY: Any exception or circuit breaker open
 
         Example:
             >>> adapter = PubChemAdapter()
@@ -276,7 +279,7 @@ class PubChemAdapter(BaseSyncAdapter):
             )
 
             if compound:
-                return assess_health_from_circuit_breaker(self.circuit_breaker)
+                return self._fallback_health_status()
 
             self.logger.warning(
                 "health_check_degraded",

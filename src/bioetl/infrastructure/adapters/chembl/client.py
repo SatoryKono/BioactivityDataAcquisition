@@ -19,7 +19,6 @@ Health-Aware Fetching:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -96,7 +95,6 @@ class ChemblAdapter(BaseHttpAdapter):
     """Provider identifier (required by DataSourcePort)."""
 
     _consecutive_errors: int = field(init=False, default=0)
-    _last_health_check: datetime | None = field(init=False, default=None)
     _cached_health: HealthStatus = field(init=False, default=HealthStatus.HEALTHY)
     _error_classifier: ErrorClassifier = field(
         init=False, default_factory=ErrorClassifier
@@ -430,8 +428,16 @@ class ChemblAdapter(BaseHttpAdapter):
         ):
             yield record
 
-    async def health_check(self) -> HealthStatus:
-        """Check ChEMBL API health status."""
+    async def _probe_health(self) -> HealthStatus:
+        """Perform ChEMBL-specific health probe.
+
+        Overrides BaseHttpAdapter._probe_health() to use ChEMBL status endpoint
+        and internal health state tracking.
+
+        Returns:
+            HealthStatus based on status endpoint response or error count.
+
+        """
         try:
             response = await self.http_client.get(CHEMBL_STATUS_URL)
             self._handle_health_response(response)
@@ -446,7 +452,18 @@ class ChemblAdapter(BaseHttpAdapter):
                 error=str(e),
             )
 
-        self._last_health_check = datetime.now()
+        return self._cached_health
+
+    def _fallback_health_status(self) -> HealthStatus:
+        """Return cached health status.
+
+        Overrides BaseHttpAdapter._fallback_health_status() to use
+        ChEMBL's internal health state rather than circuit breaker.
+
+        Returns:
+            Cached HealthStatus based on consecutive error count.
+
+        """
         return self._cached_health
 
     def _handle_health_response(self, response: Response) -> None:

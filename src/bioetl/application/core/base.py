@@ -33,7 +33,14 @@ class BasePipeline(ABC):
     - Business Logic (Transformations, Filtering)
 
     It does NOT orchestrate execution. See PipelineRunner for execution logic.
+
+    Subclasses can set `default_transformer_class` to enable fallback transformer
+    creation when no transformer is injected via DI. This eliminates the need
+    for boilerplate __init__ overrides.
     """
+
+    # Override in subclasses to enable fallback transformer creation
+    default_transformer_class: ClassVar[type["BaseTransformer"] | None] = None
 
     @classmethod
     def create(
@@ -85,7 +92,13 @@ class BasePipeline(ABC):
         self._runtime = runtime
         self._services = services
         self._run_id = run_id
-        self._transformer = transformer
+        # Use injected transformer, or create from default_transformer_class if available
+        if transformer is not None:
+            self._transformer = transformer
+        elif self.default_transformer_class is not None:
+            self._transformer = self.default_transformer_class(provider=config.provider)
+        else:
+            self._transformer = None
         self._logger = services.logger.bind(
             run_id=str(self._run_id),
             pipeline=config.pipeline_name,
