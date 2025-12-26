@@ -109,6 +109,7 @@ markers = [
     "slow: Slow tests",
     "security: Security tests",
     "vcr: VCR.py recorded HTTP interactions",
+    "performance: Performance regression tests (optional CI stage)",
 ]
 asyncio_mode = "auto"
 filterwarnings = [
