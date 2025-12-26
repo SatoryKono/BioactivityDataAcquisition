@@ -29,20 +29,43 @@ if PipelineRegistry.contains("chembl_activity"):
     definition = PipelineRegistry.get("chembl_activity")
 ```
 
-### DataSourceRegistry
+### ProviderRegistry (Primary)
 
-Registry for data source creators. Located in `src/bioetl/composition/factories/data_source_registry.py`.
+Central registry for all providers. Located in `src/bioetl/composition/providers/`.
+
+```python
+from bioetl.composition.providers import ProviderRegistry
+
+# List all registered providers
+providers = ProviderRegistry.list_providers()
+
+# Create data source directly (preferred)
+data_source = ProviderRegistry.create_data_source(
+    "chembl", settings, pipeline_config, logger
+)
+
+# Check if provider exists
+if ProviderRegistry.is_registered("chembl"):
+    config = ProviderRegistry.get("chembl")
+```
+
+### DataSourceRegistry (Facade)
+
+Thin facade over ProviderRegistry for backward compatibility. Located in `src/bioetl/composition/factories/data_source_registry.py`.
 
 ```python
 from bioetl.composition.factories.data_source_registry import DataSourceRegistry
 
-# List all registered providers
-providers = DataSourceRegistry.list_keys()
+# Old way (still works, delegates to ProviderRegistry)
+creator = DataSourceRegistry.get("chembl")
+data_source = creator(settings, pipeline_config, logger)
 
 # Check if provider exists
 if DataSourceRegistry.contains("chembl"):
     creator = DataSourceRegistry.get("chembl")
 ```
+
+**Note:** For new code, prefer using `ProviderRegistry.create_data_source()` directly.
 
 ## Legacy Aliases
 
@@ -53,6 +76,15 @@ For backward compatibility, the following legacy methods are available:
 | `PipelineRegistry` | `register_factory(factory)` | `register(key, factory)` |
 | `PipelineRegistry` | `list_pipelines()` | `list_keys()` |
 | `DataSourceRegistry` | `list_providers()` | `list_keys()` |
+| `DataSourceRegistry` | `get(provider)` | `ProviderRegistry.create_data_source()` |
+
+### Deprecated Methods
+
+| Registry | Method | Replacement |
+|----------|--------|-------------|
+| `DataSourceRegistry` | `register(provider, creator)` | `ProviderRegistry.register()` with `ProviderConfig` |
+
+**Note:** `DataSourceRegistry.register()` is deprecated. New providers should be registered through `ProviderRegistry` with a `ProviderConfig` that includes `data_source_creator`.
 
 ## Protocol Definition
 

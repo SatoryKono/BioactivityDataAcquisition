@@ -23,12 +23,41 @@
 
 ### 2.2. `factories/` — Фабрики компонентов
 
-В v5.1 логика создания компонентов централизована в специализированных фабриках:
+В v5.1+ логика создания компонентов централизована в специализированных фабриках:
 
-- **`GenericPipelineFactory`**: Универсальный конструктор пайплайнов. Он декларативно описывает, какой класс пайплайна, какой провайдер и какие схемы (Silver/Gold) использовать.
-- **`DataSourceRegistry`**: Центральный реестр создателей источников данных. Позволяет получить нужный `DataSourcePort` (ChEMBL, UniProt и т.д.) по имени провайдера.
+- **`GenericPipelineFactory`**: Универсальный конструктор пайплайнов. Декларативно описывает класс пайплайна, провайдер, схемы и класс трансформера для DI.
 - **`HttpClientFactory`**: Создает настроенные `UnifiedHTTPClient` с учетом специфичных для каждого провайдера ограничений (Rate Limits, Circuit Breaker).
 - **`StorageFactory`**: Собирает `StoragePort`, объединяя адаптеры для Bronze, Silver и Gold слоев.
+- **`DataSourceFactory`**: Создает `DataSourcePort` для конкретного провайдера.
+
+### 2.3. `providers/` — Реестр провайдеров
+
+**Расположение:** `src/bioetl/composition/providers/`
+
+Централизованная регистрация всех провайдеров данных:
+
+- **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
+- **`DataSourceRegistry`**: Фасад для backward compatibility. Делегирует создание в `ProviderRegistry`.
+
+**Пример использования:**
+```python
+# Получение data source creator
+creator = DataSourceRegistry.get("chembl")
+data_source = creator(settings, config, logger)
+
+# Или напрямую через ProviderRegistry
+data_source = ProviderRegistry.create_data_source(
+    "chembl", settings, config, logger
+)
+```
+
+**Зарегистрированные провайдеры:**
+| Provider | Data Sources | Pipelines |
+|----------|--------------|-----------|
+| chembl | ChemblAdapter | activity, assay, molecule, target, document, target_component |
+| pubchem | PubChemAdapter | compound |
+| uniprot | UniProtAdapter | protein |
+| pubmed | PubMedAdapter | publications |
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
