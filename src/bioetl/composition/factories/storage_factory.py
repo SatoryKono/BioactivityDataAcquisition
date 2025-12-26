@@ -60,7 +60,7 @@ class StorageFactory:
         settings: Settings,
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
-        metrics: MetricsPort | None = None,
+        metrics: MetricsPort,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -68,7 +68,7 @@ class StorageFactory:
             settings: Application settings with data_dir
             config: Pipeline YAML configuration
             logger: Structured logger
-            metrics: Optional metrics port for Bronze observability (O1 metrics).
+            metrics: Metrics port for Bronze observability (MUST be injected).
 
         Returns:
             StorageContext with adapter and paths

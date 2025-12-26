@@ -73,7 +73,7 @@ class IntegrationPipelineTestCase:
         settings: Settings,
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
-        metrics: MetricsPort | None = None,
+        metrics: MetricsPort,
     ) -> StorageContext:
         """Create a StorageContext pointing to local temp paths."""
         # Create real writers pointing to local paths
@@ -86,6 +86,7 @@ class IntegrationPipelineTestCase:
             bronze_writer=BronzeWriter(
                 base_path=self.bronze_path,
                 logger=logger,
+                metrics=metrics,
                 save_json=save_json,
                 json_path=self.json_path if save_json else None,
             ),

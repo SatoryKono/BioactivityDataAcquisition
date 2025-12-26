@@ -25,6 +25,7 @@ import pytest
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -76,7 +77,7 @@ def logger() -> NoOpLogger:
 @pytest.fixture
 def bronze_writer(tmp_path: Path, logger: NoOpLogger) -> BronzeWriter:
     """Create BronzeWriter for performance tests."""
-    return BronzeWriter(base_path=tmp_path, logger=logger)
+    return BronzeWriter(base_path=tmp_path, logger=logger, metrics=NoOpMetrics())
 
 
 @pytest.fixture

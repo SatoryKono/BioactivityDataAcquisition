@@ -21,7 +21,7 @@ import asyncio
 import json
 import time
 from collections.abc import AsyncIterator, Iterator
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -52,28 +52,26 @@ class BronzeWriter:
         self,
         base_path: str | Path,
         logger: LoggerPort,
+        metrics: MetricsPort,
         save_json: bool = False,
         json_path: str | None = None,
-        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize Bronze writer.
 
         Args:
             base_path: Base path for Bronze layer storage
             logger: Structured logger for observability (MUST be injected)
+            metrics: Metrics port for observability (MUST be injected).
+                     Use NoOpMetrics from composition layer if metrics disabled.
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
-            metrics: Optional metrics port for observability (O1 metrics).
-                     If None, uses NoOpMetrics for null object pattern.
 
         """
-        from bioetl.domain.ports.noop import NoOpMetrics
-
         self.base_path = Path(base_path)
         self.logger = logger
+        self._metrics = metrics
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
-        self._metrics = metrics or NoOpMetrics()
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -102,6 +100,31 @@ class BronzeWriter:
         if not hasattr(records, "__iter__") or not hasattr(records, "__next__"):
             raise TypeError(
                 f"records must be an Iterator[bytes], got {type(records).__name__}"
+            )
+
+    def _validate_utc_datetime(self, dt: datetime, param_name: str) -> None:
+        """Validate that datetime is timezone-aware and in UTC.
+
+        Bronze layer requires UTC timestamps for lineage consistency
+        and deterministic behavior (see ADR-014).
+
+        Args:
+            dt: Datetime to validate.
+            param_name: Parameter name for error messages.
+
+        Raises:
+            ValueError: If datetime is naive or not in UTC.
+        """
+        if dt.tzinfo is None:
+            raise ValueError(
+                f"{param_name} must be timezone-aware, got naive datetime. "
+                "Use datetime.now(UTC) or datetime(..., tzinfo=timezone.utc)."
+            )
+        offset = dt.tzinfo.utcoffset(dt)
+        if offset is None or offset != timedelta(0):
+            raise ValueError(
+                f"{param_name} must be UTC, got timezone with offset {offset}. "
+                "Convert to UTC before passing to BronzeWriter."
             )
 
     def _build_bronze_metadata(
@@ -169,6 +192,8 @@ class BronzeWriter:
 
         self._validate_bronze_names(provider, entity)
         self._validate_records_iterator(records)
+        self._validate_utc_datetime(date, "date")
+        self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
 
         date_str = date.strftime("%Y-%m-%d")
         relative_path = (

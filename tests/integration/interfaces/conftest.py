@@ -16,6 +16,7 @@ from click.testing import CliRunner
 
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -114,6 +115,7 @@ def create_local_storage_context(
         bronze_writer=BronzeWriter(
             base_path=str(storage_paths["bronze"]),
             logger=logger,
+            metrics=NoOpMetrics(),
             save_json=save_json,
             json_path=str(storage_paths["json"]) if save_json else None,
         ),
