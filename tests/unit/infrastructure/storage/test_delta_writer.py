@@ -868,6 +868,64 @@ class TestDeltaWriterSchemaDrift:
             # Should not raise for empty records
             await writer._check_schema_drift("test.table", [], "error")
 
+    @pytest.mark.asyncio
+    async def test_schema_drift_error_mode(self, valid_records, noop_logger):
+        """Test schema drift error mode raises SchemaEvolutionError via write_silver.
+
+        Acceptance criterion for M4: Schema Drift Handling.
+        When on_schema_mismatch='error' is set and schema drift is detected,
+        write_silver must raise SchemaEvolutionError before writing.
+        """
+        import pyarrow as pa
+
+        from bioetl.domain.exceptions import SchemaEvolutionError
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+        # Schema for incoming records
+        incoming_schema = pa.schema([
+            pa.field("entity_id", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
+
+        # Existing table has a different schema (missing 'value' field)
+        existing_table_schema = pa.schema([
+            pa.field("entity_id", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
+        mock_delta_schema = MagicMock()
+        mock_delta_schema.to_arrow.return_value = existing_table_schema
+
+        mock_table = MagicMock()
+        mock_table.schema.return_value = mock_delta_schema
+
+        with patch(
+            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            return_value=mock_table,
+        ):
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+
+            # write_silver with on_schema_mismatch="error" should raise
+            with pytest.raises(SchemaEvolutionError) as exc_info:
+                await writer.write_silver(
+                    table_name="test.table",
+                    records=valid_records,
+                    primary_keys=["entity_id"],
+                    schema=incoming_schema,
+                    mode="merge",
+                    on_schema_mismatch="error",
+                )
+
+            # Verify error details
+            assert "value" in exc_info.value.new_fields
+            assert exc_info.value.table == "test.table"
+
 
 @pytest.mark.unit
 class TestDeltaWriterWriteModePolicy:
