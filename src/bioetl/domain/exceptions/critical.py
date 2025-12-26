@@ -103,3 +103,20 @@ class InfrastructureError(CriticalError):
     def __init__(self, message: str, failed_components: list[str] | None = None) -> None:
         self.failed_components = failed_components or []
         super().__init__(message)
+
+
+class PolicyViolationError(CriticalError):
+    """Raised when medallion layer policy is violated.
+
+    This is a CRITICAL error - pipeline must not proceed with invalid
+    write mode for a given medallion layer.
+
+    Example:
+        - Bronze layer only allows APPEND mode
+        - Attempting OVERWRITE on Bronze raises PolicyViolationError
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
