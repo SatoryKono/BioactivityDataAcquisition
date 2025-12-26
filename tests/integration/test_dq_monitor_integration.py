@@ -45,7 +45,7 @@ class TestDQMonitorAnomalyDetection:
             monitor.update_baseline_from_metrics({"record_count": value})
 
         # Check with significant drop (z-score will be high)
-        anomalies = monitor.check_quality({"record_count": 100.0})
+        anomalies = monitor.check_quality({"record_count": 100.0}, timestamp=datetime.now(timezone.utc))
 
         assert len(anomalies) == 1
         assert anomalies[0].anomaly_type == AnomalyType.DROP
