@@ -128,7 +128,7 @@ class TestBootstrapObservability:
 
         assert bundle.logger is mock_logger
         assert bundle.metrics is mock_metrics
-        assert bundle.tracer is not None  # NoOpTracer
+        assert bundle.tracer is not None  # NoOpTracing
         assert bundle.dq_monitor is None
 
     @patch("bioetl.composition._bootstrap.observability.create_infra_logger")
@@ -184,7 +184,7 @@ class TestBootstrapObservability:
             extra={
                 "stage": "bootstrap",
                 "metrics_type": "NoOpMetrics",
-                "tracer_type": "NoOpTracer",
+                "tracer_type": "NoOpTracing",
                 "dq_monitor_enabled": False,
             },
         )

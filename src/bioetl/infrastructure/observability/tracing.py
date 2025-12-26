@@ -79,38 +79,6 @@ class OpenTelemetryTracer:
         self._closed = True
 
 
-class NoOpTracer:
-    """Null object pattern for tracing."""
-
-    def __init__(self) -> None:
-        """Initialize no-op tracer."""
-        self._closed = False
-
-    def get_tracer(self, name: str) -> Any:
-        """Return a dummy object that swallows calls."""
-
-        class DummySpan:
-            def __enter__(self) -> "DummySpan":
-                return self
-
-            def __exit__(self, *args: Any) -> None:
-                pass
-
-            def set_attribute(self, *args: Any) -> None:
-                pass
-
-            def add_event(self, *args: Any) -> None:
-                pass
-
-            def record_exception(self, *args: Any) -> None:
-                pass
-
-        class DummyTracer:
-            def start_as_current_span(self, *args: Any, **kwargs: Any) -> DummySpan:
-                return DummySpan()
-
-        return DummyTracer()
-
-    def close(self) -> None:
-        """No-op close. Idempotent."""
-        self._closed = True
+# NOTE: NoOpTracer has been removed from this module to eliminate duplication.
+# Use bioetl.infrastructure.observability.noop_tracing.NoOpTracing instead.
+# This is the single source of truth for no-op tracing implementations.
