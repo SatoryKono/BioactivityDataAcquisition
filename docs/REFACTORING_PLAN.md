@@ -32,6 +32,14 @@
 | "ChemblAdapter._fetch_page глушит ошибки" | `_handle_error()` всегда raises; `return [], False` — мёртвый код | `client.py:145-147, 261-267` |
 | "UnifiedHTTPClient нарушает DI" | Создание в `__aenter__` — корректный async pattern | `client.py:138-152` |
 | "D1: HTTP jitter не реализован" | MD5-based jitter в `RetryPolicy` с 2025-12-26 | `domain/resilience.py:45-84`, 11 тестов |
+| "PipelineRunner — god object" | **173 строки**, делегирует через RunnerServices bundle | `runner.py:53,84-88` |
+| "bootstrap_pipeline смешивает ответственности" | Правильно делегирует фабрикам через `factory.create_runner()` | `bootstrap.py:159-166` |
+| "ChEMBL адаптер — размытые границы" | Когезивная ответственность: health-aware fetching | `client.py` ~350 строк, использует ErrorClassifier |
+| "CLI содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя | По design |
+| "DeltaWriter нарушает DI (создаёт WriteModePolicy)" | Опциональный параметр с default — валидный паттерн | `delta_writer.py:98` |
+| "BaseTransformer без DQ-валидации" | By design: Template Method, DQ — ответственность конкретных трансформеров | `base_transformer.py` |
+| "MedallionLifecycleService без политик" | Использует `MedallionPolicy.should_clear_*` | `medallion_lifecycle.py:71-112` |
+| "BronzeWriter без observability" | Имеет структурированное логирование | `bronze_writer.py:197-205` |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
