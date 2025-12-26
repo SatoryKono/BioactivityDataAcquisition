@@ -109,6 +109,7 @@ class TestFunctionComplexity:
         "_extract_business_data": 12,  # XML extraction with many conditionals
         "__post_init__": 7,  # Dataclass post-init validation
         "SchemaEvolutionError": 7,  # Exception with detailed field tracking
+        "validate_medallion_config": 12,  # Config validation with many checks
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
