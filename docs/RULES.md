@@ -447,7 +447,7 @@ class LegacyAdapter(BaseSyncAdapter):
 2. Timestamps **MUST** передаваться из application слоя, не создаваться в infrastructure
 3. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
 4. `PipelineContext.started_at` — единственный источник времени для batch
-5. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort`
+5. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` (см. ADR-019)
 
 #### Архитектурные Тесты (REQ-ARCH-030)
 | Тест | Цель | Проверки |
