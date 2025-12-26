@@ -90,6 +90,8 @@ class GoldWriter:
         mode: str = "overwrite",
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
+        *,
+        ingestion_ts: datetime | None = None,
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -101,9 +103,12 @@ class GoldWriter:
             mode: Write mode - 'overwrite', 'append', or 'scd2'
             partition_cols: Optional partition columns
             scd_config: Required config for SCD2 mode
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014). Required for SCD2 mode.
 
         Raises:
-            ValueError: If mode is invalid, records empty, or schema not strict
+            ValueError: If mode is invalid, records empty, schema not strict,
+                       or SCD2 mode without ingestion_ts
         """
         # Validate write mode
         try:
@@ -117,9 +122,15 @@ class GoldWriter:
         if not records:
             raise ValueError("No records to write")
 
-        # SCD2 requires scd_config
-        if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
-            raise ValueError("scd_config required for SCD Type 2 mode")
+        # SCD2 requires scd_config and ingestion_ts
+        if validated_mode == GoldWriteMode.SCD2:
+            if scd_config is None:
+                raise ValueError("scd_config required for SCD Type 2 mode")
+            if ingestion_ts is None:
+                raise ValueError(
+                    "ingestion_ts required for SCD Type 2 mode "
+                    "(timestamp must come from application layer per ADR-014)"
+                )
 
         # Check strict attribute - supports both DataFrameSchema and DataFrameModel
         # DataFrameSchema: schema.strict directly
@@ -141,7 +152,11 @@ class GoldWriter:
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
         if validated_mode == GoldWriteMode.SCD2:
-            await self._write_scd2(table_path, records, scd_config, partition_cols)
+            # ingestion_ts is validated above, assert for type checker
+            assert ingestion_ts is not None
+            await self._write_scd2(
+                table_path, records, scd_config, partition_cols, ingestion_ts
+            )
         else:  # OVERWRITE or APPEND
             await self._write_simple(
                 table_path,
@@ -283,8 +298,18 @@ class GoldWriter:
         records: list[dict[str, Any]],
         scd_config: dict[str, Any],
         partition_cols: list[str] | None,
+        ingestion_ts: datetime,
     ) -> None:
-        """Write records using SCD Type 2 (history tracking)."""
+        """Write records using SCD Type 2 (history tracking).
+
+        Args:
+            table_path: Path to the Delta table.
+            records: List of records to write.
+            scd_config: SCD2 configuration (business_key, version_col, etc.).
+            partition_cols: Optional partition columns.
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014).
+        """
         business_key = scd_config["business_key"]
 
         # Sort records by business key for deterministic processing
@@ -297,9 +322,10 @@ class GoldWriter:
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
         current_flag_col = scd_config.get("current_flag_col", "is_current")
 
-        now = datetime.now(UTC).isoformat()
+        # Use ingestion_ts from application layer (ADR-014: single source of truth)
+        ts_iso = ingestion_ts.isoformat()
         for record in records:
-            record[valid_from_col] = now
+            record[valid_from_col] = ts_iso
             record[valid_to_col] = None
             record[current_flag_col] = True
             record[version_col] = record.get(version_col, 1)
@@ -310,7 +336,9 @@ class GoldWriter:
                     dt = await self._run_in_executor(
                         lambda table_path=table_path: DeltaTable(table_path)
                     )
-                    await self._merge_scd2(dt, records, business_key, scd_config)
+                    await self._merge_scd2(
+                        dt, records, business_key, scd_config, ingestion_ts
+                    )
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
@@ -337,8 +365,18 @@ class GoldWriter:
         records: list[dict[str, Any]],
         business_key: str | list[str],
         scd_config: dict[str, Any],
+        ingestion_ts: datetime,
     ) -> None:
-        """Merge records using SCD Type 2 logic."""
+        """Merge records using SCD Type 2 logic.
+
+        Args:
+            dt: DeltaTable instance to merge into.
+            records: List of records to merge.
+            business_key: Business key column(s) for matching.
+            scd_config: SCD2 configuration.
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014).
+        """
         if isinstance(business_key, str):
             business_keys = [business_key]
         else:
@@ -351,7 +389,8 @@ class GoldWriter:
             f"target.{key} = source.{key}" for key in business_keys
         )
         merge_condition += f" AND target.{current_flag_col} = true"
-        now = datetime.now(UTC).isoformat()
+        # Use ingestion_ts from application layer (ADR-014: single source of truth)
+        ts_iso = ingestion_ts.isoformat()
 
         await self._run_in_executor(
             lambda: (
@@ -365,7 +404,7 @@ class GoldWriter:
                 )
                 .when_matched_update(
                     updates={
-                        valid_to_col: f"'{now}'",
+                        valid_to_col: f"'{ts_iso}'",
                         current_flag_col: "false",
                     }
                 )

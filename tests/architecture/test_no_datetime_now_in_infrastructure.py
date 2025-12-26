@@ -22,15 +22,11 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 # 1. Timestamp does not affect determinism of batch operations
 # 2. Timestamp is required for real-time monitoring/operations
 # 3. Timestamp is not used in Bronze/Silver/Gold data
+#
+# REFACTORED (no longer need datetime.now()):
+# - operations.py: Now accepts `now: datetime` parameter from caller
+# - gold_writer.py: Now accepts `ingestion_ts: datetime` parameter for SCD2
 ALLOWED_FILES: set[str] = {
-    # infrastructure/quarantine/operations.py
-    # Uses datetime.now(UTC) for calculating retention cutoff during cleanup.
-    # Example: cutoff_date = datetime.now(UTC) - timedelta(days=max_age_days)
-    "operations.py",
-    # infrastructure/storage/gold_writer.py
-    # Uses datetime.now() for SCD2 valid_from/valid_to columns during merge operations.
-    # TODO (#arch-review): Consider passing timestamp for SCD2 as parameter
-    "gold_writer.py",
     # infrastructure/observability/lineage.py
     # Uses datetime.now(UTC) for provenance tracking in record_run_start(),
     # record_run_end(), and for filtering lineage records by date range.
