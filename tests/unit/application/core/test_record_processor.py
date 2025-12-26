@@ -178,9 +178,16 @@ def record_processor(
 class TestRecordProcessorInit:
     """Tests for RecordProcessor initialization."""
 
-    def test_init_stores_dependencies(self, record_processor, mock_storage):
-        """Test that initialization stores all dependencies."""
-        assert record_processor._storage is mock_storage
+    def test_init_stores_context(self, record_processor, mock_context):
+        """Test that initialization stores context."""
+        assert record_processor._context is mock_context
+
+    def test_init_creates_internal_components(self, record_processor):
+        """Test that initialization creates BatchTransformer and BatchWriter."""
+        # RecordProcessor creates these internally (composition pattern)
+        assert record_processor._transformer is not None
+        assert record_processor._writer is not None
+        assert record_processor._batch_metrics is not None
 
 
 @pytest.mark.unit
