@@ -24,8 +24,13 @@ class NoOpTracer:
         """Context manager exit."""
         pass
 
-    def start_as_current_span(self, name: str) -> Self:
-        """Start a new span (no-op)."""
+    def start_as_current_span(self, name: str, **kwargs: Any) -> Self:
+        """Start a new span (no-op).
+
+        Args:
+            name: Span name.
+            **kwargs: Additional arguments (e.g., attributes) - ignored.
+        """
         return self
 
     def set_attribute(self, key: str, value: Any) -> None:
