@@ -453,10 +453,12 @@ class TestCryptographyUsage:
             content = py_file.read_text(encoding="utf-8")
             for weak_hash in weak_hashes:
                 # Check for hashlib usage of weak algorithms
+                # Skip comments and multi-line strings for detection
                 matches = re.finditer(rf'hashlib\.{weak_hash}\s*\([^)]*\)', content)
                 for match in matches:
+                    call = match.group(0)
                     # Allow if usedforsecurity=False is explicitly set
-                    if "usedforsecurity=False" not in match.group(0):
+                    if "usedforsecurity=False" not in call:
                         rel_path = py_file.relative_to(PROJECT_ROOT)
                         violations.append(f"{rel_path}: Uses weak hash {weak_hash} without usedforsecurity=False")
 
