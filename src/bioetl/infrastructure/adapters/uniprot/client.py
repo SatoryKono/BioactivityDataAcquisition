@@ -22,6 +22,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -230,7 +231,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         fasta_text = await self._get_sequence_fasta(query)
         if fasta_text:
             loop = asyncio.get_running_loop()
-            seqs = await loop.run_in_executor(None, self._parse_fasta, fasta_text)
+            seqs = await loop.run_in_executor(None, FastaParser.parse, fasta_text)
             for seq in seqs:
                 yield seq
 
@@ -249,30 +250,6 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 break
             yield seq_record
             fetched += 1
-
-    def _parse_fasta(self, fasta_text: str) -> list[dict[str, Any]]:
-        """Parse FASTA format text."""
-        records = []
-        current_header = None
-        current_sequence: list[str] = []
-
-        def add_record(header: str | None, seq: list[str]) -> None:
-            if header:
-                records.append({"header": header, "sequence": "".join(seq)})
-
-        for line in fasta_text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            if line.startswith(">"):
-                add_record(current_header, current_sequence)
-                current_header = line[1:]
-                current_sequence = []
-            else:
-                current_sequence.append(line)
-
-        add_record(current_header, current_sequence)
-        return records
 
     @override
     async def _probe_health(self) -> HealthStatus:
