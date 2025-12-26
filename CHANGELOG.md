@@ -103,6 +103,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CheckpointManager**: Удалён параметр `watermark_extractor` из `GenericPipelineFactory`
 - **Config Snapshots**: Удалено поле `watermark_field` из golden master snapshots
 - **Target Component Config**: Добавлен `forensic_retention: true` в `target_component.yaml`
+- **NoOpTracer OpenTelemetry Compatibility**: Исправлен `start_as_current_span()` для принятия
+  полной сигнатуры OpenTelemetry (`attributes`, `kind`, `links`, `end_on_exit` и др.)
+  в обоих файлах `domain/ports/noop.py` и `infrastructure/observability/noop_tracing.py`
+- **Domain Exports**: Добавлены `NoOpMetrics` и `NoOpTracing` в `domain/__init__.py` `__all__`
+- **CLI Test Patches**: Исправлены пути патчей в CLI тестах после рефакторинга entrypoints
+  (`bootstrap_pipeline` → `create_pipeline_runner`, etc.)
+- **Lifecycle Test Order**: Исправлен порядок assertions в `test_rebuild_lifecycle_order` —
+  `postrun.cleanup` выполняется после `services.__aexit__` (минимизация времени блокировки)
+- **SCD2 Tests**: Добавлен обязательный параметр `ingestion_ts` в SCD2 тесты GoldWriter
+  согласно ADR-014
+- **Quarantine Purge Tests**: Добавлен обязательный параметр `now` в тесты `UnifiedQuarantine.purge()`
+- **Architecture Tests**: Исключён `noop.py` из проверки `test_ports_are_protocols` —
+  содержит реализации, а не Protocol-определения
+- **Vulture Whitelist**: Добавлены параметры NoOpTracer (`kind`, `attributes`, `links`,
+  `set_status_on_exception`, `end_on_exit`) в whitelist dead code анализа
 
 ### Changed
 

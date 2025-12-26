@@ -8,6 +8,7 @@ See the root CHANGELOG.md for the complete version history.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 5.3.2 | 2025-12-26 | NoOpTracer OTel compatibility, test infrastructure fixes |
 | 5.3.1 | 2025-12-24 | Atomic write encoding, DQ metrics, CLI safety fixes |
 | 5.3.0 | 2025-12-24 | Gold layer flattening, Unified transformers |
 | 5.2.1 | 2025-12-24 | Bug fixes: GoldValidator protocol, test run_id |
