@@ -40,6 +40,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "filter_config",
         "medallion",
         "ports",
+        "resilience",
         "transformations",
         "types",
     }

@@ -93,6 +93,7 @@ from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 # Ports
 from bioetl.domain.ports import (
     CheckpointPort,
+    CircuitBreakerPort,
     DataSourcePort,
     DQMonitorPort,
     FilterableDataSourcePort,
@@ -102,8 +103,17 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
     QuarantinePort,
+    RateLimiterPort,
     StoragePort,
     TracingPort,
+)
+
+# Resilience (domain value objects)
+from bioetl.domain.resilience import (
+    AGGRESSIVE_RETRY_POLICY,
+    CONSERVATIVE_RETRY_POLICY,
+    DEFAULT_RETRY_POLICY,
+    RetryPolicy,
 )
 
 # Pure domain transformations
@@ -180,6 +190,7 @@ __all__ = [
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
+    "PolicyViolationError",
     # Exceptions - Recoverable
     "ChemblApiError",
     "CircuitBreakerOpenError",
@@ -210,6 +221,7 @@ __all__ = [
     "MedallionPolicy",
     # Ports
     "CheckpointPort",
+    "CircuitBreakerPort",
     "DataSourcePort",
     "DQMonitorPort",
     "FilterableDataSourcePort",
@@ -219,8 +231,14 @@ __all__ = [
     "LoggerPort",
     "MetricsPort",
     "QuarantinePort",
+    "RateLimiterPort",
     "StoragePort",
     "TracingPort",
+    # Resilience
+    "AGGRESSIVE_RETRY_POLICY",
+    "CONSERVATIVE_RETRY_POLICY",
+    "DEFAULT_RETRY_POLICY",
+    "RetryPolicy",
     # Transformations (pure functions)
     "META_FIELDS",
     "calculate_dq_score",

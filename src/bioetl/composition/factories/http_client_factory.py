@@ -2,6 +2,10 @@
 
 Ensures consistent rate limiting and circuit breaker settings across providers.
 Uses ProviderRegistry for unified configuration management.
+
+SRP Compliance:
+- Creates UnifiedHTTPClient with injected RateLimiterPort and CircuitBreakerPort
+- RetryPolicy is configured via domain value object
 """
 
 from __future__ import annotations
@@ -9,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
+from bioetl.domain.resilience import RetryPolicy
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
