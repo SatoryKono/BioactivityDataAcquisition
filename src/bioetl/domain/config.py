@@ -65,17 +65,30 @@ class DQConfig:
 
 @dataclass(frozen=True)
 class TableConfig:
-    """Configuration for database tables and keys."""
+    """Configuration for database tables and keys.
 
-    primary_keys: list[str] = field(default_factory=lambda: ["entity_id"])
+    All collection fields are immutable tuples to ensure true immutability
+    of the frozen dataclass. The __post_init__ converts any incoming lists
+    to tuples for backward compatibility.
+    """
+
+    primary_keys: tuple[str, ...] = ("entity_id",)
     silver_table: str | None = None
     gold_table: str | None = None
     # Write modes from YAML sink config
     silver_write_mode: Literal["merge", "append", "overwrite"] = "merge"
     gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
-    partition_cols: list[str] = field(default_factory=list)
+    partition_cols: tuple[str, ...] = ()
     # Schema drift handling for Silver layer
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
+
+    def __post_init__(self) -> None:
+        """Convert incoming lists to tuples for immutability."""
+        # Use object.__setattr__ because frozen=True
+        if isinstance(self.primary_keys, list):
+            object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
+        if isinstance(self.partition_cols, list):
+            object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
 
 
 @dataclass(frozen=True)
@@ -95,25 +108,34 @@ class PipelineConfig:
     entity_type: str
 
     # Table configuration
-    primary_keys: list[str]
+    primary_keys: tuple[str, ...]
     silver_table: str
     gold_table: str | None = None
     write_mode: Literal["merge", "append", "overwrite"] = "merge"
     gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
-    partition_cols: list[str] = field(default_factory=list)
+    partition_cols: tuple[str, ...] = ()
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     # Processing
     gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
     batch_size: int = 100
     checkpoint_interval: int = 1000
-    fields: list[str] = field(default_factory=list)
+    fields: tuple[str, ...] = ()
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)
 
     def __post_init__(self) -> None:
-        """Validate configuration on creation."""
+        """Convert lists to tuples and validate configuration on creation."""
+        # Convert incoming lists to tuples for immutability (object.__setattr__ for frozen)
+        if isinstance(self.primary_keys, list):
+            object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
+        if isinstance(self.partition_cols, list):
+            object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
+        if isinstance(self.fields, list):
+            object.__setattr__(self, "fields", tuple(self.fields))
+
+        # Validate configuration
         validations = [
             (not self.pipeline_name, "pipeline_name cannot be empty"),
             (not self.provider, "provider cannot be empty"),
