@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -454,3 +455,489 @@ class TestPipelineRunnerLifecycle:
         calls = list(call_recorder.calls)
         assert "storage.clear_silver" in calls
         assert "storage.clear_gold" in calls
+
+    @pytest.mark.asyncio
+    async def test_preflight_validation_failure_aborts(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify pipeline aborts when infrastructure health check fails.
+
+        Preflight validation is critical for fail-fast behavior.
+        If storage or data source is unhealthy, we must abort before
+        any data operations to prevent partial writes.
+        """
+        from bioetl.domain.exceptions import InfrastructureError
+        from bioetl.domain.types import HealthStatus
+
+        config = PipelineConfig(
+            pipeline_name="test_health_fail",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Make storage health check return UNHEALTHY
+        mock_services_with_recorder.storage.health_check = AsyncMock(
+            return_value=HealthStatus.UNHEALTHY
+        )
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+
+            async def lm_aenter(self):
+                call_recorder.record("lock_manager.__aenter__")
+                return lock_manager
+
+            async def lm_aexit(self, *args):
+                call_recorder.record("lock_manager.__aexit__")
+
+            lock_manager.__aenter__ = lm_aenter
+            lock_manager.__aexit__ = lm_aexit
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=mock_services_with_recorder,
+                context=context,
+                executor=mock_executor_with_recorder,
+                checkpoint_manager=mock_checkpoint_manager_with_recorder,
+                shutdown_signal=MagicMock(),
+                logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
+            )
+
+            with pytest.raises(InfrastructureError) as exc_info:
+                await runner.run()
+
+            # Verify the error message indicates health check failure
+            assert "health check failed" in str(exc_info.value).lower()
+
+        # Verify executor was NEVER called
+        calls = list(call_recorder.calls)
+        assert "executor.execute" not in calls
+        # Verify checkpoint operations were NOT performed
+        assert "checkpoint.load" not in calls
+        assert "checkpoint.delete" not in calls
+
+    @pytest.mark.asyncio
+    async def test_graceful_shutdown_mid_batch(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify graceful shutdown saves checkpoint when signal is received.
+
+        Per ADR-008: Upon SIGTERM/SIGINT, pipeline must:
+        1. Stop extracting new records
+        2. Wait for current batch to complete
+        3. Save checkpoint
+        4. Exit with code 0
+
+        This test simulates shutdown signal during extraction.
+        """
+        from bioetl.application.core.executor import PipelineExecutor
+        from bioetl.application.core.shutdown import (
+            PipelineShutdownError,
+            ShutdownSignal,
+        )
+
+        # Create a real shutdown signal
+        shutdown_signal = ShutdownSignal()
+
+        # Create data source that yields records and triggers shutdown mid-way
+        async def mock_fetch(*args, **kwargs):
+            for i in range(10):
+                yield {"id": i, "data": f"record_{i}"}
+                # Trigger shutdown after 5 records
+                if i == 4:
+                    shutdown_signal.request()
+
+        mock_services_with_recorder.data_source.fetch = mock_fetch
+
+        # Track checkpoint save calls
+        checkpoint_save_called = False
+
+        async def save_checkpoint(records):
+            nonlocal checkpoint_save_called
+            checkpoint_save_called = True
+            call_recorder.record("checkpoint.save")
+
+        mock_checkpoint_manager_with_recorder.save_checkpoint = save_checkpoint
+
+        # Create mock record processor
+        from bioetl.application.core.record_processor import BatchResult
+
+        record_processor = AsyncMock()
+        record_processor.process_batch = AsyncMock(
+            return_value=BatchResult(
+                bronze_count=5, silver_count=5, gold_count=5, quarantined_count=0
+            )
+        )
+
+        executor = PipelineExecutor(
+            services=mock_services_with_recorder,
+            record_processor=record_processor,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=shutdown_signal,
+            entity_type="entity",
+            batch_size=100,  # Large batch so we don't process mid-extraction
+        )
+
+        # Execute should raise PipelineShutdownError
+        with pytest.raises(PipelineShutdownError, match="Shutdown during extraction"):
+            await executor.execute(limit=None)
+
+        # Verify checkpoint was saved before shutdown
+        assert checkpoint_save_called, "Checkpoint must be saved during graceful shutdown"
+        assert "checkpoint.save" in list(call_recorder.calls)
+
+    @pytest.mark.asyncio
+    async def test_checkpoint_resume_after_failure(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify pipeline resumes from checkpoint after previous failure.
+
+        Checkpoint management is critical for long-running pipelines.
+        When resume=True, the checkpoint manager must:
+        1. Load previous checkpoint metadata
+        2. Log the resume state
+        3. Continue from saved offset
+        """
+        config = PipelineConfig(
+            pipeline_name="test_resume",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Create checkpoint manager with resume=True that returns saved state
+        checkpoint_loaded = False
+        saved_metadata = {"records_processed": 500, "last_id": "abc123"}
+
+        checkpoint_manager = AsyncMock()
+
+        async def load_checkpoint():
+            nonlocal checkpoint_loaded
+            checkpoint_loaded = True
+            call_recorder.record("checkpoint.load")
+            return saved_metadata
+
+        async def delete_checkpoint():
+            call_recorder.record("checkpoint.delete")
+
+        checkpoint_manager.load_checkpoint = load_checkpoint
+        checkpoint_manager.delete_checkpoint = delete_checkpoint
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+            lock_manager.__aexit__ = AsyncMock()
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=mock_services_with_recorder,
+                context=context,
+                executor=mock_executor_with_recorder,
+                checkpoint_manager=checkpoint_manager,
+                shutdown_signal=MagicMock(),
+                logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
+            )
+
+            await runner.run()
+
+        # Verify checkpoint was loaded
+        assert checkpoint_loaded, "Checkpoint must be loaded for resume"
+        calls = list(call_recorder.calls)
+        assert "checkpoint.load" in calls
+        # Verify checkpoint load happens BEFORE execute
+        assert calls.index("checkpoint.load") < calls.index("executor.execute")
+        # Verify checkpoint is deleted after successful run
+        assert "checkpoint.delete" in calls
+
+    @pytest.mark.asyncio
+    async def test_dq_threshold_exceeded_logs_anomaly(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service_with_recorder,
+        mock_logger,
+    ):
+        """Verify data quality anomalies are detected and logged.
+
+        Per RULES.md §4.2:
+        - Soft threshold (>5% DQ errors): Warning
+        - Hard threshold (>20% DQ errors): Fail Batch
+
+        DQ monitoring provides observability into data quality drift.
+        """
+        from bioetl.infrastructure.observability.anomaly.types import (
+            Anomaly,
+            AnomalySeverity,
+            AnomalyType,
+        )
+
+        config = PipelineConfig(
+            pipeline_name="test_dq_threshold",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Configure DQ monitor to return critical anomaly
+        critical_anomaly = Anomaly(
+            metric_name="error_rate",
+            current_value=0.25,  # 25% error rate
+            baseline_mean=0.02,
+            baseline_stddev=0.01,
+            z_score=23.0,
+            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
+            severity=AnomalySeverity.CRITICAL,
+            timestamp=datetime.now(UTC),
+            message="Error rate 25% exceeds threshold 20%",
+        )
+
+        dq_monitor = MagicMock()
+        dq_monitor.check_quality = MagicMock(return_value=[critical_anomaly])
+        dq_monitor.update_baseline_from_metrics = MagicMock()
+
+        # Replace services with one that has DQ monitor
+        services_with_dq = MagicMock()
+        # Copy attributes from original mock
+        services_with_dq.lock = mock_services_with_recorder.lock
+        services_with_dq.storage = mock_services_with_recorder.storage
+        services_with_dq.data_source = mock_services_with_recorder.data_source
+        services_with_dq.metrics = mock_services_with_recorder.metrics
+        services_with_dq.logger = mock_services_with_recorder.logger
+        services_with_dq.dq_monitor = dq_monitor
+
+        # Properly set up async context manager
+        async def services_dq_aenter(self):
+            return services_with_dq
+
+        async def services_dq_aexit(self, *args):
+            pass
+
+        services_with_dq.__aenter__ = services_dq_aenter
+        services_with_dq.__aexit__ = services_dq_aexit
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+            lock_manager.__aexit__ = AsyncMock()
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=services_with_dq,
+                context=context,
+                executor=mock_executor_with_recorder,
+                checkpoint_manager=mock_checkpoint_manager_with_recorder,
+                shutdown_signal=MagicMock(),
+                logger=mock_logger,
+                lifecycle_service=mock_lifecycle_service_with_recorder,
+            )
+
+            await runner.run()
+
+        # Verify DQ check was called
+        dq_monitor.check_quality.assert_called_once()
+        # Verify metrics increment was called for anomaly
+        mock_services_with_recorder.metrics.increment_counter.assert_called()
+        # Verify logger.warning was called (for DQ anomaly)
+        assert mock_logger.warning.called or mock_logger.error.called
+
+    @pytest.mark.asyncio
+    async def test_vacuum_runs_after_success(
+        self,
+        call_recorder,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_logger,
+    ):
+        """Verify VACUUM runs on Silver and Gold tables after successful run.
+
+        Per RULES.md §3.2: VACUUM weekly, retention_period=7 days.
+        When runtime.vacuum_after_run=True, lifecycle service must call vacuum.
+        """
+        config = PipelineConfig(
+            pipeline_name="test_vacuum",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="test.silver",
+            gold_table="test.gold",
+        )
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            vacuum_after_run=True,
+            vacuum_retention_days=7,
+        )
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+
+        # Create lifecycle service that tracks vacuum calls
+        vacuum_calls = []
+
+        async def mock_vacuum(table, retention_days, dry_run):
+            vacuum_calls.append({
+                "table": table,
+                "retention_days": retention_days,
+                "dry_run": dry_run,
+            })
+            return 5  # 5 files removed
+
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+        )
+
+        lifecycle_service = MagicMock()
+        lifecycle_service.clear = AsyncMock(
+            return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
+        )
+        lifecycle_service.vacuum = mock_vacuum
+
+        with patch("bioetl.application.core.runner.LockManager") as mock_lm:
+            lock_manager = MagicMock()
+            lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+            lock_manager.__aexit__ = AsyncMock()
+            mock_lm.create.return_value = lock_manager
+
+            runner = PipelineRunner(
+                config=config,
+                runtime=runtime,
+                services=mock_services_with_recorder,
+                context=context,
+                executor=mock_executor_with_recorder,
+                checkpoint_manager=mock_checkpoint_manager_with_recorder,
+                shutdown_signal=MagicMock(),
+                logger=mock_logger,
+                lifecycle_service=lifecycle_service,
+            )
+
+            await runner.run()
+
+        # Verify vacuum was called for both tables
+        assert len(vacuum_calls) == 2, f"Expected 2 vacuum calls, got {len(vacuum_calls)}"
+        # Verify Silver vacuum
+        silver_vacuum = next(v for v in vacuum_calls if "silver" in v["table"])
+        assert silver_vacuum["retention_days"] == 7
+        assert silver_vacuum["dry_run"] is False
+        # Verify Gold vacuum
+        gold_vacuum = next(v for v in vacuum_calls if "gold" in v["table"])
+        assert gold_vacuum["retention_days"] == 7
+        assert gold_vacuum["dry_run"] is False
+
+    @pytest.mark.asyncio
+    async def test_circuit_breaker_trip_and_recovery(
+        self,
+        call_recorder,
+    ):
+        """Verify circuit breaker trips after failures and recovers.
+
+        Per ADR-007:
+        - Trigger: 5 consecutive errors
+        - Open Duration: 5 min (300s)
+        - Recovery: Half-Open → 1 probe → Closed/Open
+
+        This test verifies the state machine transitions.
+        """
+        import time
+        from unittest.mock import patch as mock_patch
+
+        from bioetl.domain.exceptions import CircuitBreakerOpenError
+        from bioetl.domain.types import CircuitBreakerState
+        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+
+        cb = CircuitBreaker(provider="test", failure_threshold=3, recovery_timeout=1)
+
+        # Initial state should be CLOSED
+        assert cb.get_state() == CircuitBreakerState.CLOSED
+        assert cb.get_failure_count() == 0
+
+        # Simulate 3 consecutive failures to trip the circuit
+        async def failing_func():
+            raise RuntimeError("Simulated failure")
+
+        for _ in range(3):
+            with pytest.raises(RuntimeError):
+                await cb.call(failing_func)
+
+        # Circuit should now be OPEN
+        assert cb.get_state() == CircuitBreakerState.OPEN
+        assert cb.get_trips_total() == 1
+
+        # Requests should be rejected while OPEN
+        with pytest.raises(CircuitBreakerOpenError):
+            await cb.call(failing_func)
+
+        # Advance time past recovery timeout using mock
+        # We mock time.monotonic to simulate time passing
+        original_monotonic = time.monotonic
+        mock_time = original_monotonic() + 2  # 2 seconds past recovery timeout (1s)
+
+        with mock_patch("time.monotonic", return_value=mock_time):
+            # Circuit should transition to HALF_OPEN and allow probe request
+            async def success_func():
+                return "success"
+
+            result = await cb.call(success_func)
+            assert result == "success"
+
+        # After successful probe, circuit should be CLOSED
+        assert cb.get_state() == CircuitBreakerState.CLOSED
+        assert cb.get_failure_count() == 0
+
+        # Verify circuit can trip again
+        for _ in range(3):
+            with pytest.raises(RuntimeError):
+                await cb.call(failing_func)
+
+        assert cb.get_state() == CircuitBreakerState.OPEN
+        assert cb.get_trips_total() == 2  # Second trip
