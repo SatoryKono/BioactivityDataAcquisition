@@ -23,6 +23,7 @@ from bioetl.composition._bootstrap.observability import (
     bootstrap_metrics,
     bootstrap_observability,
     bootstrap_tracer,
+    validate_observability_preflight,
 )
 from bioetl.composition._bootstrap.storage import (
     bootstrap_cleanup,
@@ -43,4 +44,5 @@ __all__ = [
     "bootstrap_quarantine_manager",
     "bootstrap_storage",
     "bootstrap_tracer",
+    "validate_observability_preflight",
 ]
