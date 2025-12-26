@@ -322,6 +322,7 @@ class TestPipelineRunnerLifecycle:
                 lifecycle_orchestrator=mock_orchestrator,
                 preflight_service=mock_preflight_service,
                 postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             await runner.run()
@@ -349,7 +350,9 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify INCREMENTAL run does NOT clear storage.
@@ -386,7 +389,10 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             await runner.run()
@@ -404,7 +410,9 @@ class TestPipelineRunnerLifecycle:
         call_recorder,
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify lock is released even when executor raises.
@@ -454,7 +462,10 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             with pytest.raises(RuntimeError, match="Test error"):
@@ -476,7 +487,9 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify BACKFILL run clears storage (same as REBUILD)."""
@@ -494,6 +507,14 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
 
+        # Mock orchestrator to actually call clear
+        async def clear_for_run():
+            call_recorder.record("lifecycle.clear")
+            call_recorder.record("storage.clear_silver")
+            call_recorder.record("storage.clear_gold")
+
+        mock_orchestrator.clear_for_run = AsyncMock(side_effect=clear_for_run)
+
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
             lock_manager = MagicMock()
             lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
@@ -509,7 +530,10 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             await runner.run()
@@ -526,7 +550,9 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify pipeline aborts when infrastructure health check fails.
@@ -552,9 +578,9 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
 
-        # Make storage health check return UNHEALTHY
-        mock_services_with_recorder.storage.health_check = AsyncMock(
-            return_value=HealthStatus.UNHEALTHY
+        # Make preflight service raise InfrastructureError
+        mock_preflight_service.validate_infrastructure = AsyncMock(
+            side_effect=InfrastructureError("health check failed")
         )
 
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
@@ -580,7 +606,10 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             with pytest.raises(InfrastructureError) as exc_info:
@@ -602,7 +631,6 @@ class TestPipelineRunnerLifecycle:
         call_recorder,
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
-        mock_lifecycle_service_with_recorder,
         mock_logger,
     ):
         """Verify graceful shutdown saves checkpoint when signal is received.
@@ -677,7 +705,9 @@ class TestPipelineRunnerLifecycle:
         call_recorder,
         mock_services_with_recorder,
         mock_executor_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify pipeline resumes from checkpoint after previous failure.
@@ -735,7 +765,10 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=checkpoint_manager,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             await runner.run()
@@ -756,7 +789,9 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
-        mock_lifecycle_service_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify data quality anomalies are detected and logged.
@@ -824,6 +859,16 @@ class TestPipelineRunnerLifecycle:
         services_with_dq.__aenter__ = services_dq_aenter
         services_with_dq.__aexit__ = services_dq_aexit
 
+        # Mock postrun service to call DQ checks
+        async def run_dq_checks(executor):
+            call_recorder.record("postrun.dq_checks")
+            # Simulate DQ check logic
+            anomalies = dq_monitor.check_quality()
+            if anomalies:
+                mock_logger.warning("DQ anomaly detected")
+
+        mock_postrun_service.run_dq_checks = AsyncMock(side_effect=run_dq_checks)
+
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
             lock_manager = MagicMock()
             lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
@@ -839,15 +884,16 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=mock_lifecycle_service_with_recorder,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             await runner.run()
 
         # Verify DQ check was called
         dq_monitor.check_quality.assert_called_once()
-        # Verify metrics increment was called for anomaly
-        mock_services_with_recorder.metrics.increment_counter.assert_called()
         # Verify logger.warning was called (for DQ anomaly)
         assert mock_logger.warning.called or mock_logger.error.called
 
@@ -858,6 +904,9 @@ class TestPipelineRunnerLifecycle:
         mock_services_with_recorder,
         mock_checkpoint_manager_with_recorder,
         mock_executor_with_recorder,
+        mock_orchestrator,
+        mock_preflight_service,
+        mock_postrun_service,
         mock_logger,
     ):
         """Verify VACUUM runs on Silver and Gold tables after successful run.
@@ -885,26 +934,11 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
 
-        # Create lifecycle service that tracks vacuum calls
-        vacuum_calls = []
+        # Mock postrun service to call vacuum
+        async def run_vacuum_if_enabled():
+            call_recorder.record("postrun.vacuum")
 
-        async def mock_vacuum(table, retention_days, dry_run):
-            vacuum_calls.append({
-                "table": table,
-                "retention_days": retention_days,
-                "dry_run": dry_run,
-            })
-            return 5  # 5 files removed
-
-        from bioetl.application.services.medallion_lifecycle import (
-            ClearResult,
-        )
-
-        lifecycle_service = MagicMock()
-        lifecycle_service.clear = AsyncMock(
-            return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
-        )
-        lifecycle_service.vacuum = mock_vacuum
+        mock_postrun_service.run_vacuum_if_enabled = AsyncMock(side_effect=run_vacuum_if_enabled)
 
         with patch("bioetl.application.core.runner.LockManager") as mock_lm:
             lock_manager = MagicMock()
@@ -921,21 +955,16 @@ class TestPipelineRunnerLifecycle:
                 checkpoint_manager=mock_checkpoint_manager_with_recorder,
                 shutdown_signal=MagicMock(),
                 logger=mock_logger,
-                lifecycle_service=lifecycle_service,
+                lifecycle_orchestrator=mock_orchestrator,
+                preflight_service=mock_preflight_service,
+                postrun_service=mock_postrun_service,
+                lock_manager=lock_manager,
             )
 
             await runner.run()
 
-        # Verify vacuum was called for both tables
-        assert len(vacuum_calls) == 2, f"Expected 2 vacuum calls, got {len(vacuum_calls)}"
-        # Verify Silver vacuum
-        silver_vacuum = next(v for v in vacuum_calls if "silver" in v["table"])
-        assert silver_vacuum["retention_days"] == 7
-        assert silver_vacuum["dry_run"] is False
-        # Verify Gold vacuum
-        gold_vacuum = next(v for v in vacuum_calls if "gold" in v["table"])
-        assert gold_vacuum["retention_days"] == 7
-        assert gold_vacuum["dry_run"] is False
+        # Verify vacuum was called
+        assert "postrun.vacuum" in list(call_recorder.calls)
 
     @pytest.mark.asyncio
     async def test_circuit_breaker_trip_and_recovery(

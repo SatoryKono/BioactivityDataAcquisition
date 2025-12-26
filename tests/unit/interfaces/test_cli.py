@@ -263,63 +263,67 @@ class TestCliCommands:
         assert "Unknown pipeline" in result.output or "Error" in result.output
 
     @patch("bioetl.interfaces.cli.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.create_pipeline_runner")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_with_valid_pipeline(
-        self, mock_asyncio, mock_bootstrap, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_create_runner, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
         mock_runner = MagicMock()
         mock_runner.logger = MagicMock()
         mock_runner.shutdown_signal = MagicMock()
-        mock_bootstrap.return_value = mock_runner
+        mock_create_runner.return_value = mock_runner
 
         cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        # Should have called bootstrap_pipeline
-        mock_bootstrap.assert_called_once()
+        # Should have called create_pipeline_runner
+        mock_create_runner.assert_called_once()
 
     @patch("bioetl.interfaces.cli.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.create_pipeline_runner")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_with_limit(
-        self, mock_asyncio, mock_bootstrap, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_create_runner, mock_register, cli_runner, mock_registry
     ):
         """Test that --limit is passed correctly."""
         mock_runner = MagicMock()
         mock_runner.logger = MagicMock()
         mock_runner.shutdown_signal = MagicMock()
-        mock_bootstrap.return_value = mock_runner
+        mock_create_runner.return_value = mock_runner
 
         cli_runner.invoke(
             cli, ["run", "--pipeline", "chembl_activity", "--limit", "100"]
         )
 
-        # Verify limit was passed to context
-        call_args = mock_bootstrap.call_args
-        ctx = call_args[0][0]
-        assert ctx.limit == 100
+        # Verify limit was passed via RunOptions
+        call_args = mock_create_runner.call_args
+        pipeline_name = call_args[0][0]
+        options = call_args[0][1]  # RunOptions
+        assert pipeline_name == "chembl_activity"
+        assert options.limit == 100
 
     @patch("bioetl.interfaces.cli.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.create_pipeline_runner")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_with_resume_flag(
-        self, mock_asyncio, mock_bootstrap, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_create_runner, mock_register, cli_runner, mock_registry
     ):
         """Test that --resume flag is passed correctly."""
         mock_runner = MagicMock()
         mock_runner.logger = MagicMock()
         mock_runner.shutdown_signal = MagicMock()
-        mock_bootstrap.return_value = mock_runner
+        mock_create_runner.return_value = mock_runner
 
         cli_runner.invoke(
             cli, ["run", "--pipeline", "chembl_activity", "--resume"]
         )
 
-        # Verify resume was passed to context
-        call_args = mock_bootstrap.call_args
-        ctx = call_args[0][0]
-        assert ctx.resume is True
+        # Verify resume was passed via RunOptions
+        call_args = mock_create_runner.call_args
+        pipeline_name = call_args[0][0]
+        options = call_args[0][1]  # RunOptions
+        assert pipeline_name == "chembl_activity"
+        assert options.resume is True
 
 
 # =============================================================================

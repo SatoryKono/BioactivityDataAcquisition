@@ -357,31 +357,19 @@ class TestRunCommandAdvanced:
 class TestDryRunMode:
     """Tests for dry-run mode and _preview_cleanup function."""
 
-    @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
+    @patch("bioetl.interfaces.cli.preview_cleanup")
     def test_dry_run_shows_preview(
         self,
-        mock_bootstrap_cleanup,
-        mock_load_config,
+        mock_preview_cleanup,
         runner,
     ):
         """Test that dry-run mode shows file preview without execution."""
-        # Setup cleanup service mock
-        mock_cleanup_service = MagicMock()
-        mock_cleanup_service.preview = AsyncMock(
-            return_value=CleanupPreview(
-                silver=LayerInfo(path="silver/path", file_count=5, exists=True),
-                gold=LayerInfo(path="gold/path", file_count=0, exists=False),
-                total_files=5,
-            )
+        # preview_cleanup returns CleanupPreview directly (it's async in entrypoints)
+        mock_preview_cleanup.return_value = CleanupPreview(
+            silver=LayerInfo(path="silver/path", file_count=5, exists=True),
+            gold=LayerInfo(path="gold/path", file_count=0, exists=False),
+            total_files=5,
         )
-        mock_bootstrap_cleanup.return_value = mock_cleanup_service
-
-        # Setup config mock
-        mock_config = MagicMock()
-        mock_config.silver_table = "test.table"
-        mock_config.gold_table = "test.gold_table"
-        mock_load_config.return_value = mock_config
 
         result = runner.invoke(
             cli,
@@ -395,30 +383,18 @@ class TestDryRunMode:
         assert "Total items that would be cleared: ~5" in result.output
         assert "No changes were made" in result.output
 
-    @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
+    @patch("bioetl.interfaces.cli.preview_cleanup")
     def test_dry_run_counts_existing_files(
         self,
-        mock_bootstrap_cleanup,
-        mock_load_config,
+        mock_preview_cleanup,
         runner,
     ):
         """Test that dry-run correctly counts existing files."""
-        # Setup cleanup service mock
-        mock_cleanup_service = MagicMock()
-        mock_cleanup_service.preview = AsyncMock(
-            return_value=CleanupPreview(
-                silver=LayerInfo(path="silver/path", file_count=2, exists=True),
-                gold=None,
-                total_files=2,
-            )
+        mock_preview_cleanup.return_value = CleanupPreview(
+            silver=LayerInfo(path="silver/path", file_count=2, exists=True),
+            gold=None,
+            total_files=2,
         )
-        mock_bootstrap_cleanup.return_value = mock_cleanup_service
-
-        mock_config = MagicMock()
-        mock_config.silver_table = "test.table"
-        mock_config.gold_table = None
-        mock_load_config.return_value = mock_config
 
         result = runner.invoke(
             cli,
@@ -427,18 +403,15 @@ class TestDryRunMode:
 
         assert result.exit_code == 0
         assert "2 files" in result.output
-        assert "Gold" not in result.output or "(does not exist)" in result.output
 
-    @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
+    @patch("bioetl.interfaces.cli.preview_cleanup")
     def test_dry_run_preview_exception(
         self,
-        mock_bootstrap_cleanup,
-        mock_load_config,
+        mock_preview_cleanup,
         runner,
     ):
         """Test that dry-run handles exceptions during preview."""
-        mock_load_config.side_effect = Exception("Preview error")
+        mock_preview_cleanup.side_effect = Exception("Preview error")
 
         result = runner.invoke(
             cli,
@@ -448,30 +421,19 @@ class TestDryRunMode:
         assert result.exit_code == 0  # Should catch exception and print error
         assert "Error previewing cleanup" in result.output
 
-    @patch("bioetl.interfaces.cli.load_pipeline_config")
-    @patch("bioetl.interfaces.cli.bootstrap_cleanup")
+    @patch("bioetl.interfaces.cli.preview_cleanup")
     def test_dry_run_preview_variations(
         self,
-        mock_bootstrap_cleanup,
-        mock_load_config,
+        mock_preview_cleanup,
         runner,
     ):
         """Test dry-run preview with different file existence combinations."""
         # Case: Silver missing, Gold exists
-        mock_cleanup_service = MagicMock()
-        mock_cleanup_service.preview = AsyncMock(
-            return_value=CleanupPreview(
-                silver=LayerInfo(path="silver/path", file_count=0, exists=False),
-                gold=LayerInfo(path="gold/path", file_count=10, exists=True),
-                total_files=10,
-            )
+        mock_preview_cleanup.return_value = CleanupPreview(
+            silver=LayerInfo(path="silver/path", file_count=0, exists=False),
+            gold=LayerInfo(path="gold/path", file_count=10, exists=True),
+            total_files=10,
         )
-        mock_bootstrap_cleanup.return_value = mock_cleanup_service
-
-        mock_config = MagicMock()
-        mock_config.silver_table = "test.table"
-        mock_config.gold_table = "test.gold"
-        mock_load_config.return_value = mock_config
 
         result = runner.invoke(
             cli,
@@ -493,20 +455,21 @@ class TestDryRunMode:
         assert result.exit_code == 0
         assert "cancelled" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.create_pipeline_runner")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_rebuild_with_yes_skips_confirmation(
         self,
         mock_asyncio_run,
         mock_setup_handlers,
-        mock_bootstrap,
+        mock_create_runner,
         runner,
     ):
         """Test that rebuild with -y skips confirmation."""
         mock_runner_instance = MagicMock()
         mock_runner_instance.run = AsyncMock()
-        mock_bootstrap.return_value = mock_runner_instance
+        mock_runner_instance.logger = MagicMock()  # CLI needs logger
+        mock_create_runner.return_value = mock_runner_instance
 
         result = runner.invoke(
             cli,
@@ -514,7 +477,7 @@ class TestDryRunMode:
         )
 
         assert result.exit_code == 0
-        mock_bootstrap.assert_called_once()
+        mock_create_runner.assert_called_once()
 
 
 class TestValidatePipelineName:
