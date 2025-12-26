@@ -39,7 +39,7 @@ from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.core.medallion_policy import (
     Layer,
-    MedallionPolicy,
+    WriteModePolicy,
     WriteMode,
 )
 from bioetl.application.core.transform_utils import (
@@ -69,7 +69,7 @@ __all__ = [
     "LayerInfo",
     "LifecycleOrchestrator",
     "LockManager",
-    "MedallionPolicy",
+    "WriteModePolicy",
     "PipelineConfig",
     "PipelineServices",
     "PipelineShutdownError",
