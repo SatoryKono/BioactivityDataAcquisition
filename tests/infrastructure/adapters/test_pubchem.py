@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerOpenError
+from bioetl.infrastructure.adapters.http.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+)
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
 
 
@@ -18,11 +23,36 @@ def mock_logger():
 
 
 @pytest.fixture
-def pubchem_adapter(mock_logger):
-    adapter = PubChemAdapter(logger=mock_logger, rate=100)  # High rate to avoid delays
+def rate_limiter():
+    """Create a rate limiter for testing."""
+    return TokenBucket(rate=100.0, capacity=200, provider="pubchem")
+
+
+@pytest.fixture
+def circuit_breaker():
+    """Create a circuit breaker for testing."""
+    return CircuitBreaker(provider="pubchem", failure_threshold=5, recovery_timeout=300)
+
+
+@pytest.fixture
+def thread_pool():
+    """Create a thread pool for testing."""
+    pool = ThreadPoolExecutor(max_workers=4)
+    yield pool
+    pool.shutdown(wait=False)
+
+
+@pytest.fixture
+def pubchem_adapter(mock_logger, rate_limiter, circuit_breaker, thread_pool):
+    """Create PubChemAdapter with injected dependencies."""
+    adapter = PubChemAdapter(
+        logger=mock_logger,
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        thread_pool=thread_pool,
+    )
     yield adapter
-    # Cleanup logic if necessary (though close() calls shutdown on threadpool)
-    adapter.thread_pool.shutdown(wait=False)
+    # Thread pool cleanup is handled by thread_pool fixture
 
 
 @pytest.fixture

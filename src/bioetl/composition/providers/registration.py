@@ -13,7 +13,8 @@ functions that were previously in DataSourceRegistry.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from concurrent.futures import ThreadPoolExecutor
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.providers.provider_registry import (
@@ -24,6 +25,8 @@ from bioetl.composition.providers.provider_registry import (
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
 from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
@@ -35,6 +38,7 @@ from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -108,6 +112,62 @@ def _create_chembl_data_source(
     return _wrap_with_filter(base_adapter, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_pubchem_adapter(
+    http_client: UnifiedHTTPClient | None = None,
+    logger: LoggerPort | None = None,
+    settings: Settings | None = None,
+    **kwargs: Any,
+) -> DataSourcePort:
+    """Create PubChem adapter with all dependencies injected.
+
+    This is the custom_creator for PubChem that creates all dependencies
+    in the Composition Root before creating the adapter.
+
+    Args:
+        http_client: Not used for PubChem (uses pubchempy).
+        logger: LoggerPort instance for structured logging.
+        settings: Application settings.
+        **kwargs: Additional keyword arguments (e.g., strict_error_handling).
+
+    Returns:
+        Configured PubChemAdapter instance.
+
+    Raises:
+        ValueError: If logger is not provided.
+    """
+    if logger is None:
+        raise ValueError(
+            "PubChem adapter requires logger but none was provided. "
+            "Ensure logger is passed from Composition Root."
+        )
+
+    # Get configuration parameters
+    rate = kwargs.pop("rate", 5.0)  # 5 req/sec per RULES.md
+    capacity = kwargs.pop("capacity", int(rate * 2))
+    circuit_breaker_threshold = kwargs.pop("circuit_breaker_threshold", 5)
+    circuit_breaker_timeout = kwargs.pop("circuit_breaker_timeout", 300)
+    max_workers = kwargs.pop("max_workers", 4)
+    strict_error_handling = kwargs.pop("strict_error_handling", False)
+
+    # Create dependencies in Composition Root (DI pattern)
+    rate_limiter = TokenBucket(rate=rate, capacity=capacity, provider="pubchem")
+    circuit_breaker = CircuitBreaker(
+        provider="pubchem",
+        failure_threshold=circuit_breaker_threshold,
+        recovery_timeout=circuit_breaker_timeout,
+    )
+    thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+
+    # Create adapter with injected dependencies
+    return PubChemAdapter(
+        logger=logger,
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        thread_pool=thread_pool,
+        strict_error_handling=strict_error_handling,
+    )
+
+
 def _create_pubchem_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
@@ -117,11 +177,11 @@ def _create_pubchem_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create PubChem data source with optional CSV filtering."""
-    DataSourceFactory, _ = _get_factories()
-    data_source = DataSourceFactory.create(
-        "pubchem",
+    # Create adapter via custom creator with all dependencies injected
+    data_source = _create_pubchem_adapter(
         http_client=None,
         logger=logger,
+        settings=settings,
         rate=5.0,
         strict_error_handling=settings.strict_error_handling,
     )
@@ -214,7 +274,9 @@ def register_all_providers() -> None:
             ),
         )
 
-    # PubChem - sync adapter (uses internal ThreadPoolExecutor)
+    # PubChem - sync adapter with DI-compliant custom creator
+    # Dependencies (TokenBucket, CircuitBreaker, ThreadPoolExecutor) are created
+    # in _create_pubchem_adapter following Composition Root pattern
     if not ProviderRegistry.is_registered("pubchem"):
         ProviderRegistry.register(
             "pubchem",
@@ -226,6 +288,7 @@ def register_all_providers() -> None:
                 ),
                 requires_http_client=False,
                 requires_logger=True,
+                custom_creator=_create_pubchem_adapter,
                 data_source_creator=_create_pubchem_data_source,
             ),
         )
