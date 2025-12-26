@@ -6,6 +6,8 @@ baseline updates, and threshold violations.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import pytest
 
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
@@ -28,7 +30,7 @@ class TestDQMonitorAnomalyDetection:
             monitor.update_baseline_from_metrics({"record_count": 1000.0})
 
         # Check with spike
-        anomalies = monitor.check_quality({"record_count": 5000.0})
+        anomalies = monitor.check_quality({"record_count": 5000.0}, timestamp=datetime.now(timezone.utc))
 
         assert len(anomalies) == 1
         assert anomalies[0].anomaly_type == AnomalyType.SPIKE
