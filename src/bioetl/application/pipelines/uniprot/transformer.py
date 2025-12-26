@@ -17,6 +17,7 @@ from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -28,14 +29,21 @@ class UniProtProteinTransformer(BaseTransformer):
     protein_name is optional and may be None.
     """
 
-    def __init__(self, provider: str = "uniprot"):
+    def __init__(
+        self,
+        provider: str = "uniprot",
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+    ):
         """Initialize UniProt protein transformer.
 
         Args:
             provider: Data provider identifier.
+            tracer: Optional tracing port for distributed tracing (O1 observability).
+            metrics: Optional metrics port for duration/error tracking (O1 observability).
 
         """
-        super().__init__(provider)
+        super().__init__(provider, tracer=tracer, metrics=metrics)
 
     async def _transform_impl(
         self,

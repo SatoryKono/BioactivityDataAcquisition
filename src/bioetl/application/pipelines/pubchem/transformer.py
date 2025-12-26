@@ -14,6 +14,7 @@ from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -25,14 +26,21 @@ class PubChemCompoundTransformer(BaseTransformer):
     per entity invariant validation.
     """
 
-    def __init__(self, provider: str = "pubchem"):
+    def __init__(
+        self,
+        provider: str = "pubchem",
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+    ):
         """Initialize PubChem compound transformer.
 
         Args:
             provider: Data provider identifier.
+            tracer: Optional tracing port for distributed tracing (O1 observability).
+            metrics: Optional metrics port for duration/error tracking (O1 observability).
 
         """
-        super().__init__(provider)
+        super().__init__(provider, tracer=tracer, metrics=metrics)
 
     async def _transform_impl(
         self,
