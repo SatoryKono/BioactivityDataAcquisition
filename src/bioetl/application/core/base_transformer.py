@@ -424,6 +424,7 @@ class BaseTransformer(ABC):
             run_id=context.run_id,
             run_type=context.run_type,
             source_batch_id=None,
+            ingestion_ts=context.started_at,
             **business_data,
         )
 
