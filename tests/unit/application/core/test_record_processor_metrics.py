@@ -143,8 +143,10 @@ class TestRecordProcessorMetrics:
         # Setup error classifier to return DQ error
         mock_error_classifier.classify.return_value = ErrorType.DATA_QUALITY
 
-        # Override transform to fail
-        record_processor._transform.side_effect = Exception("DQ Fail")
+        # Override transformer's transform_batch to fail
+        record_processor._transformer.transform_batch = AsyncMock(
+            side_effect=Exception("DQ Fail")
+        )
 
         records = [{"id": 1}]
         batch_id = BatchID(uuid4())

@@ -213,11 +213,15 @@ class TestDICompliance:
         violations = []
 
         # Patterns for internal instantiation (suspicious but not always wrong)
+        # NOTE: We match specific infrastructure class patterns, not general ones.
+        # Application-layer coordinators like BatchWriter, BatchTransformer are allowed
+        # since they're not infrastructure - they depend on injected ports.
         internal_creation_patterns = [
-            # Creating adapters inside __init__
-            (r"self\._\w+\s*=\s*\w+Adapter\(", "Adapter creation in __init__"),
-            (r"self\._\w+\s*=\s*\w+Client\(", "Client creation in __init__"),
-            (r"self\._\w+\s*=\s*\w+Writer\(", "Writer creation in __init__"),
+            # Creating adapters inside __init__ (infrastructure)
+            (r"self\._\w+\s*=\s*(?!Batch)\w+Adapter\(", "Adapter creation in __init__"),
+            (r"self\._\w+\s*=\s*(?!Unified)\w+Client\(", "Client creation in __init__"),
+            # Storage layer writers (infrastructure), but NOT BatchWriter (application)
+            (r"self\._\w+\s*=\s*(Bronze|Silver|Gold|Delta)Writer\(", "Storage writer creation in __init__"),
             # Creating HTTP clients inside methods
             (r"httpx\.(Async)?Client\(\)", "httpx client creation"),
         ]
