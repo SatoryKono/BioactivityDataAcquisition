@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Проверка `@runtime_checkable` для всех портов
   - Проверка полноты экспорта в `__all__`
   - Контрактные тесты для Storage, Lock, Checkpoint, Quarantine портов
-  - **Итого architecture тестов**: 97 (было 46)
+  - **Итого architecture тестов**: 213 (было 46)
 
 - **Unified Error Context**: Добавлен унифицированный контекст ошибок в `BioETLError`
   - Свойство `context` автоматически собирает все публичные атрибуты исключения
@@ -128,6 +128,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `maintenance.vacuum_retention_days` для прохождения валидации `RuntimeConfig`
 - **Batch Writer Test**: Исправлено сравнение `primary_keys` — использован `list()` для
   совместимости tuple/list
+- **Architecture Test - Adapters**: Добавлен `base_metrics.py` в исключения проверки health_check —
+  это базовый класс, а не DataSourcePort adapter
+- **Architecture Test - Domain API**: Добавлен `events` в исключения submodules в
+  `test_domain_all_is_complete` — это подмодуль, PipelineEvent уже экспортирован
+- **Preflight Service Tests**: Исправлен `gold_write_mode='append'` → `'merge'` в тестовом fixture
+  (append не допускается medallion policy для Gold слоя)
 
 ### Changed
 

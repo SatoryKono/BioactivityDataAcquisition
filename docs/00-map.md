@@ -278,13 +278,14 @@ graph TD
 | RULES.md (docs/)         | 2025-12-23   | v5.2 (E2E Testing added)     |
 | 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md         |
 | 00-rules-summary.md      | 2025-12-23   | v5.2 Synced                  |
-| 00-map.md                | 2025-12-23   | Updated (tests/, ADR-007-011)|
-| CHANGELOG.md             | 2025-12-23   | Unreleased (E2E, xrefs fix)  |
+| 00-map.md                | 2025-12-26   | Updated (ADR-012..019 added) |
+| CHANGELOG.md             | 2025-12-26   | v5.3.2 (Test infrastructure) |
 | 03-guides/               | 2025-12-20   | Consolidated (6 guides)      |
-| ADR-001..011             | 2025-12-23   | All 11 ADRs documented       |
-| tests/e2e/               | 2025-12-23   | NEW: Local-Only E2E tests    |
+| ADR-001..019             | 2025-12-26   | All 19 ADRs documented       |
+| tests/e2e/               | 2025-12-23   | Local-Only E2E tests         |
+| tests/architecture/      | 2025-12-26   | 213 architecture tests       |
 | pyproject.toml           | 2025-12-16   | Version 5.0.0                |
 
 ---
 
-*Last updated: 2025-12-23. Update when adding new documentation.*
+*Last updated: 2025-12-26. Update when adding new documentation.*
