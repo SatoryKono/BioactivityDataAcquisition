@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 
 from bioetl.infrastructure.observability.anomaly.detectors.iqr import IQRDetector
@@ -24,25 +26,25 @@ class TestIQRDetector:
     def test_detect_returns_none_for_insufficient_samples(self, detector):
         """Test that detect returns None when baseline has < 4 samples."""
         baseline = [100.0, 110.0, 120.0]  # Only 3 samples
-        result = detector.detect("metric", 500.0, baseline)
+        result = detector.detect("metric", 500.0, baseline, timestamp=datetime.now(UTC))
         assert result is None
 
     def test_detect_returns_none_for_zero_iqr(self, detector):
         """Test that detect returns None when IQR is zero."""
         baseline = [100.0, 100.0, 100.0, 100.0, 100.0]  # All same values
-        result = detector.detect("metric", 500.0, baseline)
+        result = detector.detect("metric", 500.0, baseline, timestamp=datetime.now(UTC))
         assert result is None
 
     def test_detect_returns_none_for_normal_value(self, detector):
         """Test that detect returns None for value within bounds."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 125.0, baseline)  # Within IQR
+        result = detector.detect("metric", 125.0, baseline, timestamp=datetime.now(UTC))  # Within IQR
         assert result is None
 
     def test_detect_spike_anomaly(self, detector):
         """Test detection of spike (value above Q3)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 200.0, baseline, threshold=1.0)
+        result = detector.detect("metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
@@ -52,7 +54,7 @@ class TestIQRDetector:
     def test_detect_drop_anomaly(self, detector):
         """Test detection of drop (value below Q1)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 50.0, baseline, threshold=1.0)
+        result = detector.detect("metric", 50.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -104,12 +106,14 @@ class TestIQRDetector:
 
     def test_create_anomaly(self, detector):
         """Test anomaly object creation."""
+        ts = datetime.now(UTC)
         anomaly = detector._create_anomaly(
             metric_name="test_metric",
             current_value=300.0,
             mean=100.0,
             stddev=20.0,
             score=4.0,
+            timestamp=ts,
         )
 
         assert anomaly.metric_name == "test_metric"
@@ -119,7 +123,7 @@ class TestIQRDetector:
         assert anomaly.z_score == 4.0
         assert anomaly.severity == AnomalySeverity.HIGH
         assert anomaly.anomaly_type == AnomalyType.SPIKE
-        assert anomaly.timestamp is not None
+        assert anomaly.timestamp == ts
 
     def test_create_anomaly_drop_type(self, detector):
         """Test anomaly type is DROP when value is below mean."""
@@ -129,6 +133,7 @@ class TestIQRDetector:
             mean=100.0,
             stddev=20.0,
             score=3.0,
+            timestamp=datetime.now(UTC),
         )
 
         assert anomaly.anomaly_type == AnomalyType.DROP
@@ -150,25 +155,25 @@ class TestMADDetector:
     def test_detect_returns_none_for_insufficient_samples(self, detector):
         """Test that detect returns None when baseline has < 3 samples."""
         baseline = [100.0, 110.0]  # Only 2 samples
-        result = detector.detect("metric", 500.0, baseline)
+        result = detector.detect("metric", 500.0, baseline, timestamp=datetime.now(UTC))
         assert result is None
 
     def test_detect_returns_none_for_zero_mad(self, detector):
         """Test that detect returns None when MAD is zero."""
         baseline = [100.0, 100.0, 100.0, 100.0]  # All same values
-        result = detector.detect("metric", 500.0, baseline)
+        result = detector.detect("metric", 500.0, baseline, timestamp=datetime.now(UTC))
         assert result is None
 
     def test_detect_returns_none_for_normal_value(self, detector):
         """Test that detect returns None for value within threshold."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 120.0, baseline)  # Close to median
+        result = detector.detect("metric", 120.0, baseline, timestamp=datetime.now(UTC))  # Close to median
         assert result is None
 
     def test_detect_spike_anomaly(self, detector):
         """Test detection of spike (high value)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 300.0, baseline, threshold=1.0)
+        result = detector.detect("metric", 300.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
@@ -178,7 +183,7 @@ class TestMADDetector:
     def test_detect_drop_anomaly(self, detector):
         """Test detection of drop (low value)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 10.0, baseline, threshold=1.0)
+        result = detector.detect("metric", 10.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -221,12 +226,14 @@ class TestMADDetector:
 
     def test_create_anomaly(self, detector):
         """Test anomaly object creation."""
+        ts = datetime.now(UTC)
         anomaly = detector._create_anomaly(
             metric_name="test_metric",
             current_value=300.0,
             mean=100.0,
             stddev=20.0,
             score=4.5,
+            timestamp=ts,
         )
 
         assert anomaly.metric_name == "test_metric"
@@ -236,7 +243,7 @@ class TestMADDetector:
         assert anomaly.z_score == 4.5
         assert anomaly.severity == AnomalySeverity.HIGH
         assert anomaly.anomaly_type == AnomalyType.SPIKE
-        assert anomaly.timestamp is not None
+        assert anomaly.timestamp == ts
 
     def test_create_anomaly_drop_type(self, detector):
         """Test anomaly type is DROP when value is below mean."""
@@ -246,6 +253,7 @@ class TestMADDetector:
             mean=100.0,
             stddev=20.0,
             score=3.5,
+            timestamp=datetime.now(UTC),
         )
 
         assert anomaly.anomaly_type == AnomalyType.DROP
@@ -267,7 +275,7 @@ class TestDetectorEdgeCases:
         """Test IQR detector with negative values."""
         detector = IQRDetector()
         baseline = [-100.0, -90.0, -80.0, -70.0, -60.0]
-        result = detector.detect("metric", -200.0, baseline, threshold=1.0)
+        result = detector.detect("metric", -200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -276,7 +284,7 @@ class TestDetectorEdgeCases:
         """Test MAD detector with negative values."""
         detector = MADDetector()
         baseline = [-100.0, -90.0, -80.0, -70.0, -60.0]
-        result = detector.detect("metric", -200.0, baseline, threshold=1.0)
+        result = detector.detect("metric", -200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -285,7 +293,7 @@ class TestDetectorEdgeCases:
         """Test IQR detector with large baseline."""
         detector = IQRDetector()
         baseline = list(range(1, 101))  # 1 to 100
-        result = detector.detect("metric", 200.0, baseline, threshold=1.0)
+        result = detector.detect("metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
 
@@ -293,7 +301,7 @@ class TestDetectorEdgeCases:
         """Test MAD detector with large baseline."""
         detector = MADDetector()
         baseline = list(range(1, 101))  # 1 to 100
-        result = detector.detect("metric", 200.0, baseline, threshold=1.0)
+        result = detector.detect("metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
 
         assert result is not None
 
@@ -302,7 +310,7 @@ class TestDetectorEdgeCases:
         detector = IQRDetector()
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         # Test with threshold of 1.5 (default)
-        result = detector.detect("metric", 175.0, baseline, threshold=1.5)
+        result = detector.detect("metric", 175.0, baseline, threshold=1.5, timestamp=datetime.now(UTC))
 
         # Value should be just at or past threshold
         if result is not None:
@@ -313,7 +321,7 @@ class TestDetectorEdgeCases:
         detector = MADDetector()
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         # Test with threshold of 2.0 (default)
-        result = detector.detect("metric", 120.0, baseline, threshold=2.0)
+        result = detector.detect("metric", 120.0, baseline, threshold=2.0, timestamp=datetime.now(UTC))
 
         # Should be None since value is close to median
         assert result is None
