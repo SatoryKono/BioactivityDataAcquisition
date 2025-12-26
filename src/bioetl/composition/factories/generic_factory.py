@@ -18,6 +18,7 @@ from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
     DataSourceRegistry,
 )
+from bioetl.composition.factories.runner_services import build_runner_services
 from bioetl.composition.factories.services_builder import ServicesBuilder
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
@@ -326,7 +327,19 @@ class GenericPipelineFactory(Generic[TPipeline]):
             logger=observability.logger,
         )
 
-        # Assemble Runner
+        # Build runner services via DI factory (composition layer)
+        runner_services = build_runner_services(
+            config=pipeline.config,
+            runtime=pipeline.runtime,
+            services=pipeline.services,
+            context=pipeline.context,
+            logger=observability.logger,
+            shutdown_signal=pipeline.shutdown_signal,
+            checkpoint_manager=checkpoint_manager,
+            lifecycle_service=lifecycle_service,
+        )
+
+        # Assemble Runner with injected services
         return PipelineRunner(
             config=pipeline.config,
             runtime=pipeline.runtime,
@@ -336,9 +349,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=pipeline.shutdown_signal,
             logger=observability.logger,
+            lock_manager=runner_services.lock_manager,
+            preflight_service=runner_services.preflight,
+            postrun_service=runner_services.postrun,
+            lifecycle_orchestrator=runner_services.lifecycle_orch,
             pipeline=pipeline,
             tracer=observability.tracer,
-            lifecycle_service=lifecycle_service,
         )
 
 
