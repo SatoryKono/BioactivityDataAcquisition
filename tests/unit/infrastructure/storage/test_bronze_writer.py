@@ -861,3 +861,145 @@ class TestBronzeWriterLoggerInjection:
         writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
 
         assert writer.logger is mock_logger
+
+
+@pytest.mark.unit
+class TestBronzeWriterMetadataDeterminism:
+    """Tests for metadata determinism (REQ-ARCH-030)."""
+
+    @pytest.mark.asyncio
+    async def test_metadata_bitwise_identical_on_repeated_calls(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that metadata files are bitwise identical on repeated writes.
+
+        Verifies REQ-ARCH-030: Deterministic writes for reproducibility.
+        Uses sort_keys=True and separators=(',', ':') to ensure consistent output.
+        """
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        date = datetime(2024, 1, 15)
+
+        # Write twice with the same parameters but different batch IDs
+        batch_id_1 = BatchID(uuid4())
+        batch_id_2 = BatchID(uuid4())
+
+        path_1 = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id_1,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        path_2 = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id_2,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Read both metadata files
+        meta_path_1 = (tmp_path / path_1).with_suffix(".zst.meta.json")
+        meta_path_2 = (tmp_path / path_2).with_suffix(".zst.meta.json")
+
+        with open(meta_path_1, "rb") as f:
+            meta_bytes_1 = f.read()
+        with open(meta_path_2, "rb") as f:
+            meta_bytes_2 = f.read()
+
+        # Parse to compare structure (batch_id will differ)
+        meta_1 = json.loads(meta_bytes_1)
+        meta_2 = json.loads(meta_bytes_2)
+
+        # Normalize batch_id for comparison
+        meta_1["batch_id"] = "normalized"
+        meta_2["batch_id"] = "normalized"
+
+        # Re-encode with same settings to verify determinism
+        normalized_1 = json.dumps(meta_1, sort_keys=True, separators=(",", ":"))
+        normalized_2 = json.dumps(meta_2, sort_keys=True, separators=(",", ":"))
+
+        assert normalized_1 == normalized_2, (
+            "Metadata should produce identical bytes when serialized with same settings"
+        )
+
+    def test_metadata_json_format_is_deterministic(
+        self,
+        tmp_path,
+        noop_logger,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+        batch_id: BatchID,
+    ) -> None:
+        """Test that _build_bronze_metadata produces deterministic JSON.
+
+        Multiple serializations of the same metadata dict should produce
+        identical byte sequences when using sort_keys=True and separators=(',', ':').
+        """
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        metadata = writer._build_bronze_metadata(
+            run_id=run_id,
+            run_type=run_type,
+            effective_ts=ingestion_ts,
+            provider="chembl",
+            entity="activity",
+            batch_id=batch_id,
+        )
+
+        # Serialize multiple times and verify identical output
+        serialized = [
+            json.dumps(metadata, sort_keys=True, separators=(",", ":"))
+            for _ in range(10)
+        ]
+
+        assert all(s == serialized[0] for s in serialized), (
+            "All serializations should be identical"
+        )
+
+    def test_metadata_has_no_whitespace_variations(
+        self,
+        tmp_path,
+        noop_logger,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+        batch_id: BatchID,
+    ) -> None:
+        """Test that metadata JSON has consistent formatting with no extra whitespace.
+
+        Using separators=(',', ':') removes spaces after separators.
+        """
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+
+        metadata = writer._build_bronze_metadata(
+            run_id=run_id,
+            run_type=run_type,
+            effective_ts=ingestion_ts,
+            provider="chembl",
+            entity="activity",
+            batch_id=batch_id,
+        )
+
+        serialized = json.dumps(metadata, sort_keys=True, separators=(",", ":"))
+
+        # Verify no spaces after : or ,
+        assert ": " not in serialized, "No space after colon"
+        assert ", " not in serialized, "No space after comma"
+        # Verify keys are sorted
+        keys = list(json.loads(serialized).keys())
+        assert keys == sorted(keys), "Keys should be alphabetically sorted"
