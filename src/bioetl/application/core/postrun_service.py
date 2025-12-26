@@ -10,6 +10,8 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+
 if TYPE_CHECKING:
     from bioetl.application.core.executor import PipelineExecutor
     from bioetl.application.core.pipeline_services import PipelineServices
@@ -92,16 +94,54 @@ class PostrunService:
     async def run_dq_checks(self, executor: PipelineExecutor) -> DQResult:
         """Check data quality metrics and report anomalies.
 
+        Performs threshold checks before anomaly detection:
+        1. If error_rate >= hard_fail_threshold: raises DataQualityThresholdError
+        2. If error_rate >= soft_fail_threshold: logs warning + emits metric
+        3. Then runs anomaly detection if dq_monitor is available
+
         Args:
             executor: Pipeline executor with batch metrics.
 
         Returns:
             DQResult with anomaly detection results.
+
+        Raises:
+            DataQualityThresholdError: If error rate exceeds hard threshold.
         """
+        batch_metrics = self._collect_batch_metrics(executor)
+        error_rate = batch_metrics["error_rate"]
+
+        # Check hard threshold first - fail the pipeline if exceeded
+        if error_rate >= self._config.dq.hard_fail_threshold:
+            self._logger.error(
+                "DQ hard threshold exceeded",
+                error_rate=error_rate,
+                threshold=self._config.dq.hard_fail_threshold,
+                pipeline=self._config.pipeline_name,
+            )
+            raise DataQualityThresholdError(
+                error_rate=error_rate,
+                threshold=self._config.dq.hard_fail_threshold,
+            )
+
+        # Check soft threshold - log warning and emit metric
+        if error_rate >= self._config.dq.soft_fail_threshold:
+            self._logger.warning(
+                "DQ soft threshold exceeded",
+                error_rate=error_rate,
+                threshold=self._config.dq.soft_fail_threshold,
+                pipeline=self._config.pipeline_name,
+            )
+            if self._services.metrics:
+                self._services.metrics.increment_counter(
+                    "dq_soft_threshold_exceeded",
+                    1,
+                    {"pipeline": self._config.pipeline_name},
+                )
+
+        # Skip anomaly detection if no monitor configured
         if self._services.dq_monitor is None:
             return DQResult(anomalies_count=0, has_critical=False, check_duration_ms=0)
-
-        batch_metrics = self._collect_batch_metrics(executor)
 
         start_time = time.monotonic()
         anomalies = self._services.dq_monitor.check_quality(batch_metrics)
