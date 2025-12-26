@@ -21,6 +21,7 @@ from bioetl.domain.ports.data_source import (
 )
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.locking import LockPort
+from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
@@ -43,6 +44,8 @@ __all__ = [
     "LockPort",
     "LoggerPort",
     "MetricsPort",
+    "NoOpMetrics",
+    "NoOpTracing",
     "QuarantinePort",
     "RateLimiterPort",
     "StoragePort",
