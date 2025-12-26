@@ -10,11 +10,13 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.health_aggregator import HealthAggregator
-from bioetl.domain.medallion import MedallionPolicy
+from bioetl.domain.exceptions import PolicyViolationError
+from bioetl.domain.medallion import Layer, MedallionPolicy, WriteMode, WriteModePolicy
 from bioetl.domain.types import (
     ConfigValidationError,
     HealthReport,
     HealthStatus,
+    PreflightReport,
     RunType,
 )
 
@@ -332,6 +334,194 @@ class PreflightService:
                 )
 
         return errors
+
+    def validate_write_modes(self) -> list[ConfigValidationError]:
+        """Validate that config write modes are allowed by medallion policy.
+
+        Проверяет соответствие write_mode и gold_write_mode политике Medallion:
+        - Silver: APPEND или MERGE (REQ-MEDALLION-002)
+        - Gold: MERGE или OVERWRITE (REQ-MEDALLION-003)
+
+        Returns:
+            List of ConfigValidationError if write modes violate policy.
+        """
+        errors: list[ConfigValidationError] = []
+        write_mode_policy = WriteModePolicy()
+
+        # Validate Silver write mode
+        silver_mode = self._config.write_mode
+        try:
+            write_mode_policy.validate(Layer.SILVER, WriteMode(silver_mode))
+        except (PolicyViolationError, ValueError):
+            allowed = WriteModePolicy.ALLOWED_MODES[Layer.SILVER]
+            allowed_names = ", ".join(m.value for m in sorted(allowed, key=lambda x: x.value))
+            errors.append(
+                ConfigValidationError(
+                    field="write_mode",
+                    expected=f"one of: {allowed_names}",
+                    actual=silver_mode,
+                    rule="RULES §2.1: Silver layer allowed modes",
+                )
+            )
+
+        # Validate Gold write mode
+        gold_mode = self._config.gold_write_mode
+        # Gold supports 'scd2' which maps to MERGE for policy purposes
+        effective_gold_mode = "merge" if gold_mode == "scd2" else gold_mode
+        try:
+            write_mode_policy.validate(Layer.GOLD, WriteMode(effective_gold_mode))
+        except (PolicyViolationError, ValueError):
+            allowed = WriteModePolicy.ALLOWED_MODES[Layer.GOLD]
+            allowed_names = ", ".join(m.value for m in sorted(allowed, key=lambda x: x.value))
+            errors.append(
+                ConfigValidationError(
+                    field="gold_write_mode",
+                    expected=f"one of: {allowed_names}, scd2",
+                    actual=gold_mode,
+                    rule="RULES §2.1: Gold layer allowed modes",
+                )
+            )
+
+        # Log validation results
+        if errors:
+            self._logger.warning(
+                "Write mode validation found issues",
+                extra={
+                    "error_count": len(errors),
+                    "errors": [{"field": e.field, "rule": e.rule} for e in errors],
+                },
+            )
+        else:
+            self._logger.debug(
+                "Write mode validation passed",
+                extra={
+                    "silver_mode": silver_mode,
+                    "gold_mode": gold_mode,
+                },
+            )
+
+        return errors
+
+    async def validate_preflight(
+        self,
+        services: PipelineServices,
+        runtime: RuntimeConfig,
+        bronze_path: str,
+        silver_path: str,
+        gold_path: str,
+        silver_format: str | None = None,
+        gold_format: str | None = None,
+    ) -> PreflightReport:
+        """Execute complete preflight validation.
+
+        Performs all preflight checks:
+        1. Infrastructure health validation
+        2. Medallion config validation
+        3. Write mode policy validation
+
+        Args:
+            services: Pipeline services for health checks.
+            runtime: Runtime configuration.
+            bronze_path: Base path for Bronze layer storage.
+            silver_path: Base path for Silver layer storage.
+            gold_path: Base path for Gold layer storage.
+            silver_format: Format of Silver layer.
+            gold_format: Format of Gold layer.
+
+        Returns:
+            PreflightReport with aggregated validation results.
+
+        Raises:
+            InfrastructureError: If critical infrastructure is unhealthy
+                and strict_validation is enabled.
+            ValueError: If medallion policy is invalid and strict_validation
+                is enabled.
+        """
+        self._logger.info(
+            "Starting preflight validation",
+            extra={"stage": "preflight", "strict_mode": runtime.strict_validation},
+        )
+
+        # 1. Validate infrastructure health
+        health_report = await self.validate_infrastructure(services)
+
+        # 2. Validate medallion config
+        config_errors = self.validate_medallion_config(
+            runtime=runtime,
+            bronze_path=bronze_path,
+            silver_path=silver_path,
+            gold_path=gold_path,
+            silver_format=silver_format,
+            gold_format=gold_format,
+        )
+
+        # 3. Validate write modes against policy
+        write_mode_errors = self.validate_write_modes()
+        config_errors.extend(write_mode_errors)
+
+        # Determine if medallion policy is valid
+        medallion_policy_valid = len(config_errors) == 0
+
+        # Create preflight report
+        report = PreflightReport(
+            health_report=health_report,
+            medallion_policy_valid=medallion_policy_valid,
+            config_errors=config_errors,
+        )
+
+        # Record metrics
+        self._record_preflight_metrics(report)
+
+        # Log final result
+        self._logger.info(
+            "Preflight validation completed",
+            extra={
+                "stage": "preflight",
+                "medallion_policy_valid": medallion_policy_valid,
+                "config_error_count": len(config_errors),
+                "is_healthy": health_report.is_healthy,
+                "should_block": report.should_block_startup,
+            },
+        )
+
+        # Block startup if validation failed and strict mode is enabled
+        if report.should_block_startup and runtime.strict_validation:
+            error_messages = [
+                f"{e.field}: {e.actual} (expected: {e.expected})"
+                for e in config_errors
+            ]
+            raise ValueError(
+                f"Preflight validation failed (strict mode): {', '.join(error_messages)}"
+            )
+
+        return report
+
+    def _record_preflight_metrics(self, report: PreflightReport) -> None:
+        """Record preflight validation metrics.
+
+        Records:
+        - preflight_medallion_policy_valid: Whether policy validation passed
+        - preflight_config_errors_total: Count of configuration errors
+
+        Args:
+            report: PreflightReport with validation results.
+        """
+        pipeline = self._config.pipeline_name
+        run_id = str(self._context.run_id)
+
+        # Record medallion policy validation status
+        self._metrics.set_gauge(
+            "preflight_medallion_policy_valid",
+            1.0 if report.medallion_policy_valid else 0.0,
+            {"pipeline": pipeline, "run_id": run_id},
+        )
+
+        # Record config error count
+        self._metrics.set_gauge(
+            "preflight_config_errors_total",
+            float(len(report.config_errors)),
+            {"pipeline": pipeline, "run_id": run_id},
+        )
 
 
 __all__ = ["PreflightService"]

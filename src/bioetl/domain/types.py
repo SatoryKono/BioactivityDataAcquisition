@@ -335,3 +335,33 @@ class HealthReport:
     def get_failures(self) -> list[ComponentHealthResult]:
         """Return list of components with UNHEALTHY status."""
         return [r for r in self.results if r.status == HealthStatus.UNHEALTHY]
+
+
+@dataclass(frozen=True, slots=True)
+class PreflightReport:
+    """Preflight validation report.
+
+    Aggregates results from infrastructure health checks and
+    medallion policy validation.
+
+    Attributes:
+        health_report: Infrastructure health check results.
+        medallion_policy_valid: True if config is compatible with policy.
+        config_errors: List of configuration validation errors.
+        checked_at: Timestamp when validation was performed.
+    """
+
+    health_report: HealthReport
+    medallion_policy_valid: bool
+    config_errors: list[ConfigValidationError] = field(default_factory=list)
+    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+
+    @property
+    def is_valid(self) -> bool:
+        """Return True if all validations passed."""
+        return self.health_report.is_healthy and self.medallion_policy_valid
+
+    @property
+    def should_block_startup(self) -> bool:
+        """Return True if validation failures should block pipeline startup."""
+        return not self.medallion_policy_valid or not self.health_report.is_healthy
