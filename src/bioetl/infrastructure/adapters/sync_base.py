@@ -15,7 +15,7 @@ import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.ports import DataSourcePort, LoggerPort
+from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -40,6 +40,7 @@ class BaseSyncAdapter(DataSourcePort):
     Attributes:
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
+        metrics: MetricsPort instance for metrics collection.
         rate_limiter: Token bucket rate limiter (injected).
         circuit_breaker: Circuit breaker for fault tolerance (injected).
         thread_pool: Thread pool for executing sync code (injected).
@@ -48,6 +49,7 @@ class BaseSyncAdapter(DataSourcePort):
 
     provider_name: str
     logger: LoggerPort
+    metrics: MetricsPort
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
@@ -59,6 +61,7 @@ class BaseSyncAdapter(DataSourcePort):
         circuit_breaker: CircuitBreaker,
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize Sync Adapter resources.
 
@@ -70,9 +73,11 @@ class BaseSyncAdapter(DataSourcePort):
             circuit_breaker: Pre-configured circuit breaker.
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
+            metrics: MetricsPort instance for metrics collection.
 
         """
         self.logger = logger
+        self.metrics = metrics if metrics is not None else NoOpMetrics()
         self.rate_limiter = rate_limiter
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
@@ -106,7 +111,8 @@ class BaseSyncAdapter(DataSourcePort):
         """Check API health status using Template Method pattern.
 
         Calls _probe_health() for provider-specific probe, falling back
-        to _fallback_health_status() on any exception.
+        to _fallback_health_status() on any exception. Logs warning and
+        increments failure metric on exception.
 
         Returns:
             HealthStatus from probe or fallback.
@@ -114,7 +120,18 @@ class BaseSyncAdapter(DataSourcePort):
         """
         try:
             return await self._probe_health()
-        except Exception:
+        except Exception as e:
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            self.metrics.increment_counter(
+                "health_check_failures_total",
+                1,
+                {"provider": self.provider_name},
+            )
             return self._fallback_health_status()
 
     async def _probe_health(self) -> HealthStatus:
