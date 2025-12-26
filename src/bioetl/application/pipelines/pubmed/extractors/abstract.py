@@ -5,10 +5,13 @@ Handles structured and unstructured abstract parsing.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+from typing import cast
+from xml.etree.ElementTree import Element
+
+from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 
 
-class AbstractExtractor:
+class AbstractExtractor(BaseFieldExtractor):
     """Extractor for abstract content from PubMed XML.
 
     Handles:
@@ -17,21 +20,19 @@ class AbstractExtractor:
     - Inline elements within abstract text
     """
 
-    @classmethod
-    def extract_abstract(cls, article_node: ET.Element | None) -> str | None:
-        """Extract abstract, handling structured abstracts with multiple sections.
+    def extract(self, element: Element | None) -> list[str] | None:
+        """Извлечь сырые данные из XML элемента Abstract.
 
         Args:
-            article_node: The Article element.
+            element: The Article element.
 
         Returns:
-            Combined abstract text or None.
-
+            List of text parts with labels, or None if no abstract.
         """
-        if article_node is None:
+        if element is None:
             return None
 
-        abstract_node = article_node.find(".//Abstract")
+        abstract_node = element.find(".//Abstract")
         if abstract_node is None:
             return None
 
@@ -48,4 +49,27 @@ class AbstractExtractor:
             elif full_text.strip():
                 texts.append(full_text.strip())
 
-        return " ".join(texts) if texts else None
+        return texts if texts else None
+
+    def normalize(self, raw_value: list[str]) -> str:
+        """Нормализовать извлечённый текст абстракта.
+
+        Args:
+            raw_value: List of abstract text parts.
+
+        Returns:
+            Combined abstract text.
+        """
+        return " ".join(raw_value)
+
+    @classmethod
+    def extract_abstract(cls, article_node: Element | None) -> str | None:
+        """Extract abstract, handling structured abstracts with multiple sections.
+
+        Args:
+            article_node: The Article element.
+
+        Returns:
+            Combined abstract text or None.
+        """
+        return cast("str | None", cls().process(article_node))
