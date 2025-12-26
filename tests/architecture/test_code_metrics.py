@@ -31,6 +31,8 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "runner.py": 700,  # Complex orchestration
         "base.py": 600,  # Base classes may be larger
+        # Interfaces layer exemptions
+        "cli.py": 410,  # 401 LOC - main CLI with multiple commands
         # Infrastructure layer exemptions
         "config.py": 600,  # Config can be verbose
         # Domain layer exemptions (baseline)
