@@ -10,10 +10,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import structlog
-
     from bioetl.domain.medallion import MedallionPolicy
-    from bioetl.domain.ports import StoragePort
+    from bioetl.domain.ports import LoggerPort, StoragePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,7 +66,7 @@ class MedallionLifecycleService:
     """
 
     storage: StoragePort
-    logger: structlog.BoundLogger
+    logger: LoggerPort
 
     async def clear(
         self,
