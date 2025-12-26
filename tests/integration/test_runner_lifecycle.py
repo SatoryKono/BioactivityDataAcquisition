@@ -338,8 +338,8 @@ class TestPipelineRunnerLifecycle:
             "postrun.dq_checks",
             "postrun.vacuum",
             "checkpoint.delete",
-            "postrun.cleanup",
             "lock_manager.__aexit__",
+            "postrun.cleanup",
             "services.__aexit__",
         )
 
