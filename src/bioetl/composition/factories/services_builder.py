@@ -8,6 +8,7 @@ Extracted from generic_factory.py for better separation of concerns.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -69,7 +70,7 @@ class ServicesBuilder:
         silver_schema: pa.Schema | None,
         gold_schema: Any,
         dq_config: Any,
-        primary_keys: list[str],
+        primary_keys: Sequence[str],
         silver_table: str,
         gold_table: str,
         silver_write_mode: str,

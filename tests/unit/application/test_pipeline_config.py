@@ -24,7 +24,7 @@ class TestPipelineConfig:
         assert config.pipeline_name == "test_pipeline"
         assert config.provider == "test_provider"
         assert config.entity_type == "test_entity"
-        assert config.primary_keys == ["id"]
+        assert config.primary_keys == ("id",)  # Lists converted to tuples
         assert config.silver_table == "test_silver"
         assert config.gold_table is None
         assert config.batch_size == 100  # default
