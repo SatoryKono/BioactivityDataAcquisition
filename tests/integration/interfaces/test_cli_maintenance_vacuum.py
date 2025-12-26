@@ -54,7 +54,7 @@ class TestCliMaintenanceVacuumExecution:
     ):
         """Test successful vacuum operation."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -79,7 +79,7 @@ class TestCliMaintenanceVacuumExecution:
     ):
         """Test vacuum with custom retention days."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -102,7 +102,7 @@ class TestCliMaintenanceVacuumExecution:
     ):
         """Test vacuum with short -r flag for retention."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -136,7 +136,7 @@ class TestCliMaintenanceVacuumDryRun:
     ):
         """Test that --dry-run shows what would be removed."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -161,7 +161,7 @@ class TestCliMaintenanceVacuumDryRun:
     ):
         """Test that dry-run shows the number of files that would be removed."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -181,7 +181,7 @@ class TestCliMaintenanceVacuumDryRun:
         mock_lifecycle_service.vacuum.return_value = 25
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -216,7 +216,7 @@ class TestCliMaintenanceVacuumErrors:
     ):
         """Test that vacuum propagates service errors."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service_error,
         ):
             result = cli_runner.invoke(
@@ -236,7 +236,7 @@ class TestCliMaintenanceVacuumErrors:
         mock_service.vacuum = AsyncMock(return_value=0)
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_service,
         ):
             result = cli_runner.invoke(
@@ -265,7 +265,7 @@ class TestCliMaintenanceVacuumOutput:
     ):
         """Test that vacuum shows the number of removed files."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -284,7 +284,7 @@ class TestCliMaintenanceVacuumOutput:
     ):
         """Test that dry-run output says 'would remove'."""
         with patch(
-            "bioetl.interfaces.cli.bootstrap_lifecycle_service",
+            "bioetl.interfaces.cli.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
