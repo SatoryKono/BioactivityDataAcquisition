@@ -43,6 +43,8 @@ class TestFileSizeLimits:
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "generic_factory.py": 450,  # 411 LOC - factory with transformer DI
         "storage_adapter.py": 500,  # 484 LOC - unified storage interface
+        # Infrastructure layer exemptions
+        "delta_writer.py": 650,  # 631 LOC - schema drift detection + merge logic
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -110,6 +112,7 @@ class TestFunctionComplexity:
         "__post_init__": 7,  # Dataclass post-init validation
         "SchemaEvolutionError": 7,  # Exception with detailed field tracking
         "validate_medallion_config": 12,  # Config validation with many checks
+        "run_dq_checks": 12,  # DQ checks with multiple validation paths
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
