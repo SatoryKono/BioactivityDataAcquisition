@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 import pytest
@@ -81,6 +82,7 @@ class TestLineageTracker:
             entity_type="activity",
             record_count=100,
             file_path="s3://bucket/bronze/file.jsonl.zst",
+            timestamp=datetime.now(timezone.utc),
             watermark="2024-01-01",
         )
 
@@ -117,7 +119,7 @@ class TestAnomalyDetector:
         detector.update_baseline("null_rate", [0.1, 0.1, 0.1, 0.1])
 
         # Detect anomaly with much higher value
-        anomaly = detector.detect("null_rate", 0.5)
+        anomaly = detector.detect("null_rate", 0.5, timestamp=datetime.now(timezone.utc))
 
         assert anomaly is not None
         assert anomaly.anomaly_type == AnomalyType.SPIKE
@@ -135,7 +137,7 @@ class TestAnomalyDetector:
         detector.update_baseline("record_count", [100.0, 102.0, 98.0, 101.0])
 
         # Detect anomaly with much lower value (significant drop)
-        anomaly = detector.detect("record_count", 30.0)
+        anomaly = detector.detect("record_count", 30.0, timestamp=datetime.now(timezone.utc))
 
         assert anomaly is not None
         assert anomaly.anomaly_type == AnomalyType.DROP
@@ -153,7 +155,7 @@ class TestAnomalyDetector:
         detector.update_baseline("record_count", [100.0, 105.0, 95.0, 102.0])
 
         # Value within normal range should not trigger anomaly
-        anomaly = detector.detect("record_count", 98.0)
+        anomaly = detector.detect("record_count", 98.0, timestamp=datetime.now(timezone.utc))
 
         assert anomaly is None
 
@@ -165,7 +167,7 @@ class TestAnomalyDetector:
         detector.set_threshold("error_rate", min_value=0.0, max_value=0.1)
 
         # Value exceeding threshold should trigger anomaly
-        anomaly = detector.detect("error_rate", 0.15)
+        anomaly = detector.detect("error_rate", 0.15, timestamp=datetime.now(timezone.utc))
 
         assert anomaly is not None
         assert anomaly.anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
