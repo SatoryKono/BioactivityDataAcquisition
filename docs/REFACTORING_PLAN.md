@@ -1,13 +1,13 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.0 | Дата: 2025-12-26*
+*Версия: 5.1 | Дата: 2025-12-26*
 
 ---
 
 ## ⚠️ ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ
 
 > **ВАЖНО**: Перед постановкой задач сверьтесь с этой секцией!
-> Последняя верификация: 2025-12-26 (обновлено: Phase 5 проверен и исправлен)
+> Последняя верификация: 2025-12-26 (обновлено: добавлены ложные утверждения из внешнего плана)
 
 ### ✅ УЖЕ РЕАЛИЗОВАНО (не требует работы)
 
@@ -51,6 +51,10 @@
 | "CLI плотно связан с composition" | CLI использует `entrypoints.py` — это фасад, правильный паттерн | `cli.py:17-24`, `entrypoints.py:7-8` |
 | "bootstrap_pipeline агрегирует слишком много" | ~100 строк, делегирует специализированным функциям | `bootstrap.py:68-167` |
 | "PipelineRunner.run() концентрирует этапы" | Делегирует: `preflight_service`, `lifecycle_orchestrator`, `postrun_service` | `runner.py:126-142` |
+| "D2: gold_writer.py:21,219,279 использует random" | random удалён, фиксированный backoff `0.5 * (2**attempt) + 0.05` | `gold_writer.py:286,359` |
+| "GenericPipelineFactory — god object" | 397 строк, 6 методов, делегирует `BaseServicesFactory`, `ServicesBuilder`, `build_runner_services()` | `generic_factory.py:190,299,332` |
+| "yaml_config_to_domain нарушает архитектуру" | Матрица импортов разрешает infrastructure → domain. PipelineConfig — value object | `config.py:185-228`, CLAUDE.md §2.1 |
+| "PubChemAdapter без observability" | Использует `BaseSyncAdapter` с metrics, CircuitBreaker, health_check() | `sync_base.py:130-134`, `pubchem/client.py:255-313` |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
