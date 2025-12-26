@@ -370,6 +370,11 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         "exc_type",
         "exc_val",
         "exc_tb",
+        # NoOpTracer parameters (required by OpenTelemetry interface)
+        "kind",
+        "attributes",
+        "links",
+        "set_status_on_exception",
         # Protocol methods (interfaces implemented elsewhere)
         "fetch",
         "write_bronze",
