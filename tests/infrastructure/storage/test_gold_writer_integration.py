@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pandera.pandas as pa
@@ -113,6 +114,7 @@ async def test_write_scd2_missing_config(gold_writer, valid_records, strict_sche
 async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 write when table does not exist (creates new)."""
     scd_config = {"business_key": "id"}
+    ingestion_ts = datetime.now(timezone.utc)
 
     with (
         patch("bioetl.infrastructure.storage.gold_writer.DeltaTable") as mock_dt,
@@ -123,7 +125,12 @@ async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
         mock_dt.side_effect = TableNotFoundError("Table not found")
 
         await gold_writer.write_gold(
-            "test_table", valid_records, schema=strict_schema, mode="scd2", scd_config=scd_config
+            "test_table",
+            valid_records,
+            schema=strict_schema,
+            mode="scd2",
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
         )
 
         # Should call write_deltalake to create table
