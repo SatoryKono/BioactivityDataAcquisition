@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -11,6 +12,14 @@ from bioetl.infrastructure.adapters.http.rate_limiter import (
     create_pubchem_bucket,
     create_pubmed_bucket,
 )
+
+
+def create_mock_metrics() -> MagicMock:
+    """Create a mock MetricsPort for testing."""
+    mock = MagicMock()
+    mock.set_gauge = MagicMock()
+    mock.observe_histogram = MagicMock()
+    return mock
 
 
 class TestTokenBucket:
@@ -120,3 +129,108 @@ class TestFactoryFunctions:
         """PubMed bucket with API key should have 10 req/sec."""
         bucket = create_pubmed_bucket(with_api_key=True)
         assert bucket.rate == 10.0
+
+    @pytest.mark.unit
+    def test_create_pubchem_bucket_with_metrics(self) -> None:
+        """Factory should pass metrics to bucket."""
+        mock_metrics = create_mock_metrics()
+        bucket = create_pubchem_bucket(metrics=mock_metrics)
+        assert bucket.metrics is mock_metrics
+        assert bucket.provider == "pubchem"
+
+    @pytest.mark.unit
+    def test_create_pubmed_bucket_with_metrics(self) -> None:
+        """Factory should pass metrics to bucket."""
+        mock_metrics = create_mock_metrics()
+        bucket = create_pubmed_bucket(with_api_key=False, metrics=mock_metrics)
+        assert bucket.metrics is mock_metrics
+        assert bucket.provider == "pubmed"
+
+
+class TestTokenBucketMetrics:
+    """Tests for TokenBucket metrics integration."""
+
+    @pytest.mark.unit
+    async def test_acquire_records_metrics(self) -> None:
+        """acquire should record metrics when MetricsPort is provided."""
+        mock_metrics = create_mock_metrics()
+        bucket = TokenBucket(
+            rate=5.0,
+            capacity=10,
+            provider="test_provider",
+            metrics=mock_metrics,
+        )
+
+        await bucket.acquire(1)
+
+        mock_metrics.set_gauge.assert_called_once_with(
+            "bioetl_rate_limiter_tokens_available",
+            9.0,  # 10 - 1 token acquired
+            {"provider": "test_provider"},
+        )
+        mock_metrics.observe_histogram.assert_called_once_with(
+            "bioetl_rate_limiter_wait_seconds",
+            0.0,  # No wait when tokens are available
+            {"provider": "test_provider"},
+        )
+
+    @pytest.mark.unit
+    async def test_acquire_no_metrics_when_none(self) -> None:
+        """acquire should not fail when metrics is None."""
+        bucket = TokenBucket(rate=5.0, capacity=10, provider="test")
+
+        # Should not raise any exception
+        await bucket.acquire(1)
+
+        assert bucket.available_tokens() == 9
+
+    @pytest.mark.unit
+    async def test_acquire_records_wait_time(self) -> None:
+        """acquire should record non-zero wait time when waiting for tokens."""
+        mock_metrics = create_mock_metrics()
+        bucket = TokenBucket(
+            rate=100.0,  # 100 tokens/sec = 0.01s per token
+            capacity=1,
+            provider="test_wait",
+            metrics=mock_metrics,
+        )
+
+        # Consume the only token
+        await bucket.acquire(1)
+        mock_metrics.reset_mock()
+
+        # Next acquire should wait
+        await bucket.acquire(1)
+
+        # Verify metrics were recorded
+        mock_metrics.set_gauge.assert_called_once()
+        mock_metrics.observe_histogram.assert_called_once()
+
+        # Get the wait time from the histogram call
+        call_args = mock_metrics.observe_histogram.call_args
+        wait_time = call_args[0][1]
+
+        # Should have waited (non-zero wait time)
+        assert wait_time > 0.0
+        assert wait_time < 0.5  # But not too long
+
+    @pytest.mark.unit
+    async def test_metrics_called_with_correct_provider(self) -> None:
+        """Metrics should use the correct provider label."""
+        mock_metrics = create_mock_metrics()
+        bucket = TokenBucket(
+            rate=5.0,
+            capacity=10,
+            provider="custom_provider",
+            metrics=mock_metrics,
+        )
+
+        await bucket.acquire(1)
+
+        # Check gauge call
+        gauge_call = mock_metrics.set_gauge.call_args
+        assert gauge_call[0][2] == {"provider": "custom_provider"}
+
+        # Check histogram call
+        histogram_call = mock_metrics.observe_histogram.call_args
+        assert histogram_call[0][2] == {"provider": "custom_provider"}
