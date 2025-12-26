@@ -42,8 +42,20 @@ class NoOpTracer:
 
 
 class NoOpTracing:
-    """No-op implementation of TracingPort."""
+    """No-op implementation of TracingPort.
+
+    Unified implementation for when distributed tracing is disabled.
+    Used as the single source of truth for no-op tracing.
+    """
+
+    def __init__(self) -> None:
+        """Initialize no-op tracing."""
+        self._closed = False
 
     def get_tracer(self, name: str) -> NoOpTracer:
         """Get a no-op tracer."""
         return NoOpTracer()
+
+    def close(self) -> None:
+        """No-op close. Idempotent."""
+        self._closed = True

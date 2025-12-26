@@ -19,7 +19,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.tracing import NoOpTracer
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -166,7 +166,7 @@ class IntegrationPipelineTestCase:
         observability = ObservabilityBundle(
             logger=structlog.get_logger(),
             metrics=NoOpMetrics(warn_on_use=False),
-            tracer=NoOpTracer(),
+            tracer=NoOpTracing(),
         )
 
         # Create runner
