@@ -122,6 +122,7 @@ class PubChemAdapter(BaseSyncAdapter):
         self, query: str, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds by query."""
+        # Rate limiter is called here.
         await self.rate_limiter.acquire()
         compounds = await self.circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, query, "name"
