@@ -43,7 +43,7 @@ class WriteMode(str, Enum):
     OVERWRITE = "overwrite"
 
 
-class MedallionPolicy:
+class WriteModePolicy:
     """Validates write mode compliance with medallion layer policies.
 
     Enforces medallion architecture invariants:
@@ -52,7 +52,7 @@ class MedallionPolicy:
     - Gold: MERGE or OVERWRITE (derived data)
 
     Example:
-        >>> policy = MedallionPolicy()
+        >>> policy = WriteModePolicy()
         >>> policy.validate(Layer.BRONZE, WriteMode.APPEND)  # OK
         >>> policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)  # Raises
         Traceback (most recent call last):
