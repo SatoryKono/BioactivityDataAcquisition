@@ -16,11 +16,8 @@ INTERFACES_DIR = Path("src/bioetl/interfaces")
 
 # Baseline exemptions for existing files (technical debt)
 # These files need refactoring to use LoggerPort instead of direct structlog
-EXEMPTED_FILES = {
-    # Interfaces layer baseline
-    "bioetl/interfaces/cli.py",
-    "bioetl/interfaces/orchestration/signals.py",
-}
+# NOTE: As of 2025-12-26, all exemptions have been resolved.
+EXEMPTED_FILES: set[str] = set()
 
 
 def _check_structlog_imports(

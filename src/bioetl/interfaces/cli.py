@@ -27,9 +27,8 @@ from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
-    import structlog
-
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.ports import LoggerPort
 
 
 async def _preview_cleanup_async(pipeline: str) -> None:
@@ -123,14 +122,14 @@ def _handle_destructive_run_confirmation(
     return True
 
 
-def _get_runner_logger(runner: PipelineRunner) -> structlog.BoundLogger | None:
+def _get_runner_logger(runner: PipelineRunner) -> LoggerPort | None:
     """Get logger from runner with fallback.
 
     Args:
         runner: PipelineRunner instance.
 
     Returns:
-        Logger instance or None if not found.
+        Logger instance (LoggerPort) or None if not found.
     """
     logger = getattr(runner, "logger", None)
     if logger is None:
@@ -241,7 +240,7 @@ def run(
         click.echo("Critical: Logger not initialized.", err=True)
         sys.exit(1)
 
-    setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
+    setup_shutdown_handlers(getattr(runner, "shutdown_signal", None), logger)
 
     logger.info("Starting pipeline run")
     try:
