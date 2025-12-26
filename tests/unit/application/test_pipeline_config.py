@@ -200,3 +200,16 @@ class TestRuntimeConfig:
         for run_type in RunType:
             runtime = RuntimeConfig(run_type=run_type)
             assert runtime.run_type == run_type
+
+    def test_strict_gold_validation_default_false(self):
+        """Test that strict_gold_validation defaults to False."""
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+        assert runtime.strict_gold_validation is False
+
+    def test_strict_gold_validation_true(self):
+        """Test setting strict_gold_validation to True."""
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            strict_gold_validation=True,
+        )
+        assert runtime.strict_gold_validation is True
