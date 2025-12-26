@@ -435,12 +435,16 @@ class ChemblAdapter(BaseHttpAdapter):
         and internal health state tracking.
 
         Returns:
-            HealthStatus based on status endpoint response or error count.
+            HealthStatus based on status endpoint response.
+
+        Raises:
+            Exception: On request failure (base class handles via _fallback_health_status).
 
         """
         try:
             response = await self.http_client.get(CHEMBL_STATUS_URL)
             self._handle_health_response(response)
+            return self._cached_health
         except Exception as e:
             self._consecutive_errors += 1
             self._update_health()
@@ -451,8 +455,7 @@ class ChemblAdapter(BaseHttpAdapter):
                 error_type=error_type.value,
                 error=str(e),
             )
-
-        return self._cached_health
+            raise  # Let base class handle via _fallback_health_status()
 
     def _fallback_health_status(self) -> HealthStatus:
         """Return cached health status.
