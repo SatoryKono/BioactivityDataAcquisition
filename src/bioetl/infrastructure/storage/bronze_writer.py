@@ -69,16 +69,32 @@ class BronzeWriter:
         self.json_path = json_path or str(self.base_path / "json")
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
-        """Validate provider and entity names (alphanumeric + underscores/hyphens)."""
-        if not provider or not provider.replace("_", "").replace("-", "").isalnum():
+        """Validate provider and entity names (alphanumeric + underscores only)."""
+        if not provider or not provider.replace("_", "").isalnum():
             raise ValueError(
                 f"Invalid provider name: '{provider}'. "
-                "Use alphanumeric characters, underscores, or hyphens only."
+                "Use alphanumeric characters and underscores only."
             )
-        if not entity or not entity.replace("_", "").replace("-", "").isalnum():
+        if not entity or not entity.replace("_", "").isalnum():
             raise ValueError(
                 f"Invalid entity name: '{entity}'. "
-                "Use alphanumeric characters, underscores, or hyphens only."
+                "Use alphanumeric characters and underscores only."
+            )
+
+    def _validate_records_iterator(self, records: Iterator[bytes]) -> None:
+        """Validate that records is an Iterator[bytes].
+
+        Args:
+            records: Should be an Iterator yielding bytes.
+
+        Raises:
+            TypeError: If records is not an iterator.
+        """
+        if records is None:
+            raise TypeError("records cannot be None, expected Iterator[bytes]")
+        if not hasattr(records, "__iter__") or not hasattr(records, "__next__"):
+            raise TypeError(
+                f"records must be an Iterator[bytes], got {type(records).__name__}"
             )
 
     def _build_bronze_metadata(
@@ -138,6 +154,7 @@ class BronzeWriter:
 
         """
         self._validate_bronze_names(provider, entity)
+        self._validate_records_iterator(records)
 
         date_str = date.strftime("%Y-%m-%d")
         relative_path = (
