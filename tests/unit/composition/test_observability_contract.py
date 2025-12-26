@@ -322,3 +322,154 @@ class TestHealthCheckMetrics:
         assert "component" in PIPELINE_HEALTH_CHECK_PASSED._labelnames
         assert "pipeline" in INFRASTRUCTURE_VALIDATED._labelnames
         assert "run_id" in INFRASTRUCTURE_VALIDATED._labelnames
+
+
+@pytest.mark.unit
+class TestObservabilityPreflightValidation:
+    """Tests for observability preflight validation.
+
+    Verifies that NoOp implementations in production trigger warnings
+    to prevent silent data loss.
+    """
+
+    def test_observability_production_warning_noop_tracing(self) -> None:
+        """Test that NoOpTracing in production logs warning."""
+        from bioetl.composition._bootstrap.observability import (
+            validate_observability_preflight,
+        )
+        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+        mock_logger = MagicMock()
+        mock_metrics = MagicMock()
+        noop_tracer = NoOpTracing()
+
+        validate_observability_preflight(
+            tracer=noop_tracer,
+            metrics=mock_metrics,
+            environment="prod",
+            logger=mock_logger,
+        )
+
+        # Verify warning was logged for NoOpTracing
+        mock_logger.warning.assert_called_once()
+        call_args = mock_logger.warning.call_args
+        assert call_args[0][0] == "noop_tracing_in_production"
+        assert "traces will be lost" in call_args[1]["message"]
+
+    def test_observability_production_warning_noop_metrics(self) -> None:
+        """Test that NoOpMetrics in production logs warning."""
+        from bioetl.composition._bootstrap.observability import (
+            validate_observability_preflight,
+        )
+        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+        mock_logger = MagicMock()
+        noop_metrics = NoOpMetrics(warn_on_use=False)
+        noop_tracer = NoOpTracing()  # Both NoOp to verify both warnings
+
+        validate_observability_preflight(
+            tracer=noop_tracer,
+            metrics=noop_metrics,
+            environment="prod",
+            logger=mock_logger,
+        )
+
+        # Verify both warnings were logged
+        assert mock_logger.warning.call_count == 2
+        calls = mock_logger.warning.call_args_list
+        event_names = [call[0][0] for call in calls]
+        assert "noop_tracing_in_production" in event_names
+        assert "noop_metrics_in_production" in event_names
+
+    def test_observability_no_warning_in_dev_environment(self) -> None:
+        """Test that NoOp implementations in dev don't log warnings."""
+        from bioetl.composition._bootstrap.observability import (
+            validate_observability_preflight,
+        )
+        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+        mock_logger = MagicMock()
+        noop_tracer = NoOpTracing()
+        noop_metrics = NoOpMetrics(warn_on_use=False)
+
+        validate_observability_preflight(
+            tracer=noop_tracer,
+            metrics=noop_metrics,
+            environment="dev",
+            logger=mock_logger,
+        )
+
+        # No warnings should be logged in dev
+        mock_logger.warning.assert_not_called()
+
+    def test_observability_no_warning_in_staging_environment(self) -> None:
+        """Test that NoOp implementations in staging don't log warnings."""
+        from bioetl.composition._bootstrap.observability import (
+            validate_observability_preflight,
+        )
+        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+        mock_logger = MagicMock()
+        noop_tracer = NoOpTracing()
+        noop_metrics = NoOpMetrics(warn_on_use=False)
+
+        validate_observability_preflight(
+            tracer=noop_tracer,
+            metrics=noop_metrics,
+            environment="staging",
+            logger=mock_logger,
+        )
+
+        # No warnings should be logged in staging
+        mock_logger.warning.assert_not_called()
+
+    def test_observability_no_warning_with_real_implementations(self) -> None:
+        """Test that real implementations don't log warnings in production."""
+        from bioetl.composition._bootstrap.observability import (
+            validate_observability_preflight,
+        )
+
+        mock_logger = MagicMock()
+        mock_tracer = MagicMock()  # Not NoOpTracing
+        mock_metrics = MagicMock()  # Not NoOpMetrics
+
+        validate_observability_preflight(
+            tracer=mock_tracer,
+            metrics=mock_metrics,
+            environment="prod",
+            logger=mock_logger,
+        )
+
+        # No warnings for real implementations
+        mock_logger.warning.assert_not_called()
+
+    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
+    @patch("bioetl.composition._bootstrap.observability.create_infra_logger")
+    def test_bootstrap_observability_calls_preflight_validation(
+        self,
+        mock_create_logger: MagicMock,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that bootstrap_observability calls preflight validation."""
+        from bioetl.composition._bootstrap.observability import bootstrap_observability
+
+        mock_logger = MagicMock()
+        mock_create_logger.return_value = mock_logger
+
+        settings = MagicMock()
+        settings.env = "prod"
+        settings.observability.metrics_enabled = False
+        settings.observability.tracing_enabled = False
+        settings.observability.dq_monitor_enabled = False
+
+        bootstrap_observability(
+            pipeline="test_pipeline",
+            run_id=uuid4(),
+            settings=settings,
+        )
+
+        # Verify preflight validation logged warnings for NoOp implementations
+        warning_calls = [call for call in mock_logger.warning.call_args_list]
+        event_names = [call[0][0] for call in warning_calls]
+        assert "noop_tracing_in_production" in event_names
+        assert "noop_metrics_in_production" in event_names
