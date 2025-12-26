@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.types import DQStatus
-from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
+from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
 
 
 @pytest.fixture

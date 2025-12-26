@@ -375,6 +375,7 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         "attributes",
         "links",
         "set_status_on_exception",
+        "end_on_exit",
         # Protocol methods (interfaces implemented elsewhere)
         "fetch",
         "write_bronze",
