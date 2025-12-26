@@ -37,9 +37,49 @@
 
 **Расположение:** `src/bioetl/application/core/`
 
-Содержит общие компоненты, используемые несколькими пайплайнами. Это могут быть, например, базовые классы для пайплайнов или общие утилиты для управления потоком.
+Содержит общие компоненты, используемые несколькими пайплайнами:
 
-### 2.3. `orchestration/` — Оркестрация Исполнения
+- **`BasePipeline`** — Базовый класс для всех пайплайнов
+- **`BaseTransformer`** — Базовый класс для трансформеров (Template Method паттерн)
+- **`PipelineRunner`** — Координатор исполнения пайплайна
+- **`RecordProcessor`** — Обработка batch-ов записей через Bronze→Silver→Gold
+
+### 2.3. Трансформеры (Transformer DI)
+
+**Расположение:** `src/bioetl/application/pipelines/{provider}/`
+
+Трансформеры отвечают за преобразование Bronze → Silver. Они инжектируются в пайплайны через DI:
+
+```python
+# Пример инъекции трансформера в GenericPipelineFactory
+factory = GenericPipelineFactory(
+    pipeline_name="chembl_activity",
+    pipeline_class=ChEMBLActivityPipeline,
+    provider="chembl",
+    transformer_class=ActivityTransformer,  # <-- DI
+    gold_schema=ChEMBLActivityGoldSchema,
+)
+```
+
+**Ключевые характеристики:**
+- **MUST**: Трансформер передаётся в конструктор `BasePipeline` через параметр `transformer`
+- **MUST NOT**: Пайплайн не создаёт трансформер внутри себя
+- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `_extract_business_data()`
+- **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
+
+**Доступные трансформеры:**
+| Provider | Трансформер | Расположение |
+|----------|-------------|--------------|
+| ChEMBL | `ActivityTransformer` | `pipelines/chembl/activity_transformer.py` |
+| ChEMBL | `AssayTransformer` | `pipelines/chembl/assay_transformer.py` |
+| ChEMBL | `MoleculeTransformer` | `pipelines/chembl/molecule_transformer.py` |
+| ChEMBL | `TargetTransformer` | `pipelines/chembl/target_transformer.py` |
+| ChEMBL | `DocumentTransformer` | `pipelines/chembl/document_transformer.py` |
+| PubChem | `PubChemCompoundTransformer` | `pipelines/pubchem/transformer.py` |
+| UniProt | `UniProtProteinTransformer` | `pipelines/uniprot/transformer.py` |
+| PubMed | `PubMedPublicationTransformer` | `pipelines/pubmed/transformer.py` |
+
+### 2.4. `orchestration/` — Оркестрация Исполнения
 
 **Расположение:** `src/bioetl/application/orchestration/`
 
