@@ -6,6 +6,7 @@ Implements StoragePort interface without filesystem I/O.
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
@@ -46,7 +47,7 @@ class InMemoryStorage:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> None:
+    ) -> Path:
         """Write raw records to the Bronze layer.
 
         Args:
@@ -59,6 +60,8 @@ class InMemoryStorage:
             run_type: Type of run.
             ingestion_ts: Ingestion timestamp from application layer.
 
+        Returns:
+            Path: Relative path to the written file.
         """
         key = f"bronze/v1/{provider}/{entity}/{date.strftime('%Y-%m-%d')}/{batch_id}.jsonl.zst"
         record_list = list(records)
@@ -73,6 +76,7 @@ class InMemoryStorage:
             "key": key,
             "record_count": len(record_list),
         })
+        return Path(key)
 
     async def write_silver(
         self,
