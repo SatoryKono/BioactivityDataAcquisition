@@ -8,13 +8,15 @@ and injected into PipelineRunner.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
+
+# Re-export RunnerServices from application layer for backwards compatibility
+from bioetl.application.core.runner_services import RunnerServices
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -26,26 +28,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
-
-
-@dataclass(frozen=True, slots=True)
-class RunnerServices:
-    """Bundle of application services for PipelineRunner.
-
-    Encapsulates all services that PipelineRunner requires.
-    Created via build_runner_services() factory function.
-
-    Attributes:
-        lock_manager: Lock manager for distributed locking.
-        preflight: Pre-flight infrastructure validation service.
-        postrun: Post-run DQ checks and VACUUM service.
-        lifecycle_orch: Lifecycle orchestrator for medallion layer clearing.
-    """
-
-    lock_manager: LockManager
-    preflight: PreflightService
-    postrun: PostrunService
-    lifecycle_orch: LifecycleOrchestrator
 
 
 def build_runner_services(
