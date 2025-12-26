@@ -137,21 +137,40 @@ class TestRecordProcessorMetrics:
         )
 
     async def test_process_batch_records_quarantine_metrics(
-        self, record_processor, mock_metrics, mock_context, mock_error_classifier
+        self, mock_services, mock_metrics, mock_context, mock_error_classifier, mock_gold_validator
     ):
         """Test that quarantine metrics are recorded correctly."""
+        from bioetl.domain.exceptions import DataQualityError
+
         # Setup error classifier to return DQ error
         mock_error_classifier.classify.return_value = ErrorType.DATA_QUALITY
 
-        # Override transformer's transform_batch to fail
-        record_processor._transformer.transform_batch = AsyncMock(
-            side_effect=Exception("DQ Fail")
+        # Create processor with failing transform callback
+        async def failing_transform(ctx, record):
+            raise DataQualityError("DQ Fail")
+
+        config = RecordProcessorConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+        processor = RecordProcessor(
+            services=mock_services,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            config=config,
+            transform_callback=failing_transform,
+            gold_filter_callback=MagicMock(return_value=True),
+            gold_transform_callback=MagicMock(side_effect=lambda c, r: r),
+            gold_validator=mock_gold_validator,
         )
 
         records = [{"id": 1}]
         batch_id = BatchID(uuid4())
 
-        await record_processor.process_batch(records, batch_id)
+        await processor.process_batch(records, batch_id)
 
         pipeline_label = "test_entity"
         run_type_label = mock_context.run_type.value
