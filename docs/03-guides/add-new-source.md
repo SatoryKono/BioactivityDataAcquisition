@@ -85,36 +85,75 @@ class PubMedPublicationPipeline(BasePipeline):
 
 ## Шаг 4: Регистрация (Composition Layer)
 
-В v5.1 сборка пайплайнов декларативна и централизована.
+В v5.2 сборка пайплайнов декларативна и централизована через `ProviderRegistry`.
 
-### 4.1 Регистрация создателя DataSource
-Добавьте функцию создания вашего адаптера в `src/bioetl/composition/factories/data_source_registry.py`.
+### 4.1 Регистрация провайдера в ProviderRegistry
+
+Добавьте конфигурацию провайдера в `src/bioetl/composition/providers/registration.py`:
 
 ```python
-def create_pubmed_data_source(settings, pipeline_config, filter_config=None):
-    http_client = HttpClientFactory.create_for_provider("pubmed", settings)
-    data_source = PubMedAdapter(http_client, api_key=settings.pubmed_api_key)
-    return _wrap_with_filter(data_source, filter_config)
+from bioetl.composition.providers import ProviderConfig, ProviderRegistry
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 
-# Зарегистрируйте в словаре _creators класса DataSourceRegistry
-_creators = {
-    # ...
-    "pubmed": create_pubmed_data_source,
-}
+def _create_pubmed_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create PubMed data source."""
+    http_client = HttpClientFactory.create_for_provider("pubmed", settings, logger)
+    adapter = PubMedAdapter(http_client, api_key=settings.pubmed_api_key)
+    return _wrap_with_filter(adapter, filter_config, logger, pipeline_name)
+
+# Регистрация в _register_providers():
+ProviderRegistry.register(
+    "pubmed",
+    ProviderConfig(
+        data_source_creator=_create_pubmed_data_source,
+        transformers={"publication": PubMedPublicationTransformer},
+        pipelines=["pubmed_publications"],
+    ),
+)
 ```
 
-### 4.2 Регистрация пайплайна
-Добавьте определение пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`.
+### 4.2 Создание трансформера
+
+Создайте `src/bioetl/application/pipelines/pubmed/transformer.py`:
+
+```python
+from bioetl.application.core.base_transformer import BaseTransformer
+
+class PubMedPublicationTransformer(BaseTransformer):
+    """Трансформер для PubMed публикаций."""
+
+    def _extract_business_data(self, record: dict) -> dict:
+        """Извлечение бизнес-данных из Bronze записи."""
+        return {
+            "pmid": record.get("pmid"),
+            "title": record.get("title"),
+            "abstract": record.get("abstract"),
+            # ... другие поля
+        }
+```
+
+### 4.3 Регистрация пайплайна
+
+Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
 
 ```python
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
-from bioetl.infrastructure.schemas.silver import PUBMED_PUBLICATION_SCHEMA
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
+from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
 pubmed_publications_factory = GenericPipelineFactory(
     pipeline_name="pubmed_publications",
     pipeline_class=PubMedPublicationsPipeline,
     provider="pubmed",
-    silver_schema=PUBMED_PUBLICATION_SCHEMA,
+    transformer_class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
+    gold_schema=PubMedPublicationGoldSchema,
 )
 
 def register_all_pipelines() -> None:
@@ -126,8 +165,11 @@ def register_all_pipelines() -> None:
 
 ## Чек-лист
 
-- [ ] Адаптер источника реализован.
-- [ ] Конфиг YAML создан.
-- [ ] Пайплайн реализован.
-- [ ] Источник зарегистрирован в `DataSourceRegistry`.
-- [ ] Пайплайн зарегистрирован в `pipeline_factories.py`.
+- [ ] Адаптер источника реализован (`infrastructure/adapters/pubmed/`)
+- [ ] Конфиг YAML создан (`configs/pipelines/pubmed/publication.yaml`)
+- [ ] Трансформер реализован с наследованием от `BaseTransformer`
+- [ ] Пайплайн реализован с наследованием от `BasePipeline`
+- [ ] Провайдер зарегистрирован в `ProviderRegistry` (`registration.py`)
+- [ ] Пайплайн зарегистрирован в `pipeline_factories.py` с `transformer_class`
+- [ ] Unit-тесты с инъекцией трансформера
+- [ ] Integration-тесты с VCR-кассетами
