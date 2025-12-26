@@ -89,3 +89,6 @@ class PipelineRunContext:
     filter_field: str | None = None
     query: str | None = None
     dry_run: bool = False
+    # VACUUM automation (can be set via CLI or YAML)
+    vacuum_after_run: bool | None = None
+    vacuum_retention_days: int | None = None

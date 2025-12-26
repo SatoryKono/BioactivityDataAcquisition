@@ -185,6 +185,18 @@ def cli() -> None:
     is_flag=True,
     help="Skip confirmation prompt for rebuild/backfill",
 )
+@click.option(
+    "--vacuum-after-run",
+    is_flag=True,
+    default=None,
+    help="Run VACUUM on Delta tables after successful run (overrides YAML config)",
+)
+@click.option(
+    "--vacuum-retention-days",
+    type=int,
+    default=None,
+    help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
+)
 def run(
     pipeline: str,
     run_type: str,
@@ -195,6 +207,8 @@ def run(
     filter_field: str | None,
     dry_run: bool,
     yes: bool,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
 ) -> None:
     """Run an ETL pipeline."""
     # Handle rebuild/backfill confirmation before any heavy initialization
@@ -210,6 +224,8 @@ def run(
             filter_column=filter_column,
             filter_field=filter_field,
             dry_run=dry_run,
+            vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
+            vacuum_retention_days=vacuum_retention_days,
         )
         runner = create_pipeline_runner(pipeline, options)
     except (ValueError, FileNotFoundError) as e:
