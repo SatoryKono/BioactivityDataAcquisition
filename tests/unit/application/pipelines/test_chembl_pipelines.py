@@ -8,9 +8,13 @@ import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
+from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
+from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
+from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from uuid import uuid4
 
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -85,6 +89,7 @@ class TestChEMBLAssayPipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            transformer=AssayTransformer(provider="chembl"),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -134,6 +139,7 @@ class TestChEMBLDocumentPipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            transformer=DocumentTransformer(provider="chembl"),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -183,6 +189,7 @@ class TestChEMBLMoleculePipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            transformer=MoleculeTransformer(provider="chembl"),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -232,6 +239,7 @@ class TestChEMBLTargetPipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            transformer=TargetTransformer(provider="chembl"),
         )
 
     def test_pipeline_initialization(self, pipeline):

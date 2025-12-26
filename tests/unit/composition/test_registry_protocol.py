@@ -124,11 +124,14 @@ class TestDataSourceRegistryUnifiedAPI:
             DataSourceRegistry,
         )
 
-        initial_count = len(DataSourceRegistry._creators)
-        assert initial_count > 0
+        # DataSourceRegistry now delegates to ProviderRegistry,
+        # so _creators is not used. Test that list_keys works correctly.
+        keys_before = DataSourceRegistry.list_keys()
+        assert len(keys_before) > 0
 
         DataSourceRegistry.clear()
 
+        # After clear, local _creators should be empty
         assert len(DataSourceRegistry._creators) == 0
 
     def test_get_raises_keyerror_for_unknown(self):

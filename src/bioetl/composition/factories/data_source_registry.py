@@ -21,6 +21,7 @@ from bioetl.composition.providers import (
     ProviderRegistry,
     ensure_providers_loaded,
 )
+from bioetl.composition.factories.data_sources import DataSourceFactory
 
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 # Re-export for backward compatibility
-__all__ = ["DataSourceCreator", "DataSourceRegistry"]
+__all__ = ["DataSourceCreator", "DataSourceRegistry", "DataSourceFactory"]
 
 
 class DataSourceRegistry:

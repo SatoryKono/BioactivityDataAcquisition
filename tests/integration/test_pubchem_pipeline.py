@@ -12,6 +12,7 @@ import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -119,6 +120,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
         context = PipelineContext(
@@ -170,6 +172,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
         context = PipelineContext(
@@ -214,6 +217,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
         context = PipelineContext(
@@ -247,6 +251,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
         context = PipelineContext(

@@ -76,12 +76,10 @@ class TestPubChemCompoundFactory:
     """Tests for pubchem_compound_factory (GenericPipelineFactory instance)."""
 
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
-        mock_data_source_create,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -95,8 +93,10 @@ class TestPubChemCompoundFactory:
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Mock the data source creator function stored in the factory
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
+        pubchem_compound_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         services = pubchem_compound_factory.build_services(
             settings=mock_settings,
@@ -104,18 +104,14 @@ class TestPubChemCompoundFactory:
         )
 
         assert services is not None
-        # DataSourceFactory.create is called with pubchem provider
-        mock_data_source_create.assert_called_once()
-        call_args = mock_data_source_create.call_args
-        assert call_args[0][0] == "pubchem"
+        # Verify data source creator was called
+        pubchem_compound_factory._create_data_source.assert_called_once()
 
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
-        mock_data_source_create,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -129,8 +125,10 @@ class TestPubChemCompoundFactory:
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Mock the data source creator
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
+        pubchem_compound_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         pubchem_compound_factory.build_services(
             settings=mock_settings,
@@ -140,12 +138,10 @@ class TestPubChemCompoundFactory:
         mock_base_services.create_common_services.assert_called_once()
 
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
-        mock_data_source_create,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -158,8 +154,10 @@ class TestPubChemCompoundFactory:
         )
 
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Mock the data source creator
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
+        pubchem_compound_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         pubchem_compound_factory.build_services(
             settings=mock_settings,

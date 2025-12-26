@@ -184,7 +184,7 @@ class TestTransformerInjectionPath:
         )
 
         # Check that create_with_services calls create_transformer
-        assert "self.create_transformer()" in content, (
+        assert "self.create_transformer(" in content, (
             "GenericPipelineFactory.create_with_services must call create_transformer()"
         )
 

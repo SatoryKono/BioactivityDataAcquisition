@@ -246,14 +246,10 @@ class TestChemblActivityFactory:
     """Tests for chembl_activity_factory (GenericPipelineFactory instance)."""
 
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
-        mock_data_source_create,
-        mock_http_client_factory,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -267,10 +263,10 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Mock the data source creator function stored in the factory
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
-        mock_http_client = MagicMock()
-        mock_http_client_factory.create_for_provider.return_value = mock_http_client
+        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         services = chembl_activity_factory.build_services(
             settings=mock_settings,
@@ -278,17 +274,13 @@ class TestChemblActivityFactory:
         )
 
         assert services is not None
-        mock_data_source_create.assert_called_once()
+        chembl_activity_factory._create_data_source.assert_called_once()
 
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
-        mock_data_source_create,
-        mock_http_client_factory,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -302,8 +294,10 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Mock the data source creator
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
+        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         chembl_activity_factory.build_services(
             settings=mock_settings,
@@ -313,14 +307,10 @@ class TestChemblActivityFactory:
         mock_base_services.create_common_services.assert_called_once()
 
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
-        mock_data_source_create,
-        mock_http_client_factory,
         mock_base_services,
         mock_settings,
         mock_logger,
@@ -333,8 +323,10 @@ class TestChemblActivityFactory:
         )
 
         mock_base_services.create_common_services.return_value = mock_services
+
+        # Mock the data source creator
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
+        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         chembl_activity_factory.build_services(
             settings=mock_settings,
@@ -348,12 +340,8 @@ class TestChemblActivityFactory:
     @patch("bioetl.composition.factories.generic_factory.yaml_config_to_domain")
     @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
     @patch("bioetl.composition.factories.generic_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory.create")
     def test_create_with_services(
         self,
-        mock_data_source_create,
-        mock_http_client_factory,
         mock_base_services,
         mock_load_config,
         mock_yaml_to_domain,
@@ -372,8 +360,10 @@ class TestChemblActivityFactory:
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
         mock_yaml_to_domain.return_value = mock_domain_config
+
+        # Mock the data source creator
         mock_data_source = MagicMock()
-        mock_data_source_create.return_value = mock_data_source
+        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
 
         # Create a mock pipeline class
         mock_pipeline_class = MagicMock()
