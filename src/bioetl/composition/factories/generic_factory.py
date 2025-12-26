@@ -10,10 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.factories.base_services_factory import BaseServicesFactory
@@ -21,10 +18,8 @@ from bioetl.composition.factories.data_source_registry import (
     DataSourceCreator,
     DataSourceRegistry,
 )
-from bioetl.domain.config import TableConfig
-from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.composition.factories.services_builder import ServicesBuilder
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
-from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -79,7 +74,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         silver_schema: pa.Schema | None = None,
         gold_schema: Any = None,
         data_source_creator: DataSourceCreator | None = None,
-        transformer_class: type["BaseTransformer"] | None = None,
+        transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
         """Initialize the factory.
 
@@ -115,7 +110,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             provider
         )
 
-    def create_transformer(self) -> "BaseTransformer | None":
+    def create_transformer(self) -> BaseTransformer | None:
         """Create transformer instance if transformer_class is configured.
 
         Returns:
@@ -276,15 +271,20 @@ class GenericPipelineFactory(Generic[TPipeline]):
             dq_monitor=observability.dq_monitor,
         )
 
-        # Create Helper Components
-        checkpoint_manager = self._create_checkpoint_manager(
-            pipeline=pipeline,
+        # Create Helper Components using ServicesBuilder
+        checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
+            checkpoint_port=pipeline.services.checkpoint,
             logger=observability.logger,
+            pipeline_name=pipeline.config.pipeline_name,
             run_id=run_id,
             resume=runtime.resume,
         )
 
-        record_processor = self._create_record_processor(pipeline)
+        record_processor = ServicesBuilder.create_record_processor_from_pipeline(
+            pipeline=pipeline,
+            silver_schema=self.silver_schema,
+            gold_schema=self.gold_schema,
+        )
 
         # Create Executor
         executor = PipelineExecutor(
@@ -318,59 +318,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             lifecycle_service=lifecycle_service,
         )
 
-    def _create_checkpoint_manager(
-        self,
-        pipeline: TPipeline,
-        logger: structlog.BoundLogger,
-        run_id: RunID,
-        resume: bool,
-    ) -> CheckpointManager:
-        """Create configured CheckpointManager."""
-        return CheckpointManager(
-            checkpoint_port=pipeline.services.checkpoint,
-            logger=logger,
-            pipeline_name=pipeline.config.pipeline_name,
-            run_id=run_id,
-            resume=resume,
-        )
-
-    def _create_record_processor(self, pipeline: TPipeline) -> RecordProcessor:
-        """Create configured RecordProcessor."""
-        error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=pipeline.config.primary_keys,
-            silver_table=pipeline.config.silver_table,
-            gold_table=pipeline.config.gold_table,
-            silver_write_mode=pipeline.config.write_mode,
-            gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,
-        )
-
-        processor_config = RecordProcessorConfig(
-            pipeline_name=pipeline.config.pipeline_name,
-            provider=pipeline.config.provider,
-            entity_type=pipeline.config.entity_type,
-            silver_schema=self.silver_schema,
-            gold_schema=self.gold_schema,
-            dq_config=pipeline.config.dq,
-            table_config=table_config,
-        )
-
-        # Create Gold validator from schema (DI pattern)
-        # gold_schema is always required, so always use PanderaGoldValidator
-        gold_validator = PanderaGoldValidator(self.gold_schema)
-
-        return RecordProcessor(
-            services=pipeline.services,
-            error_classifier=error_classifier,
-            context=pipeline.context,
-            config=processor_config,
-            transform_callback=pipeline.transform_bronze_to_silver,
-            gold_filter_callback=pipeline.should_write_gold,
-            gold_transform_callback=pipeline.transform_for_gold,
-            gold_validator=gold_validator,
-        )
-
 
 def create_pipeline_factory(
     pipeline_name: str,
@@ -378,7 +325,7 @@ def create_pipeline_factory(
     provider: str,
     silver_schema: pa.Schema | None = None,
     gold_schema: Any = None,
-    transformer_class: type["BaseTransformer"] | None = None,
+    transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories.
 
