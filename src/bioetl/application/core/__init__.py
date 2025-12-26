@@ -37,6 +37,11 @@ from bioetl.application.core.postrun_service import (
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.medallion_policy import (
+    Layer,
+    MedallionPolicy,
+    WriteMode,
+)
 from bioetl.application.core.transform_utils import (
     aggregate_nested_lists,
     extract_list_field,
@@ -60,9 +65,11 @@ __all__ = [
     "ClearDecision",
     "DQResult",
     "HealthAggregator",
+    "Layer",
     "LayerInfo",
     "LifecycleOrchestrator",
     "LockManager",
+    "MedallionPolicy",
     "PipelineConfig",
     "PipelineServices",
     "PipelineShutdownError",
@@ -73,6 +80,7 @@ __all__ = [
     "ShutdownSignal",
     "TransformResult",
     "VacuumResult",
+    "WriteMode",
     "aggregate_nested_lists",
     "extract_list_field",
     "flatten_nested_dict",
