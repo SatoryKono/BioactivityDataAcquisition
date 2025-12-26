@@ -18,12 +18,12 @@ import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, TypeVar
 
+from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.domain.transformations import generate_content_hash
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
-    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, ContentHash, SilverRecord
 
 T = TypeVar("T", bound="BaseEntity")
@@ -80,19 +80,19 @@ class BaseTransformer(ABC):
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:
-        """Initialize transformer with provider name and optional observability.
+        """Initialize transformer with provider name and observability.
 
         Args:
             provider: Data provider identifier (e.g., 'chembl', 'pubchem').
             entity_type: Entity type for metrics labels (e.g., 'activity', 'compound').
-            tracer: Optional tracing port for distributed tracing.
-            metrics: Optional metrics port for duration/error tracking.
+            tracer: Tracing port for distributed tracing. Defaults to NoOpTracing.
+            metrics: Metrics port for duration/error tracking. Defaults to NoOpMetrics.
 
         """
         self.provider = provider
         self.entity_type = entity_type or "unknown"
-        self._tracer = tracer
-        self._metrics = metrics
+        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
+        self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
 
     async def transform(
         self,
@@ -119,21 +119,19 @@ class BaseTransformer(ABC):
 
         """
         start_time = time.perf_counter()
-        span = None
         error_type: str | None = None
 
-        # Start tracing span if tracer is available
-        if self._tracer:
-            otel_tracer = self._tracer.get_tracer("bioetl.transformer")
-            span = otel_tracer.start_as_current_span(
-                "transform_record",
-                attributes={
-                    "bioetl.provider": self.provider,
-                    "bioetl.entity_type": self.entity_type,
-                    "bioetl.run_id": str(context.run_id),
-                },
-            )
-            span.__enter__()
+        # Start tracing span (always available via NoOpTracing default)
+        otel_tracer = self._tracer.get_tracer("bioetl.transformer")
+        span = otel_tracer.start_as_current_span(
+            "transform_record",
+            attributes={
+                "bioetl.provider": self.provider,
+                "bioetl.entity_type": self.entity_type,
+                "bioetl.run_id": str(context.run_id),
+            },
+        )
+        span.__enter__()
 
         try:
             result = await self._transform_impl(context, record)
@@ -146,9 +144,8 @@ class BaseTransformer(ABC):
                 field=e.field,
                 provider=self.provider,
             )
-            if span:
-                span.set_attribute("error", True)
-                span.set_attribute("error.type", error_type)
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", error_type)
             return None
         except ValueError as e:
             error_type = "validation_error"
@@ -157,40 +154,37 @@ class BaseTransformer(ABC):
                 error=str(e),
                 provider=self.provider,
             )
-            if span:
-                span.set_attribute("error", True)
-                span.set_attribute("error.type", error_type)
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", error_type)
             return None
         finally:
             duration = time.perf_counter() - start_time
 
-            # Record duration histogram
-            if self._metrics:
-                self._metrics.observe_histogram(
-                    "transform_duration_seconds",
-                    duration,
+            # Record duration histogram (always available via NoOpMetrics default)
+            self._metrics.observe_histogram(
+                "transform_duration_seconds",
+                duration,
+                labels={
+                    "provider": self.provider,
+                    "entity_type": self.entity_type,
+                },
+            )
+
+            # Record error counter if error occurred
+            if error_type:
+                self._metrics.increment_counter(
+                    "transform_errors_total",
+                    1,
                     labels={
                         "provider": self.provider,
                         "entity_type": self.entity_type,
+                        "error_type": error_type,
                     },
                 )
 
-                # Record error counter if error occurred
-                if error_type:
-                    self._metrics.increment_counter(
-                        "transform_errors_total",
-                        1,
-                        labels={
-                            "provider": self.provider,
-                            "entity_type": self.entity_type,
-                            "error_type": error_type,
-                        },
-                    )
-
             # End tracing span
-            if span:
-                span.set_attribute("bioetl.duration_ms", duration * 1000)
-                span.__exit__(None, None, None)
+            span.set_attribute("bioetl.duration_ms", duration * 1000)
+            span.__exit__(None, None, None)
 
     @abstractmethod
     async def _transform_impl(
