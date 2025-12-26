@@ -63,16 +63,16 @@ class _NoOpOtelTracer:
 
     def start_as_current_span(
         self,
-        _name: str,
-        _context: Any | None = None,
-        _kind: Any | None = None,
-        _attributes: dict[str, Any] | None = None,
-        _links: Any | None = None,
-        _start_time: Any | None = None,
-        _record_exception: bool = True,
-        _set_status_on_exception: bool = True,
-        _end_on_exit: bool = True,
-        **_kwargs: Any,
+        name: str,
+        context: Any | None = None,
+        kind: Any | None = None,
+        attributes: dict[str, Any] | None = None,
+        links: Any | None = None,
+        start_time: Any | None = None,
+        record_exception: bool = True,
+        set_status_on_exception: bool = True,
+        end_on_exit: bool = True,
+        **kwargs: Any,
     ) -> _NoOpSpan:
         """Start a new span (no-op).
 
