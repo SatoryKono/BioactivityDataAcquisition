@@ -19,6 +19,7 @@
 | **CLI тесты** | `tests/integration/interfaces/` | 7+ тестов: `test_cli_shutdown_integration.py`, `test_cli_run_*.py` и др. |
 | **Обработка ошибок ChEMBL** | `client.py:223-267` | `_handle_error()` ВСЕГДА кидает исключения (CriticalError/ChemblApiError) |
 | **UnifiedHTTPClient lifecycle** | `client.py:138-162` | Корректный async context manager (`__aenter__`/`__aexit__`) |
+| **D1: Детерминистичный HTTP jitter** | `domain/resilience.py:45-84` | MD5-based jitter в `RetryPolicy.calculate_delay()`, 11 тестов в `test_http_client.py` |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -29,6 +30,7 @@
 | "0 тестов interfaces/оркестрации" | 7+ интеграционных CLI тестов | `tests/integration/interfaces/` |
 | "ChemblAdapter._fetch_page глушит ошибки" | `_handle_error()` всегда raises; `return [], False` — мёртвый код | `client.py:145-147, 261-267` |
 | "UnifiedHTTPClient нарушает DI" | Создание в `__aenter__` — корректный async pattern | `client.py:138-152` |
+| "D1: HTTP jitter не реализован" | MD5-based jitter в `RetryPolicy` с 2025-12-26 | `domain/resilience.py:45-84`, 11 тестов |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
@@ -60,8 +62,8 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                     🔴 КРИТИЧНО (Фаза 1)                        │
 ├─────────────────────────────────────────────────────────────────┤
-│  D1: HTTP jitter ─────────────────────────────┐                 │
-│      (client.py:53 — random.uniform)          │                 │
+│  ✅ D1: HTTP jitter ──────────────────────────┐                 │
+│      (domain/resilience.py — MD5 jitter)      │                 │
 │                                               ├──▶ D3: Arch test│
 │  D2: Gold writer random ──────────────────────┘                 │
 │      (gold_writer.py:219,279)                                   │
@@ -106,95 +108,78 @@
 ### Проблема
 Источники недетерминизма в кодовой базе:
 
-| Файл | Строка | Паттерн | Контекст |
-|------|--------|---------|----------|
-| `infrastructure/adapters/http/client.py` | 13, 53 | `import random`, `random.uniform()` | Jitter ретраев |
-| `infrastructure/storage/gold_writer.py` | 21, 219, 279 | `import random`, `random.uniform()` | Write backoff |
+| Файл | Строка | Паттерн | Контекст | Статус |
+|------|--------|---------|----------|--------|
+| ~~`infrastructure/adapters/http/client.py`~~ | ~~13, 53~~ | ~~`import random`, `random.uniform()`~~ | ~~Jitter ретраев~~ | ✅ Исправлено в `domain/resilience.py` |
+| `infrastructure/storage/gold_writer.py` | 21, 219, 279 | `import random`, `random.uniform()` | Write backoff | ❌ Требует исправления |
 
 ---
 
-### D1: Детерминистичный джиттер в HTTP-клиенте
+### D1: Детерминистичный джиттер в HTTP-клиенте ✅ РЕАЛИЗОВАНО
 
-**Файл:** `src/bioetl/infrastructure/adapters/http/client.py`
+> **Статус:** Реализовано в `domain/resilience.py:45-84`
+> **Дата верификации:** 2025-12-26
 
-#### Текущее состояние (строки 47-54)
+**Файл:** `src/bioetl/domain/resilience.py` (перенесено из `infrastructure/adapters/http/client.py`)
 
-```python
-def calculate_delay(self, attempt: int) -> float:
-    """Calculate delay for given attempt number (0-indexed)."""
-    delay = self.base_delay * (self.multiplier**attempt)
-    delay = min(delay, self.max_delay)
-    # Add jitter
-    jitter_range = delay * self.jitter
-    delay += random.uniform(-jitter_range, jitter_range)  # ← Недетерминизм
-    return max(0.0, delay)
-```
+#### Реализованное решение
 
-#### Требуемые изменения
-
-| № | Изменение | Строки | Описание |
-|---|-----------|--------|----------|
-| 1 | Добавить параметры | 28-45 | `deterministic: bool = False`, `jitter_seed: int \| None = None` |
-| 2 | Переработать `calculate_delay()` | 47-54 | Hash-based jitter вместо `random.uniform()` |
-| 3 | Добавить URL в сигнатуру | 47 | `def calculate_delay(self, attempt: int, url: str = "") -> float:` |
-
-#### Целевой код
+`RetryPolicy` в domain слое использует MD5-based детерминистичный джиттер:
 
 ```python
-@dataclass
-class RetryConfig:
+@dataclass(frozen=True, slots=True)
+class RetryPolicy:
     max_attempts: int = 3
     base_delay: float = 1.0
     max_delay: float = 60.0
     multiplier: float = 2.0
     jitter: float = 0.1
-    deterministic: bool = False  # NEW
-    jitter_seed: int | None = None  # NEW
+    deterministic: bool = True  # По умолчанию детерминистичный
+    jitter_seed: int | None = None
 
     def calculate_delay(self, attempt: int, url: str = "") -> float:
-        """Calculate delay for given attempt number (0-indexed)."""
-        delay = self.base_delay * (self.multiplier ** attempt)
+        delay = self.base_delay * (self.multiplier**attempt)
         delay = min(delay, self.max_delay)
+        jitter_range = delay * self.jitter
 
         if self.deterministic:
-            # Детерминистичный джиттер на основе хэша
+            # MD5-based для кросс-процессной стабильности (ADR-014)
             hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
-            jitter_factor = (hash(hash_input) % 1000) / 1000.0
-            jitter_range = delay * self.jitter
+            digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+            jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
             delay += jitter_range * (jitter_factor * 2 - 1)
         else:
-            jitter_range = delay * self.jitter
+            # Deprecated: random.uniform() с DeprecationWarning
             delay += random.uniform(-jitter_range, jitter_range)
 
         return max(0.0, delay)
 ```
 
-#### Обновление вызовов
+#### Ключевые улучшения
 
-**Файл:** `src/bioetl/infrastructure/adapters/http/client.py:144, 188`
+| Аспект | Реализация |
+|--------|------------|
+| **Алгоритм** | MD5 вместо `hash()` для кросс-процессной стабильности |
+| **Default** | `deterministic=True` (безопаснее чем предложенный `False`) |
+| **Deprecation** | `deterministic=False` выдаёт `DeprecationWarning` |
+| **Расположение** | Domain слой (`domain/resilience.py`), не infrastructure |
 
-```python
-# ДО:
-delay = self.retry_config.calculate_delay(attempt)
+#### Тесты (11 тестов)
 
-# ПОСЛЕ:
-delay = self.retry_config.calculate_delay(attempt, url)
-```
-
-#### Тесты
-
-| Файл | Тест | Проверка |
-|------|------|----------|
-| `tests/unit/infrastructure/adapters/http/test_http_client.py` | `test_deterministic_jitter_same_input_same_output` | Одинаковый вход → одинаковая задержка |
-| `tests/unit/infrastructure/adapters/http/test_http_client.py` | `test_deterministic_jitter_different_urls_different_output` | Разные URL → разные задержки |
-| `tests/unit/infrastructure/adapters/http/test_http_client.py` | `test_non_deterministic_mode_uses_random` | `deterministic=False` → разные значения |
+| Файл | Тест | Статус |
+|------|------|--------|
+| `test_http_client.py` | `test_deterministic_jitter_same_input_same_output` | ✅ |
+| `test_http_client.py` | `test_deterministic_jitter_different_urls_different_output` | ✅ |
+| `test_http_client.py` | `test_non_deterministic_mode_uses_random` | ✅ |
+| `test_http_client.py` | `test_deterministic_jitter_cross_process_stability` | ✅ |
+| `test_http_client.py` | `test_deterministic_jitter_known_values` | ✅ |
 
 #### Критерии приёмки
 
-- [ ] `RetryConfig(deterministic=True)` даёт одинаковые задержки при одинаковых входных данных
-- [ ] `RetryConfig(deterministic=False)` сохраняет прежнее поведение с random
-- [ ] Тесты покрывают оба режима
-- [ ] `make lint && make test` проходят
+- [x] `RetryPolicy(deterministic=True)` даёт одинаковые задержки при одинаковых входных данных
+- [x] `RetryPolicy(deterministic=False)` сохраняет прежнее поведение с random
+- [x] Тесты покрывают оба режима
+- [x] `make lint && make test` проходят
 
 ---
 
