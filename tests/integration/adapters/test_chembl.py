@@ -107,15 +107,19 @@ class TestChemblAdapter:
 
     def test_invalid_entity_type_raises(self, chembl_adapter: Any) -> None:
         """Should raise ValueError for unknown entity type."""
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+
         with pytest.raises(ValueError, match="Unknown entity type"):
-            chembl_adapter._get_resource_url("invalid_entity")
+            ChemblEntityMapper.get_resource_url("invalid_entity")
 
     def test_entity_mapping(self, chembl_adapter: Any) -> None:
         """Entity types should map to correct ChEMBL resources."""
-        assert "molecule" in chembl_adapter._get_resource_url("compound")
-        assert "activity" in chembl_adapter._get_resource_url("activity")
-        assert "target" in chembl_adapter._get_resource_url("target")
-        assert "assay" in chembl_adapter._get_resource_url("assay")
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+
+        assert "molecule" in ChemblEntityMapper.get_resource_url("compound")
+        assert "activity" in ChemblEntityMapper.get_resource_url("activity")
+        assert "target" in ChemblEntityMapper.get_resource_url("target")
+        assert "assay" in ChemblEntityMapper.get_resource_url("assay")
 
 
 @pytest.mark.unit
@@ -124,7 +128,7 @@ class TestChemblAdapterUnit:
 
     def test_entity_url_generation(self) -> None:
         """Test URL generation for different entity types."""
-        from bioetl.infrastructure.adapters.chembl.client import (
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import (
             CHEMBL_API_BASE,
             ENTITY_MAPPING,
         )
@@ -136,7 +140,7 @@ class TestChemblAdapterUnit:
 
     def test_api_base_url(self) -> None:
         """API base URL should be correct."""
-        from bioetl.infrastructure.adapters.chembl.client import CHEMBL_API_BASE
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import CHEMBL_API_BASE
 
         assert "ebi.ac.uk" in CHEMBL_API_BASE
         assert "chembl" in CHEMBL_API_BASE

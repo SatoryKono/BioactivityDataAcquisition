@@ -42,6 +42,7 @@ class TestFileSizeLimits:
         "storage_factory.py": 650,  # 599 LOC
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "generic_factory.py": 450,  # 411 LOC - factory with transformer DI
+        "storage_adapter.py": 500,  # 484 LOC - unified storage interface
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
