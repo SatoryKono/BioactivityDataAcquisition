@@ -6,11 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.data_source_registry import (
-    DataSourceRegistry,
-    create_chembl_data_source,
-    create_pubchem_data_source,
-)
+from bioetl.composition.factories.data_source_registry import DataSourceRegistry
 from bioetl.composition.factories.generic_factory import (
     GenericPipelineFactory,
     create_pipeline_factory,
@@ -68,72 +64,23 @@ class TestDataSourceRegistry:
         assert "pubmed" in providers
 
     def test_register_custom_provider(self):
-        """Test registering a custom provider."""
+        """Test registering a custom provider stores in local dict.
+
+        Note: register() is deprecated. New registrations should go through
+        ProviderRegistry. This test verifies backward-compat local storage only.
+        """
 
         def custom_creator(settings, config, logger, filter_config=None):
             return MagicMock()
 
         DataSourceRegistry.register("custom", custom_creator)
-        assert "custom" in DataSourceRegistry.list_providers()
 
-        creator = DataSourceRegistry.get("custom")
-        assert creator is custom_creator
+        # Local registration stores in _creators dict
+        assert "custom" in DataSourceRegistry._creators
+        assert DataSourceRegistry._creators["custom"] is custom_creator
 
         # Cleanup
         del DataSourceRegistry._creators["custom"]
-
-
-class TestDataSourceCreators:
-    """Tests for individual data source creator functions."""
-
-    @patch("bioetl.composition.factories.data_source_registry.HttpClientFactory")
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory")
-    def test_create_chembl_data_source(
-        self,
-        mock_ds_factory,
-        mock_http_factory,
-        mock_settings,
-        mock_pipeline_config,
-        mock_logger,
-    ):
-        """Test ChEMBL data source creation."""
-        mock_http_client = MagicMock()
-        mock_http_factory.create_for_provider.return_value = mock_http_client
-        mock_adapter = MagicMock()
-        mock_ds_factory.create.return_value = mock_adapter
-
-        result = create_chembl_data_source(
-            mock_settings, mock_pipeline_config, mock_logger
-        )
-
-        mock_http_factory.create_for_provider.assert_called_once_with(
-            "chembl", mock_settings
-        )
-        mock_ds_factory.create.assert_called_once_with(
-            "chembl", http_client=mock_http_client, logger=mock_logger
-        )
-        assert result is mock_adapter
-
-    @patch("bioetl.composition.factories.data_source_registry.DataSourceFactory")
-    def test_create_pubchem_data_source(
-        self, mock_ds_factory, mock_settings, mock_pipeline_config, mock_logger
-    ):
-        """Test PubChem data source creation."""
-        mock_adapter = MagicMock()
-        mock_ds_factory.create.return_value = mock_adapter
-
-        result = create_pubchem_data_source(
-            mock_settings, mock_pipeline_config, mock_logger
-        )
-
-        mock_ds_factory.create.assert_called_once_with(
-            "pubchem",
-            http_client=None,
-            logger=mock_logger,
-            rate=5.0,
-            strict_error_handling=mock_settings.strict_error_handling,
-        )
-        assert result is mock_adapter
 
 
 class TestGenericPipelineFactory:
