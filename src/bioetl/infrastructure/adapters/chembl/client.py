@@ -144,7 +144,7 @@ class ChemblAdapter(BaseHttpAdapter):
             return records, has_next
         except Exception as e:
             self._handle_error(e)
-            return [], False
+            raise  # explicit re-raise для линтеров (handle_error всегда raises)
 
     async def _page_iterator(
         self, entity_type: str, limit: int | None = None
