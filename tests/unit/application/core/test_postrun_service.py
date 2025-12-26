@@ -12,7 +12,8 @@ from bioetl.application.core.postrun_service import (
     PostrunService,
     VacuumResult,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.types import RunType
 
 
@@ -483,3 +484,313 @@ class TestVacuumResult:
         assert result.silver_files_removed == 10
         assert result.gold_files_removed == 5
         assert result.skipped is False
+
+
+@pytest.mark.unit
+class TestPostrunServiceDQThresholds:
+    """Tests for DQ threshold checking in PostrunService."""
+
+    @pytest.mark.asyncio
+    async def test_hard_threshold_exceeded_raises_error(
+        self,
+        runtime_config,
+        mock_services,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test that error rate exceeding hard threshold raises DataQualityThresholdError."""
+        # Config with hard_fail_threshold=0.20 (default)
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        )
+
+        # Executor with 25% error rate (25/100 quarantined)
+        executor = MagicMock()
+        executor.records_fetched = 100
+        executor.records_bronze = 100
+        executor.records_silver = 75
+        executor.records_gold = 70
+        executor.records_quarantined = 25
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        with pytest.raises(DataQualityThresholdError) as exc_info:
+            await service.run_dq_checks(executor)
+
+        assert exc_info.value.error_rate == 0.25
+        assert exc_info.value.threshold == 0.20
+        mock_logger.error.assert_called_once()
+        # Verify error log includes expected details
+        error_call = mock_logger.error.call_args
+        assert error_call[0][0] == "DQ hard threshold exceeded"
+
+    @pytest.mark.asyncio
+    async def test_hard_threshold_exactly_at_limit_raises_error(
+        self,
+        runtime_config,
+        mock_services,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test that error rate exactly at hard threshold raises DataQualityThresholdError."""
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        )
+
+        # Executor with exactly 20% error rate (20/100 quarantined)
+        executor = MagicMock()
+        executor.records_fetched = 100
+        executor.records_bronze = 100
+        executor.records_silver = 80
+        executor.records_gold = 75
+        executor.records_quarantined = 20
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        with pytest.raises(DataQualityThresholdError):
+            await service.run_dq_checks(executor)
+
+    @pytest.mark.asyncio
+    async def test_soft_threshold_exceeded_logs_warning_and_emits_metric(
+        self,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+        mock_metrics,
+    ):
+        """Test that error rate exceeding soft threshold logs warning and emits metric."""
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        )
+
+        # Executor with 10% error rate (10/100 quarantined) - above soft, below hard
+        executor = MagicMock()
+        executor.records_fetched = 100
+        executor.records_bronze = 100
+        executor.records_silver = 90
+        executor.records_gold = 85
+        executor.records_quarantined = 10
+
+        services = MagicMock()
+        services.dq_monitor = None
+        services.metrics = mock_metrics
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        # Should not raise, but should log warning
+        result = await service.run_dq_checks(executor)
+
+        assert result.anomalies_count == 0
+        mock_logger.warning.assert_called_once()
+        warning_call = mock_logger.warning.call_args
+        assert warning_call[0][0] == "DQ soft threshold exceeded"
+
+        # Verify metric was emitted
+        mock_metrics.increment_counter.assert_called_once_with(
+            "dq_soft_threshold_exceeded",
+            1,
+            {"pipeline": "test_pipeline"},
+        )
+
+    @pytest.mark.asyncio
+    async def test_soft_threshold_exactly_at_limit_logs_warning(
+        self,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+        mock_metrics,
+    ):
+        """Test that error rate exactly at soft threshold logs warning."""
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        )
+
+        # Executor with exactly 5% error rate (5/100 quarantined)
+        executor = MagicMock()
+        executor.records_fetched = 100
+        executor.records_bronze = 100
+        executor.records_silver = 95
+        executor.records_gold = 90
+        executor.records_quarantined = 5
+
+        services = MagicMock()
+        services.dq_monitor = None
+        services.metrics = mock_metrics
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        await service.run_dq_checks(executor)
+
+        mock_logger.warning.assert_called_once()
+        mock_metrics.increment_counter.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_below_soft_threshold_no_warning(
+        self,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+        mock_metrics,
+    ):
+        """Test that error rate below soft threshold does not log warning."""
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        )
+
+        # Executor with 3% error rate (3/100 quarantined) - below soft threshold
+        executor = MagicMock()
+        executor.records_fetched = 100
+        executor.records_bronze = 100
+        executor.records_silver = 97
+        executor.records_gold = 95
+        executor.records_quarantined = 3
+
+        services = MagicMock()
+        services.dq_monitor = None
+        services.metrics = mock_metrics
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        await service.run_dq_checks(executor)
+
+        mock_logger.warning.assert_not_called()
+        mock_logger.error.assert_not_called()
+        mock_metrics.increment_counter.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_soft_threshold_without_metrics_still_logs_warning(
+        self,
+        runtime_config,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test that soft threshold logs warning even when metrics port is None."""
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        )
+
+        # Executor with 10% error rate
+        executor = MagicMock()
+        executor.records_fetched = 100
+        executor.records_bronze = 100
+        executor.records_silver = 90
+        executor.records_gold = 85
+        executor.records_quarantined = 10
+
+        services = MagicMock()
+        services.dq_monitor = None
+        services.metrics = None  # No metrics port
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        # Should not raise
+        result = await service.run_dq_checks(executor)
+
+        assert result.anomalies_count == 0
+        mock_logger.warning.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_zero_records_does_not_fail(
+        self,
+        runtime_config,
+        mock_services,
+        mock_logger,
+        mock_lifecycle_service,
+    ):
+        """Test that zero records processed does not trigger threshold errors."""
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+        )
+
+        # Executor with zero records
+        executor = MagicMock()
+        executor.records_fetched = 0
+        executor.records_bronze = 0
+        executor.records_silver = 0
+        executor.records_gold = 0
+        executor.records_quarantined = 0
+
+        service = PostrunService(
+            config=config,
+            runtime=runtime_config,
+            services=mock_services,
+            logger=mock_logger,
+            lifecycle_service=mock_lifecycle_service,
+        )
+
+        # Should not raise - error_rate is 0/1=0 which is below thresholds
+        result = await service.run_dq_checks(executor)
+
+        assert result.anomalies_count == 0
+        mock_logger.warning.assert_not_called()
+        mock_logger.error.assert_not_called()

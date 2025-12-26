@@ -79,6 +79,8 @@ class ServicesBuilder:
         transform_callback: Any,
         gold_filter_callback: Any,
         gold_transform_callback: Any,
+        *,
+        strict_gold_validation: bool = False,
     ) -> RecordProcessor:
         """Create configured RecordProcessor.
 
@@ -100,6 +102,8 @@ class ServicesBuilder:
             transform_callback: Bronze to Silver transformation callback
             gold_filter_callback: Gold filtering callback
             gold_transform_callback: Silver to Gold transformation callback
+            strict_gold_validation: If True, validation fails when gold_schema is None.
+                Default False for backward compatibility.
 
         Returns:
             Configured RecordProcessor instance
@@ -125,7 +129,8 @@ class ServicesBuilder:
         )
 
         # Create Gold validator from schema (DI pattern)
-        gold_validator = PanderaGoldValidator(gold_schema)
+        # strict mode requires schema to be provided
+        gold_validator = PanderaGoldValidator(gold_schema, strict=strict_gold_validation)
 
         return RecordProcessor(
             services=services,
@@ -143,6 +148,8 @@ class ServicesBuilder:
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
         gold_schema: Any,
+        *,
+        strict_gold_validation: bool = False,
     ) -> RecordProcessor:
         """Create RecordProcessor from pipeline instance.
 
@@ -152,6 +159,8 @@ class ServicesBuilder:
             pipeline: Pipeline instance
             silver_schema: PyArrow schema for Silver layer
             gold_schema: Pandera schema for Gold layer
+            strict_gold_validation: If True, validation fails when gold_schema is None.
+                Default False for backward compatibility.
 
         Returns:
             Configured RecordProcessor instance
@@ -174,4 +183,5 @@ class ServicesBuilder:
             transform_callback=pipeline.transform_bronze_to_silver,
             gold_filter_callback=pipeline.should_write_gold,
             gold_transform_callback=pipeline.transform_for_gold,
+            strict_gold_validation=strict_gold_validation,
         )
