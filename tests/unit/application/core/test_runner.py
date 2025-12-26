@@ -14,6 +14,7 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.runner_services import RunnerServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
@@ -90,8 +91,8 @@ def create_mock_runner_services(
     preflight_service=None,
     postrun_service=None,
     lifecycle_orchestrator=None,
-):
-    """Create mock runner services for DI injection.
+) -> RunnerServices:
+    """Create mock RunnerServices for DI injection.
 
     Args:
         lock_manager: Optional custom lock manager mock.
@@ -100,7 +101,7 @@ def create_mock_runner_services(
         lifecycle_orchestrator: Optional custom lifecycle orchestrator mock.
 
     Returns:
-        Tuple of (lock_manager, preflight_service, postrun_service, lifecycle_orchestrator)
+        RunnerServices bundle with mock services.
     """
     from bioetl.application.core.lifecycle_orchestrator import ClearDecision
     from bioetl.application.core.postrun_service import DQResult, VacuumResult
@@ -142,7 +143,12 @@ def create_mock_runner_services(
             )
         )
 
-    return lock_manager, preflight_service, postrun_service, lifecycle_orchestrator
+    return RunnerServices(
+        lock_manager=lock_manager,
+        preflight=preflight_service,
+        postrun=postrun_service,
+        lifecycle_orch=lifecycle_orchestrator,
+    )
 
 
 @pytest.fixture
@@ -259,6 +265,22 @@ def mock_lifecycle_service():
 
 
 @pytest.fixture
+def mock_runner_services(
+    mock_lock_manager,
+    mock_preflight_service,
+    mock_postrun_service,
+    mock_lifecycle_orchestrator,
+):
+    """Create a mock RunnerServices bundle for PipelineRunner."""
+    return RunnerServices(
+        lock_manager=mock_lock_manager,
+        preflight=mock_preflight_service,
+        postrun=mock_postrun_service,
+        lifecycle_orch=mock_lifecycle_orchestrator,
+    )
+
+
+@pytest.fixture
 def runner(
     pipeline_config,
     runtime_config,
@@ -268,12 +290,9 @@ def runner(
     mock_checkpoint_manager,
     shutdown_signal,
     mock_logger,
-    mock_lock_manager,
-    mock_preflight_service,
-    mock_postrun_service,
-    mock_lifecycle_orchestrator,
+    mock_runner_services,
 ):
-    """Create a PipelineRunner instance with injected services (DI pattern)."""
+    """Create a PipelineRunner instance with injected RunnerServices (DI pattern)."""
     return PipelineRunner(
         config=pipeline_config,
         runtime=runtime_config,
@@ -283,10 +302,7 @@ def runner(
         checkpoint_manager=mock_checkpoint_manager,
         shutdown_signal=shutdown_signal,
         logger=mock_logger,
-        lock_manager=mock_lock_manager,
-        preflight_service=mock_preflight_service,
-        postrun_service=mock_postrun_service,
-        lifecycle_orchestrator=mock_lifecycle_orchestrator,
+        runner_services=mock_runner_services,
     )
 
 
@@ -304,12 +320,9 @@ class TestPipelineRunnerInit:
         mock_checkpoint_manager,
         shutdown_signal,
         mock_logger,
-        mock_lock_manager,
-        mock_preflight_service,
-        mock_postrun_service,
-        mock_lifecycle_orchestrator,
+        mock_runner_services,
     ):
-        """Test runner initializes correctly with injected services."""
+        """Test runner initializes correctly with injected RunnerServices."""
         runner = PipelineRunner(
             config=pipeline_config,
             runtime=runtime_config,
@@ -319,20 +332,17 @@ class TestPipelineRunnerInit:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=mock_postrun_service,
-            lifecycle_orchestrator=mock_lifecycle_orchestrator,
+            runner_services=mock_runner_services,
         )
 
         assert runner._config == pipeline_config
         assert runner._runtime == runtime_config
         assert runner.shutdown_signal == shutdown_signal
-        # Verify injected services are stored correctly
-        assert runner._lock_manager == mock_lock_manager
-        assert runner._preflight_service == mock_preflight_service
-        assert runner._postrun_service == mock_postrun_service
-        assert runner._lifecycle_orchestrator == mock_lifecycle_orchestrator
+        # Verify services are extracted from RunnerServices
+        assert runner._lock_manager == mock_runner_services.lock_manager
+        assert runner._preflight_service == mock_runner_services.preflight
+        assert runner._postrun_service == mock_runner_services.postrun
+        assert runner._lifecycle_orchestrator == mock_runner_services.lifecycle_orch
 
     def test_services_are_injected_not_created(
         self,
@@ -344,12 +354,9 @@ class TestPipelineRunnerInit:
         mock_checkpoint_manager,
         shutdown_signal,
         mock_logger,
-        mock_lock_manager,
-        mock_preflight_service,
-        mock_postrun_service,
-        mock_lifecycle_orchestrator,
+        mock_runner_services,
     ):
-        """Test services are injected via DI, not created internally."""
+        """Test services are injected via DI (RunnerServices), not created internally."""
         runner = PipelineRunner(
             config=pipeline_config,
             runtime=runtime_config,
@@ -359,17 +366,14 @@ class TestPipelineRunnerInit:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=mock_postrun_service,
-            lifecycle_orchestrator=mock_lifecycle_orchestrator,
+            runner_services=mock_runner_services,
         )
 
-        # The exact same instances should be used (DI, not recreation)
-        assert runner._lock_manager is mock_lock_manager
-        assert runner._preflight_service is mock_preflight_service
-        assert runner._postrun_service is mock_postrun_service
-        assert runner._lifecycle_orchestrator is mock_lifecycle_orchestrator
+        # The exact same instances from RunnerServices should be used (DI)
+        assert runner._lock_manager is mock_runner_services.lock_manager
+        assert runner._preflight_service is mock_runner_services.preflight
+        assert runner._postrun_service is mock_runner_services.postrun
+        assert runner._lifecycle_orchestrator is mock_runner_services.lifecycle_orch
 
 
 @pytest.mark.unit
@@ -508,10 +512,7 @@ class TestPipelineRunnerRun:
         mock_checkpoint_manager,
         shutdown_signal,
         mock_logger,
-        mock_lock_manager,
-        mock_preflight_service,
-        mock_postrun_service,
-        mock_lifecycle_orchestrator,
+        mock_runner_services,
     ):
         """Test run passes limit to executor."""
         runtime_with_limit = RuntimeConfig(
@@ -527,10 +528,7 @@ class TestPipelineRunnerRun:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=mock_postrun_service,
-            lifecycle_orchestrator=mock_lifecycle_orchestrator,
+            runner_services=mock_runner_services,
         )
 
         await runner.run()
@@ -577,6 +575,13 @@ class TestPipelineRunnerClearViaLifecycle:
             )
         )
 
+        runner_services = RunnerServices(
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=lifecycle_orchestrator,
+        )
+
         runner = PipelineRunner(
             config=pipeline_config,
             runtime=runtime_config,
@@ -586,10 +591,7 @@ class TestPipelineRunnerClearViaLifecycle:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=mock_postrun_service,
-            lifecycle_orchestrator=lifecycle_orchestrator,
+            runner_services=runner_services,
         )
 
         await runner._clear_via_lifecycle()
@@ -625,6 +627,13 @@ class TestPipelineRunnerClearViaLifecycle:
             )
         )
 
+        runner_services = RunnerServices(
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=lifecycle_orchestrator,
+        )
+
         runner = PipelineRunner(
             config=pipeline_config,
             runtime=runtime_config,
@@ -634,10 +643,7 @@ class TestPipelineRunnerClearViaLifecycle:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=mock_postrun_service,
-            lifecycle_orchestrator=lifecycle_orchestrator,
+            runner_services=runner_services,
         )
 
         await runner.run()
@@ -695,6 +701,13 @@ class TestPipelineRunnerCheckDataQuality:
         )
         postrun_service.cleanup = AsyncMock()
 
+        runner_services = RunnerServices(
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=postrun_service,
+            lifecycle_orch=mock_lifecycle_orchestrator,
+        )
+
         runner = PipelineRunner(
             config=pipeline_config,
             runtime=runtime_config,
@@ -704,10 +717,7 @@ class TestPipelineRunnerCheckDataQuality:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=postrun_service,
-            lifecycle_orchestrator=mock_lifecycle_orchestrator,
+            runner_services=runner_services,
         )
 
         await runner._check_data_quality()
@@ -747,6 +757,13 @@ class TestPipelineRunnerCheckDataQuality:
         )
         postrun_service.cleanup = AsyncMock()
 
+        runner_services = RunnerServices(
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=postrun_service,
+            lifecycle_orch=mock_lifecycle_orchestrator,
+        )
+
         runner = PipelineRunner(
             config=pipeline_config,
             runtime=runtime_config,
@@ -756,10 +773,7 @@ class TestPipelineRunnerCheckDataQuality:
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
             logger=mock_logger,
-            lock_manager=mock_lock_manager,
-            preflight_service=mock_preflight_service,
-            postrun_service=postrun_service,
-            lifecycle_orchestrator=mock_lifecycle_orchestrator,
+            runner_services=runner_services,
         )
 
         await runner.run()
