@@ -249,7 +249,6 @@ class TestClassSize:
         "LineageTracker": 400,
         "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
-        "RecordProcessor": 410,  # 407 lines - core ETL logic
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
