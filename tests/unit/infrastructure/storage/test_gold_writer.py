@@ -23,7 +23,12 @@ def noop_logger():
 @pytest.fixture
 def gold_writer(noop_logger):
     """Create a GoldWriter instance."""
-    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
+    mock_delta_writer = MagicMock()
+    return GoldWriter(
+        base_path="s3://test-bucket/gold",
+        logger=noop_logger,
+        delta_writer=mock_delta_writer
+    )
 
 
 @pytest.fixture

@@ -49,6 +49,10 @@ class BioETLError(Exception):
 
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)
 
+
+class ProcessingError(CriticalError):
+    """Generic error during record processing."""
+
     @property
     def context(self) -> dict[str, object]:
         """Get unified error context from instance attributes.
