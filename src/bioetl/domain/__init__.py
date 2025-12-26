@@ -80,7 +80,7 @@ from bioetl.domain.exceptions import (
 )
 
 # Filter configuration
-from bioetl.domain.filter_config import (
+from bioetl.domain.filtering import (
     FilterLoadResult,
     GoldColumnFilter,
     GoldFilterConfig,
