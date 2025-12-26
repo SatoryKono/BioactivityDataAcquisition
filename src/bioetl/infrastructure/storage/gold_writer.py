@@ -18,16 +18,17 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
-
-T = TypeVar("T")
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import pandera as pandera_pa
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
+
+T = TypeVar("T")
 
 if TYPE_CHECKING:
     from pathlib import Path
