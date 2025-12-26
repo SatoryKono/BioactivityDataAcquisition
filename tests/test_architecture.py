@@ -323,8 +323,8 @@ def test_ports_are_protocols(src_dir: Path):
     ports_dir = src_dir / "bioetl" / "domain" / "ports"
     assert ports_dir.is_dir(), f"Ports directory not found: {ports_dir}"
 
-    # Collect all port files (exclude __init__.py)
-    port_files = [f for f in ports_dir.glob("*.py") if f.name != "__init__.py"]
+    # Collect all port files (exclude __init__.py and noop.py implementations)
+    port_files = [f for f in ports_dir.glob("*.py") if f.name not in ("__init__.py", "noop.py")]
     assert port_files, "No port files found in ports directory"
 
     # Check each port file contains Protocol definitions
