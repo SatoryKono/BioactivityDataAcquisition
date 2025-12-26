@@ -2,18 +2,23 @@
 
 Централизует регистрацию провайдеров, устраняя необходимость
 изменять несколько файлов при добавлении нового провайдера.
+
+После унификации с DataSourceRegistry, этот модуль также отвечает за
+высокоуровневое создание data sources с поддержкой фильтрации.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import DataSourcePort, LoggerPort
+    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True)
@@ -33,8 +38,39 @@ class HttpConfig:
     rate_overrides: dict[str, float] = field(default_factory=dict)
 
 
-# Type alias для creator function
+# Type alias для low-level adapter creator
 AdapterCreator = Callable[..., "DataSourcePort"]
+
+
+class DataSourceCreator(Protocol):
+    """Protocol for high-level data source creator functions.
+
+    These functions create fully configured data sources with filtering support.
+    """
+
+    def __call__(
+        self,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+        filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
+    ) -> DataSourcePort:
+        """Create a configured data source.
+
+        Args:
+            settings: Application settings
+            pipeline_config: Pipeline configuration from YAML
+            logger: LoggerPort instance for structured logging
+            filter_config: Optional filter configuration
+            metrics: Optional metrics port for recording filter statistics
+            pipeline_name: Pipeline name for metrics labels
+
+        Returns:
+            Configured DataSourcePort instance
+        """
+        ...
 
 
 @dataclass(frozen=True)
@@ -50,6 +86,9 @@ class ProviderConfig:
         default_kwargs: Дополнительные kwargs для конструктора адаптера
         custom_creator: Кастомная функция создания адаптера для
             сложных случаев (например, PubMed с API key логикой)
+        data_source_creator: Высокоуровневая функция создания data source
+            с поддержкой фильтрации. Если указана, используется вместо
+            стандартной логики в create_data_source().
     """
 
     adapter_class: type[DataSourcePort]
@@ -58,6 +97,7 @@ class ProviderConfig:
     requires_logger: bool = True
     default_kwargs: dict[str, Any] = field(default_factory=dict)
     custom_creator: AdapterCreator | None = None
+    data_source_creator: DataSourceCreator | None = None
 
 
 class ProviderRegistry:
@@ -192,6 +232,71 @@ class ProviderRegistry:
         """
         config = cls.get(name)
         return config.http_config
+
+    @classmethod
+    def create_data_source(
+        cls,
+        name: str,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+        filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
+    ) -> DataSourcePort:
+        """Создаёт полностью настроенный data source с поддержкой фильтрации.
+
+        Высокоуровневый метод, объединяющий функциональность ProviderRegistry
+        и бывшего DataSourceRegistry. Использует data_source_creator из
+        конфигурации провайдера, если он указан.
+
+        Args:
+            name: Имя провайдера
+            settings: Настройки приложения
+            pipeline_config: Конфигурация пайплайна из YAML
+            logger: LoggerPort для структурированного логирования
+            filter_config: Опциональная конфигурация фильтрации
+            metrics: Опциональный MetricsPort для статистики
+            pipeline_name: Имя пайплайна для меток метрик
+
+        Returns:
+            Настроенный DataSourcePort с поддержкой фильтрации
+
+        Raises:
+            KeyError: Если провайдер не зарегистрирован
+            ValueError: Если data_source_creator не задан для провайдера
+        """
+        config = cls.get(name)
+
+        if config.data_source_creator is None:
+            raise ValueError(
+                f"Provider '{name}' does not have a data_source_creator configured. "
+                "Register the provider with a data_source_creator in registration.py."
+            )
+
+        return config.data_source_creator(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+        )
+
+    @classmethod
+    def has_data_source_creator(cls, name: str) -> bool:
+        """Проверяет, есть ли у провайдера data_source_creator.
+
+        Args:
+            name: Имя провайдера
+
+        Returns:
+            True если провайдер имеет data_source_creator
+        """
+        if not cls.is_registered(name):
+            return False
+        config = cls.get(name)
+        return config.data_source_creator is not None
 
     @classmethod
     def list_providers(cls) -> list[str]:

@@ -1,23 +1,26 @@
 """Registry for data source creators.
 
-Centralizes data source creation logic, eliminating duplication across pipeline factories.
-Each provider registers a creator function that knows how to instantiate the appropriate
-DataSourcePort implementation.
+This module provides backward-compatible access to data source creation
+through DataSourceRegistry, which now delegates to ProviderRegistry.
 
-Note: This module works in conjunction with ProviderRegistry. The creator functions
-use DataSourceFactory and HttpClientFactory, which now delegate to ProviderRegistry
-for provider lookup and configuration.
+After the registry unification, the actual creator functions live in
+bioetl.composition.providers.registration module. This module serves as
+a thin facade for backward compatibility.
+
+Note: New code should prefer using ProviderRegistry.create_data_source()
+directly for better clarity.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Protocol
+from typing import TYPE_CHECKING, ClassVar
 
-from bioetl.application.core.filtered_data_source import FilteredDataSource
-from bioetl.composition.factories.data_sources import DataSourceFactory
-from bioetl.composition.factories.http_client_factory import HttpClientFactory
-from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
+# Re-export DataSourceCreator from ProviderRegistry for backward compatibility
+from bioetl.composition.providers import (
+    DataSourceCreator,
+    ProviderRegistry,
+    ensure_providers_loaded,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
@@ -25,173 +28,39 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
-class DataSourceCreator(Protocol):
-    """Protocol for data source creator functions."""
-
-    def __call__(
-        self,
-        settings: Settings,
-        pipeline_config: PipelineYamlConfig,
-        logger: LoggerPort,
-        filter_config: InputFilterConfig | None = None,
-        metrics: MetricsPort | None = None,
-        pipeline_name: str = "unknown",
-    ) -> DataSourcePort:
-        """Create a configured data source.
-
-        Args:
-            settings: Application settings
-            pipeline_config: Pipeline configuration from YAML
-            logger: LoggerPort instance for structured logging
-            filter_config: Optional filter configuration
-            metrics: Optional metrics port for recording filter statistics
-            pipeline_name: Pipeline name for metrics labels
-
-        Returns:
-            Configured DataSourcePort instance
-        """
-        ...
-
-
-def _wrap_with_filter(
-    data_source: DataSourcePort,
-    filter_config: InputFilterConfig | None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Wrap data source with FilteredDataSource if filter is enabled.
-
-    Args:
-        data_source: Base data source to wrap
-        filter_config: Optional filter configuration
-        metrics: Optional metrics port for recording filter statistics
-        pipeline_name: Pipeline name for metrics labels
-
-    Returns:
-        Original data source or FilteredDataSource wrapper
-    """
-    if filter_config and filter_config.enabled:
-        return FilteredDataSource(
-            data_source=data_source,
-            filter_reader=CsvFilterReader(),
-            filter_config=filter_config,
-            metrics=metrics,
-            pipeline_name=pipeline_name,
-        )
-    return data_source
-
-
-def create_chembl_data_source(
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Create ChEMBL data source with optional CSV filtering."""
-    http_client = HttpClientFactory.create_for_provider("chembl", settings)
-    base_adapter = DataSourceFactory.create(
-        "chembl", http_client=http_client, logger=logger
-    )
-    return _wrap_with_filter(base_adapter, filter_config, metrics, pipeline_name)
-
-
-def create_pubchem_data_source(
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Create PubChem data source."""
-    # PubChem rate limit: 5 requests/second without API key
-    data_source = DataSourceFactory.create(
-        "pubchem",
-        http_client=None,
-        logger=logger,
-        rate=5.0,
-        strict_error_handling=settings.strict_error_handling,
-    )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
-
-
-def create_uniprot_data_source(
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Create UniProt data source."""
-    http_client = HttpClientFactory.create_for_provider("uniprot", settings)
-
-    data_source = DataSourceFactory.create(
-        "uniprot",
-        http_client=http_client,
-        logger=logger,
-        base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
-        strict_error_handling=settings.strict_error_handling,
-    )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
-
-
-def create_pubmed_data_source(
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Create PubMed data source."""
-    from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
-
-    http_client = HttpClientFactory.create_for_provider("pubmed", settings)
-
-    # Determine API key: config takes precedence over settings
-    configured_api_key = pipeline_config.source.api_key
-    settings_api_key = (
-        settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
-    )
-    api_key = configured_api_key or settings_api_key
-
-    email = pipeline_config.source.email or settings.default_email
-
-    data_source = PubMedAdapter(
-        http_client=http_client,
-        logger=logger,
-        email=email,
-        api_key=api_key,
-    )
-    return _wrap_with_filter(data_source, filter_config, metrics, pipeline_name)
+# Re-export for backward compatibility
+__all__ = ["DataSourceCreator", "DataSourceRegistry"]
 
 
 class DataSourceRegistry:
-    """Registry for data source creators.
+    """Thin facade over ProviderRegistry for data source creation.
 
-    Provides a centralized way to create data sources for different providers.
-    Each provider registers a creator function that encapsulates provider-specific
-    configuration logic.
+    This class provides backward compatibility for code that used the old
+    DataSourceRegistry API. It now delegates to ProviderRegistry for all
+    operations.
 
     Example:
+        >>> # Old way (still works)
         >>> creator = DataSourceRegistry.get("chembl")
-        >>> data_source = creator(settings, pipeline_config)
+        >>> data_source = creator(settings, pipeline_config, logger)
+        >>>
+        >>> # Preferred new way
+        >>> data_source = ProviderRegistry.create_data_source(
+        ...     "chembl", settings, pipeline_config, logger
+        ... )
+
+    Note:
+        For new code, prefer using ProviderRegistry.create_data_source() directly.
     """
 
-    _creators: ClassVar[dict[str, DataSourceCreator]] = {
-        "chembl": create_chembl_data_source,
-        "pubchem": create_pubchem_data_source,
-        "uniprot": create_uniprot_data_source,
-        "pubmed": create_pubmed_data_source,
-    }
+    # Empty dict - we delegate everything to ProviderRegistry
+    _creators: ClassVar[dict[str, DataSourceCreator]] = {}
 
     @classmethod
     def get(cls, provider: str) -> DataSourceCreator:
         """Get creator function for provider.
+
+        Returns a closure that delegates to ProviderRegistry.create_data_source().
 
         Args:
             provider: Provider name (e.g., 'chembl', 'pubchem')
@@ -202,32 +71,66 @@ class DataSourceRegistry:
         Raises:
             KeyError: If provider is not registered
         """
-        if provider not in cls._creators:
-            available = ", ".join(cls._creators.keys())
+        ensure_providers_loaded()
+
+        # Check if provider exists in ProviderRegistry
+        if not ProviderRegistry.is_registered(provider):
+            available = ", ".join(ProviderRegistry.list_providers())
             raise KeyError(f"Unknown provider: {provider}. Available: {available}")
-        return cls._creators[provider]
+
+        # Check if provider has data_source_creator configured
+        if not ProviderRegistry.has_data_source_creator(provider):
+            raise KeyError(
+                f"Provider '{provider}' does not have a data_source_creator. "
+                "Ensure it is registered with data_source_creator in registration.py."
+            )
+
+        # Return a closure that delegates to ProviderRegistry
+        def creator(
+            settings: Settings,
+            pipeline_config: PipelineYamlConfig,
+            logger: LoggerPort,
+            filter_config: InputFilterConfig | None = None,
+            metrics: MetricsPort | None = None,
+            pipeline_name: str = "unknown",
+        ) -> DataSourcePort:
+            return ProviderRegistry.create_data_source(
+                name=provider,
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=logger,
+                filter_config=filter_config,
+                metrics=metrics,
+                pipeline_name=pipeline_name,
+            )
+
+        return creator
 
     @classmethod
     def register(cls, provider: str, creator: DataSourceCreator) -> None:
         """Register a new data source creator.
 
+        Note: This method is deprecated. Use ProviderRegistry.register() instead
+        with a ProviderConfig that includes data_source_creator.
+
         Args:
             provider: Provider name
             creator: Creator function
         """
+        # For backward compatibility, store locally
+        # New registrations should go through ProviderRegistry
         cls._creators[provider] = creator
 
     @classmethod
     def list_providers(cls) -> list[str]:
         """List all registered providers.
 
-        Returns providers from both this registry and ProviderRegistry.
-        Legacy alias for list_keys().
+        Returns providers from ProviderRegistry that have data_source_creator.
         """
         ensure_providers_loaded()
-        registry_providers = set(ProviderRegistry.list_providers())
-        local_providers = set(cls._creators.keys())
-        return sorted(registry_providers | local_providers)
+        # Return all providers from ProviderRegistry
+        # (they all have data_source_creator after unification)
+        return ProviderRegistry.list_providers()
 
     @classmethod
     def list_keys(cls) -> list[str]:
@@ -245,14 +148,16 @@ class DataSourceRegistry:
             key: Provider name to check
 
         Returns:
-            True if provider is registered, False otherwise
+            True if provider is registered and has data_source_creator
         """
-        return key in cls._creators
+        ensure_providers_loaded()
+        return ProviderRegistry.has_data_source_creator(key)
 
     @classmethod
     def clear(cls) -> None:
-        """Clear all registrations (for testing).
+        """Clear local registrations (for testing).
 
-        WARNING: Only use in tests. Not for production.
+        Note: This only clears the local _creators dict.
+        Use ProviderRegistry.clear() to clear the main registry.
         """
         cls._creators.clear()

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.domain.ports import MetricsPort, TracingPort
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type["BaseTransformer"]] = {}
@@ -36,7 +37,12 @@ def register_transformer(
     _TRANSFORMER_REGISTRY[(provider, entity_type)] = transformer_class
 
 
-def create_transformer(provider: str, entity_type: str) -> "BaseTransformer":
+def create_transformer(
+    provider: str,
+    entity_type: str,
+    tracer: TracingPort | None = None,
+    metrics: MetricsPort | None = None,
+) -> "BaseTransformer":
     """Create a transformer instance for the given provider and entity type.
 
     This is the main factory function for creating transformers via DI.
@@ -45,9 +51,11 @@ def create_transformer(provider: str, entity_type: str) -> "BaseTransformer":
     Args:
         provider: Provider name (e.g., 'chembl', 'pubchem').
         entity_type: Entity type (e.g., 'activity', 'compound').
+        tracer: Optional tracing port for distributed tracing (O1 observability).
+        metrics: Optional metrics port for duration/error tracking (O1 observability).
 
     Returns:
-        Configured transformer instance.
+        Configured transformer instance with observability.
 
     Raises:
         KeyError: If no transformer is registered for the provider/entity combination.
@@ -67,7 +75,7 @@ def create_transformer(provider: str, entity_type: str) -> "BaseTransformer":
         )
 
     transformer_class = _TRANSFORMER_REGISTRY[key]
-    return transformer_class(provider=provider)
+    return transformer_class(provider=provider, tracer=tracer, metrics=metrics)
 
 
 def get_transformer_class(

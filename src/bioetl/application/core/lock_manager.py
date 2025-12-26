@@ -10,10 +10,8 @@ from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSign
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
-    import structlog
-
     from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.domain.ports import LockPort
+    from bioetl.domain.ports import LockPort, LoggerPort
 
 
 class LockManager:
@@ -31,7 +29,7 @@ class LockManager:
         wait_for_lock: bool,
         wait_timeout: int,
         heartbeat_interval: int,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
     ) -> None:
@@ -63,7 +61,7 @@ class LockManager:
         wait_for_lock: bool,
         wait_timeout: int,
         heartbeat_interval: int,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
     ) -> LockManager:

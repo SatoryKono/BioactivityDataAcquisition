@@ -10,6 +10,7 @@ Implements RULES.md Section 4.1 HTTP client requirements:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -62,9 +63,11 @@ class RetryConfig:
 
         jitter_range = delay * self.jitter
         if self.deterministic:
-            # Hash-based deterministic jitter for reproducibility (ADR-014)
+            # MD5-based deterministic jitter for cross-process reproducibility (ADR-014)
+            # Note: hash() is not stable across Python processes due to PYTHONHASHSEED
             hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
-            jitter_factor = (hash(hash_input) % 1000) / 1000.0
+            digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+            jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
             # Map 0.0-1.0 to -1.0 to +1.0
             delay += jitter_range * (jitter_factor * 2 - 1)
         else:

@@ -31,7 +31,12 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, DQMonitorPort, TracingPort
+    from bioetl.domain.ports import (
+        DataSourcePort,
+        DQMonitorPort,
+        MetricsPort,
+        TracingPort,
+    )
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -110,15 +115,27 @@ class GenericPipelineFactory(Generic[TPipeline]):
             provider
         )
 
-    def create_transformer(self) -> BaseTransformer | None:
+    def create_transformer(
+        self,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+    ) -> BaseTransformer | None:
         """Create transformer instance if transformer_class is configured.
+
+        Args:
+            tracer: Optional tracer for distributed tracing (O1 observability).
+            metrics: Optional metrics port for duration/error tracking (O1 observability).
 
         Returns:
             Transformer instance or None if no transformer_class configured.
         """
         if self.transformer_class is None:
             return None
-        return self.transformer_class(provider=self.provider)
+        return self.transformer_class(
+            provider=self.provider,
+            tracer=tracer,
+            metrics=metrics,
+        )
 
     def create_data_source(
         self,
@@ -188,6 +205,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
+        metrics: MetricsPort | None = None,
     ) -> TPipeline:
         """Create pipeline instance.
 
@@ -203,6 +221,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             filter_config: Optional input filter configuration
             tracer: Optional tracer (created via bootstrap_tracer())
             dq_monitor: Optional data quality monitor for anomaly detection
+            metrics: Optional metrics port for transformer observability (O1)
 
         Returns:
             Configured pipeline instance
@@ -220,8 +239,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
         domain_config = yaml_config_to_domain(yaml_config)
 
-        # Create transformer via DI if configured
-        transformer = self.create_transformer()
+        # Create transformer via DI if configured (with observability O1)
+        transformer = self.create_transformer(
+            tracer=tracer,
+            metrics=metrics,
+        )
 
         return self.pipeline_class.create(
             run_id=run_id,
@@ -259,7 +281,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         # Load config once if not provided
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
-        # Create pipeline instance with services, tracer, and dq_monitor
+        # Create pipeline instance with services, tracer, metrics, and dq_monitor (O1)
         pipeline = self.create_with_services(
             run_id=run_id,
             runtime=runtime,
@@ -269,6 +291,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             filter_config=filter_config,
             tracer=observability.tracer,
             dq_monitor=observability.dq_monitor,
+            metrics=observability.metrics,
         )
 
         # Create Helper Components using ServicesBuilder
