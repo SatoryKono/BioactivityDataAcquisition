@@ -53,7 +53,7 @@ class TestCliRunDryRun:
         mock_runner.shutdown_signal = None
 
         with patch(
-            "bioetl.interfaces.cli.bootstrap_pipeline",
+            "bioetl.interfaces.cli.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -73,7 +73,7 @@ class TestCliRunDryRun:
         storage_paths: dict[str, Path],
     ):
         """Test that --dry-run with rebuild shows cleanup preview."""
-        # Create fake cleanup service that returns preview data
+        # Create mock CleanupPreview that preview_cleanup returns directly
         mock_preview = MagicMock()
         mock_preview.silver = MagicMock(
             exists=True,
@@ -87,12 +87,9 @@ class TestCliRunDryRun:
         )
         mock_preview.total_files = 15
 
-        mock_cleanup = MagicMock()
-        mock_cleanup.preview = AsyncMock(return_value=mock_preview)
-
         with patch(
-            "bioetl.interfaces.cli.bootstrap_cleanup",
-            return_value=mock_cleanup,
+            "bioetl.interfaces.cli.preview_cleanup",
+            new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -122,12 +119,9 @@ class TestCliRunDryRun:
         mock_preview.gold = None  # No gold table configured
         mock_preview.total_files = 10
 
-        mock_cleanup = MagicMock()
-        mock_cleanup.preview = AsyncMock(return_value=mock_preview)
-
         with patch(
-            "bioetl.interfaces.cli.bootstrap_cleanup",
-            return_value=mock_cleanup,
+            "bioetl.interfaces.cli.preview_cleanup",
+            new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -157,12 +151,9 @@ class TestCliRunDryRun:
         )
         mock_preview.total_files = 0
 
-        mock_cleanup = MagicMock()
-        mock_cleanup.preview = AsyncMock(return_value=mock_preview)
-
         with patch(
-            "bioetl.interfaces.cli.bootstrap_cleanup",
-            return_value=mock_cleanup,
+            "bioetl.interfaces.cli.preview_cleanup",
+            new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -192,12 +183,9 @@ class TestCliRunDryRun:
         )
         mock_preview.total_files = 59
 
-        mock_cleanup = MagicMock()
-        mock_cleanup.preview = AsyncMock(return_value=mock_preview)
-
         with patch(
-            "bioetl.interfaces.cli.bootstrap_cleanup",
-            return_value=mock_cleanup,
+            "bioetl.interfaces.cli.preview_cleanup",
+            new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -225,12 +213,9 @@ class TestCliDryRunErrorHandling:
         temp_env: dict[str, str],
     ):
         """Test that --dry-run handles preview errors gracefully."""
-        mock_cleanup = MagicMock()
-        mock_cleanup.preview = AsyncMock(side_effect=Exception("Preview failed"))
-
         with patch(
-            "bioetl.interfaces.cli.bootstrap_cleanup",
-            return_value=mock_cleanup,
+            "bioetl.interfaces.cli.preview_cleanup",
+            new=AsyncMock(side_effect=Exception("Preview failed")),
         ):
             result = cli_runner.invoke(
                 cli,

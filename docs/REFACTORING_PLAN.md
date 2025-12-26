@@ -1,6 +1,42 @@
 # План Рефакторинга BioETL
 
-*Версия: 4.0 | Дата: 2025-12-24*
+*Версия: 5.0 | Дата: 2025-12-26*
+
+---
+
+## ⚠️ ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ
+
+> **ВАЖНО**: Перед постановкой задач сверьтесь с этой секцией!
+> Последняя верификация: 2025-12-26
+
+### ✅ УЖЕ РЕАЛИЗОВАНО (не требует работы)
+
+| Компонент | Файл | Доказательство |
+|-----------|------|----------------|
+| **PubMedAdapter.health_check()** | `pubmed_client.py:193-273` | Реализованы `health_check()`, `_probe_health()`, `_fallback_health_status()` |
+| **VCR кассеты UniProt** | `tests/fixtures/vcr/` | 15+ кассет: `test_uniprot_protein_*.yaml`, `TestUniProtAdapterIntegration.*.yaml` |
+| **VCR кассеты PubChem** | `tests/fixtures/vcr/` | `test_pubchem_compound_full_cycle.yaml` |
+| **CLI тесты** | `tests/integration/interfaces/` | 7+ тестов: `test_cli_shutdown_integration.py`, `test_cli_run_*.py` и др. |
+| **Обработка ошибок ChEMBL** | `client.py:223-267` | `_handle_error()` ВСЕГДА кидает исключения (CriticalError/ChemblApiError) |
+| **UnifiedHTTPClient lifecycle** | `client.py:138-162` | Корректный async context manager (`__aenter__`/`__aexit__`) |
+
+### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
+
+| Ложное утверждение | Почему ложно | Верификация |
+|--------------------|--------------|-------------|
+| "PubMedAdapter не реализует health_check" | Полностью реализован | `pubmed_client.py:193-273` |
+| "Нет VCR для PubChem/UniProt integration" | Кассеты существуют | `tests/fixtures/vcr/` |
+| "0 тестов interfaces/оркестрации" | 7+ интеграционных CLI тестов | `tests/integration/interfaces/` |
+| "ChemblAdapter._fetch_page глушит ошибки" | `_handle_error()` всегда raises; `return [], False` — мёртвый код | `client.py:145-147, 261-267` |
+| "UnifiedHTTPClient нарушает DI" | Создание в `__aenter__` — корректный async pattern | `client.py:138-152` |
+
+### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
+
+| Проблема | Файл:строки | Описание |
+|----------|-------------|----------|
+| **PipelineRunner создаёт сервисы** | `runner.py:90-126` | LockManager, PreflightService, PostrunService, LifecycleOrchestrator создаются внутри конструктора |
+| **CLI вызывает bootstrap напрямую** | `cli.py:224,265,337` | Смешение interfaces и composition слоёв |
+| **Мёртвый код в ChemblAdapter** | `client.py:147` | `return [], False` недостижим после `_handle_error()` |
 
 ---
 
@@ -1091,6 +1127,82 @@ ci: lint test arch-all
 - [ ] Git branch создан для работы
 - [ ] Прочитаны `docs/RULES.md` и `.claude/PROJECT_CONTEXT.md`
 - [ ] Понятны критерии приёмки каждой задачи
+
+---
+
+## Консолидированный План DI-Рефакторинга
+
+> **Источник**: Анализ 4 планов рефакторинга (2025-12-26)
+> **Статус**: Актуальные задачи после верификации
+
+### Приоритет 1: КРИТИЧЕСКИЕ
+
+#### 1.1 Вынести сервисы из PipelineRunner в composition
+
+**Проблема**: `runner.py:90-126` — создание сервисов внутри конструктора.
+
+**Решение**:
+```python
+# composition/factories/runner_services.py (новый)
+@dataclass
+class RunnerServices:
+    lock_manager: LockManager
+    preflight: PreflightService
+    postrun: PostrunService
+    lifecycle_orch: LifecycleOrchestrator
+
+# runner.py — только принимает
+def __init__(self, ..., runner_services: RunnerServices) -> None:
+    self._lock_manager = runner_services.lock_manager
+```
+
+**Критерии готовности**:
+- [ ] PipelineRunner не создаёт сервисы
+- [ ] `make arch-test` проходит
+
+#### 1.2 Разнести CLI и composition root
+
+**Проблема**: `cli.py:224,265,337` — прямые вызовы `bootstrap_*`.
+
+**Решение**: Создать `composition/entrypoints.py`, CLI вызывает только entrypoints.
+
+**Критерии готовности**:
+- [ ] CLI не импортирует `bootstrap_*`
+- [ ] Entrypoints доступны для Prefect/REST
+
+### Приоритет 2: ВЫСОКИЙ
+
+#### 2.1 Удалить мёртвый код в ChemblAdapter
+
+**Файл**: `client.py:147` — `return [], False` недостижим.
+
+**Решение**: Удалить или заменить на `raise`.
+
+### Приоритет 3: ЖЕЛАТЕЛЬНО
+
+#### 3.1 Arch-тест на DI дисциплину
+
+**Файл**: `tests/architecture/test_di_discipline.py` (новый)
+
+Проверять отсутствие прямых конструкторов сервисов в application layer.
+
+---
+
+## 📝 Инструкция по Обновлению Верификации
+
+При обнаружении новых ложных утверждений или реализованных компонентов:
+
+1. **Верифицировать** через код (grep, read файлов)
+2. **Обновить** секцию "ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ" в начале документа
+3. **Добавить** в таблицу "УЖЕ РЕАЛИЗОВАНО" или "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+4. **Указать** дату верификации
+5. **Закоммитить** изменения
+
+```bash
+# Пример верификации
+grep -r "def health_check" src/bioetl/infrastructure/adapters/
+ls tests/fixtures/vcr/ | grep -E "(pubchem|uniprot)"
+```
 
 ---
 
