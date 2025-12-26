@@ -154,6 +154,7 @@ async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
 async def test_write_scd2_existing_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 merge with existing table."""
     scd_config = {"business_key": "id"}
+    ingestion_ts = datetime.now(timezone.utc)
 
     mock_dt_instance = MagicMock()
     mock_merge_builder = MagicMock()
@@ -166,7 +167,12 @@ async def test_write_scd2_existing_table(gold_writer, valid_records, strict_sche
         return_value=mock_dt_instance,
     ):
         await gold_writer.write_gold(
-            "test_table", valid_records, schema=strict_schema, mode="scd2", scd_config=scd_config
+            "test_table",
+            valid_records,
+            schema=strict_schema,
+            mode="scd2",
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
         )
 
         # Should call merge
