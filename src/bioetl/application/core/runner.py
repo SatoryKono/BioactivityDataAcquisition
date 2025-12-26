@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
@@ -106,8 +107,10 @@ class PipelineRunner:
         - Handles tracer close errors without failing the pipeline
         """
         self._logger.info(
-            f"Starting pipeline: {self._config.pipeline_name}",
-            extra={"stage": "startup", "run_type": self._runtime.run_type.value},
+            PipelineEvent.START,
+            pipeline=self._config.pipeline_name,
+            stage="startup",
+            run_type=self._runtime.run_type.value,
         )
 
         observer = PipelineObserver(
@@ -144,8 +147,8 @@ class PipelineRunner:
                     await self._checkpoint_manager.delete_checkpoint()
 
                 self._logger.debug(
-                    "Pipeline execution finished",
-                    extra={"records_fetched": self._executor.records_fetched},
+                    PipelineEvent.COMPLETE,
+                    records_fetched=self._executor.records_fetched,
                 )
         finally:
             await self._postrun_service.cleanup(self._tracer)
