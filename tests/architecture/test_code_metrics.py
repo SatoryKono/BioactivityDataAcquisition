@@ -259,6 +259,10 @@ class TestClassSize:
         "PreflightService": 320,  # 307 lines - preflight validation service
         # Test classes exemptions
         "TestCliCommands": 350, # Test class with many test cases
+        "TestFileSizeLimits": 350, # Test class with many exemptions
+        "TestFunctionComplexity": 350, # Test class with many exemptions
+        "TestFunctionLength": 350, # Test class with many exemptions
+        "TestClassSize": 350, # Test class with many exemptions
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
