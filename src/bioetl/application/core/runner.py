@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.observability.observer import PipelineObserver
 
 if TYPE_CHECKING:
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
     from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
-    from bioetl.application.core.lock_manager import LockManager
+    # from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.postrun_service import PostrunService
     from bioetl.application.core.preflight_service import PreflightService
