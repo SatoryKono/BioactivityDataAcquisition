@@ -265,6 +265,14 @@ class TestRunnerShutdownIntegration:
                 ["run", "--pipeline", "chembl_activity"],
             )
 
+        # The mock_shutdown_signal is retrieved from the runner instance
+        # which is created by create_pipeline_runner.
+        # However, in cli.py, we do:
+        # runner = create_pipeline_runner(...)
+        # setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
+
+        # So we expect setup_shutdown_handlers to be called with the mock_shutdown_signal
+        # that we attached to the mock_runner.
         mock_setup.assert_called_once_with(mock_shutdown_signal)
 
 
