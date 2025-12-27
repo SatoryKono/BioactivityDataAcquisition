@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.6 (2025-12-27)*
+*Синхронизировано с RULES.md v5.7 (2025-12-27)*
 
 ---
 
@@ -168,6 +168,11 @@ src/bioetl/
 | **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
 | **BronzeWriter** | "Нет observability" | Имеет структурированное логирование (`bronze_writer.py:197-205`) |
 | **DQ/Medallion политики** | "Нет автоматизации" | Реализовано: `MedallionPolicy`, `DQConfig`, `SilverWriteMode`, `GoldWriteMode` enums |
+| **bootstrap_pipeline** | "140+ строк, усложняет тестирование" | **113 строк** (`bootstrap.py:68-180`), делегирует через 4 функции |
+| **RecordProcessor** | "Совмещает метрики/карантин/запись" | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`) |
+| **PipelineRunner** | "Не выпускает метрики по стадиям" | Использует `PipelineObserver` через `RunnerServices.observer` (`runner.py:89,117`) |
+| **Write mode validation** | "Нет валидации через Enum" | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`) |
+| **Архитектурные тесты** | "Не связаны с метриками" | 187 тестов в `tests/architecture/`, `make arch-test` в CI |
 
 **Паттерны, которые НЕ являются нарушениями:**
 
@@ -193,7 +198,8 @@ src/bioetl/
 
 ### 2.3.1. Причины Ложных Утверждений (Избегать!)
 
-> **Статистика**: Анализ 2025-12-27 выявил ~50% ложных утверждений в планах рефакторинга.
+> **Статистика**: Анализ 2025-12-27 выявил ~40% ложных утверждений в 4 планах рефакторинга.
+> См. `docs/CONSOLIDATED_REFACTORING_ANALYSIS.md` для детального анализа.
 
 | Причина | Пример | Как избежать |
 |---------|--------|--------------|

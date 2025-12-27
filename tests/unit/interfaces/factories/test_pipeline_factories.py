@@ -75,8 +75,20 @@ def mock_services():
 class TestPubChemCompoundFactory:
     """Tests for pubchem_compound_factory (GenericPipelineFactory instance)."""
 
-    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.config.load_pipeline_config")
+    @pytest.fixture(autouse=True)
+    def _restore_factory_state(self):
+        """Restore factory state after each test to prevent pollution."""
+        from bioetl.composition.factories.pipeline_factories import (
+            pubchem_compound_factory,
+        )
+        # Save original _create_data_source
+        original_creator = pubchem_compound_factory._create_data_source
+        yield
+        # Restore after test
+        pubchem_compound_factory._create_data_source = original_creator
+
+    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -107,8 +119,8 @@ class TestPubChemCompoundFactory:
         # Verify data source creator was called
         pubchem_compound_factory._create_data_source.assert_called_once()
 
-    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.config.load_pipeline_config")
+    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -137,8 +149,8 @@ class TestPubChemCompoundFactory:
 
         mock_base_services.create_common_services.assert_called_once()
 
-    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
-    @patch("bioetl.infrastructure.config.load_pipeline_config")
+    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
