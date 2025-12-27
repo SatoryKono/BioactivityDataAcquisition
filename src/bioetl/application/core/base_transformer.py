@@ -298,14 +298,19 @@ class BaseTransformer(ABC):
         silver_record = dataclasses.asdict(entity)
 
         # Handle lineage fields renaming and formatting
-        silver_record["_run_id"] = str(silver_record.pop("run_id"))
-        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
+        if "run_id" in silver_record:
+            silver_record["_run_id"] = str(silver_record.pop("run_id"))
+
+        if "run_type" in silver_record:
+            silver_record["_run_type"] = str(silver_record.pop("run_type").value)
 
         # Handle source_batch_id which might be None
-        source_batch_id = silver_record.pop("source_batch_id")
-        silver_record["_source_batch_id"] = str(source_batch_id) if source_batch_id else None
+        if "source_batch_id" in silver_record:
+            source_batch_id = silver_record.pop("source_batch_id")
+            silver_record["_source_batch_id"] = str(source_batch_id) if source_batch_id else None
 
-        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
+        if "ingestion_ts" in silver_record:
+            silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
 
         return silver_record
 
