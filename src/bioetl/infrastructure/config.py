@@ -129,7 +129,8 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
             config["source"] = source_config.get("source", source_config)
 
     # Validate against strict schema
-    return PipelineYamlConfig.model_validate(config)
+    validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
+    return validated
 
 
 def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
