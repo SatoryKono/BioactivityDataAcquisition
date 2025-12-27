@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
-    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
@@ -78,6 +78,7 @@ class DeltaWriter:
         write_policy: WriteModePolicy | None = None,
         metrics: MetricsPort | None = None,
         audit: AuditPort | None = None,
+        tracing: TracingPort | None = None,
     ) -> None:
         """Initialize Delta writer.
 
@@ -90,6 +91,8 @@ class DeltaWriter:
             metrics: Optional MetricsPort for recording policy violation metrics.
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
+            tracing: Optional TracingPort for distributed tracing.
+                    Use NoOpTracing from composition layer if tracing disabled.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -100,6 +103,13 @@ class DeltaWriter:
         self._write_policy = write_policy or WriteModePolicy()
         self._metrics = metrics
         self._audit = audit
+
+        # Use NoOpTracing if not provided
+        if tracing is None:
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            self._tracing = NoOpTracing()
+        else:
+            self._tracing = tracing
 
     def _prepare_arrow_data(
         self,
@@ -382,41 +392,47 @@ class DeltaWriter:
             PolicyViolationError: If mode is not allowed for Silver layer
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
         """
-        validated_mode = self._validate_write_mode(mode)
+        tracer = self._tracing.get_tracer(__name__)
+        with tracer.start_as_current_span("write_silver") as span:
+            span.set_attribute("table_name", table_name)
+            span.set_attribute("mode", mode)
+            span.set_attribute("record_count", len(records))
 
-        # Enforce medallion layer write mode policy (Silver allows only merge/append)
-        self._enforce_write_policy(validated_mode, table_name)
+            validated_mode = self._validate_write_mode(mode)
 
-        self._validate_records(records, table_name, schema)
+            # Enforce medallion layer write mode policy (Silver allows only merge/append)
+            self._enforce_write_policy(validated_mode, table_name)
 
-        # Check for schema drift before writing
-        await self._check_schema_drift(table_name, records, on_schema_mismatch)
+            self._validate_records(records, table_name, schema)
 
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
+            # Check for schema drift before writing
+            await self._check_schema_drift(table_name, records, on_schema_mismatch)
 
-        try:
-            await self._dispatch_write(
-                validated_mode, table_path, arrow_data, primary_keys, partition_cols
-            )
-        except (SchemaMismatchError, ArrowTypeError) as e:
-            raise SchemaViolationError(table_name, errors=[str(e)]) from e
-        except DeltaError as e:
-            if "Merge-conflict" in str(e):
-                raise MergeConflictError(table_name, conflicts=1) from e
-            raise
+            table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+            arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
 
-        if self.csv_exporter:
-            csv_append = mode != "delete"
-            await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
+            try:
+                await self._dispatch_write(
+                    validated_mode, table_path, arrow_data, primary_keys, partition_cols
+                )
+            except (SchemaMismatchError, ArrowTypeError) as e:
+                raise SchemaViolationError(table_name, errors=[str(e)]) from e
+            except DeltaError as e:
+                if "Merge-conflict" in str(e):
+                    raise MergeConflictError(table_name, conflicts=1) from e
+                raise
 
-        # Log audit entry for write operation
-        if self._audit and records:
-            await self._log_silver_audit(
-                table_name=table_name,
-                records=records,
-                mode=validated_mode,
-            )
+            if self.csv_exporter:
+                csv_append = mode != "delete"
+                await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
+
+            # Log audit entry for write operation
+            if self._audit and records:
+                await self._log_silver_audit(
+                    table_name=table_name,
+                    records=records,
+                    mode=validated_mode,
+                )
 
     async def _log_silver_audit(
         self,
