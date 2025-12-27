@@ -170,39 +170,6 @@ class PipelineRunContext:
     limit: int | None = None
     query: str | None = None
 
-    # DEPRECATED: Legacy fields for backward compatibility
-    # TODO: Remove in v2.0 after migration to InputFilterContext
-    input_csv: str | None = None
-    filter_column: str | None = None
-    filter_field: str | None = None
-    vacuum_after_run: bool | None = None
-    vacuum_retention_days: int | None = None
-
-    def __post_init__(self) -> None:
-        """Validate context and migrate legacy fields."""
-        # Migrate legacy input filter fields to InputFilterContext
-        if any([self.input_csv, self.filter_column, self.filter_field]):
-            if self.input_filter.enabled:
-                # Both new and legacy specified - use new
-                pass
-            elif self.input_csv and self.filter_column and self.filter_field:
-                # All legacy fields present - create filter context
-                new_filter = InputFilterContext.from_csv(
-                    source_path=self.input_csv,
-                    column_name=self.filter_column,
-                    filter_field=self.filter_field,
-                )
-                object.__setattr__(self, "input_filter", new_filter)
-
-        # Migrate legacy vacuum fields to VacuumConfig
-        if self.vacuum_after_run is not None or self.vacuum_retention_days is not None:
-            if not self.vacuum.enabled:  # Only migrate if new config not set
-                new_vacuum = VacuumConfig(
-                    enabled=self.vacuum_after_run or False,
-                    retention_days=self.vacuum_retention_days or 7,
-                )
-                object.__setattr__(self, "vacuum", new_vacuum)
-
     @property
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
