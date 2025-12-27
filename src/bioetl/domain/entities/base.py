@@ -61,7 +61,7 @@ class RequiredEntityFields(Protocol):
         ...
 
 
-@dataclass(frozen=True, kw_only=True, slots=True)
+@dataclass(frozen=True, kw_only=True)
 class BaseEntity:
     """Base class for all domain entities.
 
