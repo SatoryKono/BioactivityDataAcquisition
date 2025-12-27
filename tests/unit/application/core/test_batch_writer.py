@@ -140,8 +140,22 @@ class TestBatchWriterSilver:
     async def test_write_silver_adds_metadata(
         self, batch_writer, mock_storage, mock_context
     ):
-        """Test that Silver records get metadata fields."""
-        records = [{"entity_id": "1", "value": 10}]
+        """Test that Silver records get _source_batch_id from BatchWriter.
+
+        Note: _run_id, _run_type, _ingestion_ts are added by the transformer
+        (BaseTransformer.entity_to_silver_record), not by BatchWriter.
+        BatchWriter only adds/updates _source_batch_id.
+        """
+        # Records already have lineage fields from transformer
+        records = [
+            {
+                "entity_id": "1",
+                "value": 10,
+                "_run_id": str(mock_context.run_id),
+                "_run_type": mock_context.run_type.value,
+                "_ingestion_ts": mock_context.started_at.isoformat(),
+            }
+        ]
         batch_id = BatchID(uuid4())
         ingestion_ts = mock_context.started_at
 

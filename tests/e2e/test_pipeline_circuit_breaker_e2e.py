@@ -238,9 +238,8 @@ class TestCircuitBreakerRecovery:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestCircuitBreakerErrorClassification:
-    """Tests for error classification in circuit breaker."""
+    """Tests for error classification in circuit breaker (sync tests)."""
 
     def test_connection_error_triggers_breaker(self):
         """E2E: Connection errors trigger circuit breaker."""
