@@ -573,3 +573,273 @@ class TestUnifiedHTTPClientRequestMethods:
 
         assert response == mock_response_200
         assert mock_circuit_breaker.call.call_count == 2
+
+
+@pytest.fixture
+def mock_logger():
+    """Create mock logger port."""
+    logger = MagicMock()
+    logger.info = MagicMock()
+    logger.warning = MagicMock()
+    logger.error = MagicMock()
+    logger.debug = MagicMock()
+    return logger
+
+
+@pytest.fixture
+def mock_metrics():
+    """Create mock metrics port."""
+    metrics = MagicMock()
+    metrics.observe_histogram = MagicMock()
+    metrics.increment_counter = MagicMock()
+    return metrics
+
+
+@pytest.fixture
+def http_client_with_observability(
+    mock_rate_limiter, mock_circuit_breaker, mock_logger, mock_metrics
+):
+    """Create UnifiedHTTPClient instance with observability ports."""
+    return UnifiedHTTPClient(
+        rate_limiter=mock_rate_limiter,
+        circuit_breaker=mock_circuit_breaker,
+        retry_policy=RetryConfig(max_attempts=3, jitter=0.0),
+        timeout=10.0,
+        provider="chembl",
+        logger=mock_logger,
+        metrics=mock_metrics,
+    )
+
+
+@pytest.mark.unit
+class TestUnifiedHTTPClientObservability:
+    """Tests for HTTP client observability features."""
+
+    def test_init_with_observability_ports(
+        self, mock_rate_limiter, mock_circuit_breaker, mock_logger, mock_metrics
+    ):
+        """Test initialization with logger and metrics ports."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            provider="pubchem",
+            logger=mock_logger,
+            metrics=mock_metrics,
+        )
+        assert client.provider == "pubchem"
+        assert client.logger == mock_logger
+        assert client.metrics == mock_metrics
+
+    def test_init_without_observability_ports(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test initialization without observability ports (backward compatible)."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+        )
+        assert client.provider == "unknown"
+        assert client.logger is None
+        assert client.metrics is None
+
+    @pytest.mark.asyncio
+    async def test_successful_request_records_latency_metric(
+        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
+    ):
+        """Test successful request records latency histogram."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.raise_for_status = MagicMock()
+        mock_circuit_breaker.call.return_value = mock_response
+
+        async with http_client_with_observability:
+            await http_client_with_observability.get("https://api.example.com/data")
+
+        mock_metrics.observe_histogram.assert_called_once()
+        call_args = mock_metrics.observe_histogram.call_args
+        assert call_args[0][0] == "http_request_latency_seconds"
+        assert call_args[0][1] > 0  # Duration should be positive
+        assert call_args[0][2]["provider"] == "chembl"
+        assert call_args[0][2]["method"] == "GET"
+        assert call_args[0][2]["status_class"] == "2xx"
+
+    @pytest.mark.asyncio
+    async def test_successful_request_no_retry_counter(
+        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
+    ):
+        """Test successful request without retries does not increment retry counter."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.raise_for_status = MagicMock()
+        mock_circuit_breaker.call.return_value = mock_response
+
+        async with http_client_with_observability:
+            await http_client_with_observability.get("https://api.example.com/data")
+
+        # Should not call increment_counter for retries (no retries happened)
+        mock_metrics.increment_counter.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_retry_logs_warning(
+        self, http_client_with_observability, mock_circuit_breaker, mock_logger
+    ):
+        """Test retry attempt logs warning."""
+        mock_response_503 = MagicMock()
+        mock_response_503.status_code = 503
+        mock_response_503.headers = {}
+
+        mock_response_200 = MagicMock()
+        mock_response_200.status_code = 200
+        mock_response_200.raise_for_status = MagicMock()
+
+        mock_circuit_breaker.call.side_effect = [mock_response_503, mock_response_200]
+
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            async with http_client_with_observability:
+                await http_client_with_observability.get("https://api.example.com/data")
+
+        # Should have logged retry warning
+        mock_logger.warning.assert_called()
+        call_kwargs = mock_logger.warning.call_args[1]
+        assert call_kwargs["provider"] == "chembl"
+        assert call_kwargs["attempt"] == 1
+        assert "503" in call_kwargs["reason"]
+
+    @pytest.mark.asyncio
+    async def test_retry_increments_counter(
+        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
+    ):
+        """Test retry increments retry counter metric."""
+        mock_response_503 = MagicMock()
+        mock_response_503.status_code = 503
+        mock_response_503.headers = {}
+
+        mock_response_200 = MagicMock()
+        mock_response_200.status_code = 200
+        mock_response_200.raise_for_status = MagicMock()
+
+        mock_circuit_breaker.call.side_effect = [mock_response_503, mock_response_200]
+
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            async with http_client_with_observability:
+                await http_client_with_observability.get("https://api.example.com/data")
+
+        # Should have called increment_counter for 1 retry
+        mock_metrics.increment_counter.assert_called_once()
+        call_args = mock_metrics.increment_counter.call_args
+        assert call_args[0][0] == "http_retries_total"
+        assert call_args[0][1] == 1
+        assert call_args[0][2]["provider"] == "chembl"
+
+    @pytest.mark.asyncio
+    async def test_circuit_breaker_open_logs_error(
+        self, http_client_with_observability, mock_circuit_breaker, mock_logger
+    ):
+        """Test circuit breaker open logs error."""
+        mock_circuit_breaker.call.side_effect = CircuitBreakerOpenError(
+            "chembl", "Circuit is open"
+        )
+
+        async with http_client_with_observability:
+            with pytest.raises(CircuitBreakerOpenError):
+                await http_client_with_observability.get("https://api.example.com/data")
+
+        mock_logger.error.assert_called()
+        call_args = mock_logger.error.call_args
+        assert call_args[0][0] == "Circuit breaker open"
+
+    @pytest.mark.asyncio
+    async def test_circuit_breaker_open_increments_metric(
+        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
+    ):
+        """Test circuit breaker open increments metric."""
+        mock_circuit_breaker.call.side_effect = CircuitBreakerOpenError(
+            "chembl", "Circuit is open"
+        )
+
+        async with http_client_with_observability:
+            with pytest.raises(CircuitBreakerOpenError):
+                await http_client_with_observability.get("https://api.example.com/data")
+
+        mock_metrics.increment_counter.assert_called_once()
+        call_args = mock_metrics.increment_counter.call_args
+        assert call_args[0][0] == "http_circuit_breaker_open_total"
+        assert call_args[0][1] == 1
+        assert call_args[0][2]["provider"] == "chembl"
+
+    @pytest.mark.asyncio
+    async def test_retry_exhausted_logs_error(
+        self, http_client_with_observability, mock_circuit_breaker, mock_logger
+    ):
+        """Test retry exhausted logs error."""
+        mock_circuit_breaker.call.side_effect = httpx.ConnectError("Connection failed")
+
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            async with http_client_with_observability:
+                with pytest.raises(RetryExhaustedError):
+                    await http_client_with_observability.get(
+                        "https://api.example.com/data"
+                    )
+
+        # Should log final error after retries exhausted
+        error_calls = [
+            c for c in mock_logger.error.call_args_list if "retries exhausted" in c[0][0]
+        ]
+        assert len(error_calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_non_retryable_error_logs_error(
+        self, http_client_with_observability, mock_circuit_breaker, mock_logger
+    ):
+        """Test non-retryable error logs error."""
+        mock_circuit_breaker.call.side_effect = ValueError("Invalid argument")
+
+        async with http_client_with_observability:
+            with pytest.raises(ValueError):
+                await http_client_with_observability.get("https://api.example.com/data")
+
+        mock_logger.error.assert_called()
+        call_args = mock_logger.error.call_args
+        assert "non-retryable" in call_args[0][0]
+
+    def test_get_status_class(self, http_client_with_observability):
+        """Test _get_status_class returns correct class."""
+        assert http_client_with_observability._get_status_class(200) == "2xx"
+        assert http_client_with_observability._get_status_class(201) == "2xx"
+        assert http_client_with_observability._get_status_class(301) == "3xx"
+        assert http_client_with_observability._get_status_class(404) == "4xx"
+        assert http_client_with_observability._get_status_class(500) == "5xx"
+        assert http_client_with_observability._get_status_class(503) == "5xx"
+
+    def test_get_host(self, http_client_with_observability):
+        """Test _get_host extracts host from URL."""
+        assert (
+            http_client_with_observability._get_host("https://api.example.com/data")
+            == "api.example.com"
+        )
+        assert (
+            http_client_with_observability._get_host("http://localhost:8080/path")
+            == "localhost:8080"
+        )
+        assert http_client_with_observability._get_host("invalid-url") == "unknown"
+
+    @pytest.mark.asyncio
+    async def test_no_observability_no_errors(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test client works without observability ports (no errors)."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            retry_policy=RetryConfig(max_attempts=2, jitter=0.0),
+        )
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.raise_for_status = MagicMock()
+        mock_circuit_breaker.call.return_value = mock_response
+
+        async with client:
+            response = await client.get("https://api.example.com/data")
+
+        assert response == mock_response

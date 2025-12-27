@@ -5,20 +5,25 @@ Implements RULES.md Section 4.1 HTTP client requirements:
 - Rate limiting (RateLimiterPort)
 - Circuit breaker (CircuitBreakerPort)
 - Exponential backoff with jitter (RetryPolicy)
+- Observability via LoggerPort and MetricsPort (optional)
 
 SRP Compliance:
 - RateLimiterPort: Handles rate limiting (injected)
 - CircuitBreakerPort: Handles fault tolerance (injected)
 - RetryPolicy: Handles retry configuration (domain value object)
+- LoggerPort: Handles structured logging (optional, injected)
+- MetricsPort: Handles metrics collection (optional, injected)
 - UnifiedHTTPClient: Coordinates HTTP communication
 """
 
 from __future__ import annotations
 
 import asyncio
+import time
 from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -26,7 +31,12 @@ from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedErro
 from bioetl.domain.resilience import RetryPolicy
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import CircuitBreakerPort, RateLimiterPort
+    from bioetl.domain.ports import (
+        CircuitBreakerPort,
+        LoggerPort,
+        MetricsPort,
+        RateLimiterPort,
+    )
     from bioetl.domain.types import RunID
 
 
@@ -63,6 +73,9 @@ class UnifiedHTTPClient:
         run_id: Current run ID for correlation header
         user_agent: User-Agent string (default: "BioETL/5.0.0")
         contact_email: Optional contact email to append to User-Agent
+        provider: Provider name for metrics labels (e.g., "chembl", "pubchem")
+        logger: Optional LoggerPort for structured logging of retries/errors
+        metrics: Optional MetricsPort for observability metrics
 
     Example:
         >>> from bioetl.infrastructure.adapters.http import TokenBucket, CircuitBreaker
@@ -71,6 +84,11 @@ class UnifiedHTTPClient:
         >>> client = UnifiedHTTPClient(rate_limiter=bucket, circuit_breaker=cb)
         >>> async with client:
         ...     response = await client.get("https://api.example.com/data")
+
+    Observability:
+        When logger/metrics are provided, the client emits:
+        - Logs: retry attempts, circuit breaker events, request completion
+        - Metrics: http_request_latency_seconds, http_retries_total
 
     """
 
@@ -81,6 +99,9 @@ class UnifiedHTTPClient:
     run_id: RunID | None = None
     user_agent: str = "BioETL/5.0.0"
     contact_email: str | None = None
+    provider: str = "unknown"
+    logger: LoggerPort | None = None
+    metrics: MetricsPort | None = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
 
@@ -133,6 +154,65 @@ class UnifiedHTTPClient:
                     delay = float(retry_after)
         await asyncio.sleep(delay)
 
+    def _get_status_class(self, status_code: int) -> str:
+        """Get status class for metrics labels (2xx, 4xx, 5xx)."""
+        return f"{status_code // 100}xx"
+
+    def _get_host(self, url: str) -> str:
+        """Extract host from URL for logging."""
+        try:
+            return urlparse(url).netloc or "unknown"
+        except Exception:
+            return "unknown"
+
+    def _log_retry(
+        self,
+        attempt: int,
+        url: str,
+        reason: str,
+        delay: float,
+        status_code: int | None = None,
+    ) -> None:
+        """Log retry attempt if logger is available."""
+        if self.logger:
+            self.logger.warning(
+                "HTTP request retry",
+                provider=self.provider,
+                host=self._get_host(url),
+                method="GET",
+                attempt=attempt + 1,
+                max_attempts=self.retry_policy.max_attempts,
+                reason=reason,
+                status_code=status_code,
+                delay_seconds=round(delay, 3),
+            )
+
+    def _record_request_metrics(
+        self,
+        method: str,
+        status_code: int,
+        duration: float,
+        retries: int,
+    ) -> None:
+        """Record request metrics if metrics port is available."""
+        if self.metrics:
+            labels = {
+                "provider": self.provider,
+                "method": method,
+                "status_class": self._get_status_class(status_code),
+            }
+            self.metrics.observe_histogram(
+                "http_request_latency_seconds",
+                duration,
+                labels,
+            )
+            if retries > 0:
+                self.metrics.increment_counter(
+                    "http_retries_total",
+                    retries,
+                    {"provider": self.provider, "status_class": labels["status_class"]},
+                )
+
     async def _request_with_retry(
         self,
         method: str,
@@ -142,6 +222,8 @@ class UnifiedHTTPClient:
         """Execute request with retries and exponential backoff."""
         client = self._get_client()
         last_error: Exception | None = None
+        retries = 0
+        start_time = time.monotonic()
 
         for attempt in range(self.retry_policy.max_attempts):
             try:
@@ -153,22 +235,79 @@ class UnifiedHTTPClient:
                 if _is_retryable_status(
                     response.status_code
                 ) and not self.retry_policy.is_last_attempt(attempt):
+                    retries += 1
+                    delay = self.retry_policy.calculate_delay(attempt, url)
+                    self._log_retry(
+                        attempt,
+                        url,
+                        f"retryable status {response.status_code}",
+                        delay,
+                        response.status_code,
+                    )
                     await self._handle_retry_delay(attempt, url, response)
                     continue
 
                 response.raise_for_status()
+
+                # Record successful request metrics
+                duration = time.monotonic() - start_time
+                self._record_request_metrics(method, response.status_code, duration, retries)
+
                 return response
 
             except CircuitBreakerOpenError:
+                # Log circuit breaker event
+                if self.logger:
+                    self.logger.error(
+                        "Circuit breaker open",
+                        provider=self.provider,
+                        host=self._get_host(url),
+                    )
+                if self.metrics:
+                    self.metrics.increment_counter(
+                        "http_circuit_breaker_open_total",
+                        1,
+                        {"provider": self.provider},
+                    )
                 raise
 
             except Exception as exc:
                 last_error = exc
                 if not _is_retryable_error(exc):
+                    # Log non-retryable error
+                    if self.logger:
+                        self.logger.error(
+                            "HTTP request failed (non-retryable)",
+                            provider=self.provider,
+                            host=self._get_host(url),
+                            error=str(exc),
+                            error_type=type(exc).__name__,
+                        )
                     raise
 
                 if not self.retry_policy.is_last_attempt(attempt):
+                    retries += 1
+                    delay = self.retry_policy.calculate_delay(attempt, url)
+                    self._log_retry(
+                        attempt,
+                        url,
+                        f"{type(exc).__name__}: {exc}",
+                        delay,
+                    )
                     await self._handle_retry_delay(attempt, url)
+
+        # Record failed request metrics
+        duration = time.monotonic() - start_time
+        self._record_request_metrics(method, 0, duration, retries)
+
+        if self.logger:
+            self.logger.error(
+                "HTTP request failed after retries exhausted",
+                provider=self.provider,
+                host=self._get_host(url),
+                total_attempts=self.retry_policy.max_attempts,
+                total_duration_seconds=round(duration, 3),
+            )
 
         raise RetryExhaustedError(url, self.retry_policy.max_attempts, last_error)
 
