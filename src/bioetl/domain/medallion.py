@@ -44,6 +44,82 @@ class WriteMode(str, Enum):
     OVERWRITE = "overwrite"
 
 
+class SilverWriteMode(str, Enum):
+    """Allowed write modes for Silver layer.
+
+    Domain enum consolidating Silver layer write semantics.
+    Used by domain/config.py and infrastructure storage adapters.
+
+    Values:
+        MERGE: Upsert records based on primary keys (default, idempotent)
+        APPEND: Add records without deduplication
+        DELETE: Delete and replace all data in the table (rebuild only)
+    """
+
+    MERGE = "merge"
+    APPEND = "append"
+    DELETE = "delete"
+
+    @classmethod
+    def from_string(cls, value: str) -> SilverWriteMode:
+        """Convert string to SilverWriteMode with validation.
+
+        Args:
+            value: String value (e.g., "merge", "append", "delete")
+
+        Returns:
+            Corresponding SilverWriteMode enum value
+
+        Raises:
+            ValueError: If value is not a valid Silver write mode
+        """
+        try:
+            return cls(value.lower())
+        except ValueError:
+            valid = ", ".join(m.value for m in cls)
+            raise ValueError(
+                f"Invalid Silver write mode: '{value}'. Valid modes: {valid}"
+            ) from None
+
+
+class GoldWriteMode(str, Enum):
+    """Allowed write modes for Gold layer.
+
+    Domain enum consolidating Gold layer write semantics.
+    Used by domain/config.py and infrastructure storage adapters.
+
+    Values:
+        APPEND: Add records without deduplication (default, incremental)
+        SCD2: Slowly Changing Dimension Type 2 (history tracking)
+        OVERWRITE: Replace all data in the table (rebuild only, requires confirmation)
+    """
+
+    APPEND = "append"
+    SCD2 = "scd2"
+    OVERWRITE = "overwrite"
+
+    @classmethod
+    def from_string(cls, value: str) -> GoldWriteMode:
+        """Convert string to GoldWriteMode with validation.
+
+        Args:
+            value: String value (e.g., "append", "scd2", "overwrite")
+
+        Returns:
+            Corresponding GoldWriteMode enum value
+
+        Raises:
+            ValueError: If value is not a valid Gold write mode
+        """
+        try:
+            return cls(value.lower())
+        except ValueError:
+            valid = ", ".join(m.value for m in cls)
+            raise ValueError(
+                f"Invalid Gold write mode: '{value}'. Valid modes: {valid}"
+            ) from None
+
+
 class WriteModePolicy:
     """Validates write mode compliance with medallion layer policies.
 
