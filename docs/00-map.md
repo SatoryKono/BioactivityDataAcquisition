@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.6 | Last updated: 2025-12-27*
+*Synced with RULES.md v5.7 | Last updated: 2025-12-27*
 
 ## Quick Links
 
@@ -35,18 +35,26 @@ docs/
 │
 ├── 00-project_rules/            # Project governance
 │   ├── 00-rules-summary.md      # TL;DR of RULES.md
-│   ├── 01-project-rules.md      # Full project rules
+│   ├── 01-project-rules.md      # Pointer to RULES.md
 │   ├── 02-user-rules.md         # Guidelines for contributors
 │   ├── 03-file-policy.md        # File/directory structure
 │   ├── 04-extending-bioetl.md   # How to add providers/pipelines
-│   └── 05-cleanup-policy.md     # Cleanup and retention
+│   ├── 05-cleanup-policy.md     # Cleanup and retention
+│   ├── 06-rules-mapping.md      # RULES.md to docs mapping
+│   └── 07-consistency-check.md  # Consistency verification guide
 │
 ├── 02-architecture/             # System architecture
+│   ├── 01-domain-layer.md       # Domain layer architecture
+│   ├── 02-application-layer.md  # Application layer architecture
+│   ├── 03-infrastructure-layer.md # Infrastructure layer architecture
+│   ├── 04-interfaces-layer.md   # Interfaces layer architecture
+│   ├── 05-composition-layer.md  # Composition layer (DI) architecture
 │   ├── system-context.md        # C4 System Context Diagram
 │   ├── container-diagram.md     # C4 Container Diagram
 │   ├── data-flow.md             # High-level Medallion data flow
-│   ├── 04-interfaces-layer.md   # Interfaces layer docs
-│   ├── 05-composition-layer.md  # Composition layer (DI) docs
+│   ├── data-layers.md           # Bronze/Silver/Gold layer details
+│   ├── observability-layers.md  # Observability architecture
+│   ├── diagrams.md              # Mermaid diagrams collection
 │   ├── decisions/               # Architecture Decision Records (ADR-001..020)
 │   └── diagrams/                # Diagram source files
 │
@@ -56,21 +64,26 @@ docs/
 │   ├── running-pipelines.md     # Running pipelines
 │   ├── troubleshooting.md       # Troubleshooting
 │   ├── add-new-source.md        # Adding new data source
-│   └── add-pipeline-existing-source.md  # Adding pipeline to existing source
+│   └── add-pipeline-existing-source.md
 │
 ├── 04-reference/                # Reference documentation
+│   ├── api/                     # API reference by layer
+│   ├── cli.md                   # CLI reference
+│   └── pipelines/               # Pipeline-specific reference
 │
 ├── 05-operations/               # Operational runbooks
+│   └── runbooks/                # Incident response playbooks
 │
 ├── contracts/                   # Data contracts
-│   └── gold/                    # Gold layer contracts
+│   └── gold/                    # Gold layer JSON schemas
+│
+├── providers/                   # Provider-specific documentation
+│
+├── RULES.md                     # Canonical rules document (v5.7)
+├── REQUIREMENTS.md              # Testable requirements
+├── REFACTORING_PLAN.md          # Current refactoring roadmap
 │
 └── templates/                   # Document & code templates
-    ├── pipeline-review-checklist.md
-    ├── config.yaml.tpl
-    ├── factory.py.tpl
-    ├── pipeline.py.tpl
-    └── source_adapter.py.tpl
 ```
 
 ---
@@ -276,16 +289,14 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md (docs/)         | 2025-12-27   | v5.6 (Anti-False-Claims)     |
-| 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md         |
+| RULES.md (docs/)         | 2025-12-27   | v5.7 (Pre-Refactoring)       |
+| REFACTORING_PLAN.md      | 2025-12-27   | v5.6 (Consolidated)          |
+| REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
+| 00-map.md                | 2025-12-27   | v5.7 Synced, structure clean |
 | 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
-| 00-map.md                | 2025-12-27   | Updated (ADR-020 added)      |
-| CHANGELOG.md             | 2025-12-27   | v5.3.3 (Documentation)       |
-| 03-guides/               | 2025-12-20   | Consolidated (6 guides)      |
+| 03-guides/               | 2025-12-20   | Consolidated (10 guides)     |
 | ADR-001..020             | 2025-12-27   | All 20 ADRs documented       |
-| tests/e2e/               | 2025-12-23   | Local-Only E2E tests         |
-| tests/architecture/      | 2025-12-26   | 213 architecture tests       |
-| pyproject.toml           | 2025-12-16   | Version 5.0.0                |
+| 05-operations/runbooks/  | 2025-12-27   | 4 active runbooks            |
 
 ---
 
