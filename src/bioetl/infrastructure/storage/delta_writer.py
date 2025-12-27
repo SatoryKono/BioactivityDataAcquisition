@@ -46,8 +46,10 @@ if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 
 
 class SilverWriteMode(str, Enum):
@@ -78,6 +80,7 @@ class DeltaWriter:
         csv_exporter: CsvExporter | None = None,
         write_policy: WriteModePolicy | None = None,
         metrics: MetricsPort | None = None,
+        audit: AuditPort | None = None,
     ) -> None:
         """Initialize Delta writer.
 
@@ -88,6 +91,8 @@ class DeltaWriter:
             write_policy: Optional WriteModePolicy for medallion layer validation.
                 If None, a default WriteModePolicy is created.
             metrics: Optional MetricsPort for recording policy violation metrics.
+            audit: Optional AuditPort for write operation traceability.
+                  Use NoOpAudit from composition layer if audit disabled.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -97,6 +102,7 @@ class DeltaWriter:
         self.logger = logger
         self._write_policy = write_policy or WriteModePolicy()
         self._metrics = metrics
+        self._audit = audit
 
     def _prepare_arrow_data(
         self,
@@ -403,6 +409,81 @@ class DeltaWriter:
         if self.csv_exporter:
             csv_append = mode != "delete"
             await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
+
+        # Log audit entry for write operation
+        if self._audit and records:
+            await self._log_silver_audit(
+                table_name=table_name,
+                records=records,
+                mode=validated_mode,
+            )
+
+    async def _log_silver_audit(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        mode: SilverWriteMode,
+    ) -> None:
+        """Log audit entry for Silver write operation.
+
+        Args:
+            table_name: Target table name
+            records: List of records written
+            mode: Write mode used
+        """
+        from datetime import datetime
+        from uuid import UUID
+
+        from bioetl.domain.types import RunID
+
+        # Extract run_id and timestamp from first record
+        first_record = records[0]
+        run_id_str = first_record.get("_run_id", "")
+        ingestion_ts_str = first_record.get("_ingestion_ts")
+
+        # Parse run_id (UUID string)
+        try:
+            run_id = RunID(UUID(run_id_str))
+        except (ValueError, TypeError):
+            # If run_id is not a valid UUID, skip audit logging
+            self.logger.warning(
+                "audit_skipped_invalid_run_id",
+                table=table_name,
+                run_id=run_id_str,
+            )
+            return
+
+        # Parse timestamp
+        if isinstance(ingestion_ts_str, str):
+            timestamp = datetime.fromisoformat(ingestion_ts_str)
+        elif isinstance(ingestion_ts_str, datetime):
+            timestamp = ingestion_ts_str
+        else:
+            from datetime import UTC
+
+            timestamp = datetime.now(UTC)
+
+        # Map SilverWriteMode to AuditOperation
+        operation_map = {
+            SilverWriteMode.MERGE: AuditOperation.MERGE,
+            SilverWriteMode.APPEND: AuditOperation.APPEND,
+            SilverWriteMode.DELETE: AuditOperation.DELETE,
+        }
+        operation = operation_map[mode]
+
+        audit_entry = AuditEntry(
+            run_id=run_id,
+            timestamp=timestamp,
+            layer=AuditLayer.SILVER,
+            table_name=table_name,
+            operation=operation,
+            records_count=len(records),
+            metadata={
+                "run_type": first_record.get("_run_type", ""),
+                "source_batch_id": first_record.get("_source_batch_id", ""),
+            },
+        )
+        await self._audit.log_write(audit_entry)
 
     async def _merge_records(
         self,

@@ -29,8 +29,9 @@ from typing import TYPE_CHECKING, Any
 import zstandard as zstd
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort
 
+from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 
@@ -56,6 +57,7 @@ class BronzeWriter:
         save_json: bool = False,
         json_path: str | None = None,
         validate_json: bool = True,
+        audit: AuditPort | None = None,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -69,6 +71,8 @@ class BronzeWriter:
             validate_json: If True, validate each record is valid JSON bytes
                           before writing. Raises BronzeValidationError on invalid.
                           Default is True for data integrity.
+            audit: Optional AuditPort for write operation traceability.
+                  Use NoOpAudit from composition layer if audit disabled.
 
         """
         self.base_path = Path(base_path)
@@ -77,6 +81,7 @@ class BronzeWriter:
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
         self.validate_json = validate_json
+        self._audit = audit
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -307,6 +312,26 @@ class BronzeWriter:
             await self._write_json_copy(
                 record_list, provider, entity, date_str, batch_id
             )
+
+        # Log audit entry for write operation
+        if self._audit:
+            audit_entry = AuditEntry(
+                run_id=run_id,
+                timestamp=ingestion_ts,
+                layer=AuditLayer.BRONZE,
+                table_name=relative_path,
+                operation=AuditOperation.WRITE,
+                records_count=record_count,
+                metadata={
+                    "provider": provider,
+                    "entity": entity,
+                    "batch_id": str(batch_id),
+                    "run_type": run_type.value,
+                    "compressed_bytes": compressed_size,
+                    "uncompressed_bytes": uncompressed_size,
+                },
+            )
+            await self._audit.log_write(audit_entry)
 
         return Path(relative_path)
 
