@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
@@ -87,6 +86,7 @@ class PipelineRunner:
         self._preflight_service = runner_services.preflight
         self._postrun_service = runner_services.postrun
         self._lifecycle_orchestrator = runner_services.lifecycle_orch
+        self._observer = runner_services.observer
 
     @property
     def logger(self) -> LoggerPort:
@@ -113,17 +113,8 @@ class PipelineRunner:
             run_type=self._runtime.run_type.value,
         )
 
-        observer = PipelineObserver(
-            pipeline_name=self._config.pipeline_name,
-            run_id=self._context.run_id,
-            run_type=self._runtime.run_type,
-            metrics=self._services.metrics,
-            logger=self._logger,
-            tracer=self._tracer,
-        )
-
         try:
-            with observer:
+            with self._observer:
                 async with self._services, self._lock_manager:
                     # Pre-flight: validate infrastructure
                     await self._preflight_service.validate_infrastructure(

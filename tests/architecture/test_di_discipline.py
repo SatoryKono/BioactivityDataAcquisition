@@ -3,8 +3,8 @@
 REQ-ARCH-DI-010: Application layer MUST NOT create infrastructure services.
 
 Application services (LockManager, PreflightService, PostrunService,
-LifecycleOrchestrator) should be created in the composition layer
-and injected via constructors.
+LifecycleOrchestrator, PipelineObserver) should be created in the composition
+layer and injected via constructors.
 
 See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
 """
@@ -26,7 +26,16 @@ FORBIDDEN_IN_APPLICATION = [
     "PreflightService(",
     "PostrunService(",
     "LifecycleOrchestrator(",
+    "PipelineObserver(",
 ]
+
+# Files where these classes are defined (class definitions are allowed)
+DEFINITION_FILES = {
+    "PipelineObserver(": {"observability/observer.py"},
+    "PreflightService(": {"core/preflight_service.py"},
+    "PostrunService(": {"core/postrun_service.py"},
+    "LifecycleOrchestrator(": {"core/lifecycle_orchestrator.py"},
+}
 
 
 def _get_base_path(relative_path: Path) -> Path:
@@ -63,8 +72,8 @@ class TestDIDiscipline:
         """Application layer must not create infrastructure services.
 
         REQ-ARCH-DI-010: Services like LockManager, PreflightService,
-        PostrunService, and LifecycleOrchestrator must be injected,
-        not created directly in application layer.
+        PostrunService, LifecycleOrchestrator, and PipelineObserver must be
+        injected, not created directly in application layer.
 
         These services should be created in composition/bootstrap.py or
         composition/factories/ and passed via constructor injection.
@@ -75,15 +84,19 @@ class TestDIDiscipline:
 
         for py_file in application_python_files:
             content = py_file.read_text(encoding="utf-8")
+            relative = py_file.relative_to(_get_base_path(APPLICATION_DIR))
+            relative_str = str(relative).replace("\\", "/")
 
             for pattern in FORBIDDEN_IN_APPLICATION:
+                # Skip files where the class is defined
+                allowed_files = DEFINITION_FILES.get(pattern, set())
+                if relative_str in allowed_files:
+                    continue
+
                 if pattern in content:
                     # Find line numbers for better error messages
                     for i, line in enumerate(content.splitlines(), 1):
                         if pattern in line:
-                            relative = py_file.relative_to(
-                                _get_base_path(APPLICATION_DIR)
-                            )
                             violations.append(
                                 f"{relative}:{i}: {pattern}"
                             )

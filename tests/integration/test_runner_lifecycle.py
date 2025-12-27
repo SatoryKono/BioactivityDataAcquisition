@@ -24,6 +24,7 @@ from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.application.core.runner_services import RunnerServices
+from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -251,6 +252,29 @@ def mock_postrun_service(call_recorder):
     return service
 
 
+@pytest.fixture
+def mock_observer():
+    """Create a mock PipelineObserver (injected via DI).
+
+    This mock properly handles context manager protocol and suppresses
+    PipelineShutdownError as the real observer would.
+    """
+    from bioetl.application.core.shutdown import PipelineShutdownError
+
+    observer = MagicMock(spec=PipelineObserver)
+
+    def exit_side_effect(exc_type, exc_val, exc_tb):
+        # Suppress PipelineShutdownError like the real observer
+        if exc_val and isinstance(exc_val, PipelineShutdownError):
+            return True
+        return False
+
+    observer.__enter__ = MagicMock(return_value=observer)
+    observer.__exit__ = MagicMock(side_effect=exit_side_effect)
+
+    return observer
+
+
 @pytest.mark.integration
 class TestPipelineRunnerLifecycle:
     """Tests for PipelineRunner lifecycle invariants."""
@@ -265,6 +289,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify call order for REBUILD run type.
@@ -314,6 +339,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -355,6 +381,7 @@ class TestPipelineRunnerLifecycle:
         mock_executor_with_recorder,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify INCREMENTAL run does NOT clear storage.
@@ -389,6 +416,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=orchestrator_no_clear,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -421,6 +449,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify lock is released even when executor raises.
@@ -464,6 +493,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -500,6 +530,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify BACKFILL run clears storage (same as REBUILD)."""
@@ -534,6 +565,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -565,6 +597,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify pipeline aborts when infrastructure health check fails.
@@ -612,6 +645,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -722,6 +756,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify pipeline resumes from checkpoint after previous failure.
@@ -773,6 +808,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -808,6 +844,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify data quality anomalies are detected and logged.
@@ -894,6 +931,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
@@ -925,6 +963,7 @@ class TestPipelineRunnerLifecycle:
         mock_orchestrator,
         mock_preflight_service,
         mock_postrun_service,
+        mock_observer,
         mock_logger,
     ):
         """Verify VACUUM runs on Silver and Gold tables after successful run.
@@ -967,6 +1006,7 @@ class TestPipelineRunnerLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         runner = PipelineRunner(
