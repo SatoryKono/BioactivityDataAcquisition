@@ -212,3 +212,50 @@ def circuit_breaker():
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
     return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=60)
+
+
+# =============================================================================
+# Isolated Registry Fixtures for Test Isolation
+# =============================================================================
+
+
+@pytest.fixture
+def isolated_registry():
+    """Create an isolated PipelineRegistry for test isolation.
+
+    Use this fixture for tests that need to register/unregister pipelines
+    without affecting other tests or global state.
+
+    Returns:
+        A new empty PipelineRegistry instance.
+
+    Example:
+        def test_my_feature(isolated_registry):
+            from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+            register_all_pipelines(registry=isolated_registry)
+            # Test uses isolated_registry...
+    """
+    from bioetl.composition.registry import create_registry
+
+    return create_registry()
+
+
+@pytest.fixture
+def populated_isolated_registry(isolated_registry):
+    """Create an isolated PipelineRegistry with all pipelines registered.
+
+    Use this fixture when you need a fully-populated registry that is
+    isolated from other tests. Ideal for parallel test execution.
+
+    Returns:
+        A PipelineRegistry instance with all pipelines registered.
+
+    Example:
+        def test_pipeline_lookup(populated_isolated_registry):
+            definition = populated_isolated_registry.get("chembl_activity")
+            assert definition.factory.pipeline_name == "chembl_activity"
+    """
+    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+
+    register_all_pipelines(registry=isolated_registry)
+    return isolated_registry

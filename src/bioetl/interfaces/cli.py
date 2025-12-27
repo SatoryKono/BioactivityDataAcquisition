@@ -23,7 +23,7 @@ from bioetl.composition.entrypoints import (
     preview_cleanup,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import get_default_registry
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
@@ -84,7 +84,8 @@ def validate_pipeline_name(
     _ctx: click.Context | None, _param: click.Parameter | None, value: str
 ) -> str:
     """Validate pipeline name against the registry at runtime."""
-    available = PipelineRegistry.list_pipelines()
+    registry = get_default_registry()
+    available = registry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")
     return value

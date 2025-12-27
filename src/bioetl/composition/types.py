@@ -8,17 +8,26 @@ For actual runtime imports, use the specific modules:
 - ObservabilityBundle: from bioetl.composition.observability
 - StorageAdapter: from bioetl.composition.factories.storage_factory
 - PipelineRegistry: from bioetl.composition.registry
+- get_default_registry: from bioetl.composition.registry (default instance)
+- create_registry: from bioetl.composition.registry (isolated instance for tests)
 """
 
 from __future__ import annotations
 
 from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.registry import PipelineDefinition, PipelineRegistry
+from bioetl.composition.registry import (
+    PipelineDefinition,
+    PipelineRegistry,
+    create_registry,
+    get_default_registry,
+)
 
 __all__ = [
     "ObservabilityBundle",
     "PipelineDefinition",
     "PipelineRegistry",
     "StorageAdapter",
+    "create_registry",
+    "get_default_registry",
 ]

@@ -37,7 +37,7 @@ from bioetl.composition._bootstrap import (
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
@@ -65,7 +65,10 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 
-def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
+def bootstrap_pipeline(
+    ctx: PipelineRunContext,
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunner:
     """Composition Root: Assembles and returns a fully configured PipelineRunner.
 
     This is the main entry point for creating a pipeline runner. It:
@@ -78,6 +81,8 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
     Args:
         ctx: Pipeline run context containing launch parameters including
             pipeline_name, run_id, run_type, resume flag, limit, filters, etc.
+        registry: Optional PipelineRegistry instance. If None, uses the
+            default global registry. Pass a custom registry for test isolation.
 
     Returns:
         PipelineRunner: Fully configured runner ready for execution.
@@ -94,10 +99,19 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         ... )
         >>> runner = bootstrap_pipeline(ctx)
         >>> await runner.run()
+
+        # For test isolation:
+        >>> from bioetl.composition.registry import create_registry
+        >>> registry = create_registry()
+        >>> register_all_pipelines(registry=registry)
+        >>> runner = bootstrap_pipeline(ctx, registry=registry)
     """
-    # Explicit registration (idempotent)
+    # Use provided registry or default
+    effective_registry = registry if registry is not None else get_default_registry()
+
+    # Explicit registration (idempotent for default registry)
     register_all_providers()
-    register_all_pipelines()
+    register_all_pipelines(registry=registry)
 
     settings = get_settings()
 
@@ -153,7 +167,7 @@ def bootstrap_pipeline(ctx: PipelineRunContext) -> PipelineRunner:
         )
 
     # Resolve pipeline factory and delegate runner creation
-    pipeline_def = PipelineRegistry.get(ctx.pipeline_name)
+    pipeline_def = effective_registry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
 
     return factory.create_runner(

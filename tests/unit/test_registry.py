@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import get_default_registry
 
 
 @pytest.fixture(autouse=True)
@@ -23,6 +23,8 @@ def test_registry_completeness():
     config_dir = Path("configs/pipelines")
     if not config_dir.exists():
         pytest.skip("Config directory not found")
+
+    registry = get_default_registry()
 
     # Walk through the config directory
     found_configs = []
@@ -44,7 +46,7 @@ def test_registry_completeness():
                     found_configs.append(pipeline_name)
 
     # Get registered pipelines
-    registered_pipelines = PipelineRegistry.list_pipelines()
+    registered_pipelines = registry.list_pipelines()
 
     # Check for missing handlers
     missing_handlers = [
@@ -58,13 +60,14 @@ def test_registry_completeness():
 
 def test_registry_contains_expected_pipelines():
     """Sanity check that key pipelines are present."""
+    registry = get_default_registry()
     expected = [
         "chembl_activity",
         "pubchem_compound",
         "uniprot_protein",
         "pubmed_publications",
     ]
-    registered = PipelineRegistry.list_pipelines()
+    registered = registry.list_pipelines()
 
     for pipe in expected:
         assert pipe in registered, f"Expected pipeline {pipe} not found in registry"
@@ -74,28 +77,62 @@ def test_register_all_pipelines_is_idempotent():
     """Test that calling register_all_pipelines multiple times is safe."""
     from bioetl.composition.factories.pipeline_factories import is_registered
 
+    registry = get_default_registry()
+
     # First call already made in fixture
     assert is_registered()
 
     # Get current count
-    initial_count = len(PipelineRegistry.list_pipelines())
+    initial_count = len(registry.list_pipelines())
 
     # Call again - should be no-op
     register_all_pipelines()
 
     # Count should remain the same
-    assert len(PipelineRegistry.list_pipelines()) == initial_count
+    assert len(registry.list_pipelines()) == initial_count
 
 
-def test_registry_empty_raises_runtime_error():
+def test_registry_empty_raises_runtime_error(isolated_registry):
     """Test that accessing empty registry raises RuntimeError."""
-    # Save current registry and clear it
-    saved_registry = PipelineRegistry._registry.copy()
-    PipelineRegistry._registry.clear()
+    # Use the isolated_registry fixture which is empty
+    with pytest.raises(RuntimeError, match="PipelineRegistry is empty"):
+        isolated_registry.get("any_pipeline")
 
-    try:
-        with pytest.raises(RuntimeError, match="PipelineRegistry is empty"):
-            PipelineRegistry.get("any_pipeline")
-    finally:
-        # Restore registry
-        PipelineRegistry._registry = saved_registry
+
+def test_isolated_registry_is_independent(isolated_registry):
+    """Test that isolated registries are independent of each other."""
+    from bioetl.composition.registry import create_registry
+
+    registry1 = isolated_registry
+    registry2 = create_registry()
+
+    # Both should be empty initially
+    assert len(registry1.list_pipelines()) == 0
+    assert len(registry2.list_pipelines()) == 0
+
+    # Register to one
+    register_all_pipelines(registry=registry1)
+
+    # First registry should be populated
+    assert len(registry1.list_pipelines()) > 0
+
+    # Second registry should still be empty
+    assert len(registry2.list_pipelines()) == 0
+
+
+def test_multiple_registries_in_same_process():
+    """Test that we can create 2 registries in one process."""
+    from bioetl.composition.registry import create_registry
+
+    registry1 = create_registry()
+    registry2 = create_registry()
+
+    register_all_pipelines(registry=registry1)
+    register_all_pipelines(registry=registry2)
+
+    # Both should have the same pipelines
+    assert registry1.list_pipelines() == registry2.list_pipelines()
+
+    # But they should be different instances
+    assert registry1 is not registry2
+    assert registry1._registry is not registry2._registry
