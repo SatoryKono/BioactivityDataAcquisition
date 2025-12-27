@@ -74,3 +74,36 @@ class SchemaEvolutionError(StorageError):
         if self.removed_fields:
             parts.append(f"removed fields: {sorted(self.removed_fields)}")
         super().__init__(", ".join(parts))
+
+
+class BronzeValidationError(StorageError):
+    """Raised when Bronze layer input validation fails.
+
+    This error indicates that records passed to BronzeWriter
+    are not valid JSON bytes. Critical error that should stop
+    the pipeline to prevent invalid data in Bronze layer.
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        message: str,
+        record_index: int | None = None,
+        original_error: str | None = None,
+    ) -> None:
+        """Initialize BronzeValidationError.
+
+        Args:
+            message: Description of the validation failure.
+            record_index: Optional 0-based index of the invalid record.
+            original_error: Optional original error message from JSON parser.
+        """
+        self.record_index = record_index
+        self.original_error = original_error
+        parts = [message]
+        if record_index is not None:
+            parts.append(f"record_index={record_index}")
+        if original_error is not None:
+            parts.append(f"error={original_error}")
+        super().__init__(", ".join(parts))
