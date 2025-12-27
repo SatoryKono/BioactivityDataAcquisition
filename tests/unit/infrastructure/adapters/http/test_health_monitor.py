@@ -219,7 +219,7 @@ class TestProviderHealthMonitorMetrics:
         """Test that error emits provider_health_status metric."""
         monitor.record_error("chembl")
 
-        mock_metrics.gauge.assert_called_with(
+        mock_metrics.set_gauge.assert_called_with(
             "provider_health_status",
             1,  # DEGRADED = 1
             labels={"provider": "chembl"},
@@ -231,7 +231,7 @@ class TestProviderHealthMonitorMetrics:
         """Test that success emits provider_health_status metric."""
         monitor.record_success("chembl")
 
-        mock_metrics.gauge.assert_called_with(
+        mock_metrics.set_gauge.assert_called_with(
             "provider_health_status",
             2,  # HEALTHY = 2
             labels={"provider": "chembl"},
@@ -243,7 +243,7 @@ class TestProviderHealthMonitorMetrics:
         """Test that health check result emits metric."""
         monitor.record_health_check_result("chembl", HealthStatus.UNHEALTHY)
 
-        mock_metrics.gauge.assert_called_with(
+        mock_metrics.set_gauge.assert_called_with(
             "provider_health_status",
             0,  # UNHEALTHY = 0
             labels={"provider": "chembl"},
