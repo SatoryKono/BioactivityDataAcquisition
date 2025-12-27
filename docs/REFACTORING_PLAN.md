@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.3 | Дата: 2025-12-27*
+*Версия: 5.4 | Дата: 2025-12-27*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -68,6 +68,11 @@
 | "Нет автоматизации DQ/Medallion политик" | Реализовано: `MedallionPolicy` в `domain/medallion.py`, `DQConfig` в `domain/config.py:25-63`, `SilverWriteMode` / `GoldWriteMode` enums | `medallion.py`, `config.py:36-37` |
 | "medallion_policy.py дублирует domain" | Это **shim для backward-compat** (19 строк re-export), НЕ дублирование | `application/core/medallion_policy.py` |
 | "Domain использует Pydantic-модели" | Используются **dataclass Value Objects** (`@dataclass(frozen=True)`), не Pydantic | `domain/config.py:25,66,94,176` |
+| "bootstrap_pipeline 140+ строк" | **113 строк** (`bootstrap.py:68-180`), делегирует через 4 функции: `register_all_providers()`, `register_all_pipelines()`, `bootstrap_observability()`, `factory.create_runner()` | `bootstrap.py:113-114,122,173` |
+| "RecordProcessor совмещает метрики/карантин/запись" | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager`. Сам класс — тонкий оркестратор. | `record_processor.py:59-85` |
+| "PipelineRunner не выпускает метрики по стадиям" | Использует `PipelineObserver` через `RunnerServices.observer` как context manager | `runner.py:89,117` |
+| "Нет валидации write mode через Enum" | **Реализовано**: `SilverWriteMode` enum (`delta_writer.py:53-64`), `GoldWriteMode` enum (`gold_writer.py:42-54`) с валидацией | M1, M2 в этом документе |
+| "Архитектурные тесты не связаны с метриками" | 187 архитектурных тестов в `tests/architecture/`, `make arch-test` в CI | `Makefile:arch-test` |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
