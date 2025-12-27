@@ -210,6 +210,16 @@ module = [
 ]
 disallow_untyped_decorators = false
 
+# Disable misc errors for Pydantic/Pandera subclasses
+# These libraries export BaseModel/DataFrameModel as Any without proper stubs
+[[tool.mypy.overrides]]
+module = [
+    "bioetl.infrastructure.schemas.gold",
+    "bioetl.infrastructure.schemas.pipeline_config",
+    "bioetl.infrastructure.config",
+]
+disable_error_code = ["misc"]
+
 # Note: All layers now pass strict mypy checks.
 # ignore_errors was removed as part of architecture review (2025-12-23).
 
