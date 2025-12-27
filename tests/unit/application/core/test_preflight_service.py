@@ -49,7 +49,7 @@ def pipeline_config():
         entity_type="activity",
         primary_keys=["activity_id"],
         silver_table="test_silver",
-        gold_write_mode="merge",  # Use valid gold write mode per medallion policy
+        gold_write_mode="scd2",  # Use valid gold write mode per medallion policy
     )
 
 
@@ -725,7 +725,7 @@ class TestValidateWriteModes:
             entity_type="activity",
             primary_keys=["id"],
             silver_table="silver",
-            gold_write_mode="merge",
+            gold_write_mode="scd2",
         )
         service = PreflightService(
             config=config,
