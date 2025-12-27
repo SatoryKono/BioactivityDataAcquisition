@@ -46,6 +46,12 @@ ALLOWED_FILES: set[str] = {
     # infrastructure/adapters/**/client.py
     # Reserved for TTL-based HTTP response caching logic.
     "client.py",
+    # infrastructure/storage/delta_writer.py
+    # Uses datetime.now(UTC) for audit logging timestamps.
+    "delta_writer.py",
+    # infrastructure/storage/gold_writer.py
+    # Uses datetime.now(UTC) for audit logging timestamps.
+    "gold_writer.py",
 }
 
 
