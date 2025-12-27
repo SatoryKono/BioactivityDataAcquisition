@@ -13,8 +13,15 @@ This package contains all port definitions organized by domain:
 - filtering: InputFilterPort for CSV filter loading
 - resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
 - serialization: JsonEncoderPort for JSON encoding
+- audit: AuditPort for write operation traceability
 """
 
+from bioetl.domain.ports.audit import (
+    AuditEntry,
+    AuditLayer,
+    AuditOperation,
+    AuditPort,
+)
 from bioetl.domain.ports.checkpoint import CheckpointPort
 from bioetl.domain.ports.data_source import (
     DataSourcePort,
@@ -22,7 +29,7 @@ from bioetl.domain.ports.data_source import (
 )
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.locking import LockPort
-from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
@@ -36,6 +43,10 @@ from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort
 
 __all__ = [
+    "AuditEntry",
+    "AuditLayer",
+    "AuditOperation",
+    "AuditPort",
     "CheckpointPort",
     "CircuitBreakerPort",
     "DQMonitorPort",
@@ -47,6 +58,7 @@ __all__ = [
     "LockPort",
     "LoggerPort",
     "MetricsPort",
+    "NoOpAudit",
     "NoOpMetrics",
     "NoOpTracing",
     "QuarantinePort",
