@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.2 | Last updated: 2025-12-26*
+*Synced with RULES.md v5.6 | Last updated: 2025-12-27*
 
 ## Quick Links
 
@@ -47,7 +47,7 @@ docs/
 │   ├── data-flow.md             # High-level Medallion data flow
 │   ├── 04-interfaces-layer.md   # Interfaces layer docs
 │   ├── 05-composition-layer.md  # Composition layer (DI) docs
-│   ├── decisions/               # Architecture Decision Records (ADR-001..006)
+│   ├── decisions/               # Architecture Decision Records (ADR-001..020)
 │   └── diagrams/                # Diagram source files
 │
 ├── 03-guides/                   # How-to guides
@@ -110,6 +110,7 @@ docs/
 | [ADR-017: Observability Architecture](02-architecture/decisions/ADR-017-observability-architecture.md) | Metrics, tracing, logging ports    | §5.1     |
 | [ADR-018: Gold Strict Validation](02-architecture/decisions/ADR-018-gold-strict-validation.md) | Pandera Gold validation                | §2.7     |
 | [ADR-019: Observability Port Enforcement](02-architecture/decisions/ADR-019-observability-port-enforcement.md) | REQ-OBS-001 compliance       | §5.1     |
+| [ADR-020: BasePipeline Decomposition](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | God Object refactoring       | §1.1     |
 
 ### Data Management
 
@@ -275,17 +276,17 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md (docs/)         | 2025-12-23   | v5.2 (E2E Testing added)     |
+| RULES.md (docs/)         | 2025-12-27   | v5.6 (Anti-False-Claims)     |
 | 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md         |
-| 00-rules-summary.md      | 2025-12-23   | v5.2 Synced                  |
-| 00-map.md                | 2025-12-26   | Updated (ADR-012..019 added) |
-| CHANGELOG.md             | 2025-12-26   | v5.3.2 (Test infrastructure) |
+| 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
+| 00-map.md                | 2025-12-27   | Updated (ADR-020 added)      |
+| CHANGELOG.md             | 2025-12-27   | v5.3.3 (Documentation)       |
 | 03-guides/               | 2025-12-20   | Consolidated (6 guides)      |
-| ADR-001..019             | 2025-12-26   | All 19 ADRs documented       |
+| ADR-001..020             | 2025-12-27   | All 20 ADRs documented       |
 | tests/e2e/               | 2025-12-23   | Local-Only E2E tests         |
 | tests/architecture/      | 2025-12-26   | 213 architecture tests       |
 | pyproject.toml           | 2025-12-16   | Version 5.0.0                |
 
 ---
 
-*Last updated: 2025-12-26. Update when adding new documentation.*
+*Last updated: 2025-12-27. Update when adding new documentation.*
