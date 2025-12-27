@@ -290,3 +290,227 @@ class TestEntityIdPerformance:
         )
         assert result.startswith("chembl:")
         assert len(result) == len("chembl:") + 16  # prefix + 16 char hash
+
+
+# =============================================================================
+# Batch Processing Benchmarks
+# =============================================================================
+
+
+class TestBatchProcessingPerformance:
+    """Benchmarks for batch processing operations."""
+
+    @pytest.fixture
+    def small_batch(self) -> list[dict[str, Any]]:
+        """Small batch of 100 records."""
+        return [
+            {
+                "id": f"record_{i}",
+                "value": i * 1.5,
+                "name": f"Item {i}",
+                "active": i % 2 == 0,
+            }
+            for i in range(100)
+        ]
+
+    @pytest.fixture
+    def medium_batch(self) -> list[dict[str, Any]]:
+        """Medium batch of 1000 records."""
+        return [
+            {
+                "id": f"record_{i}",
+                "value": i * 1.5,
+                "name": f"Item {i}",
+                "active": i % 2 == 0,
+                "properties": {"weight": i * 0.1, "volume": i * 0.01},
+            }
+            for i in range(1000)
+        ]
+
+    @pytest.fixture
+    def large_batch(self) -> list[dict[str, Any]]:
+        """Large batch of 10000 records."""
+        return [
+            {
+                "id": f"record_{i}",
+                "value": i * 1.5,
+                "name": f"Item {i}",
+            }
+            for i in range(10000)
+        ]
+
+    def test_batch_hash_generation_small(
+        self, benchmark: BenchmarkFixture, small_batch: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark hash generation for small batch."""
+        from bioetl.domain.transformations import generate_content_hash
+
+        def hash_batch():
+            return [generate_content_hash(r, "test") for r in small_batch]
+
+        result = benchmark(hash_batch)
+        assert len(result) == 100
+
+    def test_batch_hash_generation_medium(
+        self, benchmark: BenchmarkFixture, medium_batch: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark hash generation for medium batch."""
+        from bioetl.domain.transformations import generate_content_hash
+
+        def hash_batch():
+            return [generate_content_hash(r, "test") for r in medium_batch]
+
+        result = benchmark(hash_batch)
+        assert len(result) == 1000
+
+    def test_batch_transformation_filter(
+        self, benchmark: BenchmarkFixture, medium_batch: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark filtering records in a batch."""
+
+        def filter_batch():
+            return [r for r in medium_batch if r["active"]]
+
+        result = benchmark(filter_batch)
+        assert len(result) == 500  # Half are active
+
+    def test_batch_transformation_map(
+        self, benchmark: BenchmarkFixture, medium_batch: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark mapping/transforming records in a batch."""
+
+        def transform_batch():
+            return [
+                {
+                    "entity_id": r["id"],
+                    "computed_value": r["value"] * 2,
+                    "is_active": r["active"],
+                }
+                for r in medium_batch
+            ]
+
+        result = benchmark(transform_batch)
+        assert len(result) == 1000
+
+
+# =============================================================================
+# Polars DataFrame Benchmarks
+# =============================================================================
+
+
+class TestPolarsPerformance:
+    """Benchmarks for Polars DataFrame operations."""
+
+    @pytest.fixture
+    def records_for_df(self) -> list[dict[str, Any]]:
+        """Records for DataFrame creation."""
+        return [
+            {
+                "id": f"record_{i}",
+                "value": i * 1.5,
+                "name": f"Item {i}",
+                "category": f"cat_{i % 10}",
+                "active": i % 2 == 0,
+            }
+            for i in range(5000)
+        ]
+
+    def test_polars_from_dicts(
+        self, benchmark: BenchmarkFixture, records_for_df: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark Polars DataFrame creation from dicts."""
+        import polars as pl
+
+        result = benchmark(pl.DataFrame, records_for_df)
+        assert len(result) == 5000
+
+    def test_polars_filter_operation(
+        self, benchmark: BenchmarkFixture, records_for_df: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark Polars filter operation."""
+        import polars as pl
+
+        df = pl.DataFrame(records_for_df)
+
+        def filter_df():
+            return df.filter(pl.col("active") == True)  # noqa: E712
+
+        result = benchmark(filter_df)
+        assert len(result) == 2500
+
+    def test_polars_group_aggregate(
+        self, benchmark: BenchmarkFixture, records_for_df: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark Polars group by and aggregate."""
+        import polars as pl
+
+        df = pl.DataFrame(records_for_df)
+
+        def group_agg():
+            return df.group_by("category").agg(
+                pl.col("value").mean().alias("avg_value"),
+                pl.col("active").sum().alias("active_count"),
+            )
+
+        result = benchmark(group_agg)
+        assert len(result) == 10  # 10 categories
+
+
+# =============================================================================
+# Schema Validation Benchmarks
+# =============================================================================
+
+
+class TestSchemaValidationPerformance:
+    """Benchmarks for schema validation operations."""
+
+    @pytest.fixture
+    def valid_records(self) -> list[dict[str, Any]]:
+        """Records that pass validation."""
+        return [
+            {
+                "entity_id": f"test_{i}",
+                "value": float(i),
+                "name": f"Name {i}",
+                "_run_id": "test-run-id",
+                "_run_type": "incremental",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+            for i in range(1000)
+        ]
+
+    def test_dict_field_validation(
+        self, benchmark: BenchmarkFixture, valid_records: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark simple field validation."""
+
+        def validate_all():
+            results = []
+            for record in valid_records:
+                is_valid = (
+                    "entity_id" in record
+                    and "value" in record
+                    and isinstance(record["value"], (int, float))
+                )
+                results.append(is_valid)
+            return results
+
+        result = benchmark(validate_all)
+        assert all(result)
+
+    def test_comprehensive_validation(
+        self, benchmark: BenchmarkFixture, valid_records: list[dict[str, Any]]
+    ) -> None:
+        """Benchmark comprehensive field validation."""
+
+        required_fields = ["entity_id", "value", "name", "_run_id", "_run_type"]
+
+        def validate_comprehensive():
+            results = []
+            for record in valid_records:
+                is_valid = all(field in record for field in required_fields)
+                results.append(is_valid)
+            return results
+
+        result = benchmark(validate_comprehensive)
+        assert all(result)
