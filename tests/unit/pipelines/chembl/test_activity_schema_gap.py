@@ -41,7 +41,11 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
     run_id = uuid4()
     transformer = ActivityTransformer(provider="chembl")
     return ChEMBLActivityPipeline(
-        config=config, runtime=runtime, services=services, run_id=run_id, transformer=transformer
+        config=config,
+        runtime=runtime,
+        services=services,
+        run_id=run_id,
+        transformer=transformer,
     )
 
 

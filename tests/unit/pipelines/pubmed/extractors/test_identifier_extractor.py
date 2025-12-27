@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
-from bioetl.application.pipelines.pubmed.extractors.identifier import IdentifierExtractor
+from bioetl.application.pipelines.pubmed.extractors.identifier import (
+    IdentifierExtractor,
+)
 
 
 class TestExtractDoi:

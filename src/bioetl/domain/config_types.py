@@ -280,33 +280,24 @@ class RuntimeArgsDict(TypedDict, total=False):
 
 
 __all__ = [
-    # Gold filters
-    "GoldColumnFilterDict",
-    "GoldRangeDict",
-    "GoldFiltersDict",
-    # Sink
-    "CsvExportDict",
     "BronzeSinkDict",
-    "SilverSinkDict",
-    "GoldValidationDict",
-    "GoldSinkDict",
-    "SinkDict",
-    # Transform
-    "TransformDict",
-    # DQ
-    "DQRulesDict",
-    # Circuit Breaker
     "CircuitBreakerDict",
-    # Input Filter
-    "InputFilterDict",
-    # Source
     "ClientConfigDict",
-    "RateLimitDict",
+    "CsvExportDict",
+    "DQRulesDict",
+    "GoldColumnFilterDict",
+    "GoldFiltersDict",
+    "GoldRangeDict",
+    "GoldSinkDict",
+    "GoldValidationDict",
+    "InputFilterDict",
+    "PipelineConfigDict",
     "ProviderConfigDict",
+    "RateLimitDict",
+    "RuntimeArgsDict",
+    "SilverSinkDict",
+    "SinkDict",
     "SourceConfigDict",
     "SourceFileDict",
-    # Pipeline
-    "PipelineConfigDict",
-    # Runtime
-    "RuntimeArgsDict",
+    "TransformDict",
 ]

@@ -22,9 +22,7 @@ class TestRegistryProtocol:
         """PipelineRegistry must have get, register_factory, list_pipelines methods."""
         # Check class-level methods exist
         registry = PipelineRegistry()
-        assert hasattr(registry, "get"), (
-            "PipelineRegistry MUST have get() method"
-        )
+        assert hasattr(registry, "get"), "PipelineRegistry MUST have get() method"
         assert hasattr(registry, "register_factory"), (
             "PipelineRegistry MUST have register_factory() method"
         )
@@ -121,9 +119,7 @@ class TestRegistryInstanceVariables:
         registry = PipelineRegistry()
 
         # Instance should have _lock attribute
-        assert hasattr(registry, "_lock"), (
-            "PipelineRegistry MUST have _lock attribute"
-        )
+        assert hasattr(registry, "_lock"), "PipelineRegistry MUST have _lock attribute"
 
         # It should be an RLock
         assert isinstance(registry._lock, type(threading.RLock())), (
@@ -177,17 +173,15 @@ class TestRegistryInstanceVariables:
 class TestRegistryReturnTypes:
     """Registries must return proper types."""
 
-    def test_pipeline_registry_list_returns_list(self, populated_isolated_registry) -> None:
+    def test_pipeline_registry_list_returns_list(
+        self, populated_isolated_registry
+    ) -> None:
         """PipelineRegistry.list_pipelines must return list[str]."""
         result = populated_isolated_registry.list_pipelines()
-        assert isinstance(result, list), (
-            "list_pipelines() MUST return a list"
-        )
+        assert isinstance(result, list), "list_pipelines() MUST return a list"
         # All items should be strings
         for item in result:
-            assert isinstance(item, str), (
-                "list_pipelines() MUST return list of strings"
-            )
+            assert isinstance(item, str), "list_pipelines() MUST return list of strings"
 
     def test_datasource_registry_list_returns_list(self) -> None:
         """DataSourceRegistry.list_providers must return list[str]."""
@@ -196,26 +190,18 @@ class TestRegistryReturnTypes:
         )
 
         result = DataSourceRegistry.list_providers()
-        assert isinstance(result, list), (
-            "list_providers() MUST return a list"
-        )
+        assert isinstance(result, list), "list_providers() MUST return a list"
         for item in result:
-            assert isinstance(item, str), (
-                "list_providers() MUST return list of strings"
-            )
+            assert isinstance(item, str), "list_providers() MUST return list of strings"
 
     def test_provider_registry_list_returns_sorted_list(self) -> None:
         """ProviderRegistry.list_providers must return sorted list[str]."""
         from bioetl.composition.providers.provider_registry import ProviderRegistry
 
         result = ProviderRegistry.list_providers()
-        assert isinstance(result, list), (
-            "list_providers() MUST return a list"
-        )
+        assert isinstance(result, list), "list_providers() MUST return a list"
         # Check it's sorted
-        assert result == sorted(result), (
-            "list_providers() MUST return sorted list"
-        )
+        assert result == sorted(result), "list_providers() MUST return sorted list"
 
 
 class TestRegistryConsistency:
@@ -236,9 +222,7 @@ class TestRegistryConsistency:
         # Should include common providers
         common_providers = {"chembl", "pubchem", "uniprot"}
         for provider in common_providers:
-            assert provider in providers, (
-                f"DataSourceRegistry MUST include {provider}"
-            )
+            assert provider in providers, f"DataSourceRegistry MUST include {provider}"
 
 
 class TestRegistryFactoryProtocol:
@@ -251,6 +235,7 @@ class TestRegistryFactoryProtocol:
         # Test by attempting isinstance() - non-runtime_checkable raises TypeError
         class DummyImpl:
             """Dummy class for testing isinstance()."""
+
             pass
 
         try:

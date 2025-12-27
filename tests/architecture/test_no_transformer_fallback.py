@@ -127,7 +127,8 @@ class TestNoTransformerFallback:
         assert not violations, (
             "Pipeline subclasses must not define default_transformer_class.\n"
             "Transformers are injected via GenericPipelineFactory.\n\n"
-            "Violations found:\n" + "\n".join(f"  - {v}" for v in violations)
+            "Violations found:\n"
+            + "\n".join(f"  - {v}" for v in violations)
             + "\n\nSee REQ-ARCH-DI-007 and CLAUDE.md §2.2"
         )
 

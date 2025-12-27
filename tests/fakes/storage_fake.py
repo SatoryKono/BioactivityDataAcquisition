@@ -71,11 +71,13 @@ class InMemoryStorage:
             "run_type": run_type.value if hasattr(run_type, "value") else str(run_type),
             "ingestion_ts": ingestion_ts.isoformat(),
         }
-        self.operations.append({
-            "operation": "write_bronze",
-            "key": key,
-            "record_count": len(record_list),
-        })
+        self.operations.append(
+            {
+                "operation": "write_bronze",
+                "key": key,
+                "record_count": len(record_list),
+            }
+        )
         return Path(key)
 
     async def write_silver(
@@ -105,21 +107,21 @@ class InMemoryStorage:
             self.silver[table_name].extend(records)
         elif mode == "delete":
             pk_set = set(primary_keys)
-            to_delete = {
-                tuple(rec.get(k) for k in pk_set)
-                for rec in records
-            }
+            to_delete = {tuple(rec.get(k) for k in pk_set) for rec in records}
             self.silver[table_name] = [
-                rec for rec in self.silver[table_name]
+                rec
+                for rec in self.silver[table_name]
                 if tuple(rec.get(k) for k in pk_set) not in to_delete
             ]
 
-        self.operations.append({
-            "operation": "write_silver",
-            "table_name": table_name,
-            "mode": mode,
-            "record_count": len(records),
-        })
+        self.operations.append(
+            {
+                "operation": "write_silver",
+                "table_name": table_name,
+                "mode": mode,
+                "record_count": len(records),
+            }
+        )
 
     async def write_gold(
         self,
@@ -138,12 +140,14 @@ class InMemoryStorage:
             # Simplified SCD2: just append with active flag
             self.gold[table_name].extend(records)
 
-        self.operations.append({
-            "operation": "write_gold",
-            "table_name": table_name,
-            "mode": mode,
-            "record_count": len(records),
-        })
+        self.operations.append(
+            {
+                "operation": "write_gold",
+                "table_name": table_name,
+                "mode": mode,
+                "record_count": len(records),
+            }
+        )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table."""
@@ -182,12 +186,14 @@ class InMemoryStorage:
         Returns simulated file count based on table content.
         """
         # In-memory storage doesn't have old files, return 0
-        self.operations.append({
-            "operation": "vacuum",
-            "table_name": table_name,
-            "retention_hours": retention_hours,
-            "dry_run": dry_run,
-        })
+        self.operations.append(
+            {
+                "operation": "vacuum",
+                "table_name": table_name,
+                "retention_hours": retention_hours,
+                "dry_run": dry_run,
+            }
+        )
         return 0
 
     async def archive(
@@ -214,13 +220,15 @@ class InMemoryStorage:
             if remove_source:
                 del self.gold[table_name]
 
-        self.operations.append({
-            "operation": "archive",
-            "table_name": table_name,
-            "target_path": target_path,
-            "remove_source": remove_source,
-            "file_count": file_count,
-        })
+        self.operations.append(
+            {
+                "operation": "archive",
+                "table_name": table_name,
+                "target_path": target_path,
+                "remove_source": remove_source,
+                "file_count": file_count,
+            }
+        )
 
         return file_count
 

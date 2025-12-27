@@ -183,9 +183,7 @@ class CsvExporter:
                 timestamp = int(time.time())
                 backup_path = target_path.with_suffix(f".{timestamp}.csv")
                 temp_path.replace(backup_path)
-                logger.warning(
-                    "Target CSV locked, wrote to backup: %s", backup_path
-                )
+                logger.warning("Target CSV locked, wrote to backup: %s", backup_path)
                 return
         except Exception:
             if temp_path.exists():

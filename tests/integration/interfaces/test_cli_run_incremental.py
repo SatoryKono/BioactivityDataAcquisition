@@ -110,8 +110,10 @@ class TestCliRunIncremental:
                 cli,
                 [
                     "run",
-                    "--pipeline", "chembl_activity",
-                    "--limit", "5",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--limit",
+                    "5",
                     "--resume",
                 ],
             )
@@ -156,7 +158,9 @@ class TestCliRunTypes:
 
         # Should exit cleanly after user cancels
         assert result.exit_code == 0
-        assert "cancelled" in result.output.lower() or "confirm" in result.output.lower()
+        assert (
+            "cancelled" in result.output.lower() or "confirm" in result.output.lower()
+        )
 
     def test_run_type_rebuild_prompts_confirmation(
         self,
@@ -172,7 +176,9 @@ class TestCliRunTypes:
 
         # Should exit cleanly after user cancels
         assert result.exit_code == 0
-        assert "cancelled" in result.output.lower() or "confirm" in result.output.lower()
+        assert (
+            "cancelled" in result.output.lower() or "confirm" in result.output.lower()
+        )
 
     def test_run_type_backfill_skip_confirmation_with_yes(
         self,
@@ -191,7 +197,16 @@ class TestCliRunTypes:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["run", "--pipeline", "chembl_activity", "--run-type", "backfill", "-y", "--limit", "1"],
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-type",
+                    "backfill",
+                    "-y",
+                    "--limit",
+                    "1",
+                ],
             )
 
         # Check that it didn't ask for confirmation

@@ -109,7 +109,9 @@ def _create_chembl_data_source(
     base_adapter = DataSourceFactory.create(
         "chembl", http_client=http_client, logger=logger
     )
-    return _wrap_with_filter(base_adapter, filter_config, logger, metrics, pipeline_name)
+    return _wrap_with_filter(
+        base_adapter, filter_config, logger, metrics, pipeline_name
+    )
 
 
 def _create_pubchem_adapter(

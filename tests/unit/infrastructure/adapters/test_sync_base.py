@@ -120,7 +120,11 @@ class TestHealthCheckLogging:
             error_type="ConnectionError",
         )
         # Fallback status should be returned
-        assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY)
+        assert status in (
+            HealthStatus.HEALTHY,
+            HealthStatus.DEGRADED,
+            HealthStatus.UNHEALTHY,
+        )
 
     async def test_health_check_increments_failure_metric_on_exception(
         self,
@@ -195,7 +199,11 @@ class TestHealthCheckLogging:
 
         # Should still log warning
         mock_logger.warning.assert_called_once()
-        assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY)
+        assert status in (
+            HealthStatus.HEALTHY,
+            HealthStatus.DEGRADED,
+            HealthStatus.UNHEALTHY,
+        )
 
     async def test_health_check_logs_correct_error_type(
         self,

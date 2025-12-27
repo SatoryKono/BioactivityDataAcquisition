@@ -79,7 +79,11 @@ class WriteModePolicy:
         """
         allowed = self.ALLOWED_MODES[layer]
         if mode not in allowed:
-            allowed_names = "{" + ", ".join(m.value for m in sorted(allowed, key=lambda x: x.value)) + "}"
+            allowed_names = (
+                "{"
+                + ", ".join(m.value for m in sorted(allowed, key=lambda x: x.value))
+                + "}"
+            )
             raise PolicyViolationError(
                 f"{layer.value} does not allow {mode.value}. Allowed: {allowed_names}"
             )

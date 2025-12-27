@@ -162,7 +162,7 @@ class TestGracefulShutdownBehavior:
 
         async def process_with_shutdown_check(records):
             nonlocal processed_count
-            for i, record in enumerate(records):
+            for i, _record in enumerate(records):
                 if shutdown.is_requested:
                     break
                 processed_count += 1
@@ -185,7 +185,7 @@ class TestGracefulShutdownBehavior:
         async def process_batch(batch):
             nonlocal batch_completed
             # Simulate batch processing
-            for record in batch:
+            for _record in batch:
                 await asyncio.sleep(0.01)
             batch_completed = True
 

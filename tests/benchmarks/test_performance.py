@@ -117,12 +117,10 @@ class TestContentHashPerformance:
     def large_record(self) -> dict[str, Any]:
         """Large record with ~100 fields and deep nesting."""
         base = {
-            f"field_{i}": f"value_{i}" if i % 3 != 0 else i * 1.5
-            for i in range(80)
+            f"field_{i}": f"value_{i}" if i % 3 != 0 else i * 1.5 for i in range(80)
         }
         base["nested_list"] = [
-            {"id": i, "name": f"item_{i}", "values": list(range(10))}
-            for i in range(10)
+            {"id": i, "name": f"item_{i}", "values": list(range(10))} for i in range(10)
         ]
         base["deep_nested"] = {
             "level1": {
@@ -178,18 +176,12 @@ class TestNormalizationPerformance:
     @pytest.fixture
     def record_with_floats(self) -> dict[str, Any]:
         """Record with many float values needing normalization."""
-        return {
-            f"float_{i}": i * 0.123456789012345
-            for i in range(100)
-        }
+        return {f"float_{i}": i * 0.123456789012345 for i in range(100)}
 
     @pytest.fixture
     def record_with_strings(self) -> dict[str, Any]:
         """Record with strings needing stripping."""
-        return {
-            f"string_{i}": f"  value with spaces {i}  "
-            for i in range(100)
-        }
+        return {f"string_{i}": f"  value with spaces {i}  " for i in range(100)}
 
     def test_normalize_floats(
         self, benchmark: BenchmarkFixture, record_with_floats: dict[str, Any]
@@ -225,10 +217,7 @@ class TestSerializationPerformance:
         """Complex record for serialization benchmarks."""
         return {
             "id": "test_123",
-            "data": [
-                {"nested": {"deep": {"value": i}}}
-                for i in range(50)
-            ],
+            "data": [{"nested": {"deep": {"value": i}}} for i in range(50)],
             "metadata": {
                 "strings": [f"item_{i}" for i in range(20)],
                 "numbers": list(range(100)),

@@ -284,7 +284,9 @@ class DeltaWriter:
         elif validated_mode == SilverWriteMode.APPEND:
             await self._write_append(table_path, arrow_data, partition_cols)
         else:  # SilverWriteMode.MERGE
-            await self._write_merge(table_path, arrow_data, primary_keys, partition_cols)
+            await self._write_merge(
+                table_path, arrow_data, primary_keys, partition_cols
+            )
 
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get existing table schema if table exists.

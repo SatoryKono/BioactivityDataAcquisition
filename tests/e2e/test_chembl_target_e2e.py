@@ -85,7 +85,9 @@ async def test_chembl_target_cross_references(e2e_data_dir: Path):
 
     # At least some targets should have cross_references
     targets_with_xrefs = [
-        r for r in records if r.get("cross_references") and r["cross_references"] != "[]"
+        r
+        for r in records
+        if r.get("cross_references") and r["cross_references"] != "[]"
     ]
 
     # Parse and validate structure

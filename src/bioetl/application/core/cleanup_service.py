@@ -164,9 +164,7 @@ class CleanupService:
         Returns:
             CleanupResult with counts of cleared items.
         """
-        silver_cleared = await self._storage.clear_silver(
-            silver_table, dry_run=dry_run
-        )
+        silver_cleared = await self._storage.clear_silver(silver_table, dry_run=dry_run)
 
         gold_cleared = 0
         if gold_table:

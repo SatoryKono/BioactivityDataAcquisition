@@ -114,9 +114,7 @@ class TestMemoryMonitor:
     def test_get_memory_stats_fallback(self, monitor):
         """Test fallback memory stats when psutil unavailable."""
         with patch.object(monitor, "_psutil_available", False):
-            with patch.object(
-                monitor, "_get_stats_fallback"
-            ) as mock_fallback:
+            with patch.object(monitor, "_get_stats_fallback") as mock_fallback:
                 mock_fallback.return_value = MemoryStats(
                     used_mb=4096.0,
                     available_mb=4096.0,
@@ -240,16 +238,22 @@ class TestMemoryMonitor:
         with patch.object(monitor, "get_memory_stats") as mock_stats:
             # First call under pressure
             mock_stats.return_value = MemoryStats(
-                used_mb=7000.0, available_mb=1000.0, total_mb=8000.0,
-                percent_used=0.875, process_mb=256.0,
+                used_mb=7000.0,
+                available_mb=1000.0,
+                total_mb=8000.0,
+                percent_used=0.875,
+                process_mb=256.0,
             )
             monitor.get_recommended_batch_size(1000)
             assert monitor._consecutive_pressure_count == 1
 
             # Second call with no pressure
             mock_stats.return_value = MemoryStats(
-                used_mb=4000.0, available_mb=4000.0, total_mb=8000.0,
-                percent_used=0.5, process_mb=256.0,
+                used_mb=4000.0,
+                available_mb=4000.0,
+                total_mb=8000.0,
+                percent_used=0.5,
+                process_mb=256.0,
             )
             monitor.get_recommended_batch_size(500)
             assert monitor._consecutive_pressure_count == 0
@@ -295,7 +299,9 @@ class TestMemoryMonitor:
 
         with patch.object(monitor, "get_memory_stats") as mock_stats:
             mock_stats.return_value = MemoryStats(
-                used_mb=7000.0, available_mb=1000.0, total_mb=8000.0,
+                used_mb=7000.0,
+                available_mb=1000.0,
+                total_mb=8000.0,
                 percent_used=0.95,  # Very high pressure
                 process_mb=256.0,
             )

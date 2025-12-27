@@ -150,9 +150,7 @@ class TargetTransformer(BaseChemblTransformer):
             # Optional fields (present for specific target types)
             "dap_id": safe_int(record.get("dap_id")),
             "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
-            "target_constraints": self.serialize_json(
-                record.get("target_constraints")
-            ),
+            "target_constraints": self.serialize_json(record.get("target_constraints")),
             # Complex fields (JSON serialized)
             "target_components": self.serialize_json(target_components),
             "target_component_synonyms": self._aggregate_synonyms(target_components),

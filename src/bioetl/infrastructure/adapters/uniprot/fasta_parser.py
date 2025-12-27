@@ -38,10 +38,12 @@ class FastaParser:
             if line.startswith(">"):
                 # Save previous record if exists
                 if current_header is not None:
-                    records.append({
-                        "header": current_header,
-                        "sequence": "".join(current_sequence),
-                    })
+                    records.append(
+                        {
+                            "header": current_header,
+                            "sequence": "".join(current_sequence),
+                        }
+                    )
                 # Start new record
                 current_header = line[1:]  # Remove '>' prefix
                 current_sequence = []
@@ -50,10 +52,12 @@ class FastaParser:
 
         # Don't forget the last record
         if current_header is not None:
-            records.append({
-                "header": current_header,
-                "sequence": "".join(current_sequence),
-            })
+            records.append(
+                {
+                    "header": current_header,
+                    "sequence": "".join(current_sequence),
+                }
+            )
 
         return records
 

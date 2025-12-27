@@ -424,9 +424,7 @@ class TestBatchWriterTracing:
         self, mock_storage, mock_context, mock_tracer
     ):
         """Test that span records exception when write fails."""
-        mock_storage.write_bronze = AsyncMock(
-            side_effect=RuntimeError("Storage error")
-        )
+        mock_storage.write_bronze = AsyncMock(side_effect=RuntimeError("Storage error"))
 
         config = RecordProcessorConfig(
             pipeline_name="test",

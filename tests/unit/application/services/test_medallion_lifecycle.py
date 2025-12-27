@@ -104,9 +104,7 @@ class TestMedallionLifecycleServiceClear:
         )
 
         # Should only clear Silver
-        mock_storage.clear_silver.assert_called_once_with(
-            "test_silver", dry_run=False
-        )
+        mock_storage.clear_silver.assert_called_once_with("test_silver", dry_run=False)
         mock_storage.clear_gold.assert_not_called()
 
         assert result.silver_cleared == 10
@@ -128,9 +126,7 @@ class TestMedallionLifecycleServiceClear:
         )
 
         # Should clear both layers
-        mock_storage.clear_silver.assert_called_once_with(
-            "test_silver", dry_run=False
-        )
+        mock_storage.clear_silver.assert_called_once_with("test_silver", dry_run=False)
         mock_storage.clear_gold.assert_called_once_with("test_gold", dry_run=False)
 
         assert result.silver_cleared == 10
@@ -157,7 +153,9 @@ class TestMedallionLifecycleServiceClear:
         assert result.dry_run is True
 
     @pytest.mark.asyncio
-    async def test_clear_logs_dry_run(self, lifecycle_service, mock_storage, mock_logger):
+    async def test_clear_logs_dry_run(
+        self, lifecycle_service, mock_storage, mock_logger
+    ):
         """Test clear logs correctly in dry run mode."""
         policy = MedallionPolicy(clear_policy=ClearPolicy.SILVER_AND_GOLD)
         mock_storage.clear_silver.return_value = 10
@@ -277,9 +275,7 @@ class TestMedallionLifecycleServiceVacuum:
         self, lifecycle_service_with_vacuum, mock_storage_with_vacuum
     ):
         """vacuum() should convert retention_days to hours."""
-        await lifecycle_service_with_vacuum.vacuum(
-            "chembl.activity", retention_days=30
-        )
+        await lifecycle_service_with_vacuum.vacuum("chembl.activity", retention_days=30)
 
         mock_storage_with_vacuum.vacuum.assert_called_once_with(
             table_name="chembl.activity",
@@ -369,9 +365,7 @@ class TestMedallionLifecycleServiceArchive:
         self, lifecycle_service_with_archive, mock_logger
     ):
         """archive() should log start and completion."""
-        await lifecycle_service_with_archive.archive(
-            "chembl.activity", "/archive/2025"
-        )
+        await lifecycle_service_with_archive.archive("chembl.activity", "/archive/2025")
 
         # Should have at least 2 log calls (start and complete)
         assert mock_logger.info.call_count >= 2

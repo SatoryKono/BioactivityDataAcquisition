@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
 
-class BasePipeline(ABC):
+class BasePipeline(ABC):  # noqa: B024
     """Base class for ETL pipelines.
 
     Acts as a container for:
@@ -205,20 +205,22 @@ class BasePipeline(ABC):
         )
 
     # Fields to exclude from Gold layer (JSON strings retained only in Silver)
-    GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset({
-        # Molecule JSON fields (Silver forensic only)
-        "molecule_hierarchy",
-        "molecule_properties",
-        "molecule_structures",
-        "molecule_synonyms",
-        "cross_references",
-        "atc_classifications",
-        # Internal metadata fields (Silver only)
-        "entity_id",
-        "content_hash",
-        "_run_type",
-        "_source_batch_id",
-    })
+    GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            # Molecule JSON fields (Silver forensic only)
+            "molecule_hierarchy",
+            "molecule_properties",
+            "molecule_structures",
+            "molecule_synonyms",
+            "cross_references",
+            "atc_classifications",
+            # Internal metadata fields (Silver only)
+            "entity_id",
+            "content_hash",
+            "_run_type",
+            "_source_batch_id",
+        }
+    )
 
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]

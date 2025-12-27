@@ -57,9 +57,7 @@ def _check_structlog_imports(
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name == "structlog":
-                        violations.append(
-                            f"{rel_path}:{node.lineno}: import structlog"
-                        )
+                        violations.append(f"{rel_path}:{node.lineno}: import structlog")
             elif isinstance(node, ast.ImportFrom):
                 if node.module and node.module.startswith("structlog"):
                     violations.append(

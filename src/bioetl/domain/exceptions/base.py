@@ -29,10 +29,12 @@ class BioETLError(Exception):
     error_type: ClassVar[ErrorType]
 
     # Private attributes that should be excluded from context
-    _CONTEXT_EXCLUDE: ClassVar[frozenset[str]] = frozenset({
-        "args",
-        "with_traceback",
-    })
+    _CONTEXT_EXCLUDE: ClassVar[frozenset[str]] = frozenset(
+        {
+            "args",
+            "with_traceback",
+        }
+    )
 
     @classmethod
     def get_error_type(cls) -> ErrorType:
