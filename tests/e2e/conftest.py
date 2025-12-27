@@ -183,12 +183,18 @@ def assert_silver_table_has_records(
         raise AssertionError(f"Silver table does not exist: {table_path}")
 
     dt = DeltaTable(str(table_path))
-    count = len(dt.to_pyarrow_table())
+    df = dt.to_pyarrow_table()
+    count = len(df)
 
     if count < expected_min:
         raise AssertionError(
             f"Silver table {table_name} has {count} records, expected >= {expected_min}"
         )
+
+    # Verify lineage fields
+    assert "_run_id" in df.column_names
+    assert "_run_type" in df.column_names
+    assert "_ingestion_ts" in df.column_names
 
     return count
 
