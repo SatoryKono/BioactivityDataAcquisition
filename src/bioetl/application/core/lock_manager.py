@@ -7,6 +7,7 @@ import contextlib
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.locking import LockContext
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
@@ -48,6 +49,7 @@ class LockManager:
         self._shutdown_signal = shutdown_signal
         self._checkpoint_manager = checkpoint_manager
         self._heartbeat_task: asyncio.Task[None] | None = None
+        self._acquired_at: float | None = None  # monotonic timestamp when lock acquired
 
     @classmethod
     def create(
@@ -111,6 +113,8 @@ class LockManager:
             True if lock was acquired, False otherwise.
 
         """
+        import time
+
         acquired = await self._lock.acquire(
             key=self._lock_key,
             owner_id=self._run_id,
@@ -120,6 +124,7 @@ class LockManager:
             exclusive=self._exclusive,
         )
         if acquired:
+            self._acquired_at = time.monotonic()
             self._logger.info(f"Lock acquired for {self._lock_key}")
         else:
             self._logger.error(f"Failed to acquire lock for {self._lock_key}")
@@ -134,7 +139,27 @@ class LockManager:
         await self._lock.release(
             self._lock_key, self._run_id, exclusive=self._exclusive
         )
+        self._acquired_at = None
         self._logger.info("Lock released", extra={"stage": "cleanup"})
+
+    def get_context(self) -> LockContext | None:
+        """Get LockContext for passing to writers.
+
+        Returns a LockContext value object that can be passed to storage
+        writers for lock validation (RULES.md §3.3).
+
+        Returns:
+            LockContext if lock is held, None if not acquired.
+        """
+        if self._acquired_at is None:
+            return None
+
+        return LockContext(
+            key=self._lock_key,
+            owner_id=self._run_id,
+            exclusive=self._exclusive,
+            acquired_at=self._acquired_at,
+        )
 
     async def start_heartbeat(self) -> None:
         """Start the background heartbeat task.

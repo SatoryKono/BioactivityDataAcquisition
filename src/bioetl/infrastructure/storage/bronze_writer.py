@@ -31,6 +31,7 @@ import zstandard as zstd
 if TYPE_CHECKING:
     from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
+from bioetl.domain.locking import LockContext, LockNotHeldError
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
@@ -59,6 +60,7 @@ class BronzeWriter:
         validate_json: bool = True,
         audit: AuditPort | None = None,
         tracing: TracingPort | None = None,
+        require_lock: bool = False,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -76,6 +78,9 @@ class BronzeWriter:
                   Use NoOpAudit from composition layer if audit disabled.
             tracing: Optional TracingPort for distributed tracing.
                     Use NoOpTracing from composition layer if tracing disabled.
+            require_lock: If True, write operations require valid LockContext.
+                         Default is False for backward compatibility.
+                         Set to True in production for RULES.md §3.3 compliance.
 
         """
         self.base_path = Path(base_path)
@@ -85,6 +90,7 @@ class BronzeWriter:
         self.json_path = json_path or str(self.base_path / "json")
         self.validate_json = validate_json
         self._audit = audit
+        self._require_lock = require_lock
 
         # Use NoOpTracing if not provided
         if tracing is None:
@@ -146,6 +152,64 @@ class BronzeWriter:
             raise ValueError(
                 f"{param_name} must be UTC, got timezone with offset {offset}. "
                 "Convert to UTC before passing to BronzeWriter."
+            )
+
+    def _validate_lock_held(
+        self,
+        provider: str,
+        entity: str,
+        lock_context: LockContext | None,
+    ) -> None:
+        """Validate that lock is held before write operation.
+
+        Implements RULES.md §3.3 - Writers MUST verify lock held.
+
+        Args:
+            provider: Provider name (e.g., "chembl").
+            entity: Entity name (e.g., "activity").
+            lock_context: The lock context from application layer.
+
+        Raises:
+            LockNotHeldError: If lock is not held or doesn't match.
+        """
+        if not self._require_lock:
+            return  # Lock validation disabled (e.g., for tests)
+
+        table_name = f"{provider}_{entity}"
+        expected_key = f"lock:{table_name}"
+
+        if lock_context is None:
+            self.logger.error(
+                "Write attempted without lock",
+                provider=provider,
+                entity=entity,
+                expected_key=expected_key,
+            )
+            raise LockNotHeldError("write_bronze", expected_key)
+
+        if not lock_context.matches_table(table_name):
+            self.logger.error(
+                "Write attempted with wrong lock",
+                provider=provider,
+                entity=entity,
+                expected_key=expected_key,
+                actual_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                f"write_bronze (got {lock_context.key})",
+                expected_key,
+            )
+
+        if not lock_context.is_valid():
+            self.logger.error(
+                "Write attempted with expired lock",
+                provider=provider,
+                entity=entity,
+                lock_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                "write_bronze (lock expired)",
+                expected_key,
             )
 
     def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
@@ -274,6 +338,7 @@ class BronzeWriter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
+        lock_context: LockContext | None = None,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
 
@@ -289,9 +354,14 @@ class BronzeWriter:
             run_type: Type of run (incremental, backfill, etc.).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014).
+            lock_context: Lock context from LockManager. Required unless
+                         require_lock=False was passed to constructor (RULES.md §3.3).
 
         Returns:
             Relative path to the written file.
+
+        Raises:
+            LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
 
         """
         tracer = self._tracing.get_tracer(__name__)
@@ -302,6 +372,9 @@ class BronzeWriter:
             span.set_attribute("run_id", str(run_id))
 
             start_time = time.perf_counter()
+
+            # Validate lock is held before any write operation (RULES.md §3.3)
+            self._validate_lock_held(provider, entity, lock_context)
 
             self._validate_bronze_names(provider, entity)
             self._validate_records_iterator(records)
