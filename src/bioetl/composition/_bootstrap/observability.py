@@ -93,7 +93,7 @@ def bootstrap_logger(
     pipeline: str, run_id: UUID, log_level: str = "INFO"
 ) -> structlog.BoundLogger:
     """Create a logger for the application layer (e.g., CLI)."""
-    return create_infra_logger(  # type: ignore[no-any-return]
+    return create_infra_logger(
         pipeline=pipeline, run_id=run_id, log_level=log_level, json_format=True
     )
 
