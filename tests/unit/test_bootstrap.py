@@ -227,7 +227,7 @@ class TestBootstrapPipeline:
         mock_pipeline = MagicMock()
         mock_factory = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
-        mock_registry.get.return_value.factory = mock_factory
+        mock_get_registry.return_value.get.return_value.factory = mock_factory
 
         with patch(
             "bioetl.composition.bootstrap.bootstrap_logger", return_value=mock_logger
@@ -255,6 +255,7 @@ class TestChemblActivityFactory:
         from bioetl.composition.factories.pipeline_factories import (
             chembl_activity_factory,
         )
+
         # Save original _create_data_source
         original_creator = chembl_activity_factory._create_data_source
         yield
@@ -282,7 +283,9 @@ class TestChemblActivityFactory:
 
         # Mock the data source creator function stored in the factory
         mock_data_source = MagicMock()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         services = chembl_activity_factory.build_services(
             settings=mock_settings,
@@ -313,7 +316,9 @@ class TestChemblActivityFactory:
 
         # Mock the data source creator
         mock_data_source = MagicMock()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         chembl_activity_factory.build_services(
             settings=mock_settings,
@@ -342,7 +347,9 @@ class TestChemblActivityFactory:
 
         # Mock the data source creator
         mock_data_source = MagicMock()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         chembl_activity_factory.build_services(
             settings=mock_settings,
@@ -379,7 +386,9 @@ class TestChemblActivityFactory:
 
         # Mock the data source creator
         mock_data_source = MagicMock()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         # Create a mock pipeline class
         mock_pipeline_class = MagicMock()

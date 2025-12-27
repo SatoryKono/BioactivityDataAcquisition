@@ -130,6 +130,7 @@ class TestStorageAdapter:
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):
         """Test write_gold delegates to gold writer."""
         from unittest.mock import MagicMock
+
         records = [{"metric": "count", "value": 100}]
         mock_schema = MagicMock()
 

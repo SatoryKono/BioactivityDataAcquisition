@@ -143,7 +143,10 @@ def create_local_storage_context(
 @pytest.fixture
 def patch_storage_factory(storage_paths: dict[str, Path]):
     """Patch StorageFactory to use local temp paths."""
-    def _create_storage(settings: Any, config: PipelineYamlConfig, logger: Any) -> StorageContext:
+
+    def _create_storage(
+        settings: Any, config: PipelineYamlConfig, logger: Any
+    ) -> StorageContext:
         return create_local_storage_context(storage_paths, config, logger)
 
     with patch(

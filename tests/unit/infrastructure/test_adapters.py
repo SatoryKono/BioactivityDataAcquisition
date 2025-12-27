@@ -42,13 +42,17 @@ class TestChemblAdapter:
         bucket = TokenBucket(rate=10.0, capacity=10)
         cb = CircuitBreaker(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
-        adapter = ChemblAdapter(http_client=http_client, logger=mock_logger, batch_size=500)
+        adapter = ChemblAdapter(
+            http_client=http_client, logger=mock_logger, batch_size=500
+        )
 
         assert adapter.batch_size == 500
 
     def test_entity_mapping(self, mock_logger):
         """Test entity type to resource URL mapping."""
-        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+            ChemblEntityMapper,
+        )
 
         # Valid entity types via entity mapper
         assert "activity" in ChemblEntityMapper.get_resource_url("activity")
@@ -57,7 +61,9 @@ class TestChemblAdapter:
 
     def test_invalid_entity_type(self, mock_logger):
         """Test error handling for invalid entity type."""
-        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+            ChemblEntityMapper,
+        )
 
         with pytest.raises(ValueError, match="Unknown entity type"):
             ChemblEntityMapper.get_resource_url("invalid_entity")
@@ -117,9 +123,7 @@ class TestPubChemAdapter:
 
         assert adapter.rate_limiter.rate == 10.0
 
-    def test_thread_pool_injected(
-        self, mock_logger, rate_limiter, circuit_breaker
-    ):
+    def test_thread_pool_injected(self, mock_logger, rate_limiter, circuit_breaker):
         """Test thread pool is properly injected for sync operations."""
         from concurrent.futures import ThreadPoolExecutor
 
@@ -199,7 +203,9 @@ class TestUniProtAdapter:
 
     def test_adapter_creation_with_api_key(self, http_client, mock_logger):
         """Test UniProt adapter with API key."""
-        adapter = UniProtAdapter(http_client=http_client, logger=mock_logger, api_key="test_key")
+        adapter = UniProtAdapter(
+            http_client=http_client, logger=mock_logger, api_key="test_key"
+        )
 
         assert adapter.api_key == "test_key"
 
@@ -207,10 +213,11 @@ class TestUniProtAdapter:
         """Test UniProt adapter with custom base URL."""
         mock_http = MagicMock()
         custom_url = "https://custom.uniprot.org"
-        adapter = UniProtAdapter(http_client=mock_http, logger=mock_logger, base_url=custom_url)
+        adapter = UniProtAdapter(
+            http_client=mock_http, logger=mock_logger, base_url=custom_url
+        )
 
         assert adapter.base_url == custom_url
-
 
 
 @pytest.mark.unit

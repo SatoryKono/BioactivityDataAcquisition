@@ -5,14 +5,15 @@ from __future__ import annotations
 import pytest
 import structlog
 
-from bioetl.composition.factories.pipeline_factories import chembl_target_component_factory
+from bioetl.composition.factories.pipeline_factories import (
+    chembl_target_component_factory,
+)
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 logger = structlog.get_logger()
 
 
 class TestChemblTargetComponentPipeline(IntegrationPipelineTestCase):
-
     @pytest.mark.vcr
     async def test_chembl_target_component_happy_path(
         self, settings, runtime_config, run_id
@@ -60,9 +61,7 @@ class TestChemblTargetComponentPipeline(IntegrationPipelineTestCase):
         # Verify Gold Delta Table
         gold_table_name = runner.pipeline.config.gold_table
         if not gold_table_name:
-            gold_table_name = (
-                f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
-            )
+            gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
 
         gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"
 

@@ -353,9 +353,6 @@ class TestRunCommandAdvanced:
         assert "Logger not initialized" in result.output
 
 
-
-
-
 class TestDryRunMode:
     """Tests for dry-run mode and _preview_cleanup function."""
 
@@ -375,7 +372,14 @@ class TestDryRunMode:
 
         result = runner.invoke(
             cli,
-            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--run-type",
+                "rebuild",
+                "--dry-run",
+            ],
         )
 
         assert result.exit_code == 0
@@ -400,7 +404,14 @@ class TestDryRunMode:
 
         result = runner.invoke(
             cli,
-            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--run-type",
+                "rebuild",
+                "--dry-run",
+            ],
         )
 
         assert result.exit_code == 0
@@ -417,7 +428,14 @@ class TestDryRunMode:
 
         result = runner.invoke(
             cli,
-            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--run-type",
+                "rebuild",
+                "--dry-run",
+            ],
         )
 
         assert result.exit_code == 0  # Should catch exception and print error
@@ -439,7 +457,14 @@ class TestDryRunMode:
 
         result = runner.invoke(
             cli,
-            ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--run-type",
+                "rebuild",
+                "--dry-run",
+            ],
         )
 
         assert result.exit_code == 0

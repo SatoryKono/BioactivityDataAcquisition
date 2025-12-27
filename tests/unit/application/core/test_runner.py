@@ -218,9 +218,7 @@ def mock_preflight_service():
     from bioetl.domain.types import HealthReport
 
     service = MagicMock(spec=PreflightService)
-    service.validate_infrastructure = AsyncMock(
-        return_value=HealthReport(results=[])
-    )
+    service.validate_infrastructure = AsyncMock(return_value=HealthReport(results=[]))
     return service
 
 
@@ -231,10 +229,14 @@ def mock_postrun_service():
 
     service = MagicMock(spec=PostrunService)
     service.run_dq_checks = AsyncMock(
-        return_value=DQResult(anomalies_count=0, has_critical=False, check_duration_ms=0)
+        return_value=DQResult(
+            anomalies_count=0, has_critical=False, check_duration_ms=0
+        )
     )
     service.run_vacuum_if_enabled = AsyncMock(
-        return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
+        return_value=VacuumResult(
+            silver_files_removed=0, gold_files_removed=0, skipped=True
+        )
     )
     service.cleanup = AsyncMock()
     return service

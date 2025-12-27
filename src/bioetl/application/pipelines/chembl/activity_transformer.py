@@ -52,9 +52,13 @@ class ActivityTransformer(BaseChemblTransformer):
         Returns:
             Flat dictionary with prefixed keys and float-converted values.
         """
-        return flatten_nested_dict(le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS)
+        return flatten_nested_dict(
+            le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS
+        )
 
-    def _extract_action_type(self, action_data: dict[str, Any] | None) -> dict[str, Any]:
+    def _extract_action_type(
+        self, action_data: dict[str, Any] | None
+    ) -> dict[str, Any]:
         """Extract action type fields from nested dictionary.
 
         Args:

@@ -65,8 +65,11 @@ class PubMedPublicationTransformer(BaseTransformer):
             )
             content_hash = self.compute_content_hash(business_data, exclude_none=False)
             entity = self._create_entity(
-                Publication, context, entity_id=entity_id,
-                content_hash=content_hash, **business_data
+                Publication,
+                context,
+                entity_id=entity_id,
+                content_hash=content_hash,
+                **business_data,
             )
             return cast("SilverRecord", self.entity_to_silver_record(entity))
 
@@ -125,7 +128,8 @@ class PubMedPublicationTransformer(BaseTransformer):
             "language": get_text(article.find(".//Language")),
             "country": (
                 get_text(medline.find(".//MedlineJournalInfo/Country"))
-                if medline else None
+                if medline
+                else None
             ),
             "pmc_id": IdentifierExtractor.extract_pmc_id(root),
         }

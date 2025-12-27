@@ -278,7 +278,9 @@ class TestChemblAdapterErrorClassification:
     """Tests for error classification and handling."""
 
     @pytest.mark.asyncio
-    async def test_error_classification_logged(self, adapter, mock_http_client, mock_logger):
+    async def test_error_classification_logged(
+        self, adapter, mock_http_client, mock_logger
+    ):
         """Test that error type is classified and logged."""
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
@@ -424,7 +426,9 @@ class TestChemblAdapterHealthTransitions:
     """Tests for health status transitions and logging."""
 
     @pytest.mark.asyncio
-    async def test_health_transition_logged(self, adapter, mock_http_client, mock_logger):
+    async def test_health_transition_logged(
+        self, adapter, mock_http_client, mock_logger
+    ):
         """Test that health transitions are logged."""
         # First error: HEALTHY -> DEGRADED
         mock_http_client.get.side_effect = Exception("Error")
@@ -435,7 +439,8 @@ class TestChemblAdapterHealthTransitions:
 
         # Find the health transition log
         info_calls = [
-            call for call in mock_logger.info.call_args_list
+            call
+            for call in mock_logger.info.call_args_list
             if call.args and call.args[0] == "chembl_health_transition"
         ]
         assert len(info_calls) == 1
@@ -444,9 +449,7 @@ class TestChemblAdapterHealthTransitions:
         assert kwargs["current_status"] == "DEGRADED"
 
     @pytest.mark.asyncio
-    async def test_consecutive_errors_reset_on_success(
-        self, adapter, mock_http_client
-    ):
+    async def test_consecutive_errors_reset_on_success(self, adapter, mock_http_client):
         """Test that consecutive errors reset after successful fetch."""
         # First: simulate error
         mock_http_client.get.side_effect = Exception("Error")

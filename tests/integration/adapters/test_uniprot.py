@@ -48,7 +48,9 @@ class TestUniProtAdapterIntegration:
         assert uniprot_adapter.provider_name == "uniprot"
 
     @pytest.mark.vcr
-    async def test_health_check(self, uniprot_http_client: Any, mock_logger: MagicMock) -> None:
+    async def test_health_check(
+        self, uniprot_http_client: Any, mock_logger: MagicMock
+    ) -> None:
         """Test UniProt health check probe.
 
         This test requires a VCR cassette.
@@ -58,7 +60,9 @@ class TestUniProtAdapterIntegration:
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         async with uniprot_http_client:
-            adapter = UniProtAdapter(http_client=uniprot_http_client, logger=mock_logger)
+            adapter = UniProtAdapter(
+                http_client=uniprot_http_client, logger=mock_logger
+            )
             status = await adapter.health_check()
 
             # Should return a valid health status
@@ -69,7 +73,9 @@ class TestUniProtAdapterIntegration:
             ]
 
     @pytest.mark.vcr
-    async def test_fetch_proteins(self, uniprot_http_client: Any, mock_logger: MagicMock) -> None:
+    async def test_fetch_proteins(
+        self, uniprot_http_client: Any, mock_logger: MagicMock
+    ) -> None:
         """Test fetching proteins from UniProt.
 
         This test requires a VCR cassette.
@@ -78,7 +84,9 @@ class TestUniProtAdapterIntegration:
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         async with uniprot_http_client:
-            adapter = UniProtAdapter(http_client=uniprot_http_client, logger=mock_logger)
+            adapter = UniProtAdapter(
+                http_client=uniprot_http_client, logger=mock_logger
+            )
 
             records = []
             async for record in adapter.fetch("protein", query="gene:MYC", limit=2):

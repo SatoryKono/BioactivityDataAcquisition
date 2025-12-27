@@ -156,9 +156,7 @@ class PipelineExecutor:
             async for raw_record in self._extract(limit, query):
                 if self._shutdown_signal.is_requested:
                     # Graceful shutdown: save where we stopped
-                    await self._checkpoint_manager.save_checkpoint(
-                        self.records_fetched
-                    )
+                    await self._checkpoint_manager.save_checkpoint(self.records_fetched)
                     raise PipelineShutdownError("Shutdown during extraction")
 
                 batch.append(raw_record)
@@ -182,9 +180,7 @@ class PipelineExecutor:
                         )
 
                 if self.records_fetched % self.checkpoint_interval == 0:
-                    await self._checkpoint_manager.save_checkpoint(
-                        self.records_fetched
-                    )
+                    await self._checkpoint_manager.save_checkpoint(self.records_fetched)
 
             if batch:
                 await self._process_and_update_counts(batch)
@@ -208,9 +204,7 @@ class PipelineExecutor:
         except PipelineShutdownError:
             # Re-raise explicit shutdown signal
             try:
-                await self._checkpoint_manager.save_checkpoint(
-                    self.records_fetched
-                )
+                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
             except Exception:
                 # Ignore errors during emergency checkpoint save
                 pass
@@ -336,7 +330,9 @@ class PipelineExecutor:
                 attributes={
                     "bioetl.batch_id": str(batch_id),
                     "bioetl.record_count": len(batch),
-                    "bioetl.run_type": self._run_type.value if self._run_type else "unknown",
+                    "bioetl.run_type": self._run_type.value
+                    if self._run_type
+                    else "unknown",
                     "bioetl.entity_type": self._entity_type,
                 },
             )

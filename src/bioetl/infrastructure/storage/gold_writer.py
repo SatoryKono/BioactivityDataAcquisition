@@ -230,9 +230,7 @@ class GoldWriter:
         )
         await self._audit.log_write(audit_entry)
 
-    async def _run_in_executor(
-        self, func: Callable[..., T], *args: Any
-    ) -> T:
+    async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
@@ -329,7 +327,10 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols: write_deltalake(
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    mode=mode,
+                    partition_by=partition_cols: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
@@ -404,7 +405,10 @@ class GoldWriter:
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: write_deltalake(
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()
@@ -545,9 +549,7 @@ class GoldWriter:
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         # Delta Lake (Gold) -> Arrow -> Pydict
-        dt = await self._run_in_executor(
-            lambda: DeltaTable(table_path)
-        )
+        dt = await self._run_in_executor(lambda: DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
         if current_only and "is_current" in arrow_table.column_names:
             import pyarrow.compute as pc
@@ -573,9 +575,7 @@ class GoldWriter:
 
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = await self._run_in_executor(
-            lambda: DeltaTable(table_path)
-        )
+        dt = await self._run_in_executor(lambda: DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
 
         if business_key_values:

@@ -25,11 +25,20 @@ SECRET_PATTERNS = [
     (r"['\"]?api[_-]?key['\"]?\s*[:=]\s*['\"][^'\"]{10,}['\"]", "API key"),
     (r"['\"]?apikey['\"]?\s*[:=]\s*['\"][^'\"]{10,}['\"]", "API key"),
     # Authorization headers with actual tokens
-    (r"Authorization['\"]?\s*[:=]\s*['\"]Bearer\s+[A-Za-z0-9\-_.]{20,}['\"]", "Bearer token"),
-    (r"Authorization['\"]?\s*[:=]\s*['\"]Basic\s+[A-Za-z0-9+/=]{20,}['\"]", "Basic auth"),
+    (
+        r"Authorization['\"]?\s*[:=]\s*['\"]Bearer\s+[A-Za-z0-9\-_.]{20,}['\"]",
+        "Bearer token",
+    ),
+    (
+        r"Authorization['\"]?\s*[:=]\s*['\"]Basic\s+[A-Za-z0-9+/=]{20,}['\"]",
+        "Basic auth",
+    ),
     # AWS credentials (in proper context, not bare pattern which matches protein sequences)
     (r"aws_access_key_id\s*[:=]\s*['\"]AKIA[0-9A-Z]{16}['\"]", "AWS Access Key"),
-    (r"['\"]?aws[_-]?secret[_-]?access[_-]?key['\"]?\s*[:=]\s*['\"][^'\"]{20,}['\"]", "AWS secret"),
+    (
+        r"['\"]?aws[_-]?secret[_-]?access[_-]?key['\"]?\s*[:=]\s*['\"][^'\"]{20,}['\"]",
+        "AWS secret",
+    ),
     # Generic secrets
     (r"['\"]?password['\"]?\s*[:=]\s*['\"][^'\"]{8,}['\"]", "Password"),
     (r"['\"]?secret[_-]?key['\"]?\s*[:=]\s*['\"][^'\"]{10,}['\"]", "Secret key"),
@@ -76,7 +85,7 @@ class TestVCRCassetteSanitization:
         for cassette in cassette_files:
             content = cassette.read_text(encoding="utf-8")
             # Look for headers with actual values (not empty or placeholder)
-            pattern = rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{20,}['\"]?"
+            pattern = rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{(20,)}['\"]?"
             if re.search(pattern, content, re.IGNORECASE):
                 violations.append(f"{cassette.name}: Contains {header_name} header")
 
@@ -91,9 +100,7 @@ class TestVCRCassetteSanitization:
             if re.search(r"Bearer\s+[A-Za-z0-9\-_.]{20,}", content):
                 violations.append(f"{cassette.name}: Contains Bearer token")
 
-        assert not violations, "Cassettes with Bearer tokens:\n" + "\n".join(
-            violations
-        )
+        assert not violations, "Cassettes with Bearer tokens:\n" + "\n".join(violations)
 
     def test_no_aws_credentials(self, cassette_files: list[Path]) -> None:
         """Verify no AWS credentials in cassettes.
@@ -121,7 +128,9 @@ class TestVCRCassetteSanitization:
             if re.search(aws_secret_pattern, content, re.IGNORECASE):
                 violations.append(f"{cassette.name}: Contains AWS Secret")
 
-        assert not violations, "Cassettes with AWS credentials:\n" + "\n".join(violations)
+        assert not violations, "Cassettes with AWS credentials:\n" + "\n".join(
+            violations
+        )
 
 
 class TestNoHardcodedSecrets:
@@ -204,7 +213,14 @@ class TestPrivateKeyExposure:
     @pytest.fixture
     def all_files(self) -> list[Path]:
         """Get all files in project (excluding .git and venv)."""
-        excluded = {".git", ".venv", "venv", "__pycache__", ".mypy_cache", ".pytest_cache"}
+        excluded = {
+            ".git",
+            ".venv",
+            "venv",
+            "__pycache__",
+            ".mypy_cache",
+            ".pytest_cache",
+        }
         files = []
         for item in PROJECT_ROOT.rglob("*"):
             if item.is_file() and not any(ex in item.parts for ex in excluded):
@@ -224,7 +240,14 @@ class TestPrivateKeyExposure:
                 continue
 
             # Check content for text files
-            if file_path.suffix.lower() in {".py", ".txt", ".yaml", ".yml", ".json", ".md"}:
+            if file_path.suffix.lower() in {
+                ".py",
+                ".txt",
+                ".yaml",
+                ".yml",
+                ".json",
+                ".md",
+            }:
                 try:
                     content = file_path.read_text(encoding="utf-8")
                     if re.search(key_pattern, content):
@@ -242,12 +265,8 @@ class TestPIIHandling:
     def test_silver_layer_uses_hashing(self) -> None:
         """Verify Silver layer transformers use hashing for PII fields."""
         # Check that PII-related code uses sha256
-        infrastructure_files = list(
-            (SRC_DIR / "infrastructure").rglob("*.py")
-        )
-        application_files = list(
-            (SRC_DIR / "application").rglob("*.py")
-        )
+        infrastructure_files = list((SRC_DIR / "infrastructure").rglob("*.py"))
+        application_files = list((SRC_DIR / "application").rglob("*.py"))
 
         all_files = infrastructure_files + application_files
         pii_patterns = [
@@ -266,7 +285,9 @@ class TestPIIHandling:
                     # Check if sha256 or hashing is mentioned nearby
                     if not re.search(r"sha256|hash|anonymize", content, re.IGNORECASE):
                         rel_path = py_file.relative_to(PROJECT_ROOT)
-                        files_with_pii.append(f"{rel_path}: PII field '{pattern}' without hashing")
+                        files_with_pii.append(
+                            f"{rel_path}: PII field '{pattern}' without hashing"
+                        )
 
         # This is informational - PII fields without explicit hashing may be OK
         # if they're excluded from Silver layer
@@ -357,7 +378,9 @@ class TestInputValidation:
                 # Check if it's in a context that might be dangerous
                 # (loading from network, user input, etc.)
                 rel_path = py_file.relative_to(PROJECT_ROOT)
-                violations.append(f"{rel_path}: Uses pickle (review for untrusted input)")
+                violations.append(
+                    f"{rel_path}: Uses pickle (review for untrusted input)"
+                )
 
         # Informational - pickle may be OK for internal serialization
         if violations:
@@ -373,9 +396,9 @@ class TestPathTraversal:
         # Looking for patterns where user input might be joined to paths
         # without proper sanitization
         dangerous_patterns = [
-            r'os\.path\.join\s*\([^)]*request\.',
-            r'Path\s*\([^)]*request\.',
-            r'open\s*\([^)]*\+',  # String concatenation in open()
+            r"os\.path\.join\s*\([^)]*request\.",
+            r"Path\s*\([^)]*request\.",
+            r"open\s*\([^)]*\+",  # String concatenation in open()
         ]
 
         for py_file in SRC_DIR.rglob("*.py"):
@@ -419,7 +442,7 @@ class TestSecurityHeaders:
             "X-Auth-Token",
         ]
 
-        log_pattern = r'(?:logger?\.(?:info|debug|warning|error)|print)\s*\('
+        log_pattern = r"(?:logger?\.(?:info|debug|warning|error)|print)\s*\("
 
         for py_file in SRC_DIR.rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
@@ -427,8 +450,8 @@ class TestSecurityHeaders:
                 for header in sensitive_headers:
                     # Check if header name appears near logging statements
                     combined_pattern = (
-                        rf'(?:logger?\.(?:info|debug|warning|error)|print)\s*\([^)]*'
-                        rf'{header}[^)]*(?:request\.headers|response\.headers)'
+                        rf"(?:logger?\.(?:info|debug|warning|error)|print)\s*\([^)]*"
+                        rf"{header}[^)]*(?:request\.headers|response\.headers)"
                     )
                     if re.search(combined_pattern, content, re.IGNORECASE):
                         rel_path = py_file.relative_to(PROJECT_ROOT)
@@ -455,13 +478,17 @@ class TestCryptographyUsage:
                 # Check for hashlib usage of weak algorithms
                 # Skip comments and multi-line strings for detection
                 # Using a more robust regex that handles one level of nested parentheses
-                matches = re.finditer(rf'hashlib\.{weak_hash}\s*\((?:[^()]|\([^()]*\))*\)', content)
+                matches = re.finditer(
+                    rf"hashlib\.{weak_hash}\s*\((?:[^()]|\([^()]*\))*\)", content
+                )
                 for match in matches:
                     call = match.group(0)
                     # Allow if usedforsecurity=False is explicitly set
                     if "usedforsecurity=False" not in call:
                         rel_path = py_file.relative_to(PROJECT_ROOT)
-                        violations.append(f"{rel_path}: Uses weak hash {weak_hash} without usedforsecurity=False")
+                        violations.append(
+                            f"{rel_path}: Uses weak hash {weak_hash} without usedforsecurity=False"
+                        )
 
         assert not violations, "Weak hash algorithms:\n" + "\n".join(violations)
 
@@ -469,13 +496,15 @@ class TestCryptographyUsage:
         """Verify security-sensitive randomness uses secrets module."""
         # For tokens, keys, etc. - random module is not cryptographically secure
         violations = []
-        random_pattern = r'random\.(?:choice|randint|random|sample)\s*\('
+        random_pattern = r"random\.(?:choice|randint|random|sample)\s*\("
 
         for py_file in SRC_DIR.rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
             if re.search(random_pattern, content):
                 # Check if it's for security-sensitive purposes
-                if re.search(r'(?:token|key|secret|password|salt)', content, re.IGNORECASE):
+                if re.search(
+                    r"(?:token|key|secret|password|salt)", content, re.IGNORECASE
+                ):
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: random module for security purpose")
 

@@ -29,7 +29,9 @@ def vcr_cassette_dir() -> Path:
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="pubchempy canonical_smiles deprecation warning - needs client update")
+@pytest.mark.skip(
+    reason="pubchempy canonical_smiles deprecation warning - needs client update"
+)
 async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
     """E2E: PubChem Compound pipeline from fetch to Silver.
 
@@ -66,7 +68,9 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="pubchempy canonical_smiles deprecation warning - needs client update")
+@pytest.mark.skip(
+    reason="pubchempy canonical_smiles deprecation warning - needs client update"
+)
 async def test_pubchem_compound_structural_fields(e2e_data_dir: Path):
     """E2E: Verify structural fields are extracted for PubChem compounds.
 
@@ -102,7 +106,9 @@ async def test_pubchem_compound_structural_fields(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="pubchempy canonical_smiles deprecation warning - needs client update")
+@pytest.mark.skip(
+    reason="pubchempy canonical_smiles deprecation warning - needs client update"
+)
 async def test_pubchem_compound_query_filter(e2e_data_dir: Path):
     """E2E: Verify query parameter filters compounds correctly.
 

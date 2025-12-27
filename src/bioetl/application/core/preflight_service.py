@@ -258,9 +258,7 @@ class PreflightService:
                 "Medallion config validation found issues",
                 extra={
                     "error_count": len(errors),
-                    "errors": [
-                        {"field": e.field, "rule": e.rule} for e in errors
-                    ],
+                    "errors": [{"field": e.field, "rule": e.rule} for e in errors],
                     "strict_mode": runtime.strict_validation,
                 },
             )
@@ -354,7 +352,9 @@ class PreflightService:
             write_mode_policy.validate(Layer.SILVER, WriteMode(silver_mode))
         except (PolicyViolationError, ValueError):
             allowed = WriteModePolicy.ALLOWED_MODES[Layer.SILVER]
-            allowed_names = ", ".join(m.value for m in sorted(allowed, key=lambda x: x.value))
+            allowed_names = ", ".join(
+                m.value for m in sorted(allowed, key=lambda x: x.value)
+            )
             errors.append(
                 ConfigValidationError(
                     field="write_mode",
@@ -372,7 +372,9 @@ class PreflightService:
             write_mode_policy.validate(Layer.GOLD, WriteMode(effective_gold_mode))
         except (PolicyViolationError, ValueError):
             allowed = WriteModePolicy.ALLOWED_MODES[Layer.GOLD]
-            allowed_names = ", ".join(m.value for m in sorted(allowed, key=lambda x: x.value))
+            allowed_names = ", ".join(
+                m.value for m in sorted(allowed, key=lambda x: x.value)
+            )
             errors.append(
                 ConfigValidationError(
                     field="gold_write_mode",
@@ -487,8 +489,7 @@ class PreflightService:
         # Block startup if validation failed and strict mode is enabled
         if report.should_block_startup and runtime.strict_validation:
             error_messages = [
-                f"{e.field}: {e.actual} (expected: {e.expected})"
-                for e in config_errors
+                f"{e.field}: {e.actual} (expected: {e.expected})" for e in config_errors
             ]
             raise ValueError(
                 f"Preflight validation failed (strict mode): {', '.join(error_messages)}"

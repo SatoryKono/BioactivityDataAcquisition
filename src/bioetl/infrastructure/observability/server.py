@@ -18,9 +18,7 @@ _SERVER_LOCK = Lock()
 class MetricsServerError(Exception):
     """Raised when metrics server fails to start with fail_fast=True."""
 
-    def __init__(
-        self, port: int, reason: str, original_error: Exception | None = None
-    ):
+    def __init__(self, port: int, reason: str, original_error: Exception | None = None):
         """Initialize MetricsServerError.
 
         Args:
@@ -63,9 +61,7 @@ def _handle_os_error(port: int, e: OSError, retry_count: int, fail_fast: bool) -
         extra={"port": port, "errno": e.errno, "attempts": retry_count},
     )
     if fail_fast:
-        raise MetricsServerError(
-            port=port, reason="os_error", original_error=e
-        ) from e
+        raise MetricsServerError(port=port, reason="os_error", original_error=e) from e
     return False
 
 

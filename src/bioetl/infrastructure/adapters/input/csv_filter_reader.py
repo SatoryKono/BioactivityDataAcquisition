@@ -40,9 +40,7 @@ class CsvFilterReader:
         except Exception as e:
             raise ValueError(f"Failed to read CSV file: {e}") from e
 
-    def _extract_column_ids(
-        self, df: pl.DataFrame, column_name: str
-    ) -> list[str]:
+    def _extract_column_ids(self, df: pl.DataFrame, column_name: str) -> list[str]:
         """Extract and clean IDs from specified column."""
         if column_name not in df.columns:
             available = ", ".join(df.columns)

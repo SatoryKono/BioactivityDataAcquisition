@@ -271,7 +271,6 @@ class TestPubChemCompoundPipelineTransform:
         assert silver_record is None
 
 
-
 @pytest.mark.integration
 class TestPubChemCompoundPipelineCreate:
     """Тесты создания PubChem пайплайна."""
