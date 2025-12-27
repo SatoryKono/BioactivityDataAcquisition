@@ -433,6 +433,10 @@ class DeltaWriter:
             records: List of records written
             mode: Write mode used
         """
+        # Skip audit if no audit port configured
+        if self._audit is None:
+            return
+
         from datetime import datetime
         from uuid import UUID
 

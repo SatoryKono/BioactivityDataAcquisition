@@ -5,7 +5,7 @@ Transforms Bronze records to Silver format (Assay entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -108,7 +108,7 @@ class AssayTransformer(BaseChemblTransformer):
             "relationship_description": record.get("relationship_description"),
             "assay_pref_name": record.get("assay_pref_name"),
             "score": safe_float(record.get("score")),
-            **_extract_variant(record.get("variant_sequence")),
+            **_extract_variant(cast("dict[str, Any] | None", record.get("variant_sequence"))),
             "variant_sequence_json": self.serialize_json(
                 record.get("variant_sequence")
             ),

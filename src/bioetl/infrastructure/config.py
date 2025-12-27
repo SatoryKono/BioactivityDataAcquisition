@@ -140,13 +140,22 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
     return source_fields  # type: ignore[return-value]
 
 
-def _extract_write_modes(yaml_config: PipelineYamlConfig) -> tuple[str, str]:
+def _extract_write_modes(
+    yaml_config: PipelineYamlConfig,
+) -> tuple[Literal["merge", "append", "overwrite"], Literal["append", "overwrite", "scd2"]]:
     """Extract write modes from sink config."""
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
 
-    write_mode = silver_config.mode if silver_config and silver_config.mode else "merge"
-    gold_write_mode = gold_config.mode if gold_config and gold_config.mode else "append"
+    write_mode: Literal["merge", "append", "overwrite"] = "merge"
+    if silver_config and silver_config.mode:
+        # Cast the mode string to the literal type
+        write_mode = silver_config.mode  # type: ignore[assignment]
+
+    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
+    if gold_config and gold_config.mode:
+        # Cast the mode string to the literal type
+        gold_write_mode = gold_config.mode  # type: ignore[assignment]
 
     return write_mode, gold_write_mode
 
@@ -211,7 +220,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
         entity_type=yaml_config.entity_type,
-        primary_keys=yaml_config.primary_keys,
+        primary_keys=tuple(yaml_config.primary_keys),
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
         write_mode=write_mode,
@@ -219,7 +228,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         gold_filters=gold_filters,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
-        fields=source_fields,
+        fields=tuple(source_fields),
         dq=DomainDQConfig(
             soft_fail_threshold=yaml_config.dq_rules.soft_fail_threshold,
             hard_fail_threshold=yaml_config.dq_rules.hard_fail_threshold,
