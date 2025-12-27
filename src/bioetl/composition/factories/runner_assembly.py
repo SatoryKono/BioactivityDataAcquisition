@@ -244,6 +244,7 @@ def assemble_runner(
         shutdown_signal=pipeline.shutdown_signal,
         checkpoint_manager=checkpoint_manager,
         lifecycle_service=lifecycle_service,
+        tracer=observability.tracer,
     )
 
     # Assemble Runner with injected RunnerServices bundle

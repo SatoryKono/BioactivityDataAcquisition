@@ -17,6 +17,7 @@ from bioetl.application.core.preflight_service import PreflightService
 
 # Re-export RunnerServices from application layer for backwards compatibility
 from bioetl.application.core.runner_services import RunnerServices
+from bioetl.application.observability.observer import PipelineObserver
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, TracingPort
 
 
 def build_runner_services(
@@ -39,6 +40,7 @@ def build_runner_services(
     shutdown_signal: ShutdownSignal,
     checkpoint_manager: CheckpointManager,
     lifecycle_service: MedallionLifecycleService,
+    tracer: TracingPort | None = None,
 ) -> RunnerServices:
     """Build RunnerServices bundle.
 
@@ -54,6 +56,7 @@ def build_runner_services(
         shutdown_signal: Shutdown signal for graceful termination.
         checkpoint_manager: Checkpoint manager.
         lifecycle_service: Medallion lifecycle service.
+        tracer: Optional tracing port for distributed tracing.
 
     Returns:
         RunnerServices bundle with all required services.
@@ -95,11 +98,21 @@ def build_runner_services(
         lifecycle_service=lifecycle_service,
     )
 
+    observer = PipelineObserver(
+        pipeline_name=config.pipeline_name,
+        run_id=context.run_id,
+        run_type=runtime.run_type,
+        metrics=services.metrics,
+        logger=logger,
+        tracer=tracer,
+    )
+
     return RunnerServices(
         lock_manager=lock_manager,
         preflight=preflight_service,
         postrun=postrun_service,
         lifecycle_orch=lifecycle_orchestrator,
+        observer=observer,
     )
 
 
