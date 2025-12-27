@@ -118,16 +118,19 @@ def create_local_storage_context(
             metrics=NoOpMetrics(),
             save_json=save_json,
             json_path=str(storage_paths["json"]) if save_json else None,
+            require_lock=False,  # Disabled for integration tests
         ),
         silver_writer=DeltaWriter(
             base_path=str(storage_paths["silver"]),
             logger=logger,
             csv_exporter=None,
+            require_lock=False,  # Disabled for integration tests
         ),
         gold_writer=GoldWriter(
             base_path=str(storage_paths["gold"]),
             logger=logger,
             csv_exporter=None,
+            require_lock=False,  # Disabled for integration tests
         ),
     )
 
