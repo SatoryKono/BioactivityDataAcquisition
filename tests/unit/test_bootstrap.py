@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.context import PipelineRunContext, VacuumConfig
 from bioetl.domain.types import RunType
 
 
@@ -580,13 +580,12 @@ class TestBootstrapVacuumConfig:
         mock_registry.get.return_value.factory = mock_factory
         mock_get_registry.return_value = mock_registry
 
-        # Context without CLI vacuum options (None)
+        # Context without CLI vacuum options (disabled VacuumConfig)
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             run_type=RunType.INCREMENTAL,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
+            # vacuum defaults to VacuumConfig(enabled=False)
         )
 
         bootstrap_pipeline(ctx)
@@ -656,13 +655,13 @@ class TestBootstrapVacuumConfig:
         mock_registry.get.return_value.factory = mock_factory
         mock_get_registry.return_value = mock_registry
 
-        # Context with CLI overrides (explicit False and 30 days)
+        # Context with CLI overrides (explicit enabled=True and 30 days)
+        # Note: enabled=True means CLI is overriding, so its retention_days is used
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             run_type=RunType.INCREMENTAL,
-            vacuum_after_run=False,  # CLI override
-            vacuum_retention_days=30,  # CLI override
+            vacuum=VacuumConfig(enabled=True, retention_days=30),  # CLI override
         )
 
         bootstrap_pipeline(ctx)
@@ -670,5 +669,5 @@ class TestBootstrapVacuumConfig:
         # Verify runtime config was passed with CLI values (overriding YAML)
         call_args = mock_factory.create_runner.call_args
         runtime = call_args.kwargs.get("runtime") or call_args[1].get("runtime")
-        assert runtime.vacuum_after_run is False
+        assert runtime.vacuum_after_run is True  # CLI enabled=True
         assert runtime.vacuum_retention_days == 30
