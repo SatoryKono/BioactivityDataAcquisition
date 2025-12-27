@@ -282,6 +282,7 @@ class TestSchemaEvolutionEvolveMode:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
+            require_lock=False,
         )
 
         # First write
@@ -422,6 +423,7 @@ class TestSchemaEvolutionEdgeCases:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
+            require_lock=False,
         )
 
         # First write
