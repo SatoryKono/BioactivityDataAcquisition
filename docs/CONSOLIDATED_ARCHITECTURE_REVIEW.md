@@ -72,9 +72,11 @@
 
 ---
 
-## 4. План Рефакторинга (приоритизированный)
+## 4. План Рефакторинга (приоритизированный) — ✅ РЕАЛИЗОВАНО
 
-### 4.1. 🔴 КРИТИЧНО — P1+P2: Gold Writer ingestion_ts и run_id
+> **Статус**: Все задачи P1-P4 реализованы в коммите `ab40d36`
+
+### 4.1. ✅ ~~🔴 КРИТИЧНО~~ — P1+P2: Gold Writer ingestion_ts и run_id
 
 **Проблема**: `BatchWriter.write_gold()` не передаёт `ingestion_ts` в `StoragePort.write_gold()`.
 `GoldWriter._log_gold_audit()` генерирует новый `run_id` и fallback timestamp.
@@ -106,7 +108,7 @@ gold_writer.py:254       — run_id = RunID(uuid4())
 
 ---
 
-### 4.2. 🟠 ВЫСОКИЙ — P3: Tri-state VACUUM override
+### 4.2. ✅ ~~🟠 ВЫСОКИЙ~~ — P3: Tri-state VACUUM override
 
 **Проблема**: CLI `--vacuum.enabled=false` не перекрывает YAML `auto_vacuum: true`.
 
@@ -144,7 +146,7 @@ vacuum_after_run = (
 
 ---
 
-### 4.3. 🟡 СРЕДНИЙ — P4: Benchmark CI Integration
+### 4.3. ✅ ~~🟡 СРЕДНИЙ~~ — P4: Benchmark CI Integration
 
 **Проблема**: `benchmarks/` существует, но нет `make bench` и CI интеграции.
 
