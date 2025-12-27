@@ -153,6 +153,7 @@ class TestPubChemCompoundPipelineTransform:
         assert silver_record["iupac_name"] == "2-acetyloxybenzoic acid"
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
+        assert "_run_id" in silver_record
 
     async def test_transform_bronze_to_silver_partial_record(
         self,
@@ -199,6 +200,7 @@ class TestPubChemCompoundPipelineTransform:
         assert silver_record["canonical_smiles"] == "CCCC"
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
+        assert "_run_id" in silver_record
 
     async def test_transform_bronze_to_silver_no_structural_id_returns_none(
         self,

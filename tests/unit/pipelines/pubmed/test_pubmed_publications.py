@@ -161,6 +161,7 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     # Metadata
     assert "_ingestion_ts" in silver_record
     assert isinstance(silver_record["_ingestion_ts"], str)
+    assert "_run_id" in silver_record
 
 
 @pytest.mark.asyncio
