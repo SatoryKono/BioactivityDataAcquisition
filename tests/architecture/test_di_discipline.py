@@ -3,7 +3,7 @@
 REQ-ARCH-DI-010: Application layer MUST NOT create infrastructure services.
 
 Application services (LockManager, PreflightService, PostrunService,
-LifecycleOrchestrator) should be created in the composition layer
+LifecycleOrchestrator, PipelineObserver) should be created in the composition layer
 and injected via constructors.
 
 See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
@@ -11,7 +11,6 @@ See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
 
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 
 import pytest
@@ -26,6 +25,7 @@ FORBIDDEN_IN_APPLICATION = [
     "PreflightService(",
     "PostrunService(",
     "LifecycleOrchestrator(",
+    "PipelineObserver(",
 ]
 
 
@@ -43,16 +43,26 @@ class TestDIDiscipline:
     def application_python_files(self) -> list[Path]:
         """Get all Python files in application directory.
 
-        Excludes composition layer files since they are allowed to create services.
+        Excludes:
+        - Composition layer files (they are allowed to create services)
+        - Service definition files (they contain class definitions, not instantiations)
         """
         base = _get_base_path(APPLICATION_DIR)
         if not base.exists():
             pytest.skip("Application layer not found")
 
+        # Files that define services (class definitions, not instantiations)
+        excluded_files = {
+            "observer.py",  # PipelineObserver class definition
+        }
+
         files = []
         for py_file in base.rglob("*.py"):
             # Skip composition layer
             if "composition" in str(py_file):
+                continue
+            # Skip service definition files
+            if py_file.name in excluded_files:
                 continue
             files.append(py_file)
         return files
@@ -63,8 +73,8 @@ class TestDIDiscipline:
         """Application layer must not create infrastructure services.
 
         REQ-ARCH-DI-010: Services like LockManager, PreflightService,
-        PostrunService, and LifecycleOrchestrator must be injected,
-        not created directly in application layer.
+        PostrunService, LifecycleOrchestrator, and PipelineObserver must be
+        injected, not created directly in application layer.
 
         These services should be created in composition/bootstrap.py or
         composition/factories/ and passed via constructor injection.

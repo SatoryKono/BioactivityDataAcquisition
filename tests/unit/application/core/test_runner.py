@@ -16,6 +16,7 @@ from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.runner_services import RunnerServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -86,11 +87,96 @@ def create_mock_services():
     return services
 
 
+def create_mock_observer(
+    metrics: MagicMock | None = None,
+    logger: MagicMock | None = None,
+    suppress_shutdown: bool = True,
+) -> MagicMock:
+    """Create a mock PipelineObserver for DI injection.
+
+    This mock observer properly simulates the real observer's behavior:
+    - Suppresses PipelineShutdownError exceptions (like the real observer)
+    - Logs and records metrics on exit (if metrics/logger provided)
+
+    Args:
+        metrics: Optional metrics mock to record metrics on exit.
+        logger: Optional logger mock to log on exit.
+        suppress_shutdown: Whether to suppress PipelineShutdownError.
+
+    Returns:
+        MagicMock configured as a PipelineObserver with context manager support.
+    """
+
+    def exit_handler(exc_type, exc_val, exc_tb):
+        """Mock __exit__ that simulates real observer behavior.
+
+        Records metrics and suppresses PipelineShutdownError.
+        """
+        status = "success"
+        suppress = False
+
+        if exc_val:
+            if isinstance(exc_val, PipelineShutdownError):
+                status = "shutdown"
+                suppress = suppress_shutdown
+            else:
+                status = "failed"
+
+        # Record metrics like the real observer
+        if metrics:
+            metrics.observe_histogram(
+                "bioetl_pipeline_duration_seconds",
+                0.1,  # Mock duration
+                labels={
+                    "pipeline": "test_pipeline",
+                    "run_type": "incremental",
+                    "status": status,
+                },
+            )
+            metrics.increment_counter(
+                "bioetl_pipeline_runs_total",
+                1,
+                labels={
+                    "pipeline": "test_pipeline",
+                    "run_type": "incremental",
+                    "status": status,
+                },
+            )
+
+        # Log like the real observer
+        if logger:
+            if status == "failed":
+                logger.error(
+                    "pipeline_failed",
+                    status=status,
+                    error=str(exc_val),
+                    error_type=type(exc_val).__name__,
+                )
+            elif status == "shutdown":
+                logger.warning("pipeline_shutdown", status=status)
+            else:
+                logger.info("pipeline_finished", status=status)
+
+        return suppress
+
+    observer = MagicMock(spec=PipelineObserver)
+    observer.__enter__ = MagicMock(return_value=observer)
+    observer.__exit__ = MagicMock(side_effect=exit_handler)
+    observer.emit_event = MagicMock()
+    observer.emit_phase_started = MagicMock(return_value=0.0)
+    observer.emit_phase_completed = MagicMock()
+    observer.emit_health_check_result = MagicMock()
+    observer.emit_dq_anomaly = MagicMock()
+    observer.emit_vacuum_result = MagicMock()
+    return observer
+
+
 def create_mock_runner_services(
     lock_manager=None,
     preflight_service=None,
     postrun_service=None,
     lifecycle_orchestrator=None,
+    observer=None,
 ) -> RunnerServices:
     """Create mock RunnerServices for DI injection.
 
@@ -99,6 +185,7 @@ def create_mock_runner_services(
         preflight_service: Optional custom preflight service mock.
         postrun_service: Optional custom postrun service mock.
         lifecycle_orchestrator: Optional custom lifecycle orchestrator mock.
+        observer: Optional custom observer mock.
 
     Returns:
         RunnerServices bundle with mock services.
@@ -143,11 +230,15 @@ def create_mock_runner_services(
             )
         )
 
+    if observer is None:
+        observer = create_mock_observer()
+
     return RunnerServices(
         lock_manager=lock_manager,
         preflight=preflight_service,
         postrun=postrun_service,
         lifecycle_orch=lifecycle_orchestrator,
+        observer=observer,
     )
 
 
@@ -265,11 +356,24 @@ def mock_lifecycle_service():
 
 
 @pytest.fixture
+def mock_observer(mock_services, mock_logger):
+    """Create a mock PipelineObserver (injected via DI).
+
+    Uses services.metrics and logger to properly simulate real observer behavior.
+    """
+    return create_mock_observer(
+        metrics=mock_services.metrics,
+        logger=mock_logger,
+    )
+
+
+@pytest.fixture
 def mock_runner_services(
     mock_lock_manager,
     mock_preflight_service,
     mock_postrun_service,
     mock_lifecycle_orchestrator,
+    mock_observer,
 ):
     """Create a mock RunnerServices bundle for PipelineRunner."""
     return RunnerServices(
@@ -277,6 +381,7 @@ def mock_runner_services(
         preflight=mock_preflight_service,
         postrun=mock_postrun_service,
         lifecycle_orch=mock_lifecycle_orchestrator,
+        observer=mock_observer,
     )
 
 
@@ -343,6 +448,7 @@ class TestPipelineRunnerInit:
         assert runner._preflight_service == mock_runner_services.preflight
         assert runner._postrun_service == mock_runner_services.postrun
         assert runner._lifecycle_orchestrator == mock_runner_services.lifecycle_orch
+        assert runner._observer == mock_runner_services.observer
 
     def test_services_are_injected_not_created(
         self,
@@ -374,6 +480,7 @@ class TestPipelineRunnerInit:
         assert runner._preflight_service is mock_runner_services.preflight
         assert runner._postrun_service is mock_runner_services.postrun
         assert runner._lifecycle_orchestrator is mock_runner_services.lifecycle_orch
+        assert runner._observer is mock_runner_services.observer
 
 
 @pytest.mark.unit
@@ -581,6 +688,7 @@ class TestPipelineRunnerClearViaLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=lifecycle_orchestrator,
+            observer=create_mock_observer(metrics=services.metrics, logger=mock_logger),
         )
 
         runner = PipelineRunner(
@@ -633,6 +741,7 @@ class TestPipelineRunnerClearViaLifecycle:
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
             lifecycle_orch=lifecycle_orchestrator,
+            observer=create_mock_observer(metrics=services.metrics, logger=mock_logger),
         )
 
         runner = PipelineRunner(
@@ -707,6 +816,7 @@ class TestPipelineRunnerCheckDataQuality:
             preflight=mock_preflight_service,
             postrun=postrun_service,
             lifecycle_orch=mock_lifecycle_orchestrator,
+            observer=create_mock_observer(metrics=services.metrics, logger=mock_logger),
         )
 
         runner = PipelineRunner(
@@ -763,6 +873,7 @@ class TestPipelineRunnerCheckDataQuality:
             preflight=mock_preflight_service,
             postrun=postrun_service,
             lifecycle_orch=mock_lifecycle_orchestrator,
+            observer=create_mock_observer(metrics=services.metrics, logger=mock_logger),
         )
 
         runner = PipelineRunner(
