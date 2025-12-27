@@ -23,9 +23,11 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
+from enum import Enum
 import json
 from typing import TYPE_CHECKING, Any, Literal
 
+import orjson
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import DeltaError, SchemaMismatchError
@@ -117,7 +119,8 @@ class DeltaWriter:
             if value is None:
                 return None
             if key in string_fields and isinstance(value, (dict, list)):
-                return json.dumps(value, sort_keys=True)
+                # orjson.dumps returns bytes, but PyArrow string columns expect str
+                return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
             return value
 
         filtered_records = [
