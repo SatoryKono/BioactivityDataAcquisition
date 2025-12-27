@@ -158,7 +158,12 @@ class PipelineConfig:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""
-        # Convert incoming lists to tuples for immutability (object.__setattr__ for frozen)
+        self._ensure_immutability()
+        self._convert_write_modes()
+        self._validate_config()
+
+    def _ensure_immutability(self) -> None:
+        """Convert incoming lists to tuples for immutability."""
         if isinstance(self.primary_keys, list):
             object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
         if isinstance(self.partition_cols, list):
@@ -166,7 +171,8 @@ class PipelineConfig:
         if isinstance(self.fields, list):
             object.__setattr__(self, "fields", tuple(self.fields))
 
-        # Convert string write modes to enums (backward compatibility)
+    def _convert_write_modes(self) -> None:
+        """Convert string write modes to enums (backward compatibility)."""
         if isinstance(self.write_mode, str):
             # Handle deprecated "overwrite" → DELETE with warning
             mode_str = self.write_mode
@@ -187,7 +193,8 @@ class PipelineConfig:
                 self, "gold_write_mode", GoldWriteMode.from_string(self.gold_write_mode)
             )
 
-        # Validate configuration
+    def _validate_config(self) -> None:
+        """Validate configuration values."""
         validations = [
             (not self.pipeline_name, "pipeline_name cannot be empty"),
             (not self.provider, "provider cannot be empty"),
