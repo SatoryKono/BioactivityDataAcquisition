@@ -168,15 +168,15 @@ class TestTransformerInjectionPath:
 
         Verify that:
         1. Factory has create_transformer() method (public API)
-        2. create_with_services() passes transformer_class to runner_assembly
-        3. runner_assembly creates transformer and injects it into pipeline
+        2. create_with_services() passes transformer_class to pipeline creation
+        3. pipeline_factory creates transformer and injects it into pipeline
         """
         factory_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "generic_factory.py"
+            / "pipeline_factory.py"
         )
         if not factory_file.exists():
-            pytest.skip("generic_factory.py not found")
+            pytest.skip("pipeline_factory.py not found")
 
         content = factory_file.read_text(encoding="utf-8")
 
@@ -185,23 +185,17 @@ class TestTransformerInjectionPath:
             "GenericPipelineFactory must have create_transformer() method"
         )
 
-        # Check that create_with_services passes transformer_class to runner_assembly
+        # Check that create_with_services passes transformer_class
         assert "transformer_class=self.transformer_class" in content, (
             "GenericPipelineFactory.create_with_services must pass "
             "transformer_class to create_pipeline_with_services()"
         )
 
-        # Verify runner_assembly handles actual transformer creation
-        runner_file = (
-            _get_base_path(Path("src/bioetl/composition/factories"))
-            / "runner_assembly.py"
+        # Verify pipeline_factory creates transformer and passes to pipeline
+        # Check that factory creates transformer and passes to pipeline
+        assert "transformer_class(" in content, (
+            "pipeline_factory must create transformer from transformer_class"
         )
-        if runner_file.exists():
-            runner_content = runner_file.read_text(encoding="utf-8")
-            # Check that runner_assembly creates transformer and passes to pipeline
-            assert "transformer_class(" in runner_content, (
-                "runner_assembly must create transformer from transformer_class"
-            )
-            assert "transformer=transformer" in runner_content, (
-                "runner_assembly must pass transformer to pipeline constructor"
-            )
+        assert "transformer=transformer" in content, (
+            "pipeline_factory must pass transformer to pipeline constructor"
+        )
