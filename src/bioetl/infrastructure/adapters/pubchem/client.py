@@ -112,7 +112,7 @@ class PubChemAdapter(BaseSyncAdapter):
             )
 
         # Pass arguments as keyword to avoid signature mismatch
-        async for record in strategy(query=query, limit=limit):
+        async for record in strategy(query=query, limit=limit):  # type: ignore[operator]
             yield record
 
     async def _fetch_compounds(

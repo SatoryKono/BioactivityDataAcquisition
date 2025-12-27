@@ -170,7 +170,12 @@ class PostrunService:
 
         Returns:
             DQResult with anomaly detection results.
+
+        Note:
+            Caller must ensure dq_monitor is not None before calling.
         """
+        # Caller ensures dq_monitor is not None (checked in run_dq_checks)
+        assert self._services.dq_monitor is not None
         start_time = time.monotonic()
         anomalies = self._services.dq_monitor.check_quality(batch_metrics)
         check_duration_ms = (time.monotonic() - start_time) * 1000
