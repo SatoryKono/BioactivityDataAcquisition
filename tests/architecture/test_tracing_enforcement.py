@@ -99,7 +99,6 @@ class TestTracingPortContract:
             src_path = Path("src/bioetl/domain/ports.py")
 
         # TracingPort should be a Protocol
-        import inspect
 
         # Get TracingPort members
         members = [m for m in dir(TracingPort) if not m.startswith("_")]
@@ -113,7 +112,6 @@ class TestTracingPortContract:
 
     def test_noop_tracing_is_valid_implementation(self):
         """NoOpTracing should implement TracingPort."""
-        from bioetl.domain.ports import TracingPort
         from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
         noop = NoOpTracing()
@@ -341,7 +339,7 @@ class TestTracingConfiguration:
 
         # Should have tracing-related settings or at least mention it
         # May be optional (via OTEL env vars)
-        has_config = any(
+        any(
             pattern in source
             for pattern in [
                 "tracing",

@@ -20,7 +20,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from pathlib import Path
 from types import TracebackType
-from typing import IO
+from typing import IO, Any
 
 
 class AtomicWriteError(Exception):
@@ -39,7 +39,7 @@ def atomic_write(
     suffix: str = ".tmp",
     prefix: str = ".",
     encoding: str | None = None,
-) -> Iterator[IO]:
+) -> Iterator[IO[Any]]:
     """Context manager for atomic file writes.
 
     Writes to a temporary file first, then atomically replaces the target.

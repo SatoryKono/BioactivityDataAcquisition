@@ -9,9 +9,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import pytest
 
-from bioetl.application.core.base import BasePipeline
 
 
 def test_base_pipeline_does_not_have_gold_methods(src_dir: Path) -> None:

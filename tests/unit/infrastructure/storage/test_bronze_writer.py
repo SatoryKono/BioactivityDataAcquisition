@@ -16,7 +16,6 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 
@@ -860,7 +859,7 @@ class TestBronzeWriterAtomicWrite:
         bronze_path = tmp_path / "bronze" / "v1" / "chembl" / "activity"
         if bronze_path.exists():
             zst_files = list(bronze_path.rglob("*.zst"))
-            meta_files = list(bronze_path.rglob("*.meta.json"))
+            list(bronze_path.rglob("*.meta.json"))
             assert len(zst_files) == 0, "Partial .zst file should not exist"
             # Metadata might exist if we mock only data write failure, but here we fail before data write success
 

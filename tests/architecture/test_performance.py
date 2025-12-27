@@ -53,7 +53,7 @@ def test_no_json_import_in_storage_layer():
                     violations.append(f"{BATCH_WRITER.name}:{node.lineno}: from json import ...")
 
     assert not violations, (
-        f"Standard 'json' library found in performance-critical modules:\n"
+        "Standard 'json' library found in performance-critical modules:\n"
         + "\n".join(f"  - {v}" for v in violations)
         + "\n\nUse 'orjson' for high-performance serialization (REQ-PERF-001)."
     )

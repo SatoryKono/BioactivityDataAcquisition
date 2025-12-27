@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 
 # Re-export GoldWriteMode for backward compatibility
 # Consumers importing from gold_writer will still work
-__all__ = ["GoldWriter", "GoldWriteMode"]
+__all__ = ["GoldWriteMode", "GoldWriter"]
 
 
 class GoldWriter:
@@ -85,9 +85,8 @@ class GoldWriter:
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-            self._tracing = NoOpTracing()
-        else:
-            self._tracing = tracing
+            tracing = NoOpTracing()
+        self._tracing: TracingPort = tracing
 
     async def write_gold(
         self,
@@ -261,7 +260,6 @@ class GoldWriter:
             Falls back to current time and generated UUID only if not provided
             (for backward compatibility with non-pipeline callers).
         """
-        from datetime import UTC
         from uuid import uuid4
 
         # Use provided values or fallback for backward compatibility
@@ -307,6 +305,8 @@ class GoldWriter:
                 "write_mode": mode.value,
             },
         )
+        # Safety assertion: this method is only called when self._audit is not None
+        assert self._audit is not None, "_log_gold_audit called without audit configured"
         await self._audit.log_write(audit_entry)
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:

@@ -265,7 +265,7 @@ def main() -> int:
             print(f"Skipping {path}: File already exists")
             continue
 
-        with open(path, "w") as f:
+        with path.open("w") as f:
             f.write(content)
         print(f"Created {path}")
 

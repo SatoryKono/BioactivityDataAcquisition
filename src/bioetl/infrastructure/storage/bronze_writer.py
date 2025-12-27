@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage._atomic import AtomicWriteGroup, atomic_write_bytes
+from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 
 
 class BronzeWriter:
@@ -89,9 +89,8 @@ class BronzeWriter:
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-            self._tracing = NoOpTracing()
-        else:
-            self._tracing = tracing
+            tracing = NoOpTracing()
+        self._tracing: TracingPort = tracing
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -342,7 +341,7 @@ class BronzeWriter:
 
             # Perform streaming write in executor
             # We need to capture records_iter in closure safely
-            def _write_task():
+            def _write_task() -> tuple[int, int]:
                 # Write data file
                 count, size = self._write_atomic_stream(records_iter, full_path)
                 # Write metadata file
