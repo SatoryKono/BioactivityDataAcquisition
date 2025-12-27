@@ -13,6 +13,7 @@ Implements DRY principle by extracting shared logic from entity transformers.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import time
 from abc import ABC, abstractmethod
@@ -287,13 +288,14 @@ class BaseTransformer(ABC):
         - ingestion_ts → _ingestion_ts (ISO string)
 
         Args:
-            entity: Domain entity with __dict__ attribute.
+            entity: Domain entity (dataclass).
 
         Returns:
             SilverRecord dictionary with renamed lineage fields.
 
         """
-        silver_record: dict[str, Any] = entity.__dict__.copy()
+        # Use dataclasses.asdict to ensure fields from slots (BaseEntity) are included
+        silver_record = dataclasses.asdict(entity)
 
         # Handle lineage fields renaming and formatting
         silver_record["_run_id"] = str(silver_record.pop("run_id"))

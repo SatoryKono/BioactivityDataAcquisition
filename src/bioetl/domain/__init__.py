@@ -38,6 +38,7 @@ from bioetl.domain.entities import (
     Molecule,
     Protein,
     Publication,
+    RequiredEntityFields,
     Target,
     TargetComponent,
 )
@@ -96,6 +97,10 @@ from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 
 # Ports
 from bioetl.domain.ports import (
+    AuditEntry,
+    AuditLayer,
+    AuditOperation,
+    AuditPort,
     CheckpointPort,
     CircuitBreakerPort,
     DataSourcePort,
@@ -107,6 +112,7 @@ from bioetl.domain.ports import (
     LockPort,
     LoggerPort,
     MetricsPort,
+    NoOpAudit,
     NoOpMetrics,
     NoOpTracing,
     QuarantinePort,
@@ -179,6 +185,7 @@ __all__ = [
     "Molecule",
     "Protein",
     "Publication",
+    "RequiredEntityFields",
     "Target",
     "TargetComponent",
     # Error classifier
@@ -230,6 +237,10 @@ __all__ = [
     "ClearPolicy",
     "MedallionPolicy",
     # Ports
+    "AuditEntry",
+    "AuditLayer",
+    "AuditOperation",
+    "AuditPort",
     "CheckpointPort",
     "CircuitBreakerPort",
     "DataSourcePort",
@@ -241,6 +252,7 @@ __all__ = [
     "LockPort",
     "LoggerPort",
     "MetricsPort",
+    "NoOpAudit",
     "NoOpMetrics",
     "NoOpTracing",
     "QuarantinePort",
