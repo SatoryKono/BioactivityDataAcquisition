@@ -672,8 +672,8 @@ class TestBronzeWriterListBatches:
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         # Write multiple batches
-        date1 = datetime(2024, 1, 15)
-        date2 = datetime(2024, 1, 16)
+        date1 = datetime(2024, 1, 15, tzinfo=UTC)
+        date2 = datetime(2024, 1, 16, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -713,8 +713,8 @@ class TestBronzeWriterListBatches:
         """Test listing batches with date filter."""
         writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
-        date1 = datetime(2024, 1, 15)
-        date2 = datetime(2024, 1, 16)
+        date1 = datetime(2024, 1, 15, tzinfo=UTC)
+        date2 = datetime(2024, 1, 16, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),

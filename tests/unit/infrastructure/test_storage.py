@@ -159,7 +159,7 @@ class TestBronzeWriter:
 
     async def test_write_bronze_save_json_copy(self, tmp_path, noop_logger):
         """Test that write_bronze saves JSON copy if save_json is True."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), save_json=True)
 
         records = [b'{"id": 1}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
