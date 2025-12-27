@@ -73,6 +73,7 @@ async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
     assert transformed is not None
     assert transformed["activity_id"] == "123"
     assert transformed["standard_value"] == 10.5
+    assert "_run_id" in transformed
 
 
 @pytest.mark.asyncio

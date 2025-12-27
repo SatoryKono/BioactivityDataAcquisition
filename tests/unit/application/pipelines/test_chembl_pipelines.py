@@ -110,6 +110,7 @@ class TestChEMBLAssayPipeline:
 
         assert result is not None
         assert result["assay_chembl_id"] == "CHEMBL123456"
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_missing_id(self, pipeline):
@@ -160,6 +161,7 @@ class TestChEMBLDocumentPipeline:
 
         assert result is not None
         assert result["document_chembl_id"] == "CHEMBL789012"
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_missing_id(self, pipeline):
@@ -210,6 +212,7 @@ class TestChEMBLMoleculePipeline:
 
         assert result is not None
         assert result["molecule_chembl_id"] == "CHEMBL25"
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_missing_id(self, pipeline):
@@ -260,6 +263,7 @@ class TestChEMBLTargetPipeline:
 
         assert result is not None
         assert result["target_chembl_id"] == "CHEMBL1862"
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_missing_id(self, pipeline):
