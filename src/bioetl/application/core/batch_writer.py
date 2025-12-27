@@ -180,12 +180,14 @@ class BatchWriter:
             # which might be None in entity if not passed during creation.
 
             # We update _source_batch_id here as it is batch-specific context
+            # OPTIMIZATION: Convert batch_id to string once, outside the loop
+            batch_id_str = str(batch_id)
             records_with_meta = []
             for r in records:
                 # Copy to avoid mutating original
                 record = r.copy()
                 # Ensure batch ID is set correctly for this write operation
-                record["_source_batch_id"] = str(batch_id)
+                record["_source_batch_id"] = batch_id_str
                 records_with_meta.append(record)
 
             table_name = (
@@ -197,7 +199,9 @@ class BatchWriter:
             # SilverWriteMode enum provides type-safe values: MERGE, APPEND, DELETE
             write_mode = self._table_config.silver_write_mode
             # Convert enum to string value for storage port compatibility
-            mode_value = write_mode.value if hasattr(write_mode, "value") else write_mode
+            mode_value = (
+                write_mode.value if hasattr(write_mode, "value") else write_mode
+            )
             silver_mode = cast(Literal["merge", "append", "delete"], mode_value)
 
             await self._storage.write_silver(
@@ -234,9 +238,10 @@ class BatchWriter:
 
             # Filter to only include columns defined in Gold schema
             if schema_columns:
-                records = [
-                    {k: v for k, v in r.items() if k in schema_columns} for r in records
-                ]
+                # OPTIMIZATION: Only iterate relevant keys if possible
+                # Silver records are usually wider than Gold schemas, so checking
+                # `if k in r` is faster than iterating `r.items()`.
+                records = [{k: r[k] for k in schema_columns if k in r} for r in records]
 
             # Validate Gold records
             result = self._gold_validator.validate(records)
@@ -251,7 +256,9 @@ class BatchWriter:
             # GoldWriteMode enum provides type-safe values: APPEND, SCD2, OVERWRITE
             write_mode = self._table_config.gold_write_mode
             # Convert enum to string value for storage port compatibility
-            mode_value = write_mode.value if hasattr(write_mode, "value") else write_mode
+            mode_value = (
+                write_mode.value if hasattr(write_mode, "value") else write_mode
+            )
             gold_mode = cast(Literal["overwrite", "append", "scd2"], mode_value)
 
             # Pass ingestion_ts and run_id for audit correlation (ADR-014)
