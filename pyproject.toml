@@ -244,10 +244,12 @@ select = [
     # TCH disabled: types are used at runtime for isinstance checks with Protocols
     "PTH", # flake8-use-pathlib
     "RUF", # ruff-specific
+    "T201", # flake8-print (no print statements in production code)
 ]
 ignore = [
     "E501",  # Line too long
     "RUF002",  # Ambiguous unicode - project uses Russian docstrings
+    "RUF003",  # Ambiguous unicode in comments - project uses math symbols (×, ÷)
 ]
 
 [tool.ruff.lint.isort]
@@ -271,7 +273,8 @@ known-first-party = ["bioetl", "tests"]
 "src/bioetl/application/**/*.py" = ["ARG001", "ARG002", "SIM105"]
 # Composition factories may have unused args for interface consistency
 # E402: Allow imports after future imports and docstrings
-"src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "E402"]
+# ARG005: Unused lambda arguments for interface consistency
+"src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "ARG005", "E402"]
 # Interfaces layer
 "src/bioetl/interfaces/**/*.py" = ["ARG001", "ARG002"]
 
