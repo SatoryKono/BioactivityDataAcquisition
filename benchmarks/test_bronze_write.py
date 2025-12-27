@@ -6,7 +6,7 @@ Measures JSONL + zstd compression throughput.
 import asyncio
 import json
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -19,6 +19,16 @@ def _records_to_bytes_iterator(records: list[dict[str, Any]]) -> Iterator[bytes]
     """Convert records to bytes iterator for BronzeWriter."""
     for record in records:
         yield (json.dumps(record) + "\n").encode("utf-8")
+
+
+class FakeMetrics:
+    """Minimal fake metrics for benchmarks."""
+
+    def observe_histogram(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
+    def increment_counter(self, *args: Any, **kwargs: Any) -> None:
+        pass
 
 
 class FakeLogger:
@@ -47,11 +57,12 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     logger = FakeLogger()
-    writer = BronzeWriter(base_path=bronze_output_dir, logger=logger)
+    metrics = FakeMetrics()
+    writer = BronzeWriter(base_path=bronze_output_dir, logger=logger, metrics=metrics)
 
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
-    now = datetime.now()
+    now = datetime.now(UTC)
 
     async def write_batch():
         records_iter = _records_to_bytes_iterator(small_payload)
@@ -63,6 +74,7 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
             batch_id=batch_id,
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
+            ingestion_ts=now,
         )
 
     result = benchmark(lambda: asyncio.run(write_batch()))
@@ -84,11 +96,12 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     logger = FakeLogger()
-    writer = BronzeWriter(base_path=bronze_output_dir, logger=logger)
+    metrics = FakeMetrics()
+    writer = BronzeWriter(base_path=bronze_output_dir, logger=logger, metrics=metrics)
 
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
-    now = datetime.now()
+    now = datetime.now(UTC)
 
     async def write_batch():
         records_iter = _records_to_bytes_iterator(medium_payload)
@@ -100,6 +113,7 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
             batch_id=batch_id,
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
+            ingestion_ts=now,
         )
 
     result = benchmark(lambda: asyncio.run(write_batch()))
@@ -119,11 +133,12 @@ def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     logger = FakeLogger()
-    writer = BronzeWriter(base_path=bronze_output_dir, logger=logger)
+    metrics = FakeMetrics()
+    writer = BronzeWriter(base_path=bronze_output_dir, logger=logger, metrics=metrics)
 
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
-    now = datetime.now()
+    now = datetime.now(UTC)
 
     async def write_batch():
         records_iter = _records_to_bytes_iterator(large_payload)
@@ -135,6 +150,7 @@ def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
             batch_id=batch_id,
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
+            ingestion_ts=now,
         )
 
     result = benchmark(lambda: asyncio.run(write_batch()))

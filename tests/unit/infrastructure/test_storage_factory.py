@@ -23,6 +23,12 @@ def mock_logger():
 
 
 @pytest.fixture
+def mock_metrics():
+    """Create a mock metrics port."""
+    return MagicMock()
+
+
+@pytest.fixture
 def mock_settings(tmp_path):
     """Settings for local run."""
     settings = MagicMock()
@@ -135,6 +141,7 @@ class TestStorageFactoryLocal:
         mock_settings,
         mock_config_minimal,
         mock_logger,
+        mock_metrics,
     ):
         """Test that local runs use paths from settings."""
         with (
@@ -146,6 +153,7 @@ class TestStorageFactoryLocal:
                 settings=mock_settings,
                 config=mock_config_minimal,
                 logger=mock_logger,
+                metrics=mock_metrics,
             )
 
             assert isinstance(result, StorageContext)
@@ -159,6 +167,7 @@ class TestStorageFactoryLocal:
         mock_settings,
         mock_config_with_exports,
         mock_logger,
+        mock_metrics,
     ):
         """Test local run with JSON export enabled."""
         with (
@@ -172,6 +181,7 @@ class TestStorageFactoryLocal:
                 settings=mock_settings,
                 config=mock_config_with_exports,
                 logger=mock_logger,
+                metrics=mock_metrics,
             )
 
             # Verify BronzeWriter was called with save_json
@@ -184,6 +194,7 @@ class TestStorageFactoryLocal:
         mock_settings,
         mock_config_with_exports,
         mock_logger,
+        mock_metrics,
     ):
         """Test local run with CSV export enabled for Silver and Gold."""
         from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -201,6 +212,7 @@ class TestStorageFactoryLocal:
                 settings=mock_settings,
                 config=mock_config_with_exports,
                 logger=mock_logger,
+                metrics=mock_metrics,
             )
 
             # Verify DeltaWriter (Silver) was called with csv_exporter
@@ -231,6 +243,7 @@ class TestStorageFactoryEdgeCases:
         mock_settings,
         mock_config_empty_sink,
         mock_logger,
+        mock_metrics,
     ):
         """Test handling of empty sink configuration."""
         with (
@@ -244,6 +257,7 @@ class TestStorageFactoryEdgeCases:
                 settings=mock_settings,
                 config=mock_config_empty_sink,
                 logger=mock_logger,
+                metrics=mock_metrics,
             )
 
             # Should still create context with default settings
@@ -258,6 +272,7 @@ class TestStorageFactoryEdgeCases:
         mock_settings,
         mock_config_minimal,
         mock_logger,
+        mock_metrics,
     ):
         """Test that adapter contains all three writers."""
         bronze_instance = MagicMock()
@@ -283,6 +298,7 @@ class TestStorageFactoryEdgeCases:
                 settings=mock_settings,
                 config=mock_config_minimal,
                 logger=mock_logger,
+                metrics=mock_metrics,
             )
 
             assert result.adapter.bronze is bronze_instance
