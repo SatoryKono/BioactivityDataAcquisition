@@ -306,7 +306,7 @@ class TestClassSize:
 
         if violations:
             pytest.fail(
-                f"Classes exceeding line limit:\n"
+                "Classes exceeding line limit:\n"
                 + "\n".join(f"  - {v}" for v in violations)
             )
 
@@ -347,6 +347,6 @@ class TestClassSize:
 
         if violations:
             pytest.fail(
-                f"Classes with too many methods:\n"
+                "Classes with too many methods:\n"
                 + "\n".join(f"  - {v}" for v in violations)
             )

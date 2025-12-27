@@ -13,13 +13,12 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
@@ -607,7 +606,6 @@ class TestPipelineRunnerLifecycle:
         any data operations to prevent partial writes.
         """
         from bioetl.domain.exceptions import InfrastructureError
-        from bioetl.domain.types import HealthStatus
 
         config = PipelineConfig(
             pipeline_name="test_health_fail",
