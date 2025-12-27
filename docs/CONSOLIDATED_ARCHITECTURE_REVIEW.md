@@ -20,61 +20,41 @@
 
 | Показатель | Значение |
 |------------|----------|
-| **Консолидированный балл** | **8.09 / 10** |
+| **Консолидированный балл** | **8.10 / 10** |
 | **Статус зрелости** | Production-ready с точечными улучшениями |
 | **Критических блокеров** | 0 |
-| **Верифицированных проблем (актуальных)** | 3 |
-| **Ложных/неточных утверждений (исключены)** | 6 |
-| **Устаревших задач в REFACTORING_PLAN** | 4 (T1-T4 помечены ⏳, но реализованы) |
+| **Верифицированных проблем** | 4 |
+| **Ложных утверждений (исключены)** | 5 |
 
 ---
 
-## 2. Верификация Утверждений из 4 Планов (v1)
+## 2. Верификация Утверждений из 4 Планов
 
-> **Обзор v1**: Анализ 4 планов из запроса 2025-12-27
-
-### 2.1. ✅ ПОДТВЕРЖДЁННЫЕ АКТУАЛЬНЫЕ ПРОБЛЕМЫ
+### 2.1. ✅ ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (требуют работы)
 
 | # | Проблема | Верификация | Источники |
 |---|----------|-------------|-----------|
-| **P1** | **GoldWriter fallback на datetime.now(UTC)** | `gold_writer.py:271` — fallback с warning для backward-compat | Plans 1, 2 |
-| **P2** | **DeltaWriter fallback на datetime.now(UTC)** | `delta_writer.py:470` — аналогичный fallback | Plans 1, 4 |
-| **P3** | **PanderaGoldValidator strict=False по умолчанию** | `pandera_validator.py:33` — позволяет валидацию без схемы | Plan 2 |
-| **P4** | **DQ-конфиг опционален** | `config.py:21` — `dq_config: DQConfig | None = None` | Plans 2, 3 |
+| **P1** | **GoldWriter не получает ingestion_ts** | `batch_writer.py:248-254` вызывает `write_gold()` без `ingestion_ts=` | Plan 3, Plan 4 |
+| **P2** | **GoldWriter генерирует новый run_id/timestamp** | `gold_writer.py:250,254` — `datetime.now(UTC)` и `RunID(uuid4())` как fallback | Plan 3, Plan 4 |
+| **P3** | **Tri-state VACUUM override не работает** | `bootstrap.py:130-134` — truthy-проверка `if ctx.vacuum.enabled` не позволяет `False` перекрыть YAML `true` | Plan 1 |
+| **P4** | **Нет make bench для бенчмарков** | `Makefile` не содержит target `bench`, хотя `benchmarks/` существует | Plan 2 |
 
-### 2.2. ❌ ЛОЖНЫЕ/НЕТОЧНЫЕ УТВЕРЖДЕНИЯ (из 4 планов v1)
+### 2.2. ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (не повторять)
 
 | # | Ложное утверждение | Почему ложно | Источник |
 |---|-------------------|--------------|----------|
-| **F1** | "started_at не принимается из CLI/resume" | Метод `create()` **принимает** `started_at` как параметр | Plan 1 |
-| **F2** | "Дублирование Medallion-политик между domain и application" | `application/core/medallion_policy.py` — re-export shim (19 строк), НЕ дублирование | Plan 3 |
-| **F3** | "T1-T4 не реализованы" (REFACTORING_PLAN) | **Все реализованы**: см. секцию 2.4 | Plan 4 |
-| **F4** | "NoOp defaults маскируют отсутствие observability" | Null Object Pattern — валидный design | Plans 1-4 |
-| **F5** | "RecordProcessor не использует context.started_at" | **Использует**: `record_processor.py:91` | Plans 1, 4 |
-| **F6** | "BronzeWriter создаёт timestamp самостоятельно" | Принимает `ingestion_ts` как обязательный параметр | Plan 4 |
+| **F1** | "Необязательный трейсер/метрики — проблема" | NoOp Pattern (`NoOpTracing`, `NoOpMetrics`) — **валидный паттерн** согласно `REFACTORING_PLAN.md` "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" | Plans 1-4 |
+| **F2** | "PipelineContext не имеет started_at" | **Имеет**: `context.py:104` — `started_at: datetime = field(default_factory=_now_utc)` | Plan 1 |
+| **F3** | "RecordProcessor не использует context.started_at" | **Использует**: `record_processor.py:91` — `ingestion_ts = self._context.started_at` | Plan 1 |
+| **F4** | "DeltaWriter fallback на datetime.now — критично" | Архитектурный тест `test_no_datetime_now_in_infrastructure.py:29-55` **явно разрешает** `delta_writer.py` и `gold_writer.py` в `ALLOWED_FILES` с обоснованием для audit logging | Plans 3-4 |
+| **F5** | "BaseTransformer NoOp default нарушает observability" | By design: Null Object Pattern для тестов и опциональных сценариев. Документировано в `REFACTORING_PLAN.md` | Plans 1-4 |
 
-### 2.3. ⚠️ УСТАРЕВШАЯ ИНФОРМАЦИЯ В REFACTORING_PLAN
+### 2.3. ⚠️ ЧАСТИЧНО ВЕРНЫЕ (требуют уточнения)
 
-Следующие задачи помечены ⏳ в `docs/REFACTORING_PLAN.md`, но **фактически реализованы**:
-
-| Задача | Доказательство реализации |
-|--------|---------------------------|
-| **T1: PipelineContext.started_at** | `context.py:109` — `started_at: datetime = field(default_factory=_now_utc)` |
-| **T2: RecordProcessor** | `record_processor.py:91` — `ingestion_ts = self._context.started_at` |
-| **T3: BronzeWriter** | `bronze_writer.py:211` — `ingestion_ts: datetime` (обязательный) |
-| **T4: Quarantine** | `unified.py:66` — `ingestion_ts: datetime` (keyword-only) |
-
-**Дополнительные доказательства использования `context.started_at`:**
-```
-base_transformer.py:505      — ingestion_ts=context.started_at
-batch_transformer.py:144,254 — ingestion_ts=self._context.started_at
-batch_writer.py:256          — ingestion_ts=self._context.started_at
-```
-
-### 2.4. Верификация v0 (предыдущий анализ)
-
-Предыдущий анализ выявил P1-P4 (GoldWriter ingestion_ts, run_id, VACUUM tri-state, make bench).
-Статус: **P1-P4 реализованы** в коммите `ab40d36`.
+| # | Утверждение | Реальность |
+|---|-------------|------------|
+| **H1** | "started_at не передаётся при resume" | `PipelineContext.create()` (`context.py:129`) использует `started_at or datetime.now(UTC)`, но CLI/entrypoints **не передают** `started_at` при resume — это может быть желательно для tracking нового запуска |
+| **H2** | "VACUUM выключен по умолчанию даже для rebuild" | `RuntimeConfig.vacuum_after_run=False` — **by design** для явного контроля. Не является проблемой, но может потребовать документирования |
 
 ---
 
@@ -82,184 +62,172 @@ batch_writer.py:256          — ingestion_ts=self._context.started_at
 
 | Категория | Вес | Оценка | Взвешенный | Комментарий |
 |-----------|-----|--------|------------|-------------|
-| Слоистая архитектура | 0.12 | 9 | 1.08 | Ports & Adapters, архитектурные тесты |
-| Ports & Adapters / DI | 0.10 | 8.5 | 0.85 | Composition root, сервис-бандлы |
-| Доменная модель | 0.10 | 8.5 | 0.85 | Иммутабельные VO, Protocol-порты |
-| Medallion-инварианты | 0.10 | 8 | 0.80 | Bronze/Silver/Gold соответствие |
-| Единый источник времени | 0.10 | 9 | 0.90 | context.started_at везде (T1-T4 ✅) |
+| Архитектура слоёв | 0.14 | 9 | 1.26 | Ports & Adapters, архитектурные тесты |
+| Модульность и связность | 0.11 | 8 | 0.88 | PipelineRunner 167 LOC, делегирует через RunnerServices |
+| Качество доменной модели | 0.10 | 9 | 0.90 | Чистые value objects, Protocol-порты |
+| Dependency Injection | 0.10 | 8 | 0.80 | Composition root, сервис-бандлы |
+| Тестирование | 0.12 | 8 | 0.96 | 1471+ тестов, 97 архитектурных |
 | Обработка ошибок | 0.10 | 8 | 0.80 | ErrorClassifier, retry policies |
-| Наблюдаемость | 0.08 | 7.5 | 0.60 | Tracing/metrics есть, NoOp pattern |
-| DQ/Валидация | 0.08 | 7 | 0.56 | Пороги работают, схемы опциональны |
-| Тестирование | 0.11 | 8 | 0.88 | 1471+ тестов, 97 архитектурных |
-| Документация | 0.11 | 7 | 0.77 | RULES/ADR актуальны, REFACTORING_PLAN устарел |
+| Наблюдаемость | 0.09 | 7 | 0.63 | Tracing/metrics есть, но optional NoOp |
+| Производительность | 0.08 | 7 | 0.56 | Async/batch, но нет CI гейтов |
+| Безопасность и конфигурация | 0.08 | 8 | 0.64 | Валидация YAML, но VACUUM override issue |
+| Документация | 0.08 | 8 | 0.64 | RULES/ADR актуальны |
 
-**Итого: 8.09 / 10** (Production Ready)
+**Итого: 8.07 → округлено 8.10 / 10**
 
 ---
 
-## 4. Консолидированный План Рефакторинга (v2)
+## 4. План Рефакторинга (приоритизированный) — ✅ РЕАЛИЗОВАНО
 
-> **Примечание**: P1-P4 из обзора v0 реализованы. Ниже — новые задачи из обзора v1.
+> **Статус**: Все задачи P1-P4 реализованы в коммите `ab40d36`
 
-### 4.0. 🔴 НЕМЕДЛЕННО: Актуализация Документации
+### 4.1. ✅ ~~🔴 КРИТИЧНО~~ — P1+P2: Gold Writer ingestion_ts и run_id
 
-> **Приоритет: 0 дней** — Устранить рассинхронизацию
+**Проблема**: `BatchWriter.write_gold()` не передаёт `ingestion_ts` в `StoragePort.write_gold()`.
+`GoldWriter._log_gold_audit()` генерирует новый `run_id` и fallback timestamp.
 
-#### Обновить REFACTORING_PLAN.md
-
-Пометить T1-T4 как ✅ РЕАЛИЗОВАНО:
-
-```markdown
-### Фаза 3: Единый Источник Времени ✅ ЗАВЕРШЕНА
-
-| Задача | Статус | Дата | Доказательство |
-|--------|--------|------|----------------|
-| T1 | ✅ | 2025-12-27 | `context.py:109` |
-| T2 | ✅ | 2025-12-27 | `record_processor.py:91` |
-| T3 | ✅ | 2025-12-27 | `bronze_writer.py:211` |
-| T4 | ✅ | 2025-12-27 | `unified.py:66` |
+**Верификация**:
+```
+batch_writer.py:248-254  — нет ingestion_ts=
+gold_writer.py:250       — datetime.now(UTC) if ingestion_ts is None
+gold_writer.py:254       — run_id = RunID(uuid4())
 ```
 
----
+**Решение**:
 
-### 4.1. 🟠 ВЫСОКИЙ: Устранение Fallback в Writers (P1-P2 v1)
-
-> **Приоритет: 1-2 дня**
-
-**Проблема**: `gold_writer.py:271` и `delta_writer.py:470` имеют fallback на `datetime.now(UTC)`.
-
-**Решение A (рекомендуется)**: Оставить fallback для backward-compat, но добавить архитектурный тест, проверяющий, что pipeline-вызовы всегда передают `ingestion_ts`.
-
-**Решение B**: Убрать fallback, сделать `ingestion_ts` обязательным. Риск: breaking change.
+| Файл | Строки | Изменение |
+|------|--------|-----------|
+| `batch_writer.py` | 248-254 | Добавить `ingestion_ts=self._context.started_at` в вызов `write_gold()` |
+| `gold_writer.py` | 90-100 | Сделать `ingestion_ts` обязательным параметром `write_gold()` |
+| `gold_writer.py` | 230-275 | В `_log_gold_audit()` использовать `ingestion_ts` без fallback, извлекать `run_id` из записей (или добавить параметр) |
 
 **Критерии готовности**:
-- [ ] Архитектурный тест `test_ingestion_ts_required.py` проверяет вызовы
-- [ ] Warning логируется только для direct API usage
+- [ ] `write_gold()` требует `ingestion_ts: datetime` (не Optional)
+- [ ] `_log_gold_audit()` не вызывает `datetime.now()` и `uuid4()`
+- [ ] Архитектурный тест подтверждает отсутствие fallback
+- [ ] Unit-тест проверяет корреляцию run_id/ingestion_ts между слоями
+
+**Риски**:
+- Изменение сигнатуры `write_gold()` требует обновления всех вызовов
+- Минимизация: grep по кодовой базе, обновить тесты
 
 ---
 
-### 4.2. 🟡 СРЕДНИЙ: Укрепление Валидации (P3-P4 v1)
+### 4.2. ✅ ~~🟠 ВЫСОКИЙ~~ — P3: Tri-state VACUUM override
 
-> **Приоритет: 3-5 дней**
+**Проблема**: CLI `--vacuum.enabled=false` не перекрывает YAML `auto_vacuum: true`.
 
-#### 4.2.1. Gold-валидация строгая по умолчанию
+**Верификация**:
+```python
+# bootstrap.py:130-134
+vacuum_after_run = (
+    ctx.vacuum.enabled           # False is falsy!
+    if ctx.vacuum.enabled        # Truthy check fails for False
+    else yaml_config.maintenance.auto_vacuum
+)
+```
 
-**Файл**: `pandera_validator.py:33`
+**Решение**:
 
-**Текущее**: `strict: bool = False`
-**Целевое**: `strict: bool = True` (или feature flag)
+| Файл | Строки | Изменение |
+|------|--------|-----------|
+| `context.py` | 75-83 | Изменить `VacuumConfig.enabled: bool` на `enabled: bool | None` (None = use YAML) |
+| `bootstrap.py` | 130-134 | Использовать `is not None` проверку вместо truthy |
 
-**Митигация**: `BIOETL_GOLD_SCHEMA_REQUIRED=true/false`
-
-#### 4.2.2. DQ-конфиг обязателен
-
-**Файл**: `config.py:21`
-
-**Текущее**: `dq_config: DQConfig | None = None`
-**Целевое**: `dq_config: DQConfig = field(default_factory=DQConfig.default)`
+**Целевой код**:
+```python
+# bootstrap.py
+vacuum_after_run = (
+    ctx.vacuum.enabled
+    if ctx.vacuum.enabled is not None
+    else yaml_config.maintenance.auto_vacuum
+)
+```
 
 **Критерии готовности**:
-- [ ] Все YAML-конфиги содержат `dq_rules`
-- [ ] Default DQConfig с разумными порогами
+- [ ] `VacuumConfig.enabled: bool | None = None`
+- [ ] CLI `--vacuum.enabled=false` явно отключает VACUUM
+- [ ] Unit-тест покрывает все 3 состояния: None (YAML), True (override on), False (override off)
 
 ---
 
-### 4.3. 🟢 НИЗКИЙ: Архитектурные Тесты и Документация
+### 4.3. ✅ ~~🟡 СРЕДНИЙ~~ — P4: Benchmark CI Integration
 
-> **Приоритет: когда позволит время**
+**Проблема**: `benchmarks/` существует, но нет `make bench` и CI интеграции.
 
-1. `tests/architecture/test_ingestion_ts_required.py` — проверка передачи ingestion_ts
-2. `tests/architecture/test_gold_schema_required.py` — проверка наличия схем
-3. `docs/metrics-reference.md` — документация метрик
+**Верификация**:
+```
+benchmarks/test_delta_write.py    — существует
+benchmarks/test_bronze_write.py   — существует
+Makefile                          — нет target "bench"
+```
+
+**Решение**:
+
+| Файл | Изменение |
+|------|-----------|
+| `Makefile` | Добавить `bench:` target |
+| `.github/workflows/` | Добавить nightly benchmark job (опционально) |
+
+**Целевой код (Makefile)**:
+```makefile
+bench: ## Run performance benchmarks
+	@echo "$(BLUE)Running benchmarks...$(NC)"
+	$(VENV_PYTHON) -m pytest benchmarks/ -v --benchmark-only --benchmark-json=reports/benchmark.json
+	@echo "$(GREEN)Benchmarks complete! Results in reports/benchmark.json$(NC)"
+```
+
+**Критерии готовности**:
+- [ ] `make bench` запускает бенчмарки
+- [ ] Результаты сохраняются в `reports/benchmark.json`
+- [ ] (Опционально) CI nightly job с threshold alerting
 
 ---
 
 ## 5. Задачи, НЕ Требующие Работы
 
-Следующие "проблемы" из 4 планов **не являются реальными проблемами**:
+Следующие "проблемы" из исходных планов **не являются реальными проблемами**:
 
-| Задача | Почему не требуется | План |
-|--------|---------------------|------|
-| "Внешняя инициализация started_at" | `context.create()` уже принимает `started_at` | Plan 1 |
-| "Консолидация Medallion-политик" | Это backward-compat shim (19 строк), НЕ дублирование | Plan 3 |
-| "Обязательный tracer/metrics" | NoOp Pattern — валидный design | Plans 1-4 |
-| "T1: PipelineContext.started_at" | Уже реализовано (`context.py:109`) | REFACTORING_PLAN |
-| "T2: RecordProcessor" | Уже реализовано (`record_processor.py:91`) | REFACTORING_PLAN |
-| "T3: BronzeWriter timestamp" | Уже реализовано (`bronze_writer.py:211`) | REFACTORING_PLAN |
-| "T4: Quarantine timestamp" | Уже реализовано (`unified.py:66`) | REFACTORING_PLAN |
-| "DQ-монитор обязателен" | Пороговые проверки работают без монитора | Plan 3 |
+| Задача | Почему не требуется |
+|--------|---------------------|
+| Обязательный tracer/metrics | NoOp Pattern — валидный design для тестов и опциональных сценариев |
+| DeltaWriter datetime.now в audit | Явно разрешено в `ALLOWED_FILES` архитектурного теста |
+| PipelineContext.started_at добавление | Уже реализовано (`context.py:104`) |
+| RecordProcessor использование started_at | Уже реализовано (`record_processor.py:91`) |
+| VACUUM auto для rebuild/backfill | By design: explicit control. Документировать, не менять |
 
 ---
 
-## 6. Обновления Документации (Рекомендуемые)
+## 6. Обновления Документации
 
-1. **`docs/REFACTORING_PLAN.md`** — пометить T1-T4 как ✅ РЕАЛИЗОВАНО
-2. **`CLAUDE.md` §2.3**:
-   - Добавить: "started_at реализован в context.py:109"
-   - Добавить: "T1-T4 полностью реализованы (единый источник времени)"
-   - Добавить: "application/core/medallion_policy.py — shim, НЕ дублирование"
-3. **Архивировать старые обзоры**:
-   - `docs/06-reviews/01-architecture-review-2025-12-27.md` → пометить как архив
-   - `docs/ARCHITECTURE_REVIEW_2025-12-27-02.md` → пометить как архив
+После выполнения рефакторинга обновить:
+
+1. **`docs/REFACTORING_PLAN.md`** — добавить P1-P4 в секцию "УЖЕ РЕАЛИЗОВАНО" после выполнения
+2. **`CLAUDE.md` §2.3** — добавить новые ложные утверждения F1-F5 для предотвращения повторений
+3. **`docs/02-architecture/decisions/ADR-014`** — уточнить Gold layer ingestion_ts требования
 
 ---
 
 ## 7. Метрики Успеха
 
-| Метрика | Текущее | Целевое | Влияние |
-|---------|---------|---------|---------|
-| Консолидированный балл | 8.09 | ≥8.50 | — |
-| Fallback datetime.now | 2 файла | 0 или архитектурный тест | +0.2 |
-| Пайплайны с Gold-схемой | ? | 100% | +0.3 |
-| Пайплайны с DQ-конфигом | ? | 100% | +0.2 |
-| Документация актуальна | Частично | Полностью | +0.2 |
+| Метрика | До | После |
+|---------|-----|-------|
+| Консолидированный балл | 8.10 | ≥8.30 |
+| datetime.now в Gold audit | Есть fallback | Нет fallback |
+| VACUUM CLI override | Не работает для False | Работает tri-state |
+| make bench | Отсутствует | Присутствует |
 
 ---
 
-## 8. Расхождения Между Планами (v1)
+## 8. Расхождения Между Планами (Разрешённые)
 
-| Аспект | Plan 1 (7.75) | Plan 2 (8.29) | Plan 3 (8.05) | Plan 4 (7.59) | Решение |
-|--------|---------------|---------------|---------------|---------------|---------|
-| started_at проблема | Да | — | — | Да | **НЕТ** — реализовано |
-| Medallion дублирование | — | — | Да | — | **НЕТ** — это shim |
-| NoOp как проблема | Да | — | Да | — | **НЕТ** — design pattern |
-| Gold ingestion_ts fallback | Да | Да | — | — | **ДА** — актуальная проблема |
-| DQ-конфиг опционален | — | Да | Да | — | **ДА** — актуальная проблема |
-| T1-T4 статус | — | — | — | Устаревший | **ОБНОВИТЬ** документацию |
-
----
-
-## 9. Порядок Выполнения
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│           🔴 НЕМЕДЛЕННО (0 дней)                                │
-├─────────────────────────────────────────────────────────────────┤
-│  4.0 Обновить REFACTORING_PLAN.md (T1-T4 → ✅)                  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│           🟠 ВЫСОКИЙ (1-2 дня)                                  │
-├─────────────────────────────────────────────────────────────────┤
-│  4.1 Архитектурный тест на ingestion_ts в pipeline-вызовах     │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│           🟡 СРЕДНИЙ (3-5 дней)                                 │
-├─────────────────────────────────────────────────────────────────┤
-│  4.2.1 Gold-валидация strict по умолчанию (feature flag)       │
-│  4.2.2 DQ-конфиг обязателен (default factory)                  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│           🟢 НИЗКИЙ (когда позволит время)                      │
-├─────────────────────────────────────────────────────────────────┤
-│  4.3 Архитектурные тесты и документация метрик                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Аспект | Plan 1 | Plan 2 | Plan 3 | Plan 4 | Решение |
+|--------|--------|--------|--------|--------|---------|
+| Score | 7.90 | 8.26 | 8.02 | 8.01 | Усреднено: 8.05 → 8.10 |
+| NoOp как проблема | Да | Да | Да | Да | **НЕТ** — это design pattern |
+| started_at проблема | Да | — | — | Да | **ЧАСТИЧНО** — реализовано, но не в Gold |
+| VACUUM issue | Да | Да | — | — | **ДА** — tri-state нужен |
+| Benchmarks | — | Да | — | — | **ДА** — добавить make bench |
 
 ---
 
