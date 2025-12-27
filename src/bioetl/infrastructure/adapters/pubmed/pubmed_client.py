@@ -68,7 +68,8 @@ class PubMedAdapter(BaseHttpAdapter):
             "retmode": "json",
             "email": self.email,
         }
-        if self.api_key:
+        # Only send API key if it's not a dummy value
+        if self.api_key and "your_" not in self.api_key:
             params["api_key"] = self.api_key
 
         try:
@@ -90,7 +91,8 @@ class PubMedAdapter(BaseHttpAdapter):
             "rettype": "abstract",
             "email": self.email,
         }
-        if self.api_key:
+        # Only send API key if it's not a dummy value
+        if self.api_key and "your_" not in self.api_key:
             params["api_key"] = self.api_key
         return params
 
@@ -217,7 +219,8 @@ class PubMedAdapter(BaseHttpAdapter):
                 "retmode": "json",
                 "email": self.email,
             }
-            if self.api_key:
+            # Only send API key if it's not a dummy value
+            if self.api_key and "your_" not in self.api_key:
                 params["api_key"] = self.api_key
 
             start_time = time.monotonic()
