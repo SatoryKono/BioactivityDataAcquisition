@@ -200,7 +200,7 @@ class ProviderHealthMonitor:
             state: Provider health state.
         """
         value = state.status.to_metric_value()  # 0, 1, or 2
-        self.metrics.gauge(
+        self.metrics.set_gauge(
             "provider_health_status",
             value,
             labels={"provider": state.provider},
