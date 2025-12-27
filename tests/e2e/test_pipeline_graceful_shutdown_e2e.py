@@ -17,15 +17,11 @@ from __future__ import annotations
 import asyncio
 import signal
 from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType
 
 
 @pytest.mark.e2e
@@ -166,7 +162,7 @@ class TestGracefulShutdownBehavior:
 
         async def process_with_shutdown_check(records):
             nonlocal processed_count
-            for i, record in enumerate(records):
+            for i, _record in enumerate(records):
                 if shutdown.is_requested:
                     break
                 processed_count += 1
@@ -189,7 +185,7 @@ class TestGracefulShutdownBehavior:
         async def process_batch(batch):
             nonlocal batch_completed
             # Simulate batch processing
-            for record in batch:
+            for _record in batch:
                 await asyncio.sleep(0.01)
             batch_completed = True
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -436,7 +436,9 @@ class TestExecutorExecution:
             call_count[0] += 1
             return 5 if call_count[0] == 1 else size
 
-        memory_monitor.get_recommended_batch_size = MagicMock(side_effect=mock_recommend)
+        memory_monitor.get_recommended_batch_size = MagicMock(
+            side_effect=mock_recommend
+        )
 
         executor = PipelineExecutor(
             services=mock_services,

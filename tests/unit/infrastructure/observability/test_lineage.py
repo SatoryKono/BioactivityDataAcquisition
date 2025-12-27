@@ -448,7 +448,9 @@ class TestLineageTrackerGetBatchStatistics:
         """Test get_batch_statistics returns zeros on error."""
         mock_delta_table.side_effect = Exception("Error")
 
-        result = lineage_tracker.get_batch_statistics(layer="bronze", timestamp=datetime.now(UTC), days=7)
+        result = lineage_tracker.get_batch_statistics(
+            layer="bronze", timestamp=datetime.now(UTC), days=7
+        )
 
         assert result["total_batches"] == 0
         assert result["total_records"] == 0
@@ -470,7 +472,9 @@ class TestLineageTrackerGetBatchStatistics:
         mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
-        result = lineage_tracker.get_batch_statistics(layer="bronze", timestamp=datetime.now(UTC))
+        result = lineage_tracker.get_batch_statistics(
+            layer="bronze", timestamp=datetime.now(UTC)
+        )
 
         assert result["total_batches"] == 0
 
@@ -498,7 +502,9 @@ class TestLineageTrackerGetBatchStatistics:
         mock_table.to_pyarrow_table.return_value = mock_df.to_arrow()
         mock_delta_table.return_value = mock_table
 
-        result = lineage_tracker.get_batch_statistics(layer="bronze", timestamp=datetime.now(UTC), days=7)
+        result = lineage_tracker.get_batch_statistics(
+            layer="bronze", timestamp=datetime.now(UTC), days=7
+        )
 
         assert result["total_batches"] == 3
         assert result["total_records"] == 600

@@ -38,13 +38,17 @@ class TestIQRDetector:
     def test_detect_returns_none_for_normal_value(self, detector):
         """Test that detect returns None for value within bounds."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 125.0, baseline, timestamp=datetime.now(UTC))  # Within IQR
+        result = detector.detect(
+            "metric", 125.0, baseline, timestamp=datetime.now(UTC)
+        )  # Within IQR
         assert result is None
 
     def test_detect_spike_anomaly(self, detector):
         """Test detection of spike (value above Q3)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
@@ -54,7 +58,9 @@ class TestIQRDetector:
     def test_detect_drop_anomaly(self, detector):
         """Test detection of drop (value below Q1)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 50.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 50.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -167,13 +173,17 @@ class TestMADDetector:
     def test_detect_returns_none_for_normal_value(self, detector):
         """Test that detect returns None for value within threshold."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 120.0, baseline, timestamp=datetime.now(UTC))  # Close to median
+        result = detector.detect(
+            "metric", 120.0, baseline, timestamp=datetime.now(UTC)
+        )  # Close to median
         assert result is None
 
     def test_detect_spike_anomaly(self, detector):
         """Test detection of spike (high value)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 300.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 300.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
@@ -183,7 +193,9 @@ class TestMADDetector:
     def test_detect_drop_anomaly(self, detector):
         """Test detection of drop (low value)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
-        result = detector.detect("metric", 10.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 10.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -275,7 +287,9 @@ class TestDetectorEdgeCases:
         """Test IQR detector with negative values."""
         detector = IQRDetector()
         baseline = [-100.0, -90.0, -80.0, -70.0, -60.0]
-        result = detector.detect("metric", -200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", -200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -284,7 +298,9 @@ class TestDetectorEdgeCases:
         """Test MAD detector with negative values."""
         detector = MADDetector()
         baseline = [-100.0, -90.0, -80.0, -70.0, -60.0]
-        result = detector.detect("metric", -200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", -200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -293,7 +309,9 @@ class TestDetectorEdgeCases:
         """Test IQR detector with large baseline."""
         detector = IQRDetector()
         baseline = list(range(1, 101))  # 1 to 100
-        result = detector.detect("metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
 
@@ -301,7 +319,9 @@ class TestDetectorEdgeCases:
         """Test MAD detector with large baseline."""
         detector = MADDetector()
         baseline = list(range(1, 101))  # 1 to 100
-        result = detector.detect("metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 200.0, baseline, threshold=1.0, timestamp=datetime.now(UTC)
+        )
 
         assert result is not None
 
@@ -310,7 +330,9 @@ class TestDetectorEdgeCases:
         detector = IQRDetector()
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         # Test with threshold of 1.5 (default)
-        result = detector.detect("metric", 175.0, baseline, threshold=1.5, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 175.0, baseline, threshold=1.5, timestamp=datetime.now(UTC)
+        )
 
         # Value should be just at or past threshold
         if result is not None:
@@ -321,7 +343,9 @@ class TestDetectorEdgeCases:
         detector = MADDetector()
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         # Test with threshold of 2.0 (default)
-        result = detector.detect("metric", 120.0, baseline, threshold=2.0, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 120.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+        )
 
         # Should be None since value is close to median
         assert result is None

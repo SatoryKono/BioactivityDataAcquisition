@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -42,7 +42,11 @@ class PipelineFactoryProtocol(Protocol):
         runtime: RuntimeConfig,
         settings: Settings,
         logger: LoggerPort,
-        **kwargs: Any,
+        config: PipelineYamlConfig | None = ...,
+        filter_config: InputFilterConfig | None = ...,
+        tracer: TracingPort | None = ...,
+        dq_monitor: DQMonitorPort | None = ...,
+        metrics: MetricsPort | None = ...,
     ) -> BasePipeline:
         """Create pipeline with services."""
         ...

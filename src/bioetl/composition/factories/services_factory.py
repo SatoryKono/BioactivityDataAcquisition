@@ -275,7 +275,9 @@ class ServicesBuilder:
 
         # Create Gold validator from schema (DI pattern)
         # strict mode requires schema to be provided
-        gold_validator = PanderaGoldValidator(gold_schema, strict=strict_gold_validation)
+        gold_validator = PanderaGoldValidator(
+            gold_schema, strict=strict_gold_validation
+        )
 
         return RecordProcessor(
             services=services,

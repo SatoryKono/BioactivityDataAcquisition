@@ -85,14 +85,14 @@ class InitInstantiationFinder(ast.NodeVisitor):
         self._current_class: str | None = None
         self._in_init: bool = False
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:  # noqa: N802
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Track current class context."""
         old_class = self._current_class
         self._current_class = node.name
         self.generic_visit(node)
         self._current_class = old_class
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Track __init__ method context."""
         if node.name == "__init__":
             old_in_init = self._in_init
@@ -102,11 +102,11 @@ class InitInstantiationFinder(ast.NodeVisitor):
         else:
             self.generic_visit(node)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:  # noqa: N802
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         """Handle async function definitions (though __init__ is never async)."""
         self.generic_visit(node)
 
-    def visit_Assign(self, node: ast.Assign) -> None:  # noqa: N802
+    def visit_Assign(self, node: ast.Assign) -> None:
         """Check assignments in __init__ for forbidden instantiations."""
         if not self._in_init:
             self.generic_visit(node)
@@ -129,7 +129,7 @@ class InitInstantiationFinder(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:  # noqa: N802
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
         """Check annotated assignments in __init__ for forbidden instantiations.
 
         Handles patterns like:
@@ -264,9 +264,7 @@ class TestDIConstructors:
                 "DI violation: Service instantiation in __init__ methods.\n"
                 "Services MUST be injected via constructor parameters, "
                 "not created inside __init__.\n\n"
-                "Violations found:\n"
-                + "\n".join(violation_messages)
-                + "\n\n"
+                "Violations found:\n" + "\n".join(violation_messages) + "\n\n"
                 "Move service creation to composition layer "
                 "(factories/bootstrap.py) and inject via parameters.\n"
                 "See CLAUDE.md §2.2 Dependency Injection for details."
@@ -324,28 +322,28 @@ class TestDIConstructorsRegression:
 
     def test_detection_of_simple_instantiation(self) -> None:
         """Verify AST detection catches simple self.x = Service() pattern."""
-        code = '''
+        code = """
 class BadClass:
     def __init__(self):
         self._manager = LockManager()
-'''
+"""
         tree = ast.parse(code)
         finder = InitInstantiationFinder({"LockManager"})
         finder.visit(tree)
 
         assert len(finder.violations) == 1
-        lineno, class_name, containing, target = finder.violations[0]
+        _lineno, class_name, containing, target = finder.violations[0]
         assert class_name == "LockManager"
         assert containing == "BadClass"
         assert "manager" in target.lower()
 
     def test_detection_of_instantiation_with_args(self) -> None:
         """Verify detection catches Service(arg1, arg2) pattern."""
-        code = '''
+        code = """
 class BadClass:
     def __init__(self, config):
         self._service = PreflightService(config, context, logger)
-'''
+"""
         tree = ast.parse(code)
         finder = InitInstantiationFinder({"PreflightService"})
         finder.visit(tree)
@@ -355,11 +353,11 @@ class BadClass:
 
     def test_no_false_positive_for_parameter_assignment(self) -> None:
         """Verify no violation for self.x = injected_param pattern."""
-        code = '''
+        code = """
 class GoodClass:
     def __init__(self, lock_manager: LockManager):
         self._lock_manager = lock_manager  # This is injection, not creation!
-'''
+"""
         tree = ast.parse(code)
         finder = InitInstantiationFinder({"LockManager"})
         finder.visit(tree)
@@ -368,7 +366,7 @@ class GoodClass:
 
     def test_no_false_positive_outside_init(self) -> None:
         """Verify no violation for service creation outside __init__."""
-        code = '''
+        code = """
 class SomeClass:
     def __init__(self):
         pass
@@ -376,7 +374,7 @@ class SomeClass:
     def create_manager(self):
         # This is a factory method, not __init__ - different concern
         return LockManager()
-'''
+"""
         tree = ast.parse(code)
         finder = InitInstantiationFinder({"LockManager"})
         finder.visit(tree)
@@ -385,11 +383,11 @@ class SomeClass:
 
     def test_detection_of_module_qualified_instantiation(self) -> None:
         """Verify detection catches module.Service() pattern."""
-        code = '''
+        code = """
 class BadClass:
     def __init__(self):
         self._service = medallion.MedallionLifecycleService()
-'''
+"""
         tree = ast.parse(code)
         finder = InitInstantiationFinder({"MedallionLifecycleService"})
         finder.visit(tree)
@@ -399,11 +397,11 @@ class BadClass:
 
     def test_detection_of_annotated_assignment(self) -> None:
         """Verify detection catches self._x: Type = Service() pattern."""
-        code = '''
+        code = """
 class BadClass:
     def __init__(self):
         self._service: PostrunService = PostrunService()
-'''
+"""
         tree = ast.parse(code)
         finder = InitInstantiationFinder({"PostrunService"})
         finder.visit(tree)

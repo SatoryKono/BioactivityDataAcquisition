@@ -89,33 +89,35 @@ def delta_writer(tmp_path: Path, logger: NoOpLogger) -> DeltaWriter:
 @pytest.fixture
 def activity_schema() -> pa.Schema:
     """Create PyArrow schema for activity records."""
-    return pa.schema([
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("activity_id", pa.int64()),
-        pa.field("molecule_chembl_id", pa.string()),
-        pa.field("target_chembl_id", pa.string()),
-        pa.field("assay_chembl_id", pa.string()),
-        pa.field("standard_type", pa.string()),
-        pa.field("standard_value", pa.float64()),
-        pa.field("standard_units", pa.string()),
-        pa.field("pchembl_value", pa.float64()),
-        pa.field("activity_comment", pa.string()),
-        pa.field("data_validity_comment", pa.string()),
-        pa.field("potential_duplicate", pa.bool_()),
-        pa.field("canonical_smiles", pa.string()),
-        pa.field("target_organism", pa.string()),
-        pa.field("target_type", pa.string()),
-        pa.field("document_chembl_id", pa.string()),
-        pa.field("src_id", pa.int64()),
-        pa.field("bao_format", pa.string()),
-        pa.field("bao_label", pa.string()),
-        pa.field("metadata", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-    ])
+    return pa.schema(
+        [
+            pa.field("entity_id", pa.string()),
+            pa.field("content_hash", pa.string()),
+            pa.field("activity_id", pa.int64()),
+            pa.field("molecule_chembl_id", pa.string()),
+            pa.field("target_chembl_id", pa.string()),
+            pa.field("assay_chembl_id", pa.string()),
+            pa.field("standard_type", pa.string()),
+            pa.field("standard_value", pa.float64()),
+            pa.field("standard_units", pa.string()),
+            pa.field("pchembl_value", pa.float64()),
+            pa.field("activity_comment", pa.string()),
+            pa.field("data_validity_comment", pa.string()),
+            pa.field("potential_duplicate", pa.bool_()),
+            pa.field("canonical_smiles", pa.string()),
+            pa.field("target_organism", pa.string()),
+            pa.field("target_type", pa.string()),
+            pa.field("document_chembl_id", pa.string()),
+            pa.field("src_id", pa.int64()),
+            pa.field("bao_format", pa.string()),
+            pa.field("bao_label", pa.string()),
+            pa.field("metadata", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
 
 
 @pytest.mark.performance
@@ -398,10 +400,10 @@ class TestScalabilityPerformance:
 
         # If 1k write is extremely fast, we assume linear scaling is fine if 5k is also fast.
         if time_1k < 0.1:
-             # If 1k took < 100ms, 5k should take < 1s (generous buffer)
-             assert time_5k < 1.0, (
-                 f"Small batch was fast ({time_1k:.3f}s) but large batch was slow ({time_5k:.3f}s)"
-             )
+            # If 1k took < 100ms, 5k should take < 1s (generous buffer)
+            assert time_5k < 1.0, (
+                f"Small batch was fast ({time_1k:.3f}s) but large batch was slow ({time_5k:.3f}s)"
+            )
         else:
             scaling_factor = time_5k / time_1k
             assert scaling_factor < 7.0, (

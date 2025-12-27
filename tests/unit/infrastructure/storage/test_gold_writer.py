@@ -149,7 +149,9 @@ class TestGoldWriterValidation:
                 mode="overwrite",
             )
 
-    async def test_write_gold_invalid_mode_raises(self, gold_writer, valid_records, strict_schema):
+    async def test_write_gold_invalid_mode_raises(
+        self, gold_writer, valid_records, strict_schema
+    ):
         """Test write_gold raises ValueError for invalid mode."""
         with pytest.raises(ValueError, match="Invalid Gold write mode"):
             await gold_writer.write_gold(
@@ -248,7 +250,13 @@ class TestGoldWriterSCD2:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_scd2_creates_new_table(
-        self, mock_write_deltalake, mock_delta_table, gold_writer, valid_records, strict_schema, fixed_ingestion_ts
+        self,
+        mock_write_deltalake,
+        mock_delta_table,
+        gold_writer,
+        valid_records,
+        strict_schema,
+        fixed_ingestion_ts,
     ):
         """Test SCD2 write creates new table when table doesn't exist."""
         mock_delta_table.side_effect = TableNotFoundError("Not found")
@@ -277,7 +285,12 @@ class TestGoldWriterSCD2:
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_merge_existing_table(
-        self, mock_delta_table, gold_writer, valid_records, strict_schema, fixed_ingestion_ts
+        self,
+        mock_delta_table,
+        gold_writer,
+        valid_records,
+        strict_schema,
+        fixed_ingestion_ts,
     ):
         """Test SCD2 write merges into existing table."""
         mock_table_instance = MagicMock()
@@ -570,7 +583,12 @@ class TestGoldWriterDeterministicBackoff:
     @patch("bioetl.infrastructure.storage.gold_writer.asyncio.sleep")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_gold_writer_deterministic_backoff(
-        self, mock_write_deltalake, mock_sleep, gold_writer, valid_records, strict_schema
+        self,
+        mock_write_deltalake,
+        mock_sleep,
+        gold_writer,
+        valid_records,
+        strict_schema,
     ):
         """Test that backoff uses fixed delay (0.05s jitter) instead of random.
 
@@ -608,7 +626,14 @@ class TestGoldWriterDeterministicBackoff:
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_gold_writer_scd2_deterministic_backoff(
-        self, mock_write_deltalake, mock_delta_table, mock_sleep, gold_writer, valid_records, strict_schema, fixed_ingestion_ts
+        self,
+        mock_write_deltalake,
+        mock_delta_table,
+        mock_sleep,
+        gold_writer,
+        valid_records,
+        strict_schema,
+        fixed_ingestion_ts,
     ):
         """Test that SCD2 mode also uses deterministic backoff.
 

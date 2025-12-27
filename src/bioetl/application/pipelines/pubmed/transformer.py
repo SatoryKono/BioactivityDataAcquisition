@@ -65,8 +65,11 @@ class PubMedPublicationTransformer(BaseTransformer):
             )
             content_hash = self.compute_content_hash(business_data, exclude_none=False)
             entity = self._create_entity(
-                Publication, context, entity_id=entity_id,
-                content_hash=content_hash, **business_data
+                Publication,
+                context,
+                entity_id=entity_id,
+                content_hash=content_hash,
+                **business_data,
             )
             return cast("SilverRecord", self.entity_to_silver_record(entity))
 
@@ -85,6 +88,58 @@ class PubMedPublicationTransformer(BaseTransformer):
         if article is None:
             return {"pmid": pmid}
 
+        journal_data = self._extract_journal_data(article)
+        date_data = self._extract_date_data(article, pubmed_data)
+
+        return {
+            "pmid": pmid,
+            "doi": IdentifierExtractor.extract_doi(root),
+            "title": get_text(article.find(".//ArticleTitle")),
+            "abstract": AbstractExtractor.extract_abstract(article),
+            "authors": AuthorExtractor.parse_authors(article),
+            **journal_data,
+            **date_data,
+            "publication_types": ClassificationExtractor.parse_publication_types(
+                article
+            ),
+            "keywords": ClassificationExtractor.parse_keywords(medline),
+            "mesh_terms": ClassificationExtractor.parse_mesh_terms(medline),
+            "language": get_text(article.find(".//Language")),
+            "country": (
+                get_text(medline.find(".//MedlineJournalInfo/Country"))
+                if medline
+                else None
+            ),
+            "pmc_id": IdentifierExtractor.extract_pmc_id(root),
+        }
+
+    def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
+        """Extract journal-related data from article XML."""
+        journal = article.find(".//Journal")
+        if not journal:
+            return {
+                "journal": None,
+                "journal_abbrev": None,
+                "issn": None,
+                "volume": None,
+                "issue": None,
+                "pages": get_text(article.find(".//Pagination/MedlinePgn")),
+            }
+
+        journal_issue = journal.find("JournalIssue")
+        return {
+            "journal": get_text(journal.find("Title")),
+            "journal_abbrev": get_text(journal.find("ISOAbbreviation")),
+            "issn": get_text(journal.find("ISSN")),
+            "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
+            "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
+            "pages": get_text(article.find(".//Pagination/MedlinePgn")),
+        }
+
+    def _extract_date_data(
+        self, article: ET.Element, pubmed_data: ET.Element | None
+    ) -> dict[str, Any]:
+        """Extract date-related data from article XML."""
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
@@ -92,22 +147,6 @@ class PubMedPublicationTransformer(BaseTransformer):
         history = pubmed_data.find("History") if pubmed_data else None
 
         return {
-            "pmid": pmid,
-            # Basic info
-            "doi": IdentifierExtractor.extract_doi(root),
-            "title": get_text(article.find(".//ArticleTitle")),
-            "abstract": AbstractExtractor.extract_abstract(article),
-            "authors": AuthorExtractor.parse_authors(article),
-            # Journal
-            "journal": get_text(journal.find("Title")) if journal else None,
-            "journal_abbrev": (
-                get_text(journal.find("ISOAbbreviation")) if journal else None
-            ),
-            "issn": get_text(journal.find("ISSN")) if journal else None,
-            "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
-            "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
-            "pages": get_text(article.find(".//Pagination/MedlinePgn")),
-            # Dates
             "pub_date": pub_date,
             "pub_year": pub_year,
             "publication_year": pub_year,
@@ -115,17 +154,4 @@ class PubMedPublicationTransformer(BaseTransformer):
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),
             "epub_date": DateExtractor.extract_article_date(article, "Electronic"),
-            # Classification
-            "publication_types": ClassificationExtractor.parse_publication_types(
-                article
-            ),
-            "keywords": ClassificationExtractor.parse_keywords(medline),
-            "mesh_terms": ClassificationExtractor.parse_mesh_terms(medline),
-            # Metadata
-            "language": get_text(article.find(".//Language")),
-            "country": (
-                get_text(medline.find(".//MedlineJournalInfo/Country"))
-                if medline else None
-            ),
-            "pmc_id": IdentifierExtractor.extract_pmc_id(root),
         }

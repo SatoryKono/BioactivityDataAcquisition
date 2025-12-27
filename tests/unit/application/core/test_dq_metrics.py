@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.domain.types import ErrorType
 
+
 def test_batch_metrics_quarantined_tracking():
     """Test that track_quarantined_records increments the correct metric."""
     mock_metrics = MagicMock()
@@ -21,8 +22,9 @@ def test_batch_metrics_quarantined_tracking():
             "pipeline": "pipeline_test",
             "error_type": "DATA_QUALITY",
             "run_type": "incremental",
-        }
+        },
     )
+
 
 def test_record_processor_dq_logging():
     """Test that RecordProcessor logs detailed stats for soft threshold."""

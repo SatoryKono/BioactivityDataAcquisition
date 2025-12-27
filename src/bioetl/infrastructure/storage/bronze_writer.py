@@ -137,9 +137,7 @@ class BronzeWriter:
                 "Convert to UTC before passing to BronzeWriter."
             )
 
-    def _validate_json_records(
-        self, records: Iterator[bytes]
-    ) -> Iterator[bytes]:
+    def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
         """Validate that each record is valid JSON bytes (lazy generator).
 
         This method validates JSON structure without modifying records.

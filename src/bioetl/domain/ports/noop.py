@@ -66,7 +66,7 @@ class _NoOpOtelTracer:
     Returns _NoOpSpan instances that implement the span interface.
     """
 
-    def start_as_current_span(self, *args: Any, **kwargs: Any) -> _NoOpSpan:
+    def start_as_current_span(self, *_args: Any, **_kwargs: Any) -> _NoOpSpan:
         """Start a new span (no-op).
 
         Accepts any arguments to be compatible with OpenTelemetry tracer.

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 "Tests for UniProt Adapter."
 
 from unittest.mock import MagicMock

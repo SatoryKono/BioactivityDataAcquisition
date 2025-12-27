@@ -11,7 +11,6 @@ from bioetl.composition.factories.pipeline_factory import (
     GenericPipelineFactory,
     create_pipeline_factory,
 )
-from bioetl.composition.registry import PipelineRegistry
 
 
 @pytest.fixture
@@ -117,9 +116,7 @@ class TestGenericPipelineFactory:
 
         assert factory._create_data_source is custom_creator
 
-    def test_create_data_source(
-        self, mock_settings, mock_pipeline_config, mock_logger
-    ):
+    def test_create_data_source(self, mock_settings, mock_pipeline_config, mock_logger):
         """Test data source creation through factory."""
         mock_pipeline_class = MagicMock()
         mock_data_source = MagicMock()

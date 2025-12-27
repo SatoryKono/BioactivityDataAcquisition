@@ -111,7 +111,23 @@ class PostrunService:
         batch_metrics = self._collect_batch_metrics(executor)
         error_rate = batch_metrics["error_rate"]
 
-        # Check hard threshold first - fail the pipeline if exceeded
+        self._check_hard_threshold(error_rate)
+        self._check_soft_threshold(error_rate)
+
+        if self._services.dq_monitor is None:
+            return DQResult(anomalies_count=0, has_critical=False, check_duration_ms=0)
+
+        return self._run_anomaly_detection(batch_metrics)
+
+    def _check_hard_threshold(self, error_rate: float) -> None:
+        """Check if error rate exceeds hard threshold.
+
+        Args:
+            error_rate: Current error rate.
+
+        Raises:
+            DataQualityThresholdError: If threshold exceeded.
+        """
         if error_rate >= self._config.dq.hard_fail_threshold:
             self._logger.error(
                 "DQ hard threshold exceeded",
@@ -124,57 +140,101 @@ class PostrunService:
                 threshold=self._config.dq.hard_fail_threshold,
             )
 
-        # Check soft threshold - log warning and emit metric
-        if error_rate >= self._config.dq.soft_fail_threshold:
-            self._logger.warning(
-                "DQ soft threshold exceeded",
-                error_rate=error_rate,
-                threshold=self._config.dq.soft_fail_threshold,
-                pipeline=self._config.pipeline_name,
+    def _check_soft_threshold(self, error_rate: float) -> None:
+        """Check if error rate exceeds soft threshold and log warning.
+
+        Args:
+            error_rate: Current error rate.
+        """
+        if error_rate < self._config.dq.soft_fail_threshold:
+            return
+
+        self._logger.warning(
+            "DQ soft threshold exceeded",
+            error_rate=error_rate,
+            threshold=self._config.dq.soft_fail_threshold,
+            pipeline=self._config.pipeline_name,
+        )
+        if self._services.metrics:
+            self._services.metrics.increment_counter(
+                "dq_soft_threshold_exceeded",
+                1,
+                {"pipeline": self._config.pipeline_name},
             )
-            if self._services.metrics:
-                self._services.metrics.increment_counter(
-                    "dq_soft_threshold_exceeded",
-                    1,
-                    {"pipeline": self._config.pipeline_name},
-                )
 
-        # Skip anomaly detection if no monitor configured
-        if self._services.dq_monitor is None:
-            return DQResult(anomalies_count=0, has_critical=False, check_duration_ms=0)
+    def _run_anomaly_detection(self, batch_metrics: dict[str, float]) -> DQResult:
+        """Run anomaly detection and process results.
 
+        Args:
+            batch_metrics: Metrics to check for anomalies.
+
+        Returns:
+            DQResult with anomaly detection results.
+        """
         start_time = time.monotonic()
         anomalies = self._services.dq_monitor.check_quality(batch_metrics)
         check_duration_ms = (time.monotonic() - start_time) * 1000
 
-        if self._services.metrics:
-            self._services.metrics.observe_histogram(
-                "dq_check_duration_ms",
-                check_duration_ms,
-                {"pipeline": self._config.pipeline_name},
-            )
+        self._record_check_duration(check_duration_ms)
 
-        has_critical = False
-        for anomaly in anomalies:
-            self._process_anomaly(anomaly)
-            if anomaly.severity.value == "critical":
-                has_critical = True
+        has_critical = self._process_anomalies(anomalies)
 
         self._services.dq_monitor.update_baseline_from_metrics(batch_metrics)
-
-        if self._services.metrics and not has_critical:
-            for metric_name in batch_metrics:
-                self._services.metrics.increment_counter(
-                    "dq_baseline_updated",
-                    1,
-                    {"pipeline": self._config.pipeline_name, "metric": metric_name},
-                )
+        self._update_baseline_metrics(batch_metrics, has_critical)
 
         return DQResult(
             anomalies_count=len(anomalies),
             has_critical=has_critical,
             check_duration_ms=check_duration_ms,
         )
+
+    def _record_check_duration(self, duration_ms: float) -> None:
+        """Record DQ check duration metric.
+
+        Args:
+            duration_ms: Duration in milliseconds.
+        """
+        if self._services.metrics:
+            self._services.metrics.observe_histogram(
+                "dq_check_duration_ms",
+                duration_ms,
+                {"pipeline": self._config.pipeline_name},
+            )
+
+    def _process_anomalies(self, anomalies: list[Any]) -> bool:
+        """Process detected anomalies and check for critical ones.
+
+        Args:
+            anomalies: List of detected anomalies.
+
+        Returns:
+            True if any critical anomalies found.
+        """
+        has_critical = False
+        for anomaly in anomalies:
+            self._process_anomaly(anomaly)
+            if anomaly.severity.value == "critical":
+                has_critical = True
+        return has_critical
+
+    def _update_baseline_metrics(
+        self, batch_metrics: dict[str, float], has_critical: bool
+    ) -> None:
+        """Update baseline metrics counters.
+
+        Args:
+            batch_metrics: Metrics used for baseline.
+            has_critical: Whether critical anomalies were found.
+        """
+        if not self._services.metrics or has_critical:
+            return
+
+        for metric_name in batch_metrics:
+            self._services.metrics.increment_counter(
+                "dq_baseline_updated",
+                1,
+                {"pipeline": self._config.pipeline_name, "metric": metric_name},
+            )
 
     async def run_vacuum_if_enabled(self) -> VacuumResult:
         """Run VACUUM on Silver and Gold tables if enabled.
@@ -213,9 +273,7 @@ class PostrunService:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        silver_files = await self._vacuum_table(
-            self._config.silver_table, "silver"
-        )
+        silver_files = await self._vacuum_table(self._config.silver_table, "silver")
         gold_files = await self._vacuum_table(gold_table, "gold")
 
         return VacuumResult(

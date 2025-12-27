@@ -9,8 +9,7 @@ Implements RULES.md §1 - Domain Layer with pure types.
 
 from __future__ import annotations
 
-from typing import Literal, NotRequired, Required, TypedDict
-
+from typing import Literal, Required, TypedDict
 
 # =============================================================================
 # Gold Filter Configuration TypedDicts
@@ -281,33 +280,24 @@ class RuntimeArgsDict(TypedDict, total=False):
 
 
 __all__ = [
-    # Gold filters
-    "GoldColumnFilterDict",
-    "GoldRangeDict",
-    "GoldFiltersDict",
-    # Sink
-    "CsvExportDict",
     "BronzeSinkDict",
-    "SilverSinkDict",
-    "GoldValidationDict",
-    "GoldSinkDict",
-    "SinkDict",
-    # Transform
-    "TransformDict",
-    # DQ
-    "DQRulesDict",
-    # Circuit Breaker
     "CircuitBreakerDict",
-    # Input Filter
-    "InputFilterDict",
-    # Source
     "ClientConfigDict",
-    "RateLimitDict",
+    "CsvExportDict",
+    "DQRulesDict",
+    "GoldColumnFilterDict",
+    "GoldFiltersDict",
+    "GoldRangeDict",
+    "GoldSinkDict",
+    "GoldValidationDict",
+    "InputFilterDict",
+    "PipelineConfigDict",
     "ProviderConfigDict",
+    "RateLimitDict",
+    "RuntimeArgsDict",
+    "SilverSinkDict",
+    "SinkDict",
     "SourceConfigDict",
     "SourceFileDict",
-    # Pipeline
-    "PipelineConfigDict",
-    # Runtime
-    "RuntimeArgsDict",
+    "TransformDict",
 ]

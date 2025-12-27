@@ -113,9 +113,7 @@ class TestPubChemCompoundTransformer:
         assert result["canonical_smiles"] == "CCO"
 
     @pytest.mark.asyncio
-    async def test_transform_with_only_isomeric_smiles(
-        self, transformer, mock_context
-    ):
+    async def test_transform_with_only_isomeric_smiles(self, transformer, mock_context):
         """Test transformation succeeds with only isomeric_smiles."""
         record = {
             "cid": 12345,
@@ -143,9 +141,7 @@ class TestPubChemCompoundTransformer:
         assert result["inchi"] == "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3"
 
     @pytest.mark.asyncio
-    async def test_transform_with_minimal_valid_record(
-        self, transformer, mock_context
-    ):
+    async def test_transform_with_minimal_valid_record(self, transformer, mock_context):
         """Test transformation with minimal valid record (cid + one structural ID)."""
         record = {
             "cid": 1,

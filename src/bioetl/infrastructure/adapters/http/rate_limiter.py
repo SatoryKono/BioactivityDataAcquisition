@@ -164,7 +164,9 @@ def create_uniprot_bucket(
 
     """
     rate = 100.0 if with_api_key else 10.0
-    return TokenBucket(rate=rate, capacity=int(rate), provider="uniprot", metrics=metrics)
+    return TokenBucket(
+        rate=rate, capacity=int(rate), provider="uniprot", metrics=metrics
+    )
 
 
 def create_openalex_bucket(
@@ -201,7 +203,9 @@ def create_semantic_scholar_bucket(
 
     """
     # 100 requests per 5 minutes = 0.333 req/sec
-    return TokenBucket(rate=0.333, capacity=10, provider="semantic_scholar", metrics=metrics)
+    return TokenBucket(
+        rate=0.333, capacity=10, provider="semantic_scholar", metrics=metrics
+    )
 
 
 def create_pubmed_bucket(
@@ -216,4 +220,6 @@ def create_pubmed_bucket(
 
     """
     rate = 10.0 if with_api_key else 3.0
-    return TokenBucket(rate=rate, capacity=int(rate), provider="pubmed", metrics=metrics)
+    return TokenBucket(
+        rate=rate, capacity=int(rate), provider="pubmed", metrics=metrics
+    )

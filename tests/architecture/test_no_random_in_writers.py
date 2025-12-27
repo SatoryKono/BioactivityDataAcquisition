@@ -120,6 +120,6 @@ class TestNoRandomInStorageWriters:
                                         f"{py_file.name}:{node.lineno}: random.choice()"
                                     )
 
-        assert not violations, (
-            "random.choice() calls found:\n" + "\n".join(f"  - {v}" for v in violations)
+        assert not violations, "random.choice() calls found:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )

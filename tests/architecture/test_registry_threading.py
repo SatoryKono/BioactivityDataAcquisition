@@ -43,7 +43,9 @@ def create_mock_factory(name: str) -> PipelineFactoryProtocol:
 class TestConcurrentRegistration:
     """Tests for concurrent registration safety."""
 
-    def test_concurrent_registration_from_multiple_threads(self, isolated_registry) -> None:
+    def test_concurrent_registration_from_multiple_threads(
+        self, isolated_registry
+    ) -> None:
         """10 threads registering different factories simultaneously.
 
         Verifies that no race conditions occur during concurrent writes.
@@ -216,15 +218,15 @@ class TestListPipelinesDeterminism:
         # All results should be identical
         first_result = results[0]
         for result in results[1:]:
-            assert result == first_result, (
-                "list_pipelines() results are not consistent"
-            )
+            assert result == first_result, "list_pipelines() results are not consistent"
 
 
 class TestRegisterAllPipelinesThreadSafety:
     """Tests for register_all_pipelines() thread safety."""
 
-    def test_concurrent_register_all_pipelines_idempotent(self, isolated_registry) -> None:
+    def test_concurrent_register_all_pipelines_idempotent(
+        self, isolated_registry
+    ) -> None:
         """Multiple threads calling register_all_pipelines() with same registry.
 
         Since we're using an isolated registry and passing it explicitly,
@@ -281,7 +283,9 @@ class TestRegisterAllPipelinesThreadSafety:
                 raise
 
         with ThreadPoolExecutor(max_workers=num_registries) as executor:
-            futures = [executor.submit(populate_registry) for _ in range(num_registries)]
+            futures = [
+                executor.submit(populate_registry) for _ in range(num_registries)
+            ]
             for future in as_completed(futures):
                 registries.append(future.result())
 

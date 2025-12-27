@@ -321,7 +321,6 @@ class TestUniProtProteinPipelineTransform:
         assert "_run_id" in silver_record
 
 
-
 @pytest.mark.integration
 class TestUniProtProteinPipelineCreate:
     """Тесты создания UniProt пайплайна."""

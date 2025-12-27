@@ -12,7 +12,6 @@ logger = structlog.get_logger()
 
 
 class TestChemblActivityPipeline(IntegrationPipelineTestCase):
-
     @pytest.mark.vcr
     async def test_chembl_activity_happy_path(self, settings, runtime_config, run_id):
         """Test happy path: Bronze -> Silver -> Gold."""

@@ -182,11 +182,17 @@ class BatchTransformer:
             return
 
         # Hard fail check
-        if dq_config.hard_fail_threshold and error_rate >= dq_config.hard_fail_threshold:
+        if (
+            dq_config.hard_fail_threshold
+            and error_rate >= dq_config.hard_fail_threshold
+        ):
             raise DataQualityThresholdError(error_rate, dq_config.hard_fail_threshold)
 
         # Soft fail check with detailed logging
-        if dq_config.soft_fail_threshold and error_rate >= dq_config.soft_fail_threshold:
+        if (
+            dq_config.soft_fail_threshold
+            and error_rate >= dq_config.soft_fail_threshold
+        ):
             self._context.logger.warning(
                 "DQ Soft Threshold exceeded",
                 error_rate=round(error_rate, 4),
@@ -373,9 +379,7 @@ class StreamingBatchProcessor:
             # Advance by actual chunk size processed
             i += len(chunk)
 
-    def iter_records(
-        self, records: list[dict[str, Any]]
-    ) -> Iterator[dict[str, Any]]:
+    def iter_records(self, records: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         """Iterate over records without loading all into memory.
 
         This is a simple generator wrapper that can be extended

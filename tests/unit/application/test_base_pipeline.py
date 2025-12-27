@@ -161,8 +161,12 @@ async def test_run_id_propagation_is_consistent():
     pipeline = ConcretePipeline(config, runtime, services, expected_run_id)
 
     # Verify run_id consistency across all access points
-    assert pipeline.run_id == expected_run_id, "run_id property should return the injected run_id"
-    assert pipeline.context.run_id == expected_run_id, "PipelineContext should have the same run_id"
+    assert pipeline.run_id == expected_run_id, (
+        "run_id property should return the injected run_id"
+    )
+    assert pipeline.context.run_id == expected_run_id, (
+        "PipelineContext should have the same run_id"
+    )
     assert pipeline._run_id == expected_run_id, "Internal _run_id should match"
 
     # Verify logger was bound with correct run_id
@@ -186,8 +190,8 @@ class TestTransformForGold:
             "molecule_properties": '{"alogp": 1.5}',
             "molecule_structures": '{"canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}',
             "molecule_synonyms": '["Aspirin", "ASA"]',
-            "cross_references": '[]',
-            "atc_classifications": '[]',
+            "cross_references": "[]",
+            "atc_classifications": "[]",
         }
 
         gold_record = mock_pipeline.transform_for_gold(
@@ -243,5 +247,3 @@ class TestTransformForGold:
             "_source_batch_id",
         }
         assert mock_pipeline.GOLD_EXCLUDE_FIELDS == expected_fields
-
-

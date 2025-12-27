@@ -15,7 +15,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.composition.observability import ObservabilityBundle, ObservabilityContractError
+from bioetl.composition.observability import (
+    ObservabilityBundle,
+    ObservabilityContractError,
+)
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
 
@@ -34,7 +37,9 @@ class TestObservabilityBundle:
         """Test that bundle creation fails without metrics."""
         mock_logger = MagicMock()
 
-        with pytest.raises(ObservabilityContractError, match="Metrics port is required"):
+        with pytest.raises(
+            ObservabilityContractError, match="Metrics port is required"
+        ):
             ObservabilityBundle(logger=mock_logger, metrics=None)  # type: ignore[arg-type]
 
     def test_bundle_allows_optional_tracer_none(self) -> None:
@@ -469,7 +474,7 @@ class TestObservabilityPreflightValidation:
         )
 
         # Verify preflight validation logged warnings for NoOp implementations
-        warning_calls = [call for call in mock_logger.warning.call_args_list]
+        warning_calls = list(mock_logger.warning.call_args_list)
         event_names = [call[0][0] for call in warning_calls]
         assert "noop_tracing_in_production" in event_names
         assert "noop_metrics_in_production" in event_names

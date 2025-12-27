@@ -237,9 +237,7 @@ class TestFilteredDataSourceFetch:
         assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
 
     @pytest.mark.asyncio
-    async def test_fetch_with_limit(
-        self, mock_data_source, disabled_filter_config
-    ):
+    async def test_fetch_with_limit(self, mock_data_source, disabled_filter_config):
         """Test fetch passes limit to wrapped source."""
         filtered = FilteredDataSource(
             data_source=mock_data_source,
@@ -274,7 +272,9 @@ class TestFilteredDataSourceFetch:
         # Simulate entering context to load filter IDs
         await filtered.__aenter__()
 
-        with pytest.raises(TypeError, match="does not implement FilterableDataSourcePort"):
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
             async for _ in filtered.fetch("activity"):
                 pass
 

@@ -61,7 +61,9 @@ class IQRDetector(DetectorStrategy):
 
         mean = statistics.mean(baseline)
         stddev = statistics.stdev(baseline) if len(baseline) >= 2 else 0.0
-        return self._create_anomaly(metric_name, current_value, mean, stddev, score, timestamp)
+        return self._create_anomaly(
+            metric_name, current_value, mean, stddev, score, timestamp
+        )
 
     def _calculate_quartiles(self, data: Sequence[float]) -> tuple[float, float]:
         """Calculate Q1 and Q3 quartiles."""
