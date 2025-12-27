@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.data_source_registry import DataSourceRegistry
-from bioetl.composition.factories.generic_factory import (
+from bioetl.composition.factories.data_source_factory import DataSourceRegistry
+from bioetl.composition.factories.pipeline_factory import (
     GenericPipelineFactory,
     create_pipeline_factory,
 )
@@ -142,8 +142,8 @@ class TestGenericPipelineFactory:
         )
         assert result is mock_data_source
 
-    @patch("bioetl.composition.factories.runner_assembly.load_pipeline_config")
-    @patch("bioetl.composition.factories.runner_assembly.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
     def test_build_services(
         self,
         mock_services_factory,

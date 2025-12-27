@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.5 (Architecture Review Verification Protocol), 2025-12-27* 
+*Версия: 5.6 (Anti-False-Claims Protocol), 2025-12-27* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -691,13 +691,55 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 #### 7.1.4. Типичные Ложные Выводы
 
-| Паттерн | Почему ошибочен |
-|---------|-----------------|
-| "500+ LOC = god object" | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден |
-| "NoOp default = нарушение DI" | Null Object Pattern валиден для опциональных зависимостей |
-| "Optional parameter = нарушение DI" | `policy: Policy | None = None` — допустимый паттерн для value objects |
-| "click.echo в CLI = нарушение" | User-facing output — законная ответственность interfaces слоя |
-| "Shim file = дублирование" | Re-export для backward compatibility валиден |
+| Паттерн | Почему ошибочен | Пример из кодовой базы |
+|---------|-----------------|------------------------|
+| "500+ LOC = god object" | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (517 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
+| "Монолит требует декомпозиции" | Файл с делегированием — НЕ монолит | `GoldWriter` (593 LOC) делегирует `CsvExporter`, `AuditPort` |
+| "NoOp default = нарушение DI" | Null Object Pattern валиден для опциональных зависимостей | `NoOpMetrics`, `NoOpTracing` |
+| "Optional parameter = нарушение DI" | `policy: Policy | None = None` — допустимый паттерн для value objects | `timeout: float = 30.0` |
+| "click.echo в CLI = нарушение" | User-facing output — законная ответственность interfaces слоя | `cli.py` confirmation prompts |
+| "Shim file = дублирование" | Re-export для backward compatibility валиден | `medallion_policy.py` (19 LOC) |
+| "Нет автоматизации X" | Часто уже реализовано, но не проверено | `MedallionPolicy`, `DQConfig` существуют |
+
+#### 7.1.5. Причины Ложных Утверждений (REQ-ARCH-041)
+
+> **Статистика**: Анализ 2025-12-27 выявил ~50% ложных утверждений в планах рефакторинга.
+
+| Причина | Описание | Митигация |
+|---------|----------|-----------|
+| **Отсутствие верификации кодом** | Утверждения без проверки фактического состояния | `grep`, `wc -l`, чтение файла |
+| **Ложная корреляция размер → сложность** | 500+ LOC автоматически считается "монолитом" | Анализ делегирования (см. 7.1.6) |
+| **Неверная интерпретация паттернов** | NoOp как нарушение DI, shim как дублирование | Знание Null Object Pattern, backward-compat |
+| **Устаревшие знания** | Задача уже реализована, но это не проверено | Сверка с `REFACTORING_PLAN.md` |
+
+#### 7.1.6. Анализ Делегирования (MUST перед "god object")
+
+**ПЕРЕД** утверждением "god object" или "монолит" **MUST** выполнить:
+
+```bash
+# 1. Измерить размер (порог: 500 LOC)
+wc -l src/bioetl/path/to/file.py
+
+# 2. Найти делегирование (> 3 компонентов = НЕ монолит)
+grep -o "self\._[a-z_]*" src/bioetl/path/to/file.py | sort -u | wc -l
+
+# 3. Проверить публичные методы
+grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
+
+# 4. Сверить с известными ложными утверждениями
+grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/REFACTORING_PLAN.md
+```
+
+**Критерии "монолита" (ВСЕ должны выполняться):**
+- [ ] 500+ строк кода
+- [ ] Мало делегирования (< 3 уникальных `self._component`)
+- [ ] Много публичных методов с разной ответственностью
+- [ ] Отсутствие injection через конструктор
+
+**Контрпримеры (НЕ монолиты, несмотря на размер):**
+- `ChemblAdapter` (517 LOC): Делегирует 4 компонентам, когезивная ответственность
+- `GoldWriter` (593 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
+- `PreflightService` (527 LOC): 8 методов с единой ответственностью (preflight validation)
 
 ### 7.2. Обновление Документации
 
@@ -939,6 +981,7 @@ fields:
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
 
 ## История Изменений (Changelog)
+- **5.6** (2025-12-27): Anti-False-Claims Protocol (REQ-ARCH-041). Расширена §7 с детальными правилами анализа делегирования (§7.1.6), причинами ложных утверждений (§7.1.5), контрпримерами (ChemblAdapter, GoldWriter, PreflightService). Добавлены конкретные примеры из кодовой базы в §7.1.4.
 - **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
 - **5.3** (2025-12-24): Determinism and Reproducibility (ADR-014). Добавлен §4.3 с правилами детерминизма. Архитектурные тесты для random и datetime.now().

@@ -9,21 +9,18 @@ Usage:
 
 All pipeline factories are auto-registered when this module is imported.
 
-New in v5.1: Client, Storage, and DataSource factories consolidated here from
-infrastructure/factories/ following architectural requirements.
+Consolidated modules (v5.2):
+- pipeline_factory: GenericPipelineFactory, runner assembly
+- services_factory: BaseServicesFactory, ServicesBuilder, RunnerServices
+- data_source_factory: DataSourceFactory, DataSourceRegistry
+- storage: StorageAdapter, StorageContext, StorageFactory
 """
 
-# Core factory infrastructure
-from bioetl.composition.factories.data_source_registry import (
+# Data source factory and registry
+from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
+    DataSourceFactory,
     DataSourceRegistry,
-)
-
-# Data source factory
-from bioetl.composition.factories.data_sources import DataSourceFactory
-from bioetl.composition.factories.generic_factory import (
-    GenericPipelineFactory,
-    create_pipeline_factory,
 )
 
 # Import to trigger pipeline registration
@@ -34,20 +31,24 @@ from bioetl.composition.factories.pipeline_factories import (
     uniprot_protein_factory,
 )
 
-# Runner assembly functions (extracted from GenericPipelineFactory)
-from bioetl.composition.factories.runner_assembly import (
+# Pipeline factory and runner assembly
+from bioetl.composition.factories.pipeline_factory import (
+    GenericPipelineFactory,
     assemble_runner,
     build_pipeline_services,
+    create_pipeline_factory,
 )
 
-# Runner services factory (DI for PipelineRunner)
-from bioetl.composition.factories.runner_services import (
+# Services factory (DI for PipelineRunner)
+from bioetl.composition.factories.services_factory import (
+    BaseServicesFactory,
     RunnerServices,
+    ServicesBuilder,
     build_runner_services,
 )
 
 # Storage factory
-from bioetl.composition.factories.storage_factory import (
+from bioetl.composition.factories.storage import (
     StorageAdapter,
     StorageContext,
     StorageFactory,
@@ -62,11 +63,13 @@ from bioetl.composition.factories.transformer_factory import (
 )
 
 __all__ = [
+    "BaseServicesFactory",
     "DataSourceCreator",
     "DataSourceFactory",
     "DataSourceRegistry",
     "GenericPipelineFactory",
     "RunnerServices",
+    "ServicesBuilder",
     "StorageAdapter",
     "StorageContext",
     "StorageFactory",
