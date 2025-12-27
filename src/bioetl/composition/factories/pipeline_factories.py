@@ -51,7 +51,7 @@ from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsP
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
