@@ -200,7 +200,7 @@ class TestCreatePipelineFactory:
 class TestPipelineRegistryIntegration:
     """Integration tests for PipelineRegistry with GenericPipelineFactory."""
 
-    def test_register_factory_instance(self):
+    def test_register_factory_instance(self, isolated_registry):
         """Test registering factory instance with registry."""
         mock_pipeline_class = MagicMock()
         mock_schema = MagicMock()
@@ -214,11 +214,9 @@ class TestPipelineRegistryIntegration:
             data_source_creator=MagicMock(),
         )
 
-        PipelineRegistry.register_factory(factory)
+        isolated_registry.register_factory(factory)
 
-        definition = PipelineRegistry.get("test_generic")
+        definition = isolated_registry.get("test_generic")
         assert definition.factory is factory
         assert definition.silver_schema is mock_schema
-
-        # Cleanup
-        del PipelineRegistry._registry["test_generic"]
+        # No cleanup needed - isolated_registry is fresh for each test

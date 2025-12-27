@@ -132,7 +132,7 @@ class TestBootstrapPipeline:
         with pytest.raises(ValueError, match="Configuration file not found"):
             bootstrap_pipeline(ctx)
 
-    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.get_default_registry")
     @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
     @patch("bioetl.composition.bootstrap.load_pipeline_config")
     @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
@@ -147,7 +147,7 @@ class TestBootstrapPipeline:
         mock_start_metrics: MagicMock,
         mock_load_config: MagicMock,
         mock_filter_builder: MagicMock,
-        mock_registry: MagicMock,
+        mock_get_registry: MagicMock,
         mock_logger: MagicMock,
     ) -> None:
         """Test that metrics server failure doesn't block pipeline bootstrap."""
@@ -188,7 +188,9 @@ class TestBootstrapPipeline:
         mock_factory = MagicMock()
         mock_runner = MagicMock()
         mock_factory.create_runner.return_value = mock_runner
+        mock_registry = MagicMock()
         mock_registry.get.return_value.factory = mock_factory
+        mock_get_registry.return_value = mock_registry
 
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
@@ -214,9 +216,9 @@ class TestBootstrapPipeline:
         reason="Requires full integration setup - covered by integration tests"
     )
     @patch("bioetl.composition.bootstrap.get_settings")
-    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.get_default_registry")
     def test_bootstrap_pipeline_chembl_activity(
-        self, mock_registry, mock_get_settings, mock_settings, mock_logger
+        self, mock_get_registry, mock_get_settings, mock_settings, mock_logger
     ):
         """Test bootstrap_pipeline creates chembl_activity pipeline."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
@@ -519,7 +521,7 @@ class TestBootstrapMetrics:
 class TestBootstrapVacuumConfig:
     """Tests for bootstrap_pipeline vacuum configuration merging."""
 
-    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.get_default_registry")
     @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
     @patch("bioetl.composition.bootstrap.load_pipeline_config")
     @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
@@ -534,7 +536,7 @@ class TestBootstrapVacuumConfig:
         mock_start_metrics: MagicMock,
         mock_load_config: MagicMock,
         mock_filter_builder: MagicMock,
-        mock_registry: MagicMock,
+        mock_get_registry: MagicMock,
     ) -> None:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
@@ -574,7 +576,9 @@ class TestBootstrapVacuumConfig:
         mock_factory = MagicMock()
         mock_runner = MagicMock()
         mock_factory.create_runner.return_value = mock_runner
+        mock_registry = MagicMock()
         mock_registry.get.return_value.factory = mock_factory
+        mock_get_registry.return_value = mock_registry
 
         # Context without CLI vacuum options (None)
         ctx = PipelineRunContext(
@@ -593,7 +597,7 @@ class TestBootstrapVacuumConfig:
         assert runtime.vacuum_after_run is True
         assert runtime.vacuum_retention_days == 14
 
-    @patch("bioetl.composition.bootstrap.PipelineRegistry")
+    @patch("bioetl.composition.bootstrap.get_default_registry")
     @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
     @patch("bioetl.composition.bootstrap.load_pipeline_config")
     @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
@@ -608,7 +612,7 @@ class TestBootstrapVacuumConfig:
         mock_start_metrics: MagicMock,
         mock_load_config: MagicMock,
         mock_filter_builder: MagicMock,
-        mock_registry: MagicMock,
+        mock_get_registry: MagicMock,
     ) -> None:
         """Test that CLI vacuum options override YAML config."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
@@ -648,7 +652,9 @@ class TestBootstrapVacuumConfig:
         mock_factory = MagicMock()
         mock_runner = MagicMock()
         mock_factory.create_runner.return_value = mock_runner
+        mock_registry = MagicMock()
         mock_registry.get.return_value.factory = mock_factory
+        mock_get_registry.return_value = mock_registry
 
         # Context with CLI overrides (explicit False and 30 days)
         ctx = PipelineRunContext(

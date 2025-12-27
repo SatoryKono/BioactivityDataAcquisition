@@ -29,14 +29,15 @@ def cli_runner() -> CliRunner:
 
 @pytest.fixture
 def mock_registry():
-    """Mock PipelineRegistry for validation tests."""
-    with patch("bioetl.interfaces.cli.PipelineRegistry") as mock:
-        mock.list_pipelines.return_value = [
-            "chembl_activity",
-            "chembl_molecule",
-            "pubchem_compound",
-            "uniprot_protein",
-        ]
+    """Mock default registry for validation tests."""
+    mock = MagicMock()
+    mock.list_pipelines.return_value = [
+        "chembl_activity",
+        "chembl_molecule",
+        "pubchem_compound",
+        "uniprot_protein",
+    ]
+    with patch("bioetl.interfaces.cli.get_default_registry", return_value=mock):
         yield mock
 
 

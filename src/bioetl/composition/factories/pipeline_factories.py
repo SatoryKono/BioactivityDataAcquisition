@@ -9,12 +9,25 @@ Thread-safety: Registration uses a module-level lock to prevent TOCTOU race cond
 Updated: Transformer injection via DI (Phase 1 refactoring).
 All factories now include transformer_class for proper DI.
 
+Instance-level registry support (2025-12):
+- register_all_pipelines() accepts optional registry parameter
+- Default behavior uses global registry for backward compatibility
+- Tests can use isolated registries for parallel execution
+
 Usage:
     >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
     >>> register_all_pipelines()  # Call once at application startup
+
+    # For test isolation:
+    >>> from bioetl.composition.registry import create_registry
+    >>> registry = create_registry()
+    >>> register_all_pipelines(registry=registry)
 """
 
+from __future__ import annotations
+
 import threading
+from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
@@ -39,7 +52,7 @@ from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTra
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.generic_factory import GenericPipelineFactory
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
@@ -62,6 +75,9 @@ from bioetl.infrastructure.schemas.silver import (
     PUBMED_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
+
+if TYPE_CHECKING:
+    pass
 
 # Thread-safe registration state
 _registration_lock = threading.Lock()
@@ -158,7 +174,7 @@ pubmed_publications_factory = GenericPipelineFactory(
 )
 
 
-def register_all_pipelines() -> None:
+def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
     """Explicitly register all pipeline factories with PipelineRegistry.
 
     This function is idempotent and thread-safe - calling it multiple times
@@ -167,10 +183,23 @@ def register_all_pipelines() -> None:
     Uses double-checked locking pattern to minimize lock contention while
     ensuring thread-safe initialization.
 
+    When called with a custom registry, idempotency check is skipped
+    (each registry instance is independent).
+
+    Args:
+        registry: Optional PipelineRegistry instance. If None, uses the
+            default global registry. Pass a custom registry for test isolation.
+
     Should be called once at application startup (e.g., in cli.py or bootstrap.py).
     """
     global _factories_registered
 
+    # For custom registries, register directly without idempotency check
+    if registry is not None:
+        _register_factories_to(registry)
+        return
+
+    # Default registry: use idempotency guard
     # Fast path: already registered (no lock needed)
     if _factories_registered:
         return
@@ -181,17 +210,29 @@ def register_all_pipelines() -> None:
         if _factories_registered:
             return
 
-        PipelineRegistry.register_factory(chembl_activity_factory)
-        PipelineRegistry.register_factory(chembl_assay_factory)
-        PipelineRegistry.register_factory(chembl_document_factory)
-        PipelineRegistry.register_factory(chembl_target_factory)
-        PipelineRegistry.register_factory(chembl_target_component_factory)
-        PipelineRegistry.register_factory(chembl_molecule_factory)
-        PipelineRegistry.register_factory(pubchem_compound_factory)
-        PipelineRegistry.register_factory(uniprot_protein_factory)
-        PipelineRegistry.register_factory(pubmed_publications_factory)
+        default_registry = get_default_registry()
+        _register_factories_to(default_registry)
 
         _factories_registered = True
+
+
+def _register_factories_to(registry: PipelineRegistry) -> None:
+    """Register all factory instances to the given registry.
+
+    Internal helper for register_all_pipelines().
+
+    Args:
+        registry: Target registry instance.
+    """
+    registry.register_factory(chembl_activity_factory)
+    registry.register_factory(chembl_assay_factory)
+    registry.register_factory(chembl_document_factory)
+    registry.register_factory(chembl_target_factory)
+    registry.register_factory(chembl_target_component_factory)
+    registry.register_factory(chembl_molecule_factory)
+    registry.register_factory(pubchem_compound_factory)
+    registry.register_factory(uniprot_protein_factory)
+    registry.register_factory(pubmed_publications_factory)
 
 
 def is_registered() -> bool:
@@ -209,12 +250,15 @@ def is_registered() -> bool:
 def reset_registration() -> None:
     """Reset registration state (for testing only).
 
-    Thread-safe reset of registration flag. Also clears the PipelineRegistry.
+    Thread-safe reset of registration flag. Also clears the default PipelineRegistry.
     WARNING: Only use in tests. Not for production.
+
+    Note: For isolated tests, prefer creating a new registry instance with
+    create_registry() rather than using reset_registration().
     """
     global _factories_registered
     with _registration_lock:
-        PipelineRegistry.clear()
+        get_default_registry().clear()
         _factories_registered = False
 
 
