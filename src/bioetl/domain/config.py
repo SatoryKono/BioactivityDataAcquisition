@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from bioetl.domain.filter_config import GoldFilterConfig
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class DQConfig:
     """Configuration for Data Quality thresholds.
 
@@ -63,7 +63,7 @@ class DQConfig:
             )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class TableConfig:
     """Configuration for database tables and keys.
 
@@ -91,7 +91,7 @@ class TableConfig:
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class PipelineConfig:
     """Immutable pipeline configuration.
 
@@ -173,7 +173,7 @@ class PipelineConfig:
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class RuntimeConfig:
     """Runtime execution parameters.
 

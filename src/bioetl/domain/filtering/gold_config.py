@@ -16,7 +16,7 @@ from bioetl.domain.filtering.list_filters import (
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GoldFilterConfig:
     """Полная конфигурация Gold фильтров.
 
