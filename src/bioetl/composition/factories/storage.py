@@ -20,4 +20,16 @@ from __future__ import annotations
 from .storage_adapter import StorageAdapter
 from .storage_factory import StorageContext, StorageFactory
 
-__all__ = ["StorageAdapter", "StorageContext", "StorageFactory"]
+# Re-export writers for test patching compatibility
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
+__all__ = [
+    "StorageAdapter",
+    "StorageContext",
+    "StorageFactory",
+    "BronzeWriter",
+    "DeltaWriter",
+    "GoldWriter",
+]
