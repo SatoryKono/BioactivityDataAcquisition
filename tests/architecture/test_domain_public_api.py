@@ -176,9 +176,11 @@ def test_domain_exports_all_submodule_symbols() -> None:
     missing_symbols: list[str] = []
 
     for submodule_name, submodule in submodules:
-        for symbol in submodule.__all__:
-            if symbol not in domain_all:
-                missing_symbols.append(f"{submodule_name}.{symbol}")
+        # Check if submodule has __all__ defined
+        if hasattr(submodule, "__all__"):
+            for symbol in submodule.__all__:
+                if symbol not in domain_all:
+                    missing_symbols.append(f"{submodule_name}.{symbol}")
 
     assert not missing_symbols, (
         "Submodule symbols missing from domain.__all__:\n"

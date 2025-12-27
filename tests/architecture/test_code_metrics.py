@@ -260,7 +260,7 @@ class TestClassSize:
         "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "PreflightService": 500,  # 495 lines - preflight validation service
-        "BronzeWriter": 340,  # 335 lines - JSONL + zstd compression writer with metrics
+        "BronzeWriter": 380,  # 375 lines - JSONL + zstd compression writer with metrics and JSON validation
         # Test classes exemptions
         "TestCliCommands": 350, # Test class with many test cases
         "TestFileSizeLimits": 350, # Test class with many exemptions
