@@ -96,6 +96,23 @@ def e2e_pipeline_limit() -> int:
     return 10
 
 
+@pytest.fixture
+def e2e_temp_storage(tmp_path: Path) -> dict[str, Path]:
+    """Temporary storage paths for E2E tests.
+
+    Returns dict with bronze, silver, gold, and checkpoints paths.
+    """
+    paths = {
+        "bronze": tmp_path / "bronze",
+        "silver": tmp_path / "silver",
+        "gold": tmp_path / "gold",
+        "checkpoints": tmp_path / "checkpoints",
+    }
+    for path in paths.values():
+        path.mkdir(parents=True, exist_ok=True)
+    return paths
+
+
 def create_test_context(
     pipeline_name: str,
     limit: int | None = 10,
