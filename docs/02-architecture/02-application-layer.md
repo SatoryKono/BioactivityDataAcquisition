@@ -33,16 +33,17 @@
 7.  **Обновление чекпоинта:** Сохраняет новое состояние через `CheckpointPort`.
 8.  **Освобождение блокировки:** Снимает блокировку через `LockPort`.
 
-### 2.2. `core/` — Ядро Приложения
+### 2.2. `core/` — Базовые Абстракции
 
 **Расположение:** `src/bioetl/application/core/`
 
-Содержит общие компоненты, используемые несколькими пайплайнами:
+Содержит базовые классы и общие компоненты, используемые пайплайнами:
 
-- **`BasePipeline`** — Базовый класс для всех пайплайнов
-- **`BaseTransformer`** — Базовый класс для трансформеров (Template Method паттерн)
-- **`PipelineRunner`** — Координатор исполнения пайплайна
-- **`RecordProcessor`** — Обработка batch-ов записей через Bronze→Silver→Gold
+- **`BasePipeline`** (`base.py`) — Базовый класс для всех пайплайнов
+- **`BaseTransformer`** (`base_transformer.py`) — Базовый класс для трансформеров (Template Method паттерн)
+- **`RecordProcessor`** (`record_processor.py`) — Обработка batch-ов записей через Bronze→Silver→Gold
+
+Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--ядро-исполнения-пайплайнов).
 
 ### 2.3. Трансформеры (Transformer DI)
 
@@ -79,17 +80,38 @@ factory = GenericPipelineFactory(
 | UniProt | `UniProtProteinTransformer` | `pipelines/uniprot/transformer.py` |
 | PubMed | `PubMedPublicationTransformer` | `pipelines/pubmed/transformer.py` |
 
-### 2.4. `orchestration/` — Оркестрация Исполнения
+### 2.4. `core/` — Ядро Исполнения Пайплайнов
 
-**Расположение:** `src/bioetl/application/orchestration/`
+**Расположение:** `src/bioetl/application/core/`
 
-Содержит компоненты, отвечающие за *запуск* и *координацию* выполнения пайплайна (Driving Adapters logic).
+Содержит компоненты, отвечающие за *запуск*, *координацию* и *исполнение* пайплайнов.
 
-**Ключевой компонент:** `PipelineRunner`
-- Координирует создание блокировок (`LockManager`).
-- Инициализирует наблюдаемость (`PipelineObserver`).
-- Запускает выполнение пайплайна через `PipelineExecutor`.
-- Управляет жизненным циклом (загрузка/удаление чекпоинтов).
+**Ключевые компоненты:**
+
+| Файл | Компонент | Назначение |
+|------|-----------|------------|
+| `runner.py` | `PipelineRunner` | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
+| `executor.py` | `PipelineExecutor` | Координирует data flow: извлечение → трансформация → запись |
+| `lifecycle_orchestrator.py` | `LifecycleOrchestrator` | Управляет очисткой Silver/Gold слоёв по политике |
+| `runner_services.py` | `RunnerServices` | DI bundle сервисов для PipelineRunner |
+
+**`PipelineRunner`** — координатор исполнения:
+- Делегирует блокировку через `LockManager`
+- Запускает preflight-валидацию через `PreflightService`
+- Исполняет пайплайн через `PipelineExecutor`
+- Управляет postrun-операциями через `PostrunService`
+- Оркестрирует очистку слоёв через `LifecycleOrchestrator`
+
+**`RunnerServices`** — frozen dataclass, bundling зависимостей:
+```python
+@dataclass(frozen=True)
+class RunnerServices:
+    lock_manager: LockManager
+    preflight: PreflightService
+    postrun: PostrunService
+    lifecycle_orch: LifecycleOrchestrator
+    observer: PipelineObserver
+```
 
 ## 3. Принципы Работы
 
