@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.6 (Anti-False-Claims Protocol), 2025-12-27* 
+*Версия: 5.7 (Medallion & Determinism Update), 2025-12-27*
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -100,7 +100,23 @@ class MyAdapter:
 - Формат файлов (JSONL) зафиксирован в версии пути (`/v1/`).
 - Изменение формата требует новой ветки (`/v2/`). Миграция "in-place" запрещена.
  
-### 2.1.1. Инфраструктура Delta Lake 
+#### 2.1.1. Silver Write Modes (Режимы Записи)
+Режимы записи для Silver слоя строго типизированы (`SilverWriteMode` enum):
+- **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.
+- **APPEND**: Вставка новых записей без проверки дубликатов.
+- **DELETE**: Полная перезапись таблицы (удаление и вставка).
+
+**Валидация**:
+- Попытка использовать режим `OVERWRITE` (не `DELETE`) вызовет ошибку.
+- Нарушение инвариантов Medallion (например, Append для данных требующих идемпотентности) логируется как `PolicyViolation`.
+
+#### 2.1.2. Gold Write Modes (Режимы Записи)
+Режимы записи для Gold слоя строго типизированы (`GoldWriteMode` enum):
+- **OVERWRITE**: Полная перезапись витрины. Стандарт для агрегатов.
+- **APPEND**: Добавление новых партиций (для timeseries данных).
+- **SCD2**: Slowly Changing Dimensions Type 2 (историчность). Требует `scd_config` (ключи, valid_from/to).
+
+### 2.1.3. Инфраструктура Delta Lake
 - **Engine**: Использовать `delta-rs` (Rust core) для Python-воркеров для производительности. 
 - **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1. 
 - **Maintenance**: Обязательный запуск `VACUUM` с `retention_period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения. **VACUUM MUST** запускаться еженедельно.
@@ -397,7 +413,11 @@ from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 class NewProviderAdapter(BaseHttpAdapter):
-    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort):
+    def __init__(
+        self,
+        http_client: UnifiedHTTPClient,
+        logger: LoggerPort,
+    ):
         super().__init__(http_client, logger)
         self.provider_name = "new_provider"
 ```
@@ -611,6 +631,20 @@ async with services:  # __aenter__ инициализирует ресурсы
 ## 6. Документация (Автоматизация — приоритет) 
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs). 
 - **Именование**: Зеркальное (`src/bioetl/.../{provider}/` <-> `docs/providers/{provider}/`). 
+
+## 6.1. Детерминизм и Воспроизводимость
+
+**Детерминизм** — это гарантия того, что при одинаковых входных данных (source data, config) пайплайн всегда произведет идентичные выходные данные и побочные эффекты.
+
+#### MUST (Обязательно)
+1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
+2. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion_ts`, `processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
+3. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL).
+4. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
+
+**Проверка**:
+- `tests/architecture/test_no_random_in_writers.py`
+- `tests/architecture/test_no_datetime_now_in_infrastructure.py`
  
 ## 7. Протокол Архитектурных Обзоров
 
@@ -981,6 +1015,7 @@ fields:
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
 
 ## История Изменений (Changelog)
+- **5.7** (2025-12-27): Medallion & Determinism Update (Фаза 5). Добавлена §6.1 "Детерминизм и Воспроизводимость". Добавлены секции §2.1.1 и §2.1.2 с описанием режимов записи `SilverWriteMode` и `GoldWriteMode`.
 - **5.6** (2025-12-27): Anti-False-Claims Protocol (REQ-ARCH-041). Расширена §7 с детальными правилами анализа делегирования (§7.1.6), причинами ложных утверждений (§7.1.5), контрпримерами (ChemblAdapter, GoldWriter, PreflightService). Добавлены конкретные примеры из кодовой базы в §7.1.4.
 - **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
