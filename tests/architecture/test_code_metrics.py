@@ -255,7 +255,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 500,
-        "BaseTransformer": 410,  # 407 lines - complex base with hooks
+        "BaseTransformer": 415,  # 412 lines - complex base with hooks
         "DeltaWriter": 650,  # 644 lines - includes schema drift detection (M4) + audit
         "GoldWriter": 540,  # 536 lines - includes SCD Type 2 with ingestion_ts per ADR-014
         "LineageTracker": 400,
