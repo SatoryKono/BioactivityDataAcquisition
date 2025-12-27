@@ -50,6 +50,7 @@ class TestFileSizeLimits:
         # Infrastructure layer exemptions
         "delta_writer.py": 750,  # 712+ LOC - schema drift detection + merge logic + audit
         "gold_writer.py": 650,  # 637 LOC - SCD Type 2 with complex merge logic
+        "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         # Interfaces layer exemptions
         "cli.py": 450,  # 420 LOC - CLI commands and options
     }
@@ -265,7 +266,7 @@ class TestClassSize:
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 350,  # 344 lines - postrun cleanup and metrics
-        "BronzeWriter": 410,  # 399 lines - JSONL + zstd compression writer with metrics and JSON validation
+        "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
         # Test classes exemptions
         "TestCliCommands": 350,  # Test class with many test cases
         "TestFileSizeLimits": 350,  # Test class with many exemptions
