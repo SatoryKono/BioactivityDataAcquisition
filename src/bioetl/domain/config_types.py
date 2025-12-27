@@ -9,8 +9,7 @@ Implements RULES.md §1 - Domain Layer with pure types.
 
 from __future__ import annotations
 
-from typing import Literal, NotRequired, Required, TypedDict
-
+from typing import Literal, Required, TypedDict
 
 # =============================================================================
 # Gold Filter Configuration TypedDicts

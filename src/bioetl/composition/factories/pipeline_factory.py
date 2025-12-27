@@ -33,7 +33,6 @@ from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_do
 
 if TYPE_CHECKING:
     import pyarrow as pa
-    import structlog
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
@@ -44,6 +43,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         DataSourcePort,
         DQMonitorPort,
+        LoggerPort,
         MetricsPort,
         TracingPort,
     )
@@ -128,7 +128,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create data source using the configured creator."""
@@ -139,7 +139,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
     def build_services(
         self,
         settings: Settings,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -162,7 +162,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         run_id: RunID,
         runtime: RuntimeConfig,
         settings: Settings,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -254,7 +254,7 @@ def _create_data_source(
     create_data_source_fn: DataSourceCreator,
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
-    logger: structlog.BoundLogger,
+    logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
 ) -> DataSourcePort:
     """Create data source using the provided creator function.
@@ -276,7 +276,7 @@ def build_pipeline_services(
     pipeline_name: str,
     create_data_source_fn: DataSourceCreator,
     settings: Settings,
-    logger: structlog.BoundLogger,
+    logger: LoggerPort,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
@@ -321,7 +321,7 @@ def create_pipeline_with_services(
     run_id: RunID,
     runtime: RuntimeConfig,
     settings: Settings,
-    logger: structlog.BoundLogger,
+    logger: LoggerPort,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
