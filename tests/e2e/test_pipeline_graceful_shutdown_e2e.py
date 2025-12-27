@@ -17,15 +17,11 @@ from __future__ import annotations
 import asyncio
 import signal
 from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
+from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType
 
 
 @pytest.mark.e2e
