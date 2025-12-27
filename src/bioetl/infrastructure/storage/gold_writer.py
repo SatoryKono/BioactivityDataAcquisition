@@ -63,7 +63,7 @@ class GoldWriter:
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
         tracing: TracingPort | None = None,
-        require_lock: bool = False,
+        require_lock: bool = True,
     ) -> None:
         """Initialize Gold writer.
 
@@ -76,9 +76,8 @@ class GoldWriter:
             tracing: Optional TracingPort for distributed tracing.
                     Use NoOpTracing from composition layer if tracing disabled.
             require_lock: If True, write operations require valid LockContext.
-                         Set to False for testing or non-concurrent scenarios.
-                         Default is False for backward compatibility. Set to True
-                         in production per RULES.md §3.3.
+                         Default is True per RULES.md §3.3.
+                         Set to False only for testing or non-concurrent scenarios.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.

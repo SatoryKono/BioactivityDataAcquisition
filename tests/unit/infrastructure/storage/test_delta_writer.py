@@ -47,7 +47,7 @@ class TestDeltaWriterInit:
         """Test that trailing slash is stripped from base_path."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/path/", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/path/", logger=noop_logger, require_lock=False)
         assert writer.base_path == "s3://bucket/path"
 
     def test_init_with_csv_exporter(self, noop_logger):
@@ -58,7 +58,7 @@ class TestDeltaWriterInit:
 
         mock_exporter = MagicMock()
         writer = DeltaWriter(
-            base_path="/tmp/silver", logger=noop_logger, csv_exporter=mock_exporter
+            base_path="/tmp/silver", logger=noop_logger, csv_exporter=mock_exporter, require_lock=False
         )
         assert writer.csv_exporter is mock_exporter
 
@@ -66,7 +66,7 @@ class TestDeltaWriterInit:
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         assert writer.csv_exporter is None
 
 
@@ -81,7 +81,7 @@ class TestDeltaWriterValidation:
 
         import pyarrow as pa
 
-        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger, require_lock=False)
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -109,7 +109,7 @@ class TestDeltaWriterValidation:
 
         import pyarrow as pa
 
-        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger, require_lock=False)
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
@@ -126,7 +126,7 @@ class TestDeltaWriterValidation:
         """Test write_silver raises ValueError for missing metadata."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger, require_lock=False)
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
         import pyarrow as pa
@@ -146,7 +146,7 @@ class TestDeltaWriterValidation:
         """Test write_silver raises ValueError when _run_id is missing."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger, require_lock=False)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -206,7 +206,7 @@ class TestDeltaWriterWriteModeEnum:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
         assert writer._validate_write_mode("append") == SilverWriteMode.APPEND
@@ -227,7 +227,7 @@ class TestDeltaWriterTablePath:
         """Test table path is constructed correctly."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
         # Access internal path construction
         table_name = "chembl.activity"
@@ -240,7 +240,7 @@ class TestDeltaWriterTablePath:
         """Test table path with nested table name."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
         table_name = "provider.schema.table"
         expected_path = "s3://bucket/silver/provider/schema/table"
@@ -300,7 +300,7 @@ class TestDeltaWriterVacuum:
             "file2.parquet",
         ]
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         result = await writer.vacuum("test.table", retention_hours=168)
 
         assert len(result) == 2
@@ -318,7 +318,7 @@ class TestDeltaWriterVacuum:
         mock_delta_table.return_value = mock_table_instance
         mock_table_instance.vacuum.return_value = ["file1.parquet"]
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         await writer.vacuum("test.table", retention_hours=24, dry_run=True)
 
         mock_table_instance.vacuum.assert_called_once_with(
@@ -337,7 +337,7 @@ class TestDeltaWriterVacuum:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(TableNotFoundError):
                 await writer.vacuum("nonexistent.table")
@@ -362,7 +362,7 @@ class TestDeltaWriterOptimize:
             "numFilesRemoved": 5,
         }
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         result = await writer.optimize("test.table")
 
         assert result["numFilesRemoved"] == 5
@@ -380,7 +380,7 @@ class TestDeltaWriterOptimize:
         mock_table_instance.optimize = mock_optimize
         mock_optimize.compact.return_value = {}
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         await writer.optimize("test.table", partition_filters=[("year", "=", 2025)])
 
         mock_optimize.compact.assert_called_once_with(
@@ -399,7 +399,7 @@ class TestDeltaWriterOptimize:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(TableNotFoundError):
                 await writer.optimize("nonexistent.table")
@@ -424,7 +424,7 @@ class TestDeltaWriterGetTableInfo:
         mock_table_instance.schema.return_value = mock_schema
         mock_table_instance.metadata.return_value = {"id": "test-table"}
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         result = await writer.get_table_info("test.table")
 
         assert result["version"] == 10
@@ -442,7 +442,7 @@ class TestDeltaWriterGetTableInfo:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(TableNotFoundError):
                 await writer.get_table_info("nonexistent.table")
@@ -461,7 +461,7 @@ class TestDeltaWriterTimeTravel:
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         result = await writer.time_travel("test.table", version=5)
 
         assert result == mock_table_instance
@@ -478,7 +478,7 @@ class TestDeltaWriterTimeTravel:
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
         ts = datetime(2025, 1, 1, 12, 0, 0)
         result = await writer.time_travel("test.table", timestamp=ts)
 
@@ -491,7 +491,7 @@ class TestDeltaWriterTimeTravel:
 
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
         with pytest.raises(ValueError, match="Specify either version or timestamp"):
             await writer.time_travel(
@@ -503,7 +503,7 @@ class TestDeltaWriterTimeTravel:
         """Test time_travel raises ValueError when neither version nor timestamp given."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
         with pytest.raises(
             ValueError, match="Must specify either version or timestamp"
@@ -522,7 +522,7 @@ class TestDeltaWriterTimeTravel:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(TableNotFoundError):
                 await writer.time_travel("nonexistent.table", version=1)
@@ -567,7 +567,7 @@ class TestDeltaWriterErrorHandling:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             delta_table_mock,
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
@@ -620,7 +620,7 @@ class TestDeltaWriterErrorHandling:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             delta_table_mock,
         ):
-            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(MergeConflictError):
                 await writer.write_silver(
@@ -646,7 +646,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
             result = await writer._get_table_schema("test.table")
             assert result is None
 
@@ -670,7 +670,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
             result = await writer._get_table_schema("test.table")
             assert result == expected_schema
 
@@ -696,7 +696,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
                 await writer._check_schema_drift("test.table", valid_records, "error")
@@ -743,7 +743,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
                 await writer._check_schema_drift("test.table", records, "error")
@@ -771,7 +771,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise
             await writer._check_schema_drift("test.table", valid_records, "evolve")
@@ -796,7 +796,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise
             await writer._check_schema_drift("test.table", valid_records, "ignore")
@@ -831,7 +831,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise even in error mode
             await writer._check_schema_drift("test.table", valid_records, "error")
@@ -847,7 +847,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise for new table
             await writer._check_schema_drift("test.table", valid_records, "error")
@@ -870,7 +870,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise for empty records
             await writer._check_schema_drift("test.table", [], "error")
@@ -920,7 +920,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # write_silver with on_schema_mismatch="error" should raise
             with pytest.raises(SchemaEvolutionError) as exc_info:
@@ -947,7 +947,7 @@ class TestDeltaWriterWriteModePolicy:
         from bioetl.domain.medallion import WriteModePolicy
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         assert isinstance(writer._write_policy, WriteModePolicy)
 
     def test_init_with_custom_policy(self, noop_logger):
@@ -960,6 +960,7 @@ class TestDeltaWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             write_policy=custom_policy,
+            require_lock=False,
         )
         assert writer._write_policy is custom_policy
 
@@ -972,6 +973,7 @@ class TestDeltaWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
+            require_lock=False,
         )
         assert writer._metrics is mock_metrics
 
@@ -983,7 +985,7 @@ class TestDeltaWriterWriteModePolicy:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         result = writer._to_policy_write_mode(SilverWriteMode.MERGE)
         assert result == WriteMode.MERGE
 
@@ -995,7 +997,7 @@ class TestDeltaWriterWriteModePolicy:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         result = writer._to_policy_write_mode(SilverWriteMode.APPEND)
         assert result == WriteMode.APPEND
 
@@ -1007,7 +1009,7 @@ class TestDeltaWriterWriteModePolicy:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         result = writer._to_policy_write_mode(SilverWriteMode.DELETE)
         assert result == WriteMode.OVERWRITE
 
@@ -1018,7 +1020,7 @@ class TestDeltaWriterWriteModePolicy:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         # Should not raise
         writer._enforce_write_policy(SilverWriteMode.MERGE, "test.table")
 
@@ -1029,7 +1031,7 @@ class TestDeltaWriterWriteModePolicy:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         # Should not raise
         writer._enforce_write_policy(SilverWriteMode.APPEND, "test.table")
 
@@ -1041,7 +1043,7 @@ class TestDeltaWriterWriteModePolicy:
             SilverWriteMode,
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
         with pytest.raises(PolicyViolationError) as exc_info:
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
         assert "silver does not allow overwrite" in str(exc_info.value)
@@ -1059,6 +1061,7 @@ class TestDeltaWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
+            require_lock=False,
         )
 
         with pytest.raises(PolicyViolationError):
@@ -1079,7 +1082,7 @@ class TestDeltaWriterWriteModePolicy:
         )
 
         mock_logger = MagicMock()
-        writer = DeltaWriter(base_path="/tmp/silver", logger=mock_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=mock_logger, require_lock=False)
 
         with pytest.raises(PolicyViolationError):
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
@@ -1118,7 +1121,7 @@ class TestDeltaWriterWriteModePolicy:
             ]
         )
 
-        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
         with pytest.raises(PolicyViolationError) as exc_info:
             await writer.write_silver(
@@ -1160,7 +1163,7 @@ class TestDeltaWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.delta_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise PolicyViolationError
             await writer.write_silver(
@@ -1204,7 +1207,7 @@ class TestDeltaWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.delta_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger, require_lock=False)
 
             # Should not raise PolicyViolationError
             await writer.write_silver(
@@ -1244,6 +1247,7 @@ class TestDeltaWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
+            require_lock=False,
         )
 
         with pytest.raises(PolicyViolationError):

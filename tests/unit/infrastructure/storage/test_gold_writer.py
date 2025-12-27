@@ -23,7 +23,7 @@ def noop_logger():
 @pytest.fixture
 def gold_writer(noop_logger):
     """Create a GoldWriter instance."""
-    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
+    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger, require_lock=False)
 
 
 @pytest.fixture
@@ -104,7 +104,7 @@ class TestGoldWriterInit:
 
     def test_init_strips_trailing_slash(self, noop_logger):
         """Test that trailing slash is stripped from base_path."""
-        writer = GoldWriter(base_path="s3://bucket/gold/", logger=noop_logger)
+        writer = GoldWriter(base_path="s3://bucket/gold/", logger=noop_logger, require_lock=False)
         assert writer.base_path == "s3://bucket/gold"
 
     def test_init_with_csv_exporter(self, noop_logger):
@@ -113,13 +113,13 @@ class TestGoldWriterInit:
 
         mock_exporter = MagicMock()
         writer = GoldWriter(
-            base_path="/tmp/gold", logger=noop_logger, csv_exporter=mock_exporter
+            base_path="/tmp/gold", logger=noop_logger, csv_exporter=mock_exporter, require_lock=False
         )
         assert writer.csv_exporter is mock_exporter
 
     def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
-        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
+        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger, require_lock=False)
         assert writer.csv_exporter is None
 
 
