@@ -72,7 +72,7 @@ class HealthAggregator:
 
         component_results: list[ComponentHealthResult] = []
         for result in results:
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 # Convert exceptions to UNHEALTHY status
                 component_results.append(
                     ComponentHealthResult(
@@ -83,6 +83,7 @@ class HealthAggregator:
                     )
                 )
             else:
+                # result is ComponentHealthResult after exception check
                 component_results.append(result)
 
         report = HealthReport(results=component_results)

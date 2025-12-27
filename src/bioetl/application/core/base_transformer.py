@@ -21,11 +21,12 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.domain.transformations import generate_content_hash
+from bioetl.domain.types import ContentHash, EntityID
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
-    from bioetl.domain.types import BronzeRecord, ContentHash, SilverRecord
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 T = TypeVar("T", bound="BaseEntity")
 
@@ -434,8 +435,8 @@ class BaseTransformer(ABC):
 
         """
         return entity_class(
-            entity_id=entity_id,
-            content_hash=content_hash,
+            entity_id=EntityID(entity_id),
+            content_hash=ContentHash(content_hash),
             run_id=context.run_id,
             run_type=context.run_type,
             source_batch_id=None,
