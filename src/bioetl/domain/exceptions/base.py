@@ -109,9 +109,18 @@ class CriticalError(BioETLError):
     system resource exhaustion.
     """
 
-    # Default for CriticalError subclasses that don't override
     @classmethod
     def get_error_type(cls) -> ErrorType:
+        """Get the default error type for critical errors.
+
+        Returns:
+            ErrorType.DB_UNAVAILABLE as the default for CriticalError subclasses
+            that don't define their own error_type. This signals that the error
+            is fatal and the pipeline should stop immediately.
+
+        Note:
+            Subclasses may override by defining a class-level error_type attribute.
+        """
         from bioetl.domain.types import ErrorType
 
         return getattr(cls, "error_type", ErrorType.DB_UNAVAILABLE)
@@ -126,6 +135,16 @@ class RecoverableError(BioETLError):
 
     @classmethod
     def get_error_type(cls) -> ErrorType:
+        """Get the default error type for recoverable errors.
+
+        Returns:
+            ErrorType.NETWORK_ERROR as the default for RecoverableError subclasses
+            that don't define their own error_type. This signals that the error
+            is transient and retry with exponential backoff is appropriate (§3.1.3).
+
+        Note:
+            Subclasses may override by defining a class-level error_type attribute.
+        """
         from bioetl.domain.types import ErrorType
 
         return getattr(cls, "error_type", ErrorType.NETWORK_ERROR)
@@ -141,6 +160,16 @@ class DataQualityError(BioETLError):
 
     @classmethod
     def get_error_type(cls) -> ErrorType:
+        """Get the default error type for data quality errors.
+
+        Returns:
+            ErrorType.INVALID_DATA as the default for DataQualityError subclasses
+            that don't define their own error_type. This signals that the record
+            should be quarantined (§2.6) and processing should continue.
+
+        Note:
+            Subclasses may override by defining a class-level error_type attribute.
+        """
         from bioetl.domain.types import ErrorType
 
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)

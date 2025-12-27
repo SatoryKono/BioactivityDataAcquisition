@@ -29,6 +29,21 @@ def setup_shutdown_handlers(
     """
 
     def signal_handler(signum: int, _: Any) -> None:
+        """Handle OS termination signals for graceful shutdown.
+
+        This callback is registered with signal.signal() for SIGTERM and SIGINT.
+        When triggered, it logs the signal (if logger available) and requests
+        application shutdown via the ShutdownSignal instance.
+
+        Args:
+            signum: The signal number received (e.g., SIGTERM=15, SIGINT=2).
+            _: Stack frame (unused, required by signal handler signature).
+
+        Note:
+            Logger is optional to support testing scenarios where logging
+            infrastructure may not be available. See ADR-008 for graceful
+            shutdown strategy details.
+        """
         if logger is not None:
             logger.warning(
                 "Received signal, initiating graceful shutdown",
