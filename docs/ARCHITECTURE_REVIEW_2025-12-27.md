@@ -1,6 +1,6 @@
 # Архитектурный Обзор BioETL
 
-*Дата: 2025-12-27 | Версия: 1.0 | Автор: Claude (Architecture Review)*
+*Дата: 2025-12-27 | Версия: 2.0 | Автор: Claude Opus 4.5 (Architecture Review)*
 
 > **Метод**: Двойная верификация согласно `RULES.md` §7 (REQ-ARCH-040)
 > **Инструменты**: Статический анализ кода, grep/wc -l, чтение ключевых файлов
@@ -48,11 +48,11 @@
 
 | Артефакт | Количество | Описание |
 |----------|------------|----------|
-| **ADR** | 19 | Architecture Decision Records |
-| **RULES.md** | 1 | Конституция проекта (v5.6) |
-| **CLAUDE.md** | 1 | Справочник для AI |
+| **ADR** | 20 | Architecture Decision Records (ADR-001 → ADR-020) |
+| **RULES.md** | 1 | Конституция проекта (v5.7) |
+| **CLAUDE.md** | 1 | Справочник для AI с протоколом верификации |
 | **AGENT.md** | 1 | Инструкции агента (v2.3) |
-| **REFACTORING_PLAN.md** | 1 | План рефакторинга (v5.3) |
+| **REFACTORING_PLAN.md** | 1 | План рефакторинга с верифицированным статусом |
 
 ---
 
@@ -86,7 +86,7 @@
 | 7 | **Наблюдаемость** | 8% | **8** | 0.64 | Prometheus metrics. Structured logging (structlog). Tracing spans. DQ Monitor. Но: трейсинг опционален, не enforced. |
 | 8 | **Производительность** | 6% | **7** | 0.42 | Async I/O. Batch processing. Rate limiting (TokenBucket). Но: нет бенчмарков в CI, профилирование не автоматизировано. |
 | 9 | **Безопасность** | 7% | **8** | 0.56 | Secrets через env vars. PII hashing в Silver. VCR sanitization. Но: нет security audit в CI, threat model в docs неполный. |
-| 10 | **Документация** | 8% | **9** | 0.72 | 19 ADR. RULES.md (v5.6) с RFC 2119. Протокол верификации (REQ-ARCH-040). Docstrings в Google Style. |
+| 10 | **Документация** | 8% | **9** | 0.72 | 20 ADR. RULES.md (v5.7) с RFC 2119. Протокол верификации (REQ-ARCH-040). Docstrings в Google Style. |
 
 ### 3.3. Интегральный Балл
 
@@ -378,7 +378,7 @@
 1. **Чистая архитектура**: 5-слойная Hexagonal с enforcement через тесты
 2. **Строгий DI**: Composition Root, фабрики, сервис-бандлы
 3. **Обширное тестирование**: 2,369 тестов, ratio 1.83:1
-4. **Документация**: 19 ADR, RULES.md с RFC 2119
+4. **Документация**: 20 ADR, RULES.md v5.7 с RFC 2119
 5. **Протокол верификации**: REQ-ARCH-040 для предотвращения ложных утверждений
 
 ### 8.2. Области для Улучшения
