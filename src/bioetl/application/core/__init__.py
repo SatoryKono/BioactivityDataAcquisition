@@ -13,8 +13,18 @@ from __future__ import annotations
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+from bioetl.application.core.batch_transformer import (
+    BatchTransformer,
+    StreamingBatchProcessor,
+    TransformedRecord,
+    TransformResult,
+)
 from bioetl.application.core.batch_writer import BatchWriter
+from bioetl.application.core.memory_monitor import (
+    MemoryConfig,
+    MemoryMonitor,
+    MemoryStats,
+)
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.cleanup_service import (
     CleanupPreview,
@@ -69,6 +79,9 @@ __all__ = [
     "LayerInfo",
     "LifecycleOrchestrator",
     "LockManager",
+    "MemoryConfig",
+    "MemoryMonitor",
+    "MemoryStats",
     "WriteModePolicy",
     "PipelineConfig",
     "PipelineServices",
@@ -78,6 +91,8 @@ __all__ = [
     "QuarantineManager",
     "RuntimeConfig",
     "ShutdownSignal",
+    "StreamingBatchProcessor",
+    "TransformedRecord",
     "TransformResult",
     "VacuumResult",
     "WriteMode",
