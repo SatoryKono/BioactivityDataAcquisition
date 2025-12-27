@@ -267,6 +267,7 @@ class TestClassSize:
         "TestFunctionComplexity": 350, # Test class with many exemptions
         "TestFunctionLength": 350, # Test class with many exemptions
         "TestClassSize": 350, # Test class with many exemptions
+        "PipelineExecutor": 350, # Executor with tracing and metrics
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
