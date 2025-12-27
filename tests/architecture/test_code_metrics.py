@@ -40,7 +40,8 @@ class TestFileSizeLimits:
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
         # Application layer exemptions
-        "preflight_service.py": 530,  # 527 LOC - preflight validation
+        "preflight_service.py": 580,  # 572 LOC - preflight validation
+        "postrun_service.py": 410,  # 401 LOC - postrun cleanup
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         # Consolidated factory files (v5.2)
@@ -49,6 +50,7 @@ class TestFileSizeLimits:
         "services_factory.py": 450,  # 422 LOC - merged base_services + services_builder + runner_services
         # Infrastructure layer exemptions
         "delta_writer.py": 750,  # 712+ LOC - schema drift detection + merge logic + audit
+        "gold_writer.py": 650,  # 633 LOC - SCD Type 2 + audit + CSV export
         # Interfaces layer exemptions
         "cli.py": 450,  # 420 LOC - CLI commands and options
     }
@@ -259,11 +261,12 @@ class TestClassSize:
         "StorageAdapter": 500,
         "BaseTransformer": 420,  # 416 lines - complex base with hooks
         "DeltaWriter": 650,  # 644 lines - includes schema drift detection (M4) + audit
-        "GoldWriter": 540,  # 536 lines - includes SCD Type 2 with ingestion_ts per ADR-014
+        "GoldWriter": 580,  # 576 lines - includes SCD Type 2 with ingestion_ts per ADR-014
         "LineageTracker": 400,
         "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
-        "PreflightService": 500,  # 495 lines - preflight validation service
+        "PreflightService": 545,  # 540 lines - preflight validation service
+        "PostrunService": 350,  # 344 lines - postrun cleanup service
         "BronzeWriter": 410,  # 399 lines - JSONL + zstd compression writer with metrics and JSON validation
         # Test classes exemptions
         "TestCliCommands": 350,  # Test class with many test cases

@@ -6,7 +6,6 @@ from bioetl.domain.ports.noop import NoOpTracing as DomainNoOpTracing
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracer, NoOpTracing
 
 
-
 def test_reproduce_noop_tracer_issue():
     print("\nInfrastructure NoOpTracer start_as_current_span args:")
     sig = inspect.signature(NoOpTracer.start_as_current_span)

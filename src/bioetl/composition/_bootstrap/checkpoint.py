@@ -7,7 +7,6 @@ and their managers. Used primarily by CLI inspection operations.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
