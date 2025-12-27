@@ -99,7 +99,7 @@ class PipelineExecutor:
 
         # Use NoOpTracing if not provided
         if tracer is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
             self._tracer = NoOpTracing()
         else:
             self._tracer = tracer
