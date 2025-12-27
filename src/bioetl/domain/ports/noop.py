@@ -1,7 +1,7 @@
 """No-operation implementations for observability ports.
 
-Provides null object pattern implementations for TracingPort and MetricsPort
-when observability is not configured or not needed.
+Provides null object pattern implementations for TracingPort, MetricsPort,
+and AuditPort when observability is not configured or not needed.
 
 These implementations are in domain/ports (not infrastructure) because:
 - They have no I/O or external dependencies
@@ -9,17 +9,22 @@ These implementations are in domain/ports (not infrastructure) because:
 - They maintain layer separation per RULES.md import matrix
 
 Usage:
-    >>> from bioetl.domain.ports.noop import NoOpTracing, NoOpMetrics
+    >>> from bioetl.domain.ports.noop import NoOpTracing, NoOpMetrics, NoOpAudit
     >>> tracer = NoOpTracing()
     >>> metrics = NoOpMetrics()
+    >>> audit = NoOpAudit()
 """
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Self
 
 if TYPE_CHECKING:
     from types import TracebackType
+
+    from bioetl.domain.ports.audit import AuditEntry, AuditLayer
+    from bioetl.domain.types import RunID
 
 
 class _NoOpSpan:
@@ -172,5 +177,60 @@ class NoOpMetrics:
         pass
 
     def close(self) -> None:
+        """No-op close. Idempotent."""
+        pass
+
+
+class NoOpAudit:
+    """No-op implementation of AuditPort.
+
+    Used when audit logging is disabled or not configured.
+    All operations are silently ignored.
+
+    Implements:
+        AuditPort: Domain port for audit logging.
+
+    Example:
+        >>> audit = NoOpAudit()
+        >>> await audit.log_write(entry)  # no-op
+        >>> entries = await audit.get_entries()  # returns []
+
+    """
+
+    async def log_write(self, entry: AuditEntry) -> None:
+        """Log a write operation (no-op).
+
+        Args:
+            entry: The audit entry (ignored).
+
+        """
+        pass
+
+    async def get_entries(
+        self,
+        run_id: RunID | None = None,  # noqa: ARG002
+        layer: AuditLayer | None = None,  # noqa: ARG002
+        table_name: str | None = None,  # noqa: ARG002
+        start_time: datetime | None = None,  # noqa: ARG002
+        end_time: datetime | None = None,  # noqa: ARG002
+        limit: int = 100,  # noqa: ARG002
+    ) -> list[AuditEntry]:
+        """Query audit entries (no-op, returns empty list).
+
+        Args:
+            run_id: Filter by pipeline run ID (ignored).
+            layer: Filter by Medallion layer (ignored).
+            table_name: Filter by target table name (ignored).
+            start_time: Filter entries after this time (ignored).
+            end_time: Filter entries before this time (ignored).
+            limit: Maximum number of entries to return (ignored).
+
+        Returns:
+            Empty list.
+
+        """
+        return []
+
+    async def aclose(self) -> None:
         """No-op close. Idempotent."""
         pass

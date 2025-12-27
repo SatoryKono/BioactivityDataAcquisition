@@ -28,6 +28,8 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+
 T = TypeVar("T")
 
 if TYPE_CHECKING:
@@ -35,7 +37,7 @@ if TYPE_CHECKING:
 
     from pandera.polars import DataFrameSchema
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import AuditPort, LoggerPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -66,6 +68,7 @@ class GoldWriter:
         base_path: str | Path,
         logger: LoggerPort,
         csv_exporter: CsvExporter | None = None,
+        audit: AuditPort | None = None,
     ) -> None:
         """Initialize Gold writer.
 
@@ -73,6 +76,8 @@ class GoldWriter:
             base_path: Base path for Gold tables (local filesystem)
             logger: Structured logger for observability (MUST be injected)
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
+            audit: Optional AuditPort for write operation traceability.
+                  Use NoOpAudit from composition layer if audit disabled.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -80,6 +85,7 @@ class GoldWriter:
         self.base_path = str(base_path).rstrip("/")
         self.logger = logger
         self.csv_exporter = csv_exporter
+        self._audit = audit
 
     async def write_gold(
         self,
@@ -167,6 +173,62 @@ class GoldWriter:
                 primary_keys,
                 schema,
             )
+
+        # Log audit entry for write operation
+        if self._audit:
+            await self._log_gold_audit(
+                table_name=table_name,
+                records=records,
+                mode=validated_mode,
+                ingestion_ts=ingestion_ts,
+            )
+
+    async def _log_gold_audit(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        mode: GoldWriteMode,
+        ingestion_ts: datetime | None,
+    ) -> None:
+        """Log audit entry for Gold write operation.
+
+        Args:
+            table_name: Target table name
+            records: List of records written
+            mode: Write mode used
+            ingestion_ts: Ingestion timestamp (if provided)
+        """
+        from uuid import uuid4
+
+        from bioetl.domain.types import RunID
+
+        # For Gold layer, use provided ingestion_ts or current time
+        timestamp = datetime.now(UTC) if ingestion_ts is None else ingestion_ts
+
+        # Generate a run_id for Gold layer (Gold may not have run_id in records)
+        # Gold records typically come from aggregation/transformation
+        run_id = RunID(uuid4())
+
+        # Map GoldWriteMode to AuditOperation
+        operation_map = {
+            GoldWriteMode.OVERWRITE: AuditOperation.OVERWRITE,
+            GoldWriteMode.APPEND: AuditOperation.APPEND,
+            GoldWriteMode.SCD2: AuditOperation.MERGE,  # SCD2 is a type of merge
+        }
+        operation = operation_map[mode]
+
+        audit_entry = AuditEntry(
+            run_id=run_id,
+            timestamp=timestamp,
+            layer=AuditLayer.GOLD,
+            table_name=table_name,
+            operation=operation,
+            records_count=len(records),
+            metadata={
+                "write_mode": mode.value,
+            },
+        )
+        await self._audit.log_write(audit_entry)
 
     async def _run_in_executor(
         self, func: Callable[..., T], *args: Any
