@@ -62,6 +62,7 @@ class TestAssayTransformer:
         assert result["confidence_score"] == 9
         assert "entity_id" in result
         assert "content_hash" in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_assay_id(self, transformer, mock_context):
@@ -203,6 +204,7 @@ class TestDocumentTransformer:
         assert result["year"] == 2024
         assert "entity_id" in result
         assert "content_hash" in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_document_id(self, transformer, mock_context):
@@ -274,6 +276,7 @@ class TestMoleculeTransformer:
         assert result["max_phase"] == 4
         assert "entity_id" in result
         assert "content_hash" in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_molecule_id(self, transformer, mock_context):
@@ -462,6 +465,7 @@ class TestTargetTransformer:
         assert result["tax_id"] == 9606
         assert "entity_id" in result
         assert "content_hash" in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_target_id(self, transformer, mock_context):
@@ -715,6 +719,7 @@ class TestTargetComponentTransformer:
         assert result["tax_id"] == 9606
         assert "entity_id" in result
         assert "content_hash" in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_component_id(self, transformer, mock_context):
