@@ -14,10 +14,19 @@ def cli_runner():
     return CliRunner()
 
 
-def test_cli_rebuild_requires_confirmation(cli_runner):
+@pytest.fixture
+def mock_registry():
+    """Create a mock registry for CLI tests."""
+    mock = MagicMock()
+    mock.list_pipelines.return_value = ["test_pipe"]
+    mock.contains.return_value = True
+    return mock
+
+
+def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
     """Test that rebuild requires confirmation without --yes."""
     with patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner, \
-         patch("bioetl.composition.registry.PipelineRegistry.list_pipelines", return_value=["test_pipe"]):
+         patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry):
 
         result = cli_runner.invoke(cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild"])
 
@@ -27,10 +36,10 @@ def test_cli_rebuild_requires_confirmation(cli_runner):
         mock_create_runner.assert_not_called()
 
 
-def test_cli_rebuild_with_yes(cli_runner):
+def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
     with patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner, \
-         patch("bioetl.composition.registry.PipelineRegistry.list_pipelines", return_value=["test_pipe"]):
+         patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry):
 
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock()  # Make run awaitable
@@ -43,11 +52,11 @@ def test_cli_rebuild_with_yes(cli_runner):
         mock_create_runner.assert_called_once()
 
 
-def test_cli_dry_run_flag(cli_runner):
+def test_cli_dry_run_flag(cli_runner, mock_registry):
     """Test that --dry-run flag shows preview and does NOT execute pipeline."""
     with patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner, \
          patch("bioetl.interfaces.cli._preview_cleanup") as mock_preview, \
-         patch("bioetl.composition.registry.PipelineRegistry.list_pipelines", return_value=["test_pipe"]):
+         patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry):
 
         result = cli_runner.invoke(cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild", "--dry-run"])
 
