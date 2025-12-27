@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.5 | Дата: 2025-12-27*
+*Версия: 5.6 | Дата: 2025-12-27 | Обновлено: T1-T4 помечены как ✅ РЕАЛИЗОВАНО*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -15,7 +15,7 @@
 ## ⚠️ ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ
 
 > **ВАЖНО**: Перед постановкой задач сверьтесь с этой секцией!
-> Последняя верификация: 2025-12-27 (обновлено: добавлен протокол двойной верификации REQ-ARCH-040)
+> Последняя верификация: 2025-12-27 (обновлено: T1-T4 помечены ✅ РЕАЛИЗОВАНО)
 
 ### ✅ УЖЕ РЕАЛИЗОВАНО (не требует работы)
 
@@ -37,6 +37,10 @@
 | **M4: Schema drift** | `delta_writer.py:303-349` | `_check_schema_drift()` с параметром `on_schema_mismatch: Literal["error", "evolve", "ignore"]` |
 | **T5: Arch test datetime.now** | `tests/architecture/test_no_datetime_now_in_infrastructure.py` | 2 теста + список разрешённых исключений |
 | **O1: BaseTransformer tracing** | `base_transformer.py:125-187` | Tracing spans, duration histogram, error counters |
+| **T1: PipelineContext.started_at** | `context.py:109` | `started_at: datetime = field(default_factory=_now_utc)` |
+| **T2: RecordProcessor ingestion_ts** | `record_processor.py:91` | `ingestion_ts = self._context.started_at` |
+| **T3: BronzeWriter ingestion_ts** | `bronze_writer.py:211` | `ingestion_ts: datetime` (обязательный параметр) |
+| **T4: Quarantine ingestion_ts** | `unified.py:66` | `ingestion_ts: datetime` (keyword-only, required) |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -123,12 +127,12 @@
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              🟡 СРЕДНИЙ (Фаза 3) — Частично                      │
+│              ✅ СРЕДНИЙ (Фаза 3) — ЗАВЕРШЕНА                     │
 ├─────────────────────────────────────────────────────────────────┤
-│  ⏳ T1: PipelineContext.started_at                               │
-│  ⏳ T2: RecordProcessor                                          │
-│  ⏳ T3: BronzeWriter timestamp                                   │
-│  ⏳ T4: Quarantine timestamp                                     │
+│  ✅ T1: PipelineContext.started_at                              │
+│  ✅ T2: RecordProcessor                                         │
+│  ✅ T3: BronzeWriter timestamp                                  │
+│  ✅ T4: Quarantine timestamp                                    │
 │  ✅ T5: Arch test datetime.now                                  │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -534,207 +538,107 @@ class DeltaWriter:
 
 ---
 
-## Фаза 3: Единый Источник Времени и Run-Metadata 🟡
+## Фаза 3: Единый Источник Времени и Run-Metadata ✅ ЗАВЕРШЕНА
 
 ### Цель
 Все timestamp и metadata формируются в application слое и передаются вниз.
 
-### Проблема
-Временные метки создаются в разных местах (недетерминизм):
+### Статус: ✅ РЕАЛИЗОВАНО (2025-12-27)
 
-| Компонент | Файл:Строка | Проблема |
-|-----------|-------------|----------|
-| RecordProcessor | `record_processor.py:148` | `datetime.now(UTC)` — источник истины |
-| BronzeWriter | `bronze_writer.py:103` | **Дублирует** `datetime.now(UTC)` |
-| BaseEntity | `entities.py:36` | `datetime.now(UTC)` в factory |
-| Quarantine | `unified.py:89` | Отдельный `datetime.now(UTC)` |
+| Компонент | Статус | Верификация |
+|-----------|--------|-------------|
+| T1: PipelineContext.started_at | ✅ | `context.py:109` — `started_at: datetime = field(default_factory=_now_utc)` |
+| T2: RecordProcessor | ✅ | `record_processor.py:91` — `ingestion_ts = self._context.started_at` |
+| T3: BronzeWriter | ✅ | `bronze_writer.py:211` — `ingestion_ts: datetime` (обязательный параметр) |
+| T4: Quarantine | ✅ | `unified.py:66` — `ingestion_ts: datetime` (keyword-only) |
+| T5: Arch test | ✅ | `test_no_datetime_now_in_infrastructure.py` |
+
+**Дополнительные доказательства использования `context.started_at`:**
+- `base_transformer.py:505` — `ingestion_ts=context.started_at`
+- `batch_transformer.py:144,254` — `ingestion_ts=self._context.started_at`
+- `batch_writer.py:256` — `ingestion_ts=self._context.started_at`
 
 ---
 
-### T1: Расширение PipelineContext
+### T1: Расширение PipelineContext ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `context.py:109`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/domain/context.py`
 
-#### Текущее состояние (строки 13-34)
+#### Реализованное решение
+
+`PipelineContext` уже содержит `started_at` как обязательное поле с default factory:
 
 ```python
-@dataclass(frozen=True)
-class PipelineContext:
-    run_id: RunID
-    run_type: RunType
-    logger: LoggerPort
-    # ← Нет started_at
+# context.py:109
+started_at: datetime = field(default_factory=_now_utc)
 ```
 
-#### Требуемые изменения
-
-```python
-from datetime import UTC, datetime
-
-@dataclass(frozen=True)
-class PipelineContext:
-    """Context object for a pipeline run."""
-
-    run_id: RunID
-    run_type: RunType
-    logger: LoggerPort
-    started_at: datetime  # NEW: единый источник времени
-
-    @classmethod
-    def create(
-        cls,
-        run_id: RunID,
-        run_type: RunType,
-        logger: LoggerPort,
-        started_at: datetime | None = None,
-    ) -> "PipelineContext":
-        """Create context with automatic timestamp if not provided."""
-        return cls(
-            run_id=run_id,
-            run_type=run_type,
-            logger=logger,
-            started_at=started_at or datetime.now(UTC),
-        )
-
-    def bind_logger(self, **kwargs: Any) -> "PipelineContext":
-        """Bind additional context to the logger."""
-        new_logger = self.logger.bind(**kwargs)
-        return PipelineContext(
-            run_id=self.run_id,
-            run_type=self.run_type,
-            logger=new_logger,
-            started_at=self.started_at,  # Preserve timestamp
-        )
-```
+Метод `create()` принимает `started_at` как опциональный параметр для внешней инициализации.
 
 ---
 
-### T2: Использование context.started_at в RecordProcessor
+### T2: Использование context.started_at в RecordProcessor ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `record_processor.py:91`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/application/core/record_processor.py`
 
-#### Текущее состояние (строка 148)
+#### Реализованное решение
+
+`RecordProcessor` использует `context.started_at` как единый источник времени:
 
 ```python
-async def process_batch(
-    self,
-    records: list[dict[str, Any]],
-    batch_id: BatchID,
-) -> BatchResult:
-    ingestion_ts = datetime.now(UTC)  # ← Создаёт новый timestamp
-```
-
-#### Требуемые изменения
-
-```python
-async def process_batch(
-    self,
-    records: list[dict[str, Any]],
-    batch_id: BatchID,
-) -> BatchResult:
-    # Использовать timestamp из контекста для консистентности
-    ingestion_ts = self._context.started_at  # ← Единый источник
+# record_processor.py:91
+ingestion_ts = self._context.started_at
 ```
 
 ---
 
-### T3: Удаление datetime.now() из BronzeWriter
+### T3: Удаление datetime.now() из BronzeWriter ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `bronze_writer.py:211`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/infrastructure/storage/bronze_writer.py`
 
-#### Текущее состояние (строка 103)
+#### Реализованное решение
+
+`BronzeWriter.write_bronze()` принимает `ingestion_ts` как обязательный параметр:
 
 ```python
-async def write_bronze(
-    self,
-    records: Iterator[bytes],
-    provider: str,
-    entity: str,
-    date: datetime,
-    batch_id: BatchID,
-    run_id: RunID,
-    run_type: RunType,
-) -> Path:
-    ...
-    ingestion_ts = datetime.now(UTC)  # ← Дублирует timestamp!
+# bronze_writer.py:211
+ingestion_ts: datetime  # обязательный параметр
 ```
 
-#### Требуемые изменения
-
-Добавить `ingestion_ts` как обязательный параметр:
-
-```python
-async def write_bronze(
-    self,
-    records: Iterator[bytes],
-    provider: str,
-    entity: str,
-    date: datetime,
-    batch_id: BatchID,
-    run_id: RunID,
-    run_type: RunType,
-    ingestion_ts: datetime,  # NEW: передаётся из application слоя
-) -> Path:
-    ...
-    # Удалить: ingestion_ts = datetime.now(UTC)
-    metadata = {
-        "run_id": str(run_id),
-        "run_type": run_type.value,
-        "ingestion_ts": ingestion_ts.isoformat(),  # Используем переданный
-        ...
-    }
-```
-
-#### Обновление вызовов
-
-**Файл:** `src/bioetl/application/core/record_processor.py:255-263`
-
-```python
-await self._storage.write_bronze(
-    records=record_bytes,
-    provider=self._provider,
-    entity=self._entity_type,
-    date=ingestion_ts,
-    batch_id=batch_id,
-    run_id=self._context.run_id,
-    run_type=self._context.run_type,
-    ingestion_ts=ingestion_ts,  # NEW: явная передача
-)
-```
+Timestamp передаётся из application слоя, а не создаётся в infrastructure.
 
 ---
 
-### T4: Удаление datetime.now() из QuarantineManager
+### T4: Удаление datetime.now() из QuarantineManager ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `unified.py:66`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/infrastructure/quarantine/unified.py`
 
-#### Текущее состояние (строка 89)
+#### Реализованное решение
+
+`UnifiedQuarantine.write()` принимает `ingestion_ts` как keyword-only обязательный параметр:
 
 ```python
-async def quarantine_record(...):
+# unified.py:66
+async def write(
     ...
-    record_data = {
-        ...
-        "ingestion_ts": datetime.now(UTC).isoformat(),  # ← Отдельный timestamp
-    }
-```
-
-#### Требуемые изменения
-
-```python
-async def quarantine_record(
-    self,
-    record: dict[str, Any],
-    error_type: ErrorType,
-    batch_id: BatchID,
-    error_message: str,
-    ingestion_ts: datetime,  # NEW: передаётся из вызывающего кода
+    *,
+    ingestion_ts: datetime,  # keyword-only, обязательный
 ) -> None:
-    record_data = {
-        ...
-        "ingestion_ts": ingestion_ts.isoformat(),  # Используем переданный
-    }
 ```
+
+Docstring (строка 77-78) подтверждает: "Ingestion timestamp from application layer (single source of time per ADR-014). Required."
 
 ---
 
@@ -798,29 +702,22 @@ def test_no_datetime_now_in_infrastructure():
 
 ---
 
-### Зависимости Фазы 3
+### Зависимости Фазы 3 ✅ ВСЕ ВЫПОЛНЕНЫ
 
 ```
-T1 (PipelineContext) ──▶ T2 (RecordProcessor)
-                              │
-T3 (BronzeWriter) ────────────┤
-                              │
-T4 (Quarantine) ──────────────┴──▶ T5 (Arch test)
+✅ T1 (PipelineContext) ──▶ ✅ T2 (RecordProcessor)
+                                   │
+✅ T3 (BronzeWriter) ──────────────┤
+                                   │
+✅ T4 (Quarantine) ────────────────┴──▶ ✅ T5 (Arch test)
 ```
 
-### Критерии приёмки Фазы 3
+### Критерии приёмки Фазы 3 ✅ ВСЕ ВЫПОЛНЕНЫ
 
-- [ ] `PipelineContext.started_at` — единственный источник времени для batch
-- [ ] `datetime.now()` отсутствует в infrastructure слое
-- [ ] Архитектурный тест блокирует добавление `datetime.now()` в infrastructure
-- [ ] Все тесты используют фиксированные timestamps для детерминизма
-
-### Риски Фазы 3
-
-| Риск | Вероятность | Митигация |
-|------|-------------|-----------|
-| Каскадные изменения сигнатур | Высокая | Постепенный rollout с backward-compatible defaults |
-| Пропуск вызовов datetime.now() | Средняя | AST-тест + code review |
+- [x] `PipelineContext.started_at` — единственный источник времени для batch (`context.py:109`)
+- [x] `datetime.now()` отсутствует в infrastructure слое (кроме разрешённых исключений)
+- [x] Архитектурный тест блокирует добавление `datetime.now()` в infrastructure
+- [x] Все компоненты используют `context.started_at` (верифицировано 2025-12-27)
 
 ---
 
@@ -1050,10 +947,11 @@ ci: lint test arch-all
 - [x] Schema drift обрабатывается явно (`on_schema_mismatch: error/evolve/ignore`)
 - [x] Тесты покрывают edge cases
 
-### Фаза 3 🟡 Частично Завершена:
-- [ ] `datetime.now()` отсутствует в infrastructure (есть исключения с обоснованием)
-- [ ] `PipelineContext.started_at` используется везде
+### Фаза 3 🟡 ✅ ЗАВЕРШЕНА:
+- [x] `datetime.now()` отсутствует в infrastructure (есть исключения с обоснованием)
+- [x] `PipelineContext.started_at` используется везде (верифицировано 2025-12-27)
 - [x] Архитектурный тест `test_no_datetime_now_in_infrastructure` проходит
+- [x] T1-T4 реализованы: `context.py:109`, `record_processor.py:91`, `bronze_writer.py:211`, `unified.py:66`
 
 ### Фаза 4 🟢 ✅ ЗАВЕРШЕНА (O1):
 - [x] Tracing spans покрывают ключевые операции (`base_transformer.py:125-187`)
