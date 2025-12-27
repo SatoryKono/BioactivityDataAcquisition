@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GoldColumnFilter:
     """Фильтр по колонке со списком допустимых значений.
 
