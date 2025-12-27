@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from bioetl.composition.factories.storage_factory import StorageAdapter
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -40,11 +41,13 @@ def bootstrap_storage() -> StorageAdapter:
     """
     settings = get_settings()
     noop_logger = NoOpLogger()
+    noop_metrics = NoOpMetrics()
 
     return StorageAdapter(
         bronze_writer=BronzeWriter(
             base_path=settings.bronze_path,
             logger=noop_logger,
+            metrics=noop_metrics,
             save_json=False,
             json_path=None,
         ),

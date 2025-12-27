@@ -12,8 +12,10 @@ from uuid import uuid4
 import pytest
 import zstandard as zstd
 
+from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
@@ -22,6 +24,12 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 def noop_logger() -> NoOpLogger:
     """Provide a NoOpLogger for BronzeWriter tests."""
     return NoOpLogger()
+
+
+@pytest.fixture
+def noop_metrics() -> MetricsPort:
+    """Provide a NoOpMetrics for BronzeWriter tests."""
+    return NoOpMetrics()
 
 
 @pytest.fixture
@@ -65,7 +73,7 @@ class TestBronzeWriterNameValidation:
 
     def test_validate_bronze_names_valid(self, tmp_path, noop_logger) -> None:
         """Test valid provider and entity names pass validation."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         # Should not raise for valid names (alphanumeric + underscore only)
         writer._validate_bronze_names("chembl", "activity")
@@ -75,7 +83,7 @@ class TestBronzeWriterNameValidation:
 
     def test_validate_bronze_names_invalid_provider(self, tmp_path, noop_logger) -> None:
         """Test invalid provider names raise ValueError."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         with pytest.raises(ValueError, match="Invalid provider name"):
             writer._validate_bronze_names("", "activity")
@@ -95,7 +103,7 @@ class TestBronzeWriterNameValidation:
 
     def test_validate_bronze_names_invalid_entity(self, tmp_path, noop_logger) -> None:
         """Test invalid entity names raise ValueError."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         with pytest.raises(ValueError, match="Invalid entity name"):
             writer._validate_bronze_names("chembl", "")
@@ -125,8 +133,8 @@ class TestBronzeWriterNameValidation:
         ingestion_ts: datetime,
     ) -> None:
         """Test write_bronze raises ValueError for invalid provider."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         with pytest.raises(ValueError, match="Invalid provider name"):
             await writer.write_bronze(
@@ -152,8 +160,8 @@ class TestBronzeWriterNameValidation:
         ingestion_ts: datetime,
     ) -> None:
         """Test write_bronze raises ValueError for invalid entity."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         with pytest.raises(ValueError, match="Invalid entity name"):
             await writer.write_bronze(
@@ -169,7 +177,7 @@ class TestBronzeWriterNameValidation:
 
     def test_validate_records_iterator_valid(self, tmp_path, noop_logger) -> None:
         """Test valid iterator passes validation."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         # Should not raise for valid iterators
         writer._validate_records_iterator(iter([b"test"]))
@@ -178,7 +186,7 @@ class TestBronzeWriterNameValidation:
 
     def test_validate_records_iterator_none_raises(self, tmp_path, noop_logger) -> None:
         """Test None records raises TypeError."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         with pytest.raises(TypeError, match="records cannot be None"):
             writer._validate_records_iterator(None)  # type: ignore[arg-type]
@@ -187,7 +195,7 @@ class TestBronzeWriterNameValidation:
         self, tmp_path, noop_logger
     ) -> None:
         """Test non-iterator types raise TypeError."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         # List is not an iterator (has __iter__ but no __next__)
         with pytest.raises(TypeError, match="records must be an Iterator"):
@@ -212,8 +220,8 @@ class TestBronzeWriterNameValidation:
         ingestion_ts: datetime,
     ) -> None:
         """Test write_bronze raises TypeError for invalid records type."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         with pytest.raises(TypeError, match="records must be an Iterator"):
             await writer.write_bronze(
@@ -229,12 +237,130 @@ class TestBronzeWriterNameValidation:
 
 
 @pytest.mark.unit
+class TestBronzeWriterUTCValidation:
+    """Tests for BronzeWriter UTC datetime validation (ADR-014 determinism)."""
+
+    def test_validate_utc_datetime_valid(self, tmp_path, noop_logger) -> None:
+        """Test valid UTC datetime passes validation."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        # Should not raise for UTC datetime
+        utc_dt = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
+        writer._validate_utc_datetime(utc_dt, "test_param")
+
+    def test_validate_utc_datetime_naive_raises(self, tmp_path, noop_logger) -> None:
+        """Test naive datetime raises ValueError."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        naive_dt = datetime(2024, 1, 15, 12, 0, 0)  # No tzinfo
+        with pytest.raises(ValueError, match="must be timezone-aware"):
+            writer._validate_utc_datetime(naive_dt, "date")
+
+    def test_validate_utc_datetime_non_utc_raises(self, tmp_path, noop_logger) -> None:
+        """Test non-UTC timezone raises ValueError."""
+        from datetime import timezone, timedelta
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        # Create datetime with non-UTC timezone (e.g., UTC+3)
+        non_utc_tz = timezone(timedelta(hours=3))
+        non_utc_dt = datetime(2024, 1, 15, 12, 0, 0, tzinfo=non_utc_tz)
+
+        with pytest.raises(ValueError, match="must be UTC"):
+            writer._validate_utc_datetime(non_utc_dt, "ingestion_ts")
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_naive_date_raises(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze raises ValueError for naive date."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        naive_date = datetime(2024, 1, 15)  # No tzinfo
+
+        with pytest.raises(ValueError, match="date must be timezone-aware"):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="chembl",
+                entity="activity",
+                date=naive_date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_naive_ingestion_ts_raises(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Test write_bronze raises ValueError for naive ingestion_ts."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        utc_date = datetime(2024, 1, 15, tzinfo=UTC)
+        naive_ingestion = datetime(2024, 1, 15, 12, 0, 0)  # No tzinfo
+
+        with pytest.raises(ValueError, match="ingestion_ts must be timezone-aware"):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="chembl",
+                entity="activity",
+                date=utc_date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=naive_ingestion,
+            )
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_non_utc_date_raises(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze raises ValueError for non-UTC date."""
+        from datetime import timezone, timedelta
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        non_utc_tz = timezone(timedelta(hours=5))
+        non_utc_date = datetime(2024, 1, 15, tzinfo=non_utc_tz)
+
+        with pytest.raises(ValueError, match="date must be UTC"):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="chembl",
+                entity="activity",
+                date=non_utc_date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+
+
+@pytest.mark.unit
 class TestBronzeWriterInit:
     """Tests for BronzeWriter initialization."""
 
     def test_init_local_storage(self, tmp_path, noop_logger) -> None:
         """Test initialization for local storage."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         assert writer.base_path == tmp_path
         assert writer.save_json is False
@@ -242,7 +368,7 @@ class TestBronzeWriterInit:
 
     def test_init_with_save_json(self, tmp_path, noop_logger) -> None:
         """Test initialization with JSON saving enabled."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), save_json=True)
 
         assert writer.save_json is True
         assert writer.json_path is not None
@@ -253,6 +379,7 @@ class TestBronzeWriterInit:
         writer = BronzeWriter(
             base_path=tmp_path,
             logger=noop_logger,
+            metrics=NoOpMetrics(),
             save_json=True,
             json_path=custom_path,
         )
@@ -273,7 +400,7 @@ class TestBronzeWriterCompress:
         self, tmp_path, noop_logger, sample_records: list[bytes]
     ) -> None:
         """Test record compression returns data, count, and size."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         compressed, record_count, uncompressed_size = writer._compress_records(
             iter(sample_records)
@@ -293,14 +420,14 @@ class TestBronzeWriterCompress:
 
     def test_compress_empty_records_raises(self, tmp_path, noop_logger) -> None:
         """Test that empty records raise ValueError."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         with pytest.raises(ValueError, match="No records provided"):
             writer._compress_records(iter([]))
 
     def test_compress_large_records(self, tmp_path, noop_logger) -> None:
         """Test compression with records larger than chunk size."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         # Create large records
         large_record = {"data": "x" * 500_000}
@@ -334,8 +461,8 @@ class TestBronzeWriterWriteLocal:
         ingestion_ts: datetime,
     ) -> None:
         """Test writing Bronze data to local storage."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         path = await writer.write_bronze(
             records=iter(sample_records),
@@ -393,7 +520,7 @@ class TestBronzeWriterWriteLocal:
         ingestion_ts: datetime,
     ) -> None:
         """Test that local write is performed asynchronously."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
         # We patch run_in_executor to verify it's called for file I/O
@@ -433,8 +560,8 @@ class TestBronzeWriterWriteLocal:
         ingestion_ts: datetime,
     ) -> None:
         """Test writing Bronze data with JSON copy."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), save_json=True)
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -469,8 +596,8 @@ class TestBronzeWriterWriteLocal:
         ingestion_ts: datetime,
     ) -> None:
         """Test that empty records raise ValueError."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         with pytest.raises(ValueError, match="No records"):
             await writer.write_bronze(
@@ -501,8 +628,8 @@ class TestBronzeWriterReadLocal:
         ingestion_ts: datetime,
     ) -> None:
         """Test reading Bronze data from local storage."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Write first
         path = await writer.write_bronze(
@@ -542,7 +669,7 @@ class TestBronzeWriterListBatches:
         ingestion_ts: datetime,
     ) -> None:
         """Test listing batches from local storage."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         # Write multiple batches
         date1 = datetime(2024, 1, 15)
@@ -584,7 +711,7 @@ class TestBronzeWriterListBatches:
         ingestion_ts: datetime,
     ) -> None:
         """Test listing batches with date filter."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         date1 = datetime(2024, 1, 15)
         date2 = datetime(2024, 1, 16)
@@ -618,7 +745,7 @@ class TestBronzeWriterListBatches:
     @pytest.mark.asyncio
     async def test_list_batches_empty(self, tmp_path, noop_logger) -> None:
         """Test listing batches when none exist."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         batches = await writer.list_batches("nonexistent", "entity")
         assert batches == []
@@ -644,8 +771,8 @@ class TestBronzeWriterAtomicWrite:
         Simulates a failure during the atomic write commit phase.
         Verifies REQ-DATA-004: Atomic writes.
         """
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Mock AtomicWriteGroup.commit to fail
         def failing_commit(self):
@@ -693,8 +820,8 @@ class TestBronzeWriterAtomicWrite:
 
         Both files must be written together atomically.
         """
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Successful write
         path = await writer.write_bronze(
@@ -727,8 +854,8 @@ class TestBronzeWriterAtomicWrite:
         ingestion_ts: datetime,
     ) -> None:
         """Test that no temp files remain after successful write."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -757,8 +884,8 @@ class TestBronzeWriterAtomicWrite:
         ingestion_ts: datetime,
     ) -> None:
         """Test that failure during AtomicWriteGroup.add cleans up temp files."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Mock AtomicWriteGroup.add to fail on second call (metadata)
         original_add = AtomicWriteGroup.add
@@ -801,8 +928,8 @@ class TestBronzeWriterAtomicWrite:
         ingestion_ts: datetime,
     ) -> None:
         """Test that JSON copy also uses atomic write."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, save_json=True)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), save_json=True)
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -841,8 +968,8 @@ class TestBronzeWriterLoggerInjection:
     ) -> None:
         """Test that injected logger is called during write operations."""
         mock_logger = MagicMock()
-        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -867,7 +994,7 @@ class TestBronzeWriterLoggerInjection:
     def test_logger_is_stored_as_attribute(self, tmp_path) -> None:
         """Test that injected logger is stored and accessible."""
         mock_logger = MagicMock()
-        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger, metrics=NoOpMetrics())
 
         assert writer.logger is mock_logger
 
@@ -891,8 +1018,8 @@ class TestBronzeWriterMetadataDeterminism:
         Verifies REQ-ARCH-030: Deterministic writes for reproducibility.
         Uses sort_keys=True and separators=(',', ':') to ensure consistent output.
         """
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Write twice with the same parameters but different batch IDs
         batch_id_1 = BatchID(uuid4())
@@ -959,7 +1086,7 @@ class TestBronzeWriterMetadataDeterminism:
         Multiple serializations of the same metadata dict should produce
         identical byte sequences when using sort_keys=True and separators=(',', ':').
         """
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         metadata = writer._build_bronze_metadata(
             run_id=run_id,
@@ -993,7 +1120,7 @@ class TestBronzeWriterMetadataDeterminism:
 
         Using separators=(',', ':') removes spaces after separators.
         """
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         metadata = writer._build_bronze_metadata(
             run_id=run_id,
@@ -1031,7 +1158,7 @@ class TestBronzeWriterMetrics:
         """Test initialization without metrics uses NoOpMetrics."""
         from bioetl.domain.ports.noop import NoOpMetrics
 
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger)
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
 
         assert isinstance(writer._metrics, NoOpMetrics)
 
@@ -1051,7 +1178,7 @@ class TestBronzeWriterMetrics:
         writer = BronzeWriter(
             base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
         )
-        date = datetime(2024, 1, 15)
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -1094,7 +1221,7 @@ class TestBronzeWriterMetrics:
         writer = BronzeWriter(
             base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
         )
-        date = datetime(2024, 1, 15)
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -1136,7 +1263,7 @@ class TestBronzeWriterMetrics:
         writer = BronzeWriter(
             base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
         )
-        date = datetime(2024, 1, 15)
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -1178,7 +1305,7 @@ class TestBronzeWriterMetrics:
         writer = BronzeWriter(
             base_path=tmp_path, logger=noop_logger, metrics=mock_metrics
         )
-        date = datetime(2024, 1, 15)
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
@@ -1221,8 +1348,8 @@ class TestBronzeWriterMetrics:
     ) -> None:
         """Test that logger call includes record count and byte size."""
         mock_logger = MagicMock()
-        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger)
-        date = datetime(2024, 1, 15)
+        writer = BronzeWriter(base_path=tmp_path, logger=mock_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
 
         await writer.write_bronze(
             records=iter(sample_records),
