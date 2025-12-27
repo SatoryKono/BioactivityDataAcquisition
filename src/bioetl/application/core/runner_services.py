@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.postrun_service import PostrunService
     from bioetl.application.core.preflight_service import PreflightService
+    from bioetl.application.observability.observer import PipelineObserver
 
 
 @dataclass(frozen=True)
@@ -25,9 +26,11 @@ class RunnerServices:
         preflight: Pre-flight infrastructure validation service.
         postrun: Post-run DQ checks and VACUUM service.
         lifecycle_orch: Lifecycle orchestrator for medallion layer clearing.
+        observer: Pipeline observability wrapper for tracing, metrics, and logging.
     """
 
     lock_manager: LockManager
     preflight: PreflightService
     postrun: PostrunService
     lifecycle_orch: LifecycleOrchestrator
+    observer: PipelineObserver
