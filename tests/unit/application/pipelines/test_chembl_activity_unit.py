@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
-from uuid import uuid4
-
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType

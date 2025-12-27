@@ -150,7 +150,9 @@ class TestExecutorBatchSizeAdjustment:
 
     def test_adjust_batch_size_no_reduction(self, executor_with_monitor):
         """Test batch size unchanged when no pressure."""
-        executor_with_monitor._memory_monitor.get_recommended_batch_size.return_value = 100
+        executor_with_monitor._memory_monitor.get_recommended_batch_size.return_value = (
+            100
+        )
 
         new_size = executor_with_monitor._adjust_batch_size(100)
 

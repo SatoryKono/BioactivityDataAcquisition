@@ -23,12 +23,12 @@ class TestRegistryProtocol:
         # Check class-level methods exist
         registry = PipelineRegistry()
         assert hasattr(registry, "get"), "PipelineRegistry MUST have get() method"
-        assert hasattr(registry, "register_factory"), (
-            "PipelineRegistry MUST have register_factory() method"
-        )
-        assert hasattr(registry, "list_pipelines"), (
-            "PipelineRegistry MUST have list_pipelines() method"
-        )
+        assert hasattr(
+            registry, "register_factory"
+        ), "PipelineRegistry MUST have register_factory() method"
+        assert hasattr(
+            registry, "list_pipelines"
+        ), "PipelineRegistry MUST have list_pipelines() method"
 
     def test_datasource_registry_has_required_methods(self) -> None:
         """DataSourceRegistry must have get, register, list_providers methods."""
@@ -36,37 +36,37 @@ class TestRegistryProtocol:
             DataSourceRegistry,
         )
 
-        assert hasattr(DataSourceRegistry, "get"), (
-            "DataSourceRegistry MUST have get() method"
-        )
-        assert hasattr(DataSourceRegistry, "register"), (
-            "DataSourceRegistry MUST have register() method"
-        )
-        assert hasattr(DataSourceRegistry, "list_providers"), (
-            "DataSourceRegistry MUST have list_providers() method"
-        )
+        assert hasattr(
+            DataSourceRegistry, "get"
+        ), "DataSourceRegistry MUST have get() method"
+        assert hasattr(
+            DataSourceRegistry, "register"
+        ), "DataSourceRegistry MUST have register() method"
+        assert hasattr(
+            DataSourceRegistry, "list_providers"
+        ), "DataSourceRegistry MUST have list_providers() method"
 
     def test_provider_registry_has_required_methods(self) -> None:
         """ProviderRegistry must have get, register, list_providers methods."""
         from bioetl.composition.providers.provider_registry import ProviderRegistry
 
-        assert hasattr(ProviderRegistry, "get"), (
-            "ProviderRegistry MUST have get() method"
-        )
-        assert hasattr(ProviderRegistry, "register"), (
-            "ProviderRegistry MUST have register() method"
-        )
-        assert hasattr(ProviderRegistry, "list_providers"), (
-            "ProviderRegistry MUST have list_providers() method"
-        )
+        assert hasattr(
+            ProviderRegistry, "get"
+        ), "ProviderRegistry MUST have get() method"
+        assert hasattr(
+            ProviderRegistry, "register"
+        ), "ProviderRegistry MUST have register() method"
+        assert hasattr(
+            ProviderRegistry, "list_providers"
+        ), "ProviderRegistry MUST have list_providers() method"
 
     def test_provider_registry_has_create_adapter(self) -> None:
         """ProviderRegistry must have create_adapter for adapter instantiation."""
         from bioetl.composition.providers.provider_registry import ProviderRegistry
 
-        assert hasattr(ProviderRegistry, "create_adapter"), (
-            "ProviderRegistry MUST have create_adapter() method for DI"
-        )
+        assert hasattr(
+            ProviderRegistry, "create_adapter"
+        ), "ProviderRegistry MUST have create_adapter() method for DI"
 
 
 class TestRegistryRaiseOnMissingKey:
@@ -103,14 +103,14 @@ class TestRegistryInstanceVariables:
         registry = PipelineRegistry()
 
         # Instance should have _registry attribute
-        assert hasattr(registry, "_registry"), (
-            "PipelineRegistry MUST have _registry attribute"
-        )
+        assert hasattr(
+            registry, "_registry"
+        ), "PipelineRegistry MUST have _registry attribute"
 
         # It should be a dict
-        assert isinstance(registry._registry, dict), (
-            "PipelineRegistry._registry MUST be a dict"
-        )
+        assert isinstance(
+            registry._registry, dict
+        ), "PipelineRegistry._registry MUST be a dict"
 
     def test_pipeline_registry_has_instance_lock(self) -> None:
         """PipelineRegistry._lock must be an instance variable."""
@@ -122,9 +122,9 @@ class TestRegistryInstanceVariables:
         assert hasattr(registry, "_lock"), "PipelineRegistry MUST have _lock attribute"
 
         # It should be an RLock
-        assert isinstance(registry._lock, type(threading.RLock())), (
-            "PipelineRegistry._lock MUST be an RLock"
-        )
+        assert isinstance(
+            registry._lock, type(threading.RLock())
+        ), "PipelineRegistry._lock MUST be an RLock"
 
     def test_pipeline_registry_instances_are_independent(self) -> None:
         """Two PipelineRegistry instances must have separate storage."""
@@ -132,14 +132,14 @@ class TestRegistryInstanceVariables:
         registry2 = PipelineRegistry()
 
         # Should be different dict instances
-        assert registry1._registry is not registry2._registry, (
-            "PipelineRegistry instances MUST have independent _registry"
-        )
+        assert (
+            registry1._registry is not registry2._registry
+        ), "PipelineRegistry instances MUST have independent _registry"
 
         # Should be different lock instances
-        assert registry1._lock is not registry2._lock, (
-            "PipelineRegistry instances MUST have independent _lock"
-        )
+        assert (
+            registry1._lock is not registry2._lock
+        ), "PipelineRegistry instances MUST have independent _lock"
 
     def test_datasource_registry_uses_classvar(self) -> None:
         """DataSourceRegistry._creators must be ClassVar."""
@@ -147,27 +147,27 @@ class TestRegistryInstanceVariables:
             DataSourceRegistry,
         )
 
-        assert "_creators" in DataSourceRegistry.__annotations__, (
-            "DataSourceRegistry MUST have _creators annotation"
-        )
+        assert (
+            "_creators" in DataSourceRegistry.__annotations__
+        ), "DataSourceRegistry MUST have _creators annotation"
 
         hint = DataSourceRegistry.__annotations__["_creators"]
-        assert "ClassVar" in str(hint), (
-            "DataSourceRegistry._creators MUST be ClassVar for singleton pattern"
-        )
+        assert "ClassVar" in str(
+            hint
+        ), "DataSourceRegistry._creators MUST be ClassVar for singleton pattern"
 
     def test_provider_registry_uses_classvar(self) -> None:
         """ProviderRegistry._providers must be ClassVar."""
         from bioetl.composition.providers.provider_registry import ProviderRegistry
 
-        assert "_providers" in ProviderRegistry.__annotations__, (
-            "ProviderRegistry MUST have _providers annotation"
-        )
+        assert (
+            "_providers" in ProviderRegistry.__annotations__
+        ), "ProviderRegistry MUST have _providers annotation"
 
         hint = ProviderRegistry.__annotations__["_providers"]
-        assert "ClassVar" in str(hint), (
-            "ProviderRegistry._providers MUST be ClassVar for singleton pattern"
-        )
+        assert "ClassVar" in str(
+            hint
+        ), "ProviderRegistry._providers MUST be ClassVar for singleton pattern"
 
 
 class TestRegistryReturnTypes:
@@ -244,9 +244,9 @@ class TestRegistryFactoryProtocol:
         except TypeError:
             is_runtime_checkable = False
 
-        assert is_runtime_checkable, (
-            "PipelineFactoryProtocol MUST be @runtime_checkable"
-        )
+        assert (
+            is_runtime_checkable
+        ), "PipelineFactoryProtocol MUST be @runtime_checkable"
 
     def test_pipeline_factory_protocol_has_required_attributes(self) -> None:
         """PipelineFactoryProtocol must define pipeline_name and silver_schema."""
@@ -255,23 +255,23 @@ class TestRegistryFactoryProtocol:
         # Check annotations or attributes
         hints = typing.get_type_hints(PipelineFactoryProtocol)
 
-        assert "pipeline_name" in hints, (
-            "PipelineFactoryProtocol MUST have pipeline_name"
-        )
-        assert "silver_schema" in hints, (
-            "PipelineFactoryProtocol MUST have silver_schema"
-        )
+        assert (
+            "pipeline_name" in hints
+        ), "PipelineFactoryProtocol MUST have pipeline_name"
+        assert (
+            "silver_schema" in hints
+        ), "PipelineFactoryProtocol MUST have silver_schema"
 
     def test_pipeline_factory_protocol_has_create_methods(self) -> None:
         """PipelineFactoryProtocol must have create_with_services and create_runner."""
         from bioetl.composition.registry import PipelineFactoryProtocol
 
-        assert hasattr(PipelineFactoryProtocol, "create_with_services"), (
-            "PipelineFactoryProtocol MUST have create_with_services()"
-        )
-        assert hasattr(PipelineFactoryProtocol, "create_runner"), (
-            "PipelineFactoryProtocol MUST have create_runner()"
-        )
+        assert hasattr(
+            PipelineFactoryProtocol, "create_with_services"
+        ), "PipelineFactoryProtocol MUST have create_with_services()"
+        assert hasattr(
+            PipelineFactoryProtocol, "create_runner"
+        ), "PipelineFactoryProtocol MUST have create_runner()"
 
 
 class TestDefaultRegistryHelper:
@@ -280,17 +280,17 @@ class TestDefaultRegistryHelper:
     def test_get_default_registry_returns_instance(self) -> None:
         """get_default_registry() must return a PipelineRegistry instance."""
         registry = get_default_registry()
-        assert isinstance(registry, PipelineRegistry), (
-            "get_default_registry() MUST return PipelineRegistry instance"
-        )
+        assert isinstance(
+            registry, PipelineRegistry
+        ), "get_default_registry() MUST return PipelineRegistry instance"
 
     def test_get_default_registry_returns_same_instance(self) -> None:
         """get_default_registry() must return the same instance on multiple calls."""
         registry1 = get_default_registry()
         registry2 = get_default_registry()
-        assert registry1 is registry2, (
-            "get_default_registry() MUST return the same instance"
-        )
+        assert (
+            registry1 is registry2
+        ), "get_default_registry() MUST return the same instance"
 
     def test_create_registry_returns_new_instance(self) -> None:
         """create_registry() must return a new instance each time."""
@@ -298,6 +298,6 @@ class TestDefaultRegistryHelper:
 
         registry1 = create_registry()
         registry2 = create_registry()
-        assert registry1 is not registry2, (
-            "create_registry() MUST return a new instance"
-        )
+        assert (
+            registry1 is not registry2
+        ), "create_registry() MUST return a new instance"

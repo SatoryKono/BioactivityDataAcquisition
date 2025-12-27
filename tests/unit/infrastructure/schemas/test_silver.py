@@ -103,9 +103,9 @@ class TestSystemFields:
         """Verify schema contains all required system fields."""
         schema_field_names = {field.name for field in schema}
         missing_fields = REQUIRED_SYSTEM_FIELDS - schema_field_names
-        assert not missing_fields, (
-            f"{name} schema missing system fields: {missing_fields}"
-        )
+        assert (
+            not missing_fields
+        ), f"{name} schema missing system fields: {missing_fields}"
 
     @pytest.mark.parametrize(
         "schema,name",
@@ -125,9 +125,9 @@ class TestSystemFields:
         """Verify system fields have correct types."""
         for field_name in REQUIRED_SYSTEM_FIELDS:
             field = schema.field(field_name)
-            assert field.type == pa.string(), (
-                f"{name}.{field_name} should be string, got {field.type}"
-            )
+            assert (
+                field.type == pa.string()
+            ), f"{name}.{field_name} should be string, got {field.type}"
 
 
 class TestChemblActivitySchema:
@@ -170,9 +170,9 @@ class TestChemblActivitySchema:
         ]
         for field_name in float_fields:
             field = CHEMBL_ACTIVITY_SCHEMA.field(field_name)
-            assert field.type == pa.float64(), (
-                f"{field_name} should be float64, got {field.type}"
-            )
+            assert (
+                field.type == pa.float64()
+            ), f"{field_name} should be float64, got {field.type}"
 
     def test_ligand_efficiency_fields_exist(self):
         """Verify ligand efficiency metrics are present."""
@@ -223,9 +223,9 @@ class TestChemblAssaySchema:
         json_fields = ["assay_classifications", "assay_parameters"]
         for field_name in json_fields:
             field = CHEMBL_ASSAY_SCHEMA.field(field_name)
-            assert field.type == pa.string(), (
-                f"{field_name} should be string (JSON), got {field.type}"
-            )
+            assert (
+                field.type == pa.string()
+            ), f"{field_name} should be string (JSON), got {field.type}"
 
 
 class TestChemblMoleculeSchema:
@@ -241,9 +241,9 @@ class TestChemblMoleculeSchema:
         for field_name in expected_bool:
             assert field_name in CHEMBL_MOLECULE_SCHEMA.names
             field = CHEMBL_MOLECULE_SCHEMA.field(field_name)
-            assert field.type == pa.bool_(), (
-                f"{field_name} should be bool, got {field.type}"
-            )
+            assert (
+                field.type == pa.bool_()
+            ), f"{field_name} should be bool, got {field.type}"
 
     def test_has_complex_json_fields(self):
         """Verify complex JSON fields exist and are strings."""
@@ -281,9 +281,9 @@ class TestChemblTargetSchema:
         for field_name in list_fields:
             assert field_name in CHEMBL_TARGET_SCHEMA.names
             field = CHEMBL_TARGET_SCHEMA.field(field_name)
-            assert isinstance(field.type, pa.ListType), (
-                f"{field_name} should be list, got {field.type}"
-            )
+            assert isinstance(
+                field.type, pa.ListType
+            ), f"{field_name} should be list, got {field.type}"
 
     def test_component_ids_is_list_of_int64(self):
         """Verify component_ids is list of int64."""
@@ -348,9 +348,9 @@ class TestPubchemCompoundSchema:
         ]
         for field_name in non_system_fields:
             field = PUBCHEM_COMPOUND_SCHEMA.field(field_name)
-            assert field.type == pa.string(), (
-                f"{field_name} should be string, got {field.type}"
-            )
+            assert (
+                field.type == pa.string()
+            ), f"{field_name} should be string, got {field.type}"
 
 
 class TestUniprotProteinSchema:
@@ -397,9 +397,9 @@ class TestPubmedPublicationSchema:
         for field_name in list_fields:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
             field = PUBMED_PUBLICATION_SCHEMA.field(field_name)
-            assert isinstance(field.type, pa.ListType), (
-                f"{field_name} should be list, got {field.type}"
-            )
+            assert isinstance(
+                field.type, pa.ListType
+            ), f"{field_name} should be list, got {field.type}"
             assert field.type.value_type == pa.string()
 
     def test_pub_year_is_int64(self):
@@ -434,9 +434,9 @@ class TestSchemaFieldCounts:
     def test_minimum_field_count(self, schema, name, min_fields):
         """Verify schema has at least minimum expected fields."""
         actual = len(schema)
-        assert actual >= min_fields, (
-            f"{name} has {actual} fields, expected at least {min_fields}"
-        )
+        assert (
+            actual >= min_fields
+        ), f"{name} has {actual} fields, expected at least {min_fields}"
 
 
 class TestSchemaImmutability:

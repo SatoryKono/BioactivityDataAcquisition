@@ -283,9 +283,9 @@ class TestDomainProtocols:
                 if protocol_import_found and protocol_class_found:
                     break
 
-        assert protocol_import_found, (
-            "Domain ports should use typing.Protocol for interface definitions"
-        )
-        assert protocol_class_found, (
-            "Port interfaces should be classes inheriting from Protocol"
-        )
+        assert (
+            protocol_import_found
+        ), "Domain ports should use typing.Protocol for interface definitions"
+        assert (
+            protocol_class_found
+        ), "Port interfaces should be classes inheriting from Protocol"

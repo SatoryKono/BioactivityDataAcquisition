@@ -61,7 +61,7 @@ class TestCircuitBreakerStateTransitions:
         async def fail():
             raise RuntimeError("Provider error")
 
-        for _ in range(3):
+        for _i in range(3):
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
@@ -280,9 +280,9 @@ class TestCircuitBreakerErrorClassification:
             error = httpx.HTTPStatusError(
                 "Client error", request=request, response=response
             )
-            assert is_circuit_breaker_error(error) is False, (
-                f"Status {status_code} should not trigger"
-            )
+            assert (
+                is_circuit_breaker_error(error) is False
+            ), f"Status {status_code} should not trigger"
 
     def test_business_error_does_not_trigger_breaker(self):
         """E2E: Business logic errors don't trigger circuit breaker."""
@@ -382,9 +382,9 @@ class TestCircuitBreakerConcurrency:
                 try:
                     should_fail = (worker_id + i) % 3 == 0
                     await cb.call(
-                        lambda sf=should_fail: mixed_call(sf)
-                        if not sf
-                        else mixed_call(True)
+                        lambda sf=should_fail: (
+                            mixed_call(sf) if not sf else mixed_call(True)
+                        )
                     )
                     success_count += 1
                 except RuntimeError:

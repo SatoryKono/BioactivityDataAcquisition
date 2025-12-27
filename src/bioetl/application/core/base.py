@@ -10,7 +10,6 @@ Updated: Removed default_transformer_class fallback (REQ-ARCH-DI-007).
 
 from __future__ import annotations
 
-from abc import ABC
 from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 from bioetl.application.core.shutdown import ShutdownSignal
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, RunID, RunType, SilverRecord
 
 
-class BasePipeline(ABC):  # noqa: B024
+class BasePipeline:
     """Base class for ETL pipelines.
 
     Acts as a container for:

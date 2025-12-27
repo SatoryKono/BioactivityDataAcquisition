@@ -95,9 +95,9 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
 
     # Assert - Count should be similar (merge/upsert prevents duplicates)
     # Note: May differ slightly due to different batches, but should not double
-    assert count_after_second <= count_after_first * 2, (
-        f"Records doubled after second run: {count_after_first} -> {count_after_second}"
-    )
+    assert (
+        count_after_second <= count_after_first * 2
+    ), f"Records doubled after second run: {count_after_first} -> {count_after_second}"
 
 
 @pytest.mark.e2e

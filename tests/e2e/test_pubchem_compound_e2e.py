@@ -98,9 +98,9 @@ async def test_pubchem_compound_structural_fields(e2e_data_dir: Path):
             or record.get("isomeric_smiles") is not None
         )
 
-        assert has_formula or has_weight or has_smiles, (
-            f"Compound {record.get('cid')} missing all structural fields"
-        )
+        assert (
+            has_formula or has_weight or has_smiles
+        ), f"Compound {record.get('cid')} missing all structural fields"
 
 
 @pytest.mark.e2e

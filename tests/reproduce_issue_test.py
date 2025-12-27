@@ -1,7 +1,10 @@
 import inspect
+
 import pytest
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing, NoOpTracer
+
 from bioetl.domain.ports.noop import NoOpTracing as DomainNoOpTracing
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracer, NoOpTracing
+
 
 
 def test_reproduce_noop_tracer_issue():

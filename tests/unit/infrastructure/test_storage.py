@@ -475,6 +475,8 @@ class TestGoldWriter:
         schema = data.schema
         column_names = schema.names
 
-        assert column_names == ["a", "b", "c"], (
-            f"Expected sorted columns ['a', 'b', 'c'], got {column_names}"
-        )
+        assert column_names == [
+            "a",
+            "b",
+            "c",
+        ], f"Expected sorted columns ['a', 'b', 'c'], got {column_names}"

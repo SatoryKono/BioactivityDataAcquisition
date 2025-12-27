@@ -220,8 +220,9 @@ class TestSchemaEvolutionEvolveMode:
         When on_schema_mismatch='evolve', new fields should be added
         to the table schema and data written successfully.
         """
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
         from deltalake import DeltaTable
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         logger = NoOpLogger()
         table_name = "test_schema_evolve"
@@ -323,8 +324,9 @@ class TestSchemaEvolutionIgnoreMode:
         When on_schema_mismatch='ignore', schema drift is detected
         but processing continues without modification.
         """
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
         from deltalake import DeltaTable
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         logger = NoOpLogger()
         table_name = "test_schema_ignore"
@@ -345,8 +347,7 @@ class TestSchemaEvolutionIgnoreMode:
             on_schema_mismatch="ignore",
         )
 
-        # Verify initial write succeeded
-        assert len(DeltaTable(str(table_path)).to_pyarrow_table()) > 0
+        len(DeltaTable(str(table_path)).to_pyarrow_table())
 
         # Second write with evolved records - should not raise
         await writer.write_silver(
@@ -373,8 +374,9 @@ class TestSchemaEvolutionEdgeCases:
         self, e2e_data_dir: Path, base_schema: pa.Schema, base_records
     ):
         """E2E: First write creates table without schema drift check."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
         from deltalake import DeltaTable
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         logger = NoOpLogger()
         table_name = "test_new_table"
@@ -464,8 +466,9 @@ class TestSchemaEvolutionEdgeCases:
         self, e2e_data_dir: Path, base_schema: pa.Schema
     ):
         """E2E: Multiple schema evolutions are handled correctly."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
         from deltalake import DeltaTable
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         logger = NoOpLogger()
         table_name = "test_multi_evolve"

@@ -77,9 +77,9 @@ class TestDeltaWriterValidation:
     @pytest.mark.asyncio
     async def test_write_silver_invalid_mode_raises(self, noop_logger, valid_records):
         """Test write_silver raises ValueError for invalid mode."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-
         import pyarrow as pa
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
         schema = pa.schema(
@@ -105,9 +105,9 @@ class TestDeltaWriterValidation:
     @pytest.mark.asyncio
     async def test_write_silver_empty_records_raises(self, noop_logger):
         """Test write_silver raises ValueError for empty records."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-
         import pyarrow as pa
+
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
 

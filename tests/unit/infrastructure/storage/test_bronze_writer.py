@@ -282,7 +282,7 @@ class TestBronzeWriterUTCValidation:
 
     def test_validate_utc_datetime_non_utc_raises(self, tmp_path, noop_logger) -> None:
         """Test non-UTC timezone raises ValueError."""
-        from datetime import timezone, timedelta
+        from datetime import timedelta, timezone
 
         writer = BronzeWriter(
             base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
@@ -365,7 +365,7 @@ class TestBronzeWriterUTCValidation:
         ingestion_ts: datetime,
     ) -> None:
         """Test write_bronze raises ValueError for non-UTC date."""
-        from datetime import timezone, timedelta
+        from datetime import timedelta, timezone
 
         writer = BronzeWriter(
             base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
@@ -1151,9 +1151,9 @@ class TestBronzeWriterMetadataDeterminism:
         normalized_1 = json.dumps(meta_1, sort_keys=True, separators=(",", ":"))
         normalized_2 = json.dumps(meta_2, sort_keys=True, separators=(",", ":"))
 
-        assert normalized_1 == normalized_2, (
-            "Metadata should produce identical bytes when serialized with same settings"
-        )
+        assert (
+            normalized_1 == normalized_2
+        ), "Metadata should produce identical bytes when serialized with same settings"
 
     def test_metadata_json_format_is_deterministic(
         self,
@@ -1188,9 +1188,9 @@ class TestBronzeWriterMetadataDeterminism:
             for _ in range(10)
         ]
 
-        assert all(s == serialized[0] for s in serialized), (
-            "All serializations should be identical"
-        )
+        assert all(
+            s == serialized[0] for s in serialized
+        ), "All serializations should be identical"
 
     def test_metadata_has_no_whitespace_variations(
         self,

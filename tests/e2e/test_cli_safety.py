@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from click.testing import CliRunner
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from bioetl.interfaces.cli import cli
 
@@ -29,6 +30,7 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
         patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner,
         patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry),
     ):
+
         result = cli_runner.invoke(
             cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild"]
         )
@@ -45,6 +47,7 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
         patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner,
         patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry),
     ):
+
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock()  # Make run awaitable
         mock_runner.logger = MagicMock()  # Satisfy logger check
@@ -65,6 +68,7 @@ def test_cli_dry_run_flag(cli_runner, mock_registry):
         patch("bioetl.interfaces.cli._preview_cleanup") as mock_preview,
         patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry),
     ):
+
         result = cli_runner.invoke(
             cli,
             ["run", "--pipeline", "test_pipe", "--run-type", "rebuild", "--dry-run"],

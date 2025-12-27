@@ -255,6 +255,7 @@ class TestChemblActivityFactory:
         from bioetl.composition.factories.pipeline_factories import (
             chembl_activity_factory,
         )
+
         # Save original _create_data_source
         original_creator = chembl_activity_factory._create_data_source
         yield
