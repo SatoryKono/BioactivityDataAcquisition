@@ -154,6 +154,7 @@ def _create_pubchem_adapter(
     circuit_breaker_timeout = kwargs.pop("circuit_breaker_timeout", 300)
     max_workers = kwargs.pop("max_workers", 4)
     strict_error_handling = kwargs.pop("strict_error_handling", False)
+    metrics = kwargs.pop("metrics", None)
 
     # Create dependencies in Composition Root (DI pattern)
     rate_limiter = TokenBucket(rate=rate, capacity=capacity, provider="pubchem")
@@ -161,6 +162,7 @@ def _create_pubchem_adapter(
         provider="pubchem",
         failure_threshold=circuit_breaker_threshold,
         recovery_timeout=circuit_breaker_timeout,
+        metrics=metrics,
     )
     thread_pool = ThreadPoolExecutor(max_workers=max_workers)
 

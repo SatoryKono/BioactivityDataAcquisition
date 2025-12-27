@@ -3,12 +3,18 @@
 from __future__ import annotations
 
 import asyncio
+from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError
+from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import CircuitBreakerState
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import (
+    METRIC_CIRCUIT_BREAKER_STATE,
+    METRIC_CIRCUIT_BREAKER_TRIPS,
+    CircuitBreaker,
+)
 
 
 class TestCircuitBreaker:
@@ -189,3 +195,215 @@ class TestCircuitBreaker:
         cb.force_open()
         assert cb.get_state() == CircuitBreakerState.OPEN
         assert cb.get_trips_total() == 1
+
+
+class TestCircuitBreakerMetrics:
+    """Tests for CircuitBreaker metrics emission."""
+
+    @pytest.fixture
+    def mock_metrics(self) -> MagicMock:
+        """Create a mock MetricsPort."""
+        return MagicMock(spec=MetricsPort)
+
+    @pytest.mark.unit
+    def test_initial_state_emits_closed_metric(self, mock_metrics: MagicMock) -> None:
+        """Circuit breaker should emit CLOSED state metric on initialization."""
+        CircuitBreaker(provider="test", metrics=mock_metrics)
+
+        mock_metrics.set_gauge.assert_called_once_with(
+            METRIC_CIRCUIT_BREAKER_STATE,
+            0.0,  # CLOSED = 0
+            {"provider": "test"},
+        )
+
+    @pytest.mark.unit
+    async def test_closed_to_open_emits_state_and_trip_metrics(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """CLOSED -> OPEN transition should emit state and trip metrics."""
+        cb = CircuitBreaker(provider="test", failure_threshold=3, metrics=mock_metrics)
+
+        async def fail() -> None:
+            raise RuntimeError("error")
+
+        # Trigger 3 failures to open the circuit
+        for _ in range(3):
+            with pytest.raises(RuntimeError):
+                await cb.call(fail)
+
+        assert cb.get_state() == CircuitBreakerState.OPEN
+
+        # Check state gauge was set to OPEN (2.0)
+        mock_metrics.set_gauge.assert_called_with(
+            METRIC_CIRCUIT_BREAKER_STATE,
+            2.0,  # OPEN = 2
+            {"provider": "test"},
+        )
+
+        # Check trip counter was incremented
+        mock_metrics.increment_counter.assert_called_once_with(
+            METRIC_CIRCUIT_BREAKER_TRIPS,
+            1,
+            {"provider": "test"},
+        )
+
+    @pytest.mark.unit
+    async def test_open_to_half_open_emits_metric(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """OPEN -> HALF_OPEN transition should emit state metric."""
+        cb = CircuitBreaker(
+            provider="test",
+            failure_threshold=2,
+            recovery_timeout=0,
+            metrics=mock_metrics,
+        )
+
+        async def fail() -> None:
+            raise RuntimeError("error")
+
+        # Open the circuit
+        for _ in range(2):
+            with pytest.raises(RuntimeError):
+                await cb.call(fail)
+
+        assert cb.get_state() == CircuitBreakerState.OPEN
+        mock_metrics.reset_mock()
+
+        # Wait for recovery
+        await asyncio.sleep(0.01)
+
+        # Probe request that triggers HALF_OPEN transition
+        async def success() -> str:
+            return "ok"
+
+        await cb.call(success)
+
+        # Should have called set_gauge twice: once for HALF_OPEN, once for CLOSED
+        calls = mock_metrics.set_gauge.call_args_list
+        assert len(calls) >= 2
+
+        # First call should be HALF_OPEN (1.0)
+        assert calls[0][0] == (
+            METRIC_CIRCUIT_BREAKER_STATE,
+            1.0,  # HALF_OPEN = 1
+            {"provider": "test"},
+        )
+
+        # Second call should be CLOSED (0.0)
+        assert calls[1][0] == (
+            METRIC_CIRCUIT_BREAKER_STATE,
+            0.0,  # CLOSED = 0
+            {"provider": "test"},
+        )
+
+    @pytest.mark.unit
+    async def test_half_open_failure_emits_metrics(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """Failed probe in HALF_OPEN should emit state and trip metrics."""
+        cb = CircuitBreaker(
+            provider="test",
+            failure_threshold=2,
+            recovery_timeout=0,
+            metrics=mock_metrics,
+        )
+
+        async def fail() -> None:
+            raise RuntimeError("error")
+
+        # Open the circuit
+        for _ in range(2):
+            with pytest.raises(RuntimeError):
+                await cb.call(fail)
+
+        assert cb.get_state() == CircuitBreakerState.OPEN
+        mock_metrics.reset_mock()
+
+        # Wait for recovery
+        await asyncio.sleep(0.01)
+
+        # Failed probe request
+        with pytest.raises(RuntimeError):
+            await cb.call(fail)
+
+        assert cb.get_state() == CircuitBreakerState.OPEN
+
+        # Should have emitted HALF_OPEN then OPEN state
+        gauge_calls = mock_metrics.set_gauge.call_args_list
+        assert len(gauge_calls) >= 2
+
+        # First should be HALF_OPEN
+        assert gauge_calls[0][0][1] == 1.0  # HALF_OPEN
+
+        # Second should be OPEN
+        assert gauge_calls[1][0][1] == 2.0  # OPEN
+
+        # Should have incremented trip counter
+        mock_metrics.increment_counter.assert_called_with(
+            METRIC_CIRCUIT_BREAKER_TRIPS,
+            1,
+            {"provider": "test"},
+        )
+
+    @pytest.mark.unit
+    def test_force_open_emits_metrics(self, mock_metrics: MagicMock) -> None:
+        """force_open should emit state and trip metrics."""
+        cb = CircuitBreaker(provider="test", metrics=mock_metrics)
+        mock_metrics.reset_mock()
+
+        cb.force_open()
+
+        mock_metrics.set_gauge.assert_called_with(
+            METRIC_CIRCUIT_BREAKER_STATE,
+            2.0,  # OPEN = 2
+            {"provider": "test"},
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            METRIC_CIRCUIT_BREAKER_TRIPS,
+            1,
+            {"provider": "test"},
+        )
+
+    @pytest.mark.unit
+    def test_reset_emits_closed_metric(self, mock_metrics: MagicMock) -> None:
+        """reset should emit CLOSED state metric."""
+        cb = CircuitBreaker(provider="test", metrics=mock_metrics)
+        cb.force_open()
+        mock_metrics.reset_mock()
+
+        cb.reset()
+
+        mock_metrics.set_gauge.assert_called_with(
+            METRIC_CIRCUIT_BREAKER_STATE,
+            0.0,  # CLOSED = 0
+            {"provider": "test"},
+        )
+
+    @pytest.mark.unit
+    def test_no_metrics_when_none_provided(self) -> None:
+        """Circuit breaker should work without metrics (None)."""
+        cb = CircuitBreaker(provider="test", metrics=None)
+
+        # Should not raise any errors
+        cb.force_open()
+        cb.reset()
+        assert cb.get_state() == CircuitBreakerState.CLOSED
+
+    @pytest.mark.unit
+    async def test_failures_below_threshold_no_trip_metric(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """Failures below threshold should not emit trip metrics."""
+        cb = CircuitBreaker(provider="test", failure_threshold=3, metrics=mock_metrics)
+
+        async def fail() -> None:
+            raise RuntimeError("error")
+
+        # Fail 2 times (below threshold of 3)
+        for _ in range(2):
+            with pytest.raises(RuntimeError):
+                await cb.call(fail)
+
+        assert cb.get_state() == CircuitBreakerState.CLOSED
+        mock_metrics.increment_counter.assert_not_called()
