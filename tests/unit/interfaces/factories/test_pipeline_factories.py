@@ -81,7 +81,6 @@ class TestPubChemCompoundFactory:
         from bioetl.composition.factories.pipeline_factories import (
             pubchem_compound_factory,
         )
-
         # Save original _create_data_source
         original_creator = pubchem_compound_factory._create_data_source
         yield

@@ -100,7 +100,23 @@ class MyAdapter:
 - Формат файлов (JSONL) зафиксирован в версии пути (`/v1/`).
 - Изменение формата требует новой ветки (`/v2/`). Миграция "in-place" запрещена.
  
-### 2.1.1. Инфраструктура Delta Lake 
+#### 2.1.1. Silver Write Modes (Режимы Записи)
+Режимы записи для Silver слоя строго типизированы (`SilverWriteMode` enum):
+- **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.
+- **APPEND**: Вставка новых записей без проверки дубликатов.
+- **DELETE**: Полная перезапись таблицы (удаление и вставка).
+
+**Валидация**:
+- Попытка использовать режим `OVERWRITE` (не `DELETE`) вызовет ошибку.
+- Нарушение инвариантов Medallion (например, Append для данных требующих идемпотентности) логируется как `PolicyViolation`.
+
+#### 2.1.2. Gold Write Modes (Режимы Записи)
+Режимы записи для Gold слоя строго типизированы (`GoldWriteMode` enum):
+- **OVERWRITE**: Полная перезапись витрины. Стандарт для агрегатов.
+- **APPEND**: Добавление новых партиций (для timeseries данных).
+- **SCD2**: Slowly Changing Dimensions Type 2 (историчность). Требует `scd_config` (ключи, valid_from/to).
+
+### 2.1.3. Инфраструктура Delta Lake
 - **Engine**: Использовать `delta-rs` (Rust core) для Python-воркеров для производительности. 
 - **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1. 
 - **Maintenance**: Обязательный запуск `VACUUM` с `retention_period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения. **VACUUM MUST** запускаться еженедельно.
@@ -397,7 +413,11 @@ from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 class NewProviderAdapter(BaseHttpAdapter):
-    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort):
+    def __init__(
+        self,
+        http_client: UnifiedHTTPClient,
+        logger: LoggerPort,
+    ):
         super().__init__(http_client, logger)
         self.provider_name = "new_provider"
 ```
@@ -611,6 +631,20 @@ async with services:  # __aenter__ инициализирует ресурсы
 ## 6. Документация (Автоматизация — приоритет) 
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs). 
 - **Именование**: Зеркальное (`src/bioetl/.../{provider}/` <-> `docs/providers/{provider}/`). 
+
+## 6.1. Детерминизм и Воспроизводимость
+
+**Детерминизм** — это гарантия того, что при одинаковых входных данных (source data, config) пайплайн всегда произведет идентичные выходные данные и побочные эффекты.
+
+#### MUST (Обязательно)
+1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
+2. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion_ts`, `processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
+3. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL).
+4. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
+
+**Проверка**:
+- `tests/architecture/test_no_random_in_writers.py`
+- `tests/architecture/test_no_datetime_now_in_infrastructure.py`
  
 ## 7. Протокол Архитектурных Обзоров
 
