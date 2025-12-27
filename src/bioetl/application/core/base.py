@@ -204,5 +204,38 @@ class BasePipeline(ABC):  # noqa: B024
             "or override transform_bronze_to_silver()"
         )
 
-    # Gold layer transformation and filtering methods have been moved to BaseTransformer.
-    # See src/bioetl/application/core/base_transformer.py
+    def should_write_gold(self, context: PipelineContext, record: SilverRecord) -> bool:
+        """Determine if a Silver record should be written to Gold.
+
+        Delegates to the transformer if available.
+
+        Args:
+            context: Pipeline context.
+            record: Silver record to evaluate.
+
+        Returns:
+            True if record should be written to Gold layer.
+
+        """
+        if self._transformer is not None:
+            return self._transformer.should_write_gold(context, record)
+        return True
+
+    def transform_for_gold(
+        self, context: PipelineContext, silver_record: SilverRecord
+    ) -> dict[str, Any]:
+        """Transform Silver record for Gold layer.
+
+        Delegates to the transformer if available.
+
+        Args:
+            context: Pipeline context.
+            silver_record: Silver record to transform.
+
+        Returns:
+            Record suitable for Gold layer.
+
+        """
+        if self._transformer is not None:
+            return self._transformer.transform_for_gold(context, silver_record)
+        return silver_record

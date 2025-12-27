@@ -124,9 +124,25 @@ class PipelineExecutor:
     ) -> None:
         """Execute the pipeline with memory-efficient adaptive batch sizing.
 
+        Orchestrates the complete data flow: fetch → transform → write for
+        all records from the data source. Handles graceful shutdown and
+        checkpointing.
+
         Args:
-            limit: Maximum number of records to process.
-            query: Optional query string for data source.
+            limit: Maximum number of records to process. None means no limit.
+            query: Optional query string for data source filtering.
+
+        Raises:
+            PipelineShutdownError: If shutdown signal received during execution.
+            Exception: Any exception from data source or record processor.
+
+        Note:
+            After execution, counters are updated:
+            - records_fetched: Total records retrieved from source
+            - records_bronze: Records written to Bronze layer
+            - records_silver: Records written to Silver layer
+            - records_gold: Records written to Gold layer
+            - records_quarantined: Records sent to quarantine
 
         """
         root_span = self._start_execution_span()
@@ -438,6 +454,19 @@ class PipelineExecutor:
     async def _extract(
         self, limit: int | None, query: str | None = None
     ) -> AsyncIterator[dict[str, Any]]:
+        """Extract records from data source.
+
+        Delegates to the data source port to fetch records for the
+        configured entity type.
+
+        Args:
+            limit: Maximum number of records to extract. None means no limit.
+            query: Optional query string for server-side filtering.
+
+        Yields:
+            Raw records as dictionaries from the data source.
+
+        """
         async for record in self._data_source.fetch(
             entity_type=self._entity_type,
             limit=limit,

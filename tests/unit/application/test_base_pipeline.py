@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
@@ -18,6 +19,16 @@ class ConcretePipeline(BasePipeline):
     async def transform_bronze_to_silver(
         self, _context: PipelineContext, record: dict
     ) -> dict | None:
+        return record
+
+
+class MockTransformer(BaseTransformer):
+    """Mock transformer for testing."""
+
+    def __init__(self):
+        super().__init__(provider="test")
+
+    async def _transform_impl(self, context, record):
         return record
 
 
@@ -50,7 +61,11 @@ def mock_pipeline():
         logger=mock_logger,
     )
     run_id: RunID = uuid4()
-    pipeline = ConcretePipeline(config, runtime, services, run_id)
+    # Inject mock transformer
+    transformer = MockTransformer()
+    pipeline = ConcretePipeline(
+        config, runtime, services, run_id, transformer=transformer
+    )
     return pipeline
 
 
@@ -65,8 +80,8 @@ async def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.context.logger is not None
 
 
-async def test_base_pipeline_accepts_four_params():
-    """Test that BasePipeline.__init__ accepts exactly 4 parameters including run_id."""
+async def test_base_pipeline_accepts_five_params():
+    """Test that BasePipeline.__init__ accepts exactly 5 parameters including transformer."""
     config = PipelineConfig(
         pipeline_name="test",
         provider="test",
@@ -88,13 +103,15 @@ async def test_base_pipeline_accepts_four_params():
         logger=mock_logger,
     )
     run_id: RunID = uuid4()
+    transformer = MockTransformer()
 
-    # Should work with exactly 4 positional args (including run_id)
-    pipeline = ConcretePipeline(config, runtime, services, run_id)
+    # Should work with exactly 5 positional args (including run_id and transformer)
+    pipeline = ConcretePipeline(config, runtime, services, run_id, transformer)
     assert pipeline.config == config
     assert pipeline.runtime == runtime
     assert pipeline.services == services
     assert pipeline.run_id == run_id
+    assert pipeline.transformer == transformer
 
 
 @pytest.mark.skip(reason="Suspected .pyc cache issue - run with --cache-clear")
@@ -246,4 +263,5 @@ class TestTransformForGold:
             "_run_type",
             "_source_batch_id",
         }
-        assert mock_pipeline.GOLD_EXCLUDE_FIELDS == expected_fields
+        # Access via transformer
+        assert mock_pipeline.transformer.GOLD_EXCLUDE_FIELDS == expected_fields

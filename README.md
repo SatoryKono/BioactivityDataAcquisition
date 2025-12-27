@@ -21,6 +21,49 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
 * **Local-First Design**: In-memory locking, local file storage — no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
 * **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
 
+## 🏗 Architecture Overview
+
+BioETL follows **Hexagonal Architecture** (Ports & Adapters) with clear layer separation:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     INTERFACES (CLI)                        │
+├─────────────────────────────────────────────────────────────┤
+│                    COMPOSITION (DI)                         │
+│              bootstrap_pipeline() → Factories               │
+├─────────────────────────────────────────────────────────────┤
+│                     APPLICATION                             │
+│         PipelineRunner → Executor → Transformer             │
+├─────────────────────────────────────────────────────────────┤
+│                       DOMAIN                                │
+│              Ports (Interfaces) │ Types │ Entities          │
+├─────────────────────────────────────────────────────────────┤
+│                    INFRASTRUCTURE                           │
+│         ChEMBL │ PubChem │ Delta Lake │ Observability       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Data Flow**: External API → Bronze (JSONL+zstd) → Silver (Delta Lake) → Gold (Analytics)
+
+## 📊 Supported Providers
+
+| Provider | Entity Types | Status | Rate Limit |
+|----------|-------------|--------|------------|
+| **ChEMBL** | Activity, Assay, Molecule, Target, Document | Production | None |
+| **PubChem** | Compound | Production | 5 req/sec |
+| **UniProt** | Protein | Production | 100 req/sec |
+| **PubMed** | Publication | Production | 3 req/sec |
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [API Reference](docs/04-reference/api/index.md) | Full API documentation with mkdocstrings |
+| [Architecture Decisions](docs/02-architecture/decisions/) | ADRs explaining design choices |
+| [RULES.md](docs/RULES.md) | Project governance and requirements |
+| [CLI Reference](docs/04-reference/cli.md) | Command-line interface documentation |
+| [Operations Runbooks](docs/05-operations/runbooks/) | Incident response and procedures |
+
 ## ⚡ Quick Start
 
 ### Prerequisites
