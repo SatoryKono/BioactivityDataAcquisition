@@ -6,7 +6,7 @@ Extracted from RecordProcessor for single responsibility (SRP).
 
 from __future__ import annotations
 
-import json
+import orjson
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -132,13 +132,16 @@ class BatchWriter:
 
         try:
             # Serialize with deterministic key ordering
-            json_strings = [json.dumps(r, sort_keys=True) for r in records]
+            # orjson returns bytes
+            json_bytes_list = [
+                orjson.dumps(r, option=orjson.OPT_SORT_KEYS) for r in records
+            ]
 
-            # Sort for deterministic file content
-            json_strings.sort()
+            # Sort bytes for deterministic file content
+            json_bytes_list.sort()
 
-            # Create generator for bytes
-            record_bytes = ((s + "\n").encode("utf-8") for s in json_strings)
+            # Create generator for bytes with newlines
+            record_bytes = (b + b"\n" for b in json_bytes_list)
 
             await self._storage.write_bronze(
                 records=record_bytes,
