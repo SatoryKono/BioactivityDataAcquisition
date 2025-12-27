@@ -48,9 +48,7 @@ def test_start_metrics_server_failure():
 def test_interface_passes_config_params():
     """Verify interface layer passes all config params to server."""
     # Patch at the module level where it's imported as _start_server
-    with mock.patch(
-        "bioetl.interfaces.observability._start_server"
-    ) as mock_server:
+    with mock.patch("bioetl.interfaces.observability._start_server") as mock_server:
         mock_server.return_value = True
         result = observability.start_metrics_server(
             port=9090,

@@ -67,7 +67,9 @@ class TestFileSizeLimits:
 
     def test_infrastructure_files_under_limit(self, src_dir: Path) -> None:
         """Infrastructure layer files must be under 600 LOC."""
-        self._check_layer(src_dir, "infrastructure", self.LAYER_LIMITS["infrastructure"])
+        self._check_layer(
+            src_dir, "infrastructure", self.LAYER_LIMITS["infrastructure"]
+        )
 
     def test_interfaces_files_under_limit(self, src_dir: Path) -> None:
         """Interfaces layer files must be under 400 LOC."""
@@ -94,9 +96,8 @@ class TestFileSizeLimits:
             if loc > file_limit:
                 violations.append(f"{py_file.name}: {loc} LOC (limit: {file_limit})")
 
-        assert not violations, (
-            f"Files exceeding LOC limit in {layer}:\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert not violations, f"Files exceeding LOC limit in {layer}:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
 
@@ -255,7 +256,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 500,
-        "BaseTransformer": 415,  # 412 lines - grown with O1 tracing/metrics integration
+        "BaseTransformer": 415,  # 412 lines - complex base with hooks
         "DeltaWriter": 650,  # 644 lines - includes schema drift detection (M4) + audit
         "GoldWriter": 540,  # 536 lines - includes SCD Type 2 with ingestion_ts per ADR-014
         "LineageTracker": 400,
@@ -264,12 +265,12 @@ class TestClassSize:
         "PreflightService": 500,  # 495 lines - preflight validation service
         "BronzeWriter": 410,  # 399 lines - JSONL + zstd compression writer with metrics and JSON validation
         # Test classes exemptions
-        "TestCliCommands": 350, # Test class with many test cases
-        "TestFileSizeLimits": 350, # Test class with many exemptions
-        "TestFunctionComplexity": 350, # Test class with many exemptions
-        "TestFunctionLength": 350, # Test class with many exemptions
-        "TestClassSize": 350, # Test class with many exemptions
-        "PipelineExecutor": 350, # Executor with tracing and metrics
+        "TestCliCommands": 350,  # Test class with many test cases
+        "TestFileSizeLimits": 350,  # Test class with many exemptions
+        "TestFunctionComplexity": 350,  # Test class with many exemptions
+        "TestFunctionLength": 350,  # Test class with many exemptions
+        "TestClassSize": 350,  # Test class with many exemptions
+        "PipelineExecutor": 350,  # Executor with tracing and metrics
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -306,7 +307,7 @@ class TestClassSize:
 
         if violations:
             pytest.fail(
-                f"Classes exceeding line limit:\n"
+                "Classes exceeding line limit:\n"
                 + "\n".join(f"  - {v}" for v in violations)
             )
 
@@ -347,6 +348,6 @@ class TestClassSize:
 
         if violations:
             pytest.fail(
-                f"Classes with too many methods:\n"
+                "Classes with too many methods:\n"
                 + "\n".join(f"  - {v}" for v in violations)
             )

@@ -206,7 +206,9 @@ class TestCliMaintenanceVacuumErrors:
     def mock_lifecycle_service_error(self):
         """Create a mock lifecycle service that raises an error."""
         service = MagicMock()
-        service.vacuum = AsyncMock(side_effect=RuntimeError("Vacuum failed: table not found"))
+        service.vacuum = AsyncMock(
+            side_effect=RuntimeError("Vacuum failed: table not found")
+        )
         return service
 
     def test_vacuum_handles_service_error(

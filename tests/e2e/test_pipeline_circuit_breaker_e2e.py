@@ -15,10 +15,6 @@ Per RULES.md §4.3 Circuit Breaker:
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
 
 import httpx
 import pytest
@@ -65,7 +61,7 @@ class TestCircuitBreakerStateTransitions:
         async def fail():
             raise RuntimeError("Provider error")
 
-        for i in range(3):
+        for _ in range(3):
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
@@ -259,7 +255,9 @@ class TestCircuitBreakerErrorClassification:
         """E2E: 5xx server errors trigger circuit breaker."""
         request = httpx.Request("GET", "https://api.example.com")
         response = httpx.Response(500, request=request)
-        error = httpx.HTTPStatusError("Server error", request=request, response=response)
+        error = httpx.HTTPStatusError(
+            "Server error", request=request, response=response
+        )
 
         assert is_circuit_breaker_error(error) is True
 
@@ -267,7 +265,9 @@ class TestCircuitBreakerErrorClassification:
         """E2E: 429 Rate limit triggers circuit breaker."""
         request = httpx.Request("GET", "https://api.example.com")
         response = httpx.Response(429, request=request)
-        error = httpx.HTTPStatusError("Rate limited", request=request, response=response)
+        error = httpx.HTTPStatusError(
+            "Rate limited", request=request, response=response
+        )
 
         assert is_circuit_breaker_error(error) is True
 
@@ -277,8 +277,12 @@ class TestCircuitBreakerErrorClassification:
 
         for status_code in [400, 401, 403, 404, 422]:
             response = httpx.Response(status_code, request=request)
-            error = httpx.HTTPStatusError("Client error", request=request, response=response)
-            assert is_circuit_breaker_error(error) is False, f"Status {status_code} should not trigger"
+            error = httpx.HTTPStatusError(
+                "Client error", request=request, response=response
+            )
+            assert is_circuit_breaker_error(error) is False, (
+                f"Status {status_code} should not trigger"
+            )
 
     def test_business_error_does_not_trigger_breaker(self):
         """E2E: Business logic errors don't trigger circuit breaker."""
@@ -377,8 +381,10 @@ class TestCircuitBreakerConcurrency:
             for i in range(10):
                 try:
                     should_fail = (worker_id + i) % 3 == 0
-                    result = await cb.call(
-                        lambda: mixed_call(should_fail) if not should_fail else mixed_call(True)
+                    await cb.call(
+                        lambda sf=should_fail: mixed_call(sf)
+                        if not sf
+                        else mixed_call(True)
                     )
                     success_count += 1
                 except RuntimeError:

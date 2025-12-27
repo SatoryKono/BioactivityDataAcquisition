@@ -48,7 +48,9 @@ class TestChemblAdapter:
         assert chembl_adapter.provider_name == "chembl"
 
     @pytest.mark.vcr
-    async def test_fetch_activities(self, chembl_client: Any, mock_logger: MagicMock) -> None:
+    async def test_fetch_activities(
+        self, chembl_client: Any, mock_logger: MagicMock
+    ) -> None:
         """Test fetching activities from ChEMBL.
 
         This test requires a VCR cassette.
@@ -57,7 +59,9 @@ class TestChemblAdapter:
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
         async with chembl_client:
-            adapter = ChemblAdapter(http_client=chembl_client, logger=mock_logger, batch_size=10)
+            adapter = ChemblAdapter(
+                http_client=chembl_client, logger=mock_logger, batch_size=10
+            )
 
             records = []
             async for record in adapter.fetch("activity", limit=5):
@@ -69,7 +73,9 @@ class TestChemblAdapter:
                 assert "activity_id" in record
 
     @pytest.mark.vcr
-    async def test_health_check(self, chembl_client: Any, mock_logger: MagicMock) -> None:
+    async def test_health_check(
+        self, chembl_client: Any, mock_logger: MagicMock
+    ) -> None:
         """Test ChEMBL health check endpoint.
 
         This test requires a VCR cassette.
@@ -90,7 +96,9 @@ class TestChemblAdapter:
             ]
 
     @pytest.mark.vcr
-    async def test_get_entity_count(self, chembl_client: Any, mock_logger: MagicMock) -> None:
+    async def test_get_entity_count(
+        self, chembl_client: Any, mock_logger: MagicMock
+    ) -> None:
         """Test getting entity count from ChEMBL.
 
         This test requires a VCR cassette.
@@ -107,14 +115,18 @@ class TestChemblAdapter:
 
     def test_invalid_entity_type_raises(self, chembl_adapter: Any) -> None:
         """Should raise ValueError for unknown entity type."""
-        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+            ChemblEntityMapper,
+        )
 
         with pytest.raises(ValueError, match="Unknown entity type"):
             ChemblEntityMapper.get_resource_url("invalid_entity")
 
     def test_entity_mapping(self, chembl_adapter: Any) -> None:
         """Entity types should map to correct ChEMBL resources."""
-        from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+        from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+            ChemblEntityMapper,
+        )
 
         assert "molecule" in ChemblEntityMapper.get_resource_url("compound")
         assert "activity" in ChemblEntityMapper.get_resource_url("activity")

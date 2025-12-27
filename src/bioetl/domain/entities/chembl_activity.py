@@ -109,7 +109,9 @@ class Activity(BaseEntity):
     potential_duplicate: int | None = None
 
     # Action type (flattened from ChEMBL API nested structure)
-    action_type_action_type: str | None = None  # Type of action (INHIBITOR, AGONIST, etc.)
+    action_type_action_type: str | None = (
+        None  # Type of action (INHIBITOR, AGONIST, etc.)
+    )
     action_type_description: str | None = None  # Description of the action type
     action_type_parent_type: str | None = None  # Higher-level grouping (nullable)
 

@@ -260,8 +260,7 @@ class TestExceptionDocstrings:
         exception_files: list[Path] = []
         if exceptions_dir.is_dir():
             exception_files = [
-                f for f in exceptions_dir.glob("*.py")
-                if f.name != "__init__.py"
+                f for f in exceptions_dir.glob("*.py") if f.name != "__init__.py"
             ]
         elif exceptions_file.exists():
             exception_files = [exceptions_file]

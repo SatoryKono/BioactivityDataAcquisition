@@ -142,9 +142,7 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = error
 
-            result = start_metrics_server(
-                port=8000, fail_fast=False, retry_count=3
-            )
+            result = start_metrics_server(port=8000, fail_fast=False, retry_count=3)
 
             assert result is False
             # Should only try once for EADDRINUSE

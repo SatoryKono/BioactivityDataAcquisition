@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -36,7 +36,7 @@ def test_purge_handles_malicious_pipeline_name(mock_delta_table):
     quarantine.purge(
         pipeline=malicious_name,
         older_than_days=30,
-        now=datetime.now(timezone.utc),
+        now=datetime.now(UTC),
     )
 
     # Verify that the predicate sent to Delta Lake is properly escaped

@@ -54,7 +54,7 @@ class TestDeterministicCsvExport:
         # Skip header
         data_lines = lines[1:]
         # Strip quotes and whitespace from id field
-        ids = [line.split(",")[0].strip().replace('"', '') for line in data_lines]
+        ids = [line.split(",")[0].strip().replace('"', "") for line in data_lines]
 
         assert ids == ["A", "B", "C"], "Records should be sorted by id column"
 

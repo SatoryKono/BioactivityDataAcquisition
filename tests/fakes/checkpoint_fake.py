@@ -30,9 +30,7 @@ class InMemoryCheckpoint:
         """Save checkpoint to memory."""
         self._checkpoints[pipeline] = (run_id, metadata or {})
 
-    async def load(
-        self, pipeline: str
-    ) -> tuple[RunID, dict[str, Any]] | None:
+    async def load(self, pipeline: str) -> tuple[RunID, dict[str, Any]] | None:
         """Load checkpoint from memory."""
         return self._checkpoints.get(pipeline)
 

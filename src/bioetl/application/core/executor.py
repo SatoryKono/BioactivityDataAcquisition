@@ -129,104 +129,171 @@ class PipelineExecutor:
             query: Optional query string for data source.
 
         """
-        # Start root span for pipeline execution if tracer is available
-        root_span = None
-        if self._tracer:
-            otel_tracer = self._tracer.get_tracer("bioetl.executor")
-            root_span = otel_tracer.start_as_current_span(
-                "pipeline_execution",
-                attributes={
-                    "bioetl.pipeline": self._pipeline_name or "unknown",
-                    "bioetl.run_id": self._run_id or "unknown",
-                    "bioetl.entity_type": self._entity_type,
-                    "bioetl.run_type": (
-                        self._run_type.value if self._run_type else "unknown"
-                    ),
-                    "bioetl.adaptive_batch_sizing": self._adaptive_batch_size_enabled,
-                    "bioetl.initial_batch_size": self._initial_batch_size,
-                },
-            )
-            root_span.__enter__()
+        root_span = self._start_execution_span()
 
+        try:
+            await self._run_extraction_loop(limit, query)
+            self._set_execution_span_stats(root_span)
+        except PipelineShutdownError:
+            await self._handle_shutdown(root_span)
+            raise
+        except Exception as e:
+            self._handle_execution_error(root_span, e)
+            raise
+        else:
+            self._finalize_span(root_span)
+
+    def _start_execution_span(self) -> Any | None:
+        """Start root tracing span for pipeline execution.
+
+        Returns:
+            The span context manager or None if tracing disabled.
+
+        """
+        if not self._tracer:
+            return None
+
+        otel_tracer = self._tracer.get_tracer("bioetl.executor")
+        span = otel_tracer.start_as_current_span(
+            "pipeline_execution",
+            attributes={
+                "bioetl.pipeline": self._pipeline_name or "unknown",
+                "bioetl.run_id": self._run_id or "unknown",
+                "bioetl.entity_type": self._entity_type,
+                "bioetl.run_type": (
+                    self._run_type.value if self._run_type else "unknown"
+                ),
+                "bioetl.adaptive_batch_sizing": self._adaptive_batch_size_enabled,
+                "bioetl.initial_batch_size": self._initial_batch_size,
+            },
+        )
+        span.__enter__()
+        return span
+
+    async def _run_extraction_loop(
+        self, limit: int | None, query: str | None
+    ) -> None:
+        """Run the main extraction and processing loop.
+
+        Args:
+            limit: Maximum number of records to process.
+            query: Optional query string for data source.
+
+        """
         batch: list[dict[str, Any]] = []
         current_batch_size = self.batch_size
         check_interval = self._get_memory_check_interval()
 
-        try:
-            async for raw_record in self._extract(limit, query):
-                if self._shutdown_signal.is_requested:
-                    # Graceful shutdown: save where we stopped
-                    await self._checkpoint_manager.save_checkpoint(
-                        self.records_fetched
-                    )
-                    raise PipelineShutdownError("Shutdown during extraction")
+        async for raw_record in self._extract(limit, query):
+            if self._shutdown_signal.is_requested:
+                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+                raise PipelineShutdownError("Shutdown during extraction")
 
-                batch.append(raw_record)
-                self.records_fetched += 1
+            batch.append(raw_record)
+            self.records_fetched += 1
 
-                # Check memory pressure periodically
-                if (
-                    self._adaptive_batch_size_enabled
-                    and self.records_fetched % check_interval == 0
-                ):
-                    current_batch_size = self._adjust_batch_size(current_batch_size)
+            current_batch_size = self._check_memory_pressure(
+                current_batch_size, check_interval
+            )
 
-                if len(batch) >= current_batch_size:
-                    await self._process_and_update_counts(batch)
-                    batch = []
-
-                    # After processing, try to recover batch size if pressure relieved
-                    if self._adaptive_batch_size_enabled:
-                        current_batch_size = self._try_recover_batch_size(
-                            current_batch_size
-                        )
-
-                if self.records_fetched % self.checkpoint_interval == 0:
-                    await self._checkpoint_manager.save_checkpoint(
-                        self.records_fetched
-                    )
-
-            if batch:
+            if len(batch) >= current_batch_size:
                 await self._process_and_update_counts(batch)
+                batch = []
+                current_batch_size = self._maybe_recover_batch_size(current_batch_size)
 
-            # Add final counts to root span
-            if root_span:
-                root_span.set_attribute("bioetl.total_fetched", self.records_fetched)
-                root_span.set_attribute("bioetl.total_bronze", self.records_bronze)
-                root_span.set_attribute("bioetl.total_silver", self.records_silver)
-                root_span.set_attribute("bioetl.total_gold", self.records_gold)
-                root_span.set_attribute(
-                    "bioetl.total_quarantined", self.records_quarantined
-                )
-                root_span.set_attribute(
-                    "bioetl.batch_size_reductions", self._batch_size_reductions
-                )
-                root_span.set_attribute(
-                    "bioetl.min_batch_size_used", self._min_batch_size_used
-                )
+            if self.records_fetched % self.checkpoint_interval == 0:
+                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
 
-        except PipelineShutdownError:
-            # Re-raise explicit shutdown signal
-            try:
-                await self._checkpoint_manager.save_checkpoint(
-                    self.records_fetched
-                )
-            except Exception:
-                # Ignore errors during emergency checkpoint save
-                pass
-            if root_span:
-                root_span.set_attribute("bioetl.shutdown", True)
-                root_span.__exit__(None, None, None)
-            raise
-        except Exception as e:
-            if root_span:
-                root_span.set_attribute("error", True)
-                root_span.record_exception(e)
-                root_span.__exit__(None, None, None)
-            raise
-        else:
-            if root_span:
-                root_span.__exit__(None, None, None)
+        if batch:
+            await self._process_and_update_counts(batch)
+
+    def _check_memory_pressure(self, current_size: int, check_interval: int) -> int:
+        """Check memory pressure and adjust batch size if needed.
+
+        Args:
+            current_size: Current batch size.
+            check_interval: Records between checks.
+
+        Returns:
+            Adjusted batch size.
+
+        """
+        if not self._adaptive_batch_size_enabled:
+            return current_size
+        if self.records_fetched % check_interval != 0:
+            return current_size
+        return self._adjust_batch_size(current_size)
+
+    def _maybe_recover_batch_size(self, current_size: int) -> int:
+        """Try to recover batch size after processing if adaptive sizing enabled.
+
+        Args:
+            current_size: Current batch size.
+
+        Returns:
+            Potentially larger batch size.
+
+        """
+        if not self._adaptive_batch_size_enabled:
+            return current_size
+        return self._try_recover_batch_size(current_size)
+
+    def _set_execution_span_stats(self, span: Any | None) -> None:
+        """Set final statistics on the execution span.
+
+        Args:
+            span: The span to update, or None if tracing disabled.
+
+        """
+        if not span:
+            return
+
+        span.set_attribute("bioetl.total_fetched", self.records_fetched)
+        span.set_attribute("bioetl.total_bronze", self.records_bronze)
+        span.set_attribute("bioetl.total_silver", self.records_silver)
+        span.set_attribute("bioetl.total_gold", self.records_gold)
+        span.set_attribute("bioetl.total_quarantined", self.records_quarantined)
+        span.set_attribute("bioetl.batch_size_reductions", self._batch_size_reductions)
+        span.set_attribute("bioetl.min_batch_size_used", self._min_batch_size_used)
+
+    async def _handle_shutdown(self, span: Any | None) -> None:
+        """Handle graceful shutdown with checkpoint save.
+
+        Args:
+            span: The span to finalize, or None if tracing disabled.
+
+        """
+        try:
+            await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+        except Exception:
+            pass  # Ignore errors during emergency checkpoint save
+
+        if span:
+            span.set_attribute("bioetl.shutdown", True)
+            span.__exit__(None, None, None)
+
+    def _handle_execution_error(self, span: Any | None, error: Exception) -> None:
+        """Handle execution error with span cleanup.
+
+        Args:
+            span: The span to finalize, or None if tracing disabled.
+            error: The exception that occurred.
+
+        """
+        if span:
+            span.set_attribute("error", True)
+            span.record_exception(error)
+            span.__exit__(None, None, None)
+
+    def _finalize_span(self, span: Any | None) -> None:
+        """Finalize span on successful completion.
+
+        Args:
+            span: The span to finalize, or None if tracing disabled.
+
+        """
+        if span:
+            span.__exit__(None, None, None)
 
     def _get_memory_check_interval(self) -> int:
         """Get interval for memory pressure checks.
@@ -336,7 +403,9 @@ class PipelineExecutor:
                 attributes={
                     "bioetl.batch_id": str(batch_id),
                     "bioetl.record_count": len(batch),
-                    "bioetl.run_type": self._run_type.value if self._run_type else "unknown",
+                    "bioetl.run_type": self._run_type.value
+                    if self._run_type
+                    else "unknown",
                     "bioetl.entity_type": self._entity_type,
                 },
             )

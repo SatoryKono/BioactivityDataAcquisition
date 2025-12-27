@@ -1,5 +1,5 @@
 # Operations Runbooks (Playbooks)
-*Aligned with RULES.md v5.0, Appendix C*
+*Aligned with RULES.md v5.6, Appendix C*
 
 This section contains playbooks for handling common alerts and operational tasks.
 

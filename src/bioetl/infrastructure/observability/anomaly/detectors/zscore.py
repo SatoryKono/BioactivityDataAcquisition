@@ -53,7 +53,9 @@ class ZScoreDetector(DetectorStrategy):
         if z_score is None or z_score < threshold:
             return None
 
-        return self._create_anomaly(metric_name, current_value, mean, stddev, z_score, timestamp)
+        return self._create_anomaly(
+            metric_name, current_value, mean, stddev, z_score, timestamp
+        )
 
     def _calculate_z_score(
         self, value: float, mean: float, stddev: float

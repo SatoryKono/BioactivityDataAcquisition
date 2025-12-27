@@ -43,9 +43,7 @@ class BaseHttpAdapter(DataSourcePort):
     provider_name: str
     logger: LoggerPort
 
-    def __init__(
-        self, http_client: UnifiedHTTPClient, logger: LoggerPort
-    ) -> None:
+    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort) -> None:
         """Initialize BaseAdapter.
 
         Args:

@@ -1,25 +1,30 @@
 graph TD
-    subgraph "Bronze Layer (Raw Data)"
-        A[Source API Data]
+    subgraph Bronze["Bronze Layer"]
+        B1[Raw Data - JSONL + Zstandard]
+        B2[Append-Only]
+        B3[Retention: 90 days]
     end
 
-    subgraph "Silver Layer (Cleaned & Conformed)"
-        B[Standardized Schemas]
-        C[Deduplicated Records]
+    subgraph Silver["Silver Layer"]
+        S1[Normalized Data - Delta Lake]
+        S2[Merge by entity_id]
+        S3[Schema Enforcement]
     end
 
-    subgraph "Gold Layer (Aggregated & Enriched)"
-        D[Bioactivity Aggregates]
-        E[Molecule-Target Links]
+    subgraph Gold["Gold Layer"]
+        G1[Business Data - Delta Lake]
+        G2[Strict Validation - Pandera]
+        G3[SCD Type 2 / Overwrite]
     end
 
-    subgraph "Quarantine"
-        F[Validation Failures]
+    subgraph Quarantine["Quarantine"]
+        Q1[Failed Records]
+        Q2[Error Metadata]
+        Q3[Replay Support]
     end
 
-    A -- "Validation & Schema Enforcement" --> B
-    B -- "Deduplication" --> C
-    C -- "Business Logic & Aggregation" --> D
-    D -- "Enrichment" --> E
-    A -- "Failed Validation" --> F
-    B -- "Failed Transformation" --> F
+    Bronze --> Silver
+    Silver --> Gold
+    Bronze -.-> Quarantine
+    Silver -.-> Quarantine
+    Quarantine -.-> Bronze

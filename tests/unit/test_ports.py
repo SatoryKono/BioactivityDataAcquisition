@@ -76,7 +76,10 @@ class TestDataSourcePortProtocol:
                 pass
 
             async def fetch(
-                self, entity_type: str, limit: int | None = None, query: str | None = None
+                self,
+                entity_type: str,
+                limit: int | None = None,
+                query: str | None = None,
             ):
                 yield {"data": entity_type, "limit": limit, "query": query}
 
@@ -117,7 +120,6 @@ class TestStoragePortProtocol:
         from collections.abc import Iterator
         from typing import Literal
 
-
         class ValidStorage:
             async def write_bronze(
                 self,
@@ -156,14 +158,10 @@ class TestStoragePortProtocol:
             async def aclose(self) -> None:
                 pass
 
-            async def clear_silver(
-                self, table_name: str, dry_run: bool = False
-            ) -> int:
+            async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
                 return 0
 
-            async def clear_gold(
-                self, table_name: str, dry_run: bool = False
-            ) -> int:
+            async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
                 return 0
 
             async def clear_csv(self, table_name: str | None = None) -> int:
@@ -190,6 +188,7 @@ class TestStoragePortProtocol:
 
             async def health_check(self) -> Any:
                 from bioetl.domain.types import HealthStatus
+
                 return HealthStatus.HEALTHY
 
             def preview_cleanup(

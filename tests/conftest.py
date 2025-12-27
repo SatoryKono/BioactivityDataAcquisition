@@ -40,7 +40,6 @@ def pytest_configure() -> None:
         sys.modules["pubchempy"] = MagicMock()
 
 
-
 @pytest.fixture(scope="session")
 def project_root() -> Path:
     """Returns the root directory of the project."""
@@ -194,8 +193,6 @@ def clear_settings_cache():
         get_pipeline_config.cache_clear()
     except ImportError:
         yield
-
-
 
 
 @pytest.fixture

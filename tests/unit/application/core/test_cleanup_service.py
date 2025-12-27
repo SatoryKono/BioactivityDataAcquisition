@@ -135,7 +135,9 @@ class TestCleanupServicePreview:
         self, cleanup_service, mock_storage
     ):
         """Test preview calls storage.preview_cleanup."""
-        await cleanup_service.preview(silver_table="test_silver", gold_table="test_gold")
+        await cleanup_service.preview(
+            silver_table="test_silver", gold_table="test_gold"
+        )
 
         mock_storage.preview_cleanup.assert_called_once_with(
             silver_table="test_silver", gold_table="test_gold"
@@ -194,7 +196,9 @@ class TestCleanupServicePreview:
     @pytest.mark.asyncio
     async def test_preview_logs_debug(self, cleanup_service, mock_logger):
         """Test preview logs debug message."""
-        await cleanup_service.preview(silver_table="test_silver", gold_table="test_gold")
+        await cleanup_service.preview(
+            silver_table="test_silver", gold_table="test_gold"
+        )
 
         mock_logger.debug.assert_called_once()
         call_kwargs = mock_logger.debug.call_args[1]
@@ -267,7 +271,9 @@ class TestCleanupServiceExecute:
         assert result.dry_run is True
 
     @pytest.mark.asyncio
-    async def test_execute_logs_dry_run(self, cleanup_service, mock_storage, mock_logger):
+    async def test_execute_logs_dry_run(
+        self, cleanup_service, mock_storage, mock_logger
+    ):
         """Test execute logs correctly in dry run mode."""
         mock_storage.clear_silver.return_value = 10
         mock_storage.clear_gold.return_value = 5

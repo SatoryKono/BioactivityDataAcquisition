@@ -118,9 +118,7 @@ class TestUniProtProteinTransformer:
         assert result["protein_name"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_with_minimal_valid_record(
-        self, transformer, mock_context
-    ):
+    async def test_transform_with_minimal_valid_record(self, transformer, mock_context):
         """Test transformation with minimal valid record (required fields only).
 
         Only accession and entry_name are required. protein_name is optional.
@@ -343,9 +341,7 @@ class TestUniProtProteinTransformer:
             "primaryAccession": "P77777",
             "uniProtkbId": "DEEP_HUMAN",
             "proteinDescription": {
-                "recommendedName": {
-                    "fullName": {"value": "Deeply Nested Protein Name"}
-                }
+                "recommendedName": {"fullName": {"value": "Deeply Nested Protein Name"}}
             },
         }
 

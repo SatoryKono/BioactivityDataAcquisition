@@ -80,9 +80,7 @@ class ChemblAdapter(BaseHttpAdapter):
     _error_counts: dict[ErrorType, int] = field(init=False, default_factory=dict)
 
     # Entity mapper for URL and key resolution
-    _mapper: ChemblEntityMapper = field(
-        init=False, default_factory=ChemblEntityMapper
-    )
+    _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics after dataclass init."""
@@ -489,9 +487,7 @@ class ChemblAdapter(BaseHttpAdapter):
             "consecutive_errors": self._consecutive_errors,
             "total_errors": self._total_errors,
             "health_status": self._cached_health.value,
-            "error_counts_by_type": {
-                k.value: v for k, v in self._error_counts.items()
-            },
+            "error_counts_by_type": {k.value: v for k, v in self._error_counts.items()},
         }
 
     def reset_error_counters(self) -> None:

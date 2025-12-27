@@ -512,8 +512,8 @@ def test_infrastructure_does_not_import_composition(src_dir: Path) -> None:
         errors = _check_imports_in_file(py_file, forbidden)
         all_errors.extend(errors)
 
-    assert not all_errors, (
-        "Infrastructure must not import composition.\n" + "\n".join(all_errors)
+    assert not all_errors, "Infrastructure must not import composition.\n" + "\n".join(
+        all_errors
     )
 
 
@@ -625,8 +625,7 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
     if exceptions_dir.is_dir():
         # New package structure: scan all .py files except __init__.py
         exception_files = [
-            f for f in exceptions_dir.glob("*.py")
-            if f.name != "__init__.py"
+            f for f in exceptions_dir.glob("*.py") if f.name != "__init__.py"
         ]
     elif exceptions_file.exists():
         # Legacy single file structure
@@ -642,7 +641,12 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
             trees.append(ast.parse(content))
 
     # Base classes that don't need error_type (they provide defaults)
-    base_classes = {"BioETLError", "CriticalError", "RecoverableError", "DataQualityError"}
+    base_classes = {
+        "BioETLError",
+        "CriticalError",
+        "RecoverableError",
+        "DataQualityError",
+    }
 
     # Classes that inherit from BioETL exception hierarchy
     exception_bases = {
@@ -680,12 +684,18 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
                     # Check for error_type assignment
                     if isinstance(stmt, ast.Assign):
                         for target in stmt.targets:
-                            if isinstance(target, ast.Name) and target.id == "error_type":
+                            if (
+                                isinstance(target, ast.Name)
+                                and target.id == "error_type"
+                            ):
                                 has_error_type = True
                                 break
                     # Check for annotated assignment
                     if isinstance(stmt, ast.AnnAssign):
-                        if isinstance(stmt.target, ast.Name) and stmt.target.id == "error_type":
+                        if (
+                            isinstance(stmt.target, ast.Name)
+                            and stmt.target.id == "error_type"
+                        ):
                             has_error_type = True
                     # Check for Import statement (class-level import for error_type)
                     if isinstance(stmt, ast.ImportFrom):

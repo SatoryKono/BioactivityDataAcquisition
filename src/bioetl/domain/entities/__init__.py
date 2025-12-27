@@ -33,20 +33,15 @@ from bioetl.domain.entities.pubmed import Publication
 from bioetl.domain.entities.uniprot import Protein
 
 __all__ = [
-    # Base
-    "BaseEntity",
-    "RequiredEntityFields",
-    # ChEMBL
     "Activity",
     "Assay",
+    "BaseEntity",
+    "Compound",
     "Document",
     "Molecule",
+    "Protein",
+    "Publication",
+    "RequiredEntityFields",
     "Target",
     "TargetComponent",
-    # PubChem
-    "Compound",
-    # PubMed
-    "Publication",
-    # UniProt
-    "Protein",
 ]

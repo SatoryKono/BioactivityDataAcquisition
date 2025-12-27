@@ -1,4 +1,4 @@
-﻿"""Architecture test: no side-effect imports in composition layer.
+"""Architecture test: no side-effect imports in composition layer.
 
 Verifies that the composition layer does not use side-effect imports
 (imports only for their side effects, marked with noqa: F401).
@@ -72,7 +72,10 @@ def test_bootstrap_uses_explicit_registration():
     calls_register = False
     for node in ast.walk(bootstrap_func):
         if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id == "register_all_pipelines":
+            if (
+                isinstance(node.func, ast.Name)
+                and node.func.id == "register_all_pipelines"
+            ):
                 calls_register = True
                 break
 
@@ -104,9 +107,11 @@ def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
     # Check that start_metrics_server() is NOT called directly
     for node in ast.walk(bootstrap_func):
         if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id == "start_metrics_server":
+            if (
+                isinstance(node.func, ast.Name)
+                and node.func.id == "start_metrics_server"
+            ):
                 raise AssertionError(
                     "bootstrap_pipeline() must not call start_metrics_server() directly. "
                     "Use bootstrap_metrics() or bootstrap_observability() instead."
                 )
-

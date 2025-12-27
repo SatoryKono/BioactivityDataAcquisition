@@ -54,10 +54,34 @@ class TestFormatDate:
 
     def test_all_month_names(self):
         """Test all month name mappings."""
-        months = ["jan", "feb", "mar", "apr", "may", "jun",
-                  "jul", "aug", "sep", "oct", "nov", "dec"]
-        expected = ["01", "02", "03", "04", "05", "06",
-                    "07", "08", "09", "10", "11", "12"]
+        months = [
+            "jan",
+            "feb",
+            "mar",
+            "apr",
+            "may",
+            "jun",
+            "jul",
+            "aug",
+            "sep",
+            "oct",
+            "nov",
+            "dec",
+        ]
+        expected = [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+        ]
 
         for month, exp in zip(months, expected, strict=True):
             result = DateExtractor.format_date("2023", month, "01")

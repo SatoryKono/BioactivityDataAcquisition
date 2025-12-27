@@ -108,7 +108,9 @@ class TestPubChemCompoundFactory:
 
         # Mock the data source creator function stored in the factory
         mock_data_source = MagicMock()
-        pubchem_compound_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        pubchem_compound_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         services = pubchem_compound_factory.build_services(
             settings=mock_settings,
@@ -140,7 +142,9 @@ class TestPubChemCompoundFactory:
 
         # Mock the data source creator
         mock_data_source = MagicMock()
-        pubchem_compound_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        pubchem_compound_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         pubchem_compound_factory.build_services(
             settings=mock_settings,
@@ -169,7 +173,9 @@ class TestPubChemCompoundFactory:
 
         # Mock the data source creator
         mock_data_source = MagicMock()
-        pubchem_compound_factory._create_data_source = MagicMock(return_value=mock_data_source)
+        pubchem_compound_factory._create_data_source = MagicMock(
+            return_value=mock_data_source
+        )
 
         pubchem_compound_factory.build_services(
             settings=mock_settings,

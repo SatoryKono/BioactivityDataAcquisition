@@ -1,8 +1,8 @@
-
 import inspect
 import pytest
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing, NoOpTracer
 from bioetl.domain.ports.noop import NoOpTracing as DomainNoOpTracing
+
 
 def test_reproduce_noop_tracer_issue():
     print("\nInfrastructure NoOpTracer start_as_current_span args:")
@@ -18,6 +18,7 @@ def test_reproduce_noop_tracer_issue():
         print("Success with attributes")
     except TypeError as e:
         pytest.fail(f"Failed with attributes: {e}")
+
 
 def test_reproduce_domain_noop_tracer_issue():
     print("\nDomain NoOpTracing tracer type:")

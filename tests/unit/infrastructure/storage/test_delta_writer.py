@@ -82,14 +82,16 @@ class TestDeltaWriterValidation:
         import pyarrow as pa
 
         writer = DeltaWriter(base_path="s3://bucket", logger=noop_logger)
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         with pytest.raises(ValueError, match="Invalid Silver write mode 'invalid'"):
             await writer.write_silver(
@@ -199,7 +201,10 @@ class TestDeltaWriterWriteModeEnum:
 
     def test_validate_write_mode_method(self, noop_logger):
         """Test _validate_write_mode returns correct enum."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
 
@@ -646,7 +651,9 @@ class TestDeltaWriterSchemaDrift:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_table_schema_returns_schema_for_existing_table(self, noop_logger):
+    async def test_get_table_schema_returns_schema_for_existing_table(
+        self, noop_logger
+    ):
         """Test _get_table_schema returns schema for existing table."""
         import pyarrow as pa
 
@@ -692,9 +699,7 @@ class TestDeltaWriterSchemaDrift:
             writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
-                await writer._check_schema_drift(
-                    "test.table", valid_records, "error"
-                )
+                await writer._check_schema_drift("test.table", valid_records, "error")
 
             assert "value" in exc_info.value.new_fields
             assert exc_info.value.table == "test.table"
@@ -708,14 +713,16 @@ class TestDeltaWriterSchemaDrift:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         # Existing schema has more fields than incoming records
-        existing_schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("extra_field", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        existing_schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("extra_field", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         mock_delta_schema = MagicMock()
         mock_delta_schema.to_arrow.return_value = existing_schema
 
@@ -804,14 +811,16 @@ class TestDeltaWriterSchemaDrift:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         # Schema matches incoming records exactly
-        existing_schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        existing_schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         mock_delta_schema = MagicMock()
         mock_delta_schema.to_arrow.return_value = existing_schema
 
@@ -828,9 +837,7 @@ class TestDeltaWriterSchemaDrift:
             await writer._check_schema_drift("test.table", valid_records, "error")
 
     @pytest.mark.asyncio
-    async def test_schema_drift_skipped_for_new_table(
-        self, valid_records, noop_logger
-    ):
+    async def test_schema_drift_skipped_for_new_table(self, valid_records, noop_logger):
         """Test schema drift check is skipped for new tables."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -882,23 +889,27 @@ class TestDeltaWriterSchemaDrift:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         # Schema for incoming records
-        incoming_schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        incoming_schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         # Existing table has a different schema (missing 'value' field)
-        existing_table_schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        existing_table_schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         mock_delta_schema = MagicMock()
         mock_delta_schema.to_arrow.return_value = existing_table_schema
 
@@ -967,7 +978,10 @@ class TestDeltaWriterWriteModePolicy:
     def test_to_policy_write_mode_merge(self, noop_logger):
         """Test MERGE mode maps correctly."""
         from bioetl.domain.medallion import WriteMode
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.MERGE)
@@ -976,7 +990,10 @@ class TestDeltaWriterWriteModePolicy:
     def test_to_policy_write_mode_append(self, noop_logger):
         """Test APPEND mode maps correctly."""
         from bioetl.domain.medallion import WriteMode
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.APPEND)
@@ -985,7 +1002,10 @@ class TestDeltaWriterWriteModePolicy:
     def test_to_policy_write_mode_delete_maps_to_overwrite(self, noop_logger):
         """Test DELETE mode maps to OVERWRITE (critical for policy enforcement)."""
         from bioetl.domain.medallion import WriteMode
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.DELETE)
@@ -993,7 +1013,10 @@ class TestDeltaWriterWriteModePolicy:
 
     def test_enforce_write_policy_allows_merge(self, noop_logger):
         """Test policy enforcement allows MERGE mode for Silver."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         # Should not raise
@@ -1001,7 +1024,10 @@ class TestDeltaWriterWriteModePolicy:
 
     def test_enforce_write_policy_allows_append(self, noop_logger):
         """Test policy enforcement allows APPEND mode for Silver."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         # Should not raise
@@ -1010,7 +1036,10 @@ class TestDeltaWriterWriteModePolicy:
     def test_enforce_write_policy_rejects_delete(self, noop_logger):
         """Test policy enforcement rejects DELETE mode for Silver (maps to OVERWRITE)."""
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
         with pytest.raises(PolicyViolationError) as exc_info:
@@ -1020,7 +1049,10 @@ class TestDeltaWriterWriteModePolicy:
     def test_enforce_write_policy_increments_metric_on_violation(self, noop_logger):
         """Test policy violation increments policy_violations_total metric."""
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         mock_metrics = MagicMock()
         writer = DeltaWriter(
@@ -1041,7 +1073,10 @@ class TestDeltaWriterWriteModePolicy:
     def test_enforce_write_policy_logs_error_on_violation(self, noop_logger):
         """Test policy violation logs error with context."""
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
+        from bioetl.infrastructure.storage.delta_writer import (
+            DeltaWriter,
+            SilverWriteMode,
+        )
 
         mock_logger = MagicMock()
         writer = DeltaWriter(base_path="/tmp/silver", logger=mock_logger)
@@ -1072,14 +1107,16 @@ class TestDeltaWriterWriteModePolicy:
         from bioetl.domain.exceptions import PolicyViolationError
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
 
@@ -1103,21 +1140,26 @@ class TestDeltaWriterWriteModePolicy:
 
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
-        with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
-            side_effect=DeltaTableNotFoundError("Not found"),
-        ), patch(
-            "bioetl.infrastructure.storage.delta_writer.write_deltalake"
-        ) as mock_write:
+        with (
+            patch(
+                "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
+            patch(
+                "bioetl.infrastructure.storage.delta_writer.write_deltalake"
+            ) as mock_write,
+        ):
             writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise PolicyViolationError
@@ -1142,21 +1184,26 @@ class TestDeltaWriterWriteModePolicy:
 
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
-        with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
-            side_effect=DeltaTableNotFoundError("Not found"),
-        ), patch(
-            "bioetl.infrastructure.storage.delta_writer.write_deltalake"
-        ) as mock_write:
+        with (
+            patch(
+                "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
+            patch(
+                "bioetl.infrastructure.storage.delta_writer.write_deltalake"
+            ) as mock_write,
+        ):
             writer = DeltaWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise PolicyViolationError
@@ -1181,14 +1228,16 @@ class TestDeltaWriterWriteModePolicy:
         from bioetl.domain.exceptions import PolicyViolationError
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         mock_metrics = MagicMock()
         writer = DeltaWriter(

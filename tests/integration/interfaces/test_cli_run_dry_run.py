@@ -93,7 +93,14 @@ class TestCliRunDryRun:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-type",
+                    "rebuild",
+                    "--dry-run",
+                ],
             )
 
         assert result.exit_code == 0
@@ -125,7 +132,14 @@ class TestCliRunDryRun:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["run", "--pipeline", "chembl_activity", "--run-type", "backfill", "--dry-run"],
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-type",
+                    "backfill",
+                    "--dry-run",
+                ],
             )
 
         assert result.exit_code == 0
@@ -157,7 +171,14 @@ class TestCliRunDryRun:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-type",
+                    "rebuild",
+                    "--dry-run",
+                ],
             )
 
         assert result.exit_code == 0
@@ -189,7 +210,14 @@ class TestCliRunDryRun:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-type",
+                    "rebuild",
+                    "--dry-run",
+                ],
             )
 
         assert result.exit_code == 0
@@ -219,7 +247,14 @@ class TestCliDryRunErrorHandling:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["run", "--pipeline", "chembl_activity", "--run-type", "rebuild", "--dry-run"],
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--run-type",
+                    "rebuild",
+                    "--dry-run",
+                ],
             )
 
         # Should show error message but not crash

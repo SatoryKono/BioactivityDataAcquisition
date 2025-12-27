@@ -116,71 +116,115 @@ class GoldWriter:
             ValueError: If mode is invalid, records empty, schema not strict,
                        or SCD2 mode without ingestion_ts
         """
-        # Validate write mode
-        try:
-            validated_mode = GoldWriteMode(mode)
-        except ValueError:
-            valid_modes = [m.value for m in GoldWriteMode]
-            raise ValueError(
-                f"Invalid Gold write mode '{mode}'. Allowed: {valid_modes}"
-            ) from None
-
-        if not records:
-            raise ValueError("No records to write")
-
-        # SCD2 requires scd_config and ingestion_ts
-        if validated_mode == GoldWriteMode.SCD2:
-            if scd_config is None:
-                raise ValueError("scd_config required for SCD Type 2 mode")
-            if ingestion_ts is None:
-                raise ValueError(
-                    "ingestion_ts required for SCD Type 2 mode "
-                    "(timestamp must come from application layer per ADR-014)"
-                )
-
-        # Check strict attribute - supports both DataFrameSchema and DataFrameModel
-        # DataFrameSchema: schema.strict directly
-        # DataFrameModel: schema.Config.strict
-        is_strict = getattr(schema, "strict", False) or getattr(
-            getattr(schema, "Config", None), "strict", False
-        )
-        if not is_strict:
-            raise ValueError("Gold layer requires strict=True schema validation")
-        import pandas as pd
-
-        # Use pandas for validation (Gold schemas are Pandera pandas DataFrameModels)
-        df = pd.DataFrame(records)
-        try:
-            await self._run_in_executor(lambda: schema.validate(df, lazy=False))
-        except pandera_pa.errors.SchemaError as e:
-            raise ValueError(f"Schema validation failed: {e}") from e
+        validated_mode = self._validate_write_mode(mode)
+        self._validate_records(records)
+        self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
+        self._validate_schema_strict(schema)
+        await self._validate_records_against_schema(records, schema)
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
-        if validated_mode == GoldWriteMode.SCD2:
-            # ingestion_ts is validated above, assert for type checker
-            assert ingestion_ts is not None
-            await self._write_scd2(
-                table_path, records, scd_config, partition_cols, ingestion_ts
-            )
-        else:  # OVERWRITE or APPEND
-            await self._write_simple(
-                table_path,
-                table_name,
-                records,
-                validated_mode.value,
-                partition_cols,
-                primary_keys,
-                schema,
-            )
+        await self._dispatch_write(
+            validated_mode,
+            table_path,
+            table_name,
+            records,
+            partition_cols,
+            primary_keys,
+            schema,
+            scd_config,
+            ingestion_ts,
+        )
 
-        # Log audit entry for write operation
         if self._audit:
             await self._log_gold_audit(
                 table_name=table_name,
                 records=records,
                 mode=validated_mode,
                 ingestion_ts=ingestion_ts,
+            )
+
+    def _validate_write_mode(self, mode: str) -> GoldWriteMode:
+        """Validate and return the write mode enum."""
+        try:
+            return GoldWriteMode(mode)
+        except ValueError:
+            valid_modes = [m.value for m in GoldWriteMode]
+            raise ValueError(
+                f"Invalid Gold write mode '{mode}'. Allowed: {valid_modes}"
+            ) from None
+
+    def _validate_records(self, records: list[dict[str, Any]]) -> None:
+        """Validate that records list is not empty."""
+        if not records:
+            raise ValueError("No records to write")
+
+    def _validate_scd2_requirements(
+        self,
+        mode: GoldWriteMode,
+        scd_config: dict[str, Any] | None,
+        ingestion_ts: datetime | None,
+    ) -> None:
+        """Validate SCD2-specific requirements."""
+        if mode != GoldWriteMode.SCD2:
+            return
+
+        if scd_config is None:
+            raise ValueError("scd_config required for SCD Type 2 mode")
+        if ingestion_ts is None:
+            raise ValueError(
+                "ingestion_ts required for SCD Type 2 mode "
+                "(timestamp must come from application layer per ADR-014)"
+            )
+
+    def _validate_schema_strict(self, schema: DataFrameSchema) -> None:
+        """Validate that schema has strict=True."""
+        is_strict = getattr(schema, "strict", False) or getattr(
+            getattr(schema, "Config", None), "strict", False
+        )
+        if not is_strict:
+            raise ValueError("Gold layer requires strict=True schema validation")
+
+    async def _validate_records_against_schema(
+        self, records: list[dict[str, Any]], schema: DataFrameSchema
+    ) -> None:
+        """Validate records against Pandera schema."""
+        import pandas as pd
+
+        df = pd.DataFrame(records)
+        try:
+            await self._run_in_executor(lambda: schema.validate(df, lazy=False))
+        except pandera_pa.errors.SchemaError as e:
+            raise ValueError(f"Schema validation failed: {e}") from e
+
+    async def _dispatch_write(
+        self,
+        mode: GoldWriteMode,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        partition_cols: list[str] | None,
+        primary_keys: list[str] | None,
+        schema: DataFrameSchema,
+        scd_config: dict[str, Any] | None,
+        ingestion_ts: datetime | None,
+    ) -> None:
+        """Dispatch to appropriate write method based on mode."""
+        if mode == GoldWriteMode.SCD2:
+            assert ingestion_ts is not None  # Validated in _validate_scd2_requirements
+            assert scd_config is not None
+            await self._write_scd2(
+                table_path, records, scd_config, partition_cols, ingestion_ts
+            )
+        else:
+            await self._write_simple(
+                table_path,
+                table_name,
+                records,
+                mode.value,
+                partition_cols,
+                primary_keys,
+                schema,
             )
 
     async def _log_gold_audit(
@@ -230,9 +274,7 @@ class GoldWriter:
         )
         await self._audit.log_write(audit_entry)
 
-    async def _run_in_executor(
-        self, func: Callable[..., T], *args: Any
-    ) -> T:
+    async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
@@ -329,7 +371,10 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols: write_deltalake(
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    mode=mode,
+                    partition_by=partition_cols: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
@@ -404,7 +449,10 @@ class GoldWriter:
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: write_deltalake(
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()
@@ -545,9 +593,7 @@ class GoldWriter:
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         # Delta Lake (Gold) -> Arrow -> Pydict
-        dt = await self._run_in_executor(
-            lambda: DeltaTable(table_path)
-        )
+        dt = await self._run_in_executor(lambda: DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
         if current_only and "is_current" in arrow_table.column_names:
             import pyarrow.compute as pc
@@ -573,9 +619,7 @@ class GoldWriter:
 
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = await self._run_in_executor(
-            lambda: DeltaTable(table_path)
-        )
+        dt = await self._run_in_executor(lambda: DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
 
         if business_key_values:

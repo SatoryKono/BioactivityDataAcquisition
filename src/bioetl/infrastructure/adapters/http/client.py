@@ -150,10 +150,9 @@ class UnifiedHTTPClient:
                     client.request, method, url, **kwargs
                 )
 
-                if (
-                    _is_retryable_status(response.status_code)
-                    and not self.retry_policy.is_last_attempt(attempt)
-                ):
+                if _is_retryable_status(
+                    response.status_code
+                ) and not self.retry_policy.is_last_attempt(attempt):
                     await self._handle_retry_delay(attempt, url, response)
                     continue
 

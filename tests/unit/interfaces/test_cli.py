@@ -317,9 +317,7 @@ class TestCliCommands:
         mock_runner.shutdown_signal = MagicMock()
         mock_create_runner.return_value = mock_runner
 
-        cli_runner.invoke(
-            cli, ["run", "--pipeline", "chembl_activity", "--resume"]
-        )
+        cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity", "--resume"])
 
         # Verify resume was passed via RunOptions
         call_args = mock_create_runner.call_args
