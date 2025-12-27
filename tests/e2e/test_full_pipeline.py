@@ -19,7 +19,7 @@ import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -43,23 +43,21 @@ class TestChEMBLPipelineE2E:
         logger = structlog.get_logger()
 
         bronze_writer = BronzeWriter(
-            bucket=str(storage_paths["bronze"]),
-            endpoint_url=None,
-            access_key=None,
-            secret_key=None,
+            base_path=str(storage_paths["bronze"]),
+            logger=logger,
+            metrics=AsyncMock(),
             save_json=True,
             json_path=str(storage_paths["bronze"] / "json"),
-            logger=logger,
         )
 
         silver_writer = DeltaWriter(
             base_path=str(storage_paths["silver"]),
-            storage_options=None,
+            logger=logger,
         )
 
         gold_writer = GoldWriter(
             base_path=str(storage_paths["gold"]),
-            storage_options=None,
+            logger=logger,
         )
 
         return StorageAdapter(
@@ -85,8 +83,6 @@ class TestChEMBLPipelineE2E:
         - Checkpoint saved
         - Redis locks released
         """
-        from bioetl.infrastructure.factories.storage_factory import StorageContext
-
         storage_context = StorageContext(
             adapter=storage_adapter,
             bronze_path=str(storage_paths["bronze"]),
@@ -97,7 +93,7 @@ class TestChEMBLPipelineE2E:
 
         # Patch StorageFactory to return our test storage context
         with patch(
-            "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+            "bioetl.composition.factories.services_factory.StorageFactory.create",
             return_value=storage_context,
         ):
             runner = bootstrap_pipeline(
@@ -144,30 +140,27 @@ async def test_pubchem_compound_pipeline(
     - Write to Bronze layer
     - Transform to Silver layer
     """
-    from bioetl.infrastructure.factories.storage_factory import StorageContext
     import structlog
 
     logger = structlog.get_logger()
 
     # Create storage adapter
     bronze_writer = BronzeWriter(
-        bucket=str(e2e_temp_storage["bronze"]),
-        endpoint_url=None,
-        access_key=None,
-        secret_key=None,
+        base_path=str(e2e_temp_storage["bronze"]),
+        logger=logger,
+        metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
-        logger=logger,
     )
 
     silver_writer = DeltaWriter(
         base_path=str(e2e_temp_storage["silver"]),
-        storage_options=None,
+        logger=logger,
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
-        storage_options=None,
+        logger=logger,
     )
 
     storage_adapter = StorageAdapter(
@@ -186,7 +179,7 @@ async def test_pubchem_compound_pipeline(
 
     # Patch StorageFactory
     with patch(
-        "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+        "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
         runner = bootstrap_pipeline(
@@ -229,30 +222,27 @@ async def test_pipeline_resume_after_failure(
     - Pipeline can resume from checkpoint
     - No duplicate records in Silver layer
     """
-    from bioetl.infrastructure.factories.storage_factory import StorageContext
     import structlog
 
     logger = structlog.get_logger()
 
     # Create storage adapter
     bronze_writer = BronzeWriter(
-        bucket=str(e2e_temp_storage["bronze"]),
-        endpoint_url=None,
-        access_key=None,
-        secret_key=None,
+        base_path=str(e2e_temp_storage["bronze"]),
+        logger=logger,
+        metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
-        logger=logger,
     )
 
     silver_writer = DeltaWriter(
         base_path=str(e2e_temp_storage["silver"]),
-        storage_options=None,
+        logger=logger,
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
-        storage_options=None,
+        logger=logger,
     )
 
     storage_adapter = StorageAdapter(
@@ -273,7 +263,7 @@ async def test_pipeline_resume_after_failure(
 
     # First run: Process 5 records
     with patch(
-        "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+        "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
         runner = bootstrap_pipeline(
@@ -298,7 +288,7 @@ async def test_pipeline_resume_after_failure(
     # Second run: Resume with same run_id (would typically continue from checkpoint)
     # For this E2E test, we verify that running again doesn't cause errors
     with patch(
-        "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+        "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
         runner = bootstrap_pipeline(
@@ -335,30 +325,27 @@ async def test_pipeline_idempotency(
     - No duplicate records in Silver
     - Delta Lake merge/upsert working correctly
     """
-    from bioetl.infrastructure.factories.storage_factory import StorageContext
     import structlog
 
     logger = structlog.get_logger()
 
     # Create storage adapter
     bronze_writer = BronzeWriter(
-        bucket=str(e2e_temp_storage["bronze"]),
-        endpoint_url=None,
-        access_key=None,
-        secret_key=None,
+        base_path=str(e2e_temp_storage["bronze"]),
+        logger=logger,
+        metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
-        logger=logger,
     )
 
     silver_writer = DeltaWriter(
         base_path=str(e2e_temp_storage["silver"]),
-        storage_options=None,
+        logger=logger,
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
-        storage_options=None,
+        logger=logger,
     )
 
     storage_adapter = StorageAdapter(
@@ -377,7 +364,7 @@ async def test_pipeline_idempotency(
 
     # Run 1: Initial load
     with patch(
-        "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+        "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
         runner = bootstrap_pipeline(
@@ -403,7 +390,7 @@ async def test_pipeline_idempotency(
 
         # Run 2: Same data (should be idempotent)
         with patch(
-            "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+            "bioetl.composition.factories.services_factory.StorageFactory.create",
             return_value=storage_context,
         ):
             runner = bootstrap_pipeline(
