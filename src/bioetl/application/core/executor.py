@@ -48,6 +48,8 @@ class PipelineExecutor:
         checkpoint_interval: int | None = None,
         run_type: RunType | None = None,
         tracer: TracingPort | None = None,
+        pipeline_name: str | None = None,
+        run_id: str | None = None,
     ):
         """Initialize pipeline executor.
 
@@ -61,6 +63,8 @@ class PipelineExecutor:
             checkpoint_interval: Number of records between checkpoints.
             run_type: Type of pipeline run (for tracing attributes).
             tracer: Optional tracing port for distributed tracing.
+            pipeline_name: Name of the pipeline (for tracing attributes).
+            run_id: Unique run identifier (for tracing attributes).
 
         """
         self._data_source = services.data_source
@@ -75,6 +79,8 @@ class PipelineExecutor:
         self._record_processor = record_processor
         self._run_type = run_type
         self._tracer = tracer
+        self._pipeline_name = pipeline_name
+        self._run_id = run_id
 
         # Counters
         self.records_fetched = 0
@@ -95,6 +101,23 @@ class PipelineExecutor:
             query: Optional query string for data source.
 
         """
+        # Start root span for pipeline execution if tracer is available
+        root_span = None
+        if self._tracer:
+            otel_tracer = self._tracer.get_tracer("bioetl.executor")
+            root_span = otel_tracer.start_as_current_span(
+                "pipeline_execution",
+                attributes={
+                    "bioetl.pipeline": self._pipeline_name or "unknown",
+                    "bioetl.run_id": self._run_id or "unknown",
+                    "bioetl.entity_type": self._entity_type,
+                    "bioetl.run_type": (
+                        self._run_type.value if self._run_type else "unknown"
+                    ),
+                },
+            )
+            root_span.__enter__()
+
         batch: list[dict[str, Any]] = []
 
         try:
@@ -121,6 +144,16 @@ class PipelineExecutor:
             if batch:
                 await self._process_and_update_counts(batch)
 
+            # Add final counts to root span
+            if root_span:
+                root_span.set_attribute("bioetl.total_fetched", self.records_fetched)
+                root_span.set_attribute("bioetl.total_bronze", self.records_bronze)
+                root_span.set_attribute("bioetl.total_silver", self.records_silver)
+                root_span.set_attribute("bioetl.total_gold", self.records_gold)
+                root_span.set_attribute(
+                    "bioetl.total_quarantined", self.records_quarantined
+                )
+
         except PipelineShutdownError:
             # Re-raise explicit shutdown signal
             try:
@@ -130,7 +163,19 @@ class PipelineExecutor:
             except Exception:
                 # Ignore errors during emergency checkpoint save
                 pass
+            if root_span:
+                root_span.set_attribute("bioetl.shutdown", True)
+                root_span.__exit__(None, None, None)
             raise
+        except Exception as e:
+            if root_span:
+                root_span.set_attribute("error", True)
+                root_span.record_exception(e)
+                root_span.__exit__(None, None, None)
+            raise
+        else:
+            if root_span:
+                root_span.__exit__(None, None, None)
 
     async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:
         """Process batch with tracing span.

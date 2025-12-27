@@ -81,6 +81,7 @@ class RecordProcessor:
             gold_validator=gold_validator,
             error_classifier=error_classifier,
             batch_metrics=self._batch_metrics,
+            tracer=tracer,
         )
 
     async def process_batch(

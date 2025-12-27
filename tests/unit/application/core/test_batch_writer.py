@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -95,7 +95,7 @@ class TestBatchWriterBronze:
         """Test that records are serialized to JSON."""
         records = [{"id": "1", "value": 10}, {"id": "2", "value": 20}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(timezone.utc)
+        ingestion_ts = datetime.now(UTC)
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
 
@@ -126,7 +126,7 @@ class TestBatchWriterBronze:
         # Records in reverse order
         records = [{"z": "last", "a": "first"}, {"a": "first", "z": "last"}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(timezone.utc)
+        ingestion_ts = datetime.now(UTC)
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
 
@@ -295,3 +295,161 @@ class TestBatchWriterErrorLogging:
 
         mock_context.logger.error.assert_called_once()
         mock_batch_metrics.track_error.assert_called_once()
+
+
+@pytest.fixture
+def mock_tracer():
+    """Create mock tracer for testing spans."""
+    span = MagicMock()
+    span.__enter__ = MagicMock(return_value=span)
+    span.__exit__ = MagicMock(return_value=None)
+    span.set_attribute = MagicMock()
+    span.record_exception = MagicMock()
+
+    inner_tracer = MagicMock()
+    inner_tracer.start_as_current_span = MagicMock(return_value=span)
+
+    tracer = MagicMock()
+    tracer.get_tracer = MagicMock(return_value=inner_tracer)
+    return tracer
+
+
+@pytest.fixture
+def batch_writer_with_tracer(
+    mock_storage,
+    mock_context,
+    mock_gold_validator,
+    mock_error_classifier,
+    mock_batch_metrics,
+    mock_tracer,
+):
+    """Create BatchWriter instance with tracer."""
+    config = RecordProcessorConfig(
+        pipeline_name="test_provider_test_entity",
+        provider="test_provider",
+        entity_type="test_entity",
+        silver_schema=MagicMock(),
+        gold_schema=MagicMock(),
+        table_config=TableConfig(),
+    )
+    return BatchWriter(
+        storage=mock_storage,
+        context=mock_context,
+        config=config,
+        gold_validator=mock_gold_validator,
+        error_classifier=mock_error_classifier,
+        batch_metrics=mock_batch_metrics,
+        tracer=mock_tracer,
+    )
+
+
+@pytest.mark.unit
+class TestBatchWriterTracing:
+    """Tests for BatchWriter tracing spans."""
+
+    async def test_write_bronze_creates_span(
+        self, batch_writer_with_tracer, mock_tracer, mock_storage
+    ):
+        """Test that write_bronze creates a tracing span."""
+        records = [{"id": "1", "value": 10}]
+        batch_id = BatchID(uuid4())
+        ingestion_ts = datetime.now(UTC)
+
+        await batch_writer_with_tracer.write_bronze(records, batch_id, ingestion_ts)
+
+        mock_tracer.get_tracer.assert_called_with("bioetl.batch_writer")
+        inner_tracer = mock_tracer.get_tracer.return_value
+        inner_tracer.start_as_current_span.assert_called_once()
+
+        call_args = inner_tracer.start_as_current_span.call_args
+        assert call_args[0][0] == "write_bronze"
+        attrs = call_args[1]["attributes"]
+        assert attrs["bioetl.layer"] == "bronze"
+        assert attrs["bioetl.record_count"] == 1
+        assert attrs["bioetl.batch_id"] == str(batch_id)
+
+    async def test_write_silver_creates_span(
+        self, batch_writer_with_tracer, mock_tracer, mock_storage, mock_context
+    ):
+        """Test that write_silver creates a tracing span."""
+        records = [{"entity_id": "1", "value": 10}]
+        batch_id = BatchID(uuid4())
+        ingestion_ts = mock_context.started_at
+
+        await batch_writer_with_tracer.write_silver(records, batch_id, ingestion_ts)
+
+        mock_tracer.get_tracer.assert_called_with("bioetl.batch_writer")
+        inner_tracer = mock_tracer.get_tracer.return_value
+        inner_tracer.start_as_current_span.assert_called_once()
+
+        call_args = inner_tracer.start_as_current_span.call_args
+        assert call_args[0][0] == "write_silver"
+        attrs = call_args[1]["attributes"]
+        assert attrs["bioetl.layer"] == "silver"
+        assert attrs["bioetl.record_count"] == 1
+
+    async def test_write_gold_creates_span(
+        self, batch_writer_with_tracer, mock_tracer, mock_storage, mock_gold_validator
+    ):
+        """Test that write_gold creates a tracing span."""
+        records = [{"entity_id": "1", "value": 10}]
+
+        await batch_writer_with_tracer.write_gold(records)
+
+        mock_tracer.get_tracer.assert_called_with("bioetl.batch_writer")
+        inner_tracer = mock_tracer.get_tracer.return_value
+        inner_tracer.start_as_current_span.assert_called_once()
+
+        call_args = inner_tracer.start_as_current_span.call_args
+        assert call_args[0][0] == "write_gold"
+        attrs = call_args[1]["attributes"]
+        assert attrs["bioetl.layer"] == "gold"
+        assert attrs["bioetl.record_count"] == 1
+
+    async def test_span_records_exception_on_error(
+        self, mock_storage, mock_context, mock_tracer
+    ):
+        """Test that span records exception when write fails."""
+        mock_storage.write_bronze = AsyncMock(
+            side_effect=RuntimeError("Storage error")
+        )
+
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+
+        writer = BatchWriter(
+            storage=mock_storage,
+            context=mock_context,
+            config=config,
+            gold_validator=MagicMock(),
+            error_classifier=ErrorClassifier(),
+            batch_metrics=MagicMock(spec=BatchMetricsRecorder),
+            tracer=mock_tracer,
+        )
+
+        records = [{"id": "1"}]
+        batch_id = BatchID(uuid4())
+
+        with pytest.raises(RuntimeError):
+            await writer.write_bronze(records, batch_id, datetime.now(UTC))
+
+        span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        span.set_attribute.assert_called_with("error", True)
+        span.record_exception.assert_called_once()
+
+    async def test_no_span_without_tracer(self, batch_writer, mock_storage):
+        """Test that no span is created when tracer is None."""
+        records = [{"id": "1", "value": 10}]
+        batch_id = BatchID(uuid4())
+        ingestion_ts = datetime.now(UTC)
+
+        # batch_writer fixture doesn't have tracer, should work without errors
+        await batch_writer.write_bronze(records, batch_id, ingestion_ts)
+
+        mock_storage.write_bronze.assert_called_once()
