@@ -210,6 +210,17 @@ module = [
 ]
 disallow_untyped_decorators = false
 
+# Allow subclassing Any for pydantic/pandera models with ignore_missing_imports
+# These libraries don't provide inline type stubs, and ignore_missing_imports
+# makes their base classes appear as Any. The [misc] error is expected.
+[[tool.mypy.overrides]]
+module = [
+    "bioetl.infrastructure.schemas.gold",
+    "bioetl.infrastructure.schemas.pipeline_config",
+    "bioetl.infrastructure.config",
+]
+disable_error_code = ["misc"]
+
 # Note: All layers now pass strict mypy checks.
 # ignore_errors was removed as part of architecture review (2025-12-23).
 
