@@ -6,6 +6,8 @@ Tests the new Template Method pattern and helper methods:
 - _create_entity()
 - _safe_get()
 - TransformationError handling
+- should_write_gold() (New)
+- transform_for_gold() (New)
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from bioetl.application.core.base_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Activity
+from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.types import RunType
 
 
@@ -372,3 +375,55 @@ class TestSerializeJson:
         assert '"properties"' in result
         assert '"DOSE"' in result
         assert '"TIME"' in result
+
+
+@pytest.mark.unit
+class TestGoldMethods:
+    """Tests for should_write_gold and transform_for_gold methods."""
+
+    def test_should_write_gold_returns_true_without_filters(
+        self, mock_context: PipelineContext
+    ) -> None:
+        """Test should_write_gold returns True when no filters are configured."""
+        transformer = ConcreteTransformer(provider="test")
+        record = {"field": "value"}
+        assert transformer.should_write_gold(mock_context, record) is True
+
+    def test_should_write_gold_uses_filters(
+        self, mock_context: PipelineContext
+    ) -> None:
+        """Test should_write_gold uses injected filter configuration."""
+        # GoldFilterConfig usually contains column filters
+        from bioetl.domain.filtering import GoldColumnFilter
+
+        col_filter = GoldColumnFilter(
+            column="type",
+            values=frozenset(["Ki"])
+        )
+        filters = GoldFilterConfig(column_filters=(col_filter,))
+        transformer = ConcreteTransformer(provider="test", gold_filters=filters)
+
+        # Matching record
+        assert transformer.should_write_gold(mock_context, {"type": "Ki"}) is True
+
+        # Non-matching record
+        assert transformer.should_write_gold(mock_context, {"type": "IC50"}) is False
+
+    def test_transform_for_gold_removes_excluded_fields(
+        self, mock_context: PipelineContext
+    ) -> None:
+        """Test transform_for_gold removes defined excluded fields."""
+        transformer = ConcreteTransformer(provider="test")
+        silver_record = {
+            "valid_field": "keep_me",
+            "content_hash": "remove_me",
+            "_run_id": "keep_me_too",
+            "molecule_properties": "remove_me_too"
+        }
+
+        gold_record = transformer.transform_for_gold(mock_context, silver_record)
+
+        assert "valid_field" in gold_record
+        assert "_run_id" in gold_record
+        assert "content_hash" not in gold_record
+        assert "molecule_properties" not in gold_record

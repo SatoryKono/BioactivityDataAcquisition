@@ -17,7 +17,7 @@ import dataclasses
 import json
 import time
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
 from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.domain.transformations import generate_content_hash
@@ -25,6 +25,7 @@ from bioetl.domain.transformations import generate_content_hash
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.types import BronzeRecord, ContentHash, SilverRecord
 
 T = TypeVar("T", bound="BaseEntity")
@@ -74,12 +75,31 @@ class BaseTransformer(ABC):
     - `_transform_impl()`: Entity-specific transformation logic
     """
 
+    # Fields to exclude from Gold layer (JSON strings retained only in Silver)
+    GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset(
+        {
+            # Molecule JSON fields (Silver forensic only)
+            "molecule_hierarchy",
+            "molecule_properties",
+            "molecule_structures",
+            "molecule_synonyms",
+            "cross_references",
+            "atc_classifications",
+            # Internal metadata fields (Silver only)
+            "entity_id",
+            "content_hash",
+            "_run_type",
+            "_source_batch_id",
+        }
+    )
+
     def __init__(
         self,
         provider: str,
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        gold_filters: GoldFilterConfig | None = None,
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -88,12 +108,14 @@ class BaseTransformer(ABC):
             entity_type: Entity type for metrics labels (e.g., 'activity', 'compound').
             tracer: Tracing port for distributed tracing. Defaults to NoOpTracing.
             metrics: Metrics port for duration/error tracking. Defaults to NoOpMetrics.
+            gold_filters: Optional filter configuration for Gold layer.
 
         """
         self.provider = provider
         self.entity_type = entity_type or "unknown"
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
         self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        self._gold_filters = gold_filters
 
     async def transform(
         self,
@@ -215,6 +237,46 @@ class BaseTransformer(ABC):
 
         """
         ...
+
+    def should_write_gold(
+        self, _context: PipelineContext, record: dict[str, Any]
+    ) -> bool:
+        """Determine if a Silver record should be written to Gold.
+
+        Uses gold_filters from config if configured, otherwise passes all records.
+        Subclasses can override for custom filtering logic.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            record: Silver record to evaluate.
+
+        Returns:
+            True if record should be written to Gold layer.
+
+        """
+        if self._gold_filters is None or self._gold_filters.is_empty():
+            return True
+        return self._gold_filters.should_include(record)
+
+    def transform_for_gold(
+        self, _context: PipelineContext, silver_record: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Transform Silver record for Gold layer.
+
+        Removes JSON string fields that are retained only in Silver for forensic purposes.
+        Subclasses can override for custom Gold transformations.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            silver_record: Silver record to transform.
+
+        Returns:
+            Record suitable for Gold layer (flat fields only).
+
+        """
+        return {
+            k: v for k, v in silver_record.items() if k not in self.GOLD_EXCLUDE_FIELDS
+        }
 
     def compute_content_hash(
         self,
