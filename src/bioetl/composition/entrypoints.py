@@ -112,11 +112,14 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         PipelineRunContext ready for bootstrap_pipeline.
     """
     # Build InputFilterContext from CLI options
-    if options.input_csv and options.filter_column and options.filter_field:
-        input_filter = InputFilterContext.from_csv(
+    # Allow partial CLI params - FilterConfigBuilder will merge with YAML defaults
+    # If only input_csv is provided, column_name and filter_field come from YAML
+    if options.input_csv:
+        input_filter = InputFilterContext(
+            enabled=True,
             source_path=options.input_csv,
-            column_name=options.filter_column,
-            filter_field=options.filter_field,
+            column_name=options.filter_column or "",  # Empty = use YAML default
+            filter_field=options.filter_field or "",  # Empty = use YAML default
         )
     else:
         input_filter = InputFilterContext.disabled()
@@ -124,8 +127,12 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     # Build VacuumConfig from CLI options (None means use YAML default)
     # Note: VacuumConfig here only captures CLI overrides.
     # The final merge with YAML config happens in bootstrap_pipeline.
+    # Tri-state logic:
+    #   - None: No CLI override, use YAML default
+    #   - True: CLI explicitly enables vacuum (--vacuum)
+    #   - False: CLI explicitly disables vacuum (--no-vacuum)
     vacuum = VacuumConfig(
-        enabled=options.vacuum_after_run or False,
+        enabled=options.vacuum_after_run,  # Preserve None for tri-state
         retention_days=options.vacuum_retention_days or 7,
     )
 
