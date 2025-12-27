@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import asyncio
 from enum import Enum
+import json
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -40,7 +41,12 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
     TableNotFoundError,
 )
-from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
+from bioetl.domain.medallion import (
+    Layer,
+    SilverWriteMode,
+    WriteMode,
+    WriteModePolicy,
+)
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -52,18 +58,9 @@ if TYPE_CHECKING:
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 
 
-class SilverWriteMode(str, Enum):
-    """Allowed write modes for Silver layer.
-
-    Values:
-        MERGE: Upsert records based on primary keys (default)
-        APPEND: Add records without deduplication
-        DELETE: Delete and replace all data in the table
-    """
-
-    MERGE = "merge"
-    APPEND = "append"
-    DELETE = "delete"
+# Re-export SilverWriteMode for backward compatibility
+# Consumers importing from delta_writer will still work
+__all__ = ["DeltaWriter", "SilverWriteMode"]
 
 
 class DeltaWriter:
