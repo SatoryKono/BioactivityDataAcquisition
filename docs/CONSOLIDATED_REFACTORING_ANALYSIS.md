@@ -1,504 +1,385 @@
-# Анализ и Консолидация Планов Рефакторинга
+# Консолидированный Анализ Планов Рефакторинга
 
-*Версия: 1.0 | Дата: 2025-12-26*
-*Источник: Сравнительный анализ 4 планов рефакторинга*
+*Версия: 2.0 | Дата: 2025-12-27*
+*Обновление: Верификация на основе актуального кода, исправление ложных утверждений*
 
 ---
 
 ## Резюме
 
-Проанализированы 4 плана рефакторинга. Выявлены:
-- **8 фактических ошибок** (утверждения, противоречащие коду)
-- **6 уже реализованных задач** (ошибочно помечены как TODO)
-- **5 дублирующихся проблем** (описаны по-разному в разных планах)
-- **7 реальных проблем** (требуют внимания)
+Проанализированы 4 плана рефакторинга. Выявлено:
+- **~50% утверждений ложны** или основаны на недопонимании архитектуры
+- **6+ задач уже реализованы** (не обновлена документация в планах)
+- **3 реальные задачи** требуют внимания (верифицированы)
 
 ---
 
-## 1. ФАКТИЧЕСКИЕ ОШИБКИ В ПЛАНАХ
+## 1. ВЕРИФИЦИРОВАННЫЕ МЕТРИКИ КОДА
 
-### ❌ Ошибка 1: "PipelineRunner — god object с высокой связанностью"
+| Компонент | Заявлено | Реально | Статус |
+|-----------|----------|---------|--------|
+| PreflightService | 527 LOC, "комбайн" | 527 LOC, 8 методов, когезивен | ❌ Не комбайн |
+| PipelineRunner | "god object" | 175 LOC, 9 методов, делегирует | ❌ Не god object |
+| ChEMBL client | 517 LOC | 517 LOC, 20 методов, когезивен | ✅ Размер верен |
+| PubChem client | 317 LOC | 317 LOC, 11 методов | ✅ Размер верен |
+| bootstrap.py | "перегружен" | 166 LOC | ❌ Компактный |
+| medallion_policy.py | "дублирует domain" | 19 LOC, shim | ❌ Backward-compat |
+| PipelineRegistry | class-level state | ClassVar[dict] + RLock | ✅ Проблема |
 
-**Источник**: План 1
+---
 
-**Утверждение**: "Координирует locking, preflight, lifecycle, DQ, VACUUM, cleanup в одном классе — признаки god object"
+## 2. ЛОЖНЫЕ УТВЕРЖДЕНИЯ В ПЛАНАХ
 
-**Реальность**:
-- PipelineRunner — **173 строки** (не god object)
-- **Делегирует** через RunnerServices bundle (`runner.py:84-88`)
-- Собственная логика — только координация start/stop
+### ❌ Ложь 1: "PreflightService 527 строк — комбайн"
+**План**: 3
 
-```python
-# runner.py:84-88 — делегирование через bundle
-self._lock_manager = runner_services.lock_manager
-self._preflight_service = runner_services.preflight
-self._postrun_service = runner_services.postrun
-self._lifecycle_orchestrator = runner_services.lifecycle_orch
+**Реальность** (верифицировано):
+```
+PreflightService (527 LOC, 8 методов):
+├── validate_infrastructure()      # 44 строки, делегирует HealthAggregator
+├── validate_medallion_config()    # 117 строк, валидация форматов/путей/policy
+├── validate_write_modes()         # 66 строк, валидация режимов записи
+├── validate_preflight()           # 93 строки, оркестрация + метрики
+└── 4 приватных helpers            # ~100 строк
 ```
 
-**Статус**: ✅ Уже реализовано правильно. Дополнительная декомпозиция не требуется.
+**Вывод**: Это **когезивный** сервис с единой ответственностью (preflight validation).
+Декомпозиция на 2+ класса создаст overhead без выгоды.
 
 ---
 
-### ❌ Ошибка 2: "bootstrap_pipeline смешивает сборку и бизнес-настройки"
+### ❌ Ложь 2: "medallion_policy.py дублирует domain"
+**План**: 3
 
-**Источник**: План 1
-
-**Утверждение**: "Функция одновременно регистрирует провайдеров, читает YAML, конфигурирует observability и формирует runtime-политику"
-
-**Реальность**:
-- bootstrap_pipeline — **тонкий фасад** (~100 строк бизнес-логики)
-- **Делегирует** фабрикам: `factory.create_runner()` (`bootstrap.py:159-166`)
-- Регистрация провайдеров — **идемпотентная** (вызывается один раз)
-- Чтение YAML — ответственность ConfigLoader (DI)
-
-**Статус**: Архитектура корректна. Разделение на отдельные функции возможно, но не критично.
-
----
-
-### ❌ Ошибка 3: "ChEMBL адаптер — один класс с размытыми границами"
-
-**Источник**: План 3
-
-**Утверждение**: "Один класс отвечает за health-state, пагинацию, фильтрацию, дедупликацию и классификацию ошибок"
-
-**Реальность**:
-- ChemblAdapter (~350 строк) — **когезивный** HTTP-адаптер
-- Health-aware fetching — **единая ответственность** (адаптивная работа с API)
-- Использует **вынесенные** компоненты:
-  - `UnifiedHTTPClient` — HTTP-логика
-  - `ErrorClassifier` — классификация ошибок
-  - `HealthStateManager` — управление состоянием
-
-**Статус**: Архитектура адекватна. Дополнительная декомпозиция усложнит без выгоды.
-
----
-
-### ❌ Ошибка 4: "CLI содержит операционную логику подтверждения"
-
-**Источник**: План 1
-
-**Утверждение**: "Логика dry-run и подтверждений в интерфейсном слое усложняет UI-слой"
-
-**Реальность**:
-- Подтверждения пользователя — **законная ответственность interfaces слоя**
-- Dry-run флаги должны обрабатываться на уровне интерфейса
-- Другие интерфейсы (Prefect, REST) имеют свои механизмы подтверждения
-
-**Статус**: Архитектура корректна. Это не проблема.
-
----
-
-### ❌ Ошибка 5: "DeltaWriter нарушает DI — создаёт WriteModePolicy"
-
-**Источник**: План 2
-
-**Утверждение**: "DeltaWriter создаёт WriteModePolicy по умолчанию, несмотря на требование инжектировать"
-
-**Реальность**:
+**Реальность** (файл: `application/core/medallion_policy.py`, 19 строк):
 ```python
-# delta_writer.py:98 — опциональный параметр с разумным default
-write_policy: WriteModePolicy | None = None
-self._write_policy = write_policy or WriteModePolicy()
+"""Note: This module re-exports from bioetl.domain.medallion for backward compatibility.
+The canonical location is bioetl.domain.medallion."""
+
+from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
+
+__all__ = ["Layer", "WriteMode", "WriteModePolicy"]
 ```
 
-- Это **валидный паттерн** для опциональных конфигураций
-- `WriteModePolicy()` — immutable value object, не сервис
-- Аналогично `timeout: float = 30.0` в HTTP клиентах
-
-**Статус**: Паттерн корректен. Для критичных случаев policy может быть передан явно.
+**Вывод**: Это **shim для backward compatibility**, НЕ дублирование.
 
 ---
 
-### ❌ Ошибка 6: "BronzeWriter не пишет метрики/трейсы"
+### ❌ Ложь 3: "BronzeWriter допускает отсутствие MetricsPort"
+**План**: 2
 
-**Источник**: План 3
-
-**Утверждение**: "BronzeWriter логирует операции, но не пишет метрики/трейсы"
-
-**Реальность**:
+**Реальность** (bronze_writer.py:54-72):
 ```python
-# bronze_writer.py:197-205
-self.logger.info(
-    "bronze_write_complete",
-    path=relative_path,
-    provider=provider,
-    entity=entity,
-    batch_id=str(batch_id),
-    run_id=str(run_id),
-    run_type=run_type.value,
-)
+def __init__(
+    self,
+    ...
+    logger: LoggerPort,     # MUST be injected
+    metrics: MetricsPort,   # MUST be injected
+    ...
+):
+    ...
+    self._metrics = metrics
 ```
 
-- Структурированное логирование — **форма наблюдаемости**
-- Bronze — append-only JSONL, метрики менее критичны чем для Silver/Gold
-- MetricsPort можно добавить, но это желательное улучшение, не проблема
-
-**Статус**: Не критично. Можно добавить метрики как enhancement.
+**Вывод**: MetricsPort **инжектируется**. NoOp передаётся через composition — это валидный Null Object Pattern.
 
 ---
 
-### ❌ Ошибка 7: "BaseTransformer не включает DQ-валидацию"
+### ❌ Ложь 4: "CLI использует click.echo минуя LoggerPort"
+**План**: 2
 
-**Источник**: План 3
-
-**Утверждение**: "BaseTransformer не включает вызов Pandera-схем или дедупликации"
-
-**Реальность**:
-- **By design**: BaseTransformer — Template Method для общей логики
-- Pandera-валидация — ответственность **конкретных трансформеров**
-- Дедупликация — ответственность **Silver writer** (merge by content_hash)
-
-**Статус**: Архитектура корректна. Это не проблема.
+**Реальность**: click.echo — **законная ответственность interfaces слоя** для user-facing output.
+Из REFACTORING_PLAN.md: "Подтверждения — законная ответственность interfaces слоя".
 
 ---
 
-### ❌ Ошибка 8: "MedallionLifecycleService не учитывает политик"
+### ❌ Ложь 5: "Трансформер не проверяется на этапе сборки"
+**План**: 4
 
-**Источник**: План 4
-
-**Утверждение**: "Управление вакуумом/архивом не учитывает политик retentions"
-
-**Реальность**:
+**Реальность** (generic_factory.py:91-99):
 ```python
-# medallion_lifecycle.py:71-112
-# Uses MedallionPolicy.should_clear_silver / should_clear_gold
-if policy.should_clear_silver(run_type):
-    silver_cleared = await self._storage.clear_silver(...)
+def create_transformer(self, ...) -> BaseTransformer | None:
+    """Create transformer instance if transformer_class is configured."""
+    if self.transformer_class is None:
+        return None  # Handled by BasePipeline
+    return self.transformer_class(...)
 ```
 
-- Сервис **использует MedallionPolicy**
-- Политика определяет поведение на основе `run_type`
-- Retention policy — часть VacuumConfig
-
-**Статус**: Частично корректно. Можно усилить документацию, но логика работает.
+**Вывод**: Проверка есть. BasePipeline корректно обрабатывает `None`.
 
 ---
 
-## 2. УЖЕ РЕАЛИЗОВАННЫЕ ЗАДАЧИ
+### ❌ Ложь 6: "Нет связи DQ с метриками"
+**План**: 1
 
-| Задача | План | Статус | Доказательство |
-|--------|------|--------|----------------|
-| PipelineRunner DI через bundle | 1, 2 | ✅ DONE | `runner.py:53,84-88`, `runner_services.py` |
-| Детерминистичный HTTP jitter (D1) | Existing | ✅ DONE | `domain/resilience.py:45-84`, 11 тестов |
-| Удаление random из Gold (D2) | Existing | ✅ DONE | `gold_writer.py:286` — fixed 0.05s |
-| Arch-тест на random (D3) | Existing | ✅ DONE | `test_no_random_in_writers.py` |
-| Arch-тест на datetime.now (T5) | Existing | ✅ DONE | `test_no_datetime_now_in_infrastructure.py` |
-| PipelineContext.started_at (T1) | Existing | ✅ DONE | `context.py:33` |
-
----
-
-## 3. ДУБЛИРУЮЩИЕСЯ ПРОБЛЕМЫ
-
-| Проблема | Упоминания | Единое описание |
-|----------|------------|-----------------|
-| NoOp defaults в observability | План 2, 4 | BaseTransformer использует NoOp{Tracing,Metrics} по умолчанию |
-| Нестандартные события логирования | План 1, 4 | Отсутствует event-naming convention |
-| DI автоматизация проверок | План 2, 3 | Arch-тесты не ловят все DI нарушения |
-| Метрики адаптеров | План 1, 3 | Нет SLA/latency метрик для HTTP адаптеров |
-| Централизация medallion политик | План 2, 4 | Политики применяются, но не валидируются preflight |
-
----
-
-## 4. РЕАЛЬНЫЕ ПРОБЛЕМЫ (Требуют Внимания)
-
-### Проблема 1: NoOp по умолчанию маскирует отсутствие observability
-
-**Файлы**: `base_transformer.py:94-95`
-
+**Реальность** (preflight_service.py:136-155, 513-524):
 ```python
-self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
-self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+# Метрики:
+# - pipeline_health_check_passed
+# - infrastructure_validated
+# - health_check_duration_seconds
+# - preflight_medallion_policy_valid
+# - preflight_config_errors_total
 ```
 
-**Риск**: В production можно не заметить отсутствие реальных трейсеров.
-
-**Рекомендация**: Добавить preflight-check в bootstrap, warning если NoOp в prod.
+**Вывод**: Метрики существуют и документированы.
 
 ---
 
-### Проблема 2: Нестандартные event names в логах
+## 3. УЖЕ РЕАЛИЗОВАННЫЕ ЗАДАЧИ
 
-**Файлы**: `runner.py:100-149`
+| Задача | План | Доказательство |
+|--------|------|----------------|
+| PipelineRunner DI через bundle | 1, 2, 4 | `runner.py:84-88`, `runner_services.py` |
+| CLI → entrypoints.py | 1, 4 | `cli.py:17-27` импортирует из entrypoints |
+| Детерминистичный HTTP jitter | Existing | `domain/resilience.py:45-84` |
+| Удаление random из Gold | Existing | `gold_writer.py:286,359` |
+| Arch-тесты random/datetime.now | Existing | `tests/architecture/test_no_random_in_writers.py`, `test_no_datetime_now_in_infrastructure.py` |
+| PipelineContext.started_at | Existing | `context.py:33` |
 
-**Текущее состояние**:
+---
+
+## 4. ВЕРИФИЦИРОВАННЫЕ ПРОБЛЕМЫ
+
+### ✅ Проблема 1: PipelineRegistry с глобальным состоянием
+
+**Файл**: `composition/registry.py:80-81`
+
 ```python
-self._context.logger.info("Pipeline starting", extra={...})
-# vs
-self._context.logger.info("pipeline_complete", extra={...})
+class PipelineRegistry:
+    _registry: ClassVar[dict[str, PipelineDefinition]] = {}
+    _registry_lock: ClassVar[threading.RLock] = threading.RLock()
 ```
 
-**Риск**: Затрудняет фильтрацию и алерты.
+**Влияние**: Параллельные тесты требуют `clear()`, изоляция нарушена.
 
-**Рекомендация**: Стандартизировать события: `pipeline_start`, `pipeline_complete`, `pipeline_error`.
-
----
-
-### Проблема 3: CLI прямо вызывает bootstrap_*
-
-**Файлы**: `cli.py:224,265,337`
-
-**Проблема**: interfaces → composition импорт нарушает матрицу импортов.
-
-**Рекомендация**: Создать `composition/entrypoints.py`, CLI вызывает только entrypoints.
+**Приоритет**: 🔴 КРИТИЧЕСКИЙ
 
 ---
 
-### Проблема 4: Отсутствуют SLA-метрики для адаптеров
+### ✅ Проблема 2: PipelineObserver создаётся в runner
 
-**Файлы**: `infrastructure/adapters/*/`
+**Файл**: `runner.py:116-123`
 
-**Проблема**: Нет стандартных метрик latency/throughput/error_rate.
+```python
+async def run(self) -> None:
+    ...
+    observer = PipelineObserver(
+        pipeline_name=self._config.pipeline_name,
+        run_id=self._context.run_id,
+        ...
+    )
+```
 
-**Рекомендация**: Добавить декоратор или базовый класс с метриками.
+**Влияние**: Усложняет мокирование Observer в тестах.
 
----
-
-### Проблема 5: Preflight не валидирует medallion policy consistency
-
-**Файлы**: `preflight_service.py`
-
-**Проблема**: Нет проверки, что WriteModePolicy согласована с YAML config.
-
-**Рекомендация**: Добавить `policy_validation` в preflight checks.
-
----
-
-### Проблема 6: save_json=True может вызвать OOM на больших батчах
-
-**Файлы**: `bronze_writer.py` (save_json feature)
-
-**Проблема**: При save_json=True весь батч материализуется в памяти.
-
-**Рекомендация**: Добавить streaming запись для JSON режима.
+**Приоритет**: 🟠 ВЫСОКИЙ
 
 ---
 
-### Проблема 7: Недостаточное покрытие DI arch-тестами
+### ✅ Проблема 3: Нет arch-теста на Bronze метаданные
 
-**Файлы**: `tests/architecture/`
+**Текущее состояние**: Нет теста, гарантирующего наличие `_ingestion_ts`, `_run_id` в Bronze.
 
-**Проблема**: Тесты не ловят `= SomeClass()` в конструкторах.
-
-**Рекомендация**: Добавить AST-тест на создание объектов в `__init__`.
+**Приоритет**: 🟡 СРЕДНИЙ
 
 ---
 
-## 5. КОНСОЛИДИРОВАННЫЙ ПЛАН РЕФАКТОРИНГА
+## 5. КОНСОЛИДИРОВАННЫЙ ПЛАН
 
-### Приоритет 🔴 КРИТИЧНО
+### Приоритет 🔴 КРИТИЧЕСКИЙ
 
-#### C1: Разнести CLI и composition (1-2 дня)
+#### REG-1: Instance-level PipelineRegistry
 
-**Проблема**: `cli.py` напрямую импортирует `bootstrap_*`.
+**Цель**: Изоляция тестов, параллельное выполнение без `clear()`.
 
 **Решение**:
-1. Создать `src/bioetl/composition/entrypoints.py`
-2. Экспортировать: `run_pipeline(ctx)`, `run_cleanup(ctx)`, `run_status()`
-3. CLI вызывает только entrypoints
-4. Arch-тест проверяет отсутствие `from bioetl.composition.bootstrap` в interfaces
+```python
+class PipelineRegistry:
+    def __init__(self) -> None:
+        self._registry: dict[str, PipelineDefinition] = {}
+        self._lock = threading.RLock()
+
+# В composition:
+def create_registry() -> PipelineRegistry:
+    registry = PipelineRegistry()
+    register_all_pipelines(registry)
+    return registry
+```
+
+**Файлы**:
+- `composition/registry.py` — рефакторинг класса
+- `composition/bootstrap.py` — передача registry через DI
+- `tests/conftest.py` — фикстура изолированного registry
 
 **Критерии готовности**:
-- [ ] CLI не импортирует `bootstrap.*`
-- [ ] Arch-тест `test_cli_no_bootstrap_import` проходит
-- [ ] `make test` зелёный
+- [ ] Параллельные pytest без ручного `clear()`
+- [ ] Можно создать 2 registry в одном процессе
+- [ ] Все arch-тесты проходят
+
+**Оценка**: 1-2 дня
 
 ---
 
 ### Приоритет 🟠 ВЫСОКИЙ
 
-#### C2: Preflight валидация observability (0.5 дня)
+#### OBS-1: Вынести PipelineObserver в composition
 
-**Проблема**: NoOp по умолчанию маскирует проблемы.
-
-**Решение**:
-```python
-# composition/bootstrap.py
-def _validate_observability(tracer, metrics, environment: str):
-    if environment == "production":
-        if isinstance(tracer, NoOpTracing):
-            logger.warning("NoOpTracing in production - traces will be lost")
-        if isinstance(metrics, NoOpMetrics):
-            logger.warning("NoOpMetrics in production - metrics will be lost")
-```
-
-**Критерии готовности**:
-- [ ] Warning выводится при NoOp в production
-- [ ] Тест `test_observability_production_warning` проходит
-
----
-
-#### C3: Стандартизация event names (0.5 дня)
-
-**Проблема**: Разнородные события логирования.
+**Цель**: Улучшить тестируемость, следовать DI.
 
 **Решение**:
 ```python
-# domain/events.py (новый файл)
-class PipelineEvent:
-    START = "pipeline_start"
-    COMPLETE = "pipeline_complete"
-    ERROR = "pipeline_error"
-    BATCH_START = "batch_start"
-    BATCH_COMPLETE = "batch_complete"
+# runner_services.py
+@dataclass(frozen=True)
+class RunnerServices:
+    lock_manager: LockManager
+    preflight: PreflightService
+    postrun: PostrunService
+    lifecycle_orch: LifecycleOrchestrator
+    observer: PipelineObserver  # NEW
+
+# runner.py
+async def run(self) -> None:
+    with self._runner_services.observer:
+        ...
 ```
 
-Использование в runner:
-```python
-self._context.logger.info(PipelineEvent.START, extra={...})
-```
+**Файлы**:
+- `application/core/runner_services.py` — добавить observer
+- `composition/factories/runner_services.py` — создавать observer
+- `application/core/runner.py` — использовать injected observer
 
 **Критерии готовности**:
-- [ ] Все события runner используют константы
-- [ ] Grep `"pipeline_` находит только использования констант
+- [ ] PipelineRunner не создаёт Observer
+- [ ] `test_runner.py` использует mock observer
+- [ ] Arch-тест `test_di_discipline.py` обновлён
 
----
-
-#### C4: Preflight валидация medallion policy (0.5 дня)
-
-**Проблема**: Нет проверки согласованности policy с config.
-
-**Решение**:
-```python
-# application/services/preflight_service.py
-async def _validate_medallion_policy(self, config, policy):
-    if config.silver_mode not in policy.allowed_silver_modes:
-        raise PreflightError(
-            f"Silver mode '{config.silver_mode}' not allowed by policy"
-        )
-```
-
-**Критерии готовности**:
-- [ ] Preflight report содержит `medallion_policy_valid`
-- [ ] Несоответствие блокирует запуск
+**Оценка**: 0.5 дня
 
 ---
 
 ### Приоритет 🟡 СРЕДНИЙ
 
-#### C5: Метрики адаптеров (1 день)
+#### M-INV-1: Arch-тест на Bronze метаданные
 
-**Проблема**: Нет стандартных SLA метрик.
-
-**Решение**:
-```python
-# infrastructure/adapters/base_metrics.py
-class AdapterMetrics:
-    def __init__(self, metrics: MetricsPort, provider: str):
-        self._metrics = metrics
-        self._provider = provider
-
-    @contextmanager
-    def measure_request(self, endpoint: str):
-        start = time.perf_counter()
-        try:
-            yield
-        finally:
-            duration = time.perf_counter() - start
-            self._metrics.observe_histogram(
-                "adapter_request_duration_seconds",
-                duration,
-                {"provider": self._provider, "endpoint": endpoint}
-            )
-```
-
-**Критерии готовности**:
-- [ ] ChEMBL, UniProt, PubMed адаптеры используют AdapterMetrics
-- [ ] Метрики `adapter_request_duration_seconds` появляются
-
----
-
-#### C6: Расширить arch-тесты на DI (0.5 дня)
-
-**Проблема**: Не ловят `= SomeClass()` в конструкторах.
+**Цель**: Гарантировать наличие `_ingestion_ts`, `_run_id` в Bronze.
 
 **Решение**:
 ```python
-# tests/architecture/test_di_constructors.py
-FORBIDDEN_INSTANTIATIONS = [
-    "LockManager(",
-    "PreflightService(",
-    "MedallionLifecycleService(",
-]
+# tests/architecture/test_medallion_invariants.py
+def test_bronze_writer_requires_metadata():
+    """Bronze writer MUST include _ingestion_ts and _run_id."""
+    source = Path("src/bioetl/infrastructure/storage/bronze_writer.py").read_text()
 
-def test_no_service_instantiation_in_init():
-    # AST check for self.x = ForbiddenClass() in __init__
+    required_fields = ["_ingestion_ts", "_run_id", "_run_type", "_source_batch_id"]
+    for field in required_fields:
+        assert field in source, f"Bronze writer missing required field: {field}"
 ```
 
+**Файлы**:
+- `tests/architecture/test_medallion_invariants.py` (новый)
+
 **Критерии готовности**:
-- [ ] Тест проходит на текущем коде
-- [ ] Тест падает при добавлении `self.x = LockManager()` в application
+- [ ] Тест падает при удалении metadata из bronze_writer
+- [ ] `make arch-test` включает новый тест
+
+**Оценка**: 0.5 дня
 
 ---
 
-### Приоритет 🟢 ЖЕЛАТЕЛЬНО
+## 6. ЗАДАЧИ, КОТОРЫЕ НЕ СЛЕДУЕТ ВЫПОЛНЯТЬ
 
-#### C7: Streaming save_json (0.5 дня)
-
-**Проблема**: OOM риск при save_json=True на больших батчах.
-
-**Решение**: Использовать streaming запись вместо материализации.
-
----
-
-#### C8: Документация event naming convention (0.5 дня)
-
-**Решение**: Добавить секцию в RULES.md.
-
----
-
-## 6. МАТРИЦА ОТСЛЕЖИВАНИЯ
-
-| Задача | Файлы | Тесты | Риск | Effort |
-|--------|-------|-------|------|--------|
-| C1: CLI/composition | cli.py, entrypoints.py | test_cli_imports | Средний | 1-2д |
-| C2: Observability validation | bootstrap.py | test_observability | Низкий | 0.5д |
-| C3: Event names | runner.py, events.py | test_events | Низкий | 0.5д |
-| C4: Policy validation | preflight_service.py | test_preflight | Средний | 0.5д |
-| C5: Adapter metrics | adapters/*.py | test_metrics | Низкий | 1д |
-| C6: DI arch-tests | test_di_*.py | self | Низкий | 0.5д |
-| C7: Streaming JSON | bronze_writer.py | test_bronze | Низкий | 0.5д |
-| C8: Documentation | RULES.md | — | Нулевой | 0.5д |
+| Предложение из планов | Причина отклонения |
+|----------------------|-------------------|
+| Декомпозиция PreflightService на 2+ класса | Сервис когезивен, 4 метода с единой ответственностью |
+| Декомпозиция ChEMBL на 4+ классов | Over-engineering, высокая когезия |
+| Удаление medallion_policy.py | Это backward-compat shim, не дублирование |
+| Унификация click.echo → LoggerPort | click.echo — корректная ответственность interfaces |
+| Стратегии выполнения раннера | Over-engineering для текущих use cases |
+| Гарантированная инструментализация storage | Уже реализовано через DI |
+| Усиление контракта трансформера | Уже реализовано в generic_factory.py |
+| Декомпозиция PipelineRunner | Уже сделано через RunnerServices |
+| Декомпозиция bootstrap_pipeline | Компактный фасад, архитектура адекватна |
 
 ---
 
 ## 7. МЕТРИКИ УСПЕХА
 
-| Метрика | Текущее | Цель | Измерение |
-|---------|---------|------|-----------|
-| Arch tests | 187 | 195+ | `make arch-test` |
-| DI violations in application | 0 | 0 | test_di_discipline |
-| Event naming coverage | ~50% | 100% | grep analysis |
-| Adapter metrics coverage | 0% | 100% | MetricsPort usage |
-| Preflight checks | 5 | 7 | PreflightReport fields |
+| Метрика | До | После | Связанная задача |
+|---------|-----|-------|-----------------|
+| Параллельные тесты без clear() | ❌ | ✅ | REG-1 |
+| Observer через DI | ❌ | ✅ | OBS-1 |
+| Arch-тест Bronze metadata | ❌ | ✅ | M-INV-1 |
+| Ложных утверждений в планах | ~50% | 0% | Этот документ |
 
 ---
 
-## 8. ЗАДАЧИ НЕ ТРЕБУЮЩИЕ ДЕЙСТВИЙ
+## 8. ПРИЧИНЫ ЛОЖНЫХ УТВЕРЖДЕНИЙ
 
-Следующие предложения из планов **отклонены** как неактуальные:
+Анализ показал, что ложные утверждения возникли из-за:
 
-| Предложение | Причина отклонения |
-|-------------|-------------------|
-| Декомпозиция PipelineRunner | Уже сделано через RunnerServices |
-| Декомпозиция bootstrap_pipeline | Архитектура адекватна |
-| Декомпозиция ChEMBL адаптера | Когезивная ответственность |
-| Вынос подтверждений из CLI | Законная ответственность interfaces |
-| DQ в BaseTransformer | By design: ответственность конкретных transformers |
-| Обязательный WriteModePolicy в DeltaWriter | Валидный optional parameter pattern |
+1. **Отсутствие верификации кодом** — утверждения делались без проверки фактического состояния
+2. **Устаревшие знания** — часть задач уже была реализована к моменту анализа
+3. **Неверная интерпретация паттернов**:
+   - NoOp в DI = Null Object Pattern (валидно)
+   - Optional defaults = не нарушение DI (валидно)
+   - click.echo в CLI = ответственность interfaces (корректно)
+4. **Ложная корреляция размер → сложность**:
+   - 527 LOC ≠ god object (если структура когезивна)
+   - 175 LOC PipelineRunner ≠ god object (делегирует)
 
 ---
 
-## 9. ЗАКЛЮЧЕНИЕ
+## 9. РЕКОМЕНДАЦИИ ПО ПРОЦЕССУ
+
+### Обязательные проверки перед предложением рефакторинга:
+
+```bash
+# 1. Проверить размер и структуру
+wc -l src/bioetl/path/to/file.py
+grep -c "def \|async def " src/bioetl/path/to/file.py
+
+# 2. Проверить делегирование
+grep -n "self\._.*\." src/bioetl/path/to/file.py | head -20
+
+# 3. Сверить с REFACTORING_PLAN.md
+grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ\|УЖЕ РЕАЛИЗОВАНО" docs/REFACTORING_PLAN.md
+
+# 4. Найти существующие тесты
+find tests -name "*.py" -exec grep -l "ClassName" {} \;
+```
+
+### Формат верифицированного предложения:
+
+```markdown
+## Задача: [Название]
+
+### Верификация
+- **Файл**: `path/to/file.py:строки` (N строк, M методов)
+- **Проверено**: Нет в "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" ✅
+- **Дата верификации**: YYYY-MM-DD
+
+### Текущее состояние
+[Описание с ссылками `файл:строка`]
+
+### Проблема
+[Конкретное описание с доказательствами]
+
+### Решение
+[Предлагаемое решение]
+```
+
+---
+
+## 10. ЗАКЛЮЧЕНИЕ
 
 Из 4 планов рефакторинга:
-- **~40% предложений** основаны на неверном понимании кодовой базы
-- **~30% уже реализованы** (не обновлена документация)
-- **~30% — реальные улучшения** (консолидированы в C1-C8)
+- **3 задачи валидны**: REG-1, OBS-1, M-INV-1
+- **~50% утверждений ложны** или устарели
+- **Основная причина ошибок**: Отсутствие верификации кодом
 
-Основной вывод: кодовая база в хорошем состоянии. Крупных архитектурных проблем нет.
-Рекомендуемые улучшения — косметические (метрики, логирование, тесты).
+**Рекомендация**: Выполнить только верифицированные задачи (REG-1, OBS-1, M-INV-1) и обновить протокол в REFACTORING_PLAN.md.
 
 ---
 
-*Документ подготовлен на основе верификации кода 2025-12-26*
+*Документ подготовлен на основе верификации кода 2025-12-27*
