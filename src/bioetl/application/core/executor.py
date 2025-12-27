@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.ports import NoOpTracing
 from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
@@ -97,11 +98,9 @@ class PipelineExecutor:
         self._record_processor = record_processor
         self._run_type = run_type
 
-        # Use NoOpTracing if not provided
-        if tracer is None:
-            from bioetl.domain.ports import NoOpTracing
-            tracer = NoOpTracing()
-        self._tracer: TracingPort = tracer
+        # Use NoOpTracing if not provided (Null Object Pattern)
+        # NoOpTracing is imported at module level from domain.ports
+        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
 
         self._pipeline_name = pipeline_name
         self._run_id = run_id

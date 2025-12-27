@@ -16,6 +16,7 @@ SRP Compliance:
 from __future__ import annotations
 
 import asyncio
+import time
 from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -23,10 +24,17 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
+from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.domain.resilience import RetryPolicy
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import CircuitBreakerPort, RateLimiterPort
+    from bioetl.domain.ports import (
+        CircuitBreakerPort,
+        LoggerPort,
+        MetricsPort,
+        RateLimiterPort,
+        TracingPort,
+    )
     from bioetl.domain.types import RunID
 
 
@@ -50,10 +58,16 @@ def _is_retryable_error(exc: Exception) -> bool:
 
 @dataclass
 class UnifiedHTTPClient:
-    """Async HTTP client with rate limiting and circuit breaker.
+    """Async HTTP client with rate limiting, circuit breaker, and observability.
 
-    Coordinates HTTP communication using injected resilience components
-    (SRP-compliant design).
+    Coordinates HTTP communication using injected resilience and observability
+    components (SRP-compliant design).
+
+    Observability (Phase 1 Refactoring):
+    - Creates tracing spans for all HTTP requests with method/URL/status attributes
+    - Records http_request_duration_seconds histogram by provider/method/status
+    - Increments http_request_errors_total counter on failures
+    - Logs circuit breaker state changes and retry attempts
 
     Args:
         rate_limiter: RateLimiterPort implementation for rate limiting
@@ -63,6 +77,10 @@ class UnifiedHTTPClient:
         run_id: Current run ID for correlation header
         user_agent: User-Agent string (default: "BioETL/5.0.0")
         contact_email: Optional contact email to append to User-Agent
+        provider: Provider name for metrics labels (default: "unknown")
+        tracer: TracingPort for distributed tracing (default: NoOpTracing)
+        metrics: MetricsPort for metrics collection (default: NoOpMetrics)
+        logger: LoggerPort for structured logging (optional)
 
     Example:
         >>> from bioetl.infrastructure.adapters.http import TokenBucket, CircuitBreaker
@@ -81,8 +99,19 @@ class UnifiedHTTPClient:
     run_id: RunID | None = None
     user_agent: str = "BioETL/5.0.0"
     contact_email: str | None = None
+    provider: str = "unknown"
+    tracer: TracingPort | None = None
+    metrics: MetricsPort | None = None
+    logger: LoggerPort | None = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
+    _tracer: TracingPort = field(init=False)
+    _metrics: MetricsPort = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Initialize observability components with defaults if not provided."""
+        self._tracer = self.tracer if self.tracer is not None else NoOpTracing()
+        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
 
     async def __aenter__(self) -> UnifiedHTTPClient:
         """Enter async context manager."""
@@ -139,38 +168,135 @@ class UnifiedHTTPClient:
         url: str,
         **kwargs: Any,
     ) -> httpx.Response:
-        """Execute request with retries and exponential backoff."""
+        """Execute request with retries, exponential backoff, and observability.
+
+        Creates a tracing span for the entire request lifecycle and records
+        metrics for duration and errors.
+        """
         client = self._get_client()
         last_error: Exception | None = None
+        start_time = time.perf_counter()
+        status_code = 0
+        retries = 0
 
-        for attempt in range(self.retry_policy.max_attempts):
-            try:
-                await self.rate_limiter.acquire()
-                response = await self.circuit_breaker.call(
-                    client.request, method, url, **kwargs
-                )
+        # Start tracing span
+        otel_tracer = self._tracer.get_tracer("bioetl.http")
+        span = otel_tracer.start_as_current_span(
+            f"http.{method.lower()}",
+            attributes={
+                "http.method": method,
+                "http.url": url,
+                "bioetl.provider": self.provider,
+                "bioetl.run_id": str(self.run_id) if self.run_id else "unknown",
+            },
+        )
+        span.__enter__()
 
-                if _is_retryable_status(
-                    response.status_code
-                ) and not self.retry_policy.is_last_attempt(attempt):
-                    await self._handle_retry_delay(attempt, url, response)
-                    continue
+        try:
+            for attempt in range(self.retry_policy.max_attempts):
+                try:
+                    await self.rate_limiter.acquire()
+                    response = await self.circuit_breaker.call(
+                        client.request, method, url, **kwargs
+                    )
+                    status_code = response.status_code
 
-                response.raise_for_status()
-                return response
+                    if _is_retryable_status(
+                        response.status_code
+                    ) and not self.retry_policy.is_last_attempt(attempt):
+                        retries += 1
+                        if self.logger:
+                            self.logger.debug(
+                                "http_retry",
+                                url=url,
+                                method=method,
+                                status_code=status_code,
+                                attempt=attempt + 1,
+                                provider=self.provider,
+                            )
+                        await self._handle_retry_delay(attempt, url, response)
+                        continue
 
-            except CircuitBreakerOpenError:
-                raise
+                    response.raise_for_status()
+                    span.set_attribute("http.status_code", status_code)
+                    return response
 
-            except Exception as exc:
-                last_error = exc
-                if not _is_retryable_error(exc):
+                except CircuitBreakerOpenError as exc:
+                    span.set_attribute("error", True)
+                    span.set_attribute("error.type", "circuit_breaker_open")
+                    span.record_exception(exc)
+                    if self.logger:
+                        self.logger.warning(
+                            "http_circuit_breaker_open",
+                            url=url,
+                            method=method,
+                            provider=self.provider,
+                        )
                     raise
 
-                if not self.retry_policy.is_last_attempt(attempt):
-                    await self._handle_retry_delay(attempt, url)
+                except Exception as exc:
+                    last_error = exc
+                    if not _is_retryable_error(exc):
+                        span.set_attribute("error", True)
+                        span.set_attribute("error.type", type(exc).__name__)
+                        span.record_exception(exc)
+                        raise
 
-        raise RetryExhaustedError(url, self.retry_policy.max_attempts, last_error)
+                    retries += 1
+                    if not self.retry_policy.is_last_attempt(attempt):
+                        if self.logger:
+                            self.logger.debug(
+                                "http_retry",
+                                url=url,
+                                method=method,
+                                error=str(exc),
+                                attempt=attempt + 1,
+                                provider=self.provider,
+                            )
+                        await self._handle_retry_delay(attempt, url)
+
+            # All retries exhausted
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", "retry_exhausted")
+            if last_error:
+                span.record_exception(last_error)
+            raise RetryExhaustedError(url, self.retry_policy.max_attempts, last_error)
+
+        finally:
+            duration = time.perf_counter() - start_time
+            span.set_attribute("http.retries", retries)
+            span.set_attribute("bioetl.duration_ms", duration * 1000)
+            span.__exit__(None, None, None)
+
+            # Record metrics
+            labels = {
+                "provider": self.provider,
+                "method": method.upper(),
+                "status": str(status_code) if status_code else "error",
+            }
+            self._metrics.observe_histogram(
+                "http_request_duration_seconds",
+                duration,
+                labels,
+            )
+            if retries > 0:
+                self._metrics.increment_counter(
+                    "http_retries_total",
+                    retries,
+                    {"provider": self.provider, "method": method.upper()},
+                )
+            if last_error is not None or status_code >= 400:
+                self._metrics.increment_counter(
+                    "http_request_errors_total",
+                    1,
+                    {
+                        "provider": self.provider,
+                        "method": method.upper(),
+                        "error_type": type(last_error).__name__
+                        if last_error
+                        else f"http_{status_code}",
+                    },
+                )
 
     async def get(
         self,
