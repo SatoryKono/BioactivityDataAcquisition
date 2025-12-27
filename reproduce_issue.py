@@ -8,7 +8,7 @@ EntityID = NewType("EntityID", str)
 ContentHash = NewType("ContentHash", str)
 BatchID = NewType("BatchID", str)
 
-@dataclass(frozen=True, kw_only=True, slots=True)
+@dataclass(frozen=True, kw_only=True)
 class BaseEntity:
     entity_id: EntityID
     content_hash: ContentHash
