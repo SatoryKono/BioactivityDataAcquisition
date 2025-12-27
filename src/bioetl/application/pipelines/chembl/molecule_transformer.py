@@ -5,7 +5,7 @@ Transforms Bronze records to Silver format (Molecule entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -155,7 +155,7 @@ class MoleculeTransformer(BaseChemblTransformer):
             **self._map_molecule_flags(record),
             **self._map_additional_metadata(record),
             **self._map_complex_fields(record),
-            **_extract_hierarchy(record.get("molecule_hierarchy")),
-            **_extract_properties(record.get("molecule_properties")),
-            **_extract_structures(record.get("molecule_structures")),
+            **_extract_hierarchy(cast("dict[str, Any] | None", record.get("molecule_hierarchy"))),
+            **_extract_properties(cast("dict[str, Any] | None", record.get("molecule_properties"))),
+            **_extract_structures(cast("dict[str, Any] | None", record.get("molecule_structures"))),
         }

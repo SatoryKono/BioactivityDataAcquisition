@@ -197,7 +197,7 @@ class BatchWriter:
             await self._storage.write_silver(
                 table_name=table_name,
                 records=records_with_meta,
-                primary_keys=self._table_config.primary_keys,
+                primary_keys=list(self._table_config.primary_keys),
                 schema=self._silver_schema,
                 mode=write_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
@@ -249,7 +249,7 @@ class BatchWriter:
                 table_name=table_name,
                 records=records,
                 schema=gold_schema,
-                primary_keys=self._table_config.primary_keys,
+                primary_keys=list(self._table_config.primary_keys),
                 mode=write_mode,
             )
             self._end_span(span)

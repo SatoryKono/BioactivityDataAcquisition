@@ -45,12 +45,12 @@ if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.pipeline_context import PipelineContext
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.context import PipelineContext as DomainPipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -116,7 +116,7 @@ class BaseServicesFactory:
         metrics = cls._create_metrics(settings)
 
         storage_ctx = StorageFactory.create(
-            settings, pipeline_config, logger, metrics=metrics
+            settings, pipeline_config, logger, metrics=metrics  # type: ignore[arg-type]
         )
 
         lock = cls._create_lock()
@@ -138,7 +138,7 @@ class BaseServicesFactory:
             quarantine=quarantine,
             metrics=metrics,
             tracing=tracer,
-            logger=logger,
+            logger=logger,  # type: ignore[arg-type]
             dq_monitor=dq_monitor,
         )
 
@@ -217,7 +217,7 @@ class ServicesBuilder:
         dq_config: Any,
         primary_keys: Sequence[str],
         silver_table: str,
-        gold_table: str,
+        gold_table: str | None,
         silver_write_mode: str,
         gold_write_mode: str,
         on_schema_mismatch: str,
@@ -255,12 +255,12 @@ class ServicesBuilder:
         """
         error_classifier = ErrorClassifier()
         table_config = TableConfig(
-            primary_keys=primary_keys,
+            primary_keys=tuple(primary_keys),
             silver_table=silver_table,
             gold_table=gold_table,
-            silver_write_mode=silver_write_mode,
-            gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,
+            silver_write_mode=silver_write_mode,  # type: ignore[arg-type]
+            gold_write_mode=gold_write_mode,  # type: ignore[arg-type]
+            on_schema_mismatch=on_schema_mismatch,  # type: ignore[arg-type]
         )
 
         processor_config = RecordProcessorConfig(

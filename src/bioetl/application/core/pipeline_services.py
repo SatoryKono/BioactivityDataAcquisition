@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from types import TracebackType
 from typing import Self
 
 from bioetl.domain.ports import (
@@ -80,7 +81,12 @@ class PipelineServices:
         await self.data_source.__aenter__()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Exit the async context manager, closing services."""
         await self.aclose()
 
