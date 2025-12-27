@@ -211,6 +211,19 @@ complexity-report: ## Generate detailed complexity report
 	$(VENV_PYTHON) -m radon mi src/ -s >> reports/complexity.txt
 	@echo "$(GREEN)Report saved to reports/complexity.txt$(NC)"
 
+bench: ## Run performance benchmarks
+	@echo "$(BLUE)Running benchmarks...$(NC)"
+	@mkdir -p reports
+	$(VENV_PYTHON) -m pytest benchmarks/ -v --tb=short
+	@echo "$(GREEN)Benchmarks complete!$(NC)"
+
+bench-json: ## Run benchmarks with JSON output
+	@echo "$(BLUE)Running benchmarks with JSON output...$(NC)"
+	@mkdir -p reports
+	$(VENV_PYTHON) -m pytest benchmarks/ -v --benchmark-only --benchmark-json=reports/benchmark.json 2>/dev/null || \
+		$(VENV_PYTHON) -m pytest benchmarks/ -v --tb=short
+	@echo "$(GREEN)Benchmarks complete! Results in reports/benchmark.json$(NC)"
+
 mutation-test: ## Run mutation testing (slow, domain layer only)
 	@echo "$(BLUE)Running mutation testing on domain layer...$(NC)"
 	$(VENV_PYTHON) -m mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/
