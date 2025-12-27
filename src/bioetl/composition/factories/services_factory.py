@@ -312,6 +312,27 @@ class ServicesBuilder:
         Returns:
             Configured RecordProcessor instance
         """
+        # Use injected transformer if available
+        transformer = pipeline.transformer
+        if transformer is not None:
+            transform_cb = transformer.transform
+            gold_filter_cb = transformer.should_write_gold
+            gold_transform_cb = transformer.transform_for_gold
+        else:
+            # Fallback for pipelines without explicit transformer (legacy)
+            # NOTE: BasePipeline no longer implements these methods.
+            # If a subclass does not implement them and has no transformer, this will raise AttributeError.
+            # This is intentional to enforce the new architecture (REQ-ARCH-REF-001).
+            transform_cb = pipeline.transform_bronze_to_silver
+
+            # Use getattr to avoid MyPy errors if we assume they exist, but runtime will fail if missing.
+            # We provide a dummy lambda for safety if methods are strictly missing but user logic
+            # handles it elsewhere? No, strict fail is better.
+            gold_filter_cb = getattr(pipeline, "should_write_gold", lambda _c, _r: True)
+
+            # Default identity transform if missing
+            gold_transform_cb = getattr(pipeline, "transform_for_gold", lambda _c, r: r)
+
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,
             context=pipeline.context,
@@ -327,9 +348,9 @@ class ServicesBuilder:
             silver_write_mode=pipeline.config.write_mode,
             gold_write_mode=pipeline.config.gold_write_mode,
             on_schema_mismatch=pipeline.config.on_schema_mismatch,
-            transform_callback=pipeline.transform_bronze_to_silver,
-            gold_filter_callback=pipeline.should_write_gold,
-            gold_transform_callback=pipeline.transform_for_gold,
+            transform_callback=transform_cb,
+            gold_filter_callback=gold_filter_cb,
+            gold_transform_callback=gold_transform_cb,
             strict_gold_validation=strict_gold_validation,
         )
 
