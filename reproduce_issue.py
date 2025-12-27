@@ -1,20 +1,44 @@
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from typing import NewType
 
-import pytest
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing, NoOpTracer
-from bioetl.domain.ports.noop import NoOpTracing as DomainNoOpTracing
+RunID = NewType("RunID", str)
+RunType = NewType("RunType", str)
+EntityID = NewType("EntityID", str)
+ContentHash = NewType("ContentHash", str)
+BatchID = NewType("BatchID", str)
 
-def test_reproduce_noop_tracer_issue():
-    tracer = NoOpTracing().get_tracer("test")
-    try:
-        tracer.start_as_current_span("test", attributes={"foo": "bar"})
-        print("Success with attributes")
-    except TypeError as e:
-        pytest.fail(f"Failed with attributes: {e}")
+@dataclass(frozen=True, kw_only=True, slots=True)
+class BaseEntity:
+    entity_id: EntityID
+    content_hash: ContentHash
+    run_id: RunID
+    run_type: RunType
+    ingestion_ts: datetime
+    source_batch_id: BatchID | None = None
 
-def test_reproduce_domain_noop_tracer_issue():
-    domain_tracer = DomainNoOpTracing().get_tracer("test")
-    try:
-        domain_tracer.start_as_current_span("test", attributes={"foo": "bar"})
-        print("Domain Success with attributes")
-    except TypeError as e:
-        pytest.fail(f"Domain Failed with attributes: {e}")
+@dataclass(frozen=True, kw_only=True)
+class Activity(BaseEntity):
+    activity_id: str
+    molecule_chembl_id: str
+
+def test():
+    entity = Activity(
+        entity_id=EntityID("1"),
+        content_hash=ContentHash("hash"),
+        run_id=RunID("run1"),
+        run_type=RunType("incremental"),
+        ingestion_ts=datetime.now(),
+        activity_id="act1",
+        molecule_chembl_id="mol1"
+    )
+
+    d = asdict(entity)
+    print("Keys in asdict:", d.keys())
+    if "run_id" in d:
+        print("run_id is present")
+    else:
+        print("run_id is MISSING")
+
+if __name__ == "__main__":
+    test()
