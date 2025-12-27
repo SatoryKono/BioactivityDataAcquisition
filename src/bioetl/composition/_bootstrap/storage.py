@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics

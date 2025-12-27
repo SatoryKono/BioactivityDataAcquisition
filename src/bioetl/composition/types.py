@@ -14,7 +14,7 @@ For actual runtime imports, use the specific modules:
 
 from __future__ import annotations
 
-from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.registry import (
     PipelineDefinition,

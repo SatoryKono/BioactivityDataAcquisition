@@ -18,13 +18,13 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort, TracingPort
 
 # Mapping of (provider, entity_type) to transformer class
-_TRANSFORMER_REGISTRY: dict[tuple[str, str], type["BaseTransformer"]] = {}
+_TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
 
 
 def register_transformer(
     provider: str,
     entity_type: str,
-    transformer_class: type["BaseTransformer"],
+    transformer_class: type[BaseTransformer],
 ) -> None:
     """Register a transformer class for a provider/entity combination.
 
@@ -42,7 +42,7 @@ def create_transformer(
     entity_type: str,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
-) -> "BaseTransformer":
+) -> BaseTransformer:
     """Create a transformer instance for the given provider and entity type.
 
     This is the main factory function for creating transformers via DI.
@@ -81,7 +81,7 @@ def create_transformer(
 def get_transformer_class(
     provider: str,
     entity_type: str,
-) -> type["BaseTransformer"] | None:
+) -> type[BaseTransformer] | None:
     """Get transformer class without instantiating.
 
     Args:
