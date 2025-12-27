@@ -27,6 +27,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.locking import LockContext, LockNotHeldError
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
@@ -62,6 +63,7 @@ class GoldWriter:
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
         tracing: TracingPort | None = None,
+        require_lock: bool = False,
     ) -> None:
         """Initialize Gold writer.
 
@@ -73,6 +75,10 @@ class GoldWriter:
                   Use NoOpAudit from composition layer if audit disabled.
             tracing: Optional TracingPort for distributed tracing.
                     Use NoOpTracing from composition layer if tracing disabled.
+            require_lock: If True, write operations require valid LockContext.
+                         Set to False for testing or non-concurrent scenarios.
+                         Default is False for backward compatibility. Set to True
+                         in production per RULES.md §3.3.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -81,12 +87,65 @@ class GoldWriter:
         self.logger = logger
         self.csv_exporter = csv_exporter
         self._audit = audit
+        self._require_lock = require_lock
 
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
             tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
+
+    def _validate_lock_held(
+        self,
+        table_name: str,
+        lock_context: LockContext | None,
+    ) -> None:
+        """Validate that lock is held before write operation.
+
+        Implements RULES.md §3.3 - Writers MUST verify lock held.
+
+        Args:
+            table_name: Target table name (format: "provider_entity").
+            lock_context: The lock context from application layer.
+
+        Raises:
+            LockNotHeldError: If lock is not held or doesn't match table.
+        """
+        if not self._require_lock:
+            return  # Lock validation disabled (e.g., for tests)
+
+        expected_key = f"lock:{table_name}"
+
+        if lock_context is None:
+            self.logger.error(
+                "Write attempted without lock",
+                table=table_name,
+                expected_key=expected_key,
+            )
+            raise LockNotHeldError("write_gold", expected_key)
+
+        if not lock_context.matches_table(table_name):
+            self.logger.error(
+                "Write attempted with wrong lock",
+                table=table_name,
+                expected_key=expected_key,
+                actual_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                f"write_gold (got {lock_context.key})",
+                expected_key,
+            )
+
+        if not lock_context.is_valid():
+            self.logger.error(
+                "Write attempted with expired lock",
+                table=table_name,
+                lock_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                "write_gold (lock expired)",
+                expected_key,
+            )
 
     async def write_gold(
         self,
@@ -100,6 +159,7 @@ class GoldWriter:
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        lock_context: LockContext | None = None,
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -115,16 +175,22 @@ class GoldWriter:
                          (single source of time per ADR-014). Required for SCD2 mode
                          and audit logging.
             run_id: Run identifier for audit correlation across layers.
+            lock_context: Lock context from LockManager. Required unless
+                         require_lock=False was passed to constructor (RULES.md §3.3).
 
         Raises:
             ValueError: If mode is invalid, records empty, schema not strict,
                        or SCD2 mode without ingestion_ts
+            LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_gold") as span:
             span.set_attribute("table_name", table_name)
             span.set_attribute("mode", mode)
             span.set_attribute("record_count", len(records))
+
+            # Validate lock is held before any write operation (RULES.md §3.3)
+            self._validate_lock_held(table_name, lock_context)
 
             validated_mode = self._validate_write_mode(mode)
             self._validate_records(records)
