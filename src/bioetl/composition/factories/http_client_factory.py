@@ -108,7 +108,7 @@ class HttpClientFactory:
             # Return default client
             return UnifiedHTTPClient(
                 rate_limiter=TokenBucket(rate=5.0, capacity=10),
-                circuit_breaker=CircuitBreaker(provider=provider),
+                circuit_breaker=CircuitBreaker(provider=provider, metrics=metrics),
                 provider=provider,
                 run_id=run_id,
                 tracer=tracer,
@@ -129,7 +129,7 @@ class HttpClientFactory:
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucket(rate=rate, capacity=capacity),
-            circuit_breaker=CircuitBreaker(provider=provider),
+            circuit_breaker=CircuitBreaker(provider=provider, metrics=metrics),
             provider=provider,
             run_id=run_id,
             tracer=tracer,
