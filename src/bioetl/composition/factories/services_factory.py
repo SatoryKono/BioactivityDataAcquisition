@@ -116,7 +116,7 @@ class BaseServicesFactory:
         metrics = cls._create_metrics(settings)
 
         storage_ctx = StorageFactory.create(
-            settings, pipeline_config, logger, metrics=metrics  # type: ignore[arg-type]
+            settings, pipeline_config, logger, metrics=metrics
         )
 
         lock = cls._create_lock()
@@ -138,7 +138,7 @@ class BaseServicesFactory:
             quarantine=quarantine,
             metrics=metrics,
             tracing=tracer,
-            logger=logger,  # type: ignore[arg-type]
+            logger=logger,
             dq_monitor=dq_monitor,
         )
 
@@ -328,7 +328,7 @@ class ServicesBuilder:
             # Use getattr to avoid MyPy errors if we assume they exist, but runtime will fail if missing.
             # We provide a dummy lambda for safety if methods are strictly missing but user logic
             # handles it elsewhere? No, strict fail is better.
-            gold_filter_cb = getattr(pipeline, "should_write_gold", lambda _context, _record: True)
+            gold_filter_cb = getattr(pipeline, "should_write_gold", lambda _context, record: True)
 
             # Default identity transform if missing
             gold_transform_cb = getattr(pipeline, "transform_for_gold", lambda _context, silver_record: silver_record)

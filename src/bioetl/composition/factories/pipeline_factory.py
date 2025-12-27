@@ -304,7 +304,7 @@ def build_pipeline_services(
 
     return BaseServicesFactory.create_common_services(
         settings=settings,
-        logger=logger,  # type: ignore[arg-type]
+        logger=logger,
         data_source=data_source,
         pipeline_config=pipeline_config,
         tracer=tracer,
