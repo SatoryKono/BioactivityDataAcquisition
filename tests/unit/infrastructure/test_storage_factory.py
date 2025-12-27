@@ -37,6 +37,7 @@ def mock_settings(tmp_path):
     settings.silver_path = tmp_path / "silver"
     settings.gold_path = tmp_path / "gold"
     settings.checkpoint_path = tmp_path / "checkpoints"
+    settings.data_dir = tmp_path
     return settings
 
 
@@ -105,31 +106,31 @@ class TestStorageContext:
         adapter = MagicMock(spec=StorageAdapter)
         context = StorageContext(
             adapter=adapter,
-            bronze_path="/path/to/bronze",
-            silver_path="/path/to/silver",
-            gold_path="/path/to/gold",
-            checkpoints_path="/path/to/checkpoints",
+            bronze_path=Path("/path/to/bronze"),
+            silver_path=Path("/path/to/silver"),
+            gold_path=Path("/path/to/gold"),
+            checkpoints_path=Path("/path/to/checkpoints"),
         )
 
         assert context.adapter is adapter
-        assert context.bronze_path == "/path/to/bronze"
-        assert context.silver_path == "/path/to/silver"
-        assert context.gold_path == "/path/to/gold"
-        assert context.checkpoints_path == "/path/to/checkpoints"
+        assert context.bronze_path == Path("/path/to/bronze")
+        assert context.silver_path == Path("/path/to/silver")
+        assert context.gold_path == Path("/path/to/gold")
+        assert context.checkpoints_path == Path("/path/to/checkpoints")
 
     def test_storage_context_is_frozen(self, mock_logger):
         """Test StorageContext is immutable."""
         adapter = MagicMock(spec=StorageAdapter)
         context = StorageContext(
             adapter=adapter,
-            bronze_path="/path/to/bronze",
-            silver_path="/path/to/silver",
-            gold_path="/path/to/gold",
-            checkpoints_path="/path/to/checkpoints",
+            bronze_path=Path("/path/to/bronze"),
+            silver_path=Path("/path/to/silver"),
+            gold_path=Path("/path/to/gold"),
+            checkpoints_path=Path("/path/to/checkpoints"),
         )
 
         with pytest.raises(AttributeError):
-            context.bronze_path = "/new/path"
+            context.bronze_path = Path("/new/path")
 
 
 @pytest.mark.unit
