@@ -41,6 +41,7 @@ from bioetl.domain.exceptions.recoverable import (
     TimeoutError,
 )
 from bioetl.domain.exceptions.storage import (
+    BronzeValidationError,
     BucketNotFoundError,
     SchemaEvolutionError,
     StorageError,
@@ -52,6 +53,7 @@ __all__ = [
     "ApiError",
     "AuthFailureError",
     "BioETLError",
+    "BronzeValidationError",
     "BucketNotFoundError",
     "CheckpointConflictError",
     "ChemblApiError",

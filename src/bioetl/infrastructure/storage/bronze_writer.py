@@ -21,7 +21,7 @@ import asyncio
 import json
 import time
 from collections.abc import AsyncIterator, Iterator
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -55,6 +55,7 @@ class BronzeWriter:
         metrics: MetricsPort,
         save_json: bool = False,
         json_path: str | None = None,
+        validate_json: bool = True,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -65,6 +66,9 @@ class BronzeWriter:
                      Use NoOpMetrics from composition layer if metrics disabled.
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
+            validate_json: If True, validate each record is valid JSON bytes
+                          before writing. Raises BronzeValidationError on invalid.
+                          Default is True for data integrity.
 
         """
         self.base_path = Path(base_path)
@@ -72,6 +76,7 @@ class BronzeWriter:
         self._metrics = metrics
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
+        self.validate_json = validate_json
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -126,6 +131,37 @@ class BronzeWriter:
                 f"{param_name} must be UTC, got timezone with offset {offset}. "
                 "Convert to UTC before passing to BronzeWriter."
             )
+
+    def _validate_json_records(
+        self, records: Iterator[bytes]
+    ) -> Iterator[bytes]:
+        """Validate that each record is valid JSON bytes (lazy generator).
+
+        This method validates JSON structure without modifying records.
+        Uses lazy evaluation to minimize memory overhead - only parses
+        when iterating, immediately yields valid records.
+
+        Args:
+            records: Iterator of bytes, each expected to be valid JSON.
+
+        Yields:
+            Valid JSON bytes records.
+
+        Raises:
+            BronzeValidationError: If a record contains invalid JSON.
+        """
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        for index, record in enumerate(records):
+            try:
+                json.loads(record)
+            except json.JSONDecodeError as e:
+                raise BronzeValidationError(
+                    message="Invalid JSON in Bronze record",
+                    record_index=index,
+                    original_error=str(e),
+                ) from e
+            yield record
 
     def _build_bronze_metadata(
         self,
@@ -194,6 +230,10 @@ class BronzeWriter:
         self._validate_records_iterator(records)
         self._validate_utc_datetime(date, "date")
         self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
+
+        # Apply JSON validation if enabled (lazy generator wrapping)
+        if self.validate_json:
+            records = self._validate_json_records(records)
 
         date_str = date.strftime("%Y-%m-%d")
         relative_path = (
