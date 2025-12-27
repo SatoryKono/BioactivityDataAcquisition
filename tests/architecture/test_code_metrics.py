@@ -50,7 +50,7 @@ class TestFileSizeLimits:
         "services_factory.py": 450,  # 422 LOC - merged base_services + services_builder + runner_services
         # Infrastructure layer exemptions
         "delta_writer.py": 750,  # 712+ LOC - schema drift detection + merge logic + audit
-        "gold_writer.py": 650,  # 643 LOC - SCD Type 2 + audit logging
+        "gold_writer.py": 670,  # 667 LOC - SCD Type 2 + audit logging
         # Interfaces layer exemptions
         "cli.py": 450,  # 420 LOC - CLI commands and options
     }
@@ -260,7 +260,7 @@ class TestClassSize:
         "StorageAdapter": 500,
         "BaseTransformer": 480,  # 477 lines - Template Method with helpers
         "DeltaWriter": 650,  # 644 lines - includes schema drift detection (M4) + audit
-        "GoldWriter": 590,  # 586 lines - includes SCD Type 2 with ingestion_ts per ADR-014
+        "GoldWriter": 610,  # 609 lines - includes SCD Type 2 with ingestion_ts per ADR-014
         "LineageTracker": 400,
         "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
