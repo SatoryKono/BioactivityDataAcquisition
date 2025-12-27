@@ -126,7 +126,7 @@ class WriteModePolicy:
     Enforces medallion architecture invariants:
     - Bronze: APPEND only (raw data immutability)
     - Silver: APPEND or MERGE (idempotent upserts)
-    - Gold: MERGE or OVERWRITE (derived data)
+    - Gold: MERGE, OVERWRITE, or APPEND (derived data)
 
     Example:
         >>> policy = WriteModePolicy()
@@ -140,7 +140,7 @@ class WriteModePolicy:
     ALLOWED_MODES: ClassVar[dict[Layer, set[WriteMode]]] = {
         Layer.BRONZE: {WriteMode.APPEND},
         Layer.SILVER: {WriteMode.MERGE, WriteMode.APPEND},
-        Layer.GOLD: {WriteMode.MERGE, WriteMode.OVERWRITE},
+        Layer.GOLD: {WriteMode.MERGE, WriteMode.OVERWRITE, WriteMode.APPEND},
     }
 
     def validate(self, layer: Layer, mode: WriteMode) -> None:
