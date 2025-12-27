@@ -63,7 +63,7 @@ class IntegrationPipelineTestCase:
 
         # Patch StorageFactory.create to return local paths
         with patch(
-            "bioetl.composition.factories.base_services_factory.StorageFactory.create"
+            "bioetl.composition.factories.storage.StorageFactory.create"
         ) as mock_create:
             mock_create.side_effect = self._create_local_storage_context
             yield
