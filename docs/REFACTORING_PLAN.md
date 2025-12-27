@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.2 | Дата: 2025-12-27*
+*Версия: 5.3 | Дата: 2025-12-27*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -63,6 +63,11 @@
 | "GenericPipelineFactory — god object" | 397 строк, 6 методов, делегирует `BaseServicesFactory`, `ServicesBuilder`, `build_runner_services()` | `generic_factory.py:190,299,332` |
 | "yaml_config_to_domain нарушает архитектуру" | Матрица импортов разрешает infrastructure → domain. PipelineConfig — value object | `config.py:185-228`, CLAUDE.md §2.1 |
 | "PubChemAdapter без observability" | Использует `BaseSyncAdapter` с metrics, CircuitBreaker, health_check() | `sync_base.py:130-134`, `pubchem/client.py:255-313` |
+| "ChEMBL adapter — монолит 517 строк" | **Делегирует** через `EntityMapper` (112 LOC), `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter`. Когезивная ответственность. | `client.py:30,76-84,90` |
+| "GoldWriter — монолит 593 строки, требует декомпозиции на стратегии" | **Делегирует** CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 когезивны. | `gold_writer.py:70-71,87-88,351-355` |
+| "Нет автоматизации DQ/Medallion политик" | Реализовано: `MedallionPolicy` в `domain/medallion.py`, `DQConfig` в `domain/config.py:25-63`, `SilverWriteMode` / `GoldWriteMode` enums | `medallion.py`, `config.py:36-37` |
+| "medallion_policy.py дублирует domain" | Это **shim для backward-compat** (19 строк re-export), НЕ дублирование | `application/core/medallion_policy.py` |
+| "Domain использует Pydantic-модели" | Используются **dataclass Value Objects** (`@dataclass(frozen=True)`), не Pydantic | `domain/config.py:25,66,94,176` |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 

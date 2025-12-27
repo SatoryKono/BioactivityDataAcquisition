@@ -645,7 +645,7 @@ def test_adapters_implement_protocols(src_dir: Path):
 
     # Import Adapters (Lazy import to avoid import errors if deps are missing)
     try:
-        from bioetl.composition.factories.storage_factory import StorageAdapter
+        from bioetl.composition.factories.storage import StorageAdapter
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter

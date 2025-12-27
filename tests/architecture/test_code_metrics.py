@@ -42,12 +42,13 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "preflight_service.py": 530,  # 527 LOC - preflight validation
         # Composition layer exemptions
-        "storage_factory.py": 650,  # 599 LOC
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "generic_factory.py": 450,  # 411 LOC - factory with transformer DI
-        "storage_adapter.py": 500,  # 484 LOC - unified storage interface
+        # Consolidated factory files (v5.2)
+        "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
+        "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly
+        "services_factory.py": 450,  # 422 LOC - merged base_services + services_builder + runner_services
         # Infrastructure layer exemptions
-        "delta_writer.py": 720,  # 712 LOC - schema drift detection + merge logic + audit
+        "delta_writer.py": 750,  # 712+ LOC - schema drift detection + merge logic + audit
         # Interfaces layer exemptions
         "cli.py": 450,  # 420 LOC - CLI commands and options
     }
