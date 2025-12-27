@@ -205,6 +205,25 @@ class LockManager:
         await self.start_heartbeat()
         return self
 
+    async def validate(self) -> bool:
+        """Validate that this LockManager still holds the lock.
+
+        This is the Safety Guard: before critical operations (e.g., writes),
+        call this method to verify lock ownership. This prevents split-brain
+        scenarios where the lock expired but the writer continued.
+
+        Returns:
+            True if this run_id still holds the lock, False otherwise.
+
+        Example:
+            async with lock_manager:
+                # Before writing to storage:
+                if not await lock_manager.validate():
+                    raise LockLostError(lock_key, run_id)
+                await storage.write_silver(...)
+        """
+        return await self._lock.validate_owner(self._lock_key, self._run_id)
+
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,

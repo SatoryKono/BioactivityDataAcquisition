@@ -119,3 +119,125 @@ class TestMaintenanceConfig:
 
         assert yaml_config.maintenance.auto_vacuum is True
         assert yaml_config.maintenance.vacuum_retention_days == 14
+
+
+@pytest.mark.unit
+class TestMedallionFormatValidation:
+    """Tests for Medallion Architecture format constraints (RULES.md §2.1)."""
+
+    def test_silver_parquet_format_rejected(self):
+        """Test that Parquet format is rejected for Silver layer."""
+        from pydantic import ValidationError
+
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "silver": {"format": "parquet"},
+            },
+        }
+
+        with pytest.raises(ValidationError, match="Silver layer MUST use 'delta'"):
+            PipelineYamlConfig.model_validate(config_dict)
+
+    def test_gold_parquet_format_rejected(self):
+        """Test that Parquet format is rejected for Gold layer."""
+        from pydantic import ValidationError
+
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "gold": {"format": "parquet"},
+            },
+        }
+
+        with pytest.raises(ValidationError, match="Gold layer MUST use 'delta'"):
+            PipelineYamlConfig.model_validate(config_dict)
+
+    def test_silver_delta_format_accepted(self):
+        """Test that Delta format is accepted for Silver layer."""
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "silver": {"format": "delta"},
+            },
+        }
+
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+        assert yaml_config.sink["silver"].format == "delta"
+
+    def test_gold_delta_format_accepted(self):
+        """Test that Delta format is accepted for Gold layer."""
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "gold": {"format": "delta"},
+            },
+        }
+
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+        assert yaml_config.sink["gold"].format == "delta"
+
+    def test_bronze_jsonl_format_accepted(self):
+        """Test that JSONL format is accepted for Bronze layer."""
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "bronze": {"format": "jsonl"},
+            },
+        }
+
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+        assert yaml_config.sink["bronze"].format == "jsonl"
+
+    def test_bronze_delta_format_accepted(self):
+        """Test that Delta format is also accepted for Bronze layer."""
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "bronze": {"format": "delta"},
+            },
+        }
+
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+        assert yaml_config.sink["bronze"].format == "delta"
+
+    def test_bronze_parquet_format_allowed(self):
+        """Test that Parquet format IS allowed for Bronze layer (legacy support)."""
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "bronze": {"format": "parquet"},
+            },
+        }
+
+        # Bronze allows parquet for backward compatibility
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+        assert yaml_config.sink["bronze"].format == "parquet"
