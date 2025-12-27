@@ -79,6 +79,26 @@ class LockPort(Protocol):
         """
         ...
 
+    async def validate_owner(
+        self,
+        key: str,
+        owner_id: RunID,
+    ) -> bool:
+        """Validate that the given owner_id holds the lock.
+
+        This is the Safety Guard: before writing to storage, the writer
+        MUST validate that it still holds the lock. This prevents split-brain
+        scenarios where the lock expired but the writer continued.
+
+        Args:
+            key: The unique key for the lock.
+            owner_id: The ID of the run to validate.
+
+        Returns:
+            True if owner_id currently holds the lock, False otherwise.
+        """
+        ...
+
     async def aclose(self) -> None:
         """Gracefully close the lock connection and release resources."""
         ...

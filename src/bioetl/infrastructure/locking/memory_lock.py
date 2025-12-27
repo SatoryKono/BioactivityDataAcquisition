@@ -203,6 +203,40 @@ class MemoryLock(LockPort):
 
             return True
 
+    async def validate_owner(
+        self,
+        key: str,
+        owner_id: RunID,
+    ) -> bool:
+        """Validate that the given owner_id holds the lock.
+
+        This is the Safety Guard: before writing to storage, the writer
+        MUST validate that it still holds the lock.
+
+        Args:
+            key: Lock key.
+            owner_id: Owner identifier to validate.
+
+        Returns:
+            True if owner_id currently holds the lock, False otherwise.
+        """
+        async with self._global_lock:
+            if key not in self._locks:
+                return False
+
+            existing_owner, lock, expires_at, _ = self._locks[key]
+
+            # Check if lock is still held
+            if not lock.locked():
+                return False
+
+            # Check if lock has expired
+            if expires_at is not None and time.monotonic() > expires_at:
+                return False
+
+            # Check owner matches
+            return existing_owner == str(owner_id)
+
     async def aclose(self) -> None:
         """Close all locks and stop background tasks."""
         self._closed = True
