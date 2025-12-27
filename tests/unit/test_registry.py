@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.composition.registry import get_default_registry
 
 
@@ -75,7 +75,7 @@ def test_registry_contains_expected_pipelines():
 
 def test_register_all_pipelines_is_idempotent():
     """Test that calling register_all_pipelines multiple times is safe."""
-    from bioetl.composition.factories.pipeline_factories import is_registered
+    from bioetl.composition.factories.registry import is_registered
 
     registry = get_default_registry()
 

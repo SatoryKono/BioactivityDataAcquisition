@@ -9,40 +9,54 @@ Usage:
 
 All pipeline factories are auto-registered when this module is imported.
 
-New in v5.1: Client, Storage, and DataSource factories consolidated here from
-infrastructure/factories/ following architectural requirements.
+Consolidated in v5.2:
+- pipeline_factory.py: GenericPipelineFactory, runner assembly functions
+- services_factory.py: BaseServicesFactory, ServicesBuilder, RunnerServices
+- adapters_factory.py: HttpClientFactory, DataSourceFactory, DataSourceRegistry
+- registry.py: Pipeline factory instances, transformer registry
+- storage_factory.py: StorageFactory, StorageContext
+- storage_adapter.py: StorageAdapter
 """
 
-# Core factory infrastructure
-from bioetl.composition.factories.data_source_registry import (
+# Adapters factory (HTTP clients, data sources)
+from bioetl.composition.factories.adapters_factory import (
     DataSourceCreator,
+    DataSourceFactory,
     DataSourceRegistry,
+    HttpClientFactory,
 )
 
-# Data source factory
-from bioetl.composition.factories.data_sources import DataSourceFactory
-from bioetl.composition.factories.generic_factory import (
+# Pipeline factory (GenericPipelineFactory, runner assembly)
+from bioetl.composition.factories.pipeline_factory import (
     GenericPipelineFactory,
+    assemble_runner,
+    build_pipeline_services,
     create_pipeline_factory,
 )
 
-# Import to trigger pipeline registration
-from bioetl.composition.factories.pipeline_factories import (
+# Registry (pipeline factories, transformer registry)
+from bioetl.composition.factories.registry import (
     chembl_activity_factory,
+    chembl_assay_factory,
+    chembl_document_factory,
+    chembl_molecule_factory,
+    chembl_target_component_factory,
+    chembl_target_factory,
+    create_transformer,
+    get_transformer_class,
     pubchem_compound_factory,
     pubmed_publications_factory,
+    register_all_pipelines,
+    register_all_transformers,
+    register_transformer,
     uniprot_protein_factory,
 )
 
-# Runner assembly functions (extracted from GenericPipelineFactory)
-from bioetl.composition.factories.runner_assembly import (
-    assemble_runner,
-    build_pipeline_services,
-)
-
-# Runner services factory (DI for PipelineRunner)
-from bioetl.composition.factories.runner_services import (
+# Services factory (BaseServicesFactory, ServicesBuilder, RunnerServices)
+from bioetl.composition.factories.services_factory import (
+    BaseServicesFactory,
     RunnerServices,
+    ServicesBuilder,
     build_runner_services,
 )
 
@@ -53,20 +67,15 @@ from bioetl.composition.factories.storage_factory import (
     StorageFactory,
 )
 
-# Transformer factory (DI for transformers)
-from bioetl.composition.factories.transformer_factory import (
-    create_transformer,
-    get_transformer_class,
-    register_all_transformers,
-    register_transformer,
-)
-
 __all__ = [
+    "BaseServicesFactory",
     "DataSourceCreator",
     "DataSourceFactory",
     "DataSourceRegistry",
     "GenericPipelineFactory",
+    "HttpClientFactory",
     "RunnerServices",
+    "ServicesBuilder",
     "StorageAdapter",
     "StorageContext",
     "StorageFactory",
@@ -74,11 +83,17 @@ __all__ = [
     "build_pipeline_services",
     "build_runner_services",
     "chembl_activity_factory",
+    "chembl_assay_factory",
+    "chembl_document_factory",
+    "chembl_molecule_factory",
+    "chembl_target_component_factory",
+    "chembl_target_factory",
     "create_pipeline_factory",
     "create_transformer",
     "get_transformer_class",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
+    "register_all_pipelines",
     "register_all_transformers",
     "register_transformer",
     "uniprot_protein_factory",

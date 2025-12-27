@@ -249,8 +249,8 @@ class TestBootstrapPipeline:
 class TestChemblActivityFactory:
     """Tests for chembl_activity_factory (GenericPipelineFactory instance)."""
 
-    @patch("bioetl.composition.factories.runner_assembly.BaseServicesFactory")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -261,7 +261,7 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test build_services creates data source through DataSourceRegistry."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             chembl_activity_factory,
         )
 
@@ -280,8 +280,8 @@ class TestChemblActivityFactory:
         assert services is not None
         chembl_activity_factory._create_data_source.assert_called_once()
 
-    @patch("bioetl.composition.factories.runner_assembly.BaseServicesFactory")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -292,7 +292,7 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test build_services uses BaseServicesFactory."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             chembl_activity_factory,
         )
 
@@ -310,8 +310,8 @@ class TestChemblActivityFactory:
 
         mock_base_services.create_common_services.assert_called_once()
 
-    @patch("bioetl.composition.factories.runner_assembly.BaseServicesFactory")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -322,7 +322,7 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test build_services uses provided config."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             chembl_activity_factory,
         )
 
@@ -341,9 +341,9 @@ class TestChemblActivityFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.composition.factories.runner_assembly.yaml_config_to_domain")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.runner_assembly.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pipeline_factory.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
     def test_create_with_services(
         self,
         mock_base_services,
@@ -355,7 +355,7 @@ class TestChemblActivityFactory:
         mock_pipeline_config,
     ):
         """Test create_with_services creates pipeline with run_id."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             chembl_activity_factory,
         )
         from bioetl.domain.config import RuntimeConfig

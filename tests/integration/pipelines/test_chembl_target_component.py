@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 import structlog
 
-from bioetl.composition.factories.pipeline_factories import chembl_target_component_factory
+from bioetl.composition.factories.registry import chembl_target_component_factory
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 logger = structlog.get_logger()

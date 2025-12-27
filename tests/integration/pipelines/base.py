@@ -11,7 +11,7 @@ import pytest
 import structlog
 
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 
 # Import factories to ensure they are registered/available
 from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext

@@ -1,13 +1,10 @@
-# src/bioetl/composition/factories/pipeline_factories.py
-"""Consolidated pipeline factory definitions.
+"""Registry - unified registry for pipeline factories and transformers.
 
-This module creates all pipeline factories using the GenericPipelineFactory
-pattern. Registration is explicit via register_all_pipelines().
-
-Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.
-
-Updated: Transformer injection via DI (Phase 1 refactoring).
-All factories now include transformer_class for proper DI.
+Consolidated from pipeline_factories.py and transformer_factory.py.
+Provides:
+- Pipeline factory instances (chembl_activity_factory, etc.)
+- Transformer registry and factory functions
+- Registration functions for pipelines and transformers
 
 Instance-level registry support (2025-12):
 - register_all_pipelines() accepts optional registry parameter
@@ -15,13 +12,17 @@ Instance-level registry support (2025-12):
 - Tests can use isolated registries for parallel execution
 
 Usage:
-    >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+    >>> from bioetl.composition.factories.registry import register_all_pipelines
     >>> register_all_pipelines()  # Call once at application startup
 
     # For test isolation:
     >>> from bioetl.composition.registry import create_registry
     >>> registry = create_registry()
     >>> register_all_pipelines(registry=registry)
+
+    # Transformer usage:
+    >>> from bioetl.composition.factories.registry import create_transformer
+    >>> transformer = create_transformer("chembl", "activity")
 """
 
 from __future__ import annotations
@@ -51,7 +52,7 @@ from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsP
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
@@ -77,7 +78,119 @@ from bioetl.infrastructure.schemas.silver import (
 )
 
 if TYPE_CHECKING:
-    pass
+    from bioetl.domain.ports import MetricsPort, TracingPort
+
+from bioetl.application.core.base_transformer import BaseTransformer
+
+# =============================================================================
+# Transformer Registry (from transformer_factory.py)
+# =============================================================================
+
+# Mapping of (provider, entity_type) to transformer class
+_TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
+
+
+def register_transformer(
+    provider: str,
+    entity_type: str,
+    transformer_class: type[BaseTransformer],
+) -> None:
+    """Register a transformer class for a provider/entity combination.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+        entity_type: Entity type (e.g., 'activity', 'compound').
+        transformer_class: The transformer class to register.
+
+    """
+    _TRANSFORMER_REGISTRY[(provider, entity_type)] = transformer_class
+
+
+def create_transformer(
+    provider: str,
+    entity_type: str,
+    tracer: TracingPort | None = None,
+    metrics: MetricsPort | None = None,
+) -> BaseTransformer:
+    """Create a transformer instance for the given provider and entity type.
+
+    This is the main factory function for creating transformers via DI.
+    Uses the transformer registry to find the appropriate class.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+        entity_type: Entity type (e.g., 'activity', 'compound').
+        tracer: Optional tracing port for distributed tracing (O1 observability).
+        metrics: Optional metrics port for duration/error tracking (O1 observability).
+
+    Returns:
+        Configured transformer instance with observability.
+
+    Raises:
+        KeyError: If no transformer is registered for the provider/entity combination.
+
+    Example:
+        >>> transformer = create_transformer("chembl", "activity")
+        >>> isinstance(transformer, ActivityTransformer)
+        True
+
+    """
+    key = (provider, entity_type)
+    if key not in _TRANSFORMER_REGISTRY:
+        raise KeyError(
+            f"No transformer registered for provider='{provider}', "
+            f"entity_type='{entity_type}'. "
+            f"Available: {list(_TRANSFORMER_REGISTRY.keys())}"
+        )
+
+    transformer_class = _TRANSFORMER_REGISTRY[key]
+    return transformer_class(provider=provider, tracer=tracer, metrics=metrics)
+
+
+def get_transformer_class(
+    provider: str,
+    entity_type: str,
+) -> type[BaseTransformer] | None:
+    """Get transformer class without instantiating.
+
+    Args:
+        provider: Provider name.
+        entity_type: Entity type.
+
+    Returns:
+        Transformer class if registered, None otherwise.
+
+    """
+    return _TRANSFORMER_REGISTRY.get((provider, entity_type))
+
+
+def register_all_transformers() -> None:
+    """Register all known transformers.
+
+    Called during application startup to populate the registry.
+    Idempotent - safe to call multiple times.
+    """
+    # ChEMBL transformers
+    register_transformer("chembl", "activity", ActivityTransformer)
+    register_transformer("chembl", "assay", AssayTransformer)
+    register_transformer("chembl", "document", DocumentTransformer)
+    register_transformer("chembl", "molecule", MoleculeTransformer)
+    register_transformer("chembl", "target", TargetTransformer)
+    register_transformer("chembl", "target_component", TargetComponentTransformer)
+
+    # PubChem transformers
+    register_transformer("pubchem", "compound", PubChemCompoundTransformer)
+
+    # UniProt transformers
+    register_transformer("uniprot", "protein", UniProtProteinTransformer)
+
+    # PubMed transformers
+    register_transformer("pubmed", "publications", PubMedPublicationTransformer)
+
+
+# =============================================================================
+# Pipeline Factory Instances (from pipeline_factories.py)
+# =============================================================================
 
 # Thread-safe registration state
 _registration_lock = threading.Lock()
@@ -269,10 +382,14 @@ __all__ = [
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
+    "create_transformer",
+    "get_transformer_class",
     "is_registered",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
     "register_all_pipelines",
+    "register_all_transformers",
+    "register_transformer",
     "reset_registration",
     "uniprot_protein_factory",
 ]

@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
 
 

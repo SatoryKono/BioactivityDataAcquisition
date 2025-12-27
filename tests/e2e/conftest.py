@@ -31,7 +31,7 @@ def e2e_environment():
     os.environ["BIOETL_TEST_MODE"] = "true"
 
     # Register all pipelines (required for bootstrap_pipeline to work)
-    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+    from bioetl.composition.factories.registry import register_all_pipelines
 
     register_all_pipelines()
 

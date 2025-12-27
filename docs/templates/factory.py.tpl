@@ -3,7 +3,7 @@ Template for adding a pipeline factory in v5.1.
 Location: src/bioetl/composition/factories/pipeline_factories.py
 """
 from bioetl.application.pipelines.{{provider}}.{{entity}} import {{Provider}}{{Entity}}Pipeline
-from bioetl.composition.factories.generic_factory import GenericPipelineFactory
+from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.infrastructure.schemas.silver import {{PROVIDER}}_{{ENTITY}}_SCHEMA
 from bioetl.infrastructure.schemas.gold import {{Provider}}{{Entity}}GoldSchema
 

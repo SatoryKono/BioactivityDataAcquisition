@@ -22,7 +22,7 @@ from bioetl.composition.entrypoints import (
     get_quarantine_manager,
     preview_cleanup,
 )
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.composition.registry import get_default_registry
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 

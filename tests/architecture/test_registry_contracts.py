@@ -35,7 +35,7 @@ class TestRegistryProtocol:
 
     def test_datasource_registry_has_required_methods(self) -> None:
         """DataSourceRegistry must have get, register, list_providers methods."""
-        from bioetl.composition.factories.data_source_registry import (
+        from bioetl.composition.factories.adapters_factory import (
             DataSourceRegistry,
         )
 
@@ -83,7 +83,7 @@ class TestRegistryRaiseOnMissingKey:
 
     def test_datasource_registry_raises_on_missing(self) -> None:
         """DataSourceRegistry raises KeyError for unknown provider."""
-        from bioetl.composition.factories.data_source_registry import (
+        from bioetl.composition.factories.adapters_factory import (
             DataSourceRegistry,
         )
 
@@ -148,7 +148,7 @@ class TestRegistryInstanceVariables:
 
     def test_datasource_registry_uses_classvar(self) -> None:
         """DataSourceRegistry._creators must be ClassVar."""
-        from bioetl.composition.factories.data_source_registry import (
+        from bioetl.composition.factories.adapters_factory import (
             DataSourceRegistry,
         )
 
@@ -192,7 +192,7 @@ class TestRegistryReturnTypes:
 
     def test_datasource_registry_list_returns_list(self) -> None:
         """DataSourceRegistry.list_providers must return list[str]."""
-        from bioetl.composition.factories.data_source_registry import (
+        from bioetl.composition.factories.adapters_factory import (
             DataSourceRegistry,
         )
 
@@ -224,7 +224,7 @@ class TestRegistryConsistency:
 
     def test_datasource_includes_provider_registry_providers(self) -> None:
         """DataSourceRegistry.list_providers includes ProviderRegistry entries."""
-        from bioetl.composition.factories.data_source_registry import (
+        from bioetl.composition.factories.adapters_factory import (
             DataSourceRegistry,
         )
         from bioetl.composition.providers import ensure_providers_loaded

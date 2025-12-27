@@ -87,7 +87,7 @@ class TestPubChemCompoundFactory:
         mock_services,
     ):
         """Test build_services creates data source via DataSourceRegistry."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             pubchem_compound_factory,
         )
 
@@ -119,7 +119,7 @@ class TestPubChemCompoundFactory:
         mock_services,
     ):
         """Test build_services uses BaseServicesFactory."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             pubchem_compound_factory,
         )
 
@@ -149,7 +149,7 @@ class TestPubChemCompoundFactory:
         mock_services,
     ):
         """Test build_services uses provided configuration."""
-        from bioetl.composition.factories.pipeline_factories import (
+        from bioetl.composition.factories.registry import (
             pubchem_compound_factory,
         )
 

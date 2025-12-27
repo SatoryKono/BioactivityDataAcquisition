@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli
 
 if TYPE_CHECKING:

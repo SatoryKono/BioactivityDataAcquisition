@@ -49,8 +49,10 @@ def _get_factories() -> tuple[type, type]:
     Returns:
         Tuple of (DataSourceFactory, HttpClientFactory)
     """
-    from bioetl.composition.factories.data_sources import DataSourceFactory
-    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+    from bioetl.composition.factories.adapters_factory import (
+        DataSourceFactory,
+        HttpClientFactory,
+    )
 
     return DataSourceFactory, HttpClientFactory
 

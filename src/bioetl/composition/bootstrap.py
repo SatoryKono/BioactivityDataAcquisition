@@ -35,7 +35,7 @@ from bioetl.composition._bootstrap import (
     bootstrap_tracer,
 )
 from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.domain.config import RuntimeConfig

@@ -21,7 +21,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_quarantine_manager,
     load_pipeline_config,
 )
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunID, RunType

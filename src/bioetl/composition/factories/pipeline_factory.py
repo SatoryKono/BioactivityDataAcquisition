@@ -1,23 +1,25 @@
-"""Runner assembly module for pipeline factories.
+"""Pipeline Factory - unified factory for creating pipeline instances.
 
-Provides functions for building PipelineRunner and its services.
-Extracted from GenericPipelineFactory to reduce file size and improve cohesion.
+Consolidated from generic_factory.py and runner_assembly.py.
+Provides:
+- GenericPipelineFactory: Configurable factory for pipelines
+- create_pipeline_factory: Convenience function
+- assemble_runner: Builds PipelineRunner from pipeline instance
+- build_pipeline_services: Creates PipelineServices from settings
+- create_pipeline_with_services: Creates pipeline with services
 
-This module handles the "assembly" phase of pipeline creation:
-- Building PipelineServices from settings
-- Creating fully configured PipelineRunner instances
+Usage:
+    >>> from bioetl.composition.factories import GenericPipelineFactory
+    >>> factory = GenericPipelineFactory(...)
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
-from bioetl.composition.factories.base_services_factory import BaseServicesFactory
-from bioetl.composition.factories.runner_services import build_runner_services
-from bioetl.composition.factories.services_builder import ServicesBuilder
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
 if TYPE_CHECKING:
@@ -27,7 +29,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.composition.factories.data_source_registry import DataSourceCreator
+    from bioetl.composition.factories.adapters_factory import DataSourceCreator
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filter_config import InputFilterConfig
@@ -42,6 +44,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
     TPipeline = type["BasePipeline"]
+
+TPipelineVar = TypeVar("TPipelineVar", bound="BasePipeline")
+
+
+# =============================================================================
+# Helper Functions (from runner_assembly.py)
+# =============================================================================
 
 
 def create_data_source(
@@ -91,6 +100,9 @@ def build_pipeline_services(
     Returns:
         Configured PipelineServices instance
     """
+    # Import here to avoid circular imports
+    from bioetl.composition.factories.services_factory import BaseServicesFactory
+
     pipeline_config = config or load_pipeline_config(pipeline_name)
     data_source = create_data_source(
         create_data_source_fn, settings, pipeline_config, logger, filter_config
@@ -201,6 +213,12 @@ def assemble_runner(
     Returns:
         Fully initialized PipelineRunner
     """
+    # Import here to avoid circular imports
+    from bioetl.composition.factories.services_factory import (
+        ServicesBuilder,
+        build_runner_services,
+    )
+
     # Create Helper Components using ServicesBuilder
     checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
         checkpoint_port=pipeline.services.checkpoint,
@@ -261,3 +279,199 @@ def assemble_runner(
         pipeline=pipeline,
         tracer=observability.tracer,
     )
+
+
+# =============================================================================
+# GenericPipelineFactory (from generic_factory.py)
+# =============================================================================
+
+
+class GenericPipelineFactory(Generic[TPipelineVar]):
+    """Configurable factory for creating pipelines via constructor parameters.
+
+    Attributes:
+        pipeline_name: Unique name for the pipeline
+        pipeline_class: The pipeline class to instantiate
+        silver_schema: PyArrow schema for Silver layer
+        gold_schema: Pandera schema for Gold layer
+    """
+
+    def __init__(
+        self,
+        pipeline_name: str,
+        pipeline_class: type[TPipelineVar],
+        provider: str,
+        silver_schema: pa.Schema | None = None,
+        gold_schema: Any = None,
+        data_source_creator: DataSourceCreator | None = None,
+        transformer_class: type[BaseTransformer] | None = None,
+    ) -> None:
+        """Initialize the factory.
+
+        Raises:
+            ValueError: If gold_schema is not provided
+        """
+        if gold_schema is None:
+            raise ValueError(
+                f"gold_schema is required for pipeline '{pipeline_name}'. "
+                "All Gold layer writes must have schema validation."
+            )
+        self.pipeline_name = pipeline_name
+        self.pipeline_class = pipeline_class
+        self.provider = provider
+        self.silver_schema = silver_schema
+        self.gold_schema = gold_schema
+        self.transformer_class = transformer_class
+
+        # Use custom creator or look up from registry
+        if data_source_creator is not None:
+            self._create_data_source = data_source_creator
+        else:
+            # Import here to avoid circular imports
+            from bioetl.composition.factories.adapters_factory import DataSourceRegistry
+
+            self._create_data_source = DataSourceRegistry.get(provider)
+
+    def create_transformer(
+        self,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+    ) -> BaseTransformer | None:
+        """Create transformer instance if transformer_class is configured."""
+        if self.transformer_class is None:
+            return None
+        return self.transformer_class(
+            provider=self.provider,
+            tracer=tracer,
+            metrics=metrics,
+        )
+
+    def create_data_source(
+        self,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: structlog.BoundLogger,
+        filter_config: InputFilterConfig | None = None,
+    ) -> DataSourcePort:
+        """Create data source using the configured creator."""
+        return self._create_data_source(
+            settings, pipeline_config, logger, filter_config
+        )
+
+    def build_services(
+        self,
+        settings: Settings,
+        logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
+    ) -> PipelineServices:
+        """Build PipelineServices from settings."""
+        return build_pipeline_services(
+            pipeline_name=self.pipeline_name,
+            create_data_source_fn=self._create_data_source,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+        )
+
+    def create_with_services(
+        self,
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
+        metrics: MetricsPort | None = None,
+    ) -> TPipelineVar:
+        """Create pipeline instance with services and optional transformer."""
+        return cast(
+            TPipelineVar,
+            create_pipeline_with_services(
+                pipeline_name=self.pipeline_name,
+                pipeline_class=self.pipeline_class,
+                provider=self.provider,
+                create_data_source_fn=self._create_data_source,
+                transformer_class=self.transformer_class,
+                run_id=run_id,
+                runtime=runtime,
+                settings=settings,
+                logger=logger,
+                config=config,
+                filter_config=filter_config,
+                tracer=tracer,
+                dq_monitor=dq_monitor,
+                metrics=metrics,
+            ),
+        )
+
+    def create_runner(
+        self,
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        observability: ObservabilityBundle,
+        filter_config: InputFilterConfig | None = None,
+        config: PipelineYamlConfig | None = None,
+    ) -> PipelineRunner:
+        """Create a fully configured PipelineRunner with all components."""
+        # Load config once if not provided
+        yaml_config = config or load_pipeline_config(self.pipeline_name)
+
+        # Create pipeline instance with services, tracer, metrics, and dq_monitor (O1)
+        pipeline = self.create_with_services(
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=observability.logger,
+            config=yaml_config,
+            filter_config=filter_config,
+            tracer=observability.tracer,
+            dq_monitor=observability.dq_monitor,
+            metrics=observability.metrics,
+        )
+
+        # Delegate runner assembly to dedicated module
+        return assemble_runner(
+            pipeline=pipeline,
+            observability=observability,
+            silver_schema=self.silver_schema,
+            gold_schema=self.gold_schema,
+            strict_gold_validation=runtime.strict_gold_validation,
+        )
+
+
+def create_pipeline_factory(
+    pipeline_name: str,
+    pipeline_class: type[TPipelineVar],
+    provider: str,
+    silver_schema: pa.Schema | None = None,
+    gold_schema: Any = None,
+    transformer_class: type[BaseTransformer] | None = None,
+) -> GenericPipelineFactory[TPipelineVar]:
+    """Convenience function for creating pipeline factories."""
+    return GenericPipelineFactory(
+        pipeline_name=pipeline_name,
+        pipeline_class=pipeline_class,
+        provider=provider,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        transformer_class=transformer_class,
+    )
+
+
+__all__ = [
+    "GenericPipelineFactory",
+    "assemble_runner",
+    "build_pipeline_services",
+    "create_data_source",
+    "create_pipeline_factory",
+    "create_pipeline_with_services",
+]

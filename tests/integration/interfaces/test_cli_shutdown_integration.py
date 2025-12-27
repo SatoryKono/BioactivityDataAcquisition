@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
