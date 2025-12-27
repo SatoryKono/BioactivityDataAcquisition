@@ -1,7 +1,7 @@
 # Консолидированный Анализ Архитектурных Аудитов BioETL
 
-*Версия: 2.0 | Дата: 2025-12-27 | Метод: Двойная Верификация (REQ-ARCH-040)*
-*Обновлено: Верификация против main branch (commit 3cb1a00)*
+*Версия: 3.0 | Дата: 2025-12-27 | Метод: Двойная Верификация (REQ-ARCH-040)*
+*Обновлено: Верификация против main branch (commit ce8161a)*
 
 ---
 
@@ -14,177 +14,94 @@
 | 3 | `docs/architecture-audit-bioetl.md` | 6.27 | Тесты, fencing token, VACUUM |
 | 4 | `docs/07-architecture-audit-bioetl.md` | 6.31 | Silver DQ, Medallion |
 
-**Общий диапазон оценок:** 6.08 — 6.32 (консенсус: ~6.25)
+**Исходный диапазон оценок:** 6.08 — 6.32
 
 ---
 
 ## 2. Верифицированные Метрики Кодовой Базы (main branch)
 
-> Проверено против main branch 2025-12-27 (commit 3cb1a00)
+> Проверено против main branch 2025-12-27 (commit ce8161a)
 
-| Метрика | Значение | Источник |
-|---------|----------|----------|
-| Python файлов | **216** | `find src/ -name "*.py" \| wc -l` |
-| Классов | **306** | `grep -r "^class " src/ --include="*.py" \| wc -l` |
-| Средний размер модуля | **~147 строк** | 31758 / 216 |
-| mypy ошибок (--strict) | **1** | `MetricsPort.gauge` в health_monitor.py:203 |
-| print() в коде | **13** | `grep -r "print(" src/bioetl \| wc -l` |
-| Циклические импорты | **0** | `from bioetl.domain import *` — pass |
-| TODO/FIXME | **1** | `grep -rE "(TODO\|FIXME)" src/` |
-
----
-
-## 3. Анализ Утверждений: Верифицированные vs Ложные
-
-### 3.1 Подтверждённые Проблемы (актуальные на main)
-
-| Проблема | Статус | Файл:строка |
-|----------|--------|-------------|
-| **MetricsPort vs HealthMonitor** | ❌ НЕ ИСПРАВЛЕНО | `health_monitor.py:203` вызывает `metrics.gauge()` вместо `set_gauge()` |
-| **CircuitBreaker без эмиссии метрик** | ❌ НЕ ИСПРАВЛЕНО | `circuit_breaker.py:46-48` обещает метрики, но не эмитирует |
-| **13 print() в коде** | ❌ НЕ ИСПРАВЛЕНО | 8 файлов в src/bioetl |
-
-### 3.2 Исправленные Проблемы (в main)
-
-| Проблема | Статус | Коммит |
-|----------|--------|--------|
-| **require_lock=False по умолчанию** | ✅ ИСПРАВЛЕНО | `ec13bba` — теперь `require_lock=True` |
-
-### 3.3 Ложные/Неточные Утверждения (по-прежнему актуально)
-
-| Ложное утверждение | Реальность | Доказательство |
-|-------------------|------------|----------------|
-| "pytest падает из-за отсутствия orjson" | orjson **есть** в dev-зависимостях | `pyproject.toml:63` |
-| "asyncio_mode не распознан/не настроен" | `asyncio_mode = "auto"` **настроен** | `pyproject.toml:120` |
-| "MemoryLock без safety guard" | `validate_owner()` **существует** | `memory_lock.py:206-238` |
-| "MemoryLock без heartbeat" | `heartbeat()` **реализован** | `memory_lock.py:176-204` |
-| "NoOpGoldValidator — баг" | **By design** для пайплайнов без Gold | `pandera_validator.py:76-93` |
+| Метрика | Значение | Изменение | Источник |
+|---------|----------|-----------|----------|
+| Python файлов | **216** | — | `find src/ -name "*.py"` |
+| Классов | **306** | — | `grep -r "^class " src/` |
+| mypy ошибок (--strict) | **0** | ✅ -1 | `mypy src/bioetl --strict` |
+| print() в коде | **0** | ✅ -13 | `grep -r "print(" src/bioetl` |
+| Циклические импорты | **0** | — | `from bioetl.domain import *` |
+| TODO/FIXME | **1** | — | `grep -rE "(TODO\|FIXME)" src/` |
 
 ---
 
-## 4. Консолидированные Оценки по Категориям (обновлено)
+## 3. Статус Исправлений
 
-| # | Категория | Вес | Оценка | Изменение | Обоснование |
-|---|-----------|-----|--------|-----------|-------------|
-| 1 | Слоистая архитектура | 15% | **9** | — | Нарушений импортов не найдено |
-| 2 | Контракты и Ports | 12% | **6** | — | Реальный баг: MetricsPort.gauge |
-| 3 | Medallion Architecture | 12% | **7** | — | Bronze/Silver/Gold работают; VACUUM ручной |
-| 4 | Ошибки и Circuit Breaker | 10% | **6** | — | CB без метрик (не эмитирует в порт) |
-| 5 | Блокировки | 10% | **8** | +2 ⬆️ | `require_lock=True` по умолчанию (ИСПРАВЛЕНО) |
-| 6 | Валидация и DQ | 10% | **6** | — | Gold с Pandera, Silver с PyArrow |
-| 7 | Логирование | 8% | **6** | — | 13 print(), MetricsPort расхождение |
-| 8 | Тестирование | 8% | **7** | — | Тесты работают; 80%+ coverage |
-| 9 | Безопасность | 8% | **7** | — | Секреты через env/SecretStr |
-| 10 | Документация | 7% | **7** | — | RULES/ADR актуальны |
+### 3.1 Выполненные Задачи ✅
 
-**Консолидированный балл: 6.8 / 10** (+0.2 после исправления P2.1)
+| Задача | Коммит | Описание |
+|--------|--------|----------|
+| **P2.1** | `ec13bba` | `require_lock=True` по умолчанию во всех writer-ах |
+| **P1.1** | `f36d69c` | `metrics.gauge()` → `metrics.set_gauge()` в HealthMonitor |
+| **P1.2** | `16731c7` | CircuitBreaker теперь эмитирует метрики через MetricsPort |
+| **P3.1** | `0375e70` | Удалены все 13 print(), добавлено правило T201 в ruff |
 
----
+### 3.2 Верификация Исправлений
 
-## 5. Консолидированный План Рефакторинга (обновлено)
-
-### Приоритет P1: Критические (mypy, контракты)
-
-#### P1.1 Исправить MetricsPort vs HealthMonitor ❌ НЕ ВЫПОЛНЕНО
-
-**Проблема:** `HealthMonitor.py:203` вызывает `metrics.gauge()`, но `MetricsPort` определяет только `set_gauge()`.
-
-**Верификация (main branch 2025-12-27):**
+**P1.1 — MetricsPort.set_gauge():**
 ```bash
-$ mypy src/bioetl --strict 2>&1 | grep error
-src/bioetl/infrastructure/adapters/http/health_monitor.py:203: error: "MetricsPort" has no attribute "gauge"
+$ git show origin/main:src/bioetl/infrastructure/adapters/http/health_monitor.py | grep "metrics\."
+        self.metrics.set_gauge(   # ✅ Исправлено
 ```
 
-**Решение:** Заменить `metrics.gauge()` на `metrics.set_gauge()` в `health_monitor.py:203`.
-
-**Файлы:**
-- `src/bioetl/infrastructure/adapters/http/health_monitor.py:203`
-
-**Критерий готовности:**
-- `mypy src/bioetl --strict` — 0 ошибок
-
-**Трудозатраты:** S (< 1 час)
-
----
-
-#### P1.2 Добавить эмиссию метрик в CircuitBreaker ❌ НЕ ВЫПОЛНЕНО
-
-**Проблема:** Docstring обещает метрики `circuit_breaker_state` и `circuit_breaker_trips_total` (строки 46-48), но код только хранит внутренние счётчики без эмиссии.
-
-**Верификация (main branch 2025-12-27):**
+**P1.2 — CircuitBreaker метрики:**
 ```python
-# circuit_breaker.py:46-48 (docstring)
-# Metrics emitted:
-#     - circuit_breaker_state{provider}: 0=Closed, 1=Half-Open, 2=Open
-#     - circuit_breaker_trips_total{provider}: Counter of OPEN transitions
+# circuit_breaker.py (main branch)
+metrics: MetricsPort | None = None  # ✅ Добавлено
 
-# Реальность: _state, _trips_total — только внутренние поля (строки 56-59)
-# Нет MetricsPort в конструкторе, нет эмиссии метрик
+def _emit_state_metric(self) -> None:
+    if self.metrics:
+        self.metrics.set_gauge(METRIC_CIRCUIT_BREAKER_STATE, ...)  # ✅
+        self.metrics.increment_counter(METRIC_CIRCUIT_BREAKER_TRIPS, ...)  # ✅
 ```
 
-**Решение:** Добавить `MetricsPort` в конструктор и эмитировать метрики при смене состояния.
-
-**Файлы:**
-- `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`
-
-**Критерий готовности:**
-- Метрики доступны в `/metrics` endpoint
-- Тест проверяет эмиссию при переходе CLOSED→OPEN
-
-**Трудозатраты:** M (1-2 дня)
-
----
-
-### Приоритет P2: Высокий (Lock enforcement)
-
-#### P2.1 Изменить require_lock по умолчанию на True ✅ ВЫПОЛНЕНО
-
-**Статус:** Исправлено в коммите `ec13bba`
-
-**Верификация (main branch 2025-12-27):**
-```bash
-$ git show origin/main:src/bioetl/infrastructure/storage/bronze_writer.py | grep "require_lock"
-        require_lock: bool = True,
-
-$ git show origin/main:src/bioetl/infrastructure/storage/delta_writer.py | grep "require_lock"
-        require_lock: bool = True,
-
-$ git show origin/main:src/bioetl/infrastructure/storage/gold_writer.py | grep "require_lock"
-        require_lock: bool = True,
-```
-
-**Результат:** Все три writer-а теперь требуют блокировку по умолчанию.
-
----
-
-### Приоритет P3: Средний (Cleanup)
-
-#### P3.1 Удалить print() из продакшен кода ❌ НЕ ВЫПОЛНЕНО
-
-**Проблема:** 13 вхождений `print()` нарушают правило единого логгера.
-
-**Верификация (main branch 2025-12-27):**
+**P3.1 — print() удалены:**
 ```bash
 $ grep -r "print(" src/bioetl --include="*.py" | wc -l
-13
+0   # ✅ Все удалены
+
+$ grep "T201" pyproject.toml
+"T201", # flake8-print (no print statements in production code)  # ✅
 ```
 
-**Решение:**
-1. Заменить на `logger.debug()` / `logger.info()` где требуется вывод
-2. Удалить примеры в docstrings или заменить на код без side effects
-3. Добавить ruff правило `T201` (print found)
-
-**Файлы:** 8 файлов в src/bioetl
-
-**Критерий готовности:**
-- `grep -r "print(" src/bioetl --include="*.py" | wc -l` → 0
-- ruff правило блокирует новые print()
-
-**Трудозатраты:** S (0.5 дня)
+**mypy — 0 ошибок:**
+```bash
+$ mypy src/bioetl --strict 2>&1 | grep -c "error:"
+0   # ✅
+```
 
 ---
 
-### Приоритет P4: Желательно (Observability, VACUUM)
+## 4. Обновлённые Оценки по Категориям
+
+| # | Категория | Вес | Было | Стало | Изменение |
+|---|-----------|-----|------|-------|-----------|
+| 1 | Слоистая архитектура | 15% | 9 | **9** | — |
+| 2 | Контракты и Ports | 12% | 6 | **9** | +3 ⬆️ (P1.1) |
+| 3 | Medallion Architecture | 12% | 7 | **7** | — |
+| 4 | Ошибки и Circuit Breaker | 10% | 6 | **8** | +2 ⬆️ (P1.2) |
+| 5 | Блокировки | 10% | 6 | **8** | +2 ⬆️ (P2.1) |
+| 6 | Валидация и DQ | 10% | 6 | **6** | — |
+| 7 | Логирование | 8% | 6 | **8** | +2 ⬆️ (P3.1) |
+| 8 | Тестирование | 8% | 7 | **7** | — |
+| 9 | Безопасность | 8% | 7 | **7** | — |
+| 10 | Документация | 7% | 7 | **7** | — |
+
+**Консолидированный балл: 7.7 / 10** (+1.1 от исходного 6.6)
+
+---
+
+## 5. Оставшиеся Задачи
+
+### Приоритет P4: Желательно
 
 #### P4.1 Автоматизация VACUUM/retention ❌ НЕ ВЫПОЛНЕНО
 
@@ -209,86 +126,66 @@ $ grep -r "print(" src/bioetl --include="*.py" | wc -l
 
 ---
 
-## 6. Roadmap (обновлено)
+## 6. Итоговый Статус
 
 ```
-Статус на 2025-12-27:
-├── P2.1: require_lock=True ✅ ВЫПОЛНЕНО (ec13bba)
-│
-├── P1.1: Исправить MetricsPort ❌ ОЖИДАЕТ (S, < 1 час)
-├── P1.2: CB метрики ❌ ОЖИДАЕТ (M, 1-2 дня)
-├── P3.1: Удалить print() ❌ ОЖИДАЕТ (S, 0.5 дня)
-│
-├── P4.1: VACUUM автоматизация ❌ ОЖИДАЕТ (M, 2-3 дня)
-└── P4.2: Silver DQ ❌ ОЖИДАЕТ (L, 1-2 недели)
+ВЫПОЛНЕНО (4 задачи):
+├── P1.1: MetricsPort.set_gauge() ✅ (f36d69c)
+├── P1.2: CircuitBreaker метрики ✅ (16731c7)
+├── P2.1: require_lock=True ✅ (ec13bba)
+└── P3.1: Удалить print() + T201 ✅ (0375e70)
+
+ОЖИДАЕТ (2 задачи):
+├── P4.1: VACUUM автоматизация (M, 2-3 дня)
+└── P4.2: Silver DQ thresholds (L, 1-2 недели)
 ```
-
-### Рекомендуемый порядок:
-
-```
-Фаза 1 (ближайшая):
-├── P1.1: Исправить MetricsPort (S) → mypy 0 ошибок [БЛОКЕР]
-└── P3.1: Удалить print() (S)
-
-Фаза 2:
-└── P1.2: CB метрики (M)
-
-Фаза 3:
-├── P4.1: VACUUM автоматизация (M)
-└── P4.2: Silver DQ (L)
-```
-
-**Текущий балл:** 6.8 / 10
-**Ожидаемый балл после Фазы 1:** ~7.2
-**Ожидаемый балл после Фазы 2:** ~7.5
-**Ожидаемый балл после Фазы 3:** ~8.0
 
 ---
 
-## 7. Метрики CI Регресса (консолидированные)
+## 7. Метрики CI Регресса
 
-| Метрика | Порог | Команда | Блокирует PR | Статус |
-|---------|-------|---------|--------------|--------|
-| Coverage | ≥80% | `pytest --cov-fail-under=80` | Да | ✅ |
-| mypy errors | 0 | `mypy src/bioetl --strict` | Да | ❌ 1 ошибка |
-| Циклические импорты | 0 | `python -c "from bioetl.domain import *"` | Да | ✅ |
-| Нарушения слоёв | 0 | `lint-imports` | Да | ✅ |
-| print() в коде | 0 | `ruff check --select=T201` | Да | ❌ 13 вхождений |
+| Метрика | Порог | Команда | Статус |
+|---------|-------|---------|--------|
+| Coverage | ≥80% | `pytest --cov-fail-under=80` | ✅ |
+| mypy errors | 0 | `mypy src/bioetl --strict` | ✅ (0 ошибок) |
+| Циклические импорты | 0 | `python -c "from bioetl.domain import *"` | ✅ |
+| Нарушения слоёв | 0 | `lint-imports` | ✅ |
+| print() в коде | 0 | `ruff check --select=T201` | ✅ (0 вхождений) |
 
 ---
 
-## 8. Сводка Изменений
+## 8. Прогресс
 
-### 8.1 Что исправлено с момента первоначального анализа
+| Дата | Событие | Балл |
+|------|---------|------|
+| 2025-12-27 (начало) | Исходный анализ 4 планов | 6.6 |
+| 2025-12-27 | P2.1: require_lock=True | 6.8 |
+| 2025-12-27 | P1.1: MetricsPort.set_gauge() | 7.1 |
+| 2025-12-27 | P1.2: CircuitBreaker метрики | 7.3 |
+| 2025-12-27 | P3.1: Удалить print() | 7.7 |
+| — | P4.1 + P4.2 (ожидается) | ~8.0 |
 
-| Задача | Коммит | Описание |
-|--------|--------|----------|
-| P2.1 | `ec13bba` | `require_lock=True` по умолчанию во всех writer-ах |
+---
 
-### 8.2 Что остаётся исправить
+## 9. Заключение
 
-| Приоритет | Задача | Трудозатраты | Блокер |
-|-----------|--------|--------------|--------|
-| P1.1 | MetricsPort.gauge → set_gauge | S (< 1 час) | mypy --strict |
-| P1.2 | CircuitBreaker метрики | M (1-2 дня) | Docstring contract |
-| P3.1 | Удалить 13 print() | S (0.5 дня) | RULES.md |
-| P4.1 | VACUUM автоматизация | M (2-3 дня) | — |
-| P4.2 | Silver DQ thresholds | L (1-2 недели) | — |
+### Что было исправлено
 
-### 8.3 Рекомендация
+1. **mypy --strict теперь проходит без ошибок** — P1.1 исправлен
+2. **CircuitBreaker эмитирует метрики** — контракт docstring выполняется
+3. **Writers требуют lock по умолчанию** — безопасность записи усилена
+4. **Нет print() в продакшен коде** — единый логгер, ruff блокирует новые
 
-**Немедленно исправить P1.1** — это единственный mypy блокер, исправление занимает < 1 часа:
+### Что остаётся
 
-```python
-# health_monitor.py:203
-# Было:
-self.metrics.gauge("provider_health_status", value, labels={"provider": state.provider})
+- **P4.1/P4.2** — улучшения желательного уровня (VACUUM, Silver DQ)
+- Не являются блокерами для production
 
-# Должно быть:
-self.metrics.set_gauge("provider_health_status", value, labels={"provider": state.provider})
-```
+### Рекомендация
+
+Код готов к production. Оставшиеся задачи P4.x можно выполнить итеративно.
 
 ---
 
 *Документ создан в соответствии с протоколом REQ-ARCH-040 (Двойная Верификация).*
-*Все утверждения подкреплены ссылками на код и верифицированы против main branch.*
+*Все утверждения верифицированы против main branch (commit ce8161a).*
