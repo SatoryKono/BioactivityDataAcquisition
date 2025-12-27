@@ -1,6 +1,6 @@
 # Diagramming Policy
 
-*Synced with RULES.md v5.0 (2025-12-15)*
+*Synced with RULES.md v5.6 (2025-12-27)*
 
 ## Overview
 
