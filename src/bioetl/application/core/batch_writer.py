@@ -171,16 +171,18 @@ class BatchWriter:
         span = self._start_span("write_silver", "silver", len(records), batch_id)
 
         try:
-            records_with_meta = [
-                {
-                    **r,
-                    "_run_id": str(self._context.run_id),
-                    "_run_type": self._context.run_type.value,
-                    "_source_batch_id": str(batch_id),
-                    "_ingestion_ts": ingestion_ts.isoformat(),
-                }
-                for r in records
-            ]
+            # Records already have lineage fields from BaseTransformer.entity_to_silver_record
+            # But we need to ensure they are present and correct, especially source_batch_id
+            # which might be None in entity if not passed during creation.
+
+            # We update _source_batch_id here as it is batch-specific context
+            records_with_meta = []
+            for r in records:
+                # Copy to avoid mutating original
+                record = r.copy()
+                # Ensure batch ID is set correctly for this write operation
+                record["_source_batch_id"] = str(batch_id)
+                records_with_meta.append(record)
 
             table_name = (
                 self._table_config.silver_table
