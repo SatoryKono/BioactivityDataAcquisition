@@ -177,6 +177,7 @@ def is_circuit_breaker_error(exc: Exception) -> bool:
 
     if isinstance(exc, httpx.HTTPStatusError):
         # Only 5xx and 429 (rate limit) trigger circuit breaker
-        return exc.response.status_code >= 500 or exc.response.status_code == 429
+        status_code: int = exc.response.status_code
+        return status_code >= 500 or status_code == 429
 
     return False

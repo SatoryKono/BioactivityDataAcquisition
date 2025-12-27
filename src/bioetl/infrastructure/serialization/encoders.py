@@ -35,7 +35,7 @@ try:
 
     ORJSON_AVAILABLE = True
 except ImportError:
-    orjson = None  # type: ignore[assignment]
+    orjson = None
     ORJSON_AVAILABLE = False
 
 
@@ -101,7 +101,8 @@ class StdLibJsonEncoder:
             ValueError: If JSON is invalid
         """
         try:
-            return json.loads(data)  # type: ignore[no-any-return]
+            result: dict[str, Any] | list[Any] = json.loads(data)
+            return result
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON: {e}") from e
 
@@ -145,9 +146,10 @@ class OrjsonEncoder:
         Returns:
             Compact JSON string
         """
+        assert orjson is not None
         options = orjson.OPT_SORT_KEYS if sort_keys else 0
 
-        result = orjson.dumps(obj, option=options).decode("utf-8")
+        result: str = orjson.dumps(obj, option=options).decode("utf-8")
 
         # orjson doesn't have ensure_ascii option
         # For ASCII-only output, we need to escape non-ASCII chars
@@ -168,7 +170,8 @@ class OrjsonEncoder:
             Canonical JSON string suitable for hashing
         """
         # For canonical output, we need ensure_ascii=True for hashing consistency
-        result = orjson.dumps(obj, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+        assert orjson is not None
+        result: str = orjson.dumps(obj, option=orjson.OPT_SORT_KEYS).decode("utf-8")
         # Escape non-ASCII for canonical form
         return result.encode("unicode_escape").decode("ascii")
 
@@ -185,7 +188,9 @@ class OrjsonEncoder:
             ValueError: If JSON is invalid
         """
         try:
-            return orjson.loads(data)  # type: ignore[no-any-return]
+            assert orjson is not None
+            result: dict[str, Any] | list[Any] = orjson.loads(data)
+            return result
         except orjson.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON: {e}") from e
 

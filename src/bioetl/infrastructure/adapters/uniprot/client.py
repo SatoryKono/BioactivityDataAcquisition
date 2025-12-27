@@ -227,7 +227,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                     params={"query": query, "format": "fasta"},
                 )
             if response.status_code == 200:
-                return response.text
+                text: str = response.text
+                return text
             return None
         except Exception:
             self._handle_fetch_error("sequence", query)

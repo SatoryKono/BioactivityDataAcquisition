@@ -48,13 +48,14 @@ class CsvFilterReader:
                 f"Column '{column_name}' not found in CSV. Available columns: {available}"
             )
 
-        return (
+        result: list[str] = (
             df.select(pl.col(column_name).cast(pl.Utf8).str.strip_chars())
             .filter(pl.col(column_name).is_not_null())
             .filter(pl.col(column_name) != "")
             .to_series()
             .to_list()
         )
+        return result
 
     def _compute_duplicate_stats(
         self, all_ids: list[str]
