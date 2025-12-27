@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed (Documentation Audit)
+
+- **Archived review documents** (14 files total):
+  - `docs/ARCHITECTURAL_REVIEW.md` (73 lines) - consolidated into REFACTORING_PLAN.md
+  - `docs/ARCHITECTURAL_REVIEW_MARCH_2026.md` (103 lines) - archived duplicate
+  - `docs/ARCHITECTURE_REVIEW_2025-12-27.md` (413 lines) - archived duplicate
+  - `docs/CONSOLIDATED_ARCHITECTURE_REVIEW.md` (237 lines) - intermediate analysis
+  - `docs/AUDIT_REPORT_MAY_2026.md` (85 lines) - outdated audit
+  - `docs/CONSOLIDATED_REFACTORING_ANALYSIS.md` (311 lines) - intermediate analysis
+  - `docs/06-architecture-review-consolidated.md` (361 lines) - intermediate
+  - `docs/08-consolidated-refactoring-plan.md` (401 lines) - intermediate
+
+- **Stub runbooks** (placeholders only, 3 lines each):
+  - `docs/05-operations/runbooks/stale-lock.md`
+  - `docs/05-operations/runbooks/schema-evolution.md`
+  - `docs/05-operations/runbooks/quarantine-management.md`
+  - `docs/05-operations/runbooks/pipeline-failure-dq.md`
+  - `docs/05-operations/runbooks/pipeline-failure-critical.md`
+  - `docs/05-operations/runbooks/backfill-rebuild.md`
+
+- **Leftover script**: `docs/02-architecture/new.sh` (debugging artifact)
+
+### Changed (Documentation Audit)
+
+- **Numbering conflict resolved**: Renamed `docs/02-architecture/03-data_layers.md` to
+  `docs/02-architecture/data-layers.md` (conflict with `03-infrastructure-layer.md`)
+- **Project map updated**: `docs/00-map.md` reflects cleaned structure (synced with RULES.md v5.7)
+- **Runbooks index updated**: `docs/05-operations/runbooks/index.md` now lists 4 active runbooks
+
 ## [5.0.0] - 2025-12-27
 
 ### Changed
