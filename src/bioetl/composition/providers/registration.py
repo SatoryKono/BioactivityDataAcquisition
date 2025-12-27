@@ -43,11 +43,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
-def _get_factories() -> tuple[type, type]:
+def _get_factories() -> tuple[Any, Any]:
     """Lazy import factories to avoid circular imports.
 
     Returns:
         Tuple of (DataSourceFactory, HttpClientFactory)
+
+    Note:
+        Returns Any types to avoid TYPE_CHECKING circular imports with factories.
+        The factory classes have create() and create_for_provider() methods.
     """
     from bioetl.composition.factories.data_source_factory import DataSourceFactory
     from bioetl.composition.factories.http_client_factory import HttpClientFactory

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 def inspect_records(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
     limit: int = 100,
     error_code: str | None = None,
@@ -48,7 +48,7 @@ def inspect_records(
     if limit > 0:
         filtered_table = filtered_table.slice(length=limit)
 
-    records = filtered_table.to_pylist()
+    records: list[dict[str, Any]] = filtered_table.to_pylist()
     for record in records:
         record["payload"] = json.loads(record["payload"])
         record["error_details"] = json.loads(record["error_details"])
@@ -105,7 +105,7 @@ def replay_records(
 
 def get_statistics(
     base_path: str,
-    storage_options: dict[str, str],
+    storage_options: dict[str, str] | None,
     pipeline: str,
 ) -> dict[str, Any]:
     """Get quarantine statistics for a pipeline."""

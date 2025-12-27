@@ -28,10 +28,12 @@ from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.cleanup_service import CleanupPreview
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.application.services.cleanup_service import CleanupPreview
-    from bioetl.application.services.lifecycle_service import LifecycleService
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
 
 
 @dataclass(frozen=True)
@@ -229,13 +231,13 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManager:
     return bootstrap_checkpoint_manager(pipeline)
 
 
-def get_lifecycle_service() -> LifecycleService:
+def get_lifecycle_service() -> MedallionLifecycleService:
     """Get the lifecycle service for maintenance operations.
 
     Used for vacuum and archive operations on Delta tables.
 
     Returns:
-        LifecycleService instance.
+        MedallionLifecycleService instance.
 
     Example:
         >>> service = get_lifecycle_service()

@@ -19,6 +19,7 @@ import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from pathlib import Path
+from types import TracebackType
 from typing import IO
 
 
@@ -222,7 +223,12 @@ class AtomicWriteGroup:
     def __enter__(self) -> AtomicWriteGroup:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if exc_type is not None:
             self.rollback()
         # If no exception, user should have called commit()

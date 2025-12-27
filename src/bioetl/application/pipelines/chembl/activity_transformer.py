@@ -5,7 +5,7 @@ Transforms Bronze records to Silver format (Activity entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -119,7 +119,7 @@ class ActivityTransformer(BaseChemblTransformer):
             "standard_text_value": record.get("standard_text_value"),
             "standard_flag": safe_int(record.get("standard_flag")),
             "pchembl_value": safe_float(record.get("pchembl_value")),
-            **self._extract_ligand_efficiency(record.get("ligand_efficiency")),
+            **self._extract_ligand_efficiency(cast("dict[str, Any] | None", record.get("ligand_efficiency"))),
             "qudt_units": record.get("qudt_units"),
             "uo_units": record.get("uo_units"),
         }
@@ -133,7 +133,7 @@ class ActivityTransformer(BaseChemblTransformer):
             "data_validity_comment": record.get("data_validity_comment"),
             "data_validity_description": record.get("data_validity_description"),
             "potential_duplicate": safe_int(record.get("potential_duplicate")),
-            **self._extract_action_type(record.get("action_type")),
+            **self._extract_action_type(cast("dict[str, Any] | None", record.get("action_type"))),
             "activity_properties": self.serialize_json(
                 record.get("activity_properties")
             ),
