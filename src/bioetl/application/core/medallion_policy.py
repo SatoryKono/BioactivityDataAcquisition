@@ -13,6 +13,6 @@ The canonical location is bioetl.domain.medallion.
 from __future__ import annotations
 
 # Re-export from domain layer for backward compatibility
-from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
+from bioetl.domain.medallion import Layer, MedallionPolicy, WriteMode, WriteModePolicy
 
-__all__ = ["Layer", "WriteMode", "WriteModePolicy"]
+__all__ = ["Layer", "MedallionPolicy", "WriteMode", "WriteModePolicy"]
