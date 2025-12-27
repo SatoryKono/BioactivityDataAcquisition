@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from bioetl.application.core.memory_monitor import MemoryConfig
 from bioetl.domain.config import DQConfig, TableConfig
 
 
@@ -19,3 +20,4 @@ class RecordProcessorConfig:
     gold_schema: Any
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
+    memory_config: MemoryConfig = field(default_factory=MemoryConfig)
