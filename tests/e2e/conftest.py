@@ -113,6 +113,20 @@ def e2e_temp_storage(tmp_path: Path) -> dict[str, Path]:
     return paths
 
 
+class MockRedisClient:
+    """Mock Redis client for Local-Only architecture (no real Redis)."""
+
+    async def keys(self, pattern: str) -> list:
+        """Return empty list - no locks in Local-Only mode."""
+        return []
+
+
+@pytest.fixture
+def e2e_redis_client() -> MockRedisClient:
+    """Mock Redis client for E2E tests (Local-Only architecture)."""
+    return MockRedisClient()
+
+
 def create_test_context(
     pipeline_name: str,
     limit: int | None = 10,
