@@ -94,6 +94,9 @@ class StoragePort(Protocol):
         schema: Any,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+        *,
+        ingestion_ts: datetime | None = None,
+        run_id: RunID | None = None,
     ) -> None:
         """Write aggregated or validated records to the Gold layer.
 
@@ -103,6 +106,9 @@ class StoragePort(Protocol):
             schema: Pandera DataFrameSchema for strict validation (required).
             primary_keys: Optional list of column names for sorting/deduplication.
             mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
+            ingestion_ts: Ingestion timestamp from application layer
+                         (single source of time per ADR-014). Required for audit.
+            run_id: Run identifier for audit correlation across layers.
 
         Raises:
             ValueError: If schema validation fails (strict=True required).

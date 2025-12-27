@@ -211,6 +211,7 @@ class BatchWriter:
         """Write records to Gold layer with validation.
 
         Filters columns to match Gold schema, validates records.
+        Passes ingestion_ts and run_id from context for audit correlation (ADR-014).
 
         Args:
             records: Transformed Gold records.
@@ -245,12 +246,15 @@ class BatchWriter:
             if write_mode == "overwrite":
                 write_mode = "append"
 
+            # Pass ingestion_ts and run_id for audit correlation (ADR-014)
             await self._storage.write_gold(
                 table_name=table_name,
                 records=records,
                 schema=gold_schema,
                 primary_keys=self._table_config.primary_keys,
                 mode=write_mode,
+                ingestion_ts=self._context.started_at,
+                run_id=self._context.run_id,
             )
             self._end_span(span)
         except Exception as e:
