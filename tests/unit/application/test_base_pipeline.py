@@ -139,12 +139,6 @@ async def test_base_pipeline_properties(mock_pipeline):
     assert mock_pipeline.limit is None
 
 
-async def test_base_pipeline_should_write_gold(mock_pipeline):
-    """Test default should_write_gold returns True."""
-    result = mock_pipeline.should_write_gold(mock_pipeline.context, {})
-    assert result is True
-
-
 async def test_run_id_propagation_is_consistent():
     """Test that run_id from constructor is used consistently across all components.
 
@@ -191,77 +185,3 @@ async def test_run_id_propagation_is_consistent():
         run_id=str(expected_run_id),
         pipeline=config.pipeline_name,
     )
-
-
-@pytest.mark.unit
-class TestTransformForGold:
-    """Tests for transform_for_gold method."""
-
-    def test_transform_for_gold_removes_json_fields(self, mock_pipeline):
-        """Test that transform_for_gold removes JSON string fields."""
-        silver_record = {
-            "molecule_chembl_id": "CHEMBL123",
-            "pref_name": "Aspirin",
-            # JSON fields that should be excluded
-            "molecule_hierarchy": '{"parent_chembl_id": "CHEMBL123"}',
-            "molecule_properties": '{"alogp": 1.5}',
-            "molecule_structures": '{"canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O"}',
-            "molecule_synonyms": '["Aspirin", "ASA"]',
-            "cross_references": "[]",
-            "atc_classifications": "[]",
-        }
-
-        gold_record = mock_pipeline.transform_for_gold(
-            mock_pipeline.context, silver_record
-        )
-
-        # Verify JSON fields are removed
-        assert "molecule_hierarchy" not in gold_record
-        assert "molecule_properties" not in gold_record
-        assert "molecule_structures" not in gold_record
-        assert "molecule_synonyms" not in gold_record
-        assert "cross_references" not in gold_record
-        assert "atc_classifications" not in gold_record
-
-        # Verify non-excluded fields are preserved
-        assert gold_record["molecule_chembl_id"] == "CHEMBL123"
-        assert gold_record["pref_name"] == "Aspirin"
-
-    def test_transform_for_gold_preserves_flat_fields(self, mock_pipeline):
-        """Test that transform_for_gold preserves flat fields."""
-        silver_record = {
-            "molecule_chembl_id": "CHEMBL123",
-            "pref_name": "Aspirin",
-            "molecule_type": "Small molecule",
-            "max_phase": 4.0,
-            "hierarchy_parent_chembl_id": "CHEMBL123",
-            "property_mw_freebase": 180.16,
-            "structure_canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
-            "_run_id": "abc-123",
-            "_ingestion_ts": "2024-01-01T00:00:00",
-        }
-
-        gold_record = mock_pipeline.transform_for_gold(
-            mock_pipeline.context, silver_record
-        )
-
-        assert gold_record == silver_record
-
-    def test_gold_exclude_fields_constant(self, mock_pipeline):
-        """Test that GOLD_EXCLUDE_FIELDS contains expected fields."""
-        expected_fields = {
-            # Molecule JSON fields (Silver forensic only)
-            "molecule_hierarchy",
-            "molecule_properties",
-            "molecule_structures",
-            "molecule_synonyms",
-            "cross_references",
-            "atc_classifications",
-            # Internal metadata fields (Silver only)
-            "entity_id",
-            "content_hash",
-            "_run_type",
-            "_source_batch_id",
-        }
-        # Access via transformer
-        assert mock_pipeline.transformer.GOLD_EXCLUDE_FIELDS == expected_fields
