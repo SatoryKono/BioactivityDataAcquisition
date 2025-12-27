@@ -15,10 +15,6 @@ Per RULES.md §4.3 Circuit Breaker:
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
 
 import httpx
 import pytest

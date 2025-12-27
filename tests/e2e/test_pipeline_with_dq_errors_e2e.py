@@ -11,16 +11,14 @@ Per RULES.md §4.2:
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.shutdown import ShutdownSignal
-from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+from bioetl.domain.config import DQConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.types import RunType

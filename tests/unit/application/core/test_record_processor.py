@@ -16,7 +16,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.types import BatchID, RunType, ValidationResult
-from bioetl.infrastructure.config import get_pipeline_config
+from bioetl.composition.mappers.config_mapper import get_pipeline_config
 
 
 def _write_temp_pipeline_config(

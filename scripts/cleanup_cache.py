@@ -39,7 +39,7 @@ for cache_dir in cache_dirs:
         print(f"✓ Cleaned: {cache_dir}")
 
 # Remove all __pycache__ directories
-for pycache in Path(".").rglob("__pycache__"):
+for pycache in Path().rglob("__pycache__"):
     shutil.rmtree(pycache)
     print(f"✓ Removed: {pycache}")
 

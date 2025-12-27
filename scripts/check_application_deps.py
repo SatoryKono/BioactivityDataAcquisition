@@ -28,7 +28,7 @@ ALLOWED_FILES = [
 
 def get_imports(filepath: Path) -> list[str]:
     """Extract all import statements from a Python file."""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         try:
             tree = ast.parse(f.read())
         except SyntaxError:

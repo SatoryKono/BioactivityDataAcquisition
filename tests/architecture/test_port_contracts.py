@@ -640,7 +640,6 @@ class TestRateLimiterPortContract:
 
     def test_rate_limiter_port_acquire_is_async(self) -> None:
         """RateLimiterPort.acquire() MUST be async for non-blocking operation."""
-        import inspect
 
         acquire_method = ports.RateLimiterPort.acquire
         # For Protocol, check if it's a coroutine function

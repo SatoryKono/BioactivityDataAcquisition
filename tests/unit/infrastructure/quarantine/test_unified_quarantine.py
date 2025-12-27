@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
@@ -16,7 +16,7 @@ from bioetl.infrastructure.quarantine.unified_quarantine import (
 )
 
 # Fixed timestamp for test reproducibility
-TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
 
 
 def _extract_record_from_call(mock_call) -> dict:

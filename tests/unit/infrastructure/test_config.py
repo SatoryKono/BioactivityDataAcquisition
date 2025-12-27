@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.config import PipelineConfig
-from bioetl.infrastructure.config import yaml_config_to_domain
+from bioetl.composition.mappers.config_mapper import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import DQConfig as YamlDQConfig
 from bioetl.infrastructure.schemas.pipeline_config import (
     MaintenanceConfig,

@@ -1,7 +1,9 @@
 
 import asyncio
 from unittest.mock import MagicMock, patch
+
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+
 
 async def run():
     mock_logger = MagicMock()

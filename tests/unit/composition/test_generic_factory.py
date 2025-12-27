@@ -11,7 +11,6 @@ from bioetl.composition.factories.pipeline_factory import (
     GenericPipelineFactory,
     create_pipeline_factory,
 )
-from bioetl.composition.registry import PipelineRegistry
 
 
 @pytest.fixture

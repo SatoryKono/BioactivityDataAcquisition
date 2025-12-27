@@ -10,11 +10,11 @@ import pytest
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
+from bioetl.composition.mappers.config_mapper import yaml_config_to_domain
 from bioetl.infrastructure.config import (
     PipelineSettings,
     Settings,
     get_settings,
-    yaml_config_to_domain,
 )
 
 

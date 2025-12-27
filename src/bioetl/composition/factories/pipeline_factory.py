@@ -29,7 +29,8 @@ from bioetl.composition.factories.services_factory import (
     ServicesBuilder,
     build_runner_services,
 )
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.composition.mappers.config_mapper import yaml_config_to_domain
+from bioetl.infrastructure.config import load_pipeline_config
 
 if TYPE_CHECKING:
     import pyarrow as pa

@@ -20,11 +20,6 @@ from bioetl.application.core.batch_transformer import (
     TransformResult,
 )
 from bioetl.application.core.batch_writer import BatchWriter
-from bioetl.application.core.memory_monitor import (
-    MemoryConfig,
-    MemoryMonitor,
-    MemoryStats,
-)
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.cleanup_service import (
     CleanupPreview,
@@ -38,6 +33,16 @@ from bioetl.application.core.lifecycle_orchestrator import (
     LifecycleOrchestrator,
 )
 from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.medallion_policy import (
+    Layer,
+    WriteMode,
+    WriteModePolicy,
+)
+from bioetl.application.core.memory_monitor import (
+    MemoryConfig,
+    MemoryMonitor,
+    MemoryStats,
+)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
     DQResult,
@@ -47,11 +52,6 @@ from bioetl.application.core.postrun_service import (
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.application.core.medallion_policy import (
-    Layer,
-    WriteModePolicy,
-    WriteMode,
-)
 from bioetl.application.core.transform_utils import (
     aggregate_nested_lists,
     extract_list_field,
@@ -82,7 +82,6 @@ __all__ = [
     "MemoryConfig",
     "MemoryMonitor",
     "MemoryStats",
-    "WriteModePolicy",
     "PipelineConfig",
     "PipelineServices",
     "PipelineShutdownError",
@@ -92,10 +91,11 @@ __all__ = [
     "RuntimeConfig",
     "ShutdownSignal",
     "StreamingBatchProcessor",
-    "TransformedRecord",
     "TransformResult",
+    "TransformedRecord",
     "VacuumResult",
     "WriteMode",
+    "WriteModePolicy",
     "aggregate_nested_lists",
     "extract_list_field",
     "flatten_nested_dict",
