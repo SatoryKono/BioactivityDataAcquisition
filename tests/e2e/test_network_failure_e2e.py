@@ -14,8 +14,7 @@ Per RULES.md 4.1 Error Classification:
 from __future__ import annotations
 
 import asyncio
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -50,7 +49,7 @@ class TestConnectionTimeout:
             nonlocal retry_count
             retry_count += 1
             if retry_count < max_retries:
-                raise asyncio.TimeoutError("Connection timed out")
+                raise TimeoutError("Connection timed out")
             return {"success": True}
 
         # Simulate retry logic
@@ -59,7 +58,7 @@ class TestConnectionTimeout:
             try:
                 result = await flaky_operation()
                 break
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 if attempt == max_retries - 1:
                     raise
                 await asyncio.sleep(0.01)  # Minimal backoff for test
@@ -76,13 +75,13 @@ class TestConnectionTimeout:
         async def always_timeout():
             nonlocal retry_count
             retry_count += 1
-            raise asyncio.TimeoutError("Connection timed out")
+            raise TimeoutError("Connection timed out")
 
         with pytest.raises(asyncio.TimeoutError):
             for attempt in range(max_retries):
                 try:
                     await always_timeout()
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     if attempt == max_retries - 1:
                         raise
                     await asyncio.sleep(0.01)
@@ -368,7 +367,7 @@ class TestConnectionPoolExhaustion:
                 async with asyncio.timeout(0.05):
                     async with semaphore:
                         return "acquired"
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 raise ConnectionError("Pool acquisition timeout")
 
         # Start blocking request

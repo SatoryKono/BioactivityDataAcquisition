@@ -16,7 +16,6 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 

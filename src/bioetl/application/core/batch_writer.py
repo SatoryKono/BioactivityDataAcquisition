@@ -6,9 +6,10 @@ Extracted from RecordProcessor for single responsibility (SRP).
 
 from __future__ import annotations
 
-import orjson
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
+
+import orjson
 
 from bioetl.domain.exceptions import SchemaViolationError
 

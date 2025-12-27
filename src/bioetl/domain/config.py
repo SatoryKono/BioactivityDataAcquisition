@@ -84,6 +84,8 @@ class TableConfig:
     silver_write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
     gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
     partition_cols: tuple[str, ...] = ()
+    # Z-Order optimization (REQ-PERF-003)
+    optimize_z_order_columns: tuple[str, ...] = ()
     # Schema drift handling for Silver layer
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
@@ -94,6 +96,10 @@ class TableConfig:
             object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
         if isinstance(self.partition_cols, list):
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
+        if isinstance(self.optimize_z_order_columns, list):
+            object.__setattr__(
+                self, "optimize_z_order_columns", tuple(self.optimize_z_order_columns)
+            )
 
         # Convert string write modes to enums (backward compatibility)
         if isinstance(self.silver_write_mode, str):
@@ -229,6 +235,9 @@ class PipelineConfig:
             gold_write_mode=self.gold_write_mode,
             partition_cols=self.partition_cols,
             on_schema_mismatch=self.on_schema_mismatch,
+            # Note: PipelineConfig doesn't expose z-order yet, would need to add it if needed
+            # For now default empty tuple
+            optimize_z_order_columns=(),
         )
 
 

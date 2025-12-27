@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 
 # Re-export GoldWriteMode for backward compatibility
 # Consumers importing from gold_writer will still work
-__all__ = ["GoldWriter", "GoldWriteMode"]
+__all__ = ["GoldWriteMode", "GoldWriter"]
 
 
 class GoldWriter:
@@ -245,7 +245,6 @@ class GoldWriter:
             Falls back to current time and generated UUID only if not provided
             (for backward compatibility with non-pipeline callers).
         """
-        from datetime import UTC
         from uuid import uuid4
 
         # Use provided values or fallback for backward compatibility

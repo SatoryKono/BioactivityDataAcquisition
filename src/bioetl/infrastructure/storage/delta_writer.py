@@ -23,8 +23,6 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-from enum import Enum
-import json
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -56,7 +54,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
-
 
 # Re-export SilverWriteMode for backward compatibility
 # Consumers importing from delta_writer will still work
@@ -613,13 +610,15 @@ class DeltaWriter:
         table_name: str,
         target_size: int | None = None,
         partition_filters: list[tuple[str, str, Any]] | None = None,
+        z_order_columns: list[str] | None = None,
     ) -> dict[str, Any]:
-        """Optimize table layout (compaction).
+        """Optimize table layout (compaction and optional Z-Ordering).
 
         Args:
             table_name: Table name.
             target_size: Target file size in bytes (currently unused, reserved for future).
             partition_filters: Optional filters to limit optimization to specific partitions.
+            z_order_columns: Optional list of columns for Z-Order clustering (REQ-PERF-003).
 
         Returns:
             Optimization metrics.
@@ -635,6 +634,13 @@ class DeltaWriter:
                 None,
                 lambda: DeltaTable(table_path),
             )
+            if z_order_columns:
+                return await loop.run_in_executor(
+                    None,
+                    lambda: dt.optimize.z_order(
+                        columns=z_order_columns, partition_filters=filters
+                    ),
+                )
             return await loop.run_in_executor(
                 None, lambda: dt.optimize.compact(partition_filters=filters)
             )

@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage._atomic import AtomicWriteGroup, atomic_write_bytes
+from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 
 
 class BronzeWriter:
