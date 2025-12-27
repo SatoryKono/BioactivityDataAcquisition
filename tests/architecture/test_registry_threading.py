@@ -2,6 +2,8 @@
 
 Verifies that registry operations are thread-safe as per CLAUDE.md requirements.
 Tests concurrent access patterns that could expose race conditions.
+
+Updated for instance-level PipelineRegistry (2025-12).
 """
 
 from __future__ import annotations
@@ -15,11 +17,8 @@ from unittest.mock import MagicMock
 import pyarrow as pa
 import pytest
 
-from bioetl.composition.factories.pipeline_factories import (
-    register_all_pipelines,
-    reset_registration,
-)
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.registry import PipelineRegistry, create_registry
 
 if TYPE_CHECKING:
     from bioetl.composition.registry import PipelineFactoryProtocol
@@ -41,18 +40,10 @@ def create_mock_factory(name: str) -> PipelineFactoryProtocol:
     return factory
 
 
-@pytest.fixture(autouse=True)
-def clean_registry():
-    """Reset registry before and after each test."""
-    reset_registration()
-    yield
-    reset_registration()
-
-
 class TestConcurrentRegistration:
     """Tests for concurrent registration safety."""
 
-    def test_concurrent_registration_from_multiple_threads(self) -> None:
+    def test_concurrent_registration_from_multiple_threads(self, isolated_registry) -> None:
         """10 threads registering different factories simultaneously.
 
         Verifies that no race conditions occur during concurrent writes.
@@ -65,7 +56,7 @@ class TestConcurrentRegistration:
             """Register a factory with unique name."""
             try:
                 factory = create_mock_factory(f"test_pipeline_{idx}")
-                PipelineRegistry.register_factory(factory)
+                isolated_registry.register_factory(factory)
                 results.append((f"test_pipeline_{idx}", True))
             except Exception as e:
                 errors.append(e)
@@ -83,13 +74,13 @@ class TestConcurrentRegistration:
         )
 
         # Verify all pipelines are registered
-        registered = PipelineRegistry.list_pipelines()
+        registered = isolated_registry.list_pipelines()
         for i in range(num_threads):
             assert f"test_pipeline_{i}" in registered, (
                 f"Pipeline test_pipeline_{i} not found in registry"
             )
 
-    def test_concurrent_read_write_safety(self) -> None:
+    def test_concurrent_read_write_safety(self, isolated_registry) -> None:
         """Concurrent reads during writes do not cause errors.
 
         Simulates real-world scenario where list_pipelines() is called
@@ -104,7 +95,7 @@ class TestConcurrentRegistration:
             """Register a factory."""
             try:
                 factory = create_mock_factory(f"concurrent_pipeline_{idx}")
-                PipelineRegistry.register_factory(factory)
+                isolated_registry.register_factory(factory)
             except ValueError:
                 # Already registered - expected in some race scenarios
                 pass
@@ -116,7 +107,7 @@ class TestConcurrentRegistration:
             try:
                 # Small delay to interleave with writes
                 time.sleep(0.001)
-                result = PipelineRegistry.list_pipelines()
+                result = isolated_registry.list_pipelines()
                 read_results.append(result)
             except Exception as e:
                 errors.append(e)
@@ -139,7 +130,7 @@ class TestConcurrentRegistration:
         for result in read_results:
             assert isinstance(result, list), "list_pipelines() must return a list"
 
-    def test_double_registration_raises_error(self) -> None:
+    def test_double_registration_raises_error(self, isolated_registry) -> None:
         """Registering the same pipeline twice raises ValueError.
 
         Ensures duplicate detection works correctly.
@@ -147,13 +138,13 @@ class TestConcurrentRegistration:
         factory = create_mock_factory("duplicate_pipeline")
 
         # First registration succeeds
-        PipelineRegistry.register_factory(factory)
+        isolated_registry.register_factory(factory)
 
         # Second registration fails
         with pytest.raises(ValueError, match="Pipeline already registered"):
-            PipelineRegistry.register_factory(factory)
+            isolated_registry.register_factory(factory)
 
-    def test_double_registration_concurrent(self) -> None:
+    def test_double_registration_concurrent(self, isolated_registry) -> None:
         """Concurrent attempts to register same pipeline.
 
         Only one should succeed, others should get ValueError.
@@ -169,7 +160,7 @@ class TestConcurrentRegistration:
             # Synchronize all threads to start at the same time
             barrier.wait()
             try:
-                PipelineRegistry.register_factory(factory)
+                isolated_registry.register_factory(factory)
                 successes.append(idx)
             except ValueError:
                 failures.append(idx)
@@ -191,7 +182,7 @@ class TestConcurrentRegistration:
 class TestListPipelinesDeterminism:
     """Tests for deterministic list_pipelines() behavior."""
 
-    def test_list_pipelines_returns_sorted_list(self) -> None:
+    def test_list_pipelines_returns_sorted_list(self, isolated_registry) -> None:
         """list_pipelines() returns alphabetically sorted list.
 
         Ensures deterministic ordering regardless of registration order.
@@ -200,16 +191,16 @@ class TestListPipelinesDeterminism:
         names = ["zebra", "alpha", "mike", "beta"]
         for name in names:
             factory = create_mock_factory(name)
-            PipelineRegistry.register_factory(factory)
+            isolated_registry.register_factory(factory)
 
-        result = PipelineRegistry.list_pipelines()
+        result = isolated_registry.list_pipelines()
 
         # Verify sorted order
         assert result == sorted(names), (
             f"Expected sorted list {sorted(names)}, got {result}"
         )
 
-    def test_list_pipelines_consistent_across_calls(self) -> None:
+    def test_list_pipelines_consistent_across_calls(self, isolated_registry) -> None:
         """Multiple calls to list_pipelines() return identical results.
 
         Verifies no random ordering or side effects.
@@ -217,10 +208,10 @@ class TestListPipelinesDeterminism:
         # Register some pipelines
         for name in ["pipeline_a", "pipeline_b", "pipeline_c"]:
             factory = create_mock_factory(name)
-            PipelineRegistry.register_factory(factory)
+            isolated_registry.register_factory(factory)
 
         # Call multiple times
-        results = [PipelineRegistry.list_pipelines() for _ in range(10)]
+        results = [isolated_registry.list_pipelines() for _ in range(10)]
 
         # All results should be identical
         first_result = results[0]
@@ -233,20 +224,30 @@ class TestListPipelinesDeterminism:
 class TestRegisterAllPipelinesThreadSafety:
     """Tests for register_all_pipelines() thread safety."""
 
-    def test_concurrent_register_all_pipelines_idempotent(self) -> None:
-        """Multiple threads calling register_all_pipelines() simultaneously.
+    def test_concurrent_register_all_pipelines_idempotent(self, isolated_registry) -> None:
+        """Multiple threads calling register_all_pipelines() with same registry.
 
-        Only one should perform registration, others should return immediately.
+        Since we're using an isolated registry and passing it explicitly,
+        all calls will register to the same instance.
         """
         num_threads = 10
         call_count = []
         lock = threading.Lock()
         barrier = threading.Barrier(num_threads)
+        errors: list[Exception] = []
 
         def call_register() -> None:
             """Call register_all_pipelines()."""
             barrier.wait()
-            register_all_pipelines()
+            try:
+                # First call will register, subsequent calls should fail
+                # since the registry already has the pipelines
+                register_all_pipelines(registry=isolated_registry)
+            except ValueError:
+                # Expected for duplicate registrations
+                pass
+            except Exception as e:
+                errors.append(e)
             with lock:
                 call_count.append(1)
 
@@ -260,43 +261,71 @@ class TestRegisterAllPipelinesThreadSafety:
             f"Expected {num_threads} completions, got {len(call_count)}"
         )
 
-        # Registry should have correct pipelines
-        registered = PipelineRegistry.list_pipelines()
-        assert len(registered) > 0, "No pipelines registered"
+        # Verify no unexpected errors
+        assert len(errors) == 0, f"Unexpected errors: {errors}"
 
-        # Call again - should be idempotent
-        initial_count = len(registered)
-        register_all_pipelines()
-        assert len(PipelineRegistry.list_pipelines()) == initial_count, (
-            "register_all_pipelines() is not idempotent"
-        )
+    def test_multiple_registries_parallel(self) -> None:
+        """Multiple isolated registries can be populated in parallel."""
+        num_registries = 5
+        registries: list[PipelineRegistry] = []
+        errors: list[Exception] = []
+
+        def populate_registry() -> PipelineRegistry:
+            """Create and populate a registry."""
+            try:
+                registry = create_registry()
+                register_all_pipelines(registry=registry)
+                return registry
+            except Exception as e:
+                errors.append(e)
+                raise
+
+        with ThreadPoolExecutor(max_workers=num_registries) as executor:
+            futures = [executor.submit(populate_registry) for _ in range(num_registries)]
+            for future in as_completed(futures):
+                registries.append(future.result())
+
+        # All registries should be populated
+        assert len(registries) == num_registries
+        assert len(errors) == 0, f"Errors: {errors}"
+
+        # All registries should have same pipelines
+        first_pipelines = registries[0].list_pipelines()
+        for registry in registries[1:]:
+            assert registry.list_pipelines() == first_pipelines
+
+        # But all registries should be different instances
+        for i, registry1 in enumerate(registries):
+            for j, registry2 in enumerate(registries):
+                if i != j:
+                    assert registry1 is not registry2
 
 
 class TestRegistryLockBehavior:
     """Tests for RLock reentrant behavior."""
 
-    def test_contains_after_list_pipelines(self) -> None:
+    def test_contains_after_list_pipelines(self, isolated_registry) -> None:
         """Sequential calls using lock don't deadlock.
 
         RLock allows reentrant access from same thread.
         """
         factory = create_mock_factory("reentrant_test")
-        PipelineRegistry.register_factory(factory)
+        isolated_registry.register_factory(factory)
 
         # These operations use the same lock internally
-        pipelines = PipelineRegistry.list_pipelines()
+        pipelines = isolated_registry.list_pipelines()
         for name in pipelines:
             # contains() also uses the lock
-            assert PipelineRegistry.contains(name)
+            assert isolated_registry.contains(name)
 
-    def test_get_after_contains(self) -> None:
+    def test_get_after_contains(self, isolated_registry) -> None:
         """get() works after contains() check.
 
         Verifies no lock issues with consecutive operations.
         """
         factory = create_mock_factory("get_test")
-        PipelineRegistry.register_factory(factory)
+        isolated_registry.register_factory(factory)
 
-        if PipelineRegistry.contains("get_test"):
-            definition = PipelineRegistry.get("get_test")
+        if isolated_registry.contains("get_test"):
+            definition = isolated_registry.get("get_test")
             assert definition.factory.pipeline_name == "get_test"

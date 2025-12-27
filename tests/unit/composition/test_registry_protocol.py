@@ -10,61 +10,61 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import get_default_registry
 
 
 class TestPipelineRegistryUnifiedAPI:
     """Test that PipelineRegistry has unified API methods."""
 
     @pytest.fixture(autouse=True)
-    def setup_and_teardown(self):
-        """Ensure registry is populated and restore after test."""
-        register_all_pipelines()
-        backup = PipelineRegistry._registry.copy()
-
+    def setup_and_teardown(self, isolated_registry):
+        """Ensure registry is populated using isolated registry."""
+        register_all_pipelines(registry=isolated_registry)
+        self.registry = isolated_registry
         yield
-
-        PipelineRegistry._registry.clear()
-        PipelineRegistry._registry.update(backup)
 
     def test_list_keys_returns_list(self):
         """PipelineRegistry.list_keys() should return a list."""
-        keys = PipelineRegistry.list_keys()
+        keys = self.registry.list_keys()
         assert isinstance(keys, list)
 
     def test_list_keys_matches_list_pipelines(self):
         """list_keys() should return same result as list_pipelines()."""
-        assert PipelineRegistry.list_keys() == PipelineRegistry.list_pipelines()
+        assert self.registry.list_keys() == self.registry.list_pipelines()
 
     def test_contains_returns_true_for_registered(self):
         """contains() should return True for registered pipelines."""
-        keys = PipelineRegistry.list_keys()
+        keys = self.registry.list_keys()
         if keys:
-            assert PipelineRegistry.contains(keys[0])
+            assert self.registry.contains(keys[0])
 
     def test_contains_returns_false_for_unknown(self):
         """contains() should return False for unknown pipeline."""
-        assert not PipelineRegistry.contains("unknown_pipeline_xyz")
+        assert not self.registry.contains("unknown_pipeline_xyz")
 
     def test_clear_empties_registry(self):
         """clear() should empty the registry."""
-        initial_count = len(PipelineRegistry.list_keys())
+        initial_count = len(self.registry.list_keys())
         assert initial_count > 0
 
-        PipelineRegistry.clear()
+        self.registry.clear()
 
-        assert len(PipelineRegistry.list_keys()) == 0
+        assert len(self.registry.list_keys()) == 0
 
     def test_register_adds_pipeline(self):
         """register() should add a pipeline to registry."""
+        # Clear first and register a new pipeline
+        self.registry.clear()
+
         mock_factory = MagicMock()
         mock_factory.pipeline_name = "test_pipeline"
         mock_factory.silver_schema = None
+        mock_factory.gold_schema = MagicMock()  # Required
 
-        PipelineRegistry.register("test_pipeline", mock_factory)
+        self.registry.register("test_pipeline", mock_factory)
 
-        assert PipelineRegistry.contains("test_pipeline")
-        definition = PipelineRegistry.get("test_pipeline")
+        assert self.registry.contains("test_pipeline")
+        definition = self.registry.get("test_pipeline")
         assert definition.factory is mock_factory
 
 
@@ -147,15 +147,22 @@ class TestDataSourceRegistryUnifiedAPI:
 class TestUnifiedAPIConsistency:
     """Test that all registries have consistent API."""
 
+    @pytest.fixture(autouse=True)
+    def setup_registry(self, isolated_registry):
+        """Use isolated registry for tests."""
+        register_all_pipelines(registry=isolated_registry)
+        self.registry = isolated_registry
+        yield
+
     def test_both_registries_have_list_keys(self):
         """Both registries should have list_keys() method."""
         from bioetl.composition.factories.data_source_registry import (
             DataSourceRegistry,
         )
 
-        assert hasattr(PipelineRegistry, "list_keys")
+        assert hasattr(self.registry, "list_keys")
         assert hasattr(DataSourceRegistry, "list_keys")
-        assert callable(PipelineRegistry.list_keys)
+        assert callable(self.registry.list_keys)
         assert callable(DataSourceRegistry.list_keys)
 
     def test_both_registries_have_contains(self):
@@ -164,9 +171,9 @@ class TestUnifiedAPIConsistency:
             DataSourceRegistry,
         )
 
-        assert hasattr(PipelineRegistry, "contains")
+        assert hasattr(self.registry, "contains")
         assert hasattr(DataSourceRegistry, "contains")
-        assert callable(PipelineRegistry.contains)
+        assert callable(self.registry.contains)
         assert callable(DataSourceRegistry.contains)
 
     def test_both_registries_have_clear(self):
@@ -175,9 +182,9 @@ class TestUnifiedAPIConsistency:
             DataSourceRegistry,
         )
 
-        assert hasattr(PipelineRegistry, "clear")
+        assert hasattr(self.registry, "clear")
         assert hasattr(DataSourceRegistry, "clear")
-        assert callable(PipelineRegistry.clear)
+        assert callable(self.registry.clear)
         assert callable(DataSourceRegistry.clear)
 
     def test_both_registries_have_get(self):
@@ -186,9 +193,9 @@ class TestUnifiedAPIConsistency:
             DataSourceRegistry,
         )
 
-        assert hasattr(PipelineRegistry, "get")
+        assert hasattr(self.registry, "get")
         assert hasattr(DataSourceRegistry, "get")
-        assert callable(PipelineRegistry.get)
+        assert callable(self.registry.get)
         assert callable(DataSourceRegistry.get)
 
     def test_both_registries_have_register(self):
@@ -197,7 +204,7 @@ class TestUnifiedAPIConsistency:
             DataSourceRegistry,
         )
 
-        assert hasattr(PipelineRegistry, "register")
+        assert hasattr(self.registry, "register")
         assert hasattr(DataSourceRegistry, "register")
-        assert callable(PipelineRegistry.register)
+        assert callable(self.registry.register)
         assert callable(DataSourceRegistry.register)
