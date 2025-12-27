@@ -19,6 +19,6 @@ from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 __all__ = [
     "NoOpMetrics",
     "NoOpTracing",
-    "PrometheusMetrics",
     "OpenTelemetryTracer",
+    "PrometheusMetrics",
 ]
