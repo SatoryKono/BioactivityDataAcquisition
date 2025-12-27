@@ -106,10 +106,19 @@ def mock_context():
 
 @pytest.fixture
 def transform_callback():
-    """Create mock transform callback."""
+    """Create mock transform callback with lineage fields.
+
+    Simulates what BaseTransformer.entity_to_silver_record does.
+    """
 
     async def transform(ctx, record):
-        return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
+        return {
+            "entity_id": record.get("id", "unknown"),
+            "value": record.get("value"),
+            "_run_id": str(ctx.run_id),
+            "_run_type": ctx.run_type.value,
+            "_ingestion_ts": ctx.started_at.isoformat(),
+        }
 
     return transform
 
