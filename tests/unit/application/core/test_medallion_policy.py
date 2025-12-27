@@ -3,7 +3,7 @@
 Tests all layer/mode combinations per RULES.md §3 (Medallion Architecture):
 - Bronze: APPEND only
 - Silver: APPEND or MERGE
-- Gold: MERGE or OVERWRITE
+- Gold: MERGE, OVERWRITE, or APPEND
 """
 
 from __future__ import annotations
@@ -74,10 +74,11 @@ class TestWriteModePolicyAllowedModes:
         }
 
     def test_gold_allowed_modes(self):
-        """Test Gold layer allows MERGE and OVERWRITE."""
+        """Test Gold layer allows MERGE, OVERWRITE, and APPEND."""
         assert WriteModePolicy.ALLOWED_MODES[Layer.GOLD] == {
             WriteMode.MERGE,
             WriteMode.OVERWRITE,
+            WriteMode.APPEND,
         }
 
     def test_all_layers_have_policies(self):
@@ -154,12 +155,11 @@ class TestWriteModePolicyValidateGold:
         # Should not raise
         policy.validate(Layer.GOLD, WriteMode.OVERWRITE)
 
-    def test_gold_append_rejected(self):
-        """Test Gold APPEND is rejected."""
+    def test_gold_append_allowed(self):
+        """Test Gold APPEND is allowed."""
         policy = WriteModePolicy()
-        with pytest.raises(PolicyViolationError) as exc_info:
-            policy.validate(Layer.GOLD, WriteMode.APPEND)
-        assert "gold does not allow append" in str(exc_info.value)
+        # Should not raise
+        policy.validate(Layer.GOLD, WriteMode.APPEND)
 
 
 @pytest.mark.unit
@@ -174,6 +174,7 @@ class TestWriteModePolicyValidateAllCombinations:
             (Layer.SILVER, WriteMode.MERGE),
             (Layer.GOLD, WriteMode.MERGE),
             (Layer.GOLD, WriteMode.OVERWRITE),
+            (Layer.GOLD, WriteMode.APPEND),
         ],
     )
     def test_allowed_combinations(self, layer: Layer, mode: WriteMode):
@@ -188,7 +189,6 @@ class TestWriteModePolicyValidateAllCombinations:
             (Layer.BRONZE, WriteMode.MERGE),
             (Layer.BRONZE, WriteMode.OVERWRITE),
             (Layer.SILVER, WriteMode.OVERWRITE),
-            (Layer.GOLD, WriteMode.APPEND),
         ],
     )
     def test_disallowed_combinations(self, layer: Layer, mode: WriteMode):
