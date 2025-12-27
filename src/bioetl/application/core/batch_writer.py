@@ -192,17 +192,18 @@ class BatchWriter:
                 or f"{self._provider}.{self._entity_type}"
             )
 
-            # For "overwrite" mode, use "append" for batch writes
+            # Pass write mode directly without silent degradation (R1 refactoring)
+            # SilverWriteMode enum provides type-safe values: MERGE, APPEND, DELETE
             write_mode = self._table_config.silver_write_mode
-            if write_mode == "overwrite":
-                write_mode = "append"
+            # Convert enum to string value for storage port compatibility
+            mode_value = write_mode.value if hasattr(write_mode, "value") else write_mode
 
             await self._storage.write_silver(
                 table_name=table_name,
                 records=records_with_meta,
                 primary_keys=list(self._table_config.primary_keys),
                 schema=self._silver_schema,
-                mode=write_mode,
+                mode=mode_value,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
             )
             self._end_span(span)
@@ -244,10 +245,11 @@ class BatchWriter:
                 self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
             )
 
-            # For "overwrite" mode, use "append" for batch writes
+            # Pass write mode directly without silent degradation (R1 refactoring)
+            # GoldWriteMode enum provides type-safe values: APPEND, SCD2, OVERWRITE
             write_mode = self._table_config.gold_write_mode
-            if write_mode == "overwrite":
-                write_mode = "append"
+            # Convert enum to string value for storage port compatibility
+            mode_value = write_mode.value if hasattr(write_mode, "value") else write_mode
 
             # Pass ingestion_ts and run_id for audit correlation (ADR-014)
             await self._storage.write_gold(
@@ -255,7 +257,7 @@ class BatchWriter:
                 records=records,
                 schema=gold_schema,
                 primary_keys=list(self._table_config.primary_keys),
-                mode=write_mode,
+                mode=mode_value,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
             )

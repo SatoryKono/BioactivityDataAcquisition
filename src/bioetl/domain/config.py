@@ -13,9 +13,11 @@ Consolidated configuration classes (post-refactoring):
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
@@ -70,25 +72,49 @@ class TableConfig:
     All collection fields are immutable tuples to ensure true immutability
     of the frozen dataclass. The __post_init__ converts any incoming lists
     to tuples for backward compatibility.
+
+    Write modes are now typed using domain enums (SilverWriteMode, GoldWriteMode)
+    instead of Literal strings for type safety and policy enforcement.
     """
 
     primary_keys: tuple[str, ...] = ("entity_id",)
     silver_table: str | None = None
     gold_table: str | None = None
-    # Write modes from YAML sink config
-    silver_write_mode: Literal["merge", "append", "overwrite"] = "merge"
-    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
+    # Write modes using domain enums (R1 refactoring)
+    silver_write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
+    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
     partition_cols: tuple[str, ...] = ()
     # Schema drift handling for Silver layer
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     def __post_init__(self) -> None:
-        """Convert incoming lists to tuples for immutability."""
+        """Convert incoming values to proper types for immutability."""
         # Use object.__setattr__ because frozen=True
         if isinstance(self.primary_keys, list):
             object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
         if isinstance(self.partition_cols, list):
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
+
+        # Convert string write modes to enums (backward compatibility)
+        if isinstance(self.silver_write_mode, str):
+            # Handle deprecated "overwrite" → DELETE with warning
+            mode_str = self.silver_write_mode
+            if mode_str == "overwrite":
+                warnings.warn(
+                    "silver_write_mode='overwrite' is deprecated. "
+                    "Use SilverWriteMode.DELETE for rebuild operations.",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                mode_str = "delete"
+            object.__setattr__(
+                self, "silver_write_mode", SilverWriteMode.from_string(mode_str)
+            )
+
+        if isinstance(self.gold_write_mode, str):
+            object.__setattr__(
+                self, "gold_write_mode", GoldWriteMode.from_string(self.gold_write_mode)
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +126,10 @@ class PipelineConfig:
 
     This is the consolidated domain configuration object that combines
     identity, data quality, table, and processing settings.
+
+    Write modes use domain enums (SilverWriteMode, GoldWriteMode) for type
+    safety. String values are accepted for backward compatibility and
+    converted to enums in __post_init__.
     """
 
     # Identity
@@ -111,8 +141,9 @@ class PipelineConfig:
     primary_keys: tuple[str, ...]
     silver_table: str
     gold_table: str | None = None
-    write_mode: Literal["merge", "append", "overwrite"] = "merge"
-    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
+    # Write modes using domain enums (R1 refactoring)
+    write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
+    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
     partition_cols: tuple[str, ...] = ()
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
@@ -134,6 +165,27 @@ class PipelineConfig:
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
         if isinstance(self.fields, list):
             object.__setattr__(self, "fields", tuple(self.fields))
+
+        # Convert string write modes to enums (backward compatibility)
+        if isinstance(self.write_mode, str):
+            # Handle deprecated "overwrite" → DELETE with warning
+            mode_str = self.write_mode
+            if mode_str == "overwrite":
+                warnings.warn(
+                    "write_mode='overwrite' is deprecated for Silver layer. "
+                    "Use SilverWriteMode.DELETE for rebuild operations.",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                mode_str = "delete"
+            object.__setattr__(
+                self, "write_mode", SilverWriteMode.from_string(mode_str)
+            )
+
+        if isinstance(self.gold_write_mode, str):
+            object.__setattr__(
+                self, "gold_write_mode", GoldWriteMode.from_string(self.gold_write_mode)
+            )
 
         # Validate configuration
         validations = [

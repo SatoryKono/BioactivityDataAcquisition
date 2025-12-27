@@ -20,7 +20,6 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
-from enum import Enum
 from typing import TYPE_CHECKING, Any, TypeVar
 
 import pandera as pandera_pa
@@ -28,6 +27,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
 
@@ -42,18 +42,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
-class GoldWriteMode(str, Enum):
-    """Allowed write modes for Gold layer.
-
-    Values:
-        OVERWRITE: Replace all data in the table
-        APPEND: Add records without deduplication
-        SCD2: Slowly Changing Dimension Type 2 (history tracking)
-    """
-
-    OVERWRITE = "overwrite"
-    APPEND = "append"
-    SCD2 = "scd2"
+# Re-export GoldWriteMode for backward compatibility
+# Consumers importing from gold_writer will still work
+__all__ = ["GoldWriter", "GoldWriteMode"]
 
 
 class GoldWriter:
