@@ -60,7 +60,7 @@ class BronzeWriter:
         validate_json: bool = True,
         audit: AuditPort | None = None,
         tracing: TracingPort | None = None,
-        require_lock: bool = False,
+        require_lock: bool = True,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -79,8 +79,8 @@ class BronzeWriter:
             tracing: Optional TracingPort for distributed tracing.
                     Use NoOpTracing from composition layer if tracing disabled.
             require_lock: If True, write operations require valid LockContext.
-                         Default is False for backward compatibility.
-                         Set to True in production for RULES.md §3.3 compliance.
+                         Default is True per RULES.md §3.3.
+                         Set to False only for testing or non-concurrent scenarios.
 
         """
         self.base_path = Path(base_path)

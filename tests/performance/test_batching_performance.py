@@ -77,13 +77,13 @@ def logger() -> NoOpLogger:
 @pytest.fixture
 def bronze_writer(tmp_path: Path, logger: NoOpLogger) -> BronzeWriter:
     """Create BronzeWriter for performance tests."""
-    return BronzeWriter(base_path=tmp_path, logger=logger, metrics=NoOpMetrics())
+    return BronzeWriter(base_path=tmp_path, logger=logger, metrics=NoOpMetrics(), require_lock=False)
 
 
 @pytest.fixture
 def delta_writer(tmp_path: Path, logger: NoOpLogger) -> DeltaWriter:
     """Create DeltaWriter for performance tests."""
-    return DeltaWriter(base_path=tmp_path / "silver", logger=logger)
+    return DeltaWriter(base_path=tmp_path / "silver", logger=logger, require_lock=False)
 
 
 @pytest.fixture

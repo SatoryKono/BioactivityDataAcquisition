@@ -47,16 +47,19 @@ class TestChEMBLPipelineE2E:
             metrics=AsyncMock(),
             save_json=True,
             json_path=str(storage_paths["bronze"] / "json"),
+            require_lock=False,
         )
 
         silver_writer = DeltaWriter(
             base_path=str(storage_paths["silver"]),
             logger=logger,
+            require_lock=False,
         )
 
         gold_writer = GoldWriter(
             base_path=str(storage_paths["gold"]),
             logger=logger,
+            require_lock=False,
         )
 
         return StorageAdapter(

@@ -23,7 +23,7 @@ def noop_logger():
 
 @pytest.fixture
 def gold_writer(noop_logger):
-    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger)
+    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger, require_lock=False)
 
 
 @pytest.fixture
