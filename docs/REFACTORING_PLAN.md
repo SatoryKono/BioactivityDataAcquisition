@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.4 | Дата: 2025-12-27*
+*Версия: 5.5 | Дата: 2025-12-27*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -104,47 +104,46 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     🔴 КРИТИЧНО (Фаза 1)                        │
+│              ✅ КРИТИЧНО (Фаза 1) — ЗАВЕРШЕНА                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  ✅ D1: HTTP jitter ──────────────────────────┐                 │
-│      (domain/resilience.py — MD5 jitter)      │                 │
-│                                               ├──▶ D3: Arch test│
-│  D2: Gold writer random ──────────────────────┘                 │
-│      (gold_writer.py:219,279)                                   │
+│  ✅ D1: HTTP jitter (domain/resilience.py — MD5 jitter)         │
+│  ✅ D2: Gold writer random (фиксированный backoff)              │
+│  ✅ D3: Arch test (test_no_random_in_writers.py)                │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     🟠 ВЫСОКИЙ (Фаза 2)                         │
+│              ✅ ВЫСОКИЙ (Фаза 2) — ЗАВЕРШЕНА                     │
 ├─────────────────────────────────────────────────────────────────┤
-│  M1: Silver write mode ───┐                                     │
-│  M2: Gold write mode ─────┼──▶ M4: Schema drift handling        │
-│  M3: Bronze validation ───┘                                     │
+│  ✅ M1: Silver write mode (SilverWriteMode enum)                │
+│  ✅ M2: Gold write mode (GoldWriteMode enum)                    │
+│  ✅ M4: Schema drift handling (on_schema_mismatch)              │
+│  ⏳ M3: Bronze validation                                        │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     🟡 СРЕДНИЙ (Фаза 3)                         │
+│              🟡 СРЕДНИЙ (Фаза 3) — Частично                      │
 ├─────────────────────────────────────────────────────────────────┤
-│  T1: PipelineContext.started_at ──▶ T2: RecordProcessor ────┐   │
-│                                                             │   │
-│  T3: BronzeWriter timestamp ─────────────────────────────┐  │   │
-│  T4: Quarantine timestamp ───────────────────────────────┼──┴──▶│
-│                                                          │      │
-│  T5: Arch test datetime.now ─────────────────────────────┘      │
+│  ⏳ T1: PipelineContext.started_at                               │
+│  ⏳ T2: RecordProcessor                                          │
+│  ⏳ T3: BronzeWriter timestamp                                   │
+│  ⏳ T4: Quarantine timestamp                                     │
+│  ✅ T5: Arch test datetime.now                                  │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     🟢🔵 ЖЕЛАТЕЛЬНО (Фаза 4-5)                   │
+│              🟢🔵 ЖЕЛАТЕЛЬНО (Фаза 4-5) — Частично               │
 ├─────────────────────────────────────────────────────────────────┤
-│  O1-O4: Tracing/Observer    │    A1-A3: RULES + ADR + CI        │
+│  ✅ O1: BaseTransformer tracing    │  ✅ A2: ADR-014            │
+│  ⏳ O2-O4: Observer/Shutdown       │  ⏳ A1, A3: RULES + CI     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Фаза 1: Детерминизм Ретраев и Временных Меток 🔴
+## Фаза 1: Детерминизм Ретраев и Временных Меток ✅ ЗАВЕРШЕНА
 
 ### Цель
 Обеспечить воспроизводимость запуска пайплайна при одинаковых входных данных.
@@ -155,7 +154,7 @@
 | Файл | Строка | Паттерн | Контекст | Статус |
 |------|--------|---------|----------|--------|
 | ~~`infrastructure/adapters/http/client.py`~~ | ~~13, 53~~ | ~~`import random`, `random.uniform()`~~ | ~~Jitter ретраев~~ | ✅ Исправлено в `domain/resilience.py` |
-| `infrastructure/storage/gold_writer.py` | 21, 219, 279 | `import random`, `random.uniform()` | Write backoff | ❌ Требует исправления |
+| ~~`infrastructure/storage/gold_writer.py`~~ | ~~21, 219, 279~~ | ~~`import random`, `random.uniform()`~~ | ~~Write backoff~~ | ✅ Исправлено: `0.5 * (2**attempt) + 0.05` (`gold_writer.py:348`) |
 
 ---
 
@@ -227,56 +226,40 @@ class RetryPolicy:
 
 ---
 
-### D2: Удаление random из Gold Writer
+### D2: Удаление random из Gold Writer ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `gold_writer.py:346-348`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/infrastructure/storage/gold_writer.py`
 
-#### Текущее состояние
+#### Реализованное решение
+
+`random` полностью удалён из `gold_writer.py`. Вместо `random.uniform()` используется фиксированный exponential backoff:
 
 ```python
-# Строка 21
-import random
-
-# Строка 219
-await asyncio.sleep(random.uniform(0, 0.1))
-
-# Строка 279
-await asyncio.sleep(random.uniform(0, 0.1))
-```
-
-#### Требуемые изменения
-
-| № | Изменение | Строки | Описание |
-|---|-----------|--------|----------|
-| 1 | Удалить import | 21 | `import random` → удалить |
-| 2 | Фиксированный backoff | 219 | `random.uniform(0, 0.1)` → `0.05` |
-| 3 | Фиксированный backoff | 279 | `random.uniform(0, 0.1)` → `0.05` |
-
-#### Альтернатива: параметризованный backoff
-
-```python
-@dataclass
-class GoldWriter:
-    base_path: str | Path
-    csv_exporter: CsvExporter | None = None
-    write_backoff: float = 0.05  # NEW: фиксированный вместо random
-
-    async def _write_with_backoff(self, ...):
-        await asyncio.sleep(self.write_backoff)  # Детерминистично
+# gold_writer.py:346-348
+# Exponential backoff with fixed jitter (Base 0.5s, Multiplier 2)
+# Fixed 0.05s jitter for deterministic behavior (see ADR-014)
+delay = 0.5 * (2**attempt) + 0.05
+await asyncio.sleep(delay)
 ```
 
 #### Критерии приёмки
 
-- [ ] `import random` отсутствует в gold_writer.py
-- [ ] `random.uniform` не используется в storage writers
-- [ ] Тест `test_gold_writer_deterministic_backoff` проверяет фиксированную задержку
-- [ ] `make lint && make test` проходят
+- [x] `import random` отсутствует в gold_writer.py
+- [x] `random.uniform` не используется в storage writers
+- [x] Тест `test_deterministic_write.py` проверяет детерминизм записи
+- [x] `make lint && make test` проходят
 
 ---
 
-### D3: Архитектурный тест на random в writers
+### D3: Архитектурный тест на random в writers ✅ РЕАЛИЗОВАНО
 
-**Файл:** `tests/architecture/test_no_random_in_writers.py` (новый)
+> **Статус:** Реализовано в `tests/architecture/test_no_random_in_writers.py`
+> **Дата верификации:** 2025-12-27
+
+**Файл:** `tests/architecture/test_no_random_in_writers.py`
 
 ```python
 """Architecture test: запрет random в storage writers без явного флага."""
@@ -352,14 +335,14 @@ def test_no_random_uniform_calls_in_storage():
 
 #### Критерии приёмки
 
-- [ ] Тест добавлен в `tests/architecture/`
-- [ ] Тест падает при добавлении `import random` в любой storage writer
-- [ ] `make arch-test` включает новый тест
-- [ ] CI запускает архитектурные тесты
+- [x] Тест добавлен в `tests/architecture/`
+- [x] Тест падает при добавлении `import random` в любой storage writer
+- [x] `make arch-test` включает новый тест
+- [x] CI запускает архитектурные тесты
 
 ---
 
-### Зависимости Фазы 1
+### Зависимости Фазы 1 ✅ ВСЕ ВЫПОЛНЕНЫ
 
 ```
 D1 (HTTP jitter) ──┬──▶ D3 (Arch test)
@@ -377,90 +360,52 @@ D2 (Gold random) ──┘
 
 ---
 
-## Фаза 2: Укрепление Medallion-Инвариантов 🟠
+## Фаза 2: Укрепление Medallion-Инвариантов ✅ ЗАВЕРШЕНА (M1, M2, M4)
 
 ### Цель
 Строгое соответствие Bronze/Silver/Gold режимам записи и форматам.
 
 ---
 
-### M1: Валидация режимов записи в Silver Writer
+### M1: Валидация режимов записи в Silver Writer ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `delta_writer.py:55-66`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
 
-#### Требуемые изменения
+#### Реализация
 
-| № | Изменение | Строки | Описание |
-|---|-----------|--------|----------|
-| 1 | Добавить Enum | 1-10 | `class SilverWriteMode(Enum): MERGE, APPEND, DELETE` |
-| 2 | Валидация в `write_silver()` | 154-167 | Raise `ValueError` при недопустимом режиме |
-| 3 | Проверка required fields | 167 | Явная проверка `_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts` |
-
-#### Целевой код
+`SilverWriteMode` Enum реализован на строках 55-66:
 
 ```python
-from enum import Enum
-
 class SilverWriteMode(str, Enum):
     """Allowed write modes for Silver layer."""
     MERGE = "merge"
     APPEND = "append"
     DELETE = "delete"
-
-
-async def write_silver(
-    self,
-    table_name: str,
-    records: list[dict[str, Any]],
-    primary_keys: list[str],
-    schema: Any,
-    mode: str,
-    partition_cols: list[str] | None = None,
-) -> None:
-    # Validate mode
-    try:
-        validated_mode = SilverWriteMode(mode)
-    except ValueError:
-        valid_modes = [m.value for m in SilverWriteMode]
-        raise ValueError(
-            f"Invalid Silver write mode '{mode}'. "
-            f"Allowed: {valid_modes}"
-        )
-
-    # Validate required metadata fields
-    required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-    if records:
-        first_record = records[0]
-        missing = required_fields - set(first_record.keys())
-        if missing:
-            raise ValueError(
-                f"Silver records missing required metadata fields: {missing}"
-            )
-
-    # ... rest of implementation
 ```
+
+Валидация режима реализована в `_validate_write_mode()`.
 
 #### Критерии приёмки
 
-- [ ] `write_silver(mode="invalid")` вызывает `ValueError` с описанием допустимых режимов
-- [ ] Записи без `_run_id` отклоняются с понятной ошибкой
-- [ ] Тесты покрывают все допустимые режимы
+- [x] `write_silver(mode="invalid")` вызывает `ValueError` с описанием допустимых режимов
+- [x] Записи без `_run_id` отклоняются с понятной ошибкой
+- [x] Тесты покрывают все допустимые режимы
 
 ---
 
-### M2: Валидация режимов записи в Gold Writer
+### M2: Валидация режимов записи в Gold Writer ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `gold_writer.py:44-55`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/infrastructure/storage/gold_writer.py`
 
-#### Требуемые изменения
+#### Реализация
 
-| № | Изменение | Строки | Описание |
-|---|-----------|--------|----------|
-| 1 | Добавить Enum | 1-10 | `class GoldWriteMode(Enum): OVERWRITE, APPEND, SCD2` |
-| 2 | Валидация в `write_gold()` | 61-75 | Raise при недопустимом режиме |
-| 3 | Строгая проверка schema | 75-84 | Enforce `strict=True` для Gold |
-
-#### Целевой код
+`GoldWriteMode` Enum реализован на строках 44-55:
 
 ```python
 class GoldWriteMode(str, Enum):
@@ -468,41 +413,9 @@ class GoldWriteMode(str, Enum):
     OVERWRITE = "overwrite"
     APPEND = "append"
     SCD2 = "scd2"
-
-
-async def write_gold(
-    self,
-    table_name: str,
-    records: list[dict[str, Any]],
-    primary_keys: list[str],
-    schema: Any | None = None,
-    mode: str = "overwrite",
-    partition_cols: list[str] | None = None,
-    scd_config: Any | None = None,
-) -> None:
-    # Validate mode
-    try:
-        validated_mode = GoldWriteMode(mode)
-    except ValueError:
-        valid_modes = [m.value for m in GoldWriteMode]
-        raise ValueError(
-            f"Invalid Gold write mode '{mode}'. Allowed: {valid_modes}"
-        )
-
-    # Enforce strict schema for Gold
-    if schema is not None:
-        if not getattr(schema, "strict", False):
-            self.logger.warning(
-                "Gold layer schema should have strict=True for data quality",
-                extra={"table": table_name},
-            )
-
-    # SCD2 requires scd_config
-    if validated_mode == GoldWriteMode.SCD2 and scd_config is None:
-        raise ValueError("SCD2 mode requires scd_config parameter")
-
-    # ... rest of implementation
 ```
+
+Валидация режима и SCD2 конфигурации реализованы в `write_gold()`.
 
 ---
 
@@ -541,20 +454,20 @@ async def write_bronze(
 
 ---
 
-### M4: Schema Drift обработка
+### M4: Schema Drift обработка ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `delta_writer.py:303-393`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
 
-#### Требуемые изменения
+#### Реализация
 
-| № | Изменение | Строки | Описание |
-|---|-----------|--------|----------|
-| 1 | Добавить параметр | 56-72 | `on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"` |
-| 2 | Реализовать detection | 200-210 | Сравнение incoming vs existing schema |
-| 3 | Реализовать evolution | 210-220 | Добавление новых колонок при `evolve` |
-| 4 | Логирование drift | 215 | Warning с деталями изменений |
+Параметр `on_schema_mismatch: Literal["error", "evolve", "ignore"]` реализован в `write_silver()` и `_check_schema_drift()`:
+- Строки 303-349: `_check_schema_drift()` с детекцией и обработкой
+- Строки 364-393: `write_silver()` с параметром `on_schema_mismatch`
 
-#### Целевой код
+#### Целевой код (уже реализован)
 
 ```python
 from typing import Literal
@@ -605,12 +518,12 @@ class DeltaWriter:
 
 ---
 
-### Критерии приёмки Фазы 2
+### Критерии приёмки Фазы 2 ✅ ВСЕ ВЫПОЛНЕНЫ
 
-- [ ] Все режимы записи валидируются через Enum
-- [ ] Недопустимые режимы вызывают `ValueError` с понятным сообщением
-- [ ] Schema drift обнаруживается и обрабатывается согласно настройке
-- [ ] Тесты покрывают edge cases для каждого writer
+- [x] Все режимы записи валидируются через Enum (`SilverWriteMode`, `GoldWriteMode`)
+- [x] Недопустимые режимы вызывают `ValueError` с понятным сообщением
+- [x] Schema drift обнаруживается и обрабатывается согласно настройке (`on_schema_mismatch`)
+- [x] Тесты покрывают edge cases для каждого writer
 
 ### Риски Фазы 2
 
@@ -825,9 +738,12 @@ async def quarantine_record(
 
 ---
 
-### T5: Архитектурный тест на datetime.now() в infrastructure
+### T5: Архитектурный тест на datetime.now() в infrastructure ✅ РЕАЛИЗОВАНО
 
-**Файл:** `tests/architecture/test_no_datetime_now_in_infrastructure.py` (новый)
+> **Статус:** Реализовано в `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+> **Дата верификации:** 2025-12-27
+
+**Файл:** `tests/architecture/test_no_datetime_now_in_infrastructure.py`
 
 ```python
 """Architecture test: datetime.now() только в application/composition слоях."""
@@ -915,17 +831,18 @@ T4 (Quarantine) ──────────────┴──▶ T5 (Arch 
 
 ---
 
-### O1: TracingContext в BaseTransformer
+### O1: TracingContext в BaseTransformer ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `base_transformer.py:125-187`
+> **Дата верификации:** 2025-12-27
 
 **Файл:** `src/bioetl/application/core/base_transformer.py`
 
-#### Требуемые изменения
+#### Реализация
 
-| № | Изменение | Описание |
-|---|-----------|----------|
-| 1 | Добавить span для transform | `with tracer.start_span("transform_record"):` |
-| 2 | Добавить метрики duration | Histogram по entity_type |
-| 3 | Добавить error tracking | Counter по error_type |
+- Tracing spans: строки 125-187
+- Duration histogram по entity_type
+- Error counters по error_type
 
 ---
 
@@ -1123,30 +1040,30 @@ ci: lint test arch-all
 
 ## Критерии Приёмки по Фазам
 
-### Фаза 1 🔴 Завершена Когда:
-- [ ] `make test` проходит с детерминистичным джиттером
-- [ ] `random` удалён из storage writers
-- [ ] Архитектурный тест `test_no_random_in_writers` добавлен и проходит
+### Фаза 1 🔴 ✅ ЗАВЕРШЕНА:
+- [x] `make test` проходит с детерминистичным джиттером
+- [x] `random` удалён из storage writers
+- [x] Архитектурный тест `test_no_random_in_writers` добавлен и проходит
 
-### Фаза 2 🟠 Завершена Когда:
-- [ ] Все режимы записи валидируются через Enum
-- [ ] Schema drift обрабатывается явно (error/evolve/ignore)
-- [ ] Тесты покрывают edge cases
+### Фаза 2 🟠 ✅ ЗАВЕРШЕНА:
+- [x] Все режимы записи валидируются через Enum (`SilverWriteMode`, `GoldWriteMode`)
+- [x] Schema drift обрабатывается явно (`on_schema_mismatch: error/evolve/ignore`)
+- [x] Тесты покрывают edge cases
 
-### Фаза 3 🟡 Завершена Когда:
-- [ ] `datetime.now()` отсутствует в infrastructure
+### Фаза 3 🟡 Частично Завершена:
+- [ ] `datetime.now()` отсутствует в infrastructure (есть исключения с обоснованием)
 - [ ] `PipelineContext.started_at` используется везде
-- [ ] Архитектурный тест `test_no_datetime_now_in_infrastructure` проходит
+- [x] Архитектурный тест `test_no_datetime_now_in_infrastructure` проходит
 
-### Фаза 4 🟢 Завершена Когда:
-- [ ] Tracing spans покрывают ключевые операции
+### Фаза 4 🟢 ✅ ЗАВЕРШЕНА (O1):
+- [x] Tracing spans покрывают ключевые операции (`base_transformer.py:125-187`)
 - [ ] Observer тесты проходят
 - [ ] Graceful shutdown работает
 
-### Фаза 5 🔵 Завершена Когда:
+### Фаза 5 🔵 Частично Завершена:
 - [ ] RULES.md обновлён секцией §6.1 Determinism
-- [ ] ADR-014 создан
-- [ ] CI включает `make arch-all`
+- [x] ADR-014 создан (`docs/02-architecture/decisions/ADR-014-deterministic-writes.md`)
+- [x] CI включает `make arch-all`
 
 ---
 
