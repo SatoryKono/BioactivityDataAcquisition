@@ -1,12 +1,14 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
-from typing import NewType
+from uuid import uuid4
+from typing import Any
 
-RunID = NewType("RunID", str)
-RunType = NewType("RunType", str)
-EntityID = NewType("EntityID", str)
-ContentHash = NewType("ContentHash", str)
-BatchID = NewType("BatchID", str)
+# Mock types
+RunID = str
+RunType = str
+EntityID = str
+ContentHash = str
+BatchID = str
 
 @dataclass(frozen=True, kw_only=True)
 class BaseEntity:
@@ -24,21 +26,23 @@ class Activity(BaseEntity):
 
 def test():
     entity = Activity(
-        entity_id=EntityID("1"),
-        content_hash=ContentHash("hash"),
-        run_id=RunID("run1"),
-        run_type=RunType("incremental"),
+        entity_id="ent1",
+        content_hash="hash1",
+        run_id="run1",
+        run_type="incremental",
         ingestion_ts=datetime.now(),
         activity_id="act1",
         molecule_chembl_id="mol1"
     )
 
     d = asdict(entity)
-    print("Keys in asdict:", d.keys())
-    if "run_id" in d:
-        print("run_id is present")
-    else:
-        print("run_id is MISSING")
+    print("Dict keys:", d.keys())
+
+    try:
+        run_id = d.pop("run_id")
+        print("Popped run_id:", run_id)
+    except KeyError as e:
+        print("KeyError:", e)
 
 if __name__ == "__main__":
     test()
