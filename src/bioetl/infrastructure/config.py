@@ -8,11 +8,12 @@ Consolidated configuration (post-refactoring):
 - RuntimeConfig: Re-exported from domain.config for CLI convenience
 
 Usage:
-    from bioetl.infrastructure.config import get_settings
-
-    settings = get_settings()
-    print(settings.data_dir)
-    print(settings.pipeline.batch_size)
+    >>> from bioetl.infrastructure.config import get_settings
+    >>> settings = get_settings()
+    >>> settings.data_dir  # doctest: +ELLIPSIS
+    ...Path('data')
+    >>> settings.pipeline.batch_size
+    100
 """
 
 from __future__ import annotations

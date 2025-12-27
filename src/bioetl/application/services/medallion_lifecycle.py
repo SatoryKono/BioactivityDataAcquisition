@@ -62,7 +62,8 @@ class MedallionLifecycleService:
         ...     gold_table="chembl.activity",
         ...     dry_run=False,
         ... )
-        >>> print(f"Cleared {result.total_cleared} records")
+        >>> result.total_cleared  # Number of records cleared
+        150
     """
 
     storage: StoragePort
