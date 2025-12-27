@@ -2,16 +2,25 @@
 
 Implements RULES.md §2.1-2.3 medallion architecture lifecycle operations.
 This service manages clearing, vacuum, and future archive operations.
+
+Observability:
+- Tracing: Spans for clear/vacuum/archive operations via traced_operation
+- Metrics: medallion_clear_records_total, medallion_vacuum_files_total,
+           medallion_vacuum_duration_seconds, medallion_archive_files_total
+- Logging: Structured logs for all operations
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
+
+from bioetl.application.observability.span_context import traced_operation
 
 if TYPE_CHECKING:
     from bioetl.domain.medallion import MedallionPolicy
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, StoragePort, TracingPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,7 +53,8 @@ class MedallionLifecycleService:
 
     Responsibilities:
     - Clear Silver/Gold tables based on policy (M5)
-    - Future: vacuum, archive, optimize operations
+    - Vacuum, archive, optimize operations
+    - Publish metrics for all operations
 
     This service is injected into PipelineRunner and handles
     lifecycle operations that were previously inline in the runner.
@@ -52,6 +62,8 @@ class MedallionLifecycleService:
     Attributes:
         storage: StoragePort for data layer operations.
         logger: Structured logger for observability.
+        metrics: Optional MetricsPort for publishing operation metrics.
+        tracer: Optional TracingPort for distributed tracing.
 
     Example:
         >>> service = MedallionLifecycleService(storage=storage, logger=logger)
@@ -63,10 +75,20 @@ class MedallionLifecycleService:
         ...     dry_run=False,
         ... )
         >>> print(f"Cleared {result.total_cleared} records")
+
+    Observability:
+        When metrics port is provided, publishes:
+        - medallion_clear_records_total: Counter of cleared records by layer
+        - medallion_clear_duration_seconds: Histogram of clear operation duration
+        - medallion_vacuum_files_total: Counter of vacuumed files
+        - medallion_vacuum_duration_seconds: Histogram of vacuum duration
+        - medallion_archive_files_total: Counter of archived files
     """
 
     storage: StoragePort
     logger: LoggerPort
+    metrics: MetricsPort | None = field(default=None)
+    tracer: TracingPort | None = field(default=None)
 
     async def clear(
         self,
@@ -80,6 +102,8 @@ class MedallionLifecycleService:
         Enforces medallion architecture invariants:
         - Only clears based on policy (not run type directly)
         - Logs all operations for observability
+        - Publishes metrics if metrics port is available
+        - Creates tracing span if tracer is available
 
         Args:
             policy: Medallion policy determining what to clear.
@@ -90,26 +114,76 @@ class MedallionLifecycleService:
         Returns:
             ClearResult with counts of cleared records.
         """
-        silver_cleared = 0
-        gold_cleared = 0
+        async with traced_operation(
+            self.tracer,
+            "medallion.clear",
+            tracer_name="bioetl.lifecycle",
+            policy=policy.clear_policy.value,
+            silver_table=silver_table,
+            gold_table=gold_table,
+            dry_run=dry_run,
+        ):
+            start_time = time.monotonic()
+            silver_cleared = 0
+            gold_cleared = 0
 
-        if policy.should_clear_silver:
-            silver_cleared = await self.storage.clear_silver(
-                silver_table, dry_run=dry_run
+            if policy.should_clear_silver:
+                silver_cleared = await self.storage.clear_silver(
+                    silver_table, dry_run=dry_run
+                )
+
+            if policy.should_clear_gold:
+                gold_cleared = await self.storage.clear_gold(
+                    gold_table, dry_run=dry_run
+                )
+
+            result = ClearResult(
+                silver_cleared=silver_cleared,
+                gold_cleared=gold_cleared,
+                dry_run=dry_run,
             )
 
-        if policy.should_clear_gold:
-            gold_cleared = await self.storage.clear_gold(gold_table, dry_run=dry_run)
+            duration = time.monotonic() - start_time
+            self._log_result(policy, silver_table, gold_table, result)
+            self._record_clear_metrics(
+                policy, silver_table, gold_table, result, duration
+            )
 
-        result = ClearResult(
-            silver_cleared=silver_cleared,
-            gold_cleared=gold_cleared,
-            dry_run=dry_run,
+            return result
+
+    def _record_clear_metrics(
+        self,
+        policy: MedallionPolicy,
+        silver_table: str,
+        gold_table: str,
+        result: ClearResult,
+        duration: float,
+    ) -> None:
+        """Record clear operation metrics if metrics port is available."""
+        if self.metrics is None or result.dry_run:
+            return
+
+        # Record duration histogram
+        self.metrics.observe_histogram(
+            "medallion_clear_duration_seconds",
+            duration,
+            {"policy": policy.clear_policy.value},
         )
 
-        self._log_result(policy, silver_table, gold_table, result)
+        # Record cleared records counters
+        if result.silver_cleared > 0:
+            self.metrics.increment_counter(
+                "medallion_clear_records_total",
+                result.silver_cleared,
+                {"layer": "silver", "table": silver_table},
+            )
 
-        return result
+        if result.gold_cleared > 0:
+            self.metrics.increment_counter(
+                "medallion_clear_records_total",
+                result.gold_cleared,
+                {"layer": "gold", "table": gold_table},
+            )
 
     def _log_result(
         self,
@@ -169,38 +243,64 @@ class MedallionLifecycleService:
         Raises:
             StorageError: If vacuum fails
         """
-        retention_hours = retention_days * 24
-
-        self.logger.info(
-            "Starting vacuum operation",
+        async with traced_operation(
+            self.tracer,
+            "medallion.vacuum",
+            tracer_name="bioetl.lifecycle",
             table=table,
             retention_days=retention_days,
             dry_run=dry_run,
-        )
-
-        try:
-            files_removed = await self.storage.vacuum(
-                table_name=table,
-                retention_hours=retention_hours,
-                dry_run=dry_run,
-            )
+        ):
+            retention_hours = retention_days * 24
+            start_time = time.monotonic()
 
             self.logger.info(
-                "Vacuum completed",
+                "Starting vacuum operation",
                 table=table,
-                files_removed=files_removed,
+                retention_days=retention_days,
                 dry_run=dry_run,
             )
 
-            return files_removed
+            try:
+                files_removed = await self.storage.vacuum(
+                    table_name=table,
+                    retention_hours=retention_hours,
+                    dry_run=dry_run,
+                )
 
-        except Exception as e:
-            self.logger.error(
-                "Vacuum failed",
-                table=table,
-                error=str(e),
-            )
-            raise
+                duration = time.monotonic() - start_time
+
+                self.logger.info(
+                    "Vacuum completed",
+                    table=table,
+                    files_removed=files_removed,
+                    dry_run=dry_run,
+                    duration_seconds=round(duration, 3),
+                )
+
+                # Record metrics (only for actual operations, not dry runs)
+                if self.metrics is not None and not dry_run:
+                    self.metrics.observe_histogram(
+                        "medallion_vacuum_duration_seconds",
+                        duration,
+                        {"table": table},
+                    )
+                    if files_removed > 0:
+                        self.metrics.increment_counter(
+                            "medallion_vacuum_files_total",
+                            files_removed,
+                            {"table": table},
+                        )
+
+                return files_removed
+
+            except Exception as e:
+                self.logger.error(
+                    "Vacuum failed",
+                    table=table,
+                    error=str(e),
+                )
+                raise
 
     async def archive(
         self,
@@ -224,32 +324,53 @@ class MedallionLifecycleService:
         Raises:
             StorageError: If archive fails
         """
-        self.logger.info(
-            "Starting archive operation",
+        async with traced_operation(
+            self.tracer,
+            "medallion.archive",
+            tracer_name="bioetl.lifecycle",
             table=table,
             target_path=target_path,
             remove_source=remove_source,
-        )
+        ):
+            start_time = time.monotonic()
 
-        try:
-            files_archived = await self.storage.archive(
-                table_name=table,
+            self.logger.info(
+                "Starting archive operation",
+                table=table,
                 target_path=target_path,
                 remove_source=remove_source,
             )
 
-            self.logger.info(
-                "Archive completed",
-                table=table,
-                files_archived=files_archived,
-            )
+            try:
+                files_archived = await self.storage.archive(
+                    table_name=table,
+                    target_path=target_path,
+                    remove_source=remove_source,
+                )
 
-            return files_archived
+                duration = time.monotonic() - start_time
 
-        except Exception as e:
-            self.logger.error(
-                "Archive failed",
-                table=table,
-                error=str(e),
-            )
-            raise
+                self.logger.info(
+                    "Archive completed",
+                    table=table,
+                    files_archived=files_archived,
+                    duration_seconds=round(duration, 3),
+                )
+
+                # Record metrics
+                if self.metrics is not None and files_archived > 0:
+                    self.metrics.increment_counter(
+                        "medallion_archive_files_total",
+                        files_archived,
+                        {"table": table},
+                    )
+
+                return files_archived
+
+            except Exception as e:
+                self.logger.error(
+                    "Archive failed",
+                    table=table,
+                    error=str(e),
+                )
+                raise
