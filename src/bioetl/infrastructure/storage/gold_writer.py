@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
     from pandera.polars import DataFrameSchema
 
-    from bioetl.domain.ports import AuditPort, LoggerPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, TracingPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -61,6 +61,7 @@ class GoldWriter:
         logger: LoggerPort,
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
+        tracing: TracingPort | None = None,
     ) -> None:
         """Initialize Gold writer.
 
@@ -70,6 +71,8 @@ class GoldWriter:
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
+            tracing: Optional TracingPort for distributed tracing.
+                    Use NoOpTracing from composition layer if tracing disabled.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -78,6 +81,13 @@ class GoldWriter:
         self.logger = logger
         self.csv_exporter = csv_exporter
         self._audit = audit
+
+        # Use NoOpTracing if not provided
+        if tracing is None:
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            self._tracing = NoOpTracing()
+        else:
+            self._tracing = tracing
 
     async def write_gold(
         self,
@@ -111,34 +121,40 @@ class GoldWriter:
             ValueError: If mode is invalid, records empty, schema not strict,
                        or SCD2 mode without ingestion_ts
         """
-        validated_mode = self._validate_write_mode(mode)
-        self._validate_records(records)
-        self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
-        self._validate_schema_strict(schema)
-        await self._validate_records_against_schema(records, schema)
+        tracer = self._tracing.get_tracer(__name__)
+        with tracer.start_as_current_span("write_gold") as span:
+            span.set_attribute("table_name", table_name)
+            span.set_attribute("mode", mode)
+            span.set_attribute("record_count", len(records))
 
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+            validated_mode = self._validate_write_mode(mode)
+            self._validate_records(records)
+            self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
+            self._validate_schema_strict(schema)
+            await self._validate_records_against_schema(records, schema)
 
-        await self._dispatch_write(
-            validated_mode,
-            table_path,
-            table_name,
-            records,
-            partition_cols,
-            primary_keys,
-            schema,
-            scd_config,
-            ingestion_ts,
-        )
+            table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
-        if self._audit:
-            await self._log_gold_audit(
-                table_name=table_name,
-                records=records,
-                mode=validated_mode,
-                ingestion_ts=ingestion_ts,
-                run_id=run_id,
+            await self._dispatch_write(
+                validated_mode,
+                table_path,
+                table_name,
+                records,
+                partition_cols,
+                primary_keys,
+                schema,
+                scd_config,
+                ingestion_ts,
             )
+
+            if self._audit:
+                await self._log_gold_audit(
+                    table_name=table_name,
+                    records=records,
+                    mode=validated_mode,
+                    ingestion_ts=ingestion_ts,
+                    run_id=run_id,
+                )
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
         """Validate and return the write mode enum."""
