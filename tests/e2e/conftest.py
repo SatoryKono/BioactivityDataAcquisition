@@ -127,6 +127,18 @@ def e2e_redis_client() -> MockRedisClient:
     return MockRedisClient()
 
 
+class MockMinioClient:
+    """Mock MinIO client for Local-Only architecture (no real MinIO)."""
+
+    pass
+
+
+@pytest.fixture
+def e2e_minio_client() -> MockMinioClient:
+    """Mock MinIO client for E2E tests (Local-Only architecture)."""
+    return MockMinioClient()
+
+
 def create_test_context(
     pipeline_name: str,
     limit: int | None = 10,

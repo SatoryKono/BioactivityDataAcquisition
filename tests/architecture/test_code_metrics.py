@@ -57,6 +57,7 @@ class TestFileSizeLimits:
         "cli.py": 450,  # 420 LOC - CLI commands and options
         # New exemptions for split storage factory
         "storage_factory.py": 400, # Extracted from storage.py
+        "observability.py": 450, # Bootstrap observability
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:

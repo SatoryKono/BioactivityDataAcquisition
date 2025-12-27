@@ -96,7 +96,14 @@ class PipelineExecutor:
 
         self._record_processor = record_processor
         self._run_type = run_type
-        self._tracer = tracer
+
+        # Use NoOpTracing if not provided
+        if tracer is None:
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            self._tracer = NoOpTracing()
+        else:
+            self._tracer = tracer
+
         self._pipeline_name = pipeline_name
         self._run_id = run_id
         self._logger = logger or services.logger
@@ -166,9 +173,6 @@ class PipelineExecutor:
             The span context manager or None if tracing disabled.
 
         """
-        if not self._tracer:
-            return None
-
         otel_tracer = self._tracer.get_tracer("bioetl.executor")
         span = otel_tracer.start_as_current_span(
             "pipeline_execution",
@@ -412,20 +416,19 @@ class PipelineExecutor:
         span = None
 
         # Start batch tracing span if tracer is available
-        if self._tracer:
-            otel_tracer = self._tracer.get_tracer("bioetl.executor")
-            span = otel_tracer.start_as_current_span(
-                f"batch_{batch_id}",
-                attributes={
-                    "bioetl.batch_id": str(batch_id),
-                    "bioetl.record_count": len(batch),
-                    "bioetl.run_type": self._run_type.value
-                    if self._run_type
-                    else "unknown",
-                    "bioetl.entity_type": self._entity_type,
-                },
-            )
-            span.__enter__()
+        otel_tracer = self._tracer.get_tracer("bioetl.executor")
+        span = otel_tracer.start_as_current_span(
+            f"batch_{batch_id}",
+            attributes={
+                "bioetl.batch_id": str(batch_id),
+                "bioetl.record_count": len(batch),
+                "bioetl.run_type": self._run_type.value
+                if self._run_type
+                else "unknown",
+                "bioetl.entity_type": self._entity_type,
+            },
+        )
+        span.__enter__()
 
         try:
             result = await self._record_processor.process_batch(
