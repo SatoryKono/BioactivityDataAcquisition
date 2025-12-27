@@ -159,6 +159,26 @@ class DataSourceRegistry:
             metrics: MetricsPort | None = None,
             pipeline_name: str = "unknown",
         ) -> DataSourcePort:
+            """Create a data source for the captured provider name.
+
+            This closure captures the provider name from the outer scope and
+            delegates creation to ProviderRegistry.create_data_source().
+
+            Args:
+                settings: Application settings for configuration.
+                pipeline_config: Pipeline-specific YAML configuration.
+                logger: LoggerPort for structured logging.
+                filter_config: Optional input filtering configuration.
+                metrics: Optional MetricsPort for observability.
+                pipeline_name: Pipeline identifier for logging context.
+
+            Returns:
+                DataSourcePort implementation for the provider.
+
+            Note:
+                This is a backward-compatibility wrapper. For new code, prefer
+                using ProviderRegistry.create_data_source() directly.
+            """
             return ProviderRegistry.create_data_source(
                 name=provider,
                 settings=settings,

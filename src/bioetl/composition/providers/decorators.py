@@ -78,6 +78,22 @@ def register_provider(
     """
 
     def decorator(cls: type[T]) -> type[T]:
+        """Inner decorator that performs provider registration.
+
+        Captures configuration from the outer scope and registers the
+        decorated class with ProviderRegistry. Also injects __provider_name__
+        attribute for runtime introspection.
+
+        Args:
+            cls: The adapter class being decorated.
+
+        Returns:
+            The original class unchanged (registration is a side effect).
+
+        Side effects:
+            - Registers provider in ProviderRegistry with captured config
+            - Adds __provider_name__ attribute to the class
+        """
         # Создаём HTTP конфигурацию
         http_config: HttpConfig | None = None
         if requires_http_client:

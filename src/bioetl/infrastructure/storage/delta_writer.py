@@ -122,6 +122,21 @@ class DeltaWriter:
         }
 
         def serialize_value(key: str, value: Any) -> Any:
+            """Serialize complex values to JSON strings for PyArrow compatibility.
+
+            Args:
+                key: Field name to check against string_fields.
+                value: Value to potentially serialize.
+
+            Returns:
+                JSON string if value is dict/list and field is string type,
+                otherwise the original value unchanged.
+
+            Note:
+                Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
+                Complex objects in Gold layer are flattened; Silver preserves
+                JSON for forensic purposes.
+            """
             if value is None:
                 return None
             if key in string_fields and isinstance(value, (dict, list)):
