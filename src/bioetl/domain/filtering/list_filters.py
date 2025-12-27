@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GoldListLengthFilter:
     """Фильтр по длине списка в колонке.
 
@@ -32,7 +32,7 @@ class GoldListLengthFilter:
             )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GoldListContainsFilter:
     """Фильтр на содержание значений в списке (subset).
 

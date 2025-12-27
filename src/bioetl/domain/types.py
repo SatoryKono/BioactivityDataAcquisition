@@ -2,6 +2,35 @@
 
 Implements RULES.md §1 - Domain Layer with pure types and value objects.
 No I/O operations allowed (REQ-ARCH-003).
+
+Type Safety Guidelines:
+1. Use NewType for semantic disambiguation (RunID, EntityID, ContentHash, BatchID)
+2. Use TypedDict for structured dictionaries with known keys
+3. Use Literal for constrained string values
+4. Use frozen dataclasses with slots=True for value objects
+
+Justified Any Type Usage:
+The following patterns are the ONLY acceptable uses of Any in the domain layer:
+
+1. dict[str, Any] for External API Records:
+   - BronzeRecord, SilverRecord from external sources with dynamic schemas
+   - Filtering operations on records with unknown field types
+   - Justification: External APIs have varying schemas per record type
+
+2. **kwargs: Any for Logger Binding:
+   - LoggerPort.bind(**kwargs: Any)
+   - Justification: Structured logging accepts arbitrary context
+
+3. Protocol Method Parameters:
+   - Port interfaces that must work with multiple implementations
+   - Justification: Enables polymorphism while maintaining interface contracts
+
+4. Type-Agnostic Value Normalization:
+   - normalize_value(value: Any) in transformations.py
+   - safe_float/safe_int/safe_str conversion functions
+   - Justification: Must handle any JSON-serializable value type
+
+All other uses of Any require explicit justification in code comments.
 """
 
 from __future__ import annotations

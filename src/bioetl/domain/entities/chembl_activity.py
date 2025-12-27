@@ -1,6 +1,11 @@
 """ChEMBL bioactivity domain entities.
 
 Contains Activity and Assay entities for ChEMBL bioactivity data.
+
+Field Classification:
+- REQUIRED: Validated in __post_init__, will raise ValueError if empty
+- API-OPTIONAL: May or may not be present in API response, defaults to None
+- COMPUTED: Derived from other fields, may be None if source data missing
 """
 
 from __future__ import annotations
@@ -16,12 +21,25 @@ class Activity(BaseEntity):
 
     Contains all fields from ChEMBL activity API endpoint.
     See: https://www.ebi.ac.uk/chembl/api/data/activity
+
+    Required Fields (validated):
+        activity_id: Primary identifier (from BaseEntity fields + this)
+        molecule_chembl_id: Molecule identifier (required for drug discovery)
+        + All BaseEntity fields (entity_id, content_hash, run_id, etc.)
+
+    API-Optional Fields:
+        All other fields may be None depending on the activity record.
+        Gold layer filters should be used to ensure required fields for analysis.
+
+    Validation:
+        - activity_id and molecule_chembl_id must be non-empty
+        - pchembl_value must be non-negative if present
     """
 
-    # Primary identifier
+    # REQUIRED: Primary identifier (validated in __post_init__)
     activity_id: str
 
-    # Core identifiers
+    # REQUIRED: Core identifiers (validated in __post_init__)
     molecule_chembl_id: str
     target_chembl_id: str | None = None
     assay_chembl_id: str | None = None
