@@ -18,7 +18,6 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-import json
 import tempfile
 import time
 from collections.abc import AsyncIterator, Iterator
@@ -26,6 +25,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import orjson
 import zstandard as zstd
 
 if TYPE_CHECKING:
@@ -159,8 +159,8 @@ class BronzeWriter:
 
         for index, record in enumerate(records):
             try:
-                json.loads(record)
-            except json.JSONDecodeError as e:
+                orjson.loads(record)
+            except orjson.JSONDecodeError as e:
                 raise BronzeValidationError(
                     message="Invalid JSON in Bronze record",
                     record_index=index,
@@ -329,9 +329,7 @@ class BronzeWriter:
             # Write data file
             count, size = self._write_atomic_stream(records_iter, full_path)
             # Write metadata file
-            meta_bytes = json.dumps(
-                metadata, sort_keys=True, separators=(",", ":")
-            ).encode("utf-8")
+            meta_bytes = orjson.dumps(metadata, option=orjson.OPT_SORT_KEYS)
             atomic_write_bytes(meta_path, meta_bytes)
             return count, size
 
@@ -479,7 +477,7 @@ class BronzeWriter:
 
         for line in decompressed_data.decode("utf-8").splitlines():
             if line.strip():
-                yield json.loads(line)
+                yield orjson.loads(line)
 
     def _list_batches_local(self, prefix: str, date: datetime | None) -> list[str]:
         """List batch files from local filesystem."""
