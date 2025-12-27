@@ -128,13 +128,13 @@ def bootstrap_pipeline(
     # Merge YAML maintenance config with CLI overrides
     # CLI flags take precedence over YAML config
     vacuum_after_run = (
-        ctx.vacuum_after_run
-        if ctx.vacuum_after_run is not None
+        ctx.vacuum.enabled
+        if ctx.vacuum.enabled
         else yaml_config.maintenance.auto_vacuum
     )
     vacuum_retention_days = (
-        ctx.vacuum_retention_days
-        if ctx.vacuum_retention_days is not None
+        ctx.vacuum.retention_days
+        if ctx.vacuum.enabled
         else yaml_config.maintenance.vacuum_retention_days
     )
 
@@ -149,12 +149,12 @@ def bootstrap_pipeline(
         vacuum_retention_days=vacuum_retention_days,
     )
 
-    # Build filter config using the dedicated builder
+    # Build filter config using the dedicated builder or CLI input_filter
     filter_config = FilterConfigBuilder.build(
         yaml_filter=yaml_config.input_filter,
-        cli_csv=ctx.input_csv,
-        cli_column=ctx.filter_column,
-        cli_field=ctx.filter_field,
+        cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
+        cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
+        cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
     )
 
     if filter_config:
@@ -163,7 +163,7 @@ def bootstrap_pipeline(
             csv_path=filter_config.source_path,
             column=filter_config.column_name,
             filter_field=filter_config.filter_field,
-            source="cli" if ctx.input_csv else "config",
+            source="cli" if ctx.input_filter.enabled else "config",
         )
 
     # Resolve pipeline factory and delegate runner creation

@@ -23,7 +23,7 @@ from bioetl.composition.bootstrap import (
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
-from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.context import InputFilterContext, PipelineRunContext, VacuumConfig
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
@@ -109,18 +109,33 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     Returns:
         PipelineRunContext ready for bootstrap_pipeline.
     """
+    # Build InputFilterContext from CLI options
+    if options.input_csv and options.filter_column and options.filter_field:
+        input_filter = InputFilterContext.from_csv(
+            source_path=options.input_csv,
+            column_name=options.filter_column,
+            filter_field=options.filter_field,
+        )
+    else:
+        input_filter = InputFilterContext.disabled()
+
+    # Build VacuumConfig from CLI options (None means use YAML default)
+    # Note: VacuumConfig here only captures CLI overrides.
+    # The final merge with YAML config happens in bootstrap_pipeline.
+    vacuum = VacuumConfig(
+        enabled=options.vacuum_after_run or False,
+        retention_days=options.vacuum_retention_days or 7,
+    )
+
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),
         run_type=RunType(options.run_type),
         resume=options.resume,
         limit=options.limit,
-        input_csv=options.input_csv,
-        filter_column=options.filter_column,
-        filter_field=options.filter_field,
         dry_run=options.dry_run,
-        vacuum_after_run=options.vacuum_after_run,
-        vacuum_retention_days=options.vacuum_retention_days,
+        input_filter=input_filter,
+        vacuum=vacuum,
     )
 
 
