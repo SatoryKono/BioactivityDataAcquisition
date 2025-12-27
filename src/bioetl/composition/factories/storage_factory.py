@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
     import structlog
 
-    from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -65,6 +65,7 @@ class StorageFactory:
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
         metrics: MetricsPort,
+        tracing: TracingPort | None = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -73,6 +74,7 @@ class StorageFactory:
             config: Pipeline YAML configuration
             logger: Structured logger
             metrics: Metrics port for Bronze observability (MUST be injected).
+            tracing: Optional TracingPort for distributed tracing.
 
         Returns:
             StorageContext with adapter and paths
@@ -121,16 +123,19 @@ class StorageFactory:
                 save_json=save_json,
                 json_path=json_path,
                 metrics=metrics,
+                tracing=tracing,
             ),
             silver_writer=DeltaWriter(
                 base_path=silver_path,
                 logger=logger,
                 csv_exporter=silver_csv_exporter,
+                tracing=tracing,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
                 logger=logger,
                 csv_exporter=gold_csv_exporter,
+                tracing=tracing,
             ),
         )
 
