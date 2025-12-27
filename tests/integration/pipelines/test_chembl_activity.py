@@ -90,6 +90,11 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         silver_df = dt_silver.to_pyarrow_table()
         assert len(silver_df) > 0
 
+        # Verify lineage fields in Silver
+        assert "_run_id" in silver_df.column_names
+        assert "_run_type" in silver_df.column_names
+        assert "_ingestion_ts" in silver_df.column_names
+
         # Verify Gold Delta Table
         # Check what the factory uses if gold_table is None
         # runner.pipeline.config.gold_table might be None if config doesn't set it.
