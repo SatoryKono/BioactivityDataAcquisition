@@ -82,3 +82,8 @@ class OpenTelemetryTracer:
 # NOTE: NoOpTracer has been removed from this module to eliminate duplication.
 # Use bioetl.infrastructure.observability.noop_tracing.NoOpTracing instead.
 # This is the single source of truth for no-op tracing implementations.
+
+# Backward-compatible re-export for existing imports
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+__all__ = ["OpenTelemetryTracer", "NoOpTracing"]
