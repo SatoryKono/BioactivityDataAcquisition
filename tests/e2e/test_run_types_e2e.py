@@ -52,14 +52,14 @@ class TestIncrementalRunType:
         """E2E: Incremental run should not clear existing data."""
         from bioetl.application.core.medallion_policy import MedallionPolicy
 
-        policy = MedallionPolicy()
+        policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
 
         # Incremental should NOT clear Silver
-        should_clear_silver = policy.should_clear_silver(RunType.INCREMENTAL)
+        should_clear_silver = policy.should_clear_silver
         assert should_clear_silver is False
 
         # Incremental should NOT clear Gold
-        should_clear_gold = policy.should_clear_gold(RunType.INCREMENTAL)
+        should_clear_gold = policy.should_clear_gold
         assert should_clear_gold is False
 
     async def test_incremental_appends_bronze(self, mock_logger: MagicMock):
@@ -86,14 +86,14 @@ class TestBackfillRunType:
         """E2E: Backfill run should clear Silver and Gold layers."""
         from bioetl.application.core.medallion_policy import MedallionPolicy
 
-        policy = MedallionPolicy()
+        policy = MedallionPolicy.for_run_type(RunType.BACKFILL)
 
         # Backfill SHOULD clear Silver
-        should_clear_silver = policy.should_clear_silver(RunType.BACKFILL)
+        should_clear_silver = policy.should_clear_silver
         assert should_clear_silver is True
 
         # Backfill SHOULD clear Gold
-        should_clear_gold = policy.should_clear_gold(RunType.BACKFILL)
+        should_clear_gold = policy.should_clear_gold
         assert should_clear_gold is True
 
     async def test_backfill_preserves_bronze(self, mock_logger: MagicMock):
@@ -129,14 +129,14 @@ class TestRebuildRunType:
         """E2E: Rebuild should clear Silver and Gold layers."""
         from bioetl.application.core.medallion_policy import MedallionPolicy
 
-        policy = MedallionPolicy()
+        policy = MedallionPolicy.for_run_type(RunType.REBUILD)
 
         # Rebuild SHOULD clear Silver
-        should_clear_silver = policy.should_clear_silver(RunType.REBUILD)
+        should_clear_silver = policy.should_clear_silver
         assert should_clear_silver is True
 
         # Rebuild SHOULD clear Gold
-        should_clear_gold = policy.should_clear_gold(RunType.REBUILD)
+        should_clear_gold = policy.should_clear_gold
         assert should_clear_gold is True
 
     async def test_rebuild_starts_fresh(self, mock_logger: MagicMock):
@@ -171,20 +171,20 @@ class TestRunTypeTransitions:
         """E2E: Incremental run after rebuild should work normally."""
         from bioetl.application.core.medallion_policy import MedallionPolicy
 
-        policy = MedallionPolicy()
+        policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
 
         # After a rebuild, incremental should not clear
-        should_clear = policy.should_clear_silver(RunType.INCREMENTAL)
+        should_clear = policy.should_clear_silver
         assert should_clear is False
 
     async def test_backfill_after_incremental(self, mock_logger: MagicMock):
         """E2E: Backfill after incremental should clear data."""
         from bioetl.application.core.medallion_policy import MedallionPolicy
 
-        policy = MedallionPolicy()
+        policy = MedallionPolicy.for_run_type(RunType.BACKFILL)
 
         # Backfill always clears, regardless of previous run type
-        should_clear = policy.should_clear_silver(RunType.BACKFILL)
+        should_clear = policy.should_clear_silver
         assert should_clear is True
 
 
@@ -243,16 +243,14 @@ class TestMedallionPolicyIntegration:
         """E2E: Policy decisions should respect run type."""
         from bioetl.application.core.medallion_policy import MedallionPolicy
 
-        policy = MedallionPolicy()
-
         # Different run types should have different policies
-        inc_clear = policy.should_clear_silver(RunType.INCREMENTAL)
-        backfill_clear = policy.should_clear_silver(RunType.BACKFILL)
-        rebuild_clear = policy.should_clear_silver(RunType.REBUILD)
+        inc_policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
+        backfill_policy = MedallionPolicy.for_run_type(RunType.BACKFILL)
+        rebuild_policy = MedallionPolicy.for_run_type(RunType.REBUILD)
 
-        assert inc_clear is False
-        assert backfill_clear is True
-        assert rebuild_clear is True
+        assert inc_policy.should_clear_silver is False
+        assert backfill_policy.should_clear_silver is True
+        assert rebuild_policy.should_clear_silver is True
 
     async def test_silver_write_mode_enum(self):
         """E2E: SilverWriteMode enum should have expected values."""

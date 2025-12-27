@@ -55,6 +55,8 @@ class TestFileSizeLimits:
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         # Interfaces layer exemptions
         "cli.py": 450,  # 420 LOC - CLI commands and options
+        # New exemptions for split storage factory
+        "storage_factory.py": 400, # Extracted from storage.py
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
