@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class FilterLoadResult:
     """Результат загрузки фильтра ID с метаданными о дубликатах.
 
