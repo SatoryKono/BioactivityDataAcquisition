@@ -1,13 +1,18 @@
 # Консолидированный Архитектурный Обзор BioETL
 
-*Версия: 1.0 | Дата: 2025-12-27*
-*Метод: Двойная верификация согласно `CLAUDE.md` §0 и `docs/REFACTORING_PLAN.md`*
+*Версия: 2.0 | Дата: 2025-12-27 | Обновлено: добавлена верификация 4 планов рефакторинга*
+*Метод: Двойная верификация согласно `CLAUDE.md` §0 и `docs/REFACTORING_PLAN.md` (REQ-ARCH-040)*
 
-> **ИСТОЧНИК**: Анализ и консолидация 4 архитектурных обзоров:
-> 1. `docs/06-architecture-review-2026-01-05.md` (v1) — Score 7.90
-> 2. `docs/ARCHITECTURE_REVIEW_2025-12-27-LLM.md` — Score 8.26
-> 3. `docs/06-architecture-review-2026-01-05.md` (v2) — Score 8.02
-> 4. `docs/04-reference/99-architecture-review-2026-02-06.md` — Score 8.01
+> **ИСТОЧНИКИ**:
+>
+> **Обзор v1 (4 плана из запроса 2025-12-27):**
+> 1. Архитектурный обзор (inline) — Score 7.75
+> 2. `docs/06-reviews/01-architecture-review-2025-12-27.md` — Score 8.29
+> 3. `docs/ARCHITECTURE_REVIEW_2025-12-27-02.md` — Score 8.05
+> 4. Архитектурный обзор (inline) — Score 7.59
+>
+> **Обзор v0 (предыдущий анализ):**
+> - 4 плана с оценками 7.90-8.26
 
 ---
 
