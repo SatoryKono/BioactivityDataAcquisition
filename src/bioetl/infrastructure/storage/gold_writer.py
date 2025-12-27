@@ -627,7 +627,8 @@ class GoldWriter:
             import pyarrow.compute as pc
 
             arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
-        return arrow_table.to_pylist()
+        result: list[dict[str, Any]] = arrow_table.to_pylist()
+        return result
 
     async def get_history(
         self,
@@ -662,4 +663,5 @@ class GoldWriter:
 
         if "valid_from" in arrow_table.column_names:
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
-        return arrow_table.to_pylist()
+        result: list[dict[str, Any]] = arrow_table.to_pylist()
+        return result

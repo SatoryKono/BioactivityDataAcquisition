@@ -5,7 +5,7 @@ Transforms Bronze records to Silver format (Target Component entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.transform_utils import extract_list_field
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -60,7 +60,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
             ),
             # Flattened fields (extracted from protein_classifications)
             "protein_classification_ids": extract_list_field(
-                record.get("protein_classifications"),
+                cast("list[dict[str, Any]] | None", record.get("protein_classifications")),
                 "protein_classification_id",
                 safe_int,
             ),
