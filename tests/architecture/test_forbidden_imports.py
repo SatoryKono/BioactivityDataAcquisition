@@ -265,7 +265,9 @@ class TestInterfacesBootstrapIsolation:
             for pattern in forbidden_patterns:
                 if re.search(pattern, content):
                     relative_path = py_file.relative_to(src_dir)
-                    violations.append(f"{relative_path}: imports from bootstrap directly")
+                    violations.append(
+                        f"{relative_path}: imports from bootstrap directly"
+                    )
                     break
 
         assert not violations, (

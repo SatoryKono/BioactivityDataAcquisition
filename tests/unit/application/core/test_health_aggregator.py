@@ -293,9 +293,7 @@ class TestHealthAggregatorCheckAll:
         assert "API unreachable" in ds_result.error_message
 
     @pytest.mark.asyncio
-    async def test_check_all_records_duration(
-        self, health_aggregator, mock_services
-    ):
+    async def test_check_all_records_duration(self, health_aggregator, mock_services):
         """Test check_all records duration for each component."""
         report = await health_aggregator.check_all(mock_services)
 

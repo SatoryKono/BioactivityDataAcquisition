@@ -229,10 +229,9 @@ def test_domain_purity_ast(src_dir: Path):
             for v in violations
             if any(f"'{f}" in v for f in FORBIDDEN_DOMAIN_FRAMEWORKS)
         ]
-        assert (
-            not strict_violations
-        ), "Domain layer contains strictly forbidden imports.\n" + "\n".join(
-            strict_violations
+        assert not strict_violations, (
+            "Domain layer contains strictly forbidden imports.\n"
+            + "\n".join(strict_violations)
         )
 
 
@@ -324,14 +323,18 @@ def test_ports_are_protocols(src_dir: Path):
     assert ports_dir.is_dir(), f"Ports directory not found: {ports_dir}"
 
     # Collect all port files (exclude __init__.py and noop.py implementations)
-    port_files = [f for f in ports_dir.glob("*.py") if f.name not in ("__init__.py", "noop.py")]
+    port_files = [
+        f for f in ports_dir.glob("*.py") if f.name not in ("__init__.py", "noop.py")
+    ]
     assert port_files, "No port files found in ports directory"
 
     # Check each port file contains Protocol definitions
     for port_file in port_files:
         content = port_file.read_text(encoding="utf-8")
         assert "Protocol" in content, f"{port_file.name} must use Protocol"
-        assert "@runtime_checkable" in content, f"{port_file.name} must use @runtime_checkable"
+        assert "@runtime_checkable" in content, (
+            f"{port_file.name} must use @runtime_checkable"
+        )
 
 
 def test_io_ports_are_async():
@@ -562,9 +565,9 @@ def test_dependencies_versions(pyproject_toml: Path):
         data = tomllib.load(f)
     deps = data.get("project", {}).get("dependencies", [])
     for dep in deps:
-        assert any(
-            op in dep for op in [">=", "==", "~=", "<", ">"]
-        ), f"No version for {dep}"
+        assert any(op in dep for op in [">=", "==", "~=", "<", ">"]), (
+            f"No version for {dep}"
+        )
 
 
 def test_deprecated_files(project_root: Path):

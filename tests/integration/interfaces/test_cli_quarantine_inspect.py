@@ -119,7 +119,14 @@ class TestCliQuarantineInspect:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["quarantine", "inspect", "--pipeline", "chembl_activity", "--limit", "50"],
+                [
+                    "quarantine",
+                    "inspect",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--limit",
+                    "50",
+                ],
             )
 
         # Verify inspect was called with correct limit
@@ -244,11 +251,15 @@ class TestCliQuarantineInspectWithFake:
     ):
         """Test that fake quarantine correctly filters by pipeline."""
         # Get records for chembl_activity
-        chembl_records = await populated_quarantine.inspect("chembl_activity", limit=100)
+        chembl_records = await populated_quarantine.inspect(
+            "chembl_activity", limit=100
+        )
         assert len(chembl_records) == 3
 
         # Get records for pubchem_compound
-        pubchem_records = await populated_quarantine.inspect("pubchem_compound", limit=100)
+        pubchem_records = await populated_quarantine.inspect(
+            "pubchem_compound", limit=100
+        )
         assert len(pubchem_records) == 1
 
         # Get records for non-existent pipeline

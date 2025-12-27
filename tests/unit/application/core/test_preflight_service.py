@@ -192,9 +192,7 @@ class TestPreflightServiceValidation:
         assert len(histogram_calls) == 1
 
     @pytest.mark.asyncio
-    async def test_validate_infrastructure_raises_on_unhealthy(
-        self, preflight_service
-    ):
+    async def test_validate_infrastructure_raises_on_unhealthy(self, preflight_service):
         """Test validate_infrastructure raises InfrastructureError on unhealthy."""
         unhealthy_services = MagicMock()
         unhealthy_services.storage = MagicMock()
@@ -271,8 +269,6 @@ class TestPreflightServiceMetrics:
         assert gauge_calls[0][0][1] == 0.0
 
 
-
-
 @pytest.fixture
 def incremental_runtime():
     """Create an incremental runtime config."""
@@ -315,9 +311,7 @@ class TestValidateMedallionConfig:
         )
         assert errors == []
 
-    def test_silver_format_must_be_delta(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_silver_format_must_be_delta(self, preflight_service, incremental_runtime):
         """Test that Silver format must be 'delta'."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -334,9 +328,7 @@ class TestValidateMedallionConfig:
         assert errors[0].actual == "parquet"
         assert "RULES §4.1" in errors[0].rule
 
-    def test_gold_format_allows_delta(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_gold_format_allows_delta(self, preflight_service, incremental_runtime):
         """Test that Gold format 'delta' is valid."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -348,9 +340,7 @@ class TestValidateMedallionConfig:
         )
         assert errors == []
 
-    def test_gold_format_allows_parquet(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_gold_format_allows_parquet(self, preflight_service, incremental_runtime):
         """Test that Gold format 'parquet' is valid."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -362,9 +352,7 @@ class TestValidateMedallionConfig:
         )
         assert errors == []
 
-    def test_gold_format_rejects_jsonl(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_gold_format_rejects_jsonl(self, preflight_service, incremental_runtime):
         """Test that Gold format 'jsonl' is invalid."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -449,9 +437,7 @@ class TestValidateMedallionConfig:
         path_errors = [e for e in errors if e.field == "storage.paths"]
         assert len(path_errors) == 3
 
-    def test_incremental_policy_no_clear(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_incremental_policy_no_clear(self, preflight_service, incremental_runtime):
         """Test INCREMENTAL run type does not clear layers (policy consistency)."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -463,9 +449,7 @@ class TestValidateMedallionConfig:
         )
 
         # MedallionPolicy for INCREMENTAL should NOT clear - this is consistent
-        policy_errors = [
-            e for e in errors if "medallion_policy" in e.field
-        ]
+        policy_errors = [e for e in errors if "medallion_policy" in e.field]
         assert len(policy_errors) == 0
 
     def test_rebuild_policy_clears_both_layers(
@@ -482,9 +466,7 @@ class TestValidateMedallionConfig:
         )
 
         # MedallionPolicy for REBUILD should clear both - this is consistent
-        policy_errors = [
-            e for e in errors if "medallion_policy" in e.field
-        ]
+        policy_errors = [e for e in errors if "medallion_policy" in e.field]
         assert len(policy_errors) == 0
 
     def test_backfill_policy_clears_both_layers(
@@ -501,9 +483,7 @@ class TestValidateMedallionConfig:
         )
 
         # MedallionPolicy for BACKFILL should clear both - this is consistent
-        policy_errors = [
-            e for e in errors if "medallion_policy" in e.field
-        ]
+        policy_errors = [e for e in errors if "medallion_policy" in e.field]
         assert len(policy_errors) == 0
 
     def test_logs_warning_on_errors(
@@ -540,9 +520,7 @@ class TestValidateMedallionConfig:
         call_args = mock_logger.debug.call_args
         assert "Medallion config validation passed" in str(call_args)
 
-    def test_multiple_errors_accumulated(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_multiple_errors_accumulated(self, preflight_service, incremental_runtime):
         """Test that multiple validation errors are accumulated."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -559,9 +537,7 @@ class TestValidateMedallionConfig:
         assert "sink.silver.format" in fields
         assert "sink.gold.format" in fields
 
-    def test_missing_format_no_error(
-        self, preflight_service, incremental_runtime
-    ):
+    def test_missing_format_no_error(self, preflight_service, incremental_runtime):
         """Test that missing format does not cause errors."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
@@ -675,16 +651,12 @@ class TestRuntimeConfigStrictValidation:
 class TestValidateWriteModes:
     """Tests for PreflightService.validate_write_modes method."""
 
-    def test_valid_write_modes_returns_empty_errors(
-        self, preflight_service
-    ):
+    def test_valid_write_modes_returns_empty_errors(self, preflight_service):
         """Test that valid write modes return no errors."""
         errors = preflight_service.validate_write_modes()
         assert errors == []
 
-    def test_silver_merge_mode_is_valid(
-        self, mock_context, mock_logger, mock_metrics
-    ):
+    def test_silver_merge_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Silver 'merge' mode is valid."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -695,14 +667,15 @@ class TestValidateWriteModes:
             write_mode="merge",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "write_mode"]) == 0
 
-    def test_silver_append_mode_is_valid(
-        self, mock_context, mock_logger, mock_metrics
-    ):
+    def test_silver_append_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Silver 'append' mode is valid."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -713,7 +686,10 @@ class TestValidateWriteModes:
             write_mode="append",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "write_mode"]) == 0
@@ -731,16 +707,17 @@ class TestValidateWriteModes:
             write_mode="overwrite",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         silver_errors = [e for e in errors if e.field == "write_mode"]
         assert len(silver_errors) == 1
         assert "RULES §2.1" in silver_errors[0].rule
 
-    def test_gold_merge_mode_is_valid(
-        self, mock_context, mock_logger, mock_metrics
-    ):
+    def test_gold_merge_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Gold 'merge' mode is valid."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -751,7 +728,10 @@ class TestValidateWriteModes:
             gold_write_mode="merge",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
@@ -769,14 +749,15 @@ class TestValidateWriteModes:
             gold_write_mode="overwrite",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
 
-    def test_gold_scd2_mode_is_valid(
-        self, mock_context, mock_logger, mock_metrics
-    ):
+    def test_gold_scd2_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Gold 'scd2' mode is valid (maps to merge)."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -787,14 +768,15 @@ class TestValidateWriteModes:
             gold_write_mode="scd2",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
 
-    def test_gold_append_mode_is_invalid(
-        self, mock_context, mock_logger, mock_metrics
-    ):
+    def test_gold_append_mode_is_invalid(self, mock_context, mock_logger, mock_metrics):
         """Test that Gold 'append' mode is invalid."""
         config = PipelineConfig(
             pipeline_name="test",
@@ -805,7 +787,10 @@ class TestValidateWriteModes:
             gold_write_mode="append",
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         errors = service.validate_write_modes()
         gold_errors = [e for e in errors if e.field == "gold_write_mode"]
@@ -825,14 +810,15 @@ class TestValidateWriteModes:
             write_mode="overwrite",  # Invalid
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
         service.validate_write_modes()
         mock_logger.warning.assert_called()
 
-    def test_logs_debug_on_valid_modes(
-        self, preflight_service, mock_logger
-    ):
+    def test_logs_debug_on_valid_modes(self, preflight_service, mock_logger):
         """Test that valid write modes are logged as debug."""
         preflight_service.validate_write_modes()
         mock_logger.debug.assert_called()
@@ -937,7 +923,8 @@ class TestValidatePreflight:
 
         # Check metrics were recorded
         gauge_calls = [
-            call for call in mock_metrics.set_gauge.call_args_list
+            call
+            for call in mock_metrics.set_gauge.call_args_list
             if call[0][0] == "preflight_medallion_policy_valid"
         ]
         assert len(gauge_calls) == 1
@@ -945,7 +932,12 @@ class TestValidatePreflight:
 
     @pytest.mark.asyncio
     async def test_validate_preflight_includes_write_mode_errors(
-        self, mock_context, mock_logger, mock_metrics, mock_services, incremental_runtime
+        self,
+        mock_context,
+        mock_logger,
+        mock_metrics,
+        mock_services,
+        incremental_runtime,
     ):
         """Test validate_preflight includes write mode validation errors."""
         config = PipelineConfig(
@@ -957,7 +949,10 @@ class TestValidatePreflight:
             write_mode="overwrite",  # Invalid for Silver
         )
         service = PreflightService(
-            config=config, context=mock_context, logger=mock_logger, metrics=mock_metrics
+            config=config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
         )
 
         report = await service.validate_preflight(

@@ -49,7 +49,11 @@ class TestAsyncPortLifecycle:
         # Check that aclose is async
         aclose_method = port_class.aclose
         # For Protocol classes, we check the annotation
-        hints = get_type_hints(aclose_method) if hasattr(aclose_method, "__annotations__") else {}
+        hints = (
+            get_type_hints(aclose_method)
+            if hasattr(aclose_method, "__annotations__")
+            else {}
+        )
 
         # The method should return None (async def aclose(self) -> None)
         assert hints.get("return") is type(None) or "return" not in hints, (
@@ -252,7 +256,9 @@ class TestStoragePortContract:
         params = sig.parameters
 
         assert "table_name" in params, "vacuum() MUST have table_name parameter"
-        assert "retention_hours" in params, "vacuum() MUST have retention_hours parameter"
+        assert "retention_hours" in params, (
+            "vacuum() MUST have retention_hours parameter"
+        )
         assert "dry_run" in params, "vacuum() MUST have dry_run parameter"
 
     def test_storage_port_archive_has_correct_signature(self) -> None:
@@ -399,7 +405,11 @@ class TestPortDefinitionQuality:
                     for item in node.body:
                         if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
                             # Skip __init__ and private methods
-                            if item.name.startswith("_") and item.name != "__aenter__" and item.name != "__aexit__":
+                            if (
+                                item.name.startswith("_")
+                                and item.name != "__aenter__"
+                                and item.name != "__aexit__"
+                            ):
                                 continue
 
                             # Check for docstring
@@ -460,7 +470,8 @@ class TestPortDefinitionQuality:
                                     and isinstance(body[0].value.value, str)
                                 ):
                                     if isinstance(body[1], ast.Expr) and (
-                                        isinstance(body[1].value, ast.Ellipsis) or (
+                                        isinstance(body[1].value, ast.Ellipsis)
+                                        or (
                                             isinstance(body[1].value, ast.Constant)
                                             and body[1].value.value is ...
                                         )
@@ -643,7 +654,11 @@ class TestRateLimiterPortContract:
 
         acquire_method = ports.RateLimiterPort.acquire
         # For Protocol, check if it's a coroutine function
-        hints = get_type_hints(acquire_method) if hasattr(acquire_method, "__annotations__") else {}
+        hints = (
+            get_type_hints(acquire_method)
+            if hasattr(acquire_method, "__annotations__")
+            else {}
+        )
 
         # The return type should be None (async def acquire() -> None)
         assert hints.get("return") is type(None) or "return" not in hints, (

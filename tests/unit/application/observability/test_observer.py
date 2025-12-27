@@ -333,14 +333,18 @@ class TestObserverEmitEvent:
             observer.emit_event("test_event", LifecyclePhase.EXECUTION)
 
         # Verify span attribute was set
-        mock_span = tracer_mock.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            tracer_mock.get_tracer.return_value.start_as_current_span.return_value
+        )
         mock_span.set_attribute.assert_any_call("bioetl.test_event", True)
 
 
 class TestObserverEmitPhase:
     """Tests for phase start/complete event emission."""
 
-    def test_emit_phase_started_returns_timestamp(self, metrics_mock, logger_mock, run_id):
+    def test_emit_phase_started_returns_timestamp(
+        self, metrics_mock, logger_mock, run_id
+    ):
         """Test emit_phase_started returns valid timestamp."""
         observer = PipelineObserver(
             pipeline_name="test_pipeline",
@@ -374,7 +378,9 @@ class TestObserverEmitPhase:
         )
 
         start_time = observer.emit_phase_started(LifecyclePhase.EXECUTION)
-        observer.emit_phase_completed(LifecyclePhase.EXECUTION, start_time, success=True)
+        observer.emit_phase_completed(
+            LifecyclePhase.EXECUTION, start_time, success=True
+        )
 
         # Find the phase duration metric call
         histogram_calls = metrics_mock.observe_histogram.call_args_list
@@ -401,7 +407,9 @@ class TestObserverEmitPhase:
         import time
 
         start_time = time.monotonic()
-        observer.emit_phase_completed(LifecyclePhase.PREFLIGHT, start_time, success=False)
+        observer.emit_phase_completed(
+            LifecyclePhase.PREFLIGHT, start_time, success=False
+        )
 
         # Verify error was logged for failed phase
         logger_mock.error.assert_called_once()
@@ -433,7 +441,9 @@ class TestObserverHealthCheckEvents:
             {"pipeline": "test_pipeline", "component": "storage"},
         )
 
-    def test_emit_health_check_result_unhealthy(self, metrics_mock, logger_mock, run_id):
+    def test_emit_health_check_result_unhealthy(
+        self, metrics_mock, logger_mock, run_id
+    ):
         """Test emit_health_check_result for unhealthy component."""
         observer = PipelineObserver(
             pipeline_name="test_pipeline",

@@ -57,7 +57,11 @@ class TestPubChemCompoundPipeline:
         config.provider = "pubchem"
         transformer = PubChemCompoundTransformer(provider="pubchem")
         pipeline = PubChemCompoundPipeline(
-            config=config, runtime=MagicMock(), services=MagicMock(), run_id=mock_run_id, transformer=transformer
+            config=config,
+            runtime=MagicMock(),
+            services=MagicMock(),
+            run_id=mock_run_id,
+            transformer=transformer,
         )
 
         record = {

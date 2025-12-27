@@ -268,6 +268,7 @@ class TestErrorContext:
 
     def test_context_on_base_error(self) -> None:
         """Base BioETLError should have empty context if no attrs set."""
+
         # Create a simple subclass without custom __init__
         class SimpleError(BioETLError):
             pass

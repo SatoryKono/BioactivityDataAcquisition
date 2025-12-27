@@ -88,9 +88,7 @@ class InstantiationFinder(ast.NodeVisitor):
                 module_name = node.func.value.id
                 class_name = node.func.attr
                 if (module_name, class_name) in self.forbidden_attrs:
-                    self.violations.append(
-                        (node.lineno, f"{module_name}.{class_name}")
-                    )
+                    self.violations.append((node.lineno, f"{module_name}.{class_name}"))
 
         self.generic_visit(node)
 
@@ -158,7 +156,8 @@ class TestDICompliance:
             "DI violations: Application layer must not instantiate "
             "infrastructure directly.\n"
             "Move instantiation to composition layer (factories/bootstrap).\n\n"
-            "Violations found:\n" + "\n".join(f"  - {v}" for v in violations)
+            "Violations found:\n"
+            + "\n".join(f"  - {v}" for v in violations)
             + "\n\nSee CLAUDE.md §2.2 and §11 for details."
         )
 
@@ -221,7 +220,10 @@ class TestDICompliance:
             (r"self\._\w+\s*=\s*(?!Batch)\w+Adapter\(", "Adapter creation in __init__"),
             (r"self\._\w+\s*=\s*(?!Unified)\w+Client\(", "Client creation in __init__"),
             # Storage layer writers (infrastructure), but NOT BatchWriter (application)
-            (r"self\._\w+\s*=\s*(Bronze|Silver|Gold|Delta)Writer\(", "Storage writer creation in __init__"),
+            (
+                r"self\._\w+\s*=\s*(Bronze|Silver|Gold|Delta)Writer\(",
+                "Storage writer creation in __init__",
+            ),
             # Creating HTTP clients inside methods
             (r"httpx\.(Async)?Client\(\)", "httpx client creation"),
         ]
@@ -238,7 +240,10 @@ class TestDICompliance:
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     for item in node.body:
-                        if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                        if (
+                            isinstance(item, ast.FunctionDef)
+                            and item.name == "__init__"
+                        ):
                             # Get the source lines for __init__
                             init_lines = ast.get_source_segment(content, item)
                             if init_lines:
@@ -291,9 +296,7 @@ class TestDICompliance:
                 if "import httpx" in stripped or "from httpx" in stripped:
                     # Skip if in docstring (rough check)
                     if not stripped.startswith('"""') and not stripped.startswith("#"):
-                        relative = py_file.relative_to(
-                            _get_base_path(APPLICATION_DIR)
-                        )
+                        relative = py_file.relative_to(_get_base_path(APPLICATION_DIR))
                         violations.append(f"{relative}:{i}: {stripped}")
 
         assert not violations, (
@@ -342,9 +345,7 @@ class TestCompositionRootIntegrity:
         assert factories_dir.exists(), (
             "factories/ directory not found in composition layer."
         )
-        assert factories_dir.is_dir(), (
-            "factories should be a directory (package)"
-        )
+        assert factories_dir.is_dir(), "factories should be a directory (package)"
 
         # Check for factory files
         factory_files = list(factories_dir.glob("*_factory.py"))
@@ -375,9 +376,7 @@ class TestCompositionRootIntegrity:
             for line in content.splitlines():
                 if "from bioetl.composition" in line or "from .." in line:
                     # Extract imported module
-                    match = re.search(
-                        r"from bioetl\.composition\.(\w+)", line
-                    )
+                    match = re.search(r"from bioetl\.composition\.(\w+)", line)
                     if match:
                         imports.add(match.group(1))
                     # Relative imports
@@ -395,7 +394,10 @@ class TestCompositionRootIntegrity:
                 if module_b in module_imports:
                     if module_a in module_imports.get(module_b, set()):
                         cycle = f"{module_a} <-> {module_b}"
-                        if cycle not in cycles and f"{module_b} <-> {module_a}" not in cycles:
+                        if (
+                            cycle not in cycles
+                            and f"{module_b} <-> {module_a}" not in cycles
+                        ):
                             cycles.append(cycle)
 
         # Note: Some circular imports in composition may be acceptable
@@ -424,14 +426,21 @@ class TestInfrastructureIsolation:
             content = py_file.read_text(encoding="utf-8")
 
             for i, line in enumerate(content.splitlines(), 1):
-                if "from bioetl.infrastructure" in line or "import bioetl.infrastructure" in line:
+                if (
+                    "from bioetl.infrastructure" in line
+                    or "import bioetl.infrastructure" in line
+                ):
                     # Check not in TYPE_CHECKING
                     in_type_checking = False
                     lines = content.splitlines()
                     for j, check_line in enumerate(lines):
                         if "if TYPE_CHECKING:" in check_line:
                             in_type_checking = True
-                        elif in_type_checking and check_line.strip() and not check_line.startswith((" ", "\t")):
+                        elif (
+                            in_type_checking
+                            and check_line.strip()
+                            and not check_line.startswith((" ", "\t"))
+                        ):
                             in_type_checking = False
                         if j + 1 == i and in_type_checking:
                             break

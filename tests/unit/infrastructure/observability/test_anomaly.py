@@ -218,7 +218,9 @@ class TestAnomalyDetectorSeverityCalculation:
         # Set baseline with values that give mean~100 and stddev~10
         detector.update_baseline("metric", [90.0, 95.0, 100.0, 105.0, 110.0])
 
-        result = detector.detect("metric", 125.0, timestamp=datetime.now(UTC))  # ~2.5 std dev
+        result = detector.detect(
+            "metric", 125.0, timestamp=datetime.now(UTC)
+        )  # ~2.5 std dev
 
         if result:
             assert result.severity in (
@@ -231,7 +233,9 @@ class TestAnomalyDetectorSeverityCalculation:
         # Set baseline with values that give mean~100 and stddev~10
         detector.update_baseline("metric", [90.0, 95.0, 100.0, 105.0, 110.0])
 
-        result = detector.detect("metric", 200.0, timestamp=datetime.now(UTC))  # ~10 std dev
+        result = detector.detect(
+            "metric", 200.0, timestamp=datetime.now(UTC)
+        )  # ~10 std dev
 
         if result:
             assert result.severity in (
@@ -316,7 +320,9 @@ class TestAnomalyDetectorThresholds:
         detector = AnomalyDetector()
         detector.set_threshold("metric", min_value=100, max_value=200)
 
-        result = detector.detect("metric", 50, timestamp=datetime.now(UTC))  # Below minimum
+        result = detector.detect(
+            "metric", 50, timestamp=datetime.now(UTC)
+        )  # Below minimum
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
@@ -327,7 +333,9 @@ class TestAnomalyDetectorThresholds:
         detector = AnomalyDetector()
         detector.set_threshold("metric", min_value=100, max_value=200)
 
-        result = detector.detect("metric", 250, timestamp=datetime.now(UTC))  # Above maximum
+        result = detector.detect(
+            "metric", 250, timestamp=datetime.now(UTC)
+        )  # Above maximum
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
@@ -421,7 +429,9 @@ class TestDataQualityMonitor:
         monitor = DataQualityMonitor()
         monitor.add_metric("record_count", [1000, 1050, 980, 1020, 1010])
 
-        anomalies = monitor.check_quality({"record_count": 1000}, timestamp=datetime.now(UTC))
+        anomalies = monitor.check_quality(
+            {"record_count": 1000}, timestamp=datetime.now(UTC)
+        )
 
         assert anomalies == []
 
@@ -432,7 +442,9 @@ class TestDataQualityMonitor:
         monitor = DataQualityMonitor()
         monitor.add_metric("record_count", [1000, 1050, 980, 1020, 1010])
 
-        anomalies = monitor.check_quality({"record_count": 100}, timestamp=datetime.now(UTC))  # Low value
+        anomalies = monitor.check_quality(
+            {"record_count": 100}, timestamp=datetime.now(UTC)
+        )  # Low value
 
         assert len(anomalies) == 1
 
@@ -443,7 +455,9 @@ class TestDataQualityMonitor:
         monitor = DataQualityMonitor()
         monitor.add_metric("record_count", [1000, 1050, 980])
 
-        monitor.update_baseline_from_metrics({"record_count": 1020}, timestamp=datetime.now(UTC))
+        monitor.update_baseline_from_metrics(
+            {"record_count": 1020}, timestamp=datetime.now(UTC)
+        )
 
         # Baseline should be updated
         assert 1020 in monitor.detector._baselines["record_count"]
@@ -457,7 +471,9 @@ class TestDataQualityMonitor:
         monitor.add_metric("error_rate", [0.01, 0.02, 0.01], max_threshold=0.1)
 
         # This should trigger a critical anomaly (exceeds 0.1 threshold)
-        monitor.update_baseline_from_metrics({"error_rate": 0.5}, timestamp=datetime.now(UTC))
+        monitor.update_baseline_from_metrics(
+            {"error_rate": 0.5}, timestamp=datetime.now(UTC)
+        )
 
         # Baseline should NOT be updated with the anomalous value
         assert 0.5 not in monitor.detector._baselines.get("error_rate", [])

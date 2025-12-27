@@ -742,7 +742,9 @@ class TestPipelineRunnerLifecycle:
             await executor.execute(limit=None)
 
         # Verify checkpoint was saved before shutdown
-        assert checkpoint_save_called, "Checkpoint must be saved during graceful shutdown"
+        assert checkpoint_save_called, (
+            "Checkpoint must be saved during graceful shutdown"
+        )
         assert "checkpoint.save" in list(call_recorder.calls)
 
     @pytest.mark.asyncio
@@ -993,7 +995,9 @@ class TestPipelineRunnerLifecycle:
         async def run_vacuum_if_enabled():
             call_recorder.record("postrun.vacuum")
 
-        mock_postrun_service.run_vacuum_if_enabled = AsyncMock(side_effect=run_vacuum_if_enabled)
+        mock_postrun_service.run_vacuum_if_enabled = AsyncMock(
+            side_effect=run_vacuum_if_enabled
+        )
 
         lock_manager = MagicMock()
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)

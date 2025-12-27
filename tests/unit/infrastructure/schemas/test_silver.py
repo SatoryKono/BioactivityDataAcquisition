@@ -21,14 +21,16 @@ from bioetl.infrastructure.schemas.silver import (
 )
 
 # Required system fields for all Silver schemas
-REQUIRED_SYSTEM_FIELDS = frozenset({
-    "entity_id",
-    "content_hash",
-    "_run_id",
-    "_run_type",
-    "_source_batch_id",
-    "_ingestion_ts",
-})
+REQUIRED_SYSTEM_FIELDS = frozenset(
+    {
+        "entity_id",
+        "content_hash",
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+        "_ingestion_ts",
+    }
+)
 
 
 class TestSchemaExistence:

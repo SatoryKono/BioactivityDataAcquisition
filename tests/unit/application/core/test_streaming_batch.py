@@ -300,7 +300,9 @@ class TestStreamingBatchProcessor:
         batch_id = BatchID(uuid4())
 
         chunk_sizes = []
-        async for chunk in processor.process_in_chunks(records, batch_id, chunk_size=10):
+        async for chunk in processor.process_in_chunks(
+            records, batch_id, chunk_size=10
+        ):
             chunk_sizes.append(len(chunk.silver_records))
 
         # Should process all records in smaller chunks of 5
@@ -404,7 +406,9 @@ class TestIntegration:
         total_gold = 0
         chunk_count = 0
 
-        async for chunk in processor.process_in_chunks(records, batch_id, chunk_size=100):
+        async for chunk in processor.process_in_chunks(
+            records, batch_id, chunk_size=100
+        ):
             total_silver += len(chunk.silver_records)
             total_gold += len(chunk.gold_records)
             chunk_count += 1

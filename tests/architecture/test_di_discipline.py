@@ -96,14 +96,13 @@ class TestDIDiscipline:
                     # Find line numbers for better error messages
                     for i, line in enumerate(content.splitlines(), 1):
                         if pattern in line:
-                            violations.append(
-                                f"{relative}:{i}: {pattern}"
-                            )
+                            violations.append(f"{relative}:{i}: {pattern}")
 
         assert not violations, (
             "DI discipline violations: Application layer must not create "
             "services directly.\n"
             "Move service creation to composition layer (factories/bootstrap).\n\n"
-            "Violations found:\n" + "\n".join(f"  - {v}" for v in violations)
+            "Violations found:\n"
+            + "\n".join(f"  - {v}" for v in violations)
             + "\n\nSee CLAUDE.md §2.2 Dependency Injection for details."
         )

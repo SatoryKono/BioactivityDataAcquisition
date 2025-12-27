@@ -94,7 +94,9 @@ class GoldFilterConfig:
         return 1
 
     @staticmethod
-    def _length_in_bounds(length: int, min_len: int | None, max_len: int | None) -> bool:
+    def _length_in_bounds(
+        length: int, min_len: int | None, max_len: int | None
+    ) -> bool:
         """Проверяет, находится ли длина в допустимых границах."""
         if min_len is not None and length < min_len:
             return False

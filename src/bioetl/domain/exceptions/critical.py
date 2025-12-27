@@ -100,7 +100,9 @@ class InfrastructureError(CriticalError):
 
     error_type = ErrorType.DB_UNAVAILABLE
 
-    def __init__(self, message: str, failed_components: list[str] | None = None) -> None:
+    def __init__(
+        self, message: str, failed_components: list[str] | None = None
+    ) -> None:
         self.failed_components = failed_components or []
         super().__init__(message)
 

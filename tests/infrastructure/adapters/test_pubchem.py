@@ -206,7 +206,9 @@ async def test_health_check_unhealthy_after_multiple_failures(pubchem_adapter):
     """
     # Trigger 3 failures to exceed the threshold (>2 for UNHEALTHY)
     for _ in range(3):
-        with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
+        with patch(
+            "pubchempy.get_compounds", side_effect=Exception("Connection error")
+        ):
             await pubchem_adapter.health_check()
 
     # Now health check should return UNHEALTHY
@@ -286,7 +288,9 @@ async def test_rate_limiter_called_once_per_substance_fetch(
         assert call_count == 1, f"Expected 1 acquire() call, got {call_count}"
 
 
-async def test_rate_limiter_called_once_per_assay_fetch(pubchem_adapter, mock_pcp_assay):
+async def test_rate_limiter_called_once_per_assay_fetch(
+    pubchem_adapter, mock_pcp_assay
+):
     """Test rate limiter is called exactly once for assay fetch."""
     with patch("pubchempy.get_assays", return_value=[mock_pcp_assay]):
         original_acquire = pubchem_adapter.rate_limiter.acquire

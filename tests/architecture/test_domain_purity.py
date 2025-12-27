@@ -51,7 +51,10 @@ class TestDomainImmutability:
 
                     for decorator in node.decorator_list:
                         # Case 1: @dataclass
-                        if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
+                        if (
+                            isinstance(decorator, ast.Name)
+                            and decorator.id == "dataclass"
+                        ):
                             is_dataclass = True
                             # Default is frozen=False
 
@@ -74,10 +77,9 @@ class TestDomainImmutability:
                             f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
                         )
 
-        assert (
-            not violations
-        ), "Found mutable domain dataclasses (must be frozen=True):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        assert not violations, (
+            "Found mutable domain dataclasses (must be frozen=True):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_no_mutable_defaults_in_frozen_dataclasses(self, src_dir: Path) -> None:
@@ -105,7 +107,8 @@ class TestDomainImmutability:
                     is_dataclass = False
                     for decorator in node.decorator_list:
                         if (
-                            isinstance(decorator, ast.Name) and decorator.id == "dataclass"
+                            isinstance(decorator, ast.Name)
+                            and decorator.id == "dataclass"
                         ) or (
                             isinstance(decorator, ast.Call)
                             and (
@@ -123,7 +126,9 @@ class TestDomainImmutability:
                         if isinstance(item, ast.AnnAssign):
                             if item.value:  # Has a default value
                                 is_mutable = False
-                                if isinstance(item.value, (ast.List, ast.Dict, ast.Set)):
+                                if isinstance(
+                                    item.value, (ast.List, ast.Dict, ast.Set)
+                                ):
                                     is_mutable = True
                                 elif isinstance(item.value, ast.Call):
                                     # Check for simple calls like list(), dict(), set()
@@ -244,9 +249,9 @@ class TestDomainComplexity:
             except SyntaxError:
                 continue
 
-        assert (
-            not violations
-        ), f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+        assert not violations, (
+            f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+        )
 
 
 class TestDomainProtocols:

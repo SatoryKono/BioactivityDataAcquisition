@@ -56,9 +56,9 @@ def test_req_data_006_007_silver_is_delta(config_path):
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
-    assert (
-        silver_sink.get("format") == "delta"
-    ), f"Silver format in {config_path} is not 'delta'"
+    assert silver_sink.get("format") == "delta", (
+        f"Silver format in {config_path} is not 'delta'"
+    )
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
@@ -68,9 +68,9 @@ def test_req_data_008_silver_is_merge(config_path):
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
-    assert (
-        silver_sink.get("mode") == "merge"
-    ), f"Silver mode in {config_path} is not 'merge'"
+    assert silver_sink.get("mode") == "merge", (
+        f"Silver mode in {config_path} is not 'merge'"
+    )
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
@@ -82,9 +82,9 @@ def test_req_data_009_gold_is_strict(config_path):
     if "gold" in config.get("sink", {}):
         gold_sink = config.get("sink", {}).get("gold", {})
         # Assuming a 'validation' key or similar
-        assert gold_sink.get("validation", {}).get(
-            "strict", True
-        ), f"Gold validation in {config_path} is not strict"
+        assert gold_sink.get("validation", {}).get("strict", True), (
+            f"Gold validation in {config_path} is not strict"
+        )
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
@@ -94,9 +94,9 @@ def test_req_delta_003_forensic_retention(config_path):
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
-    assert (
-        "forensic_retention" in silver_sink
-    ), f"'forensic_retention' key missing in silver sink of {config_path}"
+    assert "forensic_retention" in silver_sink, (
+        f"'forensic_retention' key missing in silver sink of {config_path}"
+    )
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
@@ -113,9 +113,9 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
             if isinstance(partition_keys, list):
                 for key in partition_keys:
                     for pattern in disallowed_patterns:
-                        assert (
-                            pattern not in key.lower()
-                        ), f"High cardinality key '{key}' used for partitioning in {config_path}"
+                        assert pattern not in key.lower(), (
+                            f"High cardinality key '{key}' used for partitioning in {config_path}"
+                        )
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
@@ -124,18 +124,18 @@ def test_req_load_001_002_load_strategy(config_path):
     config = load_config_with_source(config_path)
 
     source = config.get("source", {})
-    assert (
-        "load_strategy" in source
-    ), f"'load_strategy' missing in source of {config_path}"
+    assert "load_strategy" in source, (
+        f"'load_strategy' missing in source of {config_path}"
+    )
     assert source["load_strategy"] in [
         "incremental",
         "full",
     ], f"Invalid 'load_strategy' in {config_path}"
 
     if source["load_strategy"] == "incremental":
-        assert (
-            "watermark_field" in source
-        ), f"'watermark_field' missing for incremental strategy in {config_path}"
+        assert "watermark_field" in source, (
+            f"'watermark_field' missing for incremental strategy in {config_path}"
+        )
 
 
 # This is a conceptual test for REQ-QUARANTINE-001

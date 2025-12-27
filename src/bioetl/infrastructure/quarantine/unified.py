@@ -180,9 +180,7 @@ class UnifiedQuarantine:
         Returns:
             Count of deleted records.
         """
-        return purge_records(
-            self.base_path, None, pipeline, older_than_days, now=now
-        )
+        return purge_records(self.base_path, None, pipeline, older_than_days, now=now)
 
     def update_status(self, payload_hash: str, new_status: DQStatus) -> bool:
         """Update DQ status for a quarantined record."""

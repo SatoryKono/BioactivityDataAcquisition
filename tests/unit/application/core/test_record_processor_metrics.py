@@ -137,7 +137,12 @@ class TestRecordProcessorMetrics:
         )
 
     async def test_process_batch_records_quarantine_metrics(
-        self, mock_services, mock_metrics, mock_context, mock_error_classifier, mock_gold_validator
+        self,
+        mock_services,
+        mock_metrics,
+        mock_context,
+        mock_error_classifier,
+        mock_gold_validator,
     ):
         """Test that quarantine metrics are recorded correctly."""
         from bioetl.domain.exceptions import DataQualityError

@@ -88,7 +88,9 @@ class TestCliGracefulShutdownExitCode:
     ):
         """Test that PipelineShutdownError results in exit code 130."""
         mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(side_effect=PipelineShutdownError("Shutdown requested"))
+        mock_runner.run = AsyncMock(
+            side_effect=PipelineShutdownError("Shutdown requested")
+        )
         mock_runner.logger = MagicMock()
         mock_runner.shutdown_signal = ShutdownSignal()
 
@@ -234,9 +236,7 @@ class TestRunnerShutdownIntegration:
 
         # Should have logged the shutdown
         mock_logger.warning.assert_called()
-        warning_messages = [
-            str(call) for call in mock_logger.warning.call_args_list
-        ]
+        warning_messages = [str(call) for call in mock_logger.warning.call_args_list]
         assert any("shut down" in msg.lower() for msg in warning_messages)
 
     def test_runner_shutdown_signal_passed_to_setup(
@@ -256,9 +256,7 @@ class TestRunnerShutdownIntegration:
                 "bioetl.interfaces.cli.create_pipeline_runner",
                 return_value=mock_runner,
             ),
-            patch(
-                "bioetl.interfaces.cli.setup_shutdown_handlers"
-            ) as mock_setup,
+            patch("bioetl.interfaces.cli.setup_shutdown_handlers") as mock_setup,
         ):
             cli_runner.invoke(
                 cli,
