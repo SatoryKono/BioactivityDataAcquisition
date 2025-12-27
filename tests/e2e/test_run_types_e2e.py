@@ -13,7 +13,6 @@ Per RULES.md 3.0 Medallion Architecture:
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import uuid4
 

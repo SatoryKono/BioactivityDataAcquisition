@@ -23,8 +23,6 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-from enum import Enum
-import json
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -56,7 +54,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
-
 
 # Re-export SilverWriteMode for backward compatibility
 # Consumers importing from delta_writer will still work
@@ -107,9 +104,8 @@ class DeltaWriter:
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-            self._tracing = NoOpTracing()
-        else:
-            self._tracing = tracing
+            tracing = NoOpTracing()
+        self._tracing: TracingPort = tracing
 
     def _prepare_arrow_data(
         self,

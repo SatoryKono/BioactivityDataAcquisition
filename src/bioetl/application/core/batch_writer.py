@@ -6,9 +6,10 @@ Extracted from RecordProcessor for single responsibility (SRP).
 
 from __future__ import annotations
 
-import orjson
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
+
+import orjson
 
 from bioetl.domain.exceptions import SchemaViolationError
 
@@ -197,13 +198,14 @@ class BatchWriter:
             write_mode = self._table_config.silver_write_mode
             # Convert enum to string value for storage port compatibility
             mode_value = write_mode.value if hasattr(write_mode, "value") else write_mode
+            silver_mode = cast(Literal["merge", "append", "delete"], mode_value)
 
             await self._storage.write_silver(
                 table_name=table_name,
                 records=records_with_meta,
                 primary_keys=list(self._table_config.primary_keys),
                 schema=self._silver_schema,
-                mode=mode_value,
+                mode=silver_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
             )
             self._end_span(span)
@@ -250,6 +252,7 @@ class BatchWriter:
             write_mode = self._table_config.gold_write_mode
             # Convert enum to string value for storage port compatibility
             mode_value = write_mode.value if hasattr(write_mode, "value") else write_mode
+            gold_mode = cast(Literal["overwrite", "append", "scd2"], mode_value)
 
             # Pass ingestion_ts and run_id for audit correlation (ADR-014)
             await self._storage.write_gold(
@@ -257,7 +260,7 @@ class BatchWriter:
                 records=records,
                 schema=gold_schema,
                 primary_keys=list(self._table_config.primary_keys),
-                mode=mode_value,
+                mode=gold_mode,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
             )

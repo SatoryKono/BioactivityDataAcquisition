@@ -11,7 +11,7 @@ Updated: Removed default_transformer_class fallback (REQ-ARCH-DI-007).
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING, Any, ClassVar, Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext

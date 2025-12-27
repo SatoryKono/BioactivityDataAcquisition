@@ -258,8 +258,8 @@ class ServicesBuilder:
             primary_keys=tuple(primary_keys),
             silver_table=silver_table,
             gold_table=gold_table,
-            silver_write_mode=silver_write_mode,  # type: ignore[arg-type]
-            gold_write_mode=gold_write_mode,  # type: ignore[arg-type]
+            silver_write_mode=silver_write_mode,
+            gold_write_mode=gold_write_mode,
             on_schema_mismatch=on_schema_mismatch,  # type: ignore[arg-type]
         )
 
@@ -328,10 +328,10 @@ class ServicesBuilder:
             # Use getattr to avoid MyPy errors if we assume they exist, but runtime will fail if missing.
             # We provide a dummy lambda for safety if methods are strictly missing but user logic
             # handles it elsewhere? No, strict fail is better.
-            gold_filter_cb = getattr(pipeline, "should_write_gold", lambda _c, _r: True)
+            gold_filter_cb = getattr(pipeline, "should_write_gold", lambda _context, _record: True)
 
             # Default identity transform if missing
-            gold_transform_cb = getattr(pipeline, "transform_for_gold", lambda _c, r: r)
+            gold_transform_cb = getattr(pipeline, "transform_for_gold", lambda _context, silver_record: silver_record)
 
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,

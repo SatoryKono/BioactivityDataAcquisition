@@ -19,7 +19,7 @@ import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 
@@ -184,7 +184,7 @@ class FileAuditAdapter:
         entries.sort(key=lambda e: e.timestamp, reverse=True)
         return entries[:limit]
 
-    def _parse_entry(self, data: dict) -> AuditEntry:
+    def _parse_entry(self, data: dict[str, Any]) -> AuditEntry:
         """Parse a dictionary into an AuditEntry.
 
         Args:
