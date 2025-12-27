@@ -41,7 +41,10 @@ def chembl_pipeline():
     )
     config = get_pipeline_config("chembl_activity")
     run_id = uuid4()
-    transformer = ActivityTransformer(provider="chembl")
+    # Create transformer with gold_filters from config
+    transformer = ActivityTransformer(
+        provider="chembl", gold_filters=config.gold_filters
+    )
     pipeline = ChEMBLActivityPipeline.create(
         run_id=run_id,
         runtime=runtime,
