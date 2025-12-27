@@ -64,11 +64,15 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 
 Определяет простые и составные типы данных, используемые во всей системе для обеспечения консистентности и семантической ясности. Примеры: `RunID`, `BatchID`, `Watermark`.
 
-### 2.3. `pipeline_config.py` — Модели Конфигурации
+### 2.3. `config.py` — Конфигурационные Value Objects
 
-**Источник:** `src/bioetl/domain/pipeline_config.py`
+**Источник:** `src/bioetl/domain/config.py`
 
-Содержит Pydantic-модели, которые валидируют и представляют структуру конфигурационных YAML-файлов пайплайнов. Это гарантирует, что любая конфигурация, загруженная в систему, соответствует определённой схеме.
+Содержит dataclass Value Objects для конфигурации пайплайнов:
+- `PipelineConfig` — полная конфигурация пайплайна
+- `RuntimeConfig` — параметры выполнения
+- `DQConfig` — пороги Data Quality
+- `TableConfig` — настройки таблиц
 
 ### 2.4. `error_classifier.py` — Классификатор Ошибок
 
