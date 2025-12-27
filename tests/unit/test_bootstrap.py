@@ -281,7 +281,7 @@ class TestChemblActivityFactory:
         chembl_activity_factory._create_data_source.assert_called_once()
 
     @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.infrastructure.config.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -311,7 +311,7 @@ class TestChemblActivityFactory:
         mock_base_services.create_common_services.assert_called_once()
 
     @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.infrastructure.config.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -341,8 +341,8 @@ class TestChemblActivityFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.composition.factories.runner_assembly.yaml_config_to_domain")
-    @patch("bioetl.composition.factories.generic_factory.load_pipeline_config")
+    @patch("bioetl.infrastructure.config.yaml_config_to_domain")
+    @patch("bioetl.infrastructure.config.load_pipeline_config")
     @patch("bioetl.composition.factories.services_factory.BaseServicesFactory")
     def test_create_with_services(
         self,
