@@ -126,14 +126,29 @@ class StorageAdapter:
         schema: Any,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+        *,
+        ingestion_ts: datetime | None = None,
+        run_id: RunID | None = None,
     ) -> None:
-        """Write aggregated records to Gold layer."""
+        """Write aggregated records to Gold layer.
+
+        Args:
+            table_name: Target table name
+            records: Records to write
+            schema: Pandera schema for validation
+            primary_keys: Optional primary key columns
+            mode: Write mode
+            ingestion_ts: Ingestion timestamp for audit (ADR-014)
+            run_id: Run identifier for audit correlation
+        """
         await self.gold.write_gold(
             table_name=table_name,
             records=records,
             schema=schema,
             primary_keys=primary_keys,
             mode=mode,
+            ingestion_ts=ingestion_ts,
+            run_id=run_id,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:

@@ -41,7 +41,10 @@ def chembl_pipeline():
     )
     config = get_pipeline_config("chembl_activity")
     run_id = uuid4()
-    transformer = ActivityTransformer(provider="chembl")
+    # Create transformer with gold_filters from config
+    transformer = ActivityTransformer(
+        provider="chembl", gold_filters=config.gold_filters
+    )
     pipeline = ChEMBLActivityPipeline.create(
         run_id=run_id,
         runtime=runtime,
@@ -105,7 +108,8 @@ def test_chembl_should_write_gold_true(chembl_pipeline):
         run_type=chembl_pipeline.context.run_type,
         logger=MagicMock(),
     )
-    assert chembl_pipeline.should_write_gold(context, record) is True
+    # Use transformer directly as BasePipeline no longer delegates
+    assert chembl_pipeline.transformer.should_write_gold(context, record) is True
 
 
 def test_chembl_should_write_gold_false(chembl_pipeline):
@@ -121,7 +125,7 @@ def test_chembl_should_write_gold_false(chembl_pipeline):
         "target_chembl_id": "CHEMBL2",
         "standard_type": "IC50",
     }
-    assert chembl_pipeline.should_write_gold(context, record1) is False
+    assert chembl_pipeline.transformer.should_write_gold(context, record1) is False
 
     # No standard units
     record2 = {
@@ -129,11 +133,11 @@ def test_chembl_should_write_gold_false(chembl_pipeline):
         "target_chembl_id": "CHEMBL2",
         "standard_type": "IC50",
     }
-    assert chembl_pipeline.should_write_gold(context, record2) is False
+    assert chembl_pipeline.transformer.should_write_gold(context, record2) is False
 
     # No target
     record3 = {"standard_value": 10.5, "standard_units": "nM", "standard_type": "IC50"}
-    assert chembl_pipeline.should_write_gold(context, record3) is False
+    assert chembl_pipeline.transformer.should_write_gold(context, record3) is False
 
     # Wrong type
     record4 = {
@@ -142,4 +146,4 @@ def test_chembl_should_write_gold_false(chembl_pipeline):
         "target_chembl_id": "CHEMBL2",
         "standard_type": "Other",
     }
-    assert chembl_pipeline.should_write_gold(context, record4) is False
+    assert chembl_pipeline.transformer.should_write_gold(context, record4) is False

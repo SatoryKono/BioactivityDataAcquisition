@@ -195,6 +195,8 @@ module = [
     "opentelemetry.*",
     "orjson",
     "orjson.*",
+    "psutil",
+    "psutil.*",
 ]
 ignore_missing_imports = true
 

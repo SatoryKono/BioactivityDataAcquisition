@@ -1,0 +1,73 @@
+%% BioETL Pipeline Execution Sequence
+%% Shows the complete execution flow from CLI to data storage
+
+sequenceDiagram
+    autonumber
+    participant CLI as CLI
+    participant Boot as bootstrap_pipeline
+    participant Runner as PipelineRunner
+    participant Preflight as PreflightService
+    participant Executor as PipelineExecutor
+    participant DataSource as DataSourcePort
+    participant Transformer as BaseTransformer
+    participant Storage as StoragePort
+    participant Postrun as PostrunService
+
+    %% Bootstrap Phase
+    CLI->>Boot: run(pipeline_name, run_type)
+    activate Boot
+    Boot->>Boot: register_all_providers()
+    Boot->>Boot: load_pipeline_config()
+    Boot->>Boot: bootstrap_observability()
+    Boot->>Boot: create_runner()
+    Boot-->>CLI: PipelineRunner
+    deactivate Boot
+
+    %% Pre-flight Phase
+    CLI->>Runner: run()
+    activate Runner
+    Runner->>Preflight: execute()
+    activate Preflight
+    Preflight->>Storage: health_check()
+    Storage-->>Preflight: HEALTHY
+    Preflight->>DataSource: health_check()
+    DataSource-->>Preflight: HEALTHY
+    Preflight-->>Runner: success
+    deactivate Preflight
+
+    %% Lock Acquisition
+    Runner->>Runner: acquire_lock()
+
+    %% Execution Phase
+    Runner->>Executor: execute()
+    activate Executor
+
+    loop Each Batch
+        Executor->>DataSource: fetch(batch)
+        DataSource-->>Executor: records[]
+
+        Executor->>Transformer: transform(records)
+        Transformer-->>Executor: silver_records[]
+
+        Executor->>Storage: write_bronze(records)
+        Executor->>Storage: write_silver(silver_records)
+        Executor->>Storage: write_gold(gold_records)
+
+        Executor->>Executor: checkpoint()
+    end
+
+    Executor-->>Runner: execution_result
+    deactivate Executor
+
+    %% Post-run Phase
+    Runner->>Postrun: execute()
+    activate Postrun
+    Postrun->>Postrun: run_dq_checks()
+    Postrun->>Storage: vacuum()
+    Postrun-->>Runner: postrun_result
+    deactivate Postrun
+
+    %% Cleanup
+    Runner->>Runner: release_lock()
+    Runner-->>CLI: pipeline_result
+    deactivate Runner
