@@ -12,6 +12,7 @@ from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -42,6 +43,7 @@ def bootstrap_storage() -> StorageAdapter:
     settings = get_settings()
     noop_logger = NoOpLogger()
     noop_metrics = NoOpMetrics()
+    noop_tracing = NoOpTracing()
 
     return StorageAdapter(
         bronze_writer=BronzeWriter(
@@ -50,16 +52,19 @@ def bootstrap_storage() -> StorageAdapter:
             metrics=noop_metrics,
             save_json=False,
             json_path=None,
+            tracing=noop_tracing,
         ),
         silver_writer=DeltaWriter(
             base_path=settings.silver_path,
             logger=noop_logger,
             csv_exporter=None,
+            tracing=noop_tracing,
         ),
         gold_writer=GoldWriter(
             base_path=settings.gold_path,
             logger=noop_logger,
             csv_exporter=None,
+            tracing=noop_tracing,
         ),
     )
 
