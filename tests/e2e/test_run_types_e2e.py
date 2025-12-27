@@ -50,7 +50,7 @@ class TestIncrementalRunType:
 
     async def test_incremental_does_not_clear_data(self, mock_logger: MagicMock):
         """E2E: Incremental run should not clear existing data."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
 
@@ -84,7 +84,7 @@ class TestBackfillRunType:
 
     async def test_backfill_clears_silver_and_gold(self, mock_logger: MagicMock):
         """E2E: Backfill run should clear Silver and Gold layers."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy.for_run_type(RunType.BACKFILL)
 
@@ -127,7 +127,7 @@ class TestRebuildRunType:
 
     async def test_rebuild_clears_all_layers(self, mock_logger: MagicMock):
         """E2E: Rebuild should clear Silver and Gold layers."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy.for_run_type(RunType.REBUILD)
 
@@ -169,7 +169,7 @@ class TestRunTypeTransitions:
 
     async def test_incremental_after_rebuild(self, mock_logger: MagicMock):
         """E2E: Incremental run after rebuild should work normally."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
 
@@ -179,7 +179,7 @@ class TestRunTypeTransitions:
 
     async def test_backfill_after_incremental(self, mock_logger: MagicMock):
         """E2E: Backfill after incremental should clear data."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy.for_run_type(RunType.BACKFILL)
 
@@ -232,7 +232,7 @@ class TestMedallionPolicyIntegration:
 
     async def test_policy_default_values(self):
         """E2E: Policy should have sensible defaults."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         policy = MedallionPolicy()
 
@@ -241,7 +241,7 @@ class TestMedallionPolicyIntegration:
 
     async def test_policy_respects_run_type(self):
         """E2E: Policy decisions should respect run type."""
-        from bioetl.application.core.medallion_policy import MedallionPolicy
+        from bioetl.domain.medallion import MedallionPolicy
 
         # Different run types should have different policies
         inc_policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
