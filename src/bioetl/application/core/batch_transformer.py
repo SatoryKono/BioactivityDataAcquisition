@@ -2,10 +2,13 @@
 
 Handles record transformation, error handling, and quarantine management.
 Extracted from RecordProcessor for single responsibility (SRP).
+
+Supports memory-efficient streaming processing for large datasets.
 """
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -15,6 +18,7 @@ from bioetl.domain.exceptions import DataQualityThresholdError
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.memory_manager import MemoryManager
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,
@@ -152,6 +156,159 @@ class BatchTransformer:
 
         total_count = len(records)
         error_rate = quarantined_count / total_count if total_count > 0 else 0.0
+        dq_config = self._config.dq_config
+
+        if not dq_config:
+            return
+
+        # Hard fail check
+        if dq_config.hard_fail_threshold and error_rate >= dq_config.hard_fail_threshold:
+            raise DataQualityThresholdError(error_rate, dq_config.hard_fail_threshold)
+
+        # Soft fail check with detailed logging
+        if dq_config.soft_fail_threshold and error_rate >= dq_config.soft_fail_threshold:
+            self._context.logger.warning(
+                "DQ Soft Threshold exceeded",
+                error_rate=round(error_rate, 4),
+                threshold=dq_config.soft_fail_threshold,
+                quarantined_count=quarantined_count,
+                total_count=total_count,
+                hard_threshold=dq_config.hard_fail_threshold,
+                pipeline=self._config.pipeline_name,
+            )
+
+    async def transform_batch_streaming(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        chunk_size: int,
+        memory_manager: MemoryManager | None = None,
+    ) -> AsyncIterator[TransformResult]:
+        """Transform records in chunks for memory-efficient processing.
+
+        Generator-based transformation that yields results in chunks,
+        allowing garbage collection between chunks to prevent OOM.
+
+        Args:
+            records: Raw Bronze records to transform.
+            batch_id: Identifier for the current batch.
+            chunk_size: Number of records to process per chunk.
+            memory_manager: Optional memory manager for adaptive chunk sizing.
+
+        Yields:
+            TransformResult for each chunk with silver records, gold records,
+            and quarantine count.
+
+        Raises:
+            DataQualityThresholdError: If DQ hard threshold exceeded.
+        """
+        if not records:
+            return
+
+        total_records = len(records)
+        total_quarantined = 0
+
+        for chunk in self._iter_chunks(records, chunk_size):
+            # Optionally adjust chunk size based on memory pressure
+            effective_chunk_size = chunk_size
+            if memory_manager and memory_manager.is_enabled:
+                effective_chunk_size = memory_manager.get_chunk_size(chunk_size)
+                if effective_chunk_size < chunk_size:
+                    # Re-chunk if memory manager suggests smaller chunks
+                    for sub_chunk in self._iter_chunks(chunk, effective_chunk_size):
+                        result = await self._transform_chunk(sub_chunk, batch_id)
+                        total_quarantined += result.quarantined_count
+                        yield result
+                    continue
+
+            result = await self._transform_chunk(chunk, batch_id)
+            total_quarantined += result.quarantined_count
+            yield result
+
+        # Check DQ thresholds after all chunks processed
+        self._check_dq_thresholds_count(total_records, total_quarantined)
+
+    async def _transform_chunk(
+        self, chunk: list[dict[str, Any]], batch_id: BatchID
+    ) -> TransformResult:
+        """Transform a single chunk of records.
+
+        Args:
+            chunk: Records to transform.
+            batch_id: Batch identifier.
+
+        Returns:
+            TransformResult for this chunk.
+        """
+        silver_records: list[dict[str, Any]] = []
+        gold_records: list[dict[str, Any]] = []
+        records_quarantined = 0
+
+        for raw_record in chunk:
+            record_context = self._context.bind_logger(
+                batch_id=str(batch_id),
+                entity_id=raw_record.get("activity_id"),
+            )
+            try:
+                transformed = await self._transform(record_context, raw_record)
+                if transformed:
+                    silver_records.append(transformed)
+                    if self._gold_filter(record_context, transformed):
+                        gold_record = self._gold_transform(record_context, transformed)
+                        gold_records.append(gold_record)
+            except Exception as e:
+                error_type = self._error_classifier.classify(e)
+                if error_type.is_data_quality():
+                    await self._quarantine_manager.quarantine_record(
+                        raw_record,
+                        error_type,
+                        batch_id,
+                        str(e),
+                        ingestion_ts=self._context.started_at,
+                    )
+                    records_quarantined += 1
+                    self._batch_metrics.track_error("transform", error_type)
+                    self._batch_metrics.track_quarantined_records(error_type, 1)
+                else:
+                    raise
+
+        return TransformResult(
+            silver_records=silver_records,
+            gold_records=gold_records,
+            quarantined_count=records_quarantined,
+        )
+
+    def _iter_chunks(
+        self, records: list[dict[str, Any]], chunk_size: int
+    ) -> Iterator[list[dict[str, Any]]]:
+        """Iterate over records in chunks.
+
+        Args:
+            records: Records to chunk.
+            chunk_size: Maximum records per chunk.
+
+        Yields:
+            Chunks of records.
+        """
+        for i in range(0, len(records), chunk_size):
+            yield records[i : i + chunk_size]
+
+    def _check_dq_thresholds_count(
+        self, total_count: int, quarantined_count: int
+    ) -> None:
+        """Check DQ thresholds using counts (for streaming processing).
+
+        Args:
+            total_count: Total number of records processed.
+            quarantined_count: Number of quarantined records.
+
+        Raises:
+            DataQualityThresholdError: If hard threshold exceeded.
+        """
+        if total_count == 0:
+            return
+
+        error_rate = quarantined_count / total_count
         dq_config = self._config.dq_config
 
         if not dq_config:

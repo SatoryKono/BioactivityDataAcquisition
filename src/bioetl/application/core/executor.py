@@ -3,6 +3,11 @@
 Observability (O2):
 - Root span for each batch with batch_id, record_count, run_type attributes
 - Nested spans for fetch → transform → write operations
+
+Memory Management:
+- Adaptive batch sizing based on memory pressure
+- Automatic batch size reduction under high memory load
+- Gradual recovery when memory pressure decreases
 """
 
 from __future__ import annotations
@@ -10,6 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
+from bioetl.application.core.memory_manager import MemoryConfig, MemoryManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.types import BatchID
 
@@ -19,7 +25,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.record_processor import RecordProcessor
-    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.domain.types import RunType
 
 
@@ -32,6 +38,11 @@ class PipelineExecutor:
     - Root span "batch_{batch_id}" for each batch
     - Span attributes: batch_id, record_count, run_type
     - Nested spans delegated to RecordProcessor
+
+    Memory Management:
+    - Adaptive batch sizing based on memory pressure
+    - Automatic batch size reduction when memory is constrained
+    - Gradual batch size recovery when memory pressure decreases
     """
 
     DEFAULT_BATCH_SIZE = 100
@@ -48,6 +59,8 @@ class PipelineExecutor:
         checkpoint_interval: int | None = None,
         run_type: RunType | None = None,
         tracer: TracingPort | None = None,
+        memory_config: MemoryConfig | None = None,
+        logger: LoggerPort | None = None,
     ):
         """Initialize pipeline executor.
 
@@ -61,13 +74,16 @@ class PipelineExecutor:
             checkpoint_interval: Number of records between checkpoints.
             run_type: Type of pipeline run (for tracing attributes).
             tracer: Optional tracing port for distributed tracing.
+            memory_config: Optional memory management configuration.
+            logger: Optional logger for memory management logs.
 
         """
         self._data_source = services.data_source
         self._checkpoint_manager = checkpoint_manager
         self._shutdown_signal = shutdown_signal
         self._entity_type = entity_type
-        self.batch_size = batch_size or self.DEFAULT_BATCH_SIZE
+        self._base_batch_size = batch_size or self.DEFAULT_BATCH_SIZE
+        self.batch_size = self._base_batch_size
         self.checkpoint_interval = (
             checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
         )
@@ -76,6 +92,10 @@ class PipelineExecutor:
         self._run_type = run_type
         self._tracer = tracer
 
+        # Memory management
+        self._memory_manager = MemoryManager(config=memory_config, logger=logger)
+        self._memory_manager.set_base_batch_size(self._base_batch_size)
+
         # Counters
         self.records_fetched = 0
         self.records_bronze = 0
@@ -83,12 +103,21 @@ class PipelineExecutor:
         self.records_gold = 0
         self.records_quarantined = 0
 
+    @property
+    def memory_manager(self) -> MemoryManager:
+        """Get the memory manager instance."""
+        return self._memory_manager
+
     async def execute(
         self,
         limit: int | None,
         query: str | None = None,
     ) -> None:
-        """Execute the pipeline.
+        """Execute the pipeline with memory-efficient batch processing.
+
+        Uses adaptive batch sizing to prevent OOM errors when processing
+        large datasets. Batch size is automatically reduced under memory
+        pressure and gradually recovered when pressure decreases.
 
         Args:
             limit: Maximum number of records to process.
@@ -96,6 +125,7 @@ class PipelineExecutor:
 
         """
         batch: list[dict[str, Any]] = []
+        current_batch_size = self.batch_size
 
         try:
             async for raw_record in self._extract(limit, query):
@@ -109,9 +139,16 @@ class PipelineExecutor:
                 batch.append(raw_record)
                 self.records_fetched += 1
 
-                if len(batch) >= self.batch_size:
+                if len(batch) >= current_batch_size:
                     await self._process_and_update_counts(batch)
                     batch = []
+
+                    # Adjust batch size based on memory pressure after processing
+                    current_batch_size = self._memory_manager.get_recommended_batch_size(
+                        current_batch_size
+                    )
+                    # Update instance batch_size for observability
+                    self.batch_size = current_batch_size
 
                 if self.records_fetched % self.checkpoint_interval == 0:
                     await self._checkpoint_manager.save_checkpoint(

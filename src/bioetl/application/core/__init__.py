@@ -28,6 +28,12 @@ from bioetl.application.core.lifecycle_orchestrator import (
     LifecycleOrchestrator,
 )
 from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.memory_manager import (
+    MemoryConfig,
+    MemoryManager,
+    MemoryPressure,
+    MemoryStats,
+)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
     DQResult,
@@ -69,6 +75,10 @@ __all__ = [
     "LayerInfo",
     "LifecycleOrchestrator",
     "LockManager",
+    "MemoryConfig",
+    "MemoryManager",
+    "MemoryPressure",
+    "MemoryStats",
     "WriteModePolicy",
     "PipelineConfig",
     "PipelineServices",

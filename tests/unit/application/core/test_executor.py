@@ -8,6 +8,7 @@ import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
+from bioetl.application.core.memory_manager import MemoryConfig, MemoryManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import BatchResult, RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
@@ -229,3 +230,149 @@ class TestPipelineExecutorExecute:
         await executor.execute(limit=100)
 
         assert captured_kwargs.get("limit") == 100
+
+
+@pytest.mark.unit
+class TestPipelineExecutorMemoryManagement:
+    """Tests for memory management features."""
+
+    def test_memory_manager_property(
+        self,
+        mock_services,
+        mock_record_processor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Test that memory_manager property is accessible."""
+        executor = PipelineExecutor(
+            services=mock_services,
+            record_processor=mock_record_processor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            entity_type="test_entity",
+        )
+
+        assert isinstance(executor.memory_manager, MemoryManager)
+
+    def test_custom_memory_config(
+        self,
+        mock_services,
+        mock_record_processor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Test that custom memory config is applied."""
+        config = MemoryConfig(max_batch_memory_mb=1024, enabled=False)
+        executor = PipelineExecutor(
+            services=mock_services,
+            record_processor=mock_record_processor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            entity_type="test_entity",
+            memory_config=config,
+        )
+
+        assert executor.memory_manager.config.max_batch_memory_mb == 1024
+        assert executor.memory_manager.is_enabled is False
+
+    def test_base_batch_size_stored(
+        self,
+        mock_services,
+        mock_record_processor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Test that base batch size is stored for recovery."""
+        executor = PipelineExecutor(
+            services=mock_services,
+            record_processor=mock_record_processor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            entity_type="test_entity",
+            batch_size=200,
+        )
+
+        assert executor._base_batch_size == 200
+        assert executor.batch_size == 200
+
+    def test_memory_management_disabled_by_default_keeps_batch_size(
+        self,
+        mock_services,
+        mock_record_processor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Test that memory management respects enabled flag."""
+        config = MemoryConfig(enabled=False)
+        executor = PipelineExecutor(
+            services=mock_services,
+            record_processor=mock_record_processor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            entity_type="test_entity",
+            batch_size=100,
+            memory_config=config,
+        )
+
+        # When disabled, batch size should remain constant
+        recommended = executor.memory_manager.get_recommended_batch_size(100)
+        assert recommended == 100
+
+    async def test_adaptive_batch_size_updates_during_execution(
+        self,
+        mock_services,
+        mock_record_processor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Test that batch size can be updated during execution."""
+        # Use enabled memory config
+        config = MemoryConfig(enabled=True, max_batch_memory_mb=10000)
+        executor = PipelineExecutor(
+            services=mock_services,
+            record_processor=mock_record_processor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            entity_type="test_entity",
+            batch_size=10,
+            memory_config=config,
+        )
+
+        async def mock_fetch(**kwargs):
+            for i in range(25):
+                yield {"id": str(i), "value": 10}
+
+        mock_services.data_source.fetch = mock_fetch
+        mock_record_processor.process_batch.return_value = BatchResult(
+            bronze_count=10, silver_count=10, gold_count=10, quarantined_count=0
+        )
+
+        await executor.execute(limit=None)
+
+        # Should have processed all records
+        assert executor.records_fetched == 25
+
+
+@pytest.mark.unit
+class TestPipelineExecutorWithLogger:
+    """Tests for executor with logger integration."""
+
+    def test_logger_passed_to_memory_manager(
+        self,
+        mock_services,
+        mock_record_processor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Test that logger is passed to memory manager."""
+        mock_logger = MagicMock()
+        executor = PipelineExecutor(
+            services=mock_services,
+            record_processor=mock_record_processor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            entity_type="test_entity",
+            logger=mock_logger,
+        )
+
+        assert executor.memory_manager._logger is mock_logger

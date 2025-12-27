@@ -10,6 +10,7 @@ import pytest
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.memory_manager import MemoryConfig, MemoryManager
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.config import DQConfig
 from bioetl.domain.context import PipelineContext
@@ -369,3 +370,193 @@ class TestBatchTransformerDQThresholds:
         assert len(result.silver_records) == 2
         assert result.quarantined_count == 0
         mock_context.logger.warning.assert_not_called()
+
+
+@pytest.mark.unit
+class TestBatchTransformerStreaming:
+    """Tests for streaming transformation methods."""
+
+    async def test_transform_batch_streaming_empty_records(self, batch_transformer):
+        """Test streaming transformation with empty records."""
+        batch_id = BatchID(uuid4())
+
+        results = []
+        async for result in batch_transformer.transform_batch_streaming(
+            [], batch_id, chunk_size=10
+        ):
+            results.append(result)
+
+        assert len(results) == 0
+
+    async def test_transform_batch_streaming_single_chunk(self, batch_transformer):
+        """Test streaming transformation that fits in one chunk."""
+        records = [
+            {"id": "1", "value": 10},
+            {"id": "2", "value": 3},
+        ]
+        batch_id = BatchID(uuid4())
+
+        results = []
+        async for result in batch_transformer.transform_batch_streaming(
+            records, batch_id, chunk_size=10
+        ):
+            results.append(result)
+
+        assert len(results) == 1
+        assert len(results[0].silver_records) == 2
+        assert len(results[0].gold_records) == 1  # Only value > 5
+
+    async def test_transform_batch_streaming_multiple_chunks(self, batch_transformer):
+        """Test streaming transformation that spans multiple chunks."""
+        records = [{"id": str(i), "value": 10} for i in range(25)]
+        batch_id = BatchID(uuid4())
+
+        results = []
+        async for result in batch_transformer.transform_batch_streaming(
+            records, batch_id, chunk_size=10
+        ):
+            results.append(result)
+
+        # Should have 3 chunks: 10 + 10 + 5
+        assert len(results) == 3
+        assert len(results[0].silver_records) == 10
+        assert len(results[1].silver_records) == 10
+        assert len(results[2].silver_records) == 5
+
+        # All records should pass gold filter (value > 5)
+        total_gold = sum(len(r.gold_records) for r in results)
+        assert total_gold == 25
+
+    async def test_transform_batch_streaming_with_memory_manager(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        transform_callback,
+        gold_filter_callback,
+        gold_transform_callback,
+    ):
+        """Test streaming with memory manager."""
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        # Create memory manager with disabled state
+        memory_config = MemoryConfig(enabled=False)
+        memory_manager = MemoryManager(config=memory_config)
+
+        records = [{"id": str(i), "value": 10} for i in range(20)]
+        batch_id = BatchID(uuid4())
+
+        results = []
+        async for result in transformer.transform_batch_streaming(
+            records, batch_id, chunk_size=10, memory_manager=memory_manager
+        ):
+            results.append(result)
+
+        # With disabled memory manager, should still process correctly
+        assert len(results) == 2
+        total_silver = sum(len(r.silver_records) for r in results)
+        assert total_silver == 20
+
+    async def test_transform_batch_streaming_aggregates_quarantine_count(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ):
+        """Test that quarantine count is tracked across chunks."""
+
+        async def failing_transform(ctx, record):
+            if int(record.get("id", 0)) % 2 == 0:
+                raise DataQualityError("Even IDs fail")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=failing_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        records = [{"id": str(i), "value": 10} for i in range(10)]
+        batch_id = BatchID(uuid4())
+
+        total_quarantined = 0
+        results = []
+        async for result in transformer.transform_batch_streaming(
+            records, batch_id, chunk_size=5
+        ):
+            results.append(result)
+            total_quarantined += result.quarantined_count
+
+        # 5 records quarantined (IDs 0, 2, 4, 6, 8)
+        assert total_quarantined == 5
+
+
+@pytest.mark.unit
+class TestBatchTransformerIterChunks:
+    """Tests for _iter_chunks helper method."""
+
+    def test_iter_chunks_empty(self, batch_transformer):
+        """Test chunking empty list."""
+        chunks = list(batch_transformer._iter_chunks([], 10))
+        assert chunks == []
+
+    def test_iter_chunks_smaller_than_chunk_size(self, batch_transformer):
+        """Test chunking list smaller than chunk size."""
+        records = [{"id": str(i)} for i in range(5)]
+        chunks = list(batch_transformer._iter_chunks(records, 10))
+
+        assert len(chunks) == 1
+        assert len(chunks[0]) == 5
+
+    def test_iter_chunks_exact_multiple(self, batch_transformer):
+        """Test chunking list that's exact multiple of chunk size."""
+        records = [{"id": str(i)} for i in range(20)]
+        chunks = list(batch_transformer._iter_chunks(records, 10))
+
+        assert len(chunks) == 2
+        assert len(chunks[0]) == 10
+        assert len(chunks[1]) == 10
+
+    def test_iter_chunks_with_remainder(self, batch_transformer):
+        """Test chunking list with remainder."""
+        records = [{"id": str(i)} for i in range(25)]
+        chunks = list(batch_transformer._iter_chunks(records, 10))
+
+        assert len(chunks) == 3
+        assert len(chunks[0]) == 10
+        assert len(chunks[1]) == 10
+        assert len(chunks[2]) == 5
