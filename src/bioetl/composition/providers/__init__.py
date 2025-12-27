@@ -14,7 +14,7 @@ Example:
     >>>
     >>> # Get provider configuration
     >>> config = ProviderRegistry.get("chembl")
-    >>> print(config.http_config.rate)
+    >>> config.http_config.rate
     10.0
 """
 

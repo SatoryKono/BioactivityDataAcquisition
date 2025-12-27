@@ -50,8 +50,9 @@ class PubChemAdapter(BaseSyncAdapter):
         ...     circuit_breaker=circuit_breaker,
         ...     thread_pool=thread_pool,
         ... )
-        >>> async for compound in adapter.fetch("compound", query="aspirin", limit=10):
-        ...     print(f"Compound: {compound['cid']}")
+        >>> compounds = [c async for c in adapter.fetch("compound", query="aspirin", limit=10)]
+        >>> [c['cid'] for c in compounds]  # List of compound IDs
+        [2244, 2245, 2246]
 
     """
 
@@ -269,7 +270,8 @@ class PubChemAdapter(BaseSyncAdapter):
 
         Example:
             >>> status = await adapter.health_check()
-            >>> print(f"PubChem is {status.value}")
+            >>> status.value
+            'healthy'
 
         """
         try:

@@ -151,8 +151,8 @@ class DQMonitorPort(Protocol):
         ...     "record_count": 1000,
         ...     "error_rate": 0.15,
         ... })
-        >>> for a in anomalies:
-        ...     print(f"{a.severity}: {a.message}")
+        >>> [(a.severity, a.message) for a in anomalies]  # Severity and message pairs
+        [('warning', 'Error rate above threshold')]
     """
 
     def add_metric(

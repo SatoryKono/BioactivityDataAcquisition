@@ -31,7 +31,8 @@ class RetryPolicy:
     Example:
         >>> policy = RetryPolicy(max_attempts=5, base_delay=2.0)
         >>> delay = policy.calculate_delay(attempt=0, url="https://api.example.com")
-        >>> print(f"First retry after {delay:.2f} seconds")
+        >>> f"First retry after {delay:.2f} seconds"
+        'First retry after 2.00 seconds'
     """
 
     max_attempts: int = 3
