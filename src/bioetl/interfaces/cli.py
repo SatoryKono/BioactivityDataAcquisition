@@ -241,7 +241,9 @@ def run(
         click.echo("Critical: Logger not initialized.", err=True)
         sys.exit(1)
 
-    setup_shutdown_handlers(getattr(runner, "shutdown_signal", None), logger)
+    shutdown_signal = getattr(runner, "shutdown_signal", None)
+    if shutdown_signal is not None:
+        setup_shutdown_handlers(shutdown_signal, logger)
 
     logger.info("Starting pipeline run")
     try:
