@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.4 (Architecture Documentation Update), 2025-12-25* 
+*Версия: 5.5 (Architecture Review Verification Protocol), 2025-12-27* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -612,9 +612,133 @@ async with services:  # __aenter__ инициализирует ресурсы
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs). 
 - **Именование**: Зеркальное (`src/bioetl/.../{provider}/` <-> `docs/providers/{provider}/`). 
  
-## 7. Управление Изменениями 
- 
-### 7.1. Контракты Данных (Data Contracts) 
+## 7. Протокол Архитектурных Обзоров
+
+### 7.1. Обязательная Двойная Верификация (REQ-ARCH-040)
+
+> **Причина введения**: Анализ 2025-12-27 выявил ~50% ложных утверждений в планах рефакторинга.
+> Утверждения делались без проверки фактического состояния кода.
+
+При проведении архитектурных обзоров **MUST** выполнять двойную верификацию каждой найденной проблемы:
+
+#### 7.1.1. Первая верификация (при обнаружении)
+
+**Немедленно после обнаружения потенциальной проблемы:**
+
+```bash
+# 1. Проверить размер и структуру компонента
+wc -l src/bioetl/path/to/file.py
+grep -c "def \|async def " src/bioetl/path/to/file.py
+
+# 2. Проверить делегирование (признак когезии vs god object)
+grep -n "self\._.*\." src/bioetl/path/to/file.py | head -20
+
+# 3. Сверить с известными ложными утверждениями
+grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/REFACTORING_PLAN.md
+
+# 4. Найти существующие реализации
+grep -r "class ClassName\|def method_name" src/bioetl/
+```
+
+**Критерии подтверждения проблемы:**
+- [ ] Файл прочитан полностью (не только упоминания)
+- [ ] Размер компонента измерен (LOC, количество методов)
+- [ ] Делегирование проанализировано
+- [ ] Проверено в списке известных ложных утверждений
+- [ ] Проверено, что не реализовано ранее
+
+#### 7.1.2. Вторая верификация (при документировании)
+
+**При подготовке итогового документа обзора:**
+
+Каждое утверждение о проблеме **MUST** содержать:
+
+| Поле | Требование |
+|------|------------|
+| **Файл:строки** | Точная ссылка на код (`runner.py:116-123`) |
+| **Размер** | LOC и количество методов |
+| **Структура** | Описание публичных методов и делегирования |
+| **Дата верификации** | Дата проверки кода |
+| **Проверено** | "Нет в REFACTORING_PLAN.md:ЛОЖНЫЕ УТВЕРЖДЕНИЯ ✅" |
+
+**Пример верифицированного утверждения:**
+
+```markdown
+## Проблема: PipelineObserver создаётся в runner
+
+### Верификация
+- **Файл**: `runner.py:116-123` (175 строк, 9 методов)
+- **Код**: `observer = PipelineObserver(...)`
+- **Дата**: 2025-12-27
+- **Проверено**: Нет в REFACTORING_PLAN.md:ЛОЖНЫЕ УТВЕРЖДЕНИЯ ✅
+
+### Текущее состояние
+PipelineRunner.run() создаёт PipelineObserver напрямую вместо получения через DI.
+
+### Влияние
+Усложняет мокирование Observer в unit-тестах.
+```
+
+#### 7.1.3. Запрещённые Паттерны
+
+**MUST NOT** делать утверждения без верификации:
+
+| ❌ Неверно | ✅ Верно |
+|-----------|----------|
+| "PreflightService — god object" | "PreflightService (`preflight_service.py`, 527 LOC, 8 методов) имеет 4 публичных метода с единой ответственностью" |
+| "Компонент перегружен" | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам" |
+| "Нет валидации X" | "Валидация X отсутствует в `file.py` (проверено grep по 'X')" |
+
+#### 7.1.4. Типичные Ложные Выводы
+
+| Паттерн | Почему ошибочен |
+|---------|-----------------|
+| "500+ LOC = god object" | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден |
+| "NoOp default = нарушение DI" | Null Object Pattern валиден для опциональных зависимостей |
+| "Optional parameter = нарушение DI" | `policy: Policy | None = None` — допустимый паттерн для value objects |
+| "click.echo в CLI = нарушение" | User-facing output — законная ответственность interfaces слоя |
+| "Shim file = дублирование" | Re-export для backward compatibility валиден |
+
+### 7.2. Обновление Документации
+
+При обнаружении ложного утверждения **MUST**:
+
+1. Добавить в `docs/REFACTORING_PLAN.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+2. Указать причину, почему утверждение ложно
+3. Добавить ссылку на код (`файл:строка`)
+4. Закоммитить изменения
+
+При реализации задачи **MUST**:
+
+1. Переместить в `docs/REFACTORING_PLAN.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
+2. Добавить ссылку на коммит или файл
+3. Указать дату реализации
+
+### 7.3. Команды Быстрой Верификации
+
+```bash
+# Структура компонента
+wc -l src/bioetl/path/to/file.py
+grep -c "def \|async def " src/bioetl/path/to/file.py
+
+# Делегирование (ищем вызовы сервисов)
+grep -o "self\._[a-z_]*\." src/bioetl/path/to/file.py | sort -u
+
+# Импорты в модуле
+grep "^from\|^import" src/bioetl/path/to/file.py | head -20
+
+# Тесты для компонента
+find tests -name "*.py" -exec grep -l "ClassName" {} \;
+
+# Проверка в списке ложных утверждений
+grep -B2 -A2 "ComponentName" docs/REFACTORING_PLAN.md
+```
+
+---
+
+## 8. Управление Изменениями
+
+### 8.1. Контракты Данных (Data Contracts) 
 - **Реестр Схем**: Gold-схемы публикуются в `docs/contracts/gold/{entity}.json` (JSON Schema). 
 - **Версионирование**: Семантическое версионирование схем: `{entity}_v{major}.{minor}`. 
   - Minor: добавление nullable полей. 
@@ -625,21 +749,21 @@ async with services:  # __aenter__ инициализирует ресурсы
   3. Период депрекации: 2 недели до удаления поля. 
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях. 
  
-### 7.2. Rollback Strategy 
+### 8.2. Rollback Strategy 
 - **Scope**: 
   - **Infrastructure/Code**: Auto Rollback при Error Rate > 10%. 
   - **Data DQ**: Ручной анализ и replay. Ошибки качества данных не должны триггерить автоматический откат версии приложения. 
 - **Manual Rollback**: `make rollback VERSION=...`. 
  
-## 8. Опыт Разработчика (Developer Experience) 
-### 8.1. Локальная настройка 
+## 9. Опыт Разработчика (Developer Experience)
+### 9.1. Локальная настройка 
 ```bash 
 make install      # создание venv, установка зависимостей 
 make test         # unit + integration (на кассетах) 
 make lint         # ruff + mypy 
 make run-local    # запуск сэмплового пайплайна на фикстурах 
 ``` 
-### 8.2. Окружение
+### 9.2. Окружение
 
 > **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
 
@@ -815,6 +939,7 @@ fields:
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
 
 ## История Изменений (Changelog)
+- **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
 - **5.3** (2025-12-24): Determinism and Reproducibility (ADR-014). Добавлен §4.3 с правилами детерминизма. Архитектурные тесты для random и datetime.now().
 - **5.2** (2025-12-23): Local-Only Deployment (ADR-010). Обновлены §3.3 и §8.2 для MemoryLock. ADR-003 superseded.
