@@ -92,9 +92,26 @@ nav:
             -   CLI: 04-reference/cli.md
             -   API:
                     -   Overview: 04-reference/api/index.md
-                    -   Application: 04-reference/api/application.md
-                    -   Domain: 04-reference/api/domain.md
-                    -   Infrastructure: 04-reference/api/infrastructure.md
+                    -   Domain:
+                            -   Overview: 04-reference/api/domain.md
+                            -   Ports: 04-reference/api/domain/ports.md
+                            -   Types: 04-reference/api/domain/types.md
+                            -   Entities: 04-reference/api/domain/entities.md
+                            -   Exceptions: 04-reference/api/domain/exceptions.md
+                    -   Application:
+                            -   Overview: 04-reference/api/application.md
+                            -   Core: 04-reference/api/application/core.md
+                            -   Transformers: 04-reference/api/application/transformers.md
+                            -   Pipelines: 04-reference/api/application/pipelines.md
+                    -   Infrastructure:
+                            -   Overview: 04-reference/api/infrastructure.md
+                            -   Adapters: 04-reference/api/infrastructure/adapters.md
+                            -   Storage: 04-reference/api/infrastructure/storage.md
+                            -   Observability: 04-reference/api/infrastructure/observability.md
+                    -   Composition:
+                            -   Overview: 04-reference/api/composition.md
+                            -   Bootstrap: 04-reference/api/composition/bootstrap.md
+                            -   Factories: 04-reference/api/composition/factories.md
             -   Pipelines:
                     -   "ChEMBL Activity": 04-reference/pipelines/chembl_activity.md
     -   Operations:

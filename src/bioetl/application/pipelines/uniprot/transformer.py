@@ -17,6 +17,7 @@ from bioetl.domain.transformations import generate_entity_id
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
@@ -34,6 +35,7 @@ class UniProtProteinTransformer(BaseTransformer):
         provider: str = "uniprot",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        gold_filters: GoldFilterConfig | None = None,
     ):
         """Initialize UniProt protein transformer.
 
@@ -41,9 +43,12 @@ class UniProtProteinTransformer(BaseTransformer):
             provider: Data provider identifier.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            gold_filters: Optional filter configuration for Gold layer.
 
         """
-        super().__init__(provider, tracer=tracer, metrics=metrics)
+        super().__init__(
+            provider, tracer=tracer, metrics=metrics, gold_filters=gold_filters
+        )
 
     async def _transform_impl(
         self,

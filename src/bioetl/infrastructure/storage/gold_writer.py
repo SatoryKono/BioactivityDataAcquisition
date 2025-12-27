@@ -29,6 +29,7 @@ from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.types import RunID
 
 T = TypeVar("T")
 
@@ -98,6 +99,7 @@ class GoldWriter:
         scd_config: dict[str, Any] | None = None,
         *,
         ingestion_ts: datetime | None = None,
+        run_id: RunID | None = None,
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -110,7 +112,9 @@ class GoldWriter:
             partition_cols: Optional partition columns
             scd_config: Required config for SCD2 mode
             ingestion_ts: Ingestion timestamp from application layer
-                         (single source of time per ADR-014). Required for SCD2 mode.
+                         (single source of time per ADR-014). Required for SCD2 mode
+                         and audit logging.
+            run_id: Run identifier for audit correlation across layers.
 
         Raises:
             ValueError: If mode is invalid, records empty, schema not strict,
@@ -142,6 +146,7 @@ class GoldWriter:
                 records=records,
                 mode=validated_mode,
                 ingestion_ts=ingestion_ts,
+                run_id=run_id,
             )
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
@@ -233,6 +238,7 @@ class GoldWriter:
         records: list[dict[str, Any]],
         mode: GoldWriteMode,
         ingestion_ts: datetime | None,
+        run_id: RunID | None,
     ) -> None:
         """Log audit entry for Gold write operation.
 
@@ -240,18 +246,40 @@ class GoldWriter:
             table_name: Target table name
             records: List of records written
             mode: Write mode used
-            ingestion_ts: Ingestion timestamp (if provided)
+            ingestion_ts: Ingestion timestamp from application layer (ADR-014)
+            run_id: Run identifier for audit correlation across layers
+
+        Note:
+            Uses provided ingestion_ts and run_id for audit correlation.
+            Falls back to current time and generated UUID only if not provided
+            (for backward compatibility with non-pipeline callers).
         """
+        from datetime import UTC
         from uuid import uuid4
 
-        from bioetl.domain.types import RunID
+        # Use provided values or fallback for backward compatibility
+        # ADR-014: Prefer passed values from application layer
+        if ingestion_ts is not None:
+            timestamp = ingestion_ts
+        else:
+            # Fallback for non-pipeline callers (e.g., direct API usage)
+            self.logger.warning(
+                "audit_missing_ingestion_ts",
+                table=table_name,
+                mode=mode.value,
+            )
+            timestamp = datetime.now(UTC)
 
-        # For Gold layer, use provided ingestion_ts or current time
-        timestamp = datetime.now(UTC) if ingestion_ts is None else ingestion_ts
-
-        # Generate a run_id for Gold layer (Gold may not have run_id in records)
-        # Gold records typically come from aggregation/transformation
-        run_id = RunID(uuid4())
+        if run_id is not None:
+            audit_run_id = run_id
+        else:
+            # Fallback for non-pipeline callers
+            self.logger.warning(
+                "audit_missing_run_id",
+                table=table_name,
+                mode=mode.value,
+            )
+            audit_run_id = RunID(uuid4())
 
         # Map GoldWriteMode to AuditOperation
         operation_map = {
@@ -262,7 +290,7 @@ class GoldWriter:
         operation = operation_map[mode]
 
         audit_entry = AuditEntry(
-            run_id=run_id,
+            run_id=audit_run_id,
             timestamp=timestamp,
             layer=AuditLayer.GOLD,
             table_name=table_name,
@@ -599,7 +627,8 @@ class GoldWriter:
             import pyarrow.compute as pc
 
             arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
-        return arrow_table.to_pylist()
+        result: list[dict[str, Any]] = arrow_table.to_pylist()
+        return result
 
     async def get_history(
         self,
@@ -634,4 +663,5 @@ class GoldWriter:
 
         if "valid_from" in arrow_table.column_names:
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
-        return arrow_table.to_pylist()
+        result: list[dict[str, Any]] = arrow_table.to_pylist()
+        return result

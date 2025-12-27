@@ -203,6 +203,3 @@ class BasePipeline(ABC):  # noqa: B024
             f"{self.__class__.__name__} must either receive a transformer via DI "
             "or override transform_bronze_to_silver()"
         )
-
-    # Gold layer transformation and filtering methods have been moved to BaseTransformer.
-    # See src/bioetl/application/core/base_transformer.py
