@@ -147,6 +147,8 @@ class TestStorageAdapter:
             schema=mock_schema,
             primary_keys=None,
             mode="overwrite",
+            ingestion_ts=None,
+            run_id=None,
         )
 
     async def test_aclose_completes(self, storage_adapter):
