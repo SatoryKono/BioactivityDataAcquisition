@@ -44,6 +44,7 @@ class TestFileSizeLimits:
         "base_transformer.py": 540,  # 530 LOC - Template Method with helpers
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
+        "storage_adapter.py": 520,  # 509 LOC - storage adapter with Bronze/Silver/Gold writers
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly
