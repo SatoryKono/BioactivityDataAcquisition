@@ -1,4 +1,4 @@
-# ADR-0005: Декомпозиция BasePipeline
+# ADR-020: Декомпозиция BasePipeline
 
 ## Статус
 

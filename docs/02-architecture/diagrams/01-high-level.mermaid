@@ -1,26 +1,39 @@
 flowchart TD
-    subgraph "External Sources"
-        A[Public APIs e.g., ChEMBL]
+    subgraph Sources["External Data Sources"]
+        A1[ChEMBL API]
+        A2[PubChem API]
+        A3[UniProt API]
+        A4[PubMed API]
     end
 
-    subgraph "BioETL Application"
-        B(Orchestrator)
-        C(Extractor)
-        D(Transformer)
-        E(Loader)
+    subgraph App["BioETL Application"]
+        CLI[CLI bioetl]
+        Boot[Bootstrap / DI]
+        Factory[Pipeline Factory]
+        Runner[Pipeline Runner]
+        Trans[Transformers]
+        Adapters[HTTP Adapters]
+        Storage[Storage Writers]
     end
 
-    subgraph "Data Lake (Medallion)"
-        F[Bronze Layer]
-        G[Silver Layer]
-        H[Gold Layer]
+    subgraph Lake["Data Lake - Local Storage"]
+        Bronze[Bronze Layer]
+        Silver[Silver Layer]
+        Gold[Gold Layer]
+        Quarantine[Quarantine]
     end
 
-    A --> C
-    B --> C
-    C --> F
-    F --> D
-    D --> G
-    G --> H
-    D --> E
-    E --> G
+    A1 --> Adapters
+    A2 --> Adapters
+    A3 --> Adapters
+    A4 --> Adapters
+    CLI --> Boot
+    Boot --> Factory
+    Factory --> Runner
+    Runner --> Trans
+    Trans --> Adapters
+    Trans --> Storage
+    Storage --> Bronze
+    Storage --> Silver
+    Storage --> Gold
+    Trans -.-> Quarantine
