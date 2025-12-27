@@ -39,6 +39,7 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
     TableNotFoundError,
 )
+from bioetl.domain.locking import LockContext, LockNotHeldError
 from bioetl.domain.medallion import (
     Layer,
     SilverWriteMode,
@@ -76,6 +77,7 @@ class DeltaWriter:
         metrics: MetricsPort | None = None,
         audit: AuditPort | None = None,
         tracing: TracingPort | None = None,
+        require_lock: bool = False,
     ) -> None:
         """Initialize Delta writer.
 
@@ -90,6 +92,10 @@ class DeltaWriter:
                   Use NoOpAudit from composition layer if audit disabled.
             tracing: Optional TracingPort for distributed tracing.
                     Use NoOpTracing from composition layer if tracing disabled.
+            require_lock: If True, write operations require valid LockContext.
+                         Set to False for testing or non-concurrent scenarios.
+                         Default is False for backward compatibility. Set to True
+                         in production per RULES.md §3.3.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -100,6 +106,7 @@ class DeltaWriter:
         self._write_policy = write_policy or WriteModePolicy()
         self._metrics = metrics
         self._audit = audit
+        self._require_lock = require_lock
 
         # Use NoOpTracing if not provided
         if tracing is None:
@@ -212,6 +219,58 @@ class DeltaWriter:
             raise ValueError(
                 f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
             ) from None
+
+    def _validate_lock_held(
+        self,
+        table_name: str,
+        lock_context: LockContext | None,
+    ) -> None:
+        """Validate that lock is held before write operation.
+
+        Implements RULES.md §3.3 - Writers MUST verify lock held.
+
+        Args:
+            table_name: Target table name (format: "provider_entity").
+            lock_context: The lock context from application layer.
+
+        Raises:
+            LockNotHeldError: If lock is not held or doesn't match table.
+        """
+        if not self._require_lock:
+            return  # Lock validation disabled (e.g., for tests)
+
+        expected_key = f"lock:{table_name}"
+
+        if lock_context is None:
+            self.logger.error(
+                "Write attempted without lock",
+                table=table_name,
+                expected_key=expected_key,
+            )
+            raise LockNotHeldError("write_silver", expected_key)
+
+        if not lock_context.matches_table(table_name):
+            self.logger.error(
+                "Write attempted with wrong lock",
+                table=table_name,
+                expected_key=expected_key,
+                actual_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                f"write_silver (got {lock_context.key})",
+                expected_key,
+            )
+
+        if not lock_context.is_valid():
+            self.logger.error(
+                "Write attempted with expired lock",
+                table=table_name,
+                lock_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                "write_silver (lock expired)",
+                expected_key,
+            )
 
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
         """Map SilverWriteMode to WriteMode for policy validation.
@@ -383,6 +442,7 @@ class DeltaWriter:
         mode: str = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        lock_context: LockContext | None = None,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -397,17 +457,23 @@ class DeltaWriter:
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            lock_context: Lock context from LockManager. Required unless
+                         require_lock=False was passed to constructor (RULES.md §3.3).
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
             PolicyViolationError: If mode is not allowed for Silver layer
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
+            LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
             span.set_attribute("mode", mode)
             span.set_attribute("record_count", len(records))
+
+            # Validate lock is held before any write operation (RULES.md §3.3)
+            self._validate_lock_held(table_name, lock_context)
 
             validated_mode = self._validate_write_mode(mode)
 
