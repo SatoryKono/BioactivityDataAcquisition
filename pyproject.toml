@@ -35,6 +35,8 @@ dependencies = [
     "click>=8.1",
     # Logging
     "structlog>=24.0",
+    # High-performance JSON serialization (required by batch_writer, bronze_writer, delta_writer)
+    "orjson>=3.9",
 ]
 
 [project.scripts]
@@ -47,7 +49,7 @@ tracing = [
     "opentelemetry-exporter-otlp>=1.20",
 ]
 performance = [
-    "orjson>=3.9",  # High-performance JSON serialization (2-10x faster than stdlib)
+    # orjson moved to main dependencies (required by batch_writer, bronze_writer, delta_writer)
 ]
 dev = [
     "pytest>=8.0",
@@ -59,8 +61,6 @@ dev = [
     "respx>=0.21",
     "mypy>=1.10",
     "ruff>=0.4",
-    # Performance testing
-    "orjson>=3.9",
     # Security tools (RULES.md - SAST)
     "pip-audit>=2.7",
     "bandit[toml]>=1.7",
