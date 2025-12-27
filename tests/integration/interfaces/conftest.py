@@ -14,7 +14,7 @@ from uuid import uuid4
 import pytest
 from click.testing import CliRunner
 
-from bioetl.composition.factories.storage_factory import StorageAdapter, StorageContext
+from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

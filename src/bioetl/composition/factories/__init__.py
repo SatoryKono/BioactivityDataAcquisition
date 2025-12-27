@@ -9,21 +9,21 @@ Usage:
 
 All pipeline factories are auto-registered when this module is imported.
 
-New in v5.1: Client, Storage, and DataSource factories consolidated here from
-infrastructure/factories/ following architectural requirements.
+Structure after consolidation (v5.2):
+- pipeline_factory.py: GenericPipelineFactory, runner assembly, runner services
+- services_factory.py: BaseServicesFactory, ServicesBuilder
+- data_source_factory.py: DataSourceFactory, DataSourceRegistry
+- storage.py: StorageAdapter, StorageContext, StorageFactory
+- http_client_factory.py: HttpClientFactory
+- transformer_factory.py: TransformerFactory functions
+- pipeline_factories.py: Pipeline definitions and registration
 """
 
-# Core factory infrastructure
-from bioetl.composition.factories.data_source_registry import (
+# Core factory infrastructure - from consolidated modules
+from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
+    DataSourceFactory,
     DataSourceRegistry,
-)
-
-# Data source factory
-from bioetl.composition.factories.data_sources import DataSourceFactory
-from bioetl.composition.factories.generic_factory import (
-    GenericPipelineFactory,
-    create_pipeline_factory,
 )
 
 # Import to trigger pipeline registration
@@ -33,21 +33,17 @@ from bioetl.composition.factories.pipeline_factories import (
     pubmed_publications_factory,
     uniprot_protein_factory,
 )
-
-# Runner assembly functions (extracted from GenericPipelineFactory)
-from bioetl.composition.factories.runner_assembly import (
+from bioetl.composition.factories.pipeline_factory import (
+    GenericPipelineFactory,
+    RunnerServices,
     assemble_runner,
     build_pipeline_services,
-)
-
-# Runner services factory (DI for PipelineRunner)
-from bioetl.composition.factories.runner_services import (
-    RunnerServices,
     build_runner_services,
+    create_pipeline_factory,
 )
 
 # Storage factory
-from bioetl.composition.factories.storage_factory import (
+from bioetl.composition.factories.storage import (
     StorageAdapter,
     StorageContext,
     StorageFactory,

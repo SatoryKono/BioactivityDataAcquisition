@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.storage_factory import (
+from bioetl.composition.factories.storage import (
     StorageAdapter,
     StorageContext,
     StorageFactory,

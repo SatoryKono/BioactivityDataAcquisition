@@ -6,13 +6,13 @@ that work with composition-layer constructs.
 
 For actual runtime imports, use the specific modules:
 - ObservabilityBundle: from bioetl.composition.observability
-- StorageAdapter: from bioetl.composition.factories.storage_factory
+- StorageAdapter: from bioetl.composition.factories.storage
 - PipelineRegistry: from bioetl.composition.registry
 """
 
 from __future__ import annotations
 
-from bioetl.composition.factories.storage_factory import StorageAdapter
+from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.registry import PipelineDefinition, PipelineRegistry
 

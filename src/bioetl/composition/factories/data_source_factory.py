@@ -1,36 +1,115 @@
-"""Registry for data source creators.
+# src/bioetl/composition/factories/data_source_factory.py
+"""Consolidated Data Source Factory module.
 
-This module provides backward-compatible access to data source creation
-through DataSourceRegistry, which now delegates to ProviderRegistry.
+Provides factory classes for creating data source adapters:
+- DataSourceFactory: Creates data source adapters using ProviderRegistry
+- DataSourceRegistry: Backward-compatible facade over ProviderRegistry
 
-After the registry unification, the actual creator functions live in
-bioetl.composition.providers.registration module. This module serves as
-a thin facade for backward compatibility.
-
-Note: New code should prefer using ProviderRegistry.create_data_source()
-directly for better clarity.
+Uses ProviderRegistry for unified provider registration and configuration.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, ClassVar
 
-# Re-export DataSourceCreator from ProviderRegistry for backward compatibility
 from bioetl.composition.providers import (
-    DataSourceCreator,
     ProviderRegistry,
     ensure_providers_loaded,
 )
-from bioetl.composition.factories.data_sources import DataSourceFactory
 
 if TYPE_CHECKING:
     from bioetl.domain.filter_config import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+# Type alias for data source creator function
+DataSourceCreator = Callable[
+    [
+        "Settings",
+        "PipelineYamlConfig",
+        "LoggerPort",
+        "InputFilterConfig | None",
+    ],
+    "DataSourcePort",
+]
+
 # Re-export for backward compatibility
-__all__ = ["DataSourceCreator", "DataSourceRegistry", "DataSourceFactory"]
+__all__ = ["DataSourceCreator", "DataSourceFactory", "DataSourceRegistry"]
+
+
+# =============================================================================
+# Data Source Factory
+# =============================================================================
+
+
+class DataSourceFactory:
+    """Factory for creating data source adapters.
+
+    Uses ProviderRegistry for provider lookup and adapter creation.
+    """
+
+    @classmethod
+    def create(
+        cls,
+        provider: str,
+        http_client: UnifiedHTTPClient | None = None,
+        logger: LoggerPort | None = None,
+        settings: Settings | None = None,
+        **kwargs: Any,
+    ) -> DataSourcePort:
+        """Create a data source adapter.
+
+        Uses ProviderRegistry for provider lookup and adapter creation.
+
+        Args:
+            provider: The name of the data provider (e.g., 'chembl', 'pubchem').
+            http_client: The shared HTTP client to use (only for adapters that support it).
+            logger: LoggerPort instance for structured logging.
+            settings: Application settings (for custom creators).
+            **kwargs: Additional keyword arguments to pass to the adapter constructor.
+
+        Returns:
+            An instance of the requested data source adapter.
+
+        Raises:
+            ValueError: If the provider is unknown.
+        """
+        # Ensure providers are loaded
+        ensure_providers_loaded()
+
+        # Validate provider is registered
+        if not ProviderRegistry.is_registered(provider):
+            available = ", ".join(ProviderRegistry.list_providers())
+            raise ValueError(f"Unknown provider: {provider}. Available: {available}")
+
+        # Remove filter_config from kwargs - it's handled by FilteredDataSource wrapper
+        adapter_kwargs = {k: v for k, v in kwargs.items() if k != "filter_config"}
+
+        return ProviderRegistry.create_adapter(
+            provider,
+            http_client=http_client,
+            logger=logger,
+            settings=settings,
+            **adapter_kwargs,
+        )
+
+    @classmethod
+    def list_providers(cls) -> list[str]:
+        """List all available providers.
+
+        Returns:
+            Sorted list of registered provider names.
+        """
+        ensure_providers_loaded()
+        return ProviderRegistry.list_providers()
+
+
+# =============================================================================
+# Data Source Registry (Backward Compatibility Facade)
+# =============================================================================
 
 
 class DataSourceRegistry:
