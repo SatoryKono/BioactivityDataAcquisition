@@ -485,6 +485,8 @@ class DeltaWriter:
                 "source_batch_id": first_record.get("_source_batch_id", ""),
             },
         )
+        # _log_silver_audit is only called when self._audit is not None (caller checks)
+        assert self._audit is not None
         await self._audit.log_write(audit_entry)
 
     async def _merge_records(

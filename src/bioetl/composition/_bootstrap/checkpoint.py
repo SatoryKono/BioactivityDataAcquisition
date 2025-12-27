@@ -7,7 +7,9 @@ and their managers. Used primarily by CLI inspection operations.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -88,6 +90,6 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
         checkpoint_port=checkpoint_port,
         logger=noop_logger,
         pipeline_name=pipeline_name,
-        run_id=uuid4(),  # Dummy run_id for CLI inspection
+        run_id=RunID(uuid4()),  # Dummy run_id for CLI inspection
         resume=False,
     )

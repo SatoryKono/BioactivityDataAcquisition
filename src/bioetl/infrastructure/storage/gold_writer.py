@@ -272,6 +272,8 @@ class GoldWriter:
                 "write_mode": mode.value,
             },
         )
+        # _log_gold_audit is only called when self._audit is not None (caller checks)
+        assert self._audit is not None
         await self._audit.log_write(audit_entry)
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
