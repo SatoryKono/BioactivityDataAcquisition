@@ -147,7 +147,7 @@ def patch_storage_factory(storage_paths: dict[str, Path]):
         return create_local_storage_context(storage_paths, config, logger)
 
     with patch(
-        "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+        "bioetl.composition.factories.storage.StorageFactory.create",
         side_effect=_create_storage,
     ):
         yield
