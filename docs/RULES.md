@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.6 (Anti-False-Claims Protocol), 2025-12-27* 
+*Версия: 5.7 (Pre-Refactoring Verification), 2025-12-27* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -619,6 +619,9 @@ async with services:  # __aenter__ инициализирует ресурсы
 > **Причина введения**: Анализ 2025-12-27 выявил ~50% ложных утверждений в планах рефакторинга.
 > Утверждения делались без проверки фактического состояния кода.
 
+> **⚠️ ОБЯЗАТЕЛЬНО**: Перед предложением рефакторинга **MUST** выполнить верификацию согласно
+> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/REFACTORING_PLAN.md`.
+
 При проведении архитектурных обзоров **MUST** выполнять двойную верификацию каждой найденной проблемы:
 
 #### 7.1.1. Первая верификация (при обнаружении)
@@ -981,6 +984,7 @@ fields:
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
 
 ## История Изменений (Changelog)
+- **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с CLAUDE.md §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в REFACTORING_PLAN.md.
 - **5.6** (2025-12-27): Anti-False-Claims Protocol (REQ-ARCH-041). Расширена §7 с детальными правилами анализа делегирования (§7.1.6), причинами ложных утверждений (§7.1.5), контрпримерами (ChemblAdapter, GoldWriter, PreflightService). Добавлены конкретные примеры из кодовой базы в §7.1.4.
 - **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
