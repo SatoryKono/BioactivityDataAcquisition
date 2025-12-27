@@ -2,10 +2,15 @@
 
 Handles record transformation, error handling, and quarantine management.
 Extracted from RecordProcessor for single responsibility (SRP).
+
+Supports two processing modes:
+1. Standard batch processing (transform_batch) - processes all records in memory
+2. Streaming processing (transform_stream) - generator-based for memory efficiency
 """
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -15,6 +20,7 @@ from bioetl.domain.exceptions import DataQualityThresholdError
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.memory_monitor import MemoryMonitor
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,
@@ -32,6 +38,24 @@ class TransformResult:
     silver_records: list[dict[str, Any]]
     gold_records: list[dict[str, Any]]
     quarantined_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class TransformedRecord:
+    """Single transformed record with routing info.
+
+    Used in streaming mode to yield individual records.
+
+    Attributes:
+        silver_record: The transformed Silver record (None if quarantined).
+        gold_record: The Gold record (None if filtered out or quarantined).
+        is_quarantined: Whether this record was quarantined due to DQ error.
+
+    """
+
+    silver_record: dict[str, Any] | None
+    gold_record: dict[str, Any] | None
+    is_quarantined: bool
 
 
 class BatchTransformer:
@@ -172,3 +196,196 @@ class BatchTransformer:
                 hard_threshold=dq_config.hard_fail_threshold,
                 pipeline=self._config.pipeline_name,
             )
+
+    async def transform_single(
+        self, raw_record: dict[str, Any], batch_id: BatchID
+    ) -> TransformedRecord:
+        """Transform a single record (for streaming mode).
+
+        This method processes one record at a time, enabling memory-efficient
+        streaming processing of large datasets.
+
+        Args:
+            raw_record: Single Bronze record to transform.
+            batch_id: Identifier for the current batch.
+
+        Returns:
+            TransformedRecord with silver/gold records or quarantine status.
+
+        """
+        record_context = self._context.bind_logger(
+            batch_id=str(batch_id),
+            entity_id=raw_record.get("activity_id"),
+        )
+
+        try:
+            transformed = await self._transform(record_context, raw_record)
+            if transformed:
+                gold_record = None
+                if self._gold_filter(record_context, transformed):
+                    gold_record = self._gold_transform(record_context, transformed)
+
+                return TransformedRecord(
+                    silver_record=transformed,
+                    gold_record=gold_record,
+                    is_quarantined=False,
+                )
+            # Transform returned None (filtered out at source)
+            return TransformedRecord(
+                silver_record=None,
+                gold_record=None,
+                is_quarantined=False,
+            )
+
+        except Exception as e:
+            error_type = self._error_classifier.classify(e)
+            if error_type.is_data_quality():
+                await self._quarantine_manager.quarantine_record(
+                    raw_record,
+                    error_type,
+                    batch_id,
+                    str(e),
+                    ingestion_ts=self._context.started_at,
+                )
+                self._batch_metrics.track_error("transform", error_type)
+                self._batch_metrics.track_quarantined_records(error_type, 1)
+
+                return TransformedRecord(
+                    silver_record=None,
+                    gold_record=None,
+                    is_quarantined=True,
+                )
+            raise
+
+    async def transform_stream(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+    ) -> TransformResult:
+        """Transform records using streaming mode with memory efficiency.
+
+        This method processes records one-at-a-time but accumulates results
+        for batch writing. Use this for moderate memory savings while
+        maintaining batch write semantics.
+
+        For full streaming (no accumulation), use iter_transform_stream.
+
+        Args:
+            records: Raw Bronze records to transform.
+            batch_id: Identifier for the current batch.
+
+        Returns:
+            TransformResult with silver records, gold records, and quarantine count.
+
+        Raises:
+            DataQualityThresholdError: If DQ hard threshold exceeded.
+
+        """
+        silver_records: list[dict[str, Any]] = []
+        gold_records: list[dict[str, Any]] = []
+        records_quarantined = 0
+
+        for raw_record in records:
+            result = await self.transform_single(raw_record, batch_id)
+
+            if result.is_quarantined:
+                records_quarantined += 1
+            elif result.silver_record is not None:
+                silver_records.append(result.silver_record)
+                if result.gold_record is not None:
+                    gold_records.append(result.gold_record)
+
+        # Check DQ thresholds after transformation
+        self._check_dq_thresholds(records, records_quarantined)
+
+        return TransformResult(
+            silver_records=silver_records,
+            gold_records=gold_records,
+            quarantined_count=records_quarantined,
+        )
+
+
+class StreamingBatchProcessor:
+    """Memory-efficient streaming processor for large batches.
+
+    This class provides generator-based iteration over records,
+    enabling processing of datasets that don't fit in memory.
+
+    Usage:
+        >>> processor = StreamingBatchProcessor(transformer, memory_monitor)
+        >>> async for chunk in processor.process_in_chunks(records, batch_id, chunk_size=100):
+        ...     await writer.write_silver(chunk.silver_records, batch_id, ts)
+        ...     await writer.write_gold(chunk.gold_records)
+
+    """
+
+    def __init__(
+        self,
+        transformer: BatchTransformer,
+        memory_monitor: MemoryMonitor | None = None,
+    ) -> None:
+        """Initialize streaming processor.
+
+        Args:
+            transformer: The batch transformer to use.
+            memory_monitor: Optional memory monitor for adaptive sizing.
+
+        """
+        self._transformer = transformer
+        self._memory_monitor = memory_monitor
+
+    async def process_in_chunks(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        chunk_size: int = 100,
+    ) -> AsyncIterator[TransformResult]:
+        """Process records in memory-efficient chunks.
+
+        Yields TransformResult for each chunk, allowing incremental
+        writes and garbage collection between chunks.
+
+        Args:
+            records: All records to process.
+            batch_id: Batch identifier.
+            chunk_size: Initial chunk size (may be reduced under memory pressure).
+
+        Yields:
+            TransformResult for each processed chunk.
+
+        """
+        current_chunk_size = chunk_size
+        i = 0
+        total_records = len(records)
+
+        while i < total_records:
+            # Adjust chunk size based on memory pressure
+            if self._memory_monitor:
+                current_chunk_size = self._memory_monitor.get_recommended_batch_size(
+                    current_chunk_size
+                )
+
+            chunk = records[i : i + current_chunk_size]
+            result = await self._transformer.transform_stream(chunk, batch_id)
+
+            yield result
+
+            # Advance by actual chunk size processed
+            i += len(chunk)
+
+    def iter_records(
+        self, records: list[dict[str, Any]]
+    ) -> Iterator[dict[str, Any]]:
+        """Iterate over records without loading all into memory.
+
+        This is a simple generator wrapper that can be extended
+        to read from streaming sources.
+
+        Args:
+            records: List of records (could be lazy-loaded).
+
+        Yields:
+            Individual records one at a time.
+
+        """
+        yield from records

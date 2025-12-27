@@ -20,6 +20,7 @@ def mock_services():
     """Create mock pipeline services."""
     services = MagicMock(spec=PipelineServices)
     services.data_source = AsyncMock()
+    services.logger = MagicMock()
     return services
 
 
