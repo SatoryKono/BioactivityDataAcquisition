@@ -244,3 +244,30 @@ class PipelineYamlConfig(BaseModel):
         if not v.islower():
             raise ValueError("provider must be lowercase")
         return v
+
+    @model_validator(mode="after")
+    def validate_medallion_formats(self) -> PipelineYamlConfig:
+        """Validate Medallion Architecture format constraints.
+
+        RULES.md §2.1: Silver and Gold MUST use Delta Lake format.
+        Bronze MAY use JSONL (preferred) or Delta.
+
+        Raises:
+            ValueError: If Silver or Gold layer uses Parquet format.
+        """
+        silver_config = self.sink.get("silver")
+        gold_config = self.sink.get("gold")
+
+        if silver_config and silver_config.format == "parquet":
+            raise ValueError(
+                "Silver layer MUST use 'delta' format (RULES.md §2.1). "
+                "Parquet is not allowed for Silver layer."
+            )
+
+        if gold_config and gold_config.format == "parquet":
+            raise ValueError(
+                "Gold layer MUST use 'delta' format (RULES.md §2.1). "
+                "Parquet is not allowed for Gold layer."
+            )
+
+        return self

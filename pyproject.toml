@@ -210,9 +210,8 @@ module = [
 ]
 disallow_untyped_decorators = false
 
-# Allow subclassing Any for pydantic/pandera models with ignore_missing_imports
-# These libraries don't provide inline type stubs, and ignore_missing_imports
-# makes their base classes appear as Any. The [misc] error is expected.
+# Disable misc errors for Pydantic/Pandera subclasses
+# These libraries export BaseModel/DataFrameModel as Any without proper stubs
 [[tool.mypy.overrides]]
 module = [
     "bioetl.infrastructure.schemas.gold",
