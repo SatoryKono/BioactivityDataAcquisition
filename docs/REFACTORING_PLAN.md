@@ -41,6 +41,7 @@
 | **T2: RecordProcessor ingestion_ts** | `record_processor.py:91` | `ingestion_ts = self._context.started_at` |
 | **T3: BronzeWriter ingestion_ts** | `bronze_writer.py:211` | `ingestion_ts: datetime` (обязательный параметр) |
 | **T4: Quarantine ingestion_ts** | `unified.py:66` | `ingestion_ts: datetime` (keyword-only, required) |
+| **M3: Bronze JSON validation** | `bronze_writer.py:151-178` | `_validate_json_records()` с lazy generator и `BronzeValidationError` |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -122,7 +123,7 @@
 │  ✅ M1: Silver write mode (SilverWriteMode enum)                │
 │  ✅ M2: Gold write mode (GoldWriteMode enum)                    │
 │  ✅ M4: Schema drift handling (on_schema_mismatch)              │
-│  ⏳ M3: Bronze validation                                        │
+│  ✅ M3: Bronze validation (bronze_writer.py:151-178)             │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼

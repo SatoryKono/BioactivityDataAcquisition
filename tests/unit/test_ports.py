@@ -251,6 +251,13 @@ class TestLockPortProtocol:
             ) -> bool:
                 return True
 
+            async def validate_owner(
+                self,
+                key: str,
+                owner_id: RunID,
+            ) -> bool:
+                return True
+
             async def aclose(self) -> None:
                 pass
 
