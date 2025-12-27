@@ -1,6 +1,7 @@
 # Консолидированный Анализ Архитектурных Аудитов BioETL
 
-*Версия: 1.0 | Дата: 2025-12-27 | Метод: Двойная Верификация (REQ-ARCH-040)*
+*Версия: 2.0 | Дата: 2025-12-27 | Метод: Двойная Верификация (REQ-ARCH-040)*
+*Обновлено: Верификация против main branch (commit 3cb1a00)*
 
 ---
 
@@ -17,9 +18,9 @@
 
 ---
 
-## 2. Верифицированные Метрики Кодовой Базы
+## 2. Верифицированные Метрики Кодовой Базы (main branch)
 
-> Проверено против реального кода 2025-12-27
+> Проверено против main branch 2025-12-27 (commit 3cb1a00)
 
 | Метрика | Значение | Источник |
 |---------|----------|----------|
@@ -35,73 +36,63 @@
 
 ## 3. Анализ Утверждений: Верифицированные vs Ложные
 
-### 3.1 Подтверждённые Проблемы (Все 4 плана)
+### 3.1 Подтверждённые Проблемы (актуальные на main)
 
-| Проблема | Верификация | Файл:строка |
-|----------|-------------|-------------|
-| **MetricsPort vs HealthMonitor** | `MetricsPort` объявляет `set_gauge()`, но `HealthMonitor` вызывает `metrics.gauge()` | `observability.py:76`, `health_monitor.py:203` |
-| **require_lock=False по умолчанию** | Все три writer-а имеют `require_lock: bool = False` в сигнатуре | `bronze_writer.py:63`, `gold_writer.py:66`, `delta_writer.py:80` |
-| **CircuitBreaker без эмиссии метрик** | Docstring обещает метрики (строки 46-48), но код только хранит внутренние счётчики | `circuit_breaker.py:46-48,57-59` |
-| **13 print() в коде** | Подтверждено grep-ом | 8 файлов в src/bioetl |
+| Проблема | Статус | Файл:строка |
+|----------|--------|-------------|
+| **MetricsPort vs HealthMonitor** | ❌ НЕ ИСПРАВЛЕНО | `health_monitor.py:203` вызывает `metrics.gauge()` вместо `set_gauge()` |
+| **CircuitBreaker без эмиссии метрик** | ❌ НЕ ИСПРАВЛЕНО | `circuit_breaker.py:46-48` обещает метрики, но не эмитирует |
+| **13 print() в коде** | ❌ НЕ ИСПРАВЛЕНО | 8 файлов в src/bioetl |
 
-### 3.2 Ложные/Неточные Утверждения
+### 3.2 Исправленные Проблемы (в main)
+
+| Проблема | Статус | Коммит |
+|----------|--------|--------|
+| **require_lock=False по умолчанию** | ✅ ИСПРАВЛЕНО | `ec13bba` — теперь `require_lock=True` |
+
+### 3.3 Ложные/Неточные Утверждения (по-прежнему актуально)
 
 | Ложное утверждение | Реальность | Доказательство |
 |-------------------|------------|----------------|
 | "pytest падает из-за отсутствия orjson" | orjson **есть** в dev-зависимостях | `pyproject.toml:63` |
 | "asyncio_mode не распознан/не настроен" | `asyncio_mode = "auto"` **настроен** | `pyproject.toml:120` |
-| "128 ошибок сбора тестов" | Проблема окружения, не кода | Зависимости установлены корректно |
-| "Средний размер ~21 строка" | ~147 строк (31758/216) | Арифметическая ошибка |
 | "MemoryLock без safety guard" | `validate_owner()` **существует** | `memory_lock.py:206-238` |
 | "MemoryLock без heartbeat" | `heartbeat()` **реализован** | `memory_lock.py:176-204` |
 | "NoOpGoldValidator — баг" | **By design** для пайплайнов без Gold | `pandera_validator.py:76-93` |
-| "Нет fencing token" | owner_id **используется** как идентификатор | `memory_lock.py:31,98,166-168` |
-
-### 3.3 Частично Верные Утверждения
-
-| Утверждение | Нюанс |
-|-------------|-------|
-| "TTL/heartbeat не соответствуют требованиям 60s/20s" | TTL опционален (`None` по умолчанию), но механизм работает |
-| "Writers не проверяют lock" | `require_lock=False` по умолчанию, но проверка реализована |
-| "Silver без Pandera" | Используется PyArrow schema, не Pandera (by design для производительности) |
-| "DQ пороги 5%/20% не автоматизированы" | Частично: `DQConfig` существует, enforcement — в application layer |
 
 ---
 
-## 4. Консолидированные Оценки по Категориям
+## 4. Консолидированные Оценки по Категориям (обновлено)
 
-| # | Категория | Вес | Оценка | Обоснование |
-|---|-----------|-----|--------|-------------|
-| 1 | Слоистая архитектура | 15% | **9** | Нарушений импортов не найдено |
-| 2 | Контракты и Ports | 12% | **6** | Реальный баг: MetricsPort.gauge |
-| 3 | Medallion Architecture | 12% | **7** | Bronze/Silver/Gold работают; VACUUM ручной |
-| 4 | Ошибки и Circuit Breaker | 10% | **6** | CB без метрик (не эмитирует в порт) |
-| 5 | Блокировки | 10% | **6** | Механизмы есть, но `require_lock=False` по умолчанию |
-| 6 | Валидация и DQ | 10% | **6** | Gold с Pandera, Silver с PyArrow |
-| 7 | Логирование | 8% | **6** | 13 print(), MetricsPort расхождение |
-| 8 | Тестирование | 8% | **7** | Тесты работают при корректном окружении; 80%+ coverage |
-| 9 | Безопасность | 8% | **7** | Секреты через env/SecretStr |
-| 10 | Документация | 7% | **7** | RULES/ADR актуальны, REFACTORING_PLAN ведётся |
+| # | Категория | Вес | Оценка | Изменение | Обоснование |
+|---|-----------|-----|--------|-----------|-------------|
+| 1 | Слоистая архитектура | 15% | **9** | — | Нарушений импортов не найдено |
+| 2 | Контракты и Ports | 12% | **6** | — | Реальный баг: MetricsPort.gauge |
+| 3 | Medallion Architecture | 12% | **7** | — | Bronze/Silver/Gold работают; VACUUM ручной |
+| 4 | Ошибки и Circuit Breaker | 10% | **6** | — | CB без метрик (не эмитирует в порт) |
+| 5 | Блокировки | 10% | **8** | +2 ⬆️ | `require_lock=True` по умолчанию (ИСПРАВЛЕНО) |
+| 6 | Валидация и DQ | 10% | **6** | — | Gold с Pandera, Silver с PyArrow |
+| 7 | Логирование | 8% | **6** | — | 13 print(), MetricsPort расхождение |
+| 8 | Тестирование | 8% | **7** | — | Тесты работают; 80%+ coverage |
+| 9 | Безопасность | 8% | **7** | — | Секреты через env/SecretStr |
+| 10 | Документация | 7% | **7** | — | RULES/ADR актуальны |
 
-**Консолидированный балл: 6.6 / 10** (выше чем в отдельных планах после коррекции ложных утверждений)
+**Консолидированный балл: 6.8 / 10** (+0.2 после исправления P2.1)
 
 ---
 
-## 5. Консолидированный План Рефакторинга
+## 5. Консолидированный План Рефакторинга (обновлено)
 
 ### Приоритет P1: Критические (mypy, контракты)
 
-#### P1.1 Исправить MetricsPort vs HealthMonitor
+#### P1.1 Исправить MetricsPort vs HealthMonitor ❌ НЕ ВЫПОЛНЕНО
 
 **Проблема:** `HealthMonitor.py:203` вызывает `metrics.gauge()`, но `MetricsPort` определяет только `set_gauge()`.
 
-**Верификация:**
-```python
-# observability.py:76
-def set_gauge(self, name: str, value: float, ...) -> None:
-
-# health_monitor.py:203
-self.metrics.gauge("provider_health_status", value, labels={"provider": state.provider})
+**Верификация (main branch 2025-12-27):**
+```bash
+$ mypy src/bioetl --strict 2>&1 | grep error
+src/bioetl/infrastructure/adapters/http/health_monitor.py:203: error: "MetricsPort" has no attribute "gauge"
 ```
 
 **Решение:** Заменить `metrics.gauge()` на `metrics.set_gauge()` в `health_monitor.py:203`.
@@ -116,11 +107,11 @@ self.metrics.gauge("provider_health_status", value, labels={"provider": state.pr
 
 ---
 
-#### P1.2 Добавить эмиссию метрик в CircuitBreaker
+#### P1.2 Добавить эмиссию метрик в CircuitBreaker ❌ НЕ ВЫПОЛНЕНО
 
 **Проблема:** Docstring обещает метрики `circuit_breaker_state` и `circuit_breaker_trips_total` (строки 46-48), но код только хранит внутренние счётчики без эмиссии.
 
-**Верификация:**
+**Верификация (main branch 2025-12-27):**
 ```python
 # circuit_breaker.py:46-48 (docstring)
 # Metrics emitted:
@@ -128,6 +119,7 @@ self.metrics.gauge("provider_health_status", value, labels={"provider": state.pr
 #     - circuit_breaker_trips_total{provider}: Counter of OPEN transitions
 
 # Реальность: _state, _trips_total — только внутренние поля (строки 56-59)
+# Нет MetricsPort в конструкторе, нет эмиссии метрик
 ```
 
 **Решение:** Добавить `MetricsPort` в конструктор и эмитировать метрики при смене состояния.
@@ -145,54 +137,36 @@ self.metrics.gauge("provider_health_status", value, labels={"provider": state.pr
 
 ### Приоритет P2: Высокий (Lock enforcement)
 
-#### P2.1 Изменить require_lock по умолчанию на True
+#### P2.1 Изменить require_lock по умолчанию на True ✅ ВЫПОЛНЕНО
 
-**Проблема:** Все три writer-а имеют `require_lock=False` по умолчанию, что позволяет запись без блокировки.
+**Статус:** Исправлено в коммите `ec13bba`
 
-**Верификация:**
-```python
-# bronze_writer.py:63
-require_lock: bool = False,
+**Верификация (main branch 2025-12-27):**
+```bash
+$ git show origin/main:src/bioetl/infrastructure/storage/bronze_writer.py | grep "require_lock"
+        require_lock: bool = True,
 
-# gold_writer.py:66
-require_lock: bool = False,
+$ git show origin/main:src/bioetl/infrastructure/storage/delta_writer.py | grep "require_lock"
+        require_lock: bool = True,
 
-# delta_writer.py:80
-require_lock: bool = False,
+$ git show origin/main:src/bioetl/infrastructure/storage/gold_writer.py | grep "require_lock"
+        require_lock: bool = True,
 ```
 
-**Решение:**
-1. Изменить default на `True` для production safety
-2. Явно передавать `require_lock=False` в тестах
-
-**Файлы:**
-- `src/bioetl/infrastructure/storage/bronze_writer.py:63`
-- `src/bioetl/infrastructure/storage/gold_writer.py:66`
-- `src/bioetl/infrastructure/storage/delta_writer.py:80`
-- Тесты: обновить fixtures
-
-**Риски:**
-- Существующие вызовы без lock context сломаются
-- Требуется feature flag или deprecation warning период
-
-**Критерий готовности:**
-- Запись без lock вызывает `LockNotHeldError`
-- Тесты обновлены и проходят
-
-**Трудозатраты:** M (2-3 дня)
+**Результат:** Все три writer-а теперь требуют блокировку по умолчанию.
 
 ---
 
 ### Приоритет P3: Средний (Cleanup)
 
-#### P3.1 Удалить print() из продакшен кода
+#### P3.1 Удалить print() из продакшен кода ❌ НЕ ВЫПОЛНЕНО
 
 **Проблема:** 13 вхождений `print()` нарушают правило единого логгера.
 
-**Верификация:**
+**Верификация (main branch 2025-12-27):**
 ```bash
-grep -r "print(" src/bioetl --include="*.py" | wc -l
-# 13
+$ grep -r "print(" src/bioetl --include="*.py" | wc -l
+13
 ```
 
 **Решение:**
@@ -200,7 +174,7 @@ grep -r "print(" src/bioetl --include="*.py" | wc -l
 2. Удалить примеры в docstrings или заменить на код без side effects
 3. Добавить ruff правило `T201` (print found)
 
-**Файлы:** 8 файлов (см. grep выше)
+**Файлы:** 8 файлов в src/bioetl
 
 **Критерий готовности:**
 - `grep -r "print(" src/bioetl --include="*.py" | wc -l` → 0
@@ -212,7 +186,7 @@ grep -r "print(" src/bioetl --include="*.py" | wc -l
 
 ### Приоритет P4: Желательно (Observability, VACUUM)
 
-#### P4.1 Автоматизация VACUUM/retention
+#### P4.1 Автоматизация VACUUM/retention ❌ НЕ ВЫПОЛНЕНО
 
 **Текущее состояние:** VACUUM вызывается вручную через сервисы, нет автоматического планировщика.
 
@@ -222,7 +196,7 @@ grep -r "print(" src/bioetl --include="*.py" | wc -l
 
 **Трудозатраты:** M (2-3 дня)
 
-#### P4.2 DQ метрики и пороги для Silver
+#### P4.2 DQ метрики и пороги для Silver ❌ НЕ ВЫПОЛНЕНО
 
 **Текущее состояние:** Silver использует PyArrow schema без DQ threshold enforcement.
 
@@ -235,62 +209,86 @@ grep -r "print(" src/bioetl --include="*.py" | wc -l
 
 ---
 
-## 6. Roadmap
+## 6. Roadmap (обновлено)
 
 ```
-Фаза 1 (1 неделя):
-├── P1.1: Исправить MetricsPort (S) ✓ → mypy 0 ошибок
-└── P1.2: CB метрики (M)
+Статус на 2025-12-27:
+├── P2.1: require_lock=True ✅ ВЫПОЛНЕНО (ec13bba)
+│
+├── P1.1: Исправить MetricsPort ❌ ОЖИДАЕТ (S, < 1 час)
+├── P1.2: CB метрики ❌ ОЖИДАЕТ (M, 1-2 дня)
+├── P3.1: Удалить print() ❌ ОЖИДАЕТ (S, 0.5 дня)
+│
+├── P4.1: VACUUM автоматизация ❌ ОЖИДАЕТ (M, 2-3 дня)
+└── P4.2: Silver DQ ❌ ОЖИДАЕТ (L, 1-2 недели)
+```
 
-Фаза 2 (2 недели):
-├── P2.1: require_lock=True (M)
+### Рекомендуемый порядок:
+
+```
+Фаза 1 (ближайшая):
+├── P1.1: Исправить MetricsPort (S) → mypy 0 ошибок [БЛОКЕР]
 └── P3.1: Удалить print() (S)
 
-Фаза 3 (2+ недели):
+Фаза 2:
+└── P1.2: CB метрики (M)
+
+Фаза 3:
 ├── P4.1: VACUUM автоматизация (M)
 └── P4.2: Silver DQ (L)
 ```
 
-**Ожидаемый балл после Фазы 1-2:** ~7.5
+**Текущий балл:** 6.8 / 10
+**Ожидаемый балл после Фазы 1:** ~7.2
+**Ожидаемый балл после Фазы 2:** ~7.5
 **Ожидаемый балл после Фазы 3:** ~8.0
 
 ---
 
 ## 7. Метрики CI Регресса (консолидированные)
 
-| Метрика | Порог | Команда | Блокирует PR |
-|---------|-------|---------|--------------|
-| Coverage | ≥80% | `pytest --cov-fail-under=80` | Да |
-| mypy errors | 0 | `mypy src/bioetl --strict` | Да |
-| Циклические импорты | 0 | `PYTHONPATH=src python -c "from bioetl.domain import *"` | Да |
-| Нарушения слоёв | 0 | `lint-imports` | Да |
-| print() в коде | 0 | `ruff check --select=T201` | Да (после P3.1) |
+| Метрика | Порог | Команда | Блокирует PR | Статус |
+|---------|-------|---------|--------------|--------|
+| Coverage | ≥80% | `pytest --cov-fail-under=80` | Да | ✅ |
+| mypy errors | 0 | `mypy src/bioetl --strict` | Да | ❌ 1 ошибка |
+| Циклические импорты | 0 | `python -c "from bioetl.domain import *"` | Да | ✅ |
+| Нарушения слоёв | 0 | `lint-imports` | Да | ✅ |
+| print() в коде | 0 | `ruff check --select=T201` | Да | ❌ 13 вхождений |
 
 ---
 
-## 8. Выводы
+## 8. Сводка Изменений
 
-### 8.1 Что было неправильно в исходных планах
+### 8.1 Что исправлено с момента первоначального анализа
 
-1. **Ложные утверждения о зависимостях** — orjson и asyncio_mode настроены корректно
-2. **Неверные метрики** — средний размер модуля 147, не 21 строка
-3. **Преувеличение проблем MemoryLock** — safety guard и heartbeat реализованы
-4. **Смешение проблем кода и окружения** — pytest падает из-за окружения, не кода
+| Задача | Коммит | Описание |
+|--------|--------|----------|
+| P2.1 | `ec13bba` | `require_lock=True` по умолчанию во всех writer-ах |
 
-### 8.2 Что было правильно
+### 8.2 Что остаётся исправить
 
-1. **MetricsPort.gauge баг** — подтверждён (единственная mypy ошибка)
-2. **require_lock=False** — подтверждён риск
-3. **CircuitBreaker без метрик** — подтверждён gap между docstring и реализацией
-4. **print() в коде** — подтверждено 13 вхождений
+| Приоритет | Задача | Трудозатраты | Блокер |
+|-----------|--------|--------------|--------|
+| P1.1 | MetricsPort.gauge → set_gauge | S (< 1 час) | mypy --strict |
+| P1.2 | CircuitBreaker метрики | M (1-2 дня) | Docstring contract |
+| P3.1 | Удалить 13 print() | S (0.5 дня) | RULES.md |
+| P4.1 | VACUUM автоматизация | M (2-3 дня) | — |
+| P4.2 | Silver DQ thresholds | L (1-2 недели) | — |
 
-### 8.3 Рекомендации
+### 8.3 Рекомендация
 
-1. **Использовать REFACTORING_PLAN.md** — он уже ведётся с двойной верификацией
-2. **Удалить дублирующие audit-ы** — консолидировать в один документ
-3. **Приоритизировать P1** — это единственные блокеры для mypy --strict
+**Немедленно исправить P1.1** — это единственный mypy блокер, исправление занимает < 1 часа:
+
+```python
+# health_monitor.py:203
+# Было:
+self.metrics.gauge("provider_health_status", value, labels={"provider": state.provider})
+
+# Должно быть:
+self.metrics.set_gauge("provider_health_status", value, labels={"provider": state.provider})
+```
 
 ---
 
 *Документ создан в соответствии с протоколом REQ-ARCH-040 (Двойная Верификация).*
-*Все утверждения подкреплены ссылками на код.*
+*Все утверждения подкреплены ссылками на код и верифицированы против main branch.*
