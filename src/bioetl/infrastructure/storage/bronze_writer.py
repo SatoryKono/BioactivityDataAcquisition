@@ -19,10 +19,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import tempfile
 import time
 from collections.abc import AsyncIterator, Iterator
 from datetime import datetime, timedelta
-from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
+from bioetl.infrastructure.storage._atomic import AtomicWriteGroup, atomic_write_bytes
 
 
 class BronzeWriter:
@@ -107,9 +107,11 @@ class BronzeWriter:
         """
         if records is None:
             raise TypeError("records cannot be None, expected Iterator[bytes]")
-        if not hasattr(records, "__iter__") or not hasattr(records, "__next__"):
+        # Relaxed check: Accept Iterable, but prefer Iterator.
+        # Logic in write_bronze will convert to iter() if needed.
+        if not hasattr(records, "__iter__"):
             raise TypeError(
-                f"records must be an Iterator[bytes], got {type(records).__name__}"
+                f"records must be an Iterator[bytes] (or Iterable), got {type(records).__name__}"
             )
 
     def _validate_utc_datetime(self, dt: datetime, param_name: str) -> None:
@@ -185,19 +187,73 @@ class BronzeWriter:
             "batch_id": str(batch_id),
         }
 
-    def _write_atomic_bronze(
-        self, data: bytes, path: Path, metadata: dict[str, str], meta_path: Path
-    ) -> None:
-        """Write data and metadata atomically using temp files + rename."""
-        with AtomicWriteGroup() as group:
-            group.add(path, data)
-            group.add(
-                meta_path,
-                json.dumps(metadata, sort_keys=True, separators=(",", ":")).encode(
-                    "utf-8"
-                ),
-            )
-            group.commit()
+    def _write_atomic_stream(
+        self,
+        records: Iterator[bytes],
+        target_path: Path,
+    ) -> tuple[int, int]:
+        """Stream compress records directly to a temp file, then rename atomically.
+
+        Args:
+            records: Iterator of bytes records.
+            target_path: Final destination path.
+
+        Returns:
+            Tuple of (record_count, uncompressed_size).
+        """
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+
+        fd, temp_path_str = tempfile.mkstemp(
+            suffix=".tmp",
+            prefix="." + target_path.stem + "_",
+            dir=target_path.parent,
+        )
+        temp_path = Path(temp_path_str)
+
+        compressor = zstd.ZstdCompressor(
+            level=self.COMPRESSION_LEVEL,
+            threads=self.COMPRESSION_THREADS,
+            write_content_size=True,
+        )
+
+        record_count = 0
+        uncompressed_size = 0
+        chunk_buffer = bytearray()
+
+        try:
+            with (
+                open(fd, "wb") as f_out,
+                compressor.stream_writer(
+                    f_out, closefd=False, write_size=self.COMPRESSION_CHUNK_SIZE
+                ) as writer,
+            ):
+                for record in records:
+                    chunk_buffer.extend(record)
+                    record_count += 1
+                    uncompressed_size += len(record)
+
+                    if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
+                        writer.write(chunk_buffer)
+                        chunk_buffer.clear()
+
+                if chunk_buffer:
+                    writer.write(chunk_buffer)
+                    chunk_buffer.clear()
+
+            if record_count == 0:
+                # Clean up empty temp file
+                temp_path.unlink()
+                raise ValueError("No records to write")
+
+            # Atomic rename
+            temp_path.replace(target_path)
+
+        except Exception:
+            if temp_path.exists():
+                temp_path.unlink()
+            raise
+
+        return record_count, uncompressed_size
 
     async def write_bronze(
         self,
@@ -211,6 +267,8 @@ class BronzeWriter:
         ingestion_ts: datetime,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
+
+        Streams records through zstd compressor directly to disk.
 
         Args:
             records: Iterator of JSON-encoded record bytes.
@@ -234,6 +292,9 @@ class BronzeWriter:
         self._validate_utc_datetime(date, "date")
         self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
 
+        # Ensure records is an iterator (handles lists/tuples transparently)
+        records = iter(records)
+
         # Apply JSON validation if enabled (lazy generator wrapping)
         if self.validate_json:
             records = self._validate_json_records(records)
@@ -248,6 +309,10 @@ class BronzeWriter:
 
         loop = asyncio.get_running_loop()
 
+        # Handle save_json: requires duplicating the iterator if iterator can only be consumed once
+        # Note: If records is a generator, we must materialize it or tee it.
+        # Assuming list(records) for safety if save_json is True, as we did before.
+        # This breaks streaming for save_json=True case, but that is acceptable (debug mode).
         if self.save_json:
             record_list = list(records)
             records_iter = iter(record_list)
@@ -255,22 +320,23 @@ class BronzeWriter:
             record_list = []
             records_iter = records
 
-        compressed_data, record_count, uncompressed_size = await loop.run_in_executor(
-            None, self._compress_records, records_iter
-        )
-        if not compressed_data:
-            raise ValueError("No records to write")
-
-        compressed_size = len(compressed_data)
         full_path = self.base_path / relative_path
         meta_path = full_path.with_suffix(".zst.meta.json")
 
-        await loop.run_in_executor(
-            None,
-            lambda: self._write_atomic_bronze(
-                compressed_data, full_path, metadata, meta_path
-            ),
-        )
+        # Perform streaming write in executor
+        # We need to capture records_iter in closure safely
+        def _write_task():
+            # Write data file
+            count, size = self._write_atomic_stream(records_iter, full_path)
+            # Write metadata file
+            meta_bytes = json.dumps(
+                metadata, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")
+            atomic_write_bytes(meta_path, meta_bytes)
+            return count, size
+
+        record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
+        compressed_size = full_path.stat().st_size
 
         # Record metrics
         duration = time.perf_counter() - start_time
@@ -342,8 +408,6 @@ class BronzeWriter:
         batch_id: BatchID,
     ) -> None:
         """Write uncompressed JSONL copy of records atomically."""
-        from bioetl.infrastructure.storage._atomic import atomic_write_bytes
-
         json_relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl"
 
         # Combine all records into single JSONL content
@@ -359,11 +423,18 @@ class BronzeWriter:
         )
 
     def _compress_records(self, records: Iterator[bytes]) -> tuple[bytes, int, int]:
-        """Compress JSONL records using zstandard with streaming.
+        """Compress JSONL records using zstandard.
+
+        Deprecated: Use _write_atomic_stream for direct-to-disk streaming.
+        Kept for backward compatibility if needed, but not used by main path.
 
         Returns:
             Tuple of (compressed_data, record_count, uncompressed_size).
         """
+        # This method is no longer used by write_bronze but kept for interface stability if any
+        # tests call it directly.
+        from io import BytesIO
+
         output = BytesIO()
         compressor = zstd.ZstdCompressor(
             level=self.COMPRESSION_LEVEL,
@@ -384,7 +455,6 @@ class BronzeWriter:
                 uncompressed_size += len(record)
 
                 if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
-                    # Pass bytearray directly to avoid memory copy
                     writer.write(chunk_buffer)
                     chunk_buffer.clear()
 

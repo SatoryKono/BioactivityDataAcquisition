@@ -57,6 +57,7 @@ class BaseChemblTransformer(BaseTransformer):
         provider: str = "chembl",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        gold_filters: Any | None = None,
     ) -> None:
         """Initialize ChEMBL transformer.
 
@@ -64,9 +65,15 @@ class BaseChemblTransformer(BaseTransformer):
             provider: Data provider identifier. Defaults to 'chembl'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            gold_filters: Optional GoldFilterConfig for Gold filtering logic.
 
         """
-        super().__init__(provider, tracer=tracer, metrics=metrics)
+        super().__init__(
+            provider,
+            tracer=tracer,
+            metrics=metrics,
+            gold_filters=gold_filters,
+        )
 
     async def _transform_impl(
         self,
