@@ -374,6 +374,7 @@ def create_pipeline_with_services(
             provider=provider,
             tracer=tracer,
             metrics=metrics,
+            gold_filters=domain_config.gold_filters,
         )
 
     return pipeline_class.create(
