@@ -313,7 +313,8 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
 
     Example:
         >>> preview = await preview_cleanup("chembl_activity")
-        >>> print(f"Would clear {preview.total_files} files")
+        >>> preview.total_files  # Number of files to clear
+        42
     """
     _ensure_registrations()
     config = load_pipeline_config(pipeline)
@@ -338,8 +339,8 @@ async def inspect_quarantine(pipeline: str, limit: int = 100) -> list[dict[str, 
 
     Example:
         >>> records = await inspect_quarantine("chembl_activity", limit=50)
-        >>> for rec in records:
-        ...     print(f"Error: {rec['error_code']}")
+        >>> [rec['error_code'] for rec in records]  # List of error codes
+        ['DQ_MISSING_FIELD', 'DQ_INVALID_SMILES']
     """
     manager = get_quarantine_manager(pipeline)
     records: list[dict[str, Any]] = await manager.inspect(limit=limit)
@@ -359,8 +360,8 @@ async def list_checkpoints(pipeline: str) -> list[str]:
 
     Example:
         >>> checkpoints = await list_checkpoints("chembl_activity")
-        >>> for cp in checkpoints:
-        ...     print(f"- {cp}")
+        >>> checkpoints  # List of checkpoint identifiers
+        ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
     """
     manager = get_checkpoint_manager(pipeline)
     checkpoints: list[str] = await manager.list_all()

@@ -83,13 +83,15 @@ class CleanupService:
     Example:
         >>> service = CleanupService(storage=storage, logger=logger)
         >>> preview = await service.preview("chembl_activity", "chembl.activity")
-        >>> print(f"Would clear {preview.total_files} files")
+        >>> preview.total_files  # Number of files to clear
+        42
         >>> result = await service.execute(
         ...     silver_table="chembl_activity",
         ...     gold_table="chembl.activity",
         ...     dry_run=False,
         ... )
-        >>> print(f"Cleared {result.total_cleared} items")
+        >>> result.total_cleared  # Number of items cleared
+        150
     """
 
     def __init__(self, storage: StoragePort, logger: LoggerPort) -> None:
