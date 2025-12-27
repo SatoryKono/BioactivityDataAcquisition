@@ -73,12 +73,17 @@ class InputFilterContext:
 
 @dataclass(frozen=True, slots=True)
 class VacuumConfig:
-    """Vacuum operation configuration with explicit defaults.
+    """Vacuum operation configuration with tri-state enabled flag.
 
-    Provides non-optional configuration for vacuum operations.
+    The enabled field supports three states:
+    - None: Use YAML config default (no CLI override)
+    - True: CLI explicitly enables vacuum
+    - False: CLI explicitly disables vacuum
+
+    This allows CLI --vacuum.enabled=false to override YAML auto_vacuum=true.
     """
 
-    enabled: bool = False
+    enabled: bool | None = None
     retention_days: int = 7
 
     def __post_init__(self) -> None:
@@ -178,6 +183,12 @@ class PipelineRunContext:
         return self.input_filter.enabled
 
     @property
-    def vacuum_enabled(self) -> bool:
-        """Check if vacuum is enabled (backward compatible)."""
+    def vacuum_enabled(self) -> bool | None:
+        """Check if vacuum is enabled (tri-state).
+
+        Returns:
+            True: CLI explicitly enabled vacuum
+            False: CLI explicitly disabled vacuum
+            None: No CLI override, use YAML config default
+        """
         return self.vacuum.enabled
