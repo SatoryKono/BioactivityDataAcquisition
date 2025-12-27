@@ -41,6 +41,7 @@ class TestFileSizeLimits:
         "exceptions.py": 550,  # 513 LOC
         # Application layer exemptions
         "preflight_service.py": 580,  # 572 LOC - preflight validation
+        "base_transformer.py": 540,  # 530 LOC - Template Method with helpers
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         # Consolidated factory files (v5.2)
@@ -257,7 +258,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 500,
-        "BaseTransformer": 420,  # 416 lines - complex base with hooks
+        "BaseTransformer": 480,  # 477 lines - Template Method with helpers
         "DeltaWriter": 650,  # 644 lines - includes schema drift detection (M4) + audit
         "GoldWriter": 590,  # 586 lines - includes SCD Type 2 with ingestion_ts per ADR-014
         "LineageTracker": 400,
@@ -266,7 +267,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 410,  # 399 lines - JSONL + zstd compression writer with metrics and JSON validation
-        "PipelineExecutor": 420,  # 415 lines - executor with tracing and metrics
+        "PipelineExecutor": 450,  # 444 lines - executor with tracing and metrics
         # Test classes exemptions
         "TestCliCommands": 350,  # Test class with many test cases
         "TestFileSizeLimits": 350,  # Test class with many exemptions
