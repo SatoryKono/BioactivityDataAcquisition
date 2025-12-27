@@ -81,7 +81,7 @@ class TestNoStructlogInApplicationLayer:
         violations = _check_structlog_imports(APPLICATION_DIR, EXEMPTED_FILES)
 
         assert not violations, (
-            f"Direct structlog imports found in application layer:\n"
+            "Direct structlog imports found in application layer:\n"
             + "\n".join(f"  - {v}" for v in violations)
             + "\n\nUse LoggerPort from domain.ports instead. See ADR-006."
         )
@@ -99,7 +99,7 @@ class TestNoStructlogInInterfacesLayer:
         violations = _check_structlog_imports(INTERFACES_DIR, EXEMPTED_FILES)
 
         assert not violations, (
-            f"Direct structlog imports found in interfaces layer:\n"
+            "Direct structlog imports found in interfaces layer:\n"
             + "\n".join(f"  - {v}" for v in violations)
             + "\n\nUse LoggerPort from domain.ports instead. See ADR-006."
         )

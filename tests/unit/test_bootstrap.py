@@ -227,7 +227,7 @@ class TestBootstrapPipeline:
         mock_pipeline = MagicMock()
         mock_factory = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
-        mock_registry.get.return_value.factory = mock_factory
+        mock_get_registry.return_value.get.return_value.factory = mock_factory
 
         with patch(
             "bioetl.composition.bootstrap.bootstrap_logger", return_value=mock_logger

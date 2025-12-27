@@ -12,7 +12,6 @@ import typing
 
 import pytest
 
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
 

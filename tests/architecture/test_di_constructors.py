@@ -85,14 +85,14 @@ class InitInstantiationFinder(ast.NodeVisitor):
         self._current_class: str | None = None
         self._in_init: bool = False
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:  # noqa: N802
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Track current class context."""
         old_class = self._current_class
         self._current_class = node.name
         self.generic_visit(node)
         self._current_class = old_class
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Track __init__ method context."""
         if node.name == "__init__":
             old_in_init = self._in_init
@@ -102,11 +102,11 @@ class InitInstantiationFinder(ast.NodeVisitor):
         else:
             self.generic_visit(node)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:  # noqa: N802
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         """Handle async function definitions (though __init__ is never async)."""
         self.generic_visit(node)
 
-    def visit_Assign(self, node: ast.Assign) -> None:  # noqa: N802
+    def visit_Assign(self, node: ast.Assign) -> None:
         """Check assignments in __init__ for forbidden instantiations."""
         if not self._in_init:
             self.generic_visit(node)
@@ -129,7 +129,7 @@ class InitInstantiationFinder(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:  # noqa: N802
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
         """Check annotated assignments in __init__ for forbidden instantiations.
 
         Handles patterns like:

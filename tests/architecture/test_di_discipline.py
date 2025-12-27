@@ -11,7 +11,6 @@ See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
 
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 
 import pytest

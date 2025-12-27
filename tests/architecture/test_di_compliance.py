@@ -75,7 +75,7 @@ class InstantiationFinder(ast.NodeVisitor):
         self.forbidden_attrs = forbidden_attrs
         self.violations: list[tuple[int, str]] = []
 
-    def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
+    def visit_Call(self, node: ast.Call) -> None:
         """Visit function/constructor calls."""
         # Case 1: Direct class instantiation - ClassName()
         if isinstance(node.func, ast.Name):

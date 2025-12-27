@@ -10,7 +10,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.registry import get_default_registry
 
 
 class TestPipelineRegistryUnifiedAPI:

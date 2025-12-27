@@ -6,7 +6,7 @@ Contains operations for reading and analyzing quarantined records.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 import pyarrow.compute as pc
