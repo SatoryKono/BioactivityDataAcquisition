@@ -85,9 +85,7 @@ class LocalCheckpoint:
                 temp_file.unlink()
             raise
 
-    async def load(
-        self, pipeline: str
-    ) -> tuple[RunID, dict[str, Any]] | None:
+    async def load(self, pipeline: str) -> tuple[RunID, dict[str, Any]] | None:
         """Load last checkpoint."""
         key = self._get_key(pipeline)
         full_path = self.base_path / key

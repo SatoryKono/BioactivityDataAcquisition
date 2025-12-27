@@ -238,9 +238,7 @@ def parse_date_field(
 
 # SMILES validation regex (базовая проверка синтаксиса)
 # Допускает: буквы, цифры, скобки, точки, знаки, решётки, проценты, @, +, -, =, #
-_SMILES_PATTERN = re.compile(
-    r"^[A-Za-z0-9@+\-=#$()\[\]\\/%.*]+$"
-)
+_SMILES_PATTERN = re.compile(r"^[A-Za-z0-9@+\-=#$()\[\]\\/%.*]+$")
 
 
 def validate_smiles(smiles: str | None) -> bool:

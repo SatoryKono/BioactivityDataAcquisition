@@ -9,7 +9,6 @@ from __future__ import annotations
 from pathlib import Path
 
 
-
 def test_domain_all_is_complete(src_dir: Path) -> None:
     """Verify domain/__init__.py __all__ contains all public symbols.
 
@@ -53,7 +52,8 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
 
     # Filter to public symbols only (not starting with _)
     public_attrs = {
-        attr for attr in all_attrs
+        attr
+        for attr in all_attrs
         if not attr.startswith("_") and attr not in excluded_patterns
     }
 

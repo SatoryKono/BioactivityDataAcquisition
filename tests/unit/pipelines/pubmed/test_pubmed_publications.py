@@ -38,7 +38,9 @@ def mock_runtime():
 def pipeline(mock_config, mock_runtime, mock_services):
     run_id = uuid4()
     transformer = PubMedPublicationTransformer(provider="pubmed")
-    return PubMedPublicationsPipeline(mock_config, mock_runtime, mock_services, run_id, transformer=transformer)
+    return PubMedPublicationsPipeline(
+        mock_config, mock_runtime, mock_services, run_id, transformer=transformer
+    )
 
 
 @pytest.fixture

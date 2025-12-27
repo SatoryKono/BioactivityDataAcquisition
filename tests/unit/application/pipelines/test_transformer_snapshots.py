@@ -330,7 +330,10 @@ class TestTargetComponentTransformerSnapshot:
             "description": "Test protein component",
             "organism": "Homo sapiens",
             "tax_id": 9606,
-            "target_component_synonyms": [{"synonym": "Gene1"}, {"synonym": "Protein1"}],
+            "target_component_synonyms": [
+                {"synonym": "Gene1"},
+                {"synonym": "Protein1"},
+            ],
             "target_component_xrefs": [
                 {"xref_id": "P12345", "xref_src_db": "UniProt"},
             ],

@@ -109,7 +109,9 @@ class TestSettings:
     def test_data_dir_custom(self, monkeypatch) -> None:
         """Test custom data_dir."""
         monkeypatch.delenv("BIOETL_ENV", raising=False)
-        settings = Settings(test_mode=True, data_dir=Path("/custom/data"), _env_file=None)
+        settings = Settings(
+            test_mode=True, data_dir=Path("/custom/data"), _env_file=None
+        )
         assert settings.data_dir == Path("/custom/data")
 
     def test_path_properties(self, monkeypatch) -> None:

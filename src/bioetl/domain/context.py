@@ -164,7 +164,9 @@ class PipelineRunContext:
     resume: bool = False
     dry_run: bool = False
     vacuum: VacuumConfig = field(default_factory=VacuumConfig)
-    input_filter: InputFilterContext = field(default_factory=InputFilterContext.disabled)
+    input_filter: InputFilterContext = field(
+        default_factory=InputFilterContext.disabled
+    )
 
     # Truly optional fields (None means "not specified, use config default")
     limit: int | None = None

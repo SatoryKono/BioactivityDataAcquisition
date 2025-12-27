@@ -231,9 +231,7 @@ class TestLifecycleOrchestratorClear:
         assert call_kwargs["dry_run"] is True
 
     @pytest.mark.asyncio
-    async def test_clear_logs_completion(
-        self, lifecycle_orchestrator, mock_logger
-    ):
+    async def test_clear_logs_completion(self, lifecycle_orchestrator, mock_logger):
         """Test clear_for_run logs completion message."""
         await lifecycle_orchestrator.clear_for_run()
 

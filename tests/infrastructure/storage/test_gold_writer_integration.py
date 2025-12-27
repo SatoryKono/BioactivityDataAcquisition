@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import MagicMock, patch
 
 import pandera.pandas as pa
@@ -69,7 +69,9 @@ async def test_write_gold_schema_validation_failure(gold_writer, strict_schema):
 async def test_write_gold_invalid_mode(gold_writer, valid_records, strict_schema):
     """Test invalid write mode raises ValueError."""
     with pytest.raises(ValueError, match="Invalid Gold write mode"):
-        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="invalid")
+        await gold_writer.write_gold(
+            "test_table", valid_records, schema=strict_schema, mode="invalid"
+        )
 
 
 async def test_write_simple_overwrite(gold_writer, valid_records, strict_schema):
@@ -77,7 +79,9 @@ async def test_write_simple_overwrite(gold_writer, valid_records, strict_schema)
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
     ) as mock_write:
-        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="overwrite")
+        await gold_writer.write_gold(
+            "test_table", valid_records, schema=strict_schema, mode="overwrite"
+        )
 
         mock_write.assert_called_once()
         call_kwargs = mock_write.call_args[1]
@@ -98,7 +102,9 @@ async def test_write_simple_append(gold_writer, valid_records, strict_schema):
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
     ) as mock_write:
-        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="append")
+        await gold_writer.write_gold(
+            "test_table", valid_records, schema=strict_schema, mode="append"
+        )
 
         mock_write.assert_called_once()
         call_kwargs = mock_write.call_args[1]
@@ -108,13 +114,15 @@ async def test_write_simple_append(gold_writer, valid_records, strict_schema):
 async def test_write_scd2_missing_config(gold_writer, valid_records, strict_schema):
     """Test SCD2 mode without config raises ValueError."""
     with pytest.raises(ValueError, match="scd_config required"):
-        await gold_writer.write_gold("test_table", valid_records, schema=strict_schema, mode="scd2")
+        await gold_writer.write_gold(
+            "test_table", valid_records, schema=strict_schema, mode="scd2"
+        )
 
 
 async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 write when table does not exist (creates new)."""
     scd_config = {"business_key": "id"}
-    ingestion_ts = datetime.now(timezone.utc)
+    ingestion_ts = datetime.now(UTC)
 
     with (
         patch("bioetl.infrastructure.storage.gold_writer.DeltaTable") as mock_dt,
@@ -154,7 +162,7 @@ async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
 async def test_write_scd2_existing_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 merge with existing table."""
     scd_config = {"business_key": "id"}
-    ingestion_ts = datetime.now(timezone.utc)
+    ingestion_ts = datetime.now(UTC)
 
     mock_dt_instance = MagicMock()
     mock_merge_builder = MagicMock()

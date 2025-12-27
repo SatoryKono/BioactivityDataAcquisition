@@ -191,10 +191,16 @@ class TestPipelineContextEquality:
         started_at = datetime.now(UTC)
 
         ctx1 = PipelineContext(
-            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger, started_at=started_at
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            started_at=started_at,
         )
         ctx2 = PipelineContext(
-            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger, started_at=started_at
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            logger=logger,
+            started_at=started_at,
         )
 
         assert ctx1 == ctx2

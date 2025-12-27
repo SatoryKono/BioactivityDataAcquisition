@@ -158,9 +158,7 @@ class HealthAggregator:
         self._record_metrics(component, result)
         return result
 
-    def _record_metrics(
-        self, component: str, result: ComponentHealthResult
-    ) -> None:
+    def _record_metrics(self, component: str, result: ComponentHealthResult) -> None:
         """Record health check metrics.
 
         Args:
@@ -230,8 +228,7 @@ class HealthAggregator:
 
         failed_components = [f.component for f in failures]
         error_messages = [
-            f"{f.component}: {f.error_message or 'check failed'}"
-            for f in failures
+            f"{f.component}: {f.error_message or 'check failed'}" for f in failures
         ]
 
         raise InfrastructureError(

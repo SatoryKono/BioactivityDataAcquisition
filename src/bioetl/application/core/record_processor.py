@@ -94,25 +94,37 @@ class RecordProcessor:
         await self._execute_with_span(
             "write_bronze",
             self._writer.write_bronze(records, batch_id, ingestion_ts),
-            batch_id, len(records),
-            on_error=lambda e: self._writer.log_and_track_write_error("bronze", e, batch_id),
+            batch_id,
+            len(records),
+            on_error=lambda e: self._writer.log_and_track_write_error(
+                "bronze", e, batch_id
+            ),
         )
         self._batch_metrics.track_batch_size("bronze", len(records))
         self._batch_metrics.track_processed_records("bronze", len(records))
 
         # Transform records
         result = await self._execute_transform_with_span(records, batch_id)
-        self._batch_metrics.track_processed_records("quarantined", result.quarantined_count)
-        self._batch_metrics.track_processed_records("silver", len(result.silver_records))
+        self._batch_metrics.track_processed_records(
+            "quarantined", result.quarantined_count
+        )
+        self._batch_metrics.track_processed_records(
+            "silver", len(result.silver_records)
+        )
         self._batch_metrics.track_processed_records("gold", len(result.gold_records))
 
         # Write to Silver
         if result.silver_records:
             await self._execute_with_span(
                 "write_silver",
-                self._writer.write_silver(result.silver_records, batch_id, ingestion_ts),
-                batch_id, len(result.silver_records),
-                on_error=lambda e: self._writer.log_and_track_write_error("silver", e, batch_id),
+                self._writer.write_silver(
+                    result.silver_records, batch_id, ingestion_ts
+                ),
+                batch_id,
+                len(result.silver_records),
+                on_error=lambda e: self._writer.log_and_track_write_error(
+                    "silver", e, batch_id
+                ),
             )
 
         # Write to Gold
@@ -120,8 +132,11 @@ class RecordProcessor:
             await self._execute_with_span(
                 "write_gold",
                 self._writer.write_gold(result.gold_records),
-                batch_id, len(result.gold_records),
-                on_error=lambda e: self._writer.log_and_track_write_error("gold", e, batch_id),
+                batch_id,
+                len(result.gold_records),
+                on_error=lambda e: self._writer.log_and_track_write_error(
+                    "gold", e, batch_id
+                ),
             )
 
         return BatchResult(
@@ -171,7 +186,9 @@ class RecordProcessor:
             return None
         count_key = "bioetl.input_count" if input_count else "bioetl.record_count"
         attrs = {"bioetl.batch_id": str(batch_id), count_key: count}
-        span = self._tracer.get_tracer("bioetl.processor").start_as_current_span(name, attributes=attrs)
+        span = self._tracer.get_tracer("bioetl.processor").start_as_current_span(
+            name, attributes=attrs
+        )
         span.__enter__()
         return span
 

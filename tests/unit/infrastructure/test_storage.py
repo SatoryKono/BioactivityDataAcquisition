@@ -51,12 +51,16 @@ class TestBronzeWriter:
 
     def test_bronze_writer_initialization(self, tmp_path, noop_logger):
         """Test BronzeWriter can be initialized."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
         assert writer.base_path == tmp_path
 
     async def test_write_bronze_creates_file(self, tmp_path, noop_logger):
         """Test write_bronze creates file in local storage."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         records = [b'{"id": 1, "data": "test"}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -78,7 +82,9 @@ class TestBronzeWriter:
 
     async def test_write_bronze_generates_correct_key(self, tmp_path, noop_logger):
         """Test that write_bronze generates the correct path."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         records = [b'{"id": 1}\n']
         provider = "test_provider"
@@ -104,7 +110,9 @@ class TestBronzeWriter:
 
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
         """REQ-DATA-001: Test that data is compressed with zstandard."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         records = [b'{"id": 1, "data": "test"}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -137,7 +145,9 @@ class TestBronzeWriter:
 
     async def test_write_bronze_with_no_records(self, tmp_path, noop_logger):
         """Test that write_bronze raises error if there are no records."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         records = []
         provider = "test_provider"
@@ -159,7 +169,12 @@ class TestBronzeWriter:
 
     async def test_write_bronze_save_json_copy(self, tmp_path, noop_logger):
         """Test that write_bronze saves JSON copy if save_json is True."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), save_json=True)
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            save_json=True,
+        )
 
         records = [b'{"id": 1}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -198,12 +213,16 @@ class TestBronzeWriter:
         compressed = compressor.compress(jsonl_data.encode("utf-8"))
 
         # Create directory structure (path format: bronze/v1/{provider}/{entity}/{date}/)
-        bronze_dir = tmp_path / "bronze" / "v1" / "test_provider" / "test_entity" / "2023-01-01"
+        bronze_dir = (
+            tmp_path / "bronze" / "v1" / "test_provider" / "test_entity" / "2023-01-01"
+        )
         bronze_dir.mkdir(parents=True)
         test_file = bronze_dir / "batch_test.jsonl.zst"
         test_file.write_bytes(compressed)
 
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         # Read it back
         read_records = []
@@ -217,7 +236,9 @@ class TestBronzeWriter:
 
     async def test_list_batches(self, tmp_path, noop_logger):
         """Test list_batches."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         # Write two batches
         date = datetime(2023, 1, 1, tzinfo=UTC)
@@ -241,7 +262,9 @@ class TestBronzeWriter:
 
     async def test_list_batches_nonexistent(self, tmp_path, noop_logger):
         """Test list_batches returns empty for nonexistent path."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         batches = await writer.list_batches("nonexistent", "entity", datetime.now())
 
@@ -249,7 +272,9 @@ class TestBronzeWriter:
 
     async def test_writes_metadata_file(self, tmp_path, noop_logger):
         """Test that write_bronze creates metadata file."""
-        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        writer = BronzeWriter(
+            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics()
+        )
 
         records = [b'{"id": 1}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -325,7 +350,9 @@ class TestDeltaWriter:
 
         mock_write_deltalake.assert_called_once()
 
-    async def test_write_silver_merge_existing_table(self, mock_delta_writer, noop_logger):
+    async def test_write_silver_merge_existing_table(
+        self, mock_delta_writer, noop_logger
+    ):
         """Test write_silver merges into existing table."""
         import pyarrow as pa
 
@@ -369,7 +396,10 @@ class TestDeltaWriter:
 
         # Use same schema as existing_schema mock
         await writer.write_silver(
-            table_name="test_table", records=records, primary_keys=["id"], schema=existing_schema
+            table_name="test_table",
+            records=records,
+            primary_keys=["id"],
+            schema=existing_schema,
         )
 
         mock_table_instance.merge.assert_called_once()

@@ -246,9 +246,7 @@ class TestOrjsonEncoder:
         result = encoder.loads(json_bytes)
         assert result == {"key": "value"}
 
-    def test_loads_invalid_json_raises_valueerror(
-        self, encoder: OrjsonEncoder
-    ) -> None:
+    def test_loads_invalid_json_raises_valueerror(self, encoder: OrjsonEncoder) -> None:
         """Should raise ValueError for invalid JSON."""
         with pytest.raises(ValueError, match="Invalid JSON"):
             encoder.loads("not valid json")
@@ -335,12 +333,10 @@ class TestEncoderOutputConsistency:
             {"float": 3.14159},
             {"null": None},
             {"bool_true": True, "bool_false": False},
-            {"special": "quotes\"and\\backslash"},
+            {"special": 'quotes"and\\backslash'},
         ]
 
-    def test_stdlib_produces_valid_json(
-        self, test_data: list[dict[str, Any]]
-    ) -> None:
+    def test_stdlib_produces_valid_json(self, test_data: list[dict[str, Any]]) -> None:
         """StdLib encoder should produce valid JSON."""
         encoder = StdLibJsonEncoder()
         for data in test_data:
@@ -350,9 +346,7 @@ class TestEncoderOutputConsistency:
             assert parsed == data
 
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
-    def test_orjson_produces_valid_json(
-        self, test_data: list[dict[str, Any]]
-    ) -> None:
+    def test_orjson_produces_valid_json(self, test_data: list[dict[str, Any]]) -> None:
         """Orjson encoder should produce valid JSON."""
         encoder = OrjsonEncoder()
         for data in test_data:
@@ -405,7 +399,7 @@ class TestEdgeCases:
 
     def test_special_characters(self, encoder: JsonEncoderPort) -> None:
         """Should handle special characters."""
-        data = {"special": "\n\t\r\"\\"}
+        data = {"special": '\n\t\r"\\'}
         result = encoder.loads(encoder.dumps(data))
         assert result == data
 

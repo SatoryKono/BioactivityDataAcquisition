@@ -78,7 +78,9 @@ class TestCsvFilterReaderLoadFilterIds:
         # Verify sorted order
         assert list(result.ids) == sorted(result.ids)
 
-    async def test_load_filter_ids_reports_duplicates(self, csv_reader, sample_csv_file):
+    async def test_load_filter_ids_reports_duplicates(
+        self, csv_reader, sample_csv_file
+    ):
         """Test that duplicates are detected and reported."""
         result = await csv_reader.load_filter_ids(sample_csv_file, "molecule_id")
 
@@ -130,7 +132,9 @@ class TestCsvFilterReaderLoadFilterIds:
         # Only non-empty values should be present
         assert result.unique_count == 3  # VALUE1, VALUE2, VALUE3
 
-    async def test_load_filter_ids_no_duplicates(self, csv_reader, csv_with_empty_values):
+    async def test_load_filter_ids_no_duplicates(
+        self, csv_reader, csv_with_empty_values
+    ):
         """Test has_duplicates is False when no duplicates."""
         result = await csv_reader.load_filter_ids(csv_with_empty_values, "id")
 

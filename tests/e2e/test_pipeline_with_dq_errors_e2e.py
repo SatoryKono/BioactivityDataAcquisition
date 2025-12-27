@@ -11,16 +11,14 @@ Per RULES.md §4.2:
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.shutdown import ShutdownSignal
-from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+from bioetl.domain.config import DQConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.types import RunType
@@ -92,9 +90,7 @@ def create_mock_transform_callback(
 class TestDQSoftThreshold:
     """Tests for DQ soft threshold (warning) behavior."""
 
-    async def test_soft_threshold_logs_warning_but_continues(
-        self, e2e_data_dir: Path
-    ):
+    async def test_soft_threshold_logs_warning_but_continues(self, e2e_data_dir: Path):
         """E2E: Pipeline logs warning when DQ errors exceed soft threshold.
 
         When error rate is between soft and hard thresholds (5-20%),
@@ -168,7 +164,8 @@ class TestDQSoftThreshold:
         # Assert - warning was logged
         mock_logger.warning.assert_called()
         warning_calls = [
-            call for call in mock_logger.warning.call_args_list
+            call
+            for call in mock_logger.warning.call_args_list
             if "DQ Soft Threshold" in str(call)
         ]
         assert len(warning_calls) >= 1, "Expected DQ Soft Threshold warning"
@@ -239,7 +236,8 @@ class TestDQSoftThreshold:
 
         # Assert - no DQ threshold warning
         dq_warnings = [
-            call for call in mock_logger.warning.call_args_list
+            call
+            for call in mock_logger.warning.call_args_list
             if "DQ" in str(call) and "Threshold" in str(call)
         ]
         assert len(dq_warnings) == 0, "Should not warn below soft threshold"

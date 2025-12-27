@@ -213,9 +213,7 @@ class PostrunService:
             or f"{self._config.provider}.{self._config.entity_type}"
         )
 
-        silver_files = await self._vacuum_table(
-            self._config.silver_table, "silver"
-        )
+        silver_files = await self._vacuum_table(self._config.silver_table, "silver")
         gold_files = await self._vacuum_table(gold_table, "gold")
 
         return VacuumResult(

@@ -11,7 +11,6 @@ Per domain/config.py TableConfig:
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -27,30 +26,34 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 @pytest.fixture
 def base_schema() -> pa.Schema:
     """Create base schema for testing."""
-    return pa.schema([
-        pa.field("entity_id", pa.string()),
-        pa.field("name", pa.string()),
-        pa.field("value", pa.float64()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-    ])
+    return pa.schema(
+        [
+            pa.field("entity_id", pa.string()),
+            pa.field("name", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
 
 
 @pytest.fixture
 def evolved_schema() -> pa.Schema:
     """Create schema with additional field (evolution)."""
-    return pa.schema([
-        pa.field("entity_id", pa.string()),
-        pa.field("name", pa.string()),
-        pa.field("value", pa.float64()),
-        pa.field("new_field", pa.string()),  # New field added
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-    ])
+    return pa.schema(
+        [
+            pa.field("entity_id", pa.string()),
+            pa.field("name", pa.string()),
+            pa.field("value", pa.float64()),
+            pa.field("new_field", pa.string()),  # New field added
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
 
 
 @pytest.fixture
@@ -205,8 +208,12 @@ class TestSchemaEvolutionEvolveMode:
     """Tests for schema drift with on_schema_mismatch='evolve' mode."""
 
     async def test_schema_evolve_mode_allows_new_fields(
-        self, e2e_data_dir: Path, base_schema: pa.Schema, evolved_schema: pa.Schema,
-        base_records, evolved_records
+        self,
+        e2e_data_dir: Path,
+        base_schema: pa.Schema,
+        evolved_schema: pa.Schema,
+        base_records,
+        evolved_records,
     ):
         """E2E: Schema evolution with 'evolve' mode allows new fields.
 
@@ -254,8 +261,12 @@ class TestSchemaEvolutionEvolveMode:
         assert final_count == 3  # 2 original + 1 new
 
     async def test_schema_evolve_mode_logs_warning(
-        self, e2e_data_dir: Path, base_schema: pa.Schema, evolved_schema: pa.Schema,
-        base_records, evolved_records
+        self,
+        e2e_data_dir: Path,
+        base_schema: pa.Schema,
+        evolved_schema: pa.Schema,
+        base_records,
+        evolved_records,
     ):
         """E2E: Schema evolution logs warning about drift."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -292,7 +303,8 @@ class TestSchemaEvolutionEvolveMode:
 
         # Verify warning was logged
         warning_calls = [
-            call for call in mock_logger.warning.call_args_list
+            call
+            for call in mock_logger.warning.call_args_list
             if "Schema drift" in str(call)
         ]
         assert len(warning_calls) >= 1
@@ -333,7 +345,8 @@ class TestSchemaEvolutionIgnoreMode:
             on_schema_mismatch="ignore",
         )
 
-        initial_count = len(DeltaTable(str(table_path)).to_pyarrow_table())
+        # Verify initial write succeeded
+        assert len(DeltaTable(str(table_path)).to_pyarrow_table()) > 0
 
         # Second write with evolved records - should not raise
         await writer.write_silver(
@@ -441,7 +454,8 @@ class TestSchemaEvolutionEdgeCases:
 
         # No schema drift warnings
         drift_warnings = [
-            call for call in mock_logger.warning.call_args_list
+            call
+            for call in mock_logger.warning.call_args_list
             if "Schema drift" in str(call)
         ]
         assert len(drift_warnings) == 0
@@ -485,16 +499,18 @@ class TestSchemaEvolutionEdgeCases:
         )
 
         # Second write - add field_a
-        schema_v2 = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("name", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("field_a", pa.string()),  # New field
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema_v2 = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("name", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("field_a", pa.string()),  # New field
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         records_v2 = [
             {
@@ -519,17 +535,19 @@ class TestSchemaEvolutionEdgeCases:
         )
 
         # Third write - add field_b
-        schema_v3 = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("name", pa.string()),
-            pa.field("value", pa.float64()),
-            pa.field("field_a", pa.string()),
-            pa.field("field_b", pa.int64()),  # Another new field
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema_v3 = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("name", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("field_a", pa.string()),
+                pa.field("field_b", pa.int64()),  # Another new field
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
 
         records_v3 = [
             {

@@ -282,9 +282,8 @@ class StorageAdapter:
         if gold_table:
             result["gold"] = self._preview_layer(self.gold, gold_table)
 
-        result["total_files"] = (
-            result["silver"]["file_count"]
-            + (result["gold"]["file_count"] if result["gold"] else 0)
+        result["total_files"] = result["silver"]["file_count"] + (
+            result["gold"]["file_count"] if result["gold"] else 0
         )
         return result
 
@@ -454,7 +453,9 @@ class StorageAdapter:
                 None,
                 lambda: shutil.copytree(silver_table_path, silver_target),
             )
-            total_archived += sum(1 for f in silver_table_path.rglob("*") if f.is_file())
+            total_archived += sum(
+                1 for f in silver_table_path.rglob("*") if f.is_file()
+            )
             if remove_source:
                 await loop.run_in_executor(
                     None,

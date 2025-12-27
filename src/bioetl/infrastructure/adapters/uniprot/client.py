@@ -127,9 +127,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             params["cursor"] = cursor
         return params
 
-    def _parse_response(
-        self, response: httpx.Response
-    ) -> tuple[list, str | None]:
+    def _parse_response(self, response: httpx.Response) -> tuple[list, str | None]:
         """Process the HTTP response from a protein fetch request."""
         if response.status_code != 200:
             return [], None
