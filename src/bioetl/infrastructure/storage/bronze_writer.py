@@ -29,7 +29,7 @@ import orjson
 import zstandard as zstd
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
@@ -58,6 +58,7 @@ class BronzeWriter:
         json_path: str | None = None,
         validate_json: bool = True,
         audit: AuditPort | None = None,
+        tracing: TracingPort | None = None,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -73,6 +74,8 @@ class BronzeWriter:
                           Default is True for data integrity.
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
+            tracing: Optional TracingPort for distributed tracing.
+                    Use NoOpTracing from composition layer if tracing disabled.
 
         """
         self.base_path = Path(base_path)
@@ -82,6 +85,13 @@ class BronzeWriter:
         self.json_path = json_path or str(self.base_path / "json")
         self.validate_json = validate_json
         self._audit = audit
+
+        # Use NoOpTracing if not provided
+        if tracing is None:
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            self._tracing = NoOpTracing()
+        else:
+            self._tracing = tracing
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -285,117 +295,127 @@ class BronzeWriter:
             Relative path to the written file.
 
         """
-        start_time = time.perf_counter()
+        tracer = self._tracing.get_tracer(__name__)
+        with tracer.start_as_current_span("write_bronze") as span:
+            span.set_attribute("provider", provider)
+            span.set_attribute("entity", entity)
+            span.set_attribute("batch_id", str(batch_id))
+            span.set_attribute("run_id", str(run_id))
 
-        self._validate_bronze_names(provider, entity)
-        self._validate_records_iterator(records)
-        self._validate_utc_datetime(date, "date")
-        self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
+            start_time = time.perf_counter()
 
-        # Ensure records is an iterator (handles lists/tuples transparently)
-        records = iter(records)
+            self._validate_bronze_names(provider, entity)
+            self._validate_records_iterator(records)
+            self._validate_utc_datetime(date, "date")
+            self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
 
-        # Apply JSON validation if enabled (lazy generator wrapping)
-        if self.validate_json:
-            records = self._validate_json_records(records)
+            # Ensure records is an iterator (handles lists/tuples transparently)
+            records = iter(records)
 
-        date_str = date.strftime("%Y-%m-%d")
-        relative_path = (
-            f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
-        )
-        metadata = self._build_bronze_metadata(
-            run_id, run_type, ingestion_ts, provider, entity, batch_id
-        )
+            # Apply JSON validation if enabled (lazy generator wrapping)
+            if self.validate_json:
+                records = self._validate_json_records(records)
 
-        loop = asyncio.get_running_loop()
-
-        # Handle save_json: requires duplicating the iterator if iterator can only be consumed once
-        # Note: If records is a generator, we must materialize it or tee it.
-        # Assuming list(records) for safety if save_json is True, as we did before.
-        # This breaks streaming for save_json=True case, but that is acceptable (debug mode).
-        if self.save_json:
-            record_list = list(records)
-            records_iter = iter(record_list)
-        else:
-            record_list = []
-            records_iter = records
-
-        full_path = self.base_path / relative_path
-        meta_path = full_path.with_suffix(".zst.meta.json")
-
-        # Perform streaming write in executor
-        # We need to capture records_iter in closure safely
-        def _write_task():
-            # Write data file
-            count, size = self._write_atomic_stream(records_iter, full_path)
-            # Write metadata file
-            meta_bytes = orjson.dumps(metadata, option=orjson.OPT_SORT_KEYS)
-            atomic_write_bytes(meta_path, meta_bytes)
-            return count, size
-
-        record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
-        compressed_size = full_path.stat().st_size
-
-        # Record metrics
-        duration = time.perf_counter() - start_time
-        labels = {"provider": provider, "entity": entity}
-
-        self._metrics.observe_histogram(
-            "bronze_write_duration_seconds",
-            duration,
-            labels,
-        )
-        self._metrics.increment_counter(
-            "bronze_records_written_total",
-            record_count,
-            labels,
-        )
-        self._metrics.increment_counter(
-            "bronze_bytes_written_total",
-            compressed_size,
-            labels,
-        )
-
-        self.logger.info(
-            "bronze_write_complete",
-            path=relative_path,
-            provider=provider,
-            entity=entity,
-            batch_id=str(batch_id),
-            run_id=str(run_id),
-            run_type=run_type.value,
-            record_count=record_count,
-            compressed_bytes=compressed_size,
-            uncompressed_bytes=uncompressed_size,
-            duration_seconds=round(duration, 3),
-        )
-
-        if self.save_json:
-            await self._write_json_copy(
-                record_list, provider, entity, date_str, batch_id
+            date_str = date.strftime("%Y-%m-%d")
+            relative_path = (
+                f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+            )
+            metadata = self._build_bronze_metadata(
+                run_id, run_type, ingestion_ts, provider, entity, batch_id
             )
 
-        # Log audit entry for write operation
-        if self._audit:
-            audit_entry = AuditEntry(
-                run_id=run_id,
-                timestamp=ingestion_ts,
-                layer=AuditLayer.BRONZE,
-                table_name=relative_path,
-                operation=AuditOperation.WRITE,
-                records_count=record_count,
-                metadata={
-                    "provider": provider,
-                    "entity": entity,
-                    "batch_id": str(batch_id),
-                    "run_type": run_type.value,
-                    "compressed_bytes": compressed_size,
-                    "uncompressed_bytes": uncompressed_size,
-                },
-            )
-            await self._audit.log_write(audit_entry)
+            loop = asyncio.get_running_loop()
 
-        return Path(relative_path)
+            # Handle save_json: requires duplicating the iterator if iterator can only be consumed once
+            # Note: If records is a generator, we must materialize it or tee it.
+            # Assuming list(records) for safety if save_json is True, as we did before.
+            # This breaks streaming for save_json=True case, but that is acceptable (debug mode).
+            if self.save_json:
+                record_list = list(records)
+                records_iter = iter(record_list)
+            else:
+                record_list = []
+                records_iter = records
+
+            full_path = self.base_path / relative_path
+            meta_path = full_path.with_suffix(".zst.meta.json")
+
+            # Perform streaming write in executor
+            # We need to capture records_iter in closure safely
+            def _write_task():
+                # Write data file
+                count, size = self._write_atomic_stream(records_iter, full_path)
+                # Write metadata file
+                meta_bytes = orjson.dumps(metadata, option=orjson.OPT_SORT_KEYS)
+                atomic_write_bytes(meta_path, meta_bytes)
+                return count, size
+
+            record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
+            compressed_size = full_path.stat().st_size
+
+            # Record metrics
+            duration = time.perf_counter() - start_time
+            labels = {"provider": provider, "entity": entity}
+
+            self._metrics.observe_histogram(
+                "bronze_write_duration_seconds",
+                duration,
+                labels,
+            )
+            self._metrics.increment_counter(
+                "bronze_records_written_total",
+                record_count,
+                labels,
+            )
+            self._metrics.increment_counter(
+                "bronze_bytes_written_total",
+                compressed_size,
+                labels,
+            )
+
+            self.logger.info(
+                "bronze_write_complete",
+                path=relative_path,
+                provider=provider,
+                entity=entity,
+                batch_id=str(batch_id),
+                run_id=str(run_id),
+                run_type=run_type.value,
+                record_count=record_count,
+                compressed_bytes=compressed_size,
+                uncompressed_bytes=uncompressed_size,
+                duration_seconds=round(duration, 3),
+            )
+
+            if self.save_json:
+                await self._write_json_copy(
+                    record_list, provider, entity, date_str, batch_id
+                )
+
+            # Log audit entry for write operation
+            if self._audit:
+                audit_entry = AuditEntry(
+                    run_id=run_id,
+                    timestamp=ingestion_ts,
+                    layer=AuditLayer.BRONZE,
+                    table_name=relative_path,
+                    operation=AuditOperation.WRITE,
+                    records_count=record_count,
+                    metadata={
+                        "provider": provider,
+                        "entity": entity,
+                        "batch_id": str(batch_id),
+                        "run_type": run_type.value,
+                        "compressed_bytes": compressed_size,
+                        "uncompressed_bytes": uncompressed_size,
+                    },
+                )
+                await self._audit.log_write(audit_entry)
+
+            span.set_attribute("record_count", record_count)
+            span.set_attribute("compressed_size", compressed_size)
+
+            return Path(relative_path)
 
     async def _write_json_copy(
         self,
