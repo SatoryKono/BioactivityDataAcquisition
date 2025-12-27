@@ -126,15 +126,17 @@ def bootstrap_pipeline(
     )
 
     # Merge YAML maintenance config with CLI overrides
-    # CLI flags take precedence over YAML config
+    # CLI flags take precedence over YAML config (tri-state: None/True/False)
+    # None means no CLI override -> use YAML
+    # True/False means explicit CLI override
     vacuum_after_run = (
         ctx.vacuum.enabled
-        if ctx.vacuum.enabled
+        if ctx.vacuum.enabled is not None
         else yaml_config.maintenance.auto_vacuum
     )
     vacuum_retention_days = (
         ctx.vacuum.retention_days
-        if ctx.vacuum.enabled
+        if ctx.vacuum.enabled is not None
         else yaml_config.maintenance.vacuum_retention_days
     )
 
