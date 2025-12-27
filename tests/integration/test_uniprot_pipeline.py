@@ -155,6 +155,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["sequence_length"] == 439
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
+        assert "_run_id" in silver_record
 
     async def test_transform_bronze_to_silver_minimal_record(
         self,
@@ -186,7 +187,7 @@ class TestUniProtProteinPipelineTransform:
         bronze_record = {
             "primaryAccession": "Q99999",
             "uniProtkbId": "TEST_HUMAN",
-            # No proteinDescription - protein_name is optional
+            # No proteinDescription - protein_name will be None
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
@@ -202,6 +203,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["sequence_length"] is None
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
+        assert "_run_id" in silver_record
 
     async def test_transform_bronze_to_silver_missing_accession_returns_none(
         self,
@@ -277,6 +279,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["protein_name"] is None
         assert silver_record["gene_names"] == ["GENE1"]
         assert "entity_id" in silver_record
+        assert "_run_id" in silver_record
 
     async def test_transform_bronze_to_silver_empty_genes(
         self,
@@ -315,6 +318,7 @@ class TestUniProtProteinPipelineTransform:
 
         assert silver_record is not None
         assert silver_record["gene_names"] == []
+        assert "_run_id" in silver_record
 
 
 
@@ -389,6 +393,7 @@ class TestUniProtProteinPipelineEdgeCases:
         assert silver_record is not None
         # Should only include valid gene names
         assert "VALID" in silver_record["gene_names"]
+        assert "_run_id" in silver_record
 
     async def test_transform_with_none_organism(
         self,
@@ -427,3 +432,4 @@ class TestUniProtProteinPipelineEdgeCases:
 
         assert silver_record is not None
         assert silver_record["organism_id"] is None
+        assert "_run_id" in silver_record
