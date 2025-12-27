@@ -1372,3 +1372,261 @@ class TestBronzeWriterMetrics:
         assert call_kwargs["uncompressed_bytes"] > 0
         assert "duration_seconds" in call_kwargs
         assert call_kwargs["duration_seconds"] >= 0
+
+
+@pytest.mark.unit
+class TestBronzeWriterJsonValidation:
+    """Tests for BronzeWriter JSON input validation."""
+
+    def test_init_with_validate_json_default(self, tmp_path, noop_logger) -> None:
+        """Test that validate_json defaults to True."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        assert writer.validate_json is True
+
+    def test_init_with_validate_json_disabled(self, tmp_path, noop_logger) -> None:
+        """Test initialization with JSON validation disabled."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            validate_json=False,
+        )
+        assert writer.validate_json is False
+
+    def test_validate_json_records_valid(self, tmp_path, noop_logger) -> None:
+        """Test _validate_json_records passes valid JSON through."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        valid_records = [
+            b'{"id": 1, "name": "test"}\n',
+            b'{"id": 2, "value": 100}\n',
+            b'[1, 2, 3]\n',
+            b'"string"\n',
+            b'123\n',
+            b'null\n',
+        ]
+
+        validated = list(writer._validate_json_records(iter(valid_records)))
+        assert validated == valid_records
+
+    def test_validate_json_records_invalid_raises(self, tmp_path, noop_logger) -> None:
+        """Test _validate_json_records raises BronzeValidationError on invalid JSON."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        invalid_records = [
+            b'{"id": 1}\n',
+            b'not valid json\n',  # This is invalid
+            b'{"id": 3}\n',
+        ]
+
+        with pytest.raises(BronzeValidationError) as exc_info:
+            list(writer._validate_json_records(iter(invalid_records)))
+
+        assert exc_info.value.record_index == 1
+        assert exc_info.value.original_error is not None
+        assert "Invalid JSON" in str(exc_info.value)
+
+    def test_validate_json_records_empty_string(self, tmp_path, noop_logger) -> None:
+        """Test _validate_json_records raises on empty string."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        with pytest.raises(BronzeValidationError) as exc_info:
+            list(writer._validate_json_records(iter([b''])))
+
+        assert exc_info.value.record_index == 0
+
+    def test_validate_json_records_truncated_json(self, tmp_path, noop_logger) -> None:
+        """Test _validate_json_records raises on truncated JSON."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        truncated_records = [
+            b'{"id": 1, "name": "incomplete',  # Missing closing brace and quote
+        ]
+
+        with pytest.raises(BronzeValidationError) as exc_info:
+            list(writer._validate_json_records(iter(truncated_records)))
+
+        assert exc_info.value.record_index == 0
+
+    def test_validate_json_records_is_lazy(self, tmp_path, noop_logger) -> None:
+        """Test _validate_json_records is a lazy generator."""
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+
+        valid_records = [
+            b'{"id": 1}\n',
+            b'{"id": 2}\n',
+        ]
+
+        # Getting the generator should not consume any records
+        gen = writer._validate_json_records(iter(valid_records))
+        assert hasattr(gen, '__next__')
+
+        # First record should be validated on demand
+        first = next(gen)
+        assert first == b'{"id": 1}\n'
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_validates_json_by_default(
+        self,
+        tmp_path,
+        noop_logger,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze validates JSON when validate_json=True (default)."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        writer = BronzeWriter(base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics())
+        date = datetime(2024, 1, 15, tzinfo=UTC)
+
+        invalid_records = [
+            b'{"valid": true}\n',
+            b'invalid json here\n',
+        ]
+
+        with pytest.raises(BronzeValidationError) as exc_info:
+            await writer.write_bronze(
+                records=iter(invalid_records),
+                provider="chembl",
+                entity="activity",
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+
+        assert exc_info.value.record_index == 1
+        assert "Invalid JSON" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_skips_validation_when_disabled(
+        self,
+        tmp_path,
+        noop_logger,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze skips JSON validation when validate_json=False."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            validate_json=False,
+        )
+        date = datetime(2024, 1, 15, tzinfo=UTC)
+
+        # These are invalid JSON but should still be written when validation disabled
+        # Note: They still need to be bytes
+        invalid_records = [
+            b'not json but bytes\n',
+            b'another invalid line\n',
+        ]
+
+        # Should not raise - writes the bytes as-is
+        path = await writer.write_bronze(
+            records=iter(invalid_records),
+            provider="test",
+            entity="data",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify file was written
+        full_path = tmp_path / path
+        assert full_path.exists()
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_valid_json_succeeds(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze succeeds with valid JSON records and validation enabled."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            validate_json=True,
+        )
+        date = datetime(2024, 1, 15, tzinfo=UTC)
+
+        path = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify file was written successfully
+        full_path = tmp_path / path
+        assert full_path.exists()
+
+        # Verify we can read back the records
+        records_read = []
+        async for record in writer.read_bronze(str(path)):
+            records_read.append(record)
+
+        assert len(records_read) == len(sample_records)
+
+    def test_bronze_validation_error_attributes(self) -> None:
+        """Test BronzeValidationError has correct attributes."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        error = BronzeValidationError(
+            message="Test error",
+            record_index=5,
+            original_error="Expecting value",
+        )
+
+        assert error.record_index == 5
+        assert error.original_error == "Expecting value"
+        assert "Test error" in str(error)
+        assert "record_index=5" in str(error)
+        assert "error=Expecting value" in str(error)
+
+    def test_bronze_validation_error_context(self) -> None:
+        """Test BronzeValidationError exposes context for logging."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        error = BronzeValidationError(
+            message="Invalid JSON",
+            record_index=10,
+            original_error="Unterminated string",
+        )
+
+        context = error.context
+        assert context["record_index"] == 10
+        assert context["original_error"] == "Unterminated string"
+
+    def test_bronze_validation_error_without_optional_fields(self) -> None:
+        """Test BronzeValidationError works without optional fields."""
+        from bioetl.domain.exceptions import BronzeValidationError
+
+        error = BronzeValidationError(message="Simple error")
+
+        assert error.record_index is None
+        assert error.original_error is None
+        assert str(error) == "Simple error"
