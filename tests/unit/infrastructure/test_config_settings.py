@@ -202,6 +202,8 @@ class TestYamlConfigToDomain:
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.05
         yaml_config.dq_rules.hard_fail_threshold = 0.20
+        # Configure sink as empty dict (no custom write modes)
+        yaml_config.sink = {}
 
         result = yaml_config_to_domain(yaml_config)
 
