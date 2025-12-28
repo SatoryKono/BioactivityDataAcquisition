@@ -262,7 +262,6 @@ Preview of files to be cleaned up.
 ```python
 from bioetl.application.core import (
     PipelineRunner,
-    PipelineExecutor,
     PipelineServices,
     CheckpointManager,
     PreflightService,
@@ -272,17 +271,17 @@ from bioetl.application.core import (
 # See: bioetl.composition.bootstrap.bootstrap_pipeline()
 
 # Example: Direct executor usage
-executor = PipelineExecutor(
-    services=pipeline_services,
-    record_processor=processor,
-    checkpoint_manager=checkpoint_manager,
-    shutdown_signal=shutdown_signal,
-    entity_type="activity",
-    batch_size=100,
-)
+# executor = PipelineExecutor(
+#     services=pipeline_services,
+#     record_processor=processor,
+#     checkpoint_manager=checkpoint_manager,
+#     shutdown_signal=shutdown_signal,
+#     entity_type="activity",
+#     batch_size=100,
+# )
 
 # Execute data flow
-await executor.execute()
+# await executor.execute()
 ```
 
 ## See Also

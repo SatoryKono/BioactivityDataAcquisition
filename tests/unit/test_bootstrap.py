@@ -212,9 +212,6 @@ class TestBootstrapPipeline:
             retry_delay=1.0,
         )
 
-    @pytest.mark.skip(
-        reason="Requires full integration setup - covered by integration tests"
-    )
     @patch("bioetl.composition.bootstrap.get_settings")
     @patch("bioetl.composition.bootstrap.get_default_registry")
     def test_bootstrap_pipeline_chembl_activity(

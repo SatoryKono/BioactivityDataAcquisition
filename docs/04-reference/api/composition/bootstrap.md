@@ -210,16 +210,15 @@ Get application settings from environment.
 ```python
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
-    bootstrap_observability,
-    bootstrap_storage,
 )
-from bioetl.domain.context import PipelineRunContext
+from bioetl.composition._bootstrap.observability import bootstrap_observability
+from bioetl.composition._bootstrap.storage import bootstrap_storage
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
 # Full bootstrap (recommended)
-ctx = PipelineRunContext(
+ctx = PipelineContext(
     pipeline_name="chembl_activity",
-    run_id=uuid4(),
     run_type=RunType.INCREMENTAL,
 )
 runner = bootstrap_pipeline(ctx)
