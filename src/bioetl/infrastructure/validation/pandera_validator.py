@@ -168,7 +168,7 @@ class PanderaGoldValidator:
             # Pandera will raise error for extra columns.
 
             # We need to tell Pandera to be non-strict if our validator is configured as non-strict.
-            if not self._strict and hasattr(self._schema, "strict"):
+            if not self._strict and hasattr(self._schema, "columns"):
                  # We can't easily modify the schema instance if it's frozen or shared.
                  # But we can try to validate with a non-strict copy or just catch the error?
                  # Catching the error is risky as it might hide other schema issues.
@@ -196,7 +196,10 @@ class PanderaGoldValidator:
                      schema_columns.update(self._schema.index.names)
 
                  # Filter DF to only schema columns
-                 df_to_validate = df[list(schema_columns.intersection(df.columns))]
+                 # We need to handle case where schema column is NOT in df (missing column) - Pandera handles that.
+                 # We only want to remove columns from DF that are NOT in schema.
+                 cols_to_keep = list(schema_columns.intersection(df.columns))
+                 df_to_validate = df[cols_to_keep]
 
                  self._schema.validate(df_to_validate, lazy=True)
             else:
