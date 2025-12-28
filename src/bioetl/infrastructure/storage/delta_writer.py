@@ -510,6 +510,15 @@ class DeltaWriter:
             # Validate lock is held before any write operation (RULES.md §3.3)
             self._validate_lock_held(table_name, lock_context, expected_owner_id)
 
+            # Deduplicate records based on primary keys to prevent duplicates in batch
+            if primary_keys and records:
+                unique_records = {}
+                for record in records:
+                    key = tuple(record.get(pk) for pk in primary_keys)
+                    unique_records[key] = record
+                records = list(unique_records.values())
+                span.set_attribute("record_count", len(records))
+
             validated_mode = self._validate_write_mode(mode)
 
             # Enforce medallion layer write mode policy (Silver allows only merge/append)
