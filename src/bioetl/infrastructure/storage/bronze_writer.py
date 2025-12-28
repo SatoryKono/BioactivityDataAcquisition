@@ -305,6 +305,7 @@ class BronzeWriter:
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
+        **kwargs,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
 
@@ -322,6 +323,7 @@ class BronzeWriter:
                          (single source of time per ADR-014).
             lock_context: Lock context from LockManager. Required unless
                          require_lock=False was passed to constructor (RULES.md §3.3).
+            **kwargs: Additional arguments for compatibility (ignored).
 
         Returns:
             Relative path to the written file.
