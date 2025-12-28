@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -21,7 +19,7 @@ class DocumentTermSchema(ETLRecordSchema):
     )
 
     # === Metadata ===
-    term: Optional[Series[str]] = pa.Field(
+    term: Series[str] | None = pa.Field(
         nullable=True, description="Term."
     )
 

@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -29,17 +27,17 @@ class TargetComponentSchema(ETLRecordSchema):
     )
 
     # === Metadata ===
-    relationship: Optional[Series[str]] = pa.Field(
+    relationship: Series[str] | None = pa.Field(
         nullable=True,
         isin=["SINGLE PROTEIN", "PROTEIN SUBUNIT", "RNA", "INTERACTING PROTEIN"],
         description="Relationship type.",
     )
-    stoichiometry: Optional[Series[int]] = pa.Field(
+    stoichiometry: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Stoichiometry.",
     )
-    homologue: Optional[Series[int]] = pa.Field(
+    homologue: Series[int] | None = pa.Field(
         nullable=True,
         isin=[0, 1, 2],
         description="Homologue flag.",

@@ -172,6 +172,8 @@ disallow_subclassing_any = false  # Allow subclassing pydantic BaseModel and pan
 warn_unreachable = false  # Disable for unreachable code warnings in type narrowing
 strict_equality = true
 extra_checks = true
+# Exclude tools directory (auxiliary scripts without strict type annotations)
+exclude = ["src/tools/"]
 
 
 [[tool.mypy.overrides]]
@@ -265,9 +267,14 @@ known-first-party = ["bioetl", "tests"]
 # C901: Architecture tests perform complex static analysis checks
 # E402: Allow imports after future imports and docstrings
 # RUF012: Mutable class attributes for parametrize test data are intentional
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901", "E402", "RUF012"]
+# RUF059: Unused unpacked variables are common in test fixtures
+"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901", "E402", "RUF012", "RUF059", "T201"]
 # Domain __init__.py uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/domain/__init__.py" = ["RUF022"]
+# Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
+"src/bioetl/composition/entrypoints.py" = ["RUF022"]
+# CLI tools legitimately use print() and may use simpler patterns
+"src/tools/**/*.py" = ["T201", "PTH", "SIM"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine

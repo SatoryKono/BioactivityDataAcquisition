@@ -1,21 +1,21 @@
 """Script to programmatically verify schema parity."""
-import sys
-from bioetl.infrastructure.schemas.silver import (
-    CHEMBL_MOLECULE_SCHEMA,
-    CHEMBL_TARGET_SCHEMA,
-    CHEMBL_ACTIVITY_SCHEMA,
-    CHEMBL_ASSAY_SCHEMA,
-)
+import dataclasses
+
+from bioetl.domain.entities.chembl_activity import Activity, Assay
+from bioetl.domain.entities.chembl_structures import Molecule, Target
 from bioetl.infrastructure.schemas.gold import (
-    ChEMBLMoleculeGoldSchema,
-    ChEMBLTargetGoldSchema,
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
+    ChEMBLMoleculeGoldSchema,
+    ChEMBLTargetGoldSchema,
 )
-from bioetl.domain.entities.chembl_structures import Molecule, Target
-from bioetl.domain.entities.chembl_activity import Activity, Assay
-import dataclasses
-import pandera
+from bioetl.infrastructure.schemas.silver import (
+    CHEMBL_ACTIVITY_SCHEMA,
+    CHEMBL_ASSAY_SCHEMA,
+    CHEMBL_MOLECULE_SCHEMA,
+    CHEMBL_TARGET_SCHEMA,
+)
+
 
 def get_dataclass_fields(cls):
     """Return set of field names from a dataclass, excluding system fields."""
@@ -46,7 +46,7 @@ def check_parity(name, domain_cls, silver_schema, gold_model):
     if missing_in_silver:
         print(f"  [ERROR] Fields in Domain but missing in Silver: {missing_in_silver}")
     else:
-        print(f"  [OK] All Domain fields present in Silver.")
+        print("  [OK] All Domain fields present in Silver.")
 
     # Check 2: Silver vs Gold
     # Gold Schema keys() usually returns the aliased name if defined, or the field name.
@@ -60,7 +60,7 @@ def check_parity(name, domain_cls, silver_schema, gold_model):
     elif missing_in_silver_from_gold:
          print(f"  [ERROR] Fields in Gold but missing in Silver: {missing_in_silver_from_gold}")
     else:
-        print(f"  [OK] Silver and Gold schemas match exactly.")
+        print("  [OK] Silver and Gold schemas match exactly.")
 
 if __name__ == "__main__":
     check_parity("Molecule", Molecule, CHEMBL_MOLECULE_SCHEMA, ChEMBLMoleculeGoldSchema)

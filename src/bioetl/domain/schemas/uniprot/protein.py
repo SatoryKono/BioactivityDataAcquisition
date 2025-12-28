@@ -6,13 +6,11 @@ Source: https://rest.uniprot.org/uniprotkb/
 from __future__ import annotations
 
 from datetime import date
-from typing import Optional
 
 import pandera as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-
 
 # === Fixed Value Constants ===
 PROTEIN_EXISTENCE_LEVELS = [
@@ -47,55 +45,55 @@ class ProteinSchema(ETLRecordSchema):
         nullable=False,
         description="Recommended protein name"
     )
-    protein_short_names: Optional[Series[str]] = pa.Field(
+    protein_short_names: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of short names"
     )
-    protein_ec_numbers: Optional[Series[str]] = pa.Field(
+    protein_ec_numbers: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of EC numbers"
     )
 
     # === Gene Names ===
-    gene_primary: Optional[Series[str]] = pa.Field(
+    gene_primary: Series[str] | None = pa.Field(
         nullable=True,
         description="Primary gene name"
     )
-    gene_synonyms: Optional[Series[str]] = pa.Field(
+    gene_synonyms: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of gene synonyms"
     )
-    gene_orf_names: Optional[Series[str]] = pa.Field(
+    gene_orf_names: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of ORF names"
     )
 
     # === Organism ===
-    organism_scientific: Optional[Series[str]] = pa.Field(
+    organism_scientific: Series[str] | None = pa.Field(
         nullable=True,
         description="Scientific organism name"
     )
-    organism_common: Optional[Series[str]] = pa.Field(
+    organism_common: Series[str] | None = pa.Field(
         nullable=True,
         description="Common organism name"
     )
-    taxonomy_id: Optional[Series[int]] = pa.Field(
+    taxonomy_id: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="NCBI Taxonomy ID"
     )
-    lineage: Optional[Series[str]] = pa.Field(
+    lineage: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of taxonomic lineage"
     )
 
     # === Evidence & Quality ===
-    protein_existence: Optional[Series[str]] = pa.Field(
+    protein_existence: Series[str] | None = pa.Field(
         nullable=True,
         isin=PROTEIN_EXISTENCE_LEVELS,
         description="Evidence level for existence"
     )
-    annotation_score: Optional[Series[int]] = pa.Field(
+    annotation_score: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         le=5,
@@ -117,95 +115,95 @@ class ProteinSchema(ETLRecordSchema):
         ge=1,
         description="Sequence length"
     )
-    sequence_mass: Optional[Series[int]] = pa.Field(
+    sequence_mass: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Molecular mass (Da)"
     )
-    sequence_checksum: Optional[Series[str]] = pa.Field(
+    sequence_checksum: Series[str] | None = pa.Field(
         nullable=True,
         description="CRC64 checksum"
     )
-    sequence_modified: Optional[Series[date]] = pa.Field(
+    sequence_modified: Series[date] | None = pa.Field(
         nullable=True,
         description="Sequence last modified date"
     )
 
     # === Entry Metadata ===
-    entry_version: Optional[Series[int]] = pa.Field(
+    entry_version: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Entry version number"
     )
-    entry_created: Optional[Series[date]] = pa.Field(
+    entry_created: Series[date] | None = pa.Field(
         nullable=True,
         description="Entry creation date"
     )
-    entry_modified: Optional[Series[date]] = pa.Field(
+    entry_modified: Series[date] | None = pa.Field(
         nullable=True,
         description="Entry last modified date"
     )
 
     # === Functional Annotation ===
-    function_comment: Optional[Series[str]] = pa.Field(
+    function_comment: Series[str] | None = pa.Field(
         nullable=True,
         description="Function description"
     )
-    catalytic_activity: Optional[Series[str]] = pa.Field(
+    catalytic_activity: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of catalytic reactions"
     )
-    pathway: Optional[Series[str]] = pa.Field(
+    pathway: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of pathways"
     )
-    subcellular_location: Optional[Series[str]] = pa.Field(
+    subcellular_location: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of subcellular locations"
     )
-    tissue_specificity: Optional[Series[str]] = pa.Field(
+    tissue_specificity: Series[str] | None = pa.Field(
         nullable=True,
         description="Tissue expression pattern"
     )
-    disease_involvement: Optional[Series[str]] = pa.Field(
+    disease_involvement: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of disease associations"
     )
-    pharmaceutical_use: Optional[Series[str]] = pa.Field(
+    pharmaceutical_use: Series[str] | None = pa.Field(
         nullable=True,
         description="Pharmaceutical applications"
     )
-    similarity_comment: Optional[Series[str]] = pa.Field(
+    similarity_comment: Series[str] | None = pa.Field(
         nullable=True,
         description="Family and domain information"
     )
-    caution: Optional[Series[str]] = pa.Field(
+    caution: Series[str] | None = pa.Field(
         nullable=True,
         description="Warnings about this entry"
     )
 
     # === Counts ===
-    cross_reference_count: Optional[Series[int]] = pa.Field(
+    cross_reference_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of database cross-references"
     )
-    feature_count: Optional[Series[int]] = pa.Field(
+    feature_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of sequence features"
     )
-    keyword_count: Optional[Series[int]] = pa.Field(
+    keyword_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of keywords"
     )
-    publication_count: Optional[Series[int]] = pa.Field(
+    publication_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of publications"
     )
-    isoform_count: Optional[Series[int]] = pa.Field(
+    isoform_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of isoforms"
