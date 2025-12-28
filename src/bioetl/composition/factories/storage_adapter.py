@@ -59,6 +59,7 @@ class StorageAdapter:
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
+        **kwargs: Any,
     ) -> Path:
         """Write raw records to Bronze layer.
 
@@ -99,6 +100,7 @@ class StorageAdapter:
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         lock_context: LockContext | None = None,
+        **kwargs: Any,
     ) -> None:
         """Write transformed records to Silver layer."""
         await self.silver.write_silver(
@@ -123,6 +125,7 @@ class StorageAdapter:
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         lock_context: LockContext | None = None,
+        **kwargs: Any,
     ) -> None:
         """Write aggregated records to Gold layer.
 

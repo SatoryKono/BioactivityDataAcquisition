@@ -459,7 +459,7 @@ class DeltaWriter:
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         lock_context: LockContext | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
