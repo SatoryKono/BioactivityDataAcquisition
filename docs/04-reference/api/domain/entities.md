@@ -151,8 +151,7 @@ activity = Activity(
     run_type=RunType.INCREMENTAL,
     ingestion_ts=datetime.now(),
     # ChEMBL-specific fields
-    activity_id=12345,
-    assay_chembl_id="CHEMBL123456",
+    activity_id="12345",
     molecule_chembl_id="CHEMBL789",
     standard_type="IC50",
     standard_value=50.0,
