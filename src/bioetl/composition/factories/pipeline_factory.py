@@ -209,7 +209,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             run_id=run_id,
             runtime=runtime,
             settings=settings,
-            logger=cast("LoggerPort", observability.logger),
+            logger=observability.logger,
             config=yaml_config,
             filter_config=filter_config,
             tracer=observability.tracer,
@@ -410,8 +410,7 @@ def assemble_runner(
         Fully initialized PipelineRunner
     """
     # Create Helper Components using ServicesBuilder
-    # Cast logger to LoggerPort - structlog.BoundLogger is runtime-compatible
-    logger_port = cast("LoggerPort", observability.logger)
+    logger_port = observability.logger
 
     checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
         checkpoint_port=pipeline.services.checkpoint,
