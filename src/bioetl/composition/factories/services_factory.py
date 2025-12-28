@@ -41,8 +41,6 @@ from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
     import pyarrow as pa
-    import structlog
-    from structlog.stdlib import BoundLogger
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.shutdown import ShutdownSignal
@@ -78,7 +76,7 @@ __all__ = [
 class DataSourceFactoryProtocol(Protocol):
     """Protocol for data source creation."""
 
-    def create(self, settings: Settings, logger: BoundLogger) -> DataSourcePort: ...
+    def create(self, settings: Settings, logger: LoggerPort) -> DataSourcePort: ...
 
 
 # =============================================================================
@@ -93,7 +91,7 @@ class BaseServicesFactory:
     def create_common_services(
         cls,
         settings: Settings,
-        logger: BoundLogger,
+        logger: LoggerPort,
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
         tracer: TracingPort | None = None,
@@ -180,7 +178,7 @@ class ServicesBuilder:
     @staticmethod
     def create_checkpoint_manager(
         checkpoint_port: CheckpointPort,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         pipeline_name: str,
         run_id: RunID,
         resume: bool,

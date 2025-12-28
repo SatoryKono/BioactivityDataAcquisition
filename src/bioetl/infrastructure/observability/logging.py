@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Any
+from typing import cast
 from uuid import UUID
 
 import structlog
@@ -30,7 +30,7 @@ def create_logger(
     run_id: UUID,
     log_level: str = "INFO",
     json_format: bool = True,
-) -> Any:
+) -> structlog.stdlib.BoundLogger:
     """Create a structured logger factory.
 
     Args:
@@ -59,14 +59,14 @@ def create_logger(
         processors.append(structlog.dev.ConsoleRenderer())
 
     structlog.configure(
-        processors=processors,
+        processors=processors,  # type: ignore[arg-type]
         logger_factory=structlog.stdlib.LoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
 
     logger = structlog.get_logger(f"bioetl.{pipeline}")
-    logger = logger.bind(run_id=str(run_id), pipeline=pipeline)
+    bound_logger = logger.bind(run_id=str(run_id), pipeline=pipeline)
 
     # Set the log level for the underlying standard logger
     logging.basicConfig(
@@ -75,4 +75,4 @@ def create_logger(
         format="%(message)s",
     )
 
-    return logger
+    return cast(structlog.stdlib.BoundLogger, bound_logger)

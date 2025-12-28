@@ -23,9 +23,7 @@ from .storage_adapter import StorageAdapter
 if TYPE_CHECKING:
     from typing import Any
 
-    import structlog
-
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -63,7 +61,7 @@ class StorageFactory:
     def create(
         settings: Settings,
         config: PipelineYamlConfig,
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
     ) -> StorageContext:
@@ -156,7 +154,7 @@ class StorageFactory:
 
     @staticmethod
     def _log_export_status(
-        logger: structlog.BoundLogger,
+        logger: LoggerPort,
         json_path: str | None,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,

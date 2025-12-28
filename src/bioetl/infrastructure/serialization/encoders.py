@@ -24,18 +24,23 @@ from __future__ import annotations
 
 import json
 import os
+import types
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports import JsonEncoderPort
 
+if TYPE_CHECKING:
+    import orjson as orjson_module
+
 # Optional orjson import
+_orjson: types.ModuleType | None
 try:
-    import orjson
+    import orjson as _orjson
 
     ORJSON_AVAILABLE = True
 except ImportError:
-    orjson = None
+    _orjson = None
     ORJSON_AVAILABLE = False
 
 
@@ -146,10 +151,10 @@ class OrjsonEncoder:
         Returns:
             Compact JSON string
         """
-        assert orjson is not None
-        options = orjson.OPT_SORT_KEYS if sort_keys else 0
+        assert _orjson is not None
+        options = _orjson.OPT_SORT_KEYS if sort_keys else 0
 
-        result: str = orjson.dumps(obj, option=options).decode("utf-8")
+        result: str = _orjson.dumps(obj, option=options).decode("utf-8")
 
         # orjson doesn't have ensure_ascii option
         # For ASCII-only output, we need to escape non-ASCII chars
@@ -170,8 +175,8 @@ class OrjsonEncoder:
             Canonical JSON string suitable for hashing
         """
         # For canonical output, we need ensure_ascii=True for hashing consistency
-        assert orjson is not None
-        result: str = orjson.dumps(obj, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+        assert _orjson is not None
+        result: str = _orjson.dumps(obj, option=_orjson.OPT_SORT_KEYS).decode("utf-8")
         # Escape non-ASCII for canonical form
         return result.encode("unicode_escape").decode("ascii")
 
@@ -187,11 +192,12 @@ class OrjsonEncoder:
         Raises:
             ValueError: If JSON is invalid
         """
+        assert _orjson is not None
         try:
-            assert orjson is not None
-            result: dict[str, Any] | list[Any] = orjson.loads(data)
+            result: dict[str, Any] | list[Any] = _orjson.loads(data)
             return result
-        except orjson.JSONDecodeError as e:
+        except json.JSONDecodeError as e:
+            # orjson.JSONDecodeError inherits from json.JSONDecodeError
             raise ValueError(f"Invalid JSON: {e}") from e
 
 
