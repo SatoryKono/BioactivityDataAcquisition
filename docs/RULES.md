@@ -324,11 +324,15 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 ### 3.3. Конкурентность и Блокировки
 
 > **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
->
-> Текущая реализация использует **MemoryLock** для локального развёртывания.
-> Redis-блокировки (ADR-003) остаются спецификацией для будущего распределённого развёртывания.
 
-#### Текущая реализация (Local-Only)
+#### Strict Single Instance Policy (Local-Only)
+**ЗАПРЕЩЕНО** запускать несколько экземпляров одного пайплайна. Система разработана как **Single Instance Application**.
+
+- **Constraint**: `MemoryLock` работает только внутри одного процесса. Межпроцессные блокировки отсутствуют.
+- **Риск**: Параллельный запуск приведет к повреждению данных (Data Corruption) в Delta Lake/JSONL.
+- **Horizontal Scaling**: **FORBIDDEN**. Масштабирование только вертикальное.
+
+#### Текущая реализация
 - **Механизм**: In-memory блокировки (`MemoryLock`)
 - **Scope**: Один процесс Python
 - **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`
