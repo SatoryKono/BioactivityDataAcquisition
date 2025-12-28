@@ -330,10 +330,6 @@ class TestMemoryMonitorPsutil:
         # This just verifies the check runs without error
         assert isinstance(monitor._psutil_available, bool)
 
-    @pytest.mark.skipif(
-        True,  # Skip in CI - psutil may not be installed
-        reason="psutil may not be available in test environment",
-    )
     def test_get_stats_with_psutil(self, mock_logger):
         """Test stats retrieval with psutil (integration test)."""
         config = MemoryConfig()

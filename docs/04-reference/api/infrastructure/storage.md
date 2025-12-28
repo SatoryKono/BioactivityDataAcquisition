@@ -73,15 +73,6 @@ Writer for Silver layer (Delta Lake with merge/upsert).
             - optimize
             - get_table_stats
 
-### SilverWriteMode
-
-Write mode enum for Silver layer operations.
-
-::: bioetl.infrastructure.storage.delta_writer.SilverWriteMode
-    options:
-        show_root_heading: true
-        show_source: false
-
 **Features**:
 - ACID transactions via Delta Lake
 - Merge/upsert by content hash
@@ -166,6 +157,7 @@ await gold_writer.vacuum(retention_hours=720)
 
 ```python
 from bioetl.infrastructure.storage import BronzeWriter, DeltaWriter, GoldWriter
+from bioetl.domain.medallion import SilverWriteMode
 
 # Bronze: raw data storage
 bronze = BronzeWriter(
