@@ -116,15 +116,6 @@ def register_all_transformers() -> None:
         TargetComponentTransformer,
     )
     from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-    from bioetl.application.pipelines.gtopdb.interaction_transformer import (
-        GtopdbInteractionTransformer,
-    )
-    from bioetl.application.pipelines.gtopdb.ligand_transformer import (
-        GtopdbLigandTransformer,
-    )
-    from bioetl.application.pipelines.gtopdb.target_transformer import (
-        GtopdbTargetTransformer,
-    )
     from bioetl.application.pipelines.pubchem.transformer import (
         PubChemCompoundTransformer,
     )
@@ -151,11 +142,6 @@ def register_all_transformers() -> None:
 
     # PubMed transformers
     register_transformer("pubmed", "publications", PubMedPublicationTransformer)
-
-    # GtoPdb transformers
-    register_transformer("gtopdb", "target", GtopdbTargetTransformer)
-    register_transformer("gtopdb", "ligand", GtopdbLigandTransformer)
-    register_transformer("gtopdb", "interaction", GtopdbInteractionTransformer)
 
 
 __all__ = [

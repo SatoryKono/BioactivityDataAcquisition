@@ -28,11 +28,6 @@ from bioetl.domain.entities.chembl_structures import (
     Target,
     TargetComponent,
 )
-from bioetl.domain.entities.gtopdb import (
-    GtopdbInteraction,
-    GtopdbLigand,
-    GtopdbTarget,
-)
 from bioetl.domain.entities.pubchem import Compound
 from bioetl.domain.entities.pubmed import Publication
 from bioetl.domain.entities.uniprot import Protein
@@ -43,9 +38,6 @@ __all__ = [
     "BaseEntity",
     "Compound",
     "Document",
-    "GtopdbInteraction",
-    "GtopdbLigand",
-    "GtopdbTarget",
     "Molecule",
     "Protein",
     "Publication",
