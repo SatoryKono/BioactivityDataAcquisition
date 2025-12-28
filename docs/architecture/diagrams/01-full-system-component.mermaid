@@ -1,0 +1,140 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph External["External Systems"]
+        ChEMBL_API["ChEMBL API"]
+        PubChem_API["PubChem API"]
+        UniProt_API["UniProt API"]
+        PubMed_API["PubMed API"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        CLI["CLI\n(Click)"]
+        Orchestration["Orchestration\n(Signal Handling)"]
+    end
+
+    subgraph Application["Application Layer"]
+        subgraph Core["Core"]
+            PipelineRunner["PipelineRunner"]
+            PipelineExecutor["PipelineExecutor"]
+            RecordProcessor["RecordProcessor"]
+            BatchTransformer["BatchTransformer"]
+        end
+        subgraph Services["Services"]
+            LockManager["LockManager"]
+            CheckpointManager["CheckpointManager"]
+            PreflightService["PreflightService"]
+            PostrunService["PostrunService"]
+            LifecycleOrchestrator["LifecycleOrchestrator"]
+        end
+        subgraph Transformers["Entity Transformers"]
+            ActivityTransformer["ActivityTransformer"]
+            MoleculeTransformer["MoleculeTransformer"]
+            AssayTransformer["AssayTransformer"]
+            TargetTransformer["TargetTransformer"]
+        end
+    end
+
+    subgraph Domain["Domain Layer"]
+        subgraph Ports["Ports (Protocols)"]
+            DataSourcePort["DataSourcePort"]
+            StoragePort["StoragePort"]
+            LockPort["LockPort"]
+            CheckpointPort["CheckpointPort"]
+            QuarantinePort["QuarantinePort"]
+            MetricsPort["MetricsPort"]
+            TracingPort["TracingPort"]
+            LoggerPort["LoggerPort"]
+        end
+        subgraph Entities["Entities"]
+            Activity["Activity"]
+            Molecule["Molecule"]
+            Assay["Assay"]
+            Target["Target"]
+        end
+        subgraph Config["Configuration"]
+            PipelineConfig["PipelineConfig"]
+            RuntimeConfig["RuntimeConfig"]
+            DQConfig["DQConfig"]
+        end
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        subgraph Adapters["Data Source Adapters"]
+            ChemblAdapter["ChemblAdapter"]
+            PubchemAdapter["PubchemAdapter"]
+            UniprotAdapter["UniprotAdapter"]
+            PubmedAdapter["PubmedAdapter"]
+        end
+        subgraph HTTP["HTTP Infrastructure"]
+            UnifiedHTTPClient["UnifiedHTTPClient"]
+            CircuitBreaker["CircuitBreaker"]
+            TokenBucket["TokenBucket\n(RateLimiter)"]
+        end
+        subgraph Storage["Storage Writers"]
+            BronzeWriter["BronzeWriter"]
+            DeltaWriter["DeltaWriter\n(Silver)"]
+            GoldWriter["GoldWriter"]
+        end
+        subgraph Locking["Locking"]
+            MemoryLock["MemoryLock"]
+        end
+    end
+
+    subgraph Composition["Composition Layer"]
+        Bootstrap["bootstrap_pipeline()"]
+        Factories["Factories"]
+        Registry["PipelineRegistry"]
+    end
+
+    subgraph DataLake["Data Lake (Local FS)"]
+        Bronze[("Bronze\nJSONL+zstd")]
+        Silver[("Silver\nDelta Lake")]
+        Gold[("Gold\nDelta/Parquet")]
+        Quarantine[("Quarantine")]
+        Checkpoints[("Checkpoints")]
+    end
+
+    %% External connections
+    ChEMBL_API --> ChemblAdapter
+    PubChem_API --> PubchemAdapter
+    UniProt_API --> UniprotAdapter
+    PubMed_API --> PubmedAdapter
+
+    %% Interface to Application
+    CLI --> Bootstrap
+    Orchestration --> PipelineRunner
+
+    %% Composition wiring
+    Bootstrap --> Factories
+    Factories --> Registry
+    Bootstrap --> PipelineRunner
+
+    %% Application internal
+    PipelineRunner --> PipelineExecutor
+    PipelineRunner --> LockManager
+    PipelineRunner --> PreflightService
+    PipelineRunner --> PostrunService
+    PipelineExecutor --> RecordProcessor
+    RecordProcessor --> BatchTransformer
+    BatchTransformer --> ActivityTransformer
+    BatchTransformer --> MoleculeTransformer
+
+    %% Domain dependencies (interfaces)
+    PipelineRunner -.-> DataSourcePort
+    PipelineRunner -.-> StoragePort
+    PipelineRunner -.-> LockPort
+
+    %% Infrastructure implements Ports
+    ChemblAdapter -.->|implements| DataSourcePort
+    BronzeWriter -.->|implements| StoragePort
+    MemoryLock -.->|implements| LockPort
+
+    %% HTTP infrastructure
+    ChemblAdapter --> UnifiedHTTPClient
+    UnifiedHTTPClient --> CircuitBreaker
+    UnifiedHTTPClient --> TokenBucket
+
+    %% Storage writes
+    BronzeWriter --> Bronze
+    DeltaWriter --> Silver
+    GoldWriter --> Gold

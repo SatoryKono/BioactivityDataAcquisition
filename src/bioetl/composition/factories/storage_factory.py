@@ -111,20 +111,11 @@ class StorageFactory:
         # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
         require_lock = not settings.test_mode
 
-        # Log path sources for debugging
-        bronze_from_yaml = use_yaml_paths and bronze_config and bronze_config.path
-        silver_from_yaml = use_yaml_paths and silver_config and silver_config.path
-        gold_from_yaml = use_yaml_paths and gold_config and gold_config.path
-
         logger.info(
             "Using local storage",
             bronze_path=str(bronze_path),
             silver_path=str(silver_path),
             gold_path=str(gold_path),
-            bronze_from_yaml=bool(bronze_from_yaml),
-            silver_from_yaml=bool(silver_from_yaml),
-            gold_from_yaml=bool(gold_from_yaml),
-            test_mode=settings.test_mode,
             require_lock=require_lock,
         )
 
