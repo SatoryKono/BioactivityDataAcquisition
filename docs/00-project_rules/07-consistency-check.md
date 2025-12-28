@@ -12,7 +12,7 @@
     - Delta `VACUUM` еженедельно `retention_period=7 days`.
     - Forensic retention (7d по умолчанию; 30d для Critical).
     - Schema Drift policy (Info/Warn/Critical + SLA 48h).
-    - Locking: Redis SETNX + EXPIRE; TTL=60s; heartbeat=20s; fencing token; Max 4h; safety guard.
+    - Locking: MemoryLock (Local-Only); Max 4h; safety guard.
     - Circuit Breaker: trigger=5, open=5m, half-open probe; метрики `circuit_breaker_state`, `trips_total`.
     - DQ thresholds: 5%/20%; аномалии: 2x/5x baseline; cold start.
     - Secrets policy; PII salted; Graceful Shutdown; DR RPO/RTO.
@@ -33,7 +33,7 @@ grep -R "Синхронизировано с RULES.md v5.0" docs/00-project_rule
 # 2) Ключевые формулировки (примерный набор)
 grep -R "Raw Parquet" docs/00-project_rules/00-rules-summary.md
 grep -R "VACUUM" docs/00-project_rules/
-grep -R "Redis.*SETNX.*EXPIRE" -n docs/00-project_rules/
+grep -R "MemoryLock" -n docs/00-project_rules/
 grep -R "Trigger | 5" -n docs/00-project_rules/00-rules-summary.md
 grep -R "5%.*20%" -n docs/00-project_rules/
 grep -R "forensic_retention" -n docs/

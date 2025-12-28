@@ -160,15 +160,14 @@
 
 ### 2.13. Конкурентность и блокировки (MUST)
 
-| Параметр      | Значение                 |
+> **Note**: Local-Only Deployment (ADR-010). Redis отложен для будущего распределённого развёртывания.
+
+| Параметр      | Значение (Local-Only)    |
 |---------------|--------------------------|
-| Механизм      | Redis `SETNX` + `EXPIRE` |
-| TTL           | 60 секунд                |
-| Heartbeat     | Каждые 20 сек            |
-| Fencing Token | `owner_id` (run_id)      |
+| Механизм      | `MemoryLock` (in-process)|
 | Max Duration  | 4 часа                   |
 
-**Invariant**: Потеря блокировки = потеря права на запись. Safety Guard **MUST** валидировать `owner_id` перед записью.
+**Invariant**: Потеря блокировки = потеря права на запись. Safety Guard **MUST** валидировать lock ownership перед записью.
 
 ### 2.14. Рефакторинг модулей (MUST)
 
@@ -219,7 +218,6 @@ grep -r "X" src/bioetl/domain/__init__.py
 | Рефакторить без карты зависимостей         | Высокий риск регрессии              |
 | Sentinel values (-1, "N/A")                | Используйте NULL                    |
 | Raw Parquet в Silver                       | Используйте Delta Lake              |
-| Смешивание бэкендов (Redis + DB) для locks | Inconsistency                       |
 | Использовать `print()` для логирования     | Нарушает политику структурных логов |
 
 ## 4. Disaster Recovery (SHOULD)
