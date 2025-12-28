@@ -18,15 +18,15 @@ BioETL provides three observability pillars:
 
 Prometheus-compatible metrics exporter.
 
-::: bioetl.infrastructure.observability.metrics.PrometheusMetrics
+::: bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics
     options:
         show_root_heading: true
         show_source: false
         members:
             - __init__
-            - increment
-            - gauge
-            - histogram
+            - observe_histogram
+            - increment_counter
+            - set_gauge
             - close
 
 ### NoOpMetrics
@@ -50,17 +50,16 @@ No-op implementation for testing or disabled metrics.
 
 ## Tracing
 
-### TracingExporter
+### OpenTelemetryTracer
 
 OpenTelemetry tracing exporter.
 
-::: bioetl.infrastructure.observability.tracing.TracingExporter
+::: bioetl.infrastructure.observability.tracing.OpenTelemetryTracer
     options:
         show_root_heading: true
         show_source: false
         members:
             - __init__
-            - start_span
             - get_tracer
             - close
 
@@ -94,21 +93,14 @@ pipeline_run
 
 ## Logging
 
-### StructlogLogger
+### create_logger
 
-Structured logging implementation.
+Factory function for creating structured loggers.
 
-::: bioetl.infrastructure.observability.logging.StructlogLogger
+::: bioetl.infrastructure.observability.logging.create_logger
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - __init__
-            - info
-            - warning
-            - error
-            - debug
-            - bind
 
 ### NoOpLogger
 
@@ -186,27 +178,26 @@ await server.start()
 ## Usage Example
 
 ```python
-from bioetl.infrastructure.observability import PrometheusMetrics
-from bioetl.infrastructure.observability.tracing import TracingExporter
-from bioetl.infrastructure.observability.logging import StructlogLogger
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
+from bioetl.infrastructure.observability.logging import create_logger
 
 # Initialize observability stack
-metrics = PrometheusMetrics(namespace="bioetl")
-tracer = TracingExporter(service_name="bioetl-pipeline")
-logger = StructlogLogger()
+metrics = PrometheusMetrics()
+tracer = OpenTelemetryTracer(service_name="bioetl-pipeline")
+logger = create_logger(pipeline="chembl_activity", run_id=run_id)
 
 # Use in pipeline
 logger = logger.bind(run_id=str(run_id))
 
-with tracer.start_span("batch_processing") as span:
+with tracer.get_tracer("bioetl").start_as_current_span("batch_processing") as span:
     span.set_attribute("batch_id", str(batch_id))
 
     # Process batch
     records_count = process_batch(records)
 
     # Record metrics
-    metrics.increment("records_processed_total", records_count)
-    metrics.histogram("batch_duration_seconds", duration)
+    metrics.increment_counter("records_processed_total", records_count, {"pipeline": "chembl_activity"})
 
     logger.info("batch_complete", records=records_count)
 ```
