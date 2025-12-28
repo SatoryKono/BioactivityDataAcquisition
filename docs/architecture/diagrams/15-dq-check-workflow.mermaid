@@ -1,0 +1,96 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TD
+    subgraph Input["Input Stage"]
+        A[/"📥 Input Records<br/>(from Bronze)"/]
+    end
+
+    subgraph Validation["Validation Stage"]
+        B["🔍 Pandera Schema Validation"]
+        B1["Check required fields"]
+        B2["Validate data types"]
+        B3["Check value constraints"]
+        B4["Validate relationships"]
+
+        B --> B1
+        B --> B2
+        B --> B3
+        B --> B4
+    end
+
+    subgraph Classification["Error Classification"]
+        C{{"📊 Calculate Error Rate"}}
+        D["✅ 0% errors"]
+        E["⚠️ < 5% errors<br/>(soft_fail_threshold)"]
+        F["⚠️ 5-20% errors<br/>(warning zone)"]
+        G["❌ > 20% errors<br/>(hard_fail_threshold)"]
+    end
+
+    subgraph Actions["Action Paths"]
+        H["✅ All Pass<br/>No warnings"]
+        I["✅ Pass with Quarantine<br/>Route failures"]
+        J["⚠️ Pass with Warnings<br/>Set _dq_warn=true"]
+        K["❌ FAIL Batch<br/>All to Quarantine"]
+    end
+
+    subgraph Routing["Record Routing"]
+        L[("💾 Silver Layer<br/>DeltaWriter.merge()")]
+        M[("🗑️ Quarantine<br/>QuarantineWriter")]
+        N["🚨 Alert<br/>P2 Notification"]
+    end
+
+    subgraph Metrics["Metrics Export"]
+        O["📈 dq_validation_score<br/>Gauge: 0.0-1.0"]
+        P["📈 record_error_rate<br/>Gauge: percentage"]
+        Q["📈 dq_check_duration_ms<br/>Histogram"]
+        R["📈 dq_soft_threshold_exceeded<br/>Counter"]
+        S["📈 quarantine_records_total<br/>Counter"]
+    end
+
+    %% Main flow
+    A --> B
+    B1 --> C
+    B2 --> C
+    B3 --> C
+    B4 --> C
+
+    C -->|"0%"| D
+    C -->|"< 5%"| E
+    C -->|"5-20%"| F
+    C -->|"> 20%"| G
+
+    D --> H
+    E --> I
+    F --> J
+    G --> K
+
+    H --> L
+    I --> L
+    I --> M
+    J --> L
+    J --> M
+    J --> R
+    K --> M
+    K --> N
+
+    %% Metrics connections
+    B --> O
+    B --> P
+    B --> Q
+    M --> S
+
+    %% Styling
+    style D fill:#90EE90,color:#000
+    style E fill:#FFFFE0,color:#000
+    style F fill:#FFD700,color:#000
+    style G fill:#FF6B6B,color:#fff
+    style L fill:#C0C0C0,color:#000
+    style M fill:#FF6B6B,color:#fff
+    style N fill:#FF4500,color:#fff
+
+    %% Configuration annotation
+    subgraph Config["DQConfig Parameters"]
+        direction LR
+        CFG1["soft_fail_threshold: 0.05 (5%)"]
+        CFG2["hard_fail_threshold: 0.20 (20%)"]
+        CFG3["strict_validation: false"]
+    end
