@@ -263,13 +263,21 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
     species_group_flag: Series[bool] = pa.Field(nullable=True)
+    description: Series[str] = pa.Field(nullable=True)
+    downgraded: Series[bool] = pa.Field(nullable=True)
+    dap_id: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    pipeline_stages: Series[str] = pa.Field(nullable=True)
+    target_constraints: Series[str] = pa.Field(nullable=True)
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
+    target_component_synonyms: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[object] = pa.Field(nullable=True) # list[str]
     component_ids: Series[object] = pa.Field(nullable=True) # list[int]
     component_types: Series[object] = pa.Field(nullable=True) # list[str]
     component_relationships: Series[object] = pa.Field(nullable=True) # list[str]
     component_descriptions: Series[object] = pa.Field(nullable=True) # list[str]
+    component_organisms: Series[object] = pa.Field(nullable=True) # list[str]
+    component_tax_ids: Series[object] = pa.Field(nullable=True) # list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -353,6 +361,15 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     structure_type: Series[str] = pa.Field(nullable=True)
     max_phase: Series[float] = pa.Field(nullable=True, coerce=True)
     first_approval: Series[float] = pa.Field(nullable=True, coerce=True)
+    chirality: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    dosed_ingredient: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    availability_type: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    usan_stem: Series[str] = pa.Field(nullable=True)
+    usan_stem_definition: Series[str] = pa.Field(nullable=True)
+    usan_substem: Series[str] = pa.Field(nullable=True)
+    usan_year: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    helm_notation: Series[str] = pa.Field(nullable=True)
+    molecule_species: Series[str] = pa.Field(nullable=True)
     oral: Series[bool] = pa.Field(nullable=True)
     parenteral: Series[bool] = pa.Field(nullable=True)
     topical: Series[bool] = pa.Field(nullable=True)
@@ -370,6 +387,25 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     molecule_synonyms: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     atc_classifications: Series[str] = pa.Field(nullable=True)
+    hierarchy_parent_chembl_id: Series[str] = pa.Field(nullable=True)
+    hierarchy_active_chembl_id: Series[str] = pa.Field(nullable=True)
+    hierarchy_child_chembl_id: Series[str] = pa.Field(nullable=True)
+    property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_full_mwt: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_hba: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_psa: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_ro5_violations: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_heavy_atoms: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_aromatic_rings: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_full_molformula: Series[str] = pa.Field(nullable=True)
+    property_ro3_pass: Series[str] = pa.Field(nullable=True)
+    structure_canonical_smiles: Series[str] = pa.Field(nullable=True)
+    structure_standard_inchi: Series[str] = pa.Field(nullable=True)
+    structure_standard_inchi_key: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

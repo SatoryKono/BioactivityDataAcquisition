@@ -32,6 +32,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "annotations",
         # Submodules (imported but not re-exported individually)
         "config",
+        "config_types",  # TypedDict definitions for YAML config (not public API)
         "context",
         "entities",
         "error_classifier",
