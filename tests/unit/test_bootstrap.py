@@ -30,6 +30,9 @@ def mock_settings():
     settings.s3.bucket_checkpoints = "checkpoints"
     settings.storage_options = {}
     settings.metrics = None
+    # Pipeline settings for RuntimeConfig
+    settings.pipeline = MagicMock()
+    settings.pipeline.heartbeat_interval = 30
     return settings
 
 
@@ -215,8 +218,14 @@ class TestBootstrapPipeline:
     @patch("bioetl.composition.bootstrap.get_settings")
     @patch("bioetl.composition.bootstrap.get_default_registry")
     @patch("bioetl.composition.bootstrap.bootstrap_observability")
+    @patch("bioetl.composition.bootstrap.register_all_providers")
+    @patch("bioetl.composition.bootstrap.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.load_pipeline_config")
     def test_bootstrap_pipeline_chembl_activity(
         self,
+        mock_load_config,
+        mock_register_pipelines,
+        mock_register_providers,
         mock_observability,
         mock_get_registry,
         mock_get_settings,
@@ -227,26 +236,40 @@ class TestBootstrapPipeline:
         from bioetl.composition.bootstrap import bootstrap_pipeline
 
         mock_get_settings.return_value = mock_settings
-        mock_observability.return_value = MagicMock()  # Mock observability result
-        mock_pipeline = MagicMock()
+
+        # Mock YAML config with maintenance settings
+        mock_yaml_config = MagicMock()
+        mock_yaml_config.maintenance.auto_vacuum = False
+        mock_yaml_config.maintenance.vacuum_retention_days = 7
+        # Input filter with disabled state (source_path empty means disabled)
+        mock_yaml_config.input_filter.enabled = False
+        mock_yaml_config.input_filter.source_path = ""
+        mock_yaml_config.input_filter.column_name = ""
+        mock_yaml_config.input_filter.filter_field = ""
+        mock_load_config.return_value = mock_yaml_config
+
+        # Mock observability with logger
+        mock_obs = MagicMock()
+        mock_obs.logger = mock_logger
+        mock_observability.return_value = mock_obs
+
+        # Mock factory and runner
+        mock_runner = MagicMock(spec=PipelineRunner)
         mock_factory = MagicMock()
-        mock_factory.create_with_services.return_value = mock_pipeline
+        mock_factory.create_runner.return_value = mock_runner
         mock_get_registry.return_value.get.return_value.factory = mock_factory
 
-        with patch(
-            "bioetl.composition.bootstrap.bootstrap_logger", return_value=mock_logger
-        ):
-            ctx = PipelineRunContext(
-                pipeline_name="chembl_activity",
-                run_id=uuid4(),
-                run_type=RunType.INCREMENTAL,
-                resume=False,
-                limit=100,
-            )
-            result = bootstrap_pipeline(ctx)
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            resume=False,
+            limit=100,
+        )
+        result = bootstrap_pipeline(ctx)
 
-        assert isinstance(result, PipelineRunner)
-        mock_factory.create_with_services.assert_called_once()
+        assert result is mock_runner
+        mock_factory.create_runner.assert_called_once()
 
 
 @pytest.mark.unit
