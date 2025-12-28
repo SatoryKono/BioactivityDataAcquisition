@@ -28,4 +28,4 @@ jobs:
           radon cc src/bioetl --min C --show-closures
 
           # Test coverage
-          pytest --cov=src/bioetl --cov-fail-under=80
+          pytest --cov=src/bioetl --cov-fail-under=85
