@@ -1,5 +1,5 @@
 # File Policy
-*Синхронизировано с RULES.md v5.6 (2025-12-27)*
+*Синхронизировано с RULES.md v5.7 (2025-12-28)*
 
 Этот документ фиксирует структуру репозитория и правила размещения файлов.
 
@@ -14,11 +14,17 @@
 
 ```text
 .
+├── assets/                     # MkDocs theme assets (stylesheets, js)
+├── benchmarks/                 # Performance tests (pytest-benchmark)
 ├── configs/                    # Runtime конфигурации (YAML)
 │   ├── pipelines/              # Конфиги пайплайнов по провайдерам
 │   │   └── {provider}/         # e.g., chembl/, pubchem/
 │   │       └── {entity}.yaml   # e.g., activity.yaml
 │   └── providers/              # Конфиги провайдеров (rate limits, URLs)
+├── data/                       # Данные (Bronze/Silver/Gold)
+│   ├── bronze/                 # {format_version}/{provider}/{entity}/{date}/
+│   ├── silver/                 # Delta Lake таблицы
+│   └── gold/                   # Витрины
 ├── docs/                       # Документация
 │   ├── application/            # Use Cases (описания пайплайнов)
 │   │   └── pipelines/          # По провайдерам и сущностям
@@ -34,28 +40,37 @@
 │   ├── interfaces/             # CLI документация
 │   ├── templates/              # Шаблоны (pipeline-review-checklist.md)
 │   └── 00-map.md               # Навигатор по проекту
+├── grafana/                    # Grafana dashboards (observability)
+│   ├── dashboards/             # JSON dashboard definitions
+│   └── provisioning/           # Auto-provisioning configs
+├── qc/                         # Quality Control artifacts
+│   └── golden/                 # Golden test artifacts
+├── scripts/                    # Operational scripts (не утилиты!)
+│   ├── check_architecture.py   # CI архитектурные проверки
+│   └── cleanup_cache.py        # Очистка кэшей
 ├── src/                        # Исходный код
-│   └── bioetl/                 # Root package
-│       ├── application/        # Пайплайны, Use Cases
-│       │   └── pipelines/      # {provider}/{entity}/
-│       ├── domain/             # Чистая логика, Protocols
-│       │   ├── configs/        # Pydantic-модели конфигов
-│       │   ├── ports/          # Интерфейсы (typing.Protocol) — пакет с фасадом
-│       │   └── schemas/        # Pandera-схемы
-│       ├── infrastructure/     # Адаптеры
-│       │   ├── clients/        # HTTP клиенты по провайдерам
-│       │   └── config/         # Инфраструктурные модели
-│       └── interfaces/         # CLI (Typer)
-├── tests/                      # Тесты (зеркалят src/)
-│   ├── fixtures/               # VCR.py кассеты
-│   │   └── vcr/                # Записи API-ответов
-│   └── golden/                 # Эталонные данные
-├── data/                       # Данные (Bronze/Silver/Gold)
-│   ├── bronze/                 # {format_version}/{provider}/{entity}/{date}/
-│   ├── silver/                 # Delta Lake таблицы
-│   └── gold/                   # Витрины
-└── qc/                         # Quality Control
-    └── golden/                 # Golden test artifacts
+│   ├── bioetl/                 # Root package
+│   │   ├── application/        # Пайплайны, Use Cases
+│   │   │   └── pipelines/      # {provider}/{entity}/
+│   │   ├── composition/        # DI-контейнер, factories, bootstrap
+│   │   ├── domain/             # Чистая логика, Protocols
+│   │   │   ├── configs/        # Pydantic-модели конфигов
+│   │   │   ├── ports/          # Интерфейсы (typing.Protocol)
+│   │   │   └── schemas/        # Pandera-схемы
+│   │   ├── infrastructure/     # Адаптеры
+│   │   │   ├── clients/        # HTTP клиенты по провайдерам
+│   │   │   └── config/         # Инфраструктурные модели
+│   │   └── interfaces/         # CLI (Click)
+│   └── tools/                  # Утилиты проекта
+│       ├── audit_structure.py  # Аудит структуры проекта
+│       └── create_pipeline.py  # Генератор boilerplate
+└── tests/                      # Тесты (зеркалят src/)
+    ├── architecture/           # Архитектурные тесты
+    ├── benchmarks/             # Интеграция с pytest-benchmark
+    ├── fixtures/               # VCR.py кассеты
+    │   └── vcr/                # Записи API-ответов
+    ├── integration/            # Интеграционные тесты
+    └── unit/                   # Unit тесты
 ```
 
 ## Medallion Architecture Paths (MUST)
@@ -71,12 +86,41 @@
 - Изменение формата **MUST** создавать новую ветку (`/v2/`).
 - Миграция "in-place" **MUST NOT**.
 
-## Запрет корневых папок (MUST)
+## Политика Корневых Папок (MUST)
 
-- Создание новых папок в корне репозитория **MUST NOT**.
-- Утилиты и скрипты **MUST** размещаться в `src/tools/`.
-- Допустимые корневые каталоги: `src/`, `tests/`, `docs/`, `configs/`, `data/`, `.github/`, `.cursor/`, `.trae/`, `.windsurf/`, `qc/`.
-- Временные отчёты → `reports/` (не коммитятся, см. `.gitignore`).
+Создание **НОВЫХ** папок в корне репозитория **MUST NOT** без обоснования в ADR.
+
+### Допустимые корневые каталоги
+
+| Каталог | Назначение | Комментарий |
+|---------|------------|-------------|
+| `src/` | Исходный код (bioetl, tools) | **Core** |
+| `tests/` | Тесты (зеркалят src/) | **Core** |
+| `docs/` | Документация | **Core** |
+| `configs/` | Runtime конфигурации (YAML) | **Core** |
+| `data/` | Данные (Bronze/Silver/Gold) | В `.gitignore`, кроме структуры |
+| `qc/` | Quality Control артефакты | |
+| `scripts/` | Операционные скрипты (CI, архитектура) | Не путать с `src/tools/` |
+| `benchmarks/` | Performance тесты (pytest-benchmark) | |
+| `grafana/` | Grafana dashboards (observability) | |
+| `assets/` | MkDocs theme assets | |
+| `reports/` | Временные отчёты | Не коммитятся, в `.gitignore` |
+| `.github/` | GitHub workflows | |
+| `.cursor/` | Cursor IDE rules | |
+| `.trae/` | Trae rules | |
+| `.windsurf/` | Windsurf rules | |
+| `.claude/` | Claude Code config | |
+| `.codex/` | OpenAI Codex config | |
+| `.jules/` | Jules config | |
+
+### Разграничение scripts/ и src/tools/
+
+| Директория | Назначение | Примеры |
+|------------|------------|---------|
+| `scripts/` | CI/операционные скрипты, запускаемые извне | `check_architecture.py`, `cleanup_cache.py` |
+| `src/tools/` | Утилиты проекта, часть кодовой базы | `create_pipeline.py`, `audit_structure.py` |
+
+**Правило**: Если скрипт импортирует `bioetl` модули → `src/tools/`. Если standalone → `scripts/`.
 
 ## Правила именования
 
