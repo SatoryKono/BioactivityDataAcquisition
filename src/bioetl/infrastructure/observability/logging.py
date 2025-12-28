@@ -19,10 +19,98 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import cast
+from typing import Any, Self
 from uuid import UUID
 
 import structlog
+
+from bioetl.domain.ports import LoggerPort
+
+
+class StructlogLogger:
+    """Formal LoggerPort adapter wrapping structlog.
+
+    This adapter provides a formal implementation of LoggerPort,
+    replacing duck typing with explicit interface implementation.
+
+    The class wraps structlog.stdlib.BoundLogger and ensures
+    type-safe integration with the domain layer.
+
+    Example:
+        >>> logger = StructlogLogger(structlog.get_logger())
+        >>> logger.info("event_name", key="value")
+        >>> bound = logger.bind(run_id="123")
+        >>> bound.warning("another_event")
+    """
+
+    __slots__ = ("_logger",)
+
+    def __init__(self, logger: structlog.stdlib.BoundLogger) -> None:
+        """Initialize with a structlog BoundLogger.
+
+        Args:
+            logger: The underlying structlog logger instance.
+        """
+        self._logger = logger
+
+    def bind(self, **kwargs: Any) -> Self:
+        """Bind additional context to the logger.
+
+        Returns a new StructlogLogger instance with the bound context.
+
+        Args:
+            **kwargs: Key-value pairs to bind to the logger context.
+
+        Returns:
+            New StructlogLogger with bound context.
+        """
+        bound = self._logger.bind(**kwargs)
+        return self.__class__(bound)
+
+    def info(self, _event: str, **kwargs: Any) -> Any:
+        """Log an informational message.
+
+        Args:
+            _event: The event name/message.
+            **kwargs: Additional context for the log entry.
+        """
+        return self._logger.info(_event, **kwargs)
+
+    def warning(self, _event: str, **kwargs: Any) -> Any:
+        """Log a warning message.
+
+        Args:
+            _event: The event name/message.
+            **kwargs: Additional context for the log entry.
+        """
+        return self._logger.warning(_event, **kwargs)
+
+    def error(self, _event: str, **kwargs: Any) -> Any:
+        """Log an error message.
+
+        Args:
+            _event: The event name/message.
+            **kwargs: Additional context for the log entry.
+        """
+        return self._logger.error(_event, **kwargs)
+
+    def debug(self, _event: str, **kwargs: Any) -> Any:
+        """Log a debug message.
+
+        Args:
+            _event: The event name/message.
+            **kwargs: Additional context for the log entry.
+        """
+        return self._logger.debug(_event, **kwargs)
+
+    def exception(self, _event: str, **kwargs: Any) -> Any:
+        """Log an exception with traceback.
+
+        Args:
+            _event: The event name/message.
+            **kwargs: Additional context for the log entry.
+        """
+        return self._logger.exception(_event, **kwargs)
 
 
 def create_logger(
@@ -30,7 +118,7 @@ def create_logger(
     run_id: UUID,
     log_level: str = "INFO",
     json_format: bool = True,
-) -> structlog.stdlib.BoundLogger:
+) -> LoggerPort:
     """Create a structured logger factory.
 
     Args:
@@ -40,7 +128,7 @@ def create_logger(
         json_format: Use JSON output format (default: True).
 
     Returns:
-        Configured structlog logger with bound context.
+        StructlogLogger implementing LoggerPort with bound context.
 
     """
     processors = [
@@ -75,4 +163,4 @@ def create_logger(
         format="%(message)s",
     )
 
-    return cast(structlog.stdlib.BoundLogger, bound_logger)
+    return StructlogLogger(bound_logger)
