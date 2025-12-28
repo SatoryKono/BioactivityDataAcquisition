@@ -180,11 +180,11 @@ Register all available transformers.
 
 ## HTTP Client Factory
 
-### create_http_client
+### HttpClientFactory
 
-Create configured HTTP client for provider.
+Factory for creating HTTP clients.
 
-::: bioetl.composition.factories.http_client_factory.create_http_client
+::: bioetl.composition.factories.http_client_factory.HttpClientFactory
     options:
         show_root_heading: true
         show_source: false
