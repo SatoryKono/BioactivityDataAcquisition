@@ -421,6 +421,27 @@ async def aclose() -> None                             # Graceful shutdown
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
 **Цель покрытия:** >85% line coverage (проверяется в CI через `--cov-fail-under=85`)
 
+### Тестовые Зависимости
+
+Проект использует optional dependency группы в `pyproject.toml`:
+
+```bash
+# Полный набор для разработки (рекомендуется)
+make install  # или: pip install -e ".[dev]"
+
+# Минимальный набор только для тестов (CI)
+pip install -e ".[tests]"
+```
+
+**Группа `tests` включает:**
+- `pytest`, `pytest-cov`, `pytest-asyncio`, `pytest-xdist` — основа тестирования
+- `respx` — HTTP-мокирование для тестов адаптеров
+- `hypothesis` — property-based тестирование
+- `vcrpy`, `pytest-vcr` — VCR-кассеты для integration-тестов
+- `syrupy` — snapshot-тестирование
+
+См. `docs/RULES.md` §4.2.1 для полного описания.
+
 ### Контрактные тесты портов
 
 Файл `tests/architecture/test_port_contracts.py` (51 тест) проверяет:
