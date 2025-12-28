@@ -137,9 +137,10 @@ class TargetTransformer(BaseChemblTransformer):
         flattened_components = self._flatten_target_components(target_components)
 
         # Handle downgraded field: convert to bool if it's 0/1
-        downgraded = record.get("downgraded")
-        if downgraded is not None:
-            downgraded = bool(downgraded)
+        # Use safe_int to handle "0"/"1" strings correctly
+        downgraded_val = safe_int(record.get("downgraded"))
+        # Default to False if missing or invalid, to ensure boolean dtype for Gold schema
+        downgraded = bool(downgraded_val) if downgraded_val is not None else False
 
         return {
             # Primary identifier
