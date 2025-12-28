@@ -204,11 +204,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
         # Create pipeline instance with services, tracer, metrics, and dq_monitor (O1)
+        # Cast logger to LoggerPort - structlog.BoundLogger is runtime-compatible
         pipeline = self.create_with_services(
             run_id=run_id,
             runtime=runtime,
             settings=settings,
-            logger=observability.logger,
+            logger=cast("LoggerPort", observability.logger),
             config=yaml_config,
             filter_config=filter_config,
             tracer=observability.tracer,
@@ -409,9 +410,12 @@ def assemble_runner(
         Fully initialized PipelineRunner
     """
     # Create Helper Components using ServicesBuilder
+    # Cast logger to LoggerPort - structlog.BoundLogger is runtime-compatible
+    logger_port = cast("LoggerPort", observability.logger)
+
     checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
         checkpoint_port=pipeline.services.checkpoint,
-        logger=observability.logger,
+        logger=logger_port,
         pipeline_name=pipeline.config.pipeline_name,
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
@@ -438,7 +442,7 @@ def assemble_runner(
     # Create lifecycle service (M5)
     lifecycle_service = MedallionLifecycleService(
         storage=pipeline.services.storage,
-        logger=observability.logger,
+        logger=logger_port,
     )
 
     # Build runner services via DI factory (composition layer)
@@ -447,7 +451,7 @@ def assemble_runner(
         runtime=pipeline.runtime,
         services=pipeline.services,
         context=pipeline.context,
-        logger=observability.logger,
+        logger=logger_port,
         shutdown_signal=pipeline.shutdown_signal,
         checkpoint_manager=checkpoint_manager,
         lifecycle_service=lifecycle_service,
@@ -463,7 +467,7 @@ def assemble_runner(
         executor=executor,
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
-        logger=observability.logger,
+        logger=logger_port,
         runner_services=runner_services,
         pipeline=pipeline,
         tracer=observability.tracer,
