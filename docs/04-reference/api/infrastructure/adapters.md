@@ -1,21 +1,12 @@
-# Data Source Adapters
+# Infrastructure Adapters
 
-Concrete implementations of `DataSourcePort` for external APIs.
+Implementations of domain ports for external systems.
 
-## Overview
-
-| Adapter | Provider | Rate Limit | Protocol |
-|---------|----------|------------|----------|
-| `ChemblAdapter` | ChEMBL | None | REST API |
-| `PubChemAdapter` | PubChem | 5 req/sec | REST API |
-| `UniProtAdapter` | UniProt | 100 req/sec | REST API |
-| `PubMedAdapter` | PubMed/NCBI | 3 req/sec | E-utilities XML |
-
-## HTTP Infrastructure
+## HTTP Adapters
 
 ### UnifiedHTTPClient
 
-Base HTTP client with rate limiting, retries, and circuit breaker.
+Unified HTTP client with rate limiting, circuit breaker, and observability.
 
 ::: bioetl.infrastructure.adapters.http.client.UnifiedHTTPClient
     options:
@@ -25,168 +16,154 @@ Base HTTP client with rate limiting, retries, and circuit breaker.
             - __init__
             - get
             - post
+            - health_check
             - aclose
 
-### RateLimiter
+### TokenBucket
 
-Token bucket rate limiter for API compliance.
+Token bucket rate limiter implementation.
 
-::: bioetl.infrastructure.adapters.http.rate_limiter.RateLimiter
+::: bioetl.infrastructure.adapters.http.rate_limiter.TokenBucket
     options:
         show_root_heading: true
         show_source: false
+        members:
+            - __init__
+            - acquire
+            - try_acquire
+            - available_tokens
 
 ### CircuitBreaker
 
-Circuit breaker for failing fast on degraded services.
+Circuit breaker pattern implementation.
 
 ::: bioetl.infrastructure.adapters.http.circuit_breaker.CircuitBreaker
     options:
         show_root_heading: true
         show_source: false
+        members:
+            - __init__
+            - call
+            - state
 
-## ChEMBL Adapter
+### PaginatedFetcherMixin
 
-### ChemblAdapter
+Mixin for handling paginated API responses.
 
-ChEMBL database adapter with health-aware fetching.
-
-::: bioetl.infrastructure.adapters.chembl.client.ChemblAdapter
+::: bioetl.infrastructure.adapters.http.pagination.PaginatedFetcherMixin
     options:
         show_root_heading: true
         show_source: false
         members:
-            - __init__
-            - fetch
-            - health_check
+            - fetch_all_pages
 
-### ChemblEntityMapper
+## Storage Adapters
 
-Maps entity types to ChEMBL API endpoints.
+### DeltaWriter
 
-::: bioetl.infrastructure.adapters.chembl.entity_mapper.ChemblEntityMapper
-    options:
-        show_root_heading: true
-        show_source: false
+Storage adapter for Delta Lake (Silver/Gold layers).
 
-## PubChem Adapter
-
-### PubChemAdapter
-
-PubChem compound data adapter using pubchempy library.
-
-::: bioetl.infrastructure.adapters.pubchem.client.PubChemAdapter
+::: bioetl.infrastructure.storage.delta_writer.DeltaWriter
     options:
         show_root_heading: true
         show_source: false
         members:
-            - __init__
-            - fetch
-            - health_check
+            - write_silver
+            - write_gold
+            - read_table
+            - table_exists
 
-## UniProt Adapter
+### BronzeWriter
 
-### UniProtAdapter
+Storage adapter for local filesystem (Bronze layer).
 
-UniProt protein database adapter.
-
-::: bioetl.infrastructure.adapters.uniprot.client.UniProtAdapter
+::: bioetl.infrastructure.storage.bronze_writer.BronzeWriter
     options:
         show_root_heading: true
         show_source: false
         members:
-            - __init__
-            - fetch
-            - health_check
+            - write_bronze
+            - list_files
 
-## PubMed Adapter
+## Lock Adapters
 
-### PubMedAdapter
+### MemoryLockAdapter
 
-PubMed/NCBI E-utilities adapter for publication data.
+In-memory lock implementation (Local-Only).
 
-::: bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter
+::: bioetl.infrastructure.adapters.lock.memory_lock.MemoryLockAdapter
     options:
         show_root_heading: true
         show_source: false
         members:
-            - __init__
-            - fetch
-            - health_check
+            - acquire
+            - release
+            - heartbeat
 
-## Base Adapter Classes
+## Checkpoint Adapters
 
-### BaseHttpAdapter
+### LocalCheckpointAdapter
 
-Abstract base class for HTTP-based adapters.
+Local filesystem checkpoint implementation.
 
-::: bioetl.infrastructure.adapters.base.BaseHttpAdapter
+::: bioetl.infrastructure.adapters.checkpoint.local_checkpoint.LocalCheckpointAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - save
+            - load
+            - delete
+
+## Observability Adapters
+
+### StructLogAdapter
+
+Structured logging adapter.
+
+::: bioetl.infrastructure.adapters.observability.structlog_adapter.StructLogAdapter
     options:
         show_root_heading: true
         show_source: false
 
-### BaseSyncAdapter
+### PrometheusMetricsAdapter
 
-Base class for wrapping synchronous libraries.
+Prometheus metrics adapter.
 
-::: bioetl.infrastructure.adapters.sync_base.BaseSyncAdapter
+::: bioetl.infrastructure.adapters.observability.prometheus_adapter.PrometheusMetricsAdapter
     options:
         show_root_heading: true
         show_source: false
 
-## Health-Aware Fetching
+### OpenTelemetryTracingAdapter
 
-Adapters adjust behavior based on health status:
+OpenTelemetry tracing adapter.
 
-| Status | Behavior |
-|--------|----------|
-| `HEALTHY` | Normal batch size |
-| `DEGRADED` | batch_size ÷ 2 |
-| `UNHEALTHY` | Fail fast with `CriticalError` |
-
-```python
-from bioetl.domain.types import HealthStatus
-
-# Health check returns status
-status = await adapter.health_check()
-
-if status == HealthStatus.UNHEALTHY:
-    raise CriticalError("ChEMBL API unavailable")
-elif status == HealthStatus.DEGRADED:
-    batch_size = batch_size // 2
-```
+::: bioetl.infrastructure.adapters.observability.opentelemetry_adapter.OpenTelemetryTracingAdapter
+    options:
+        show_root_heading: true
+        show_source: false
 
 ## Usage Example
 
 ```python
-from bioetl.infrastructure.adapters.chembl import ChemblAdapter
-from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.client.UnifiedHTTPClient import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter.TokenBucket import TokenBucket
 
-# Create HTTP client with rate limiting
-http_client = UnifiedHTTPClient(
-    base_url="https://www.ebi.ac.uk/chembl/api/data",
-    timeout=30.0,
-    max_retries=3,
+# Create rate limiter
+limiter = TokenBucket(rate=5.0, capacity=10)
+
+# Create client
+client = UnifiedHTTPClient(
+    rate_limiter=limiter,
+    provider="chembl",
 )
 
-# Create ChEMBL adapter
-adapter = ChemblAdapter(
-    http_client=http_client,
-    logger=logger,
-    batch_size=1000,
-)
-
-# Health check before fetching
-status = await adapter.health_check()
-if status == HealthStatus.HEALTHY:
-    async for batch in adapter.fetch(entity_type="activity"):
-        process_batch(batch)
-
-await adapter.aclose()
+# Make request
+response = await client.get("https://www.ebi.ac.uk/chembl/api/data/activity")
 ```
 
 ## See Also
 
-- [Storage Writers](storage.md) - Storage layer implementations
-- [Domain Ports](../domain/ports.md) - Port interfaces
-- [Circuit Breaker ADR](../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)
+- [Domain Ports](../domain/ports.md) - Interfaces implemented by adapters
+- [Configuration](../domain/config.md) - Adapter configuration
