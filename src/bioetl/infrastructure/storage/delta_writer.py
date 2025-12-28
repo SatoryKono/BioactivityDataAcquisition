@@ -37,9 +37,8 @@ from bioetl.domain.exceptions import (
     PolicyViolationError,
     SchemaEvolutionError,
     SchemaViolationError,
-    TableNotFoundError,
 )
-from bioetl.domain.locking import LockContext, LockNotHeldError
+from bioetl.domain.locking import LockContext
 from bioetl.domain.medallion import (
     Layer,
     SilverWriteMode,
@@ -47,6 +46,8 @@ from bioetl.domain.medallion import (
     WriteModePolicy,
 )
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.storage.lock_validator import validate_lock_for_write
+from bioetl.infrastructure.storage.retention_manager import RetentionManager
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -130,6 +131,9 @@ class DeltaWriter:
             )
             silver_validator = NoOpSilverValidator()
         self._silver_validator: SilverValidatorPort = silver_validator
+
+        # Delegate retention operations to RetentionManager
+        self._retention_manager = RetentionManager(base_path)
 
     def _prepare_arrow_data(
         self,
@@ -245,68 +249,17 @@ class DeltaWriter:
     ) -> None:
         """Validate that lock is held before write operation.
 
+        Delegates to centralized lock_validator module.
         Implements RULES.md §3.3 - Writers MUST verify lock held.
-
-        Args:
-            table_name: Target table name (format: "provider_entity").
-            lock_context: The lock context from application layer.
-            expected_owner_id: Expected owner RunID (fencing token). If provided,
-                              validates that lock_context.owner_id matches to prevent
-                              writes from stale lock holders after lock re-acquisition.
-
-        Raises:
-            LockNotHeldError: If lock is not held, doesn't match table,
-                             is expired, or owner_id doesn't match.
         """
-        if not self._require_lock:
-            return  # Lock validation disabled (e.g., for tests)
-
-        expected_key = f"lock:{table_name}"
-
-        if lock_context is None:
-            self.logger.error(
-                "Write attempted without lock",
-                table=table_name,
-                expected_key=expected_key,
-            )
-            raise LockNotHeldError("write_silver", expected_key)
-
-        if not lock_context.matches_table(table_name):
-            self.logger.error(
-                "Write attempted with wrong lock",
-                table=table_name,
-                expected_key=expected_key,
-                actual_key=lock_context.key,
-            )
-            raise LockNotHeldError(
-                f"write_silver (got {lock_context.key})",
-                expected_key,
-            )
-
-        if not lock_context.is_valid():
-            self.logger.error(
-                "Write attempted with expired lock",
-                table=table_name,
-                lock_key=lock_context.key,
-            )
-            raise LockNotHeldError(
-                "write_silver (lock expired)",
-                expected_key,
-            )
-
-        # Fencing token validation: verify owner_id matches expected
-        if expected_owner_id is not None and lock_context.owner_id != expected_owner_id:
-            self.logger.error(
-                "Write attempted with wrong owner_id (fencing token mismatch)",
-                table=table_name,
-                expected_owner_id=str(expected_owner_id),
-                actual_owner_id=str(lock_context.owner_id),
-                lock_key=lock_context.key,
-            )
-            raise LockNotHeldError(
-                f"write_silver (owner mismatch: {lock_context.owner_id} != {expected_owner_id})",
-                expected_key,
-            )
+        validate_lock_for_write(
+            table_name=table_name,
+            lock_context=lock_context,
+            logger=self.logger,
+            operation="write_silver",
+            require_lock=self._require_lock,
+            expected_owner_id=expected_owner_id,
+        )
 
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
         """Map SilverWriteMode to WriteMode for policy validation.
@@ -761,6 +714,8 @@ class DeltaWriter:
     ) -> list[str]:
         """Remove old files that are no longer referenced by the Delta log.
 
+        Delegates to RetentionManager for maintenance operations.
+
         Args:
             table_name: Table name.
             retention_hours: Hours of retention.
@@ -768,21 +723,10 @@ class DeltaWriter:
 
         Returns:
             List of files deleted (or to be deleted).
-
         """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return await loop.run_in_executor(
-                None,
-                lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
-            )
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        return await self._retention_manager.vacuum(
+            table_name, retention_hours=retention_hours, dry_run=dry_run
+        )
 
     async def optimize(
         self,
@@ -792,6 +736,8 @@ class DeltaWriter:
     ) -> dict[str, Any]:
         """Optimize table layout (compaction).
 
+        Delegates to RetentionManager for maintenance operations.
+
         Args:
             table_name: Table name.
             target_size: Target file size in bytes (currently unused, reserved for future).
@@ -799,49 +745,23 @@ class DeltaWriter:
 
         Returns:
             Optimization metrics.
-
         """
-        # Note: target_size reserved for future delta-rs API support
-        _ = target_size  # Suppress unused variable warning
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        loop = asyncio.get_running_loop()
-        filters = partition_filters  # Capture for lambda closure
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return await loop.run_in_executor(
-                None, lambda: dt.optimize.compact(partition_filters=filters)
-            )
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        return await self._retention_manager.optimize(
+            table_name, target_size=target_size, partition_filters=partition_filters
+        )
 
     async def get_table_info(self, table_name: str) -> dict[str, Any]:
         """Get metadata about a Delta table.
+
+        Delegates to RetentionManager for maintenance operations.
 
         Args:
             table_name: Table name.
 
         Returns:
             Dictionary with table metadata (version, files, history).
-
         """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return {
-                "version": dt.version(),
-                "num_files": len(dt.files()),
-                "schema": dt.schema().to_arrow(),
-                "metadata": dt.metadata(),
-            }
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        return await self._retention_manager.get_table_info(table_name)
 
     async def time_travel(
         self,
@@ -851,6 +771,8 @@ class DeltaWriter:
     ) -> DeltaTable:
         """Read a previous version of the table.
 
+        Delegates to RetentionManager for maintenance operations.
+
         Args:
             table_name: Table name.
             version: Version number.
@@ -858,35 +780,7 @@ class DeltaWriter:
 
         Returns:
             PyArrow table or equivalent of the snapshot.
-
         """
-        if version is not None and timestamp is not None:
-            raise ValueError("Specify either version or timestamp, not both")
-
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        loop = asyncio.get_running_loop()
-
-        try:
-            if version is not None:
-                return await loop.run_in_executor(
-                    None,
-                    lambda: DeltaTable(
-                        table_path,
-                        version=version,
-                    ),
-                )
-            elif timestamp is not None:
-                timestamp_str = timestamp.isoformat()
-                return await loop.run_in_executor(
-                    None,
-                    lambda: DeltaTable(
-                        table_path,
-                        storage_options={
-                            "time_travel": timestamp_str,
-                        },
-                    ),
-                )
-            else:
-                raise ValueError("Must specify either version or timestamp")
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        return await self._retention_manager.time_travel(
+            table_name, version=version, timestamp=timestamp
+        )
