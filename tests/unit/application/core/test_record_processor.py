@@ -111,7 +111,7 @@ def transform_callback():
     Simulates what BaseTransformer.entity_to_silver_record does.
     """
 
-    async def transform(ctx, record):
+    async def transform(ctx, record, index):
         return {
             "entity_id": record.get("id", "unknown"),
             "value": record.get("value"),
