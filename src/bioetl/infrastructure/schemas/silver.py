@@ -250,15 +250,23 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("organism", pa.string()),
         pa.field("tax_id", pa.int64()),
         pa.field("species_group_flag", pa.bool_()),
+        pa.field("description", pa.string()),
+        pa.field("downgraded", pa.bool_()),
+        pa.field("dap_id", pa.int64()),
+        pa.field("pipeline_stages", pa.string()),
+        pa.field("target_constraints", pa.string()),
         # Complex fields (JSON strings)
         pa.field("target_components", pa.string()),
         pa.field("cross_references", pa.string()),
+        pa.field("target_component_synonyms", pa.string()),
         # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_ids", pa.list_(pa.int64())),
         pa.field("component_types", pa.list_(pa.string())),
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
+        pa.field("component_organisms", pa.list_(pa.string())),
+        pa.field("component_tax_ids", pa.list_(pa.int64())),
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # Lineage metadata
@@ -349,6 +357,17 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("structure_type", pa.string()),
         pa.field("max_phase", pa.int64()),
         pa.field("first_approval", pa.int64()),
+        pa.field("chirality", pa.int64()),
+        pa.field("dosed_ingredient", pa.int64()),
+        pa.field("availability_type", pa.int64()),
+        # USAN naming
+        pa.field("usan_stem", pa.string()),
+        pa.field("usan_stem_definition", pa.string()),
+        pa.field("usan_substem", pa.string()),
+        pa.field("usan_year", pa.int64()),
+        # Other metadata
+        pa.field("helm_notation", pa.string()),
+        pa.field("molecule_species", pa.string()),
         # Flags
         pa.field("oral", pa.bool_()),
         pa.field("parenteral", pa.bool_()),
@@ -368,6 +387,28 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("molecule_synonyms", pa.string()),
         pa.field("cross_references", pa.string()),
         pa.field("atc_classifications", pa.string()),
+        # Flattened Hierarchy
+        pa.field("hierarchy_parent_chembl_id", pa.string()),
+        pa.field("hierarchy_active_chembl_id", pa.string()),
+        pa.field("hierarchy_child_chembl_id", pa.string()),
+        # Flattened Properties
+        pa.field("property_alogp", pa.float64()),
+        pa.field("property_mw_freebase", pa.float64()),
+        pa.field("property_full_mwt", pa.float64()),
+        pa.field("property_hba", pa.int64()),
+        pa.field("property_hbd", pa.int64()),
+        pa.field("property_psa", pa.float64()),
+        pa.field("property_rtb", pa.int64()),
+        pa.field("property_ro5_violations", pa.int64()),
+        pa.field("property_heavy_atoms", pa.int64()),
+        pa.field("property_aromatic_rings", pa.int64()),
+        pa.field("property_qed_weighted", pa.float64()),
+        pa.field("property_full_molformula", pa.string()),
+        pa.field("property_ro3_pass", pa.string()),
+        # Flattened Structures
+        pa.field("structure_canonical_smiles", pa.string()),
+        pa.field("structure_standard_inchi", pa.string()),
+        pa.field("structure_standard_inchi_key", pa.string()),
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
