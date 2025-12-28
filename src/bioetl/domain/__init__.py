@@ -120,6 +120,7 @@ from bioetl.domain.ports import (
     NoOpTracing,
     QuarantinePort,
     RateLimiterPort,
+    SilverValidatorPort,
     StoragePort,
     TracingPort,
 )
@@ -263,6 +264,7 @@ __all__ = [
     "NoOpTracing",
     "QuarantinePort",
     "RateLimiterPort",
+    "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
     # Resilience
