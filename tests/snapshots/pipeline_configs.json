@@ -65,7 +65,7 @@
     },
     "gold_table": null,
     "gold_write_mode": "overwrite",
-    "on_schema_mismatch": "error",
+    "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "chembl_activity",
     "primary_keys": [

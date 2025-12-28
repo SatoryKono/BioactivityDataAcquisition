@@ -136,6 +136,11 @@ class TargetTransformer(BaseChemblTransformer):
         # Extract flattened components
         flattened_components = self._flatten_target_components(target_components)
 
+        # Handle downgraded field: convert to bool if it's 0/1
+        downgraded = record.get("downgraded")
+        if downgraded is not None:
+            downgraded = bool(downgraded)
+
         return {
             # Primary identifier
             "target_chembl_id": str(primary_id),
@@ -146,7 +151,7 @@ class TargetTransformer(BaseChemblTransformer):
             "tax_id": safe_int(record.get("tax_id")),
             "species_group_flag": record.get("species_group_flag"),
             "description": record.get("description"),
-            "downgraded": record.get("downgraded"),
+            "downgraded": downgraded,
             # Optional fields (present for specific target types)
             "dap_id": safe_int(record.get("dap_id")),
             "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
