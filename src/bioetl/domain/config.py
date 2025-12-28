@@ -65,6 +65,29 @@ class DQConfig:
             )
 
 
+def _convert_silver_write_mode(mode: SilverWriteMode | str) -> SilverWriteMode:
+    """Convert string to SilverWriteMode, handling deprecated values."""
+    if isinstance(mode, SilverWriteMode):
+        return mode
+    mode_str = mode
+    if mode_str == "overwrite":
+        warnings.warn(
+            "silver_write_mode='overwrite' is deprecated. "
+            "Use SilverWriteMode.DELETE for rebuild operations.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        mode_str = "delete"
+    return SilverWriteMode.from_string(mode_str)
+
+
+def _convert_gold_write_mode(mode: GoldWriteMode | str) -> GoldWriteMode:
+    """Convert string to GoldWriteMode."""
+    if isinstance(mode, GoldWriteMode):
+        return mode
+    return GoldWriteMode.from_string(mode)
+
+
 @dataclass(frozen=True, slots=True)
 class TableConfig:
     """Configuration for database tables and keys.
@@ -94,27 +117,9 @@ class TableConfig:
             object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
         if isinstance(self.partition_cols, list):
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
-
         # Convert string write modes to enums (backward compatibility)
-        if isinstance(self.silver_write_mode, str):
-            # Handle deprecated "overwrite" → DELETE with warning
-            mode_str = self.silver_write_mode
-            if mode_str == "overwrite":
-                warnings.warn(
-                    "silver_write_mode='overwrite' is deprecated. "
-                    "Use SilverWriteMode.DELETE for rebuild operations.",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                mode_str = "delete"
-            object.__setattr__(
-                self, "silver_write_mode", SilverWriteMode.from_string(mode_str)
-            )
-
-        if isinstance(self.gold_write_mode, str):
-            object.__setattr__(
-                self, "gold_write_mode", GoldWriteMode.from_string(self.gold_write_mode)
-            )
+        object.__setattr__(self, "silver_write_mode", _convert_silver_write_mode(self.silver_write_mode))
+        object.__setattr__(self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode))
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,25 +178,8 @@ class PipelineConfig:
 
     def _convert_write_modes(self) -> None:
         """Convert string write modes to enums (backward compatibility)."""
-        if isinstance(self.write_mode, str):
-            # Handle deprecated "overwrite" → DELETE with warning
-            mode_str = self.write_mode
-            if mode_str == "overwrite":
-                warnings.warn(
-                    "write_mode='overwrite' is deprecated for Silver layer. "
-                    "Use SilverWriteMode.DELETE for rebuild operations.",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                mode_str = "delete"
-            object.__setattr__(
-                self, "write_mode", SilverWriteMode.from_string(mode_str)
-            )
-
-        if isinstance(self.gold_write_mode, str):
-            object.__setattr__(
-                self, "gold_write_mode", GoldWriteMode.from_string(self.gold_write_mode)
-            )
+        object.__setattr__(self, "write_mode", _convert_silver_write_mode(self.write_mode))
+        object.__setattr__(self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode))
 
     def _validate_config(self) -> None:
         """Validate configuration values."""
@@ -272,20 +260,19 @@ class RuntimeConfig:
 
     def __post_init__(self) -> None:
         """Validate runtime config."""
-        if self.limit is not None and self.limit <= 0:
-            raise ValueError(f"limit must be positive or None, got {self.limit}")
-        if self.heartbeat_interval <= 0:
-            raise ValueError(
-                f"heartbeat_interval must be positive, got {self.heartbeat_interval}"
-            )
-        if self.lock_wait_timeout <= 0:
-            raise ValueError(
-                f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}"
-            )
-        if self.vacuum_retention_days <= 0:
-            raise ValueError(
-                f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}"
-            )
+        self._validate_positive_values()
+
+    def _validate_positive_values(self) -> None:
+        """Validate that numeric fields have positive values."""
+        validations = [
+            (self.limit is not None and self.limit <= 0, f"limit must be positive or None, got {self.limit}"),
+            (self.heartbeat_interval <= 0, f"heartbeat_interval must be positive, got {self.heartbeat_interval}"),
+            (self.lock_wait_timeout <= 0, f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}"),
+            (self.vacuum_retention_days <= 0, f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}"),
+        ]
+        for condition, message in validations:
+            if condition:
+                raise ValueError(message)
 
     @property
     def effective_lock_ttl(self) -> int:

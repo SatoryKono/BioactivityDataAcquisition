@@ -26,12 +26,9 @@ import json
 import os
 import types
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from bioetl.domain.ports import JsonEncoderPort
-
-if TYPE_CHECKING:
-    import orjson as orjson_module
 
 # Optional orjson import
 _orjson: types.ModuleType | None
