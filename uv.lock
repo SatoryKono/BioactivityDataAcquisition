@@ -203,9 +203,25 @@ tracing = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "bandit" },
     { name = "hypothesis" },
+    { name = "import-linter" },
+    { name = "mypy" },
+    { name = "pip-audit" },
     { name = "pytest" },
+    { name = "pytest-archon" },
     { name = "pytest-asyncio" },
+    { name = "pytest-benchmark" },
+    { name = "pytest-cov" },
+    { name = "pytest-vcr" },
+    { name = "pytest-xdist" },
+    { name = "radon" },
+    { name = "respx" },
+    { name = "ruff" },
+    { name = "syrupy" },
+    { name = "vcrpy" },
+    { name = "vulture" },
+    { name = "xenon" },
 ]
 
 [package.metadata]
@@ -262,9 +278,25 @@ provides-extras = ["tracing", "performance", "dev", "docs"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "hypothesis", specifier = ">=6.148.7" },
-    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "bandit", extras = ["toml"], specifier = ">=1.7" },
+    { name = "hypothesis", specifier = ">=6.100" },
+    { name = "import-linter", specifier = ">=2.0" },
+    { name = "mypy", specifier = ">=1.10" },
+    { name = "pip-audit", specifier = ">=2.7" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-archon", specifier = ">=0.0.6" },
     { name = "pytest-asyncio", specifier = ">=0.23" },
+    { name = "pytest-benchmark", specifier = ">=4.0" },
+    { name = "pytest-cov", specifier = ">=4.0" },
+    { name = "pytest-vcr", specifier = ">=1.0" },
+    { name = "pytest-xdist", specifier = ">=3.5" },
+    { name = "radon", specifier = ">=6.0" },
+    { name = "respx", specifier = ">=0.21" },
+    { name = "ruff", specifier = ">=0.4" },
+    { name = "syrupy", specifier = ">=4.0" },
+    { name = "vcrpy", specifier = ">=6.0" },
+    { name = "vulture", specifier = ">=2.11" },
+    { name = "xenon", specifier = ">=0.9" },
 ]
 
 [[package]]
