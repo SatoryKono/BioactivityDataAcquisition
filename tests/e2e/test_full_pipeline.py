@@ -12,21 +12,20 @@ Focus on test_infrastructure.py for E2E infrastructure testing.
 """
 
 from unittest.mock import AsyncMock, patch
-from uuid import uuid4
 
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
-from bioetl.domain.types import RunType
 from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from tests.e2e.conftest import create_test_context
 
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: bootstrap_pipeline API changed to accept PipelineRunContext")
+@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: Delta Lake Arrow schema compatibility issues")
 class TestChEMBLPipelineE2E:
     """E2E tests for ChEMBL Activity pipeline."""
 
@@ -98,13 +97,8 @@ class TestChEMBLPipelineE2E:
             "bioetl.composition.factories.services_factory.StorageFactory.create",
             return_value=storage_context,
         ):
-            runner = bootstrap_pipeline(
-                pipeline_name="chembl_activity",
-                run_id=uuid4(),
-                run_type=RunType.INCREMENTAL,
-                resume=False,
-                limit=e2e_pipeline_limit,
-            )
+            ctx = create_test_context("chembl_activity", limit=e2e_pipeline_limit)
+            runner = bootstrap_pipeline(ctx)
 
             # Execute pipeline
             await runner.run()
@@ -128,7 +122,7 @@ class TestChEMBLPipelineE2E:
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: bootstrap_pipeline API changed to accept PipelineRunContext")
+@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: PubChem query requirements")
 async def test_pubchem_compound_pipeline(
     e2e_temp_storage,
     e2e_redis_client,
@@ -184,14 +178,12 @@ async def test_pubchem_compound_pipeline(
         "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
-            pipeline_name="pubchem_compound",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
+        ctx = create_test_context(
+            "pubchem_compound",
             limit=e2e_pipeline_limit,
             query="aspirin",
         )
+        runner = bootstrap_pipeline(ctx)
 
         # Execute pipeline
         await runner.run()
@@ -211,7 +203,7 @@ async def test_pubchem_compound_pipeline(
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: bootstrap_pipeline API changed to accept PipelineRunContext")
+@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: Delta Lake Arrow schema compatibility issues")
 async def test_pipeline_resume_after_failure(
     e2e_temp_storage,
     e2e_redis_client,
@@ -261,20 +253,13 @@ async def test_pipeline_resume_after_failure(
         checkpoints_path=str(e2e_temp_storage["checkpoints"]),
     )
 
-    run_id = uuid4()
-
     # First run: Process 5 records
     with patch(
         "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
-            pipeline_name="chembl_activity",
-            run_id=run_id,
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=5,
-        )
+        ctx = create_test_context("chembl_activity", limit=5)
+        runner = bootstrap_pipeline(ctx)
 
         await runner.run()
 
@@ -293,13 +278,8 @@ async def test_pipeline_resume_after_failure(
         "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),  # New run_id for fresh start
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=5,
-        )
+        ctx = create_test_context("chembl_activity", limit=5)
+        runner = bootstrap_pipeline(ctx)
 
         await runner.run()
 
@@ -314,7 +294,7 @@ async def test_pipeline_resume_after_failure(
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: bootstrap_pipeline API changed to accept PipelineRunContext")
+@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: Delta Lake Arrow schema compatibility issues")
 async def test_pipeline_idempotency(
     e2e_temp_storage,
     e2e_redis_client,
@@ -369,13 +349,8 @@ async def test_pipeline_idempotency(
         "bioetl.composition.factories.services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=5,
-        )
+        ctx = create_test_context("chembl_activity", limit=5)
+        runner = bootstrap_pipeline(ctx)
 
         await runner.run()
 
@@ -395,13 +370,8 @@ async def test_pipeline_idempotency(
             "bioetl.composition.factories.services_factory.StorageFactory.create",
             return_value=storage_context,
         ):
-            runner = bootstrap_pipeline(
-                pipeline_name="chembl_activity",
-                run_id=uuid4(),
-                run_type=RunType.INCREMENTAL,
-                resume=False,
-                limit=5,
-            )
+            ctx = create_test_context("chembl_activity", limit=5)
+            runner = bootstrap_pipeline(ctx)
 
             await runner.run()
 
