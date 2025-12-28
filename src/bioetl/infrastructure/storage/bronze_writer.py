@@ -159,6 +159,7 @@ class BronzeWriter:
         provider: str,
         entity: str,
         lock_context: LockContext | None,
+        expected_owner_id: RunID | None = None,
     ) -> None:
         """Validate that lock is held before write operation.
 
@@ -168,9 +169,13 @@ class BronzeWriter:
             provider: Provider name (e.g., "chembl").
             entity: Entity name (e.g., "activity").
             lock_context: The lock context from application layer.
+            expected_owner_id: Expected owner RunID (fencing token). If provided,
+                              validates that lock_context.owner_id matches to prevent
+                              writes from stale lock holders after lock re-acquisition.
 
         Raises:
-            LockNotHeldError: If lock is not held or doesn't match.
+            LockNotHeldError: If lock is not held, doesn't match,
+                             is expired, or owner_id doesn't match.
         """
         if not self._require_lock:
             return  # Lock validation disabled (e.g., for tests)
@@ -209,6 +214,21 @@ class BronzeWriter:
             )
             raise LockNotHeldError(
                 "write_bronze (lock expired)",
+                expected_key,
+            )
+
+        # Fencing token validation: verify owner_id matches expected
+        if expected_owner_id is not None and lock_context.owner_id != expected_owner_id:
+            self.logger.error(
+                "Write attempted with wrong owner_id (fencing token mismatch)",
+                provider=provider,
+                entity=entity,
+                expected_owner_id=str(expected_owner_id),
+                actual_owner_id=str(lock_context.owner_id),
+                lock_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                f"write_bronze (owner mismatch: {lock_context.owner_id} != {expected_owner_id})",
                 expected_key,
             )
 
@@ -374,7 +394,8 @@ class BronzeWriter:
             start_time = time.perf_counter()
 
             # Validate lock is held before any write operation (RULES.md §3.3)
-            self._validate_lock_held(provider, entity, lock_context)
+            # Pass run_id as expected_owner_id for fencing token validation
+            self._validate_lock_held(provider, entity, lock_context, run_id)
 
             self._validate_bronze_names(provider, entity)
             self._validate_records_iterator(records)
