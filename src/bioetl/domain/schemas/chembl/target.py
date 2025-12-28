@@ -13,77 +13,59 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 
 class TargetSchema(ETLRecordSchema):
-    """Target validation schema for Silver/Gold layers."""
+    """Target validation schema for Silver layer."""
 
     # === Primary Key ===
+    tid: Series[int] = pa.Field(
+        nullable=False, description="Primary key."
+    )
+
+    # === Identifiers ===
     target_chembl_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
-        description="Primary key (ChEMBL identifier).",
+        description="ChEMBL ID.",
     )
 
-    # === Core Metadata ===
-    pref_name: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Preferred name of the target."
-    )
+    # === Classification ===
     target_type: Optional[Series[str]] = pa.Field(
         nullable=True,
         isin=[
-            "SINGLE PROTEIN",
-            "PROTEIN FAMILY",
-            "PROTEIN COMPLEX",
-            "PROTEIN COMPLEX GROUP",
-            "SELECTIVITY GROUP",
-            "CELL-LINE",
-            "TISSUE",
-            "ORGANISM",
-            "ADMET",
-            "SUBCELLULAR",
-            "UNKNOWN",
-            "NUCLEIC-ACID",
-            "SMALL MOLECULE",
-            "METAL",
+            "SINGLE PROTEIN", "PROTEIN FAMILY", "PROTEIN COMPLEX", "PROTEIN COMPLEX GROUP",
+            "SELECTIVITY GROUP", "CHIMERIC PROTEIN", "CELL-LINE", "TISSUE", "ORGANISM",
+            "MACROMOLECULE", "SMALL MOLECULE", "LIPID", "METAL", "UNKNOWN",
         ],
-        description="Type of the target.",
+        description="Target type.",
     )
-    organism: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Organism of the target."
+    target_parent_type: Optional[Series[str]] = pa.Field(
+        nullable=True,
+        isin=["MOLECULAR", "NON-MOLECULAR", "PROTEIN", "UNDEFINED"],
+        description="Target parent type.",
+    )
+
+    # === Metadata ===
+    pref_name: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Preferred name."
     )
     tax_id: Optional[Series[int]] = pa.Field(
-        nullable=True, description="Taxonomy ID of the organism."
+        nullable=True, description="NCBI Taxonomy ID."
     )
-    species_group_flag: Optional[Series[bool]] = pa.Field(
-        nullable=True, description="Species group flag."
+    organism: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Organism."
     )
-
-    # === Complex Fields (JSON Strings) ===
-    target_components: Optional[Series[str]] = pa.Field(
-        nullable=True, description="JSON string of target components."
+    species_group_flag: Optional[Series[int]] = pa.Field(
+        nullable=True,
+        isin=[0, 1],
+        description="Species group flag.",
     )
-    cross_references: Optional[Series[str]] = pa.Field(
-        nullable=True, description="JSON string of cross references."
-    )
-
-    # === Flattened Component Fields (Lists) ===
-    # Note: Pandera Series[object] is used for lists, validation is limited
-    component_accessions: Optional[Series[object]] = pa.Field(
-        nullable=True, description="List of component accessions."
-    )
-    component_ids: Optional[Series[object]] = pa.Field(
-        nullable=True, description="List of component IDs."
-    )
-    component_types: Optional[Series[object]] = pa.Field(
-        nullable=True, description="List of component types."
-    )
-    component_relationships: Optional[Series[object]] = pa.Field(
-        nullable=True, description="List of component relationships."
-    )
-    component_descriptions: Optional[Series[object]] = pa.Field(
-        nullable=True, description="List of component descriptions."
+    downgraded: Optional[Series[int]] = pa.Field(
+        nullable=True,
+        isin=[0, 1],
+        description="Downgraded flag.",
     )
 
     class Config:
         """Pandera configuration."""
         strict = True
-        ordered = False
+        ordered = True
         coerce = True

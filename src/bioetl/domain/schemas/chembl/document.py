@@ -13,29 +13,37 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 
 class DocumentSchema(ETLRecordSchema):
-    """Document validation schema for Silver/Gold layers."""
+    """Document validation schema for Silver layer."""
 
     # === Primary Key ===
+    doc_id: Series[int] = pa.Field(
+        nullable=False, description="Primary key."
+    )
+
+    # === Identifiers ===
     document_chembl_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
-        description="Primary key (ChEMBL identifier).",
+        description="ChEMBL ID.",
     )
-
-    # === External Identifiers ===
     pubmed_id: Optional[Series[int]] = pa.Field(
         nullable=True, description="PubMed ID."
     )
     doi: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Digital Object Identifier."
+        nullable=True,
+        str_matches=r"^10\.\d+/.+$",
+        description="DOI.",
     )
     patent_id: Optional[Series[str]] = pa.Field(
         nullable=True, description="Patent ID."
     )
+    src_id: Optional[Series[int]] = pa.Field(
+        nullable=True, description="Source ID."
+    )
 
-    # === Core Metadata ===
+    # === Metadata ===
     title: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Document title."
+        nullable=True, description="Title."
     )
     doc_type: Optional[Series[str]] = pa.Field(
         nullable=True,
@@ -43,30 +51,22 @@ class DocumentSchema(ETLRecordSchema):
         description="Document type.",
     )
     authors: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Authors string."
+        nullable=True, description="Authors."
     )
     abstract: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Abstract text."
+        nullable=True, description="Abstract."
     )
-
-    # === Journal Information ===
     journal: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Journal name."
-    )
-    journal_full_title: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Full journal title."
+        nullable=True, description="Journal."
     )
     year: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        ge=1800,
-        le=2100,
-        description="Publication year.",
+        nullable=True, description="Year."
     )
     volume: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Journal volume."
+        nullable=True, description="Volume."
     )
     issue: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Journal issue."
+        nullable=True, description="Issue."
     )
     first_page: Optional[Series[str]] = pa.Field(
         nullable=True, description="First page."
@@ -74,12 +74,12 @@ class DocumentSchema(ETLRecordSchema):
     last_page: Optional[Series[str]] = pa.Field(
         nullable=True, description="Last page."
     )
-    src_id: Optional[Series[int]] = pa.Field(
-        nullable=True, description="Source ID."
+    ridx: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Record index."
     )
 
     class Config:
         """Pandera configuration."""
         strict = True
-        ordered = False
+        ordered = True
         coerce = True
