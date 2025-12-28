@@ -73,6 +73,23 @@ def wrong_table_lock_context(run_id: RunID) -> LockContext:
     )
 
 
+@pytest.fixture
+def different_owner_id() -> RunID:
+    """Create a different run ID (simulates lock re-acquisition)."""
+    return RunID(uuid4())
+
+
+@pytest.fixture
+def wrong_owner_lock_context(different_owner_id: RunID) -> LockContext:
+    """Create a lock context with different owner (fencing token mismatch)."""
+    return LockContext.create(
+        provider="chembl",
+        entity="activity",
+        owner_id=different_owner_id,
+        exclusive=False,
+    )
+
+
 class TestLockContext:
     """Tests for LockContext value object."""
 
@@ -223,6 +240,51 @@ class TestDeltaWriterLockValidation:
         # Should not raise even with None
         delta_writer_no_lock._validate_lock_held("chembl_activity", None)
 
+    def test_validate_lock_held_wrong_owner_id(
+        self,
+        delta_writer: "DeltaWriter",
+        wrong_owner_lock_context: LockContext,
+        run_id: RunID,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test validation fails when lock has wrong owner_id (fencing token mismatch)."""
+        with pytest.raises(LockNotHeldError) as exc_info:
+            delta_writer._validate_lock_held(
+                "chembl_activity",
+                wrong_owner_lock_context,
+                expected_owner_id=run_id,  # Different from wrong_owner_lock_context.owner_id
+            )
+
+        assert "owner mismatch" in str(exc_info.value)
+        mock_logger.error.assert_called()
+
+    def test_validate_lock_held_matching_owner_id(
+        self,
+        delta_writer: "DeltaWriter",
+        valid_lock_context: LockContext,
+        run_id: RunID,
+    ) -> None:
+        """Test validation passes when owner_id matches expected."""
+        # Should not raise - owner_id matches
+        delta_writer._validate_lock_held(
+            "chembl_activity",
+            valid_lock_context,
+            expected_owner_id=run_id,
+        )
+
+    def test_validate_lock_held_no_expected_owner_skips_check(
+        self,
+        delta_writer: "DeltaWriter",
+        valid_lock_context: LockContext,
+    ) -> None:
+        """Test validation passes when expected_owner_id is None (backward compat)."""
+        # Should not raise - no owner check when expected_owner_id is None
+        delta_writer._validate_lock_held(
+            "chembl_activity",
+            valid_lock_context,
+            expected_owner_id=None,
+        )
+
 
 class TestGoldWriterLockValidation:
     """Tests for GoldWriter lock validation."""
@@ -277,6 +339,38 @@ class TestGoldWriterLockValidation:
         """Test validation is skipped when require_lock=False."""
         # Should not raise even with None
         gold_writer_no_lock._validate_lock_held("chembl_activity", None)
+
+    def test_validate_lock_held_wrong_owner_id(
+        self,
+        gold_writer: "GoldWriter",
+        wrong_owner_lock_context: LockContext,
+        run_id: RunID,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test validation fails when lock has wrong owner_id (fencing token mismatch)."""
+        with pytest.raises(LockNotHeldError) as exc_info:
+            gold_writer._validate_lock_held(
+                "chembl_activity",
+                wrong_owner_lock_context,
+                expected_owner_id=run_id,
+            )
+
+        assert "owner mismatch" in str(exc_info.value)
+        mock_logger.error.assert_called()
+
+    def test_validate_lock_held_matching_owner_id(
+        self,
+        gold_writer: "GoldWriter",
+        valid_lock_context: LockContext,
+        run_id: RunID,
+    ) -> None:
+        """Test validation passes when owner_id matches expected."""
+        # Should not raise
+        gold_writer._validate_lock_held(
+            "chembl_activity",
+            valid_lock_context,
+            expected_owner_id=run_id,
+        )
 
 
 class TestBronzeWriterLockValidation:
@@ -351,6 +445,40 @@ class TestBronzeWriterLockValidation:
         """Test validation is skipped when require_lock=False."""
         # Should not raise even with None
         bronze_writer_no_lock._validate_lock_held("chembl", "activity", None)
+
+    def test_validate_lock_held_wrong_owner_id(
+        self,
+        bronze_writer: "BronzeWriter",
+        wrong_owner_lock_context: LockContext,
+        run_id: RunID,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test validation fails when lock has wrong owner_id (fencing token mismatch)."""
+        with pytest.raises(LockNotHeldError) as exc_info:
+            bronze_writer._validate_lock_held(
+                "chembl",
+                "activity",
+                wrong_owner_lock_context,
+                expected_owner_id=run_id,
+            )
+
+        assert "owner mismatch" in str(exc_info.value)
+        mock_logger.error.assert_called()
+
+    def test_validate_lock_held_matching_owner_id(
+        self,
+        bronze_writer: "BronzeWriter",
+        valid_lock_context: LockContext,
+        run_id: RunID,
+    ) -> None:
+        """Test validation passes when owner_id matches expected."""
+        # Should not raise
+        bronze_writer._validate_lock_held(
+            "chembl",
+            "activity",
+            valid_lock_context,
+            expected_owner_id=run_id,
+        )
 
 
 class TestLockManagerGetContext:

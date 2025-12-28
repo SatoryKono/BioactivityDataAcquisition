@@ -46,6 +46,7 @@ from bioetl.domain.medallion import (
     WriteMode,
     WriteModePolicy,
 )
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -223,6 +224,7 @@ class DeltaWriter:
         self,
         table_name: str,
         lock_context: LockContext | None,
+        expected_owner_id: RunID | None = None,
     ) -> None:
         """Validate that lock is held before write operation.
 
@@ -231,9 +233,13 @@ class DeltaWriter:
         Args:
             table_name: Target table name (format: "provider_entity").
             lock_context: The lock context from application layer.
+            expected_owner_id: Expected owner RunID (fencing token). If provided,
+                              validates that lock_context.owner_id matches to prevent
+                              writes from stale lock holders after lock re-acquisition.
 
         Raises:
-            LockNotHeldError: If lock is not held or doesn't match table.
+            LockNotHeldError: If lock is not held, doesn't match table,
+                             is expired, or owner_id doesn't match.
         """
         if not self._require_lock:
             return  # Lock validation disabled (e.g., for tests)
@@ -268,6 +274,20 @@ class DeltaWriter:
             )
             raise LockNotHeldError(
                 "write_silver (lock expired)",
+                expected_key,
+            )
+
+        # Fencing token validation: verify owner_id matches expected
+        if expected_owner_id is not None and lock_context.owner_id != expected_owner_id:
+            self.logger.error(
+                "Write attempted with wrong owner_id (fencing token mismatch)",
+                table=table_name,
+                expected_owner_id=str(expected_owner_id),
+                actual_owner_id=str(lock_context.owner_id),
+                lock_key=lock_context.key,
+            )
+            raise LockNotHeldError(
+                f"write_silver (owner mismatch: {lock_context.owner_id} != {expected_owner_id})",
                 expected_key,
             )
 
@@ -471,8 +491,24 @@ class DeltaWriter:
             span.set_attribute("mode", mode)
             span.set_attribute("record_count", len(records))
 
+            # Extract expected owner_id from records for fencing token validation
+            expected_owner_id: RunID | None = None
+            if records:
+                run_id_str = records[0].get("_run_id")
+                if run_id_str:
+                    from uuid import UUID
+                    try:
+                        expected_owner_id = RunID(UUID(run_id_str))
+                    except (ValueError, TypeError):
+                        # Invalid run_id format, skip owner validation
+                        self.logger.warning(
+                            "Could not parse _run_id for owner validation",
+                            table=table_name,
+                            run_id=run_id_str,
+                        )
+
             # Validate lock is held before any write operation (RULES.md §3.3)
-            self._validate_lock_held(table_name, lock_context)
+            self._validate_lock_held(table_name, lock_context, expected_owner_id)
 
             validated_mode = self._validate_write_mode(mode)
 
