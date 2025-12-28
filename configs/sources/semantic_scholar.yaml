@@ -1,0 +1,48 @@
+# configs/sources/semantic_scholar.yaml
+# Конфигурация источника данных Semantic Scholar.
+
+source:
+    type: api
+    load_strategy: full
+    batch_size: 500  # S2 batch API supports up to 500 IDs per request
+    provider_config:
+        provider: semantic_scholar
+        base_url: https://api.semanticscholar.org/graph/v1
+        client:
+            timeout_sec: 60.0
+            max_retries: 3
+        # Optional API key for higher rate limits (1 req/sec vs 100 req/5min)
+        api_key: "${BIOETL_SEMANTIC_SCHOLAR_API_KEY}"
+        # Include SPECTER embeddings in response
+        include_embedding: false
+
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    rate_limit:
+        # Without API key: 100 requests per 5 minutes (~0.33 req/sec)
+        # With API key: 1 request per second
+        requests_per_second: 0.33
+        burst: 10
+
+    health_check:
+        method: GET
+        endpoint: /paper/DOI:10.1038/nature12373
+        params:
+            fields: title
+        timeout: 5
+
+    batch:
+        max_ids: 500
+        fields:
+            - paperId
+            - externalIds
+            - title
+            - authors
+            - venue
+            - year
+            - abstract
+            - citationCount
+            - influentialCitationCount
+            - fieldsOfStudy

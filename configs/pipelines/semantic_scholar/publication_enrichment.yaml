@@ -1,0 +1,128 @@
+# configs/pipelines/semantic_scholar/publication_enrichment.yaml
+# Конфигурация пайплайна для обогащения публикаций данными Semantic Scholar.
+#
+# Pipeline Flow:
+# Bronze(Publication DOIs/PMIDs)
+#     → Semantic Scholar Batch API
+#     → Silver(Publication + citations + embeddings)
+#     → Gold(Citation Graph, Influence Scores)
+
+pipeline_name: semantic_scholar_publication_enrichment
+provider: semantic_scholar
+entity_type: paper
+version: "1.0.0"
+description: "Enrich publications with Semantic Scholar metadata: citations, influence scores, embeddings"
+
+# Use semantic_scholar_id as primary, with doi as fallback
+primary_keys: ["semantic_scholar_id"]
+fallback_keys: ["doi"]
+silver_table: "semantic_scholar_papers"
+gold_table: "semantic_scholar_papers"
+
+# Ссылка на файл с конфигурацией источника данных
+source_file: ../../sources/semantic_scholar.yaml
+
+# Pipeline-specific source configuration
+source:
+    # API key injected via env var (optional, increases rate limits)
+    api_key: "${BIOETL_SEMANTIC_SCHOLAR_API_KEY}"
+    # Include SPECTER embeddings for ML pipelines
+    include_embedding: true
+    # Fields to request from S2 API
+    fields:
+        - paperId
+        - externalIds
+        - title
+        - authors
+        - venue
+        - year
+        - abstract
+        - citationCount
+        - influentialCitationCount
+        - fieldsOfStudy
+        - embedding
+
+# Gold layer filters
+gold_filters:
+    required_fields:
+        - semantic_scholar_id
+        - title
+    # Exclude embedding from Gold (keep in Silver for ML)
+    exclude_fields:
+        - _embedding
+    columns: {}
+
+transform:
+    version: "1.0.0"
+    steps:
+        - extract_external_ids
+        - normalize_authors
+        - extract_embedding
+        - compute_influence_ratio
+
+sink:
+    bronze:
+        path: "data/bronze/semantic_scholar/paper"
+        format: jsonl
+        save_json: true
+
+    silver:
+        path: "data/silver/semantic_scholar/paper"
+        format: delta
+        mode: merge
+        primary_key: ["semantic_scholar_id"]
+        partition_by: ["year"]
+        classification: public
+        forensic_retention: true
+        csv_export:
+            enabled: true
+            path: "data/output/csv/silver"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+    gold:
+        enabled: true
+        validation:
+            strict: true
+        path: "data/gold/semantic_scholar/paper"
+        format: delta
+        mode: overwrite
+        csv_export:
+            enabled: true
+            path: "data/output/csv/gold"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+dq_rules:
+    soft_fail_threshold: 0.05
+    hard_fail_threshold: 0.20
+    # Custom DQ rules for S2 data
+    required_fields:
+        - semantic_scholar_id
+        - title
+    numeric_ranges:
+        citation_count:
+            min: 0
+        influential_citation_count:
+            min: 0
+        year:
+            min: 1900
+            max: 2030
+
+circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+
+# Input filter configuration (for CSV-based ID filtering)
+# Use to enrich existing publications by DOI or PMID
+input_filter:
+    enabled: true
+    source_path: "data/input/dois.csv"
+    column_name: "doi"
+    filter_field: "doi"
+    # Alternative: filter by PMID
+    # column_name: "pmid"
+    # filter_field: "pmid"
+    batch_size: 500  # Match S2 batch API limit
