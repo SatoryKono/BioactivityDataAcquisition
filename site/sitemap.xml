@@ -45,6 +45,10 @@
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/mermaid-test/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
          <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/00-project_rules/00-rules-summary/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
@@ -74,6 +78,14 @@
     </url>
     <url>
          <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/00-project_rules/07-consistency-check/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/00-project_rules/AUDIT-REPORT/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/01-governance/rules/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
@@ -329,6 +341,10 @@
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/backfill-rebuild/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
          <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/data-recovery/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
@@ -341,7 +357,27 @@
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/pipeline-failure-critical/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/pipeline-failure-dq/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/quarantine-management/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
          <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/scaling/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/schema-evolution/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://SatoryKono.github.io/BioactivityDataAcquisition/05-operations/runbooks/stale-lock/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
