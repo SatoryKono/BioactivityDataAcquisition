@@ -158,6 +158,7 @@ src/bioetl/
 
 | Компонент | ❌ Ложное утверждение | ✅ Реальность |
 |-----------|----------------------|---------------|
+| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42` |
 | **PipelineRunner** | "God object, слишком много ответственностей" | **173 строки**, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
 | **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
 | **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **Делегирует** через `EntityMapper` (112 LOC), `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py:30,76-84,90`) |

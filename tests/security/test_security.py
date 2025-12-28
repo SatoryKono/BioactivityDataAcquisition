@@ -260,10 +260,29 @@ class TestPrivateKeyExposure:
 
 
 class TestPIIHandling:
-    """Tests for PII handling patterns."""
+    """Tests for PII handling patterns.
+
+    IMPORTANT: Known False Positives (NOT actual PII):
+    -------------------------------------------------
+    - `email` in config.py and pubmed_client.py: This is a technical API identifier
+      required by NCBI E-utilities for tool identification, NOT user personal data.
+      NCBI mandates this for rate limiting and contact purposes.
+      See: https://www.ncbi.nlm.nih.gov/books/NBK25497/
+
+    This test uses pytest.skip() (not assert fail) because:
+    1. Pattern matching may catch false positives like API identifiers
+    2. Some fields may be intentionally excluded from Silver layer
+    3. Manual review is needed to distinguish real PII from technical identifiers
+    """
 
     def test_silver_layer_uses_hashing(self) -> None:
-        """Verify Silver layer transformers use hashing for PII fields."""
+        """Verify Silver layer transformers use hashing for PII fields.
+
+        Note: This test may flag false positives for technical identifiers
+        (e.g., NCBI API email). The test uses pytest.skip() to request manual
+        review rather than failing, as automated pattern matching cannot
+        distinguish between real PII and API configuration values.
+        """
         # Check that PII-related code uses sha256
         infrastructure_files = list((SRC_DIR / "infrastructure").rglob("*.py"))
         application_files = list((SRC_DIR / "application").rglob("*.py"))
@@ -290,7 +309,8 @@ class TestPIIHandling:
                         )
 
         # This is informational - PII fields without explicit hashing may be OK
-        # if they're excluded from Silver layer
+        # if they're excluded from Silver layer or are technical identifiers
+        # (e.g., NCBI API email is NOT user PII)
         if files_with_pii:
             pytest.skip("Review PII handling:\n" + "\n".join(files_with_pii))
 
