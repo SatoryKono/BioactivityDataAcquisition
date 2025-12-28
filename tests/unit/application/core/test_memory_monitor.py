@@ -335,11 +335,13 @@ class TestMemoryMonitorPsutil:
         config = MemoryConfig()
         monitor = MemoryMonitor(config=config, logger=mock_logger)
 
-        if monitor._psutil_available:
-            stats = monitor._get_stats_psutil()
+        if not monitor._psutil_available:
+            pytest.skip("psutil not available in this environment")
 
-            assert stats.total_mb > 0
-            assert stats.available_mb >= 0
-            assert stats.used_mb >= 0
-            assert 0 <= stats.percent_used <= 1
-            assert stats.process_mb > 0
+        stats = monitor._get_stats_psutil()
+
+        assert stats.total_mb > 0
+        assert stats.available_mb >= 0
+        assert stats.used_mb >= 0
+        assert 0 <= stats.percent_used <= 1
+        assert stats.process_mb > 0
