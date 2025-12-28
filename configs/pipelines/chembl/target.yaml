@@ -68,7 +68,7 @@ sink:
     gold:
         enabled: true
         validation:
-            strict: false  # TODO: Fix downgraded field type coercion before enabling strict
+            strict: true
         path: "data/output/gold"
         format: delta
         mode: overwrite
