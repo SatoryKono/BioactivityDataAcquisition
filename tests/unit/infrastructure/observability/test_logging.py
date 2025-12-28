@@ -6,7 +6,65 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.infrastructure.observability.logging import create_logger
+from bioetl.domain.ports import LoggerPort
+from bioetl.infrastructure.observability.logging import StructlogLogger, create_logger
+
+
+@pytest.mark.unit
+class TestStructlogLogger:
+    """Tests for StructlogLogger adapter."""
+
+    def test_structlog_logger_implements_logger_port(self) -> None:
+        """Test that StructlogLogger implements LoggerPort protocol."""
+        run_id = uuid4()
+        logger = create_logger(
+            pipeline="test_pipeline",
+            run_id=run_id,
+        )
+
+        # StructlogLogger must implement LoggerPort
+        assert isinstance(logger, LoggerPort)
+
+    def test_structlog_logger_is_structlog_logger_type(self) -> None:
+        """Test that create_logger returns StructlogLogger instance."""
+        run_id = uuid4()
+        logger = create_logger(
+            pipeline="test_pipeline",
+            run_id=run_id,
+        )
+
+        assert isinstance(logger, StructlogLogger)
+
+    def test_structlog_logger_bind_returns_self_type(self) -> None:
+        """Test that bind() returns StructlogLogger, not BoundLogger."""
+        run_id = uuid4()
+        logger = create_logger(
+            pipeline="test_pipeline",
+            run_id=run_id,
+        )
+
+        bound = logger.bind(extra_key="value")
+
+        # bind() must return StructlogLogger, not raw BoundLogger
+        assert isinstance(bound, StructlogLogger)
+        assert isinstance(bound, LoggerPort)
+
+    def test_structlog_logger_all_methods(self) -> None:
+        """Test that StructlogLogger has all LoggerPort methods."""
+        run_id = uuid4()
+        logger = create_logger(
+            pipeline="test_pipeline",
+            run_id=run_id,
+        )
+
+        # All these methods should exist and not raise
+        logger.info("info_event", key="value")
+        logger.warning("warning_event", key="value")
+        logger.error("error_event", key="value")
+        logger.debug("debug_event", key="value")
+
+        # exception requires exc_info in context, just check it exists
+        assert hasattr(logger, "exception")
 
 
 @pytest.mark.unit

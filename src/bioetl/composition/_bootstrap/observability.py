@@ -15,10 +15,10 @@ from __future__ import annotations
 
 import contextlib
 from typing import TYPE_CHECKING
-
-import structlog
+from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
@@ -29,9 +29,7 @@ from bioetl.infrastructure.observability.server import start_metrics_server
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
-    from bioetl.domain.ports import DQMonitorPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import DQMonitorPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -48,7 +46,7 @@ def validate_observability_preflight(
     tracer: TracingPort,
     metrics: MetricsPort,
     environment: str,
-    logger: structlog.stdlib.BoundLogger,
+    logger: LoggerPort,
 ) -> None:
     """Validate observability components for production readiness.
 
@@ -91,8 +89,12 @@ def validate_observability_preflight(
 
 def bootstrap_logger(
     pipeline: str, run_id: UUID, log_level: str = "INFO"
-) -> structlog.stdlib.BoundLogger:
-    """Create a logger for the application layer (e.g., CLI)."""
+) -> LoggerPort:
+    """Create a logger for the application layer (e.g., CLI).
+
+    Returns:
+        StructlogLogger implementing LoggerPort.
+    """
     return create_infra_logger(
         pipeline=pipeline, run_id=run_id, log_level=log_level, json_format=True
     )
