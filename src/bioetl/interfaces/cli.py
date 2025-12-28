@@ -396,8 +396,7 @@ def vacuum_all_command(retention_days: int, dry_run: bool, layer: str) -> None:
 
         bioetl maintenance vacuum-all --layer silver
     """
-    from bioetl.composition.bootstrap import load_pipeline_config
-    from bioetl.composition.entrypoints import get_lifecycle_service
+    from bioetl.composition.entrypoints import get_lifecycle_service, load_pipeline_config
     from bioetl.composition.registry import get_default_registry
 
     lifecycle = get_lifecycle_service()
