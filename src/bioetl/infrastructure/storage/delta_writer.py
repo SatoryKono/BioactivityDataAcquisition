@@ -241,6 +241,39 @@ class DeltaWriter:
                 f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
             ) from None
 
+    def _extract_owner_id_from_records(
+        self, records: list[dict[str, Any]], table_name: str
+    ) -> RunID | None:
+        """Extract owner_id from records for fencing token validation."""
+        if not records:
+            return None
+        run_id_str = records[0].get("_run_id")
+        if not run_id_str:
+            return None
+        from uuid import UUID
+
+        try:
+            return RunID(UUID(run_id_str))
+        except (ValueError, TypeError):
+            self.logger.warning(
+                "Could not parse _run_id for owner validation",
+                table=table_name,
+                run_id=run_id_str,
+            )
+            return None
+
+    def _deduplicate_by_primary_keys(
+        self, records: list[dict[str, Any]], primary_keys: list[str]
+    ) -> list[dict[str, Any]]:
+        """Deduplicate records based on primary keys to prevent duplicates in batch."""
+        if not primary_keys or not records:
+            return records
+        unique_records: dict[tuple[Any, ...], dict[str, Any]] = {}
+        for record in records:
+            key = tuple(record.get(pk) for pk in primary_keys)
+            unique_records[key] = record
+        return list(unique_records.values())
+
     def _validate_lock_held(
         self,
         table_name: str,
@@ -490,33 +523,11 @@ class DeltaWriter:
             span.set_attribute("mode", mode)
             span.set_attribute("record_count", len(records))
 
-            # Extract expected owner_id from records for fencing token validation
-            expected_owner_id: RunID | None = None
-            if records:
-                run_id_str = records[0].get("_run_id")
-                if run_id_str:
-                    from uuid import UUID
-                    try:
-                        expected_owner_id = RunID(UUID(run_id_str))
-                    except (ValueError, TypeError):
-                        # Invalid run_id format, skip owner validation
-                        self.logger.warning(
-                            "Could not parse _run_id for owner validation",
-                            table=table_name,
-                            run_id=run_id_str,
-                        )
-
-            # Validate lock is held before any write operation (RULES.md §3.3)
+            expected_owner_id = self._extract_owner_id_from_records(records, table_name)
             self._validate_lock_held(table_name, lock_context, expected_owner_id)
 
-            # Deduplicate records based on primary keys to prevent duplicates in batch
-            if primary_keys and records:
-                unique_records = {}
-                for record in records:
-                    key = tuple(record.get(pk) for pk in primary_keys)
-                    unique_records[key] = record
-                records = list(unique_records.values())
-                span.set_attribute("record_count", len(records))
+            records = self._deduplicate_by_primary_keys(records, primary_keys)
+            span.set_attribute("record_count", len(records))
 
             validated_mode = self._validate_write_mode(mode)
 

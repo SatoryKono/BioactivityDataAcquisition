@@ -58,86 +58,34 @@ class StorageFactory:
         return None
 
     @staticmethod
-    def create(
-        settings: Settings,
-        config: PipelineYamlConfig,
+    def _resolve_layer_path(
+        layer_config: Any, default_path: Path, use_yaml_paths: bool
+    ) -> Path:
+        """Resolve storage path from config or fall back to default."""
+        if use_yaml_paths and layer_config and layer_config.path:
+            return Path(layer_config.path)
+        return default_path
+
+    @staticmethod
+    def _create_storage_adapter(
+        bronze_path: Path,
+        silver_path: Path,
+        gold_path: Path,
+        bronze_config: Any,
+        silver_csv_exporter: CsvExporter | None,
+        gold_csv_exporter: CsvExporter | None,
         logger: LoggerPort,
         metrics: MetricsPort,
-        tracing: TracingPort | None = None,
-    ) -> StorageContext:
-        """Create a StorageAdapter for local deployment.
-
-        Args:
-            settings: Application settings with data_dir
-            config: Pipeline YAML configuration
-            logger: Structured logger
-            metrics: Metrics port for Bronze observability (MUST be injected).
-            tracing: Optional TracingPort for distributed tracing.
-
-        Returns:
-            StorageContext with adapter and paths
-        """
-        # Get layer configs from YAML
-        bronze_config = config.sink.get("bronze")
-        silver_config = config.sink.get("silver")
-        gold_config = config.sink.get("gold")
-
-        # Use YAML paths if specified, otherwise fall back to settings.
-        # In test mode (BIOETL_TEST_MODE=true), always use settings to respect
-        # test isolation with temp directories.
-        use_yaml_paths = not settings.test_mode
-
-        bronze_path = (
-            Path(bronze_config.path)
-            if use_yaml_paths and bronze_config and bronze_config.path
-            else settings.bronze_path
-        )
-        silver_path = (
-            Path(silver_config.path)
-            if use_yaml_paths and silver_config and silver_config.path
-            else settings.silver_path
-        )
-        gold_path = (
-            Path(gold_config.path)
-            if use_yaml_paths and gold_config and gold_config.path
-            else settings.gold_path
-        )
-        checkpoints_path = settings.checkpoint_path
-
+        tracing: TracingPort | None,
+        require_lock: bool,
+    ) -> StorageAdapter:
+        """Create StorageAdapter with all writers configured."""
+        save_json = bronze_config.save_json if bronze_config else False
         json_path = None
-        silver_csv_exporter: CsvExporter | None = None
-        gold_csv_exporter: CsvExporter | None = None
-
-        # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
-        require_lock = not settings.test_mode
-
-        logger.info(
-            "Using local storage",
-            bronze_path=str(bronze_path),
-            silver_path=str(silver_path),
-            gold_path=str(gold_path),
-            require_lock=require_lock,
-        )
-
         if bronze_config and bronze_config.save_json:
-            # JSON path is sibling to bronze path
             json_path = str(bronze_path.parent / "json")
 
-        if silver_config:
-            silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-                silver_config.csv_export
-            )
-        if gold_config:
-            gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-                gold_config.csv_export
-            )
-
-        StorageFactory._log_export_status(
-            logger, json_path, silver_csv_exporter, gold_csv_exporter
-        )
-        save_json = bronze_config.save_json if bronze_config else False
-
-        adapter = StorageAdapter(
+        return StorageAdapter(
             bronze_writer=BronzeWriter(
                 base_path=bronze_path,
                 logger=logger,
@@ -163,12 +111,87 @@ class StorageFactory:
             ),
         )
 
+    @staticmethod
+    def create(
+        settings: Settings,
+        config: PipelineYamlConfig,
+        logger: LoggerPort,
+        metrics: MetricsPort,
+        tracing: TracingPort | None = None,
+    ) -> StorageContext:
+        """Create a StorageAdapter for local deployment.
+
+        Args:
+            settings: Application settings with data_dir
+            config: Pipeline YAML configuration
+            logger: Structured logger
+            metrics: Metrics port for Bronze observability (MUST be injected).
+            tracing: Optional TracingPort for distributed tracing.
+
+        Returns:
+            StorageContext with adapter and paths
+        """
+        bronze_config = config.sink.get("bronze")
+        silver_config = config.sink.get("silver")
+        gold_config = config.sink.get("gold")
+
+        # In test mode, always use settings to respect test isolation
+        use_yaml_paths = not settings.test_mode
+
+        bronze_path = StorageFactory._resolve_layer_path(
+            bronze_config, settings.bronze_path, use_yaml_paths
+        )
+        silver_path = StorageFactory._resolve_layer_path(
+            silver_config, settings.silver_path, use_yaml_paths
+        )
+        gold_path = StorageFactory._resolve_layer_path(
+            gold_config, settings.gold_path, use_yaml_paths
+        )
+
+        require_lock = not settings.test_mode
+
+        logger.info(
+            "Using local storage",
+            bronze_path=str(bronze_path),
+            silver_path=str(silver_path),
+            gold_path=str(gold_path),
+            require_lock=require_lock,
+        )
+
+        silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+            silver_config.csv_export if silver_config else None
+        )
+        gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+            gold_config.csv_export if gold_config else None
+        )
+
+        json_path = None
+        if bronze_config and bronze_config.save_json:
+            json_path = str(bronze_path.parent / "json")
+
+        StorageFactory._log_export_status(
+            logger, json_path, silver_csv_exporter, gold_csv_exporter
+        )
+
+        adapter = StorageFactory._create_storage_adapter(
+            bronze_path=bronze_path,
+            silver_path=silver_path,
+            gold_path=gold_path,
+            bronze_config=bronze_config,
+            silver_csv_exporter=silver_csv_exporter,
+            gold_csv_exporter=gold_csv_exporter,
+            logger=logger,
+            metrics=metrics,
+            tracing=tracing,
+            require_lock=require_lock,
+        )
+
         return StorageContext(
             adapter=adapter,
             bronze_path=bronze_path,
             silver_path=silver_path,
             gold_path=gold_path,
-            checkpoints_path=checkpoints_path,
+            checkpoints_path=settings.checkpoint_path,
         )
 
     @staticmethod
