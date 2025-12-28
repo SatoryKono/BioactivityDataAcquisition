@@ -125,6 +125,7 @@ class TestStorageAdapter:
             mode="merge",
             partition_cols=None,
             on_schema_mismatch="error",
+            lock_context=None,
         )
 
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):
@@ -149,6 +150,7 @@ class TestStorageAdapter:
             mode="overwrite",
             ingestion_ts=None,
             run_id=None,
+            lock_context=None,
         )
 
     async def test_aclose_completes(self, storage_adapter):
