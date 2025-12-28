@@ -149,4 +149,4 @@ Pipelines write data to:
 
 - [CLI Reference](../04-reference/cli.md) - Full command documentation
 - [Troubleshooting](troubleshooting.md) - Common problems and solutions
-- [Pipeline Configuration](../04-reference/pipelines/chembl_activity.md) - YAML config format
+- [Pipeline Configuration](../04-reference/pipelines/chembl-activity.md) - YAML config format

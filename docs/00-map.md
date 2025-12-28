@@ -81,7 +81,7 @@ docs/
 │
 ├── RULES.md                     # Canonical rules document (v5.7)
 ├── REQUIREMENTS.md              # Testable requirements
-├── REFACTORING_PLAN.md          # Current refactoring roadmap
+├── refactoring-plan.md          # Current refactoring roadmap
 │
 └── templates/                   # Document & code templates
 ```
@@ -290,7 +290,7 @@ graph TD
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
 | RULES.md (docs/)         | 2025-12-27   | v5.7 (Pre-Refactoring)       |
-| REFACTORING_PLAN.md      | 2025-12-27   | v5.6 (Consolidated)          |
+| refactoring-plan.md      | 2025-12-27   | v5.6 (Consolidated)          |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | 00-map.md                | 2025-12-27   | v5.7 Synced, structure clean |
 | 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
