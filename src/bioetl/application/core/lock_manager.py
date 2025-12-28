@@ -129,6 +129,9 @@ class LockManager:
         )
         if acquired:
             self._acquired_at = time.monotonic()
+            # Update shared context holder for writers
+            if self._context_holder is not None:
+                self._context_holder.set(self.get_context())  # type: ignore[arg-type]
             self._logger.info(f"Lock acquired for {self._lock_key}")
         else:
             self._logger.error(f"Failed to acquire lock for {self._lock_key}")
@@ -144,6 +147,9 @@ class LockManager:
             self._lock_key, self._run_id, exclusive=self._exclusive
         )
         self._acquired_at = None
+        # Clear shared context holder
+        if self._context_holder is not None:
+            self._context_holder.clear()
         self._logger.info("Lock released", extra={"stage": "cleanup"})
 
     def get_context(self) -> LockContext | None:

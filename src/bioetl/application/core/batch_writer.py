@@ -7,11 +7,12 @@ Extracted from RecordProcessor for single responsibility (SRP).
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Callable, Literal, cast
 
 import orjson
 
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.domain.locking import LockContext
 
 if TYPE_CHECKING:
     from typing import Any as SpanType
