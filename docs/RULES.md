@@ -1021,6 +1021,9 @@ fields:
 | [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Pipeline Services Lifecycle | Accepted | 2025-12-24 |
 | [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md) | Error Handling Strategy | Accepted | 2025-12-26 |
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
+| [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md) | Gold Strict Validation | Accepted | 2025-12-28 |
+| [ADR-019](02-architecture/decisions/ADR-019-observability-port-enforcement.md) | Observability Port Enforcement | Accepted | 2025-12-26 |
+| [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | 2025-12-16 |
 
 ## История Изменений (Changelog)
 - **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с CLAUDE.md §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в refactoring-plan.md.

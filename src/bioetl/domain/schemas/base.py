@@ -5,7 +5,6 @@ Contains common metadata fields required by RULES.md §2.4.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 import pandera as pa
@@ -32,7 +31,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         isin=["incremental", "backfill", "rebuild"],
         description="Type of pipeline run.",
     )
-    _source_batch_id: Optional[Series[UUID]] = pa.Field(
+    _source_batch_id: Series[UUID] | None = pa.Field(
         nullable=True, description="Batch context ID from the source."
     )
     _ingestion_ts: Series[datetime] = pa.Field(

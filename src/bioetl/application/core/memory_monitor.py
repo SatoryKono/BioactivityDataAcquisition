@@ -138,7 +138,7 @@ class MemoryMonitor:
         import resource
 
         # Get process memory usage (Unix-only attributes)
-        rusage = resource.getrusage(resource.RUSAGE_SELF)  # type: ignore[attr-defined]
+        rusage = resource.getrusage(resource.RUSAGE_SELF)
         process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
 
         # Try to read system memory from /proc/meminfo
