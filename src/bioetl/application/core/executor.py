@@ -468,6 +468,14 @@ class PipelineExecutor:
             Raw records as dictionaries from the data source.
 
         """
+        # Pass filter_ids and filter_field if configured in data source
+        # This requires checking if data source supports filtering
+        # For now, we assume standard fetch unless executor is extended
+
+        # Check if data source has filter config injected
+        # This is a bit of a hack, ideally executor should know about filters
+        # But filters are injected into data source at creation time
+
         async for record in self._data_source.fetch(
             entity_type=self._entity_type,
             limit=limit,
