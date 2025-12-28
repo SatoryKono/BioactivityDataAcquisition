@@ -51,6 +51,7 @@ from bioetl.application.core.postrun_service import (
 )
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.core.transform_utils import (
     aggregate_nested_lists,
@@ -83,6 +84,7 @@ __all__ = [
     "MemoryMonitor",
     "MemoryStats",
     "PipelineConfig",
+    "PipelineRunner",
     "PipelineServices",
     "PipelineShutdownError",
     "PostrunService",

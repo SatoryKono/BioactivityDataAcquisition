@@ -42,10 +42,14 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     molecular_weight: Series[str] = pa.Field(nullable=True)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
 
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+
     class Config:
         """Pandera configuration."""
 
-        strict = False
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class UniProtProteinGoldSchema(pa.DataFrameModel):
@@ -56,10 +60,14 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     protein_name: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[int] = pa.Field(nullable=True, ge=0, coerce=True)
 
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+
     class Config:
         """Pandera configuration."""
 
-        strict = False
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):

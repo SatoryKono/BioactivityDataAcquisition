@@ -70,10 +70,12 @@ class PubChemCompoundTransformer(BaseTransformer):
         cid = self._get_required_field(record, "cid")
 
         # Step 2: Build business data dictionary
+        # Note: molecular_weight is converted to string to match Silver schema
+        mol_weight = record.get("molecular_weight")
         business_data: dict[str, Any] = {
             "cid": str(cid),
             "molecular_formula": record.get("molecular_formula"),
-            "molecular_weight": record.get("molecular_weight"),
+            "molecular_weight": str(mol_weight) if mol_weight is not None else None,
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
             "inchi": record.get("inchi"),
