@@ -96,12 +96,11 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## 9. Locking & Concurrency (RULES.md §3.3)
 
-- [ ] Distributed lock implemented (Redis SETNX + EXPIRE)
+> **Note**: Local-Only Deployment (ADR-010). MemoryLock используется для локального развёртывания.
+
+- [ ] Lock implemented (`MemoryLock` for Local-Only)
 - [ ] Lock key format: `lock:{provider}_{entity}`
 - [ ] Backfill uses exclusive lock: `lock:{provider}_{entity}:exclusive`
-- [ ] TTL: 60 seconds
-- [ ] Heartbeat: every 20 seconds
-- [ ] Fencing Token (`owner_id`) validated before write
 - [ ] Max Duration: 4 hours
 - [ ] Safety Guard: lock validated before Delta write
 
