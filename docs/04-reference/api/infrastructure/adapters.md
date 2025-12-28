@@ -122,8 +122,8 @@ Observability components are documented in [Observability](observability.md).
 ## Usage Example
 
 ```python
-from bioetl.infrastructure.adapters.http.client.UnifiedHTTPClient import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter.TokenBucket import TokenBucket
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 # Create rate limiter
 limiter = TokenBucket(rate=5.0, capacity=10)
