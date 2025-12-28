@@ -63,7 +63,7 @@ class InMemoryStorage:
         Returns:
             Path: Relative path to the written file.
         """
-        key = f"bronze/v1/{provider}/{entity}/{date.strftime('%Y-%m-%d')}/{batch_id}.jsonl.zst"
+        key = f"v1/{provider}/{entity}/{date.strftime('%Y-%m-%d')}/{batch_id}.jsonl.zst"
         record_list = list(records)
         self.bronze[key].extend(record_list)
         self.bronze_metadata[key] = {

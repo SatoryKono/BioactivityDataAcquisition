@@ -324,7 +324,7 @@ class TestBatchingPerformance:
         )
 
         # Find the compressed file
-        bronze_path = tmp_path / "bronze" / "v1" / "chembl" / "activity"
+        bronze_path = tmp_path / "v1" / "chembl" / "activity"
         compressed_files = list(bronze_path.rglob("*.jsonl.zst"))
         assert len(compressed_files) == 1
 
