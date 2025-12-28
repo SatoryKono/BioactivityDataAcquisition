@@ -152,6 +152,54 @@ class CsvExporter:
         sort_keys = [(col, direction) for col in existing_cols]
         return table.sort_by(sort_keys)
 
+    def _deduplicate(self, table: pa.Table, primary_keys: list[str]) -> pa.Table:
+        """Deduplicate table based on primary keys.
+
+        Uses pandas for deduplication as PyArrow lacks direct support.
+        Keeps the last occurrence of duplicates.
+
+        Args:
+            table: PyArrow table to deduplicate
+            primary_keys: List of columns to use as unique key
+
+        Returns:
+            Deduplicated PyArrow table
+        """
+        if not primary_keys:
+            return table
+
+        # Verify all primary keys exist in table
+        missing_keys = [key for key in primary_keys if key not in table.column_names]
+        if missing_keys:
+            logger.warning(
+                "Cannot deduplicate CSV: missing primary keys %s", missing_keys
+            )
+            return table
+
+        try:
+            # Convert to pandas for deduplication
+            # Note: This loads data into memory, which is consistent with _read_and_concat
+            df = table.to_pandas()
+            original_count = len(df)
+            df = df.drop_duplicates(subset=primary_keys, keep="last")
+            dedup_count = len(df)
+
+            if dedup_count < original_count:
+                logger.debug(
+                    "Deduplicated CSV data: removed %d rows",
+                    original_count - dedup_count,
+                )
+
+            # Convert back to PyArrow table
+            # Use original schema to preserve types
+            return pa.Table.from_pandas(df, schema=table.schema)
+        except ImportError:
+            logger.warning("Pandas not available for CSV deduplication")
+            return table
+        except Exception as e:
+            logger.warning("CSV deduplication failed: %s", e)
+            return table
+
     @staticmethod
     def _atomic_csv_write(
         data: pa.Table,
@@ -196,6 +244,7 @@ class CsvExporter:
         data: pa.Table,
         append: bool = True,
         sort_by: list[str] | None = None,
+        primary_keys: list[str] | None = None,
     ) -> Path:
         """Export PyArrow table to CSV file.
 
@@ -204,6 +253,7 @@ class CsvExporter:
             data: PyArrow table to export
             append: If True, append to existing file; if False, overwrite
             sort_by: Override default sort columns for this export
+            primary_keys: Optional list of primary keys for deduplication (upsert simulation)
 
         Returns:
             Path to the written CSV file
@@ -215,13 +265,21 @@ class CsvExporter:
         # Convert list/struct columns to JSON strings for CSV compatibility
         csv_data = self._flatten_for_csv(data)
 
+        loop = asyncio.get_running_loop()
+
         # If append mode and file exists, read and concatenate
         if append and csv_full_path.exists():
-            loop = asyncio.get_running_loop()
             csv_data = await loop.run_in_executor(
                 None,
                 lambda: self._read_and_concat(csv_full_path, csv_data),
             )
+
+            # Deduplicate if primary keys provided (simulate upsert)
+            if primary_keys:
+                csv_data = await loop.run_in_executor(
+                    None,
+                    lambda: self._deduplicate(csv_data, primary_keys),
+                )
 
         # Sort for deterministic output
         sort_columns = sort_by if sort_by is not None else self.sort_by
@@ -235,7 +293,6 @@ class CsvExporter:
         )
 
         # Atomic write in executor to avoid blocking
-        loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
             lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options),

@@ -49,7 +49,7 @@ sink:
         format: delta
         mode: merge
         primary_key: [ "activity_id" ]
-        partition_by: [ "year", "month" ]
+        # partition_by removed: columns 'year' and 'month' do not exist in Activity entity
         classification: public
         forensic_retention: true
         csv_export:
