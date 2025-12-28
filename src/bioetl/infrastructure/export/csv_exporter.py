@@ -209,9 +209,6 @@ class CsvExporter:
             Path to the written CSV file
 
         """
-        # DEBUG LOGGING
-        print(f"DEBUG: CsvExporter.export called for table: {table_name}")
-
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
 
