@@ -179,7 +179,7 @@ class BasePipeline(ABC):  # noqa: B024
     # --- Logic Methods (to be used by Executor) ---
 
     async def transform_bronze_to_silver(
-        self, context: PipelineContext, record: BronzeRecord
+        self, context: PipelineContext, record: BronzeRecord, index: int = 0
     ) -> SilverRecord | None:
         """Transform a raw record from Bronze to Silver format.
 
@@ -189,6 +189,7 @@ class BasePipeline(ABC):  # noqa: B024
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             SilverRecord if transformation successful, None if skipped.
@@ -198,7 +199,7 @@ class BasePipeline(ABC):  # noqa: B024
 
         """
         if self._transformer is not None:
-            return await self._transformer.transform(context, record)
+            return await self._transformer.transform(context, record, index)
         raise NotImplementedError(
             f"{self.__class__.__name__} must either receive a transformer via DI "
             "or override transform_bronze_to_silver()"
