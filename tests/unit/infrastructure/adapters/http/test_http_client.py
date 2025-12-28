@@ -499,7 +499,7 @@ class TestUnifiedHTTPClientRequestMethods:
     @pytest.mark.asyncio
     async def test_post_with_json(self, http_client, mock_circuit_breaker):
         """Test POST request with JSON body."""
-        mock_response = MagicMock()
+        mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 201
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
@@ -515,7 +515,7 @@ class TestUnifiedHTTPClientRequestMethods:
     @pytest.mark.asyncio
     async def test_head_request(self, http_client, mock_circuit_breaker):
         """Test HEAD request."""
-        mock_response = MagicMock()
+        mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
