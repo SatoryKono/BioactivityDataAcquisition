@@ -288,7 +288,7 @@ class TestDeltaWriterVacuum:
     """Tests for DeltaWriter vacuum operation."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_vacuum_returns_deleted_files(self, mock_delta_table, noop_logger):
         """Test vacuum returns list of deleted files."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -309,7 +309,7 @@ class TestDeltaWriterVacuum:
         )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_vacuum_dry_run(self, mock_delta_table, noop_logger):
         """Test vacuum dry run."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -334,7 +334,7 @@ class TestDeltaWriterVacuum:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
@@ -348,7 +348,7 @@ class TestDeltaWriterOptimize:
     """Tests for DeltaWriter optimize operation."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_optimize_returns_metrics(self, mock_delta_table, noop_logger):
         """Test optimize returns compaction metrics."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -369,7 +369,7 @@ class TestDeltaWriterOptimize:
         mock_optimize.compact.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_optimize_with_partition_filters(self, mock_delta_table, noop_logger):
         """Test optimize with partition filters."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -396,7 +396,7 @@ class TestDeltaWriterOptimize:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
@@ -410,7 +410,7 @@ class TestDeltaWriterGetTableInfo:
     """Tests for DeltaWriter get_table_info operation."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_get_table_info_returns_metadata(self, mock_delta_table, noop_logger):
         """Test get_table_info returns table metadata."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -439,7 +439,7 @@ class TestDeltaWriterGetTableInfo:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)
@@ -453,7 +453,7 @@ class TestDeltaWriterTimeTravel:
     """Tests for DeltaWriter time_travel operation."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_time_travel_by_version(self, mock_delta_table, noop_logger):
         """Test time_travel by version number."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -468,7 +468,7 @@ class TestDeltaWriterTimeTravel:
         mock_delta_table.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_time_travel_by_timestamp(self, mock_delta_table, noop_logger):
         """Test time_travel by timestamp."""
         from datetime import datetime
@@ -519,7 +519,7 @@ class TestDeltaWriterTimeTravel:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = DeltaWriter(base_path="s3://bucket/silver", logger=noop_logger, require_lock=False)

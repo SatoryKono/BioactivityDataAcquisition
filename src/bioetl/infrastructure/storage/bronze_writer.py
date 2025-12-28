@@ -31,10 +31,11 @@ import zstandard as zstd
 if TYPE_CHECKING:
     from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
-from bioetl.domain.locking import LockContext, LockNotHeldError
+from bioetl.domain.locking import LockContext
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
+from bioetl.infrastructure.storage.lock_validator import validate_lock_for_write
 
 
 class BronzeWriter:
@@ -163,74 +164,19 @@ class BronzeWriter:
     ) -> None:
         """Validate that lock is held before write operation.
 
+        Delegates to centralized lock_validator module.
         Implements RULES.md §3.3 - Writers MUST verify lock held.
-
-        Args:
-            provider: Provider name (e.g., "chembl").
-            entity: Entity name (e.g., "activity").
-            lock_context: The lock context from application layer.
-            expected_owner_id: Expected owner RunID (fencing token). If provided,
-                              validates that lock_context.owner_id matches to prevent
-                              writes from stale lock holders after lock re-acquisition.
-
-        Raises:
-            LockNotHeldError: If lock is not held, doesn't match,
-                             is expired, or owner_id doesn't match.
         """
-        if not self._require_lock:
-            return  # Lock validation disabled (e.g., for tests)
-
         table_name = f"{provider}_{entity}"
-        expected_key = f"lock:{table_name}"
-
-        if lock_context is None:
-            self.logger.error(
-                "Write attempted without lock",
-                provider=provider,
-                entity=entity,
-                expected_key=expected_key,
-            )
-            raise LockNotHeldError("write_bronze", expected_key)
-
-        if not lock_context.matches_table(table_name):
-            self.logger.error(
-                "Write attempted with wrong lock",
-                provider=provider,
-                entity=entity,
-                expected_key=expected_key,
-                actual_key=lock_context.key,
-            )
-            raise LockNotHeldError(
-                f"write_bronze (got {lock_context.key})",
-                expected_key,
-            )
-
-        if not lock_context.is_valid():
-            self.logger.error(
-                "Write attempted with expired lock",
-                provider=provider,
-                entity=entity,
-                lock_key=lock_context.key,
-            )
-            raise LockNotHeldError(
-                "write_bronze (lock expired)",
-                expected_key,
-            )
-
-        # Fencing token validation: verify owner_id matches expected
-        if expected_owner_id is not None and lock_context.owner_id != expected_owner_id:
-            self.logger.error(
-                "Write attempted with wrong owner_id (fencing token mismatch)",
-                provider=provider,
-                entity=entity,
-                expected_owner_id=str(expected_owner_id),
-                actual_owner_id=str(lock_context.owner_id),
-                lock_key=lock_context.key,
-            )
-            raise LockNotHeldError(
-                f"write_bronze (owner mismatch: {lock_context.owner_id} != {expected_owner_id})",
-                expected_key,
-            )
+        validate_lock_for_write(
+            table_name=table_name,
+            lock_context=lock_context,
+            logger=self.logger,
+            operation="write_bronze",
+            require_lock=self._require_lock,
+            expected_owner_id=expected_owner_id,
+            log_context={"provider": provider, "entity": entity},
+        )
 
     def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
         """Validate that each record is valid JSON bytes (lazy generator).
