@@ -1,20 +1,30 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install test lint run-local docker-up docker-down docker-reset seed-local clean clean-all
+.PHONY: help install install-uv install-pip test lint run-local docker-up docker-down docker-reset seed-local clean clean-all
 .DEFAULT_GOAL := help
 
-# Python
-PYTHON := python
+# Detect uv availability (preferred package manager)
+UV_EXISTS := $(shell command -v uv 2> /dev/null)
+
+# Python configuration
+PYTHON := python3
 VENV := .venv
-VENV_BIN := $(VENV)/Scripts
 ifeq ($(OS),Windows_NT)
+	VENV_BIN := $(VENV)/Scripts
 	VENV_PYTHON := $(VENV_BIN)/python.exe
 	VENV_PIP := $(VENV_BIN)/pip.exe
 else
 	VENV_BIN := $(VENV)/bin
 	VENV_PYTHON := $(VENV_BIN)/python
 	VENV_PIP := $(VENV_BIN)/pip
+endif
+
+# Use uv run if available, otherwise use venv python
+ifdef UV_EXISTS
+	RUN := uv run
+else
+	RUN := $(VENV_PYTHON) -m
 endif
 
 # Colors for output
@@ -27,30 +37,42 @@ help: ## Show this help message
 	@echo "$(BLUE)BioETL - Available Commands:$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 
-install: ## Create venv and install dependencies
+install: ## Install dependencies (uses uv if available, otherwise pip)
+ifdef UV_EXISTS
+	@$(MAKE) install-uv
+else
+	@$(MAKE) install-pip
+endif
+
+install-uv: ## Install dependencies using uv (preferred)
+	@echo "$(BLUE)Installing dependencies with uv...$(NC)"
+	uv sync --extra dev --extra tracing
+	@echo "$(GREEN)Installation complete! Run commands with: uv run <command>$(NC)"
+
+install-pip: ## Install dependencies using pip (fallback)
 	@echo "$(BLUE)Creating virtual environment...$(NC)"
 	$(PYTHON) -m venv $(VENV)
 	@echo "$(BLUE)Upgrading pip...$(NC)"
 	$(VENV_PIP) install --upgrade pip setuptools wheel
 	@echo "$(BLUE)Installing dependencies...$(NC)"
-	$(VENV_PIP) install -e ".[dev]"
-	@echo "$(GREEN)Installation complete! Activate venv with: $(VENV_BIN)/activate$(NC)"
+	$(VENV_PIP) install -e ".[dev,tracing]"
+	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
 test: ## Run unit and integration tests (serial, with coverage)
 	@echo "$(BLUE)Running tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85
+	$(RUN) pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85
 
 test-fast: ## Run tests in parallel (faster, no benchmarks)
 	@echo "$(BLUE)Running tests (parallel mode)...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v -n auto --dist loadscope --ignore=tests/benchmarks --cov=src/bioetl --cov-report=term-missing
+	$(RUN) pytest tests/ -v -n auto --dist loadscope --ignore=tests/benchmarks --cov=src/bioetl --cov-report=term-missing
 
 test-unit: ## Run only unit tests (fast, no I/O)
 	@echo "$(BLUE)Running unit tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v -m unit -n auto --dist loadscope --ignore=tests/benchmarks
+	$(RUN) pytest tests/ -v -m unit -n auto --dist loadscope --ignore=tests/benchmarks
 
 test-integration: ## Run integration tests
 	@echo "$(BLUE)Running integration tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v -m integration --vcr-record=none
+	$(RUN) pytest tests/ -v -m integration --vcr-record=none
 
 test-e2e: ## Run E2E tests with Docker (requires docker-compose)
 	@echo "$(BLUE)Starting Docker services...$(NC)"
@@ -58,48 +80,48 @@ test-e2e: ## Run E2E tests with Docker (requires docker-compose)
 	@echo "$(BLUE)Waiting for services to be ready...$(NC)"
 	@sleep 5
 	@echo "$(BLUE)Running E2E tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/e2e/ -v -m e2e --tb=short || (docker compose -f docker-compose.test.yml down && exit 1)
+	$(RUN) pytest tests/e2e/ -v -m e2e --tb=short || (docker compose -f docker-compose.test.yml down && exit 1)
 	@echo "$(YELLOW)Stopping Docker services...$(NC)"
 	docker compose -f docker-compose.test.yml down
 	@echo "$(GREEN)E2E tests complete!$(NC)"
 
 test-e2e-local: ## Run E2E tests (assumes Docker services already running)
 	@echo "$(BLUE)Running E2E tests (using existing services)...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/e2e/ -v -m e2e --tb=short
+	$(RUN) pytest tests/e2e/ -v -m e2e --tb=short
 
 test-watch: ## Run tests in watch mode
-	$(VENV_PYTHON) -m pytest tests/ --looponfail
+	$(RUN) pytest tests/ --looponfail
 
 test-failed: ## Run only the tests that failed in the last run
 	@echo "$(BLUE)Running failed tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v --lf
+	$(RUN) pytest tests/ -v --lf
 
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/test_architecture_enforcement.py -v --tb=short
+	$(RUN) pytest tests/test_architecture_enforcement.py -v --tb=short
 	@echo "$(GREEN)Architecture tests passed!$(NC)"
 
 test-architecture-strict: ## Run architecture tests with import-linter
 	@echo "$(BLUE)Running strict architecture checks...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/test_architecture_enforcement.py -v
+	$(RUN) pytest tests/test_architecture_enforcement.py -v
 	@echo "$(BLUE)Running import-linter...$(NC)"
-	$(VENV_PYTHON) -m importlinter
+	$(RUN) importlinter
 	@echo "$(GREEN)All architecture checks passed!$(NC)"
 
 lint: ## Run ruff and mypy
 	@echo "$(BLUE)Running ruff...$(NC)"
-	$(VENV_PYTHON) -m ruff check src/ tests/
+	$(RUN) ruff check src/ tests/
 	@echo "$(BLUE)Running mypy...$(NC)"
-	$(VENV_PYTHON) -m mypy src/bioetl
+	$(RUN) mypy src/bioetl
 
 lint-fix: ## Auto-fix linting issues
 	@echo "$(BLUE)Auto-fixing with ruff...$(NC)"
-	$(VENV_PYTHON) -m ruff check --fix src/ tests/
-	$(VENV_PYTHON) -m ruff format src/ tests/
+	$(RUN) ruff check --fix src/ tests/
+	$(RUN) ruff format src/ tests/
 
 security: ## Run security audit (pip-audit)
 	@echo "$(BLUE)Running security audit...$(NC)"
-	$(VENV_PIP) audit --strict
+	$(RUN) pip-audit --strict
 
 docker-up: ## Start Docker Compose services (Postgres, Redis, MinIO)
 	@echo "$(BLUE)Starting Docker services...$(NC)"
@@ -120,12 +142,12 @@ docker-logs: ## Show logs from Docker services
 
 seed-local: ## Load sample fixtures into local DB
 	@echo "$(BLUE)Seeding local database...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.seed --env local
+	$(RUN) bioetl.interfaces.cli.seed --env local
 	@echo "$(GREEN)Database seeded!$(NC)"
 
 run-local: ## Run sample pipeline on local fixtures
 	@echo "$(BLUE)Running sample pipeline...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.runner --pipeline sample --env local
+	$(RUN) bioetl.interfaces.cli.runner --pipeline sample --env local
 
 clean: ## Clean up generated files (Python artifacts, caches, build outputs)
 	@echo "$(YELLOW)Cleaning Python artifacts...$(NC)"
@@ -149,38 +171,46 @@ clean-all: clean ## Clean all (artifacts + logs + temp files)
 # Quarantine management (RULES.md §2.6)
 quarantine-inspect: ## Inspect quarantine errors (PIPELINE=...)
 	@echo "$(BLUE)Inspecting quarantine for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.quarantine inspect --pipeline $(PIPELINE)
+	$(RUN) bioetl.interfaces.cli.quarantine inspect --pipeline $(PIPELINE)
 
 quarantine-replay: ## Replay quarantine records (PIPELINE=...)
 	@echo "$(BLUE)Replaying quarantine for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.quarantine replay --pipeline $(PIPELINE)
+	$(RUN) bioetl.interfaces.cli.quarantine replay --pipeline $(PIPELINE)
 
 quarantine-purge: ## Purge quarantine (PIPELINE=...)
 	@echo "$(YELLOW)Purging quarantine for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.quarantine purge --pipeline $(PIPELINE)
+	$(RUN) bioetl.interfaces.cli.quarantine purge --pipeline $(PIPELINE)
 
 # Lock management (RULES.md §3.3)
 release-lock: ## Release stuck lock (PIPELINE=...)
 	@echo "$(YELLOW)Releasing lock for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.lock release --pipeline $(PIPELINE)
+	$(RUN) bioetl.interfaces.cli.lock release --pipeline $(PIPELINE)
 
 # Disaster Recovery (RULES.md §5.5)
 dr-restore: ## Restore from backup (SCENARIO=..., DATE=...)
 	@echo "$(BLUE)Running DR restore: scenario=$(SCENARIO), date=$(DATE)$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.dr restore --scenario $(SCENARIO) --date $(DATE)
+	$(RUN) bioetl.interfaces.cli.dr restore --scenario $(SCENARIO) --date $(DATE)
 
 # Rollback (RULES.md §7.2)
 rollback: ## Rollback to version (VERSION=...)
 	@echo "$(YELLOW)Rolling back to $(VERSION)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.interfaces.cli.rollback --version $(VERSION)
+	$(RUN) bioetl.interfaces.cli.rollback --version $(VERSION)
 
 # Development helpers
 dev-shell: ## Open Python shell with project context
+ifdef UV_EXISTS
+	uv run python -i -c "from bioetl import *; print('BioETL dev shell ready!')"
+else
 	$(VENV_PYTHON) -i -c "from bioetl import *; print('BioETL dev shell ready!')"
+endif
 
 profile: ## Run pipeline with py-spy (PIPELINE=...)
 	@echo "$(BLUE)Profiling pipeline $(PIPELINE)...$(NC)"
+ifdef UV_EXISTS
+	uv run py-spy record -o profile.svg -- uv run bioetl run --pipeline $(PIPELINE)
+else
 	$(VENV_BIN)/py-spy record -o profile.svg -- $(VENV_PYTHON) -m bioetl.interfaces.cli run --pipeline $(PIPELINE)
+endif
 
 watch-logs: ## Watch structured logs (tail -f)
 	tail -f logs/bioetl.log | jq '.'
@@ -188,60 +218,60 @@ watch-logs: ## Watch structured logs (tail -f)
 # Architecture and Quality Checks
 arch-test: ## Run architecture tests (layer dependencies, determinism)
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/architecture/ -v --tb=short
+	$(RUN) pytest tests/architecture/ -v --tb=short
 	@echo "$(GREEN)Architecture tests passed!$(NC)"
 
 arch-lint: ## Run import-linter contracts
 	@echo "$(BLUE)Checking import contracts...$(NC)"
-	$(VENV_PYTHON) -m importlinter --config .importlinter
+	$(RUN) importlinter --config .importlinter
 
 arch-all: arch-lint arch-test ## Run all architecture checks (lint + tests)
 	@echo "$(GREEN)All architecture checks passed!$(NC)"
 
 complexity: ## Check cyclomatic complexity (max CC=10)
 	@echo "$(BLUE)Checking code complexity...$(NC)"
-	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules B --max-average A --exclude "tests/*" src/
+	$(RUN) xenon --max-absolute B --max-modules B --max-average A --exclude "tests/*" src/
 	@echo "$(BLUE)Checking domain layer complexity (max CC=5)...$(NC)"
-	$(VENV_PYTHON) -m xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain/
+	$(RUN) xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain/
 	@echo "$(BLUE)Checking adapters complexity (max CC=5)...$(NC)"
-	$(VENV_PYTHON) -m xenon --max-absolute A --max-modules A --max-average A src/bioetl/infrastructure/adapters/
+	$(RUN) xenon --max-absolute A --max-modules A --max-average A src/bioetl/infrastructure/adapters/
 	@echo "$(BLUE)Checking factories complexity (strict A/A/B)...$(NC)"
-	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules A --max-average A src/bioetl/interfaces/factories/
+	$(RUN) xenon --max-absolute B --max-modules A --max-average A src/bioetl/interfaces/factories/
 
 check-duplication: ## Check for code duplication
 	@echo "$(BLUE)Checking code duplication...$(NC)"
-	$(VENV_PYTHON) -m pylint --disable=all --enable=duplicate-code src/bioetl/infrastructure/adapters
+	$(RUN) pylint --disable=all --enable=duplicate-code src/bioetl/infrastructure/adapters
 
 complexity-report: ## Generate detailed complexity report
 	@echo "$(BLUE)Generating complexity report...$(NC)"
 	mkdir -p reports
-	$(VENV_PYTHON) -m radon cc src/ -a -s > reports/complexity.txt
-	$(VENV_PYTHON) -m radon mi src/ -s >> reports/complexity.txt
+	$(RUN) radon cc src/ -a -s > reports/complexity.txt
+	$(RUN) radon mi src/ -s >> reports/complexity.txt
 	@echo "$(GREEN)Report saved to reports/complexity.txt$(NC)"
 
 bench: ## Run performance benchmarks
 	@echo "$(BLUE)Running benchmarks...$(NC)"
 	@mkdir -p reports
-	$(VENV_PYTHON) -m pytest benchmarks/ -v --tb=short
+	$(RUN) pytest benchmarks/ -v --tb=short
 	@echo "$(GREEN)Benchmarks complete!$(NC)"
 
 bench-json: ## Run benchmarks with JSON output
 	@echo "$(BLUE)Running benchmarks with JSON output...$(NC)"
 	@mkdir -p reports
-	$(VENV_PYTHON) -m pytest benchmarks/ -v --benchmark-only --benchmark-json=reports/benchmark.json 2>/dev/null || \
-		$(VENV_PYTHON) -m pytest benchmarks/ -v --tb=short
+	$(RUN) pytest benchmarks/ -v --benchmark-only --benchmark-json=reports/benchmark.json 2>/dev/null || \
+		$(RUN) pytest benchmarks/ -v --tb=short
 	@echo "$(GREEN)Benchmarks complete! Results in reports/benchmark.json$(NC)"
 
 mutation-test: ## Run mutation testing (slow, domain layer only)
 	@echo "$(BLUE)Running mutation testing on domain layer...$(NC)"
-	$(VENV_PYTHON) -m mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/
+	$(RUN) mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/
 
 mutation-report: ## Show mutation testing results
-	$(VENV_PYTHON) -m mutmut results
+	$(RUN) mutmut results
 
 typecheck: ## Run strict type checking
 	@echo "$(BLUE)Running mypy (strict)...$(NC)"
-	$(VENV_PYTHON) -m mypy --config-file pyproject.toml src/bioetl
+	$(RUN) mypy --config-file pyproject.toml src/bioetl
 
 quality: lint arch-lint complexity typecheck ## Run all quality checks
 	@echo "$(GREEN)All quality checks passed!$(NC)"
@@ -257,26 +287,34 @@ ci-test: test arch-all ## Run all tests for CI (includes architecture checks)
 ci-quality: quality ## Run full quality gate
 
 ci-build: ## Build distribution packages
-	$(VENV_PYTHON) -m build
+	$(RUN) build
 
 # Documentation
 docs-serve: ## Serve documentation locally
-	$(VENV_PYTHON) -m mkdocs serve
+	$(RUN) mkdocs serve
 
 docs-build: ## Build documentation
-	$(VENV_PYTHON) -m mkdocs build
+	$(RUN) mkdocs build
 
 contracts-check: ## Generate and check data contracts
 	@echo "$(BLUE)Generating data contracts...$(NC)"
+ifdef UV_EXISTS
+	uv run python scripts/generate_contracts.py
+else
 	$(VENV_PYTHON) scripts/generate_contracts.py
+endif
 	@echo "$(GREEN)Contracts generated!$(NC)"
 
 # Version management
 version: ## Show current version
+ifdef UV_EXISTS
+	@uv run python -c "import bioetl; print(f'BioETL v{bioetl.__version__}')"
+else
 	@$(VENV_PYTHON) -c "import bioetl; print(f'BioETL v{bioetl.__version__}')"
+endif
 
 bump-version: ## Bump version (TYPE=major|minor|patch)
-	$(VENV_PYTHON) -m bumpversion $(TYPE)
+	$(RUN) bumpversion $(TYPE)
 
 # Vendoring mermaid assets
 vendor-mermaid: ## Download mermaid assets into assets/ (PowerShell on Windows)
