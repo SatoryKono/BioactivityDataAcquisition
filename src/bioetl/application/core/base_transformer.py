@@ -108,6 +108,7 @@ class BaseTransformer(ABC):
         self,
         context: PipelineContext,
         record: BronzeRecord,
+        index: int,
     ) -> SilverRecord | None:
         """Transform Bronze record to Silver format (Template Method).
 
@@ -123,6 +124,7 @@ class BaseTransformer(ABC):
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             SilverRecord if transformation successful, None if record should be skipped.
@@ -139,12 +141,13 @@ class BaseTransformer(ABC):
                 "bioetl.provider": self.provider,
                 "bioetl.entity_type": self.entity_type,
                 "bioetl.run_id": str(context.run_id),
+                "bioetl.record_index": index,
             },
         )
         span.__enter__()
 
         try:
-            result = await self._transform_impl(context, record)
+            result = await self._transform_impl(context, record, index)
             return result
         except TransformationError as e:
             error_type = "transformation_error"
@@ -201,6 +204,7 @@ class BaseTransformer(ABC):
         self,
         context: PipelineContext,
         record: BronzeRecord,
+        index: int,
     ) -> SilverRecord | None:
         """Implement entity-specific transformation logic.
 
@@ -214,6 +218,7 @@ class BaseTransformer(ABC):
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             SilverRecord if transformation successful, None if record should be skipped.
@@ -451,6 +456,7 @@ class BaseTransformer(ABC):
         context: PipelineContext,
         entity_id: str,
         content_hash: str,
+        index: int,
         **business_data: Any,
     ) -> T:
         """Create a domain entity with lineage metadata.
@@ -463,6 +469,7 @@ class BaseTransformer(ABC):
             context: Pipeline context with run_id, run_type.
             entity_id: Unique entity identifier.
             content_hash: Content hash for versioning.
+            index: Sequential index of the record in the pipeline run.
             **business_data: Entity-specific business data.
 
         Returns:
@@ -477,6 +484,7 @@ class BaseTransformer(ABC):
             ...     context,
             ...     entity_id="chembl:activity:12345",
             ...     content_hash="abc123...",
+            ...     index=0,
             ...     activity_id="12345",
             ...     molecule_chembl_id="CHEMBL25",
             ... )
@@ -489,6 +497,7 @@ class BaseTransformer(ABC):
             run_type=context.run_type,
             source_batch_id=None,
             ingestion_ts=context.started_at,
+            _index=index,
             **business_data,
         )
 

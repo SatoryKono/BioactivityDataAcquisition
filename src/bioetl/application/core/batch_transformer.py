@@ -121,13 +121,14 @@ class BatchTransformer:
         gold_records: list[dict[str, Any]] = []
         records_quarantined = 0
 
-        for raw_record in records:
+        for index, raw_record in enumerate(records):
             record_context = self._context.bind_logger(
                 batch_id=str(batch_id),
                 entity_id=raw_record.get("activity_id"),
             )
             try:
-                transformed = await self._transform(record_context, raw_record)
+                # Pass index to transform callback
+                transformed = await self._transform(record_context, raw_record, index)
                 if transformed:
                     silver_records.append(transformed)
                     if self._gold_filter(record_context, transformed):
@@ -204,7 +205,7 @@ class BatchTransformer:
             )
 
     async def transform_single(
-        self, raw_record: dict[str, Any], batch_id: BatchID
+        self, raw_record: dict[str, Any], batch_id: BatchID, index: int = 0
     ) -> TransformedRecord:
         """Transform a single record (for streaming mode).
 
@@ -214,6 +215,7 @@ class BatchTransformer:
         Args:
             raw_record: Single Bronze record to transform.
             batch_id: Identifier for the current batch.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             TransformedRecord with silver/gold records or quarantine status.
@@ -225,7 +227,7 @@ class BatchTransformer:
         )
 
         try:
-            transformed = await self._transform(record_context, raw_record)
+            transformed = await self._transform(record_context, raw_record, index)
             if transformed:
                 gold_record = None
                 if self._gold_filter(record_context, transformed):
@@ -267,6 +269,7 @@ class BatchTransformer:
         self,
         records: list[dict[str, Any]],
         batch_id: BatchID,
+        start_index: int = 0,
     ) -> TransformResult:
         """Transform records using streaming mode with memory efficiency.
 
@@ -279,6 +282,7 @@ class BatchTransformer:
         Args:
             records: Raw Bronze records to transform.
             batch_id: Identifier for the current batch.
+            start_index: Starting index for the batch.
 
         Returns:
             TransformResult with silver records, gold records, and quarantine count.
@@ -291,8 +295,8 @@ class BatchTransformer:
         gold_records: list[dict[str, Any]] = []
         records_quarantined = 0
 
-        for raw_record in records:
-            result = await self.transform_single(raw_record, batch_id)
+        for i, raw_record in enumerate(records):
+            result = await self.transform_single(raw_record, batch_id, start_index + i)
 
             if result.is_quarantined:
                 records_quarantined += 1
@@ -345,6 +349,7 @@ class StreamingBatchProcessor:
         records: list[dict[str, Any]],
         batch_id: BatchID,
         chunk_size: int = 100,
+        start_index: int = 0,
     ) -> AsyncIterator[TransformResult]:
         """Process records in memory-efficient chunks.
 
@@ -355,6 +360,7 @@ class StreamingBatchProcessor:
             records: All records to process.
             batch_id: Batch identifier.
             chunk_size: Initial chunk size (may be reduced under memory pressure).
+            start_index: Starting index for the entire batch.
 
         Yields:
             TransformResult for each processed chunk.
@@ -372,7 +378,7 @@ class StreamingBatchProcessor:
                 )
 
             chunk = records[i : i + current_chunk_size]
-            result = await self._transformer.transform_stream(chunk, batch_id)
+            result = await self._transformer.transform_stream(chunk, batch_id, start_index + i)
 
             yield result
 

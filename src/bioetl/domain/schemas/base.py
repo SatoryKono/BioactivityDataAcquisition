@@ -41,6 +41,9 @@ class ETLRecordSchema(pa.DataFrameModel):
     _dq_warn: Series[bool] = pa.Field(
         nullable=False, default=False, description="Flag for data quality warnings."
     )
+    _index: Series[int] = pa.Field(
+        nullable=False, ge=0, description="Sequential index of the record in the pipeline run."
+    )
 
     class Config:
         """Pandera configuration."""
