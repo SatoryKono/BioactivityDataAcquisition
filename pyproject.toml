@@ -140,7 +140,7 @@ exclude_lines = [
     "raise NotImplementedError",
     "@abstractmethod",
 ]
-fail_under = 80
+fail_under = 85
 show_missing = true
 
 # ============ MYPY ============
@@ -317,6 +317,7 @@ skips = ["*/domain/*"]
 [dependency-groups]
 dev = [
     # Core testing
+    "pyyaml>=6.0",
     "pytest>=8.0",
     "pytest-cov>=4.0",
     "pytest-asyncio>=0.23",

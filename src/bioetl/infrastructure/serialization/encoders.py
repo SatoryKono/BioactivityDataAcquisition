@@ -31,14 +31,15 @@ from typing import Any
 from bioetl.domain.ports import JsonEncoderPort
 
 # Optional orjson import
-_orjson: types.ModuleType | None
 try:
-    import orjson as _orjson
+    import orjson as _orjson_module
 
     ORJSON_AVAILABLE = True
 except ImportError:
-    _orjson = None
+    _orjson_module = None
     ORJSON_AVAILABLE = False
+
+_orjson: types.ModuleType | None = _orjson_module
 
 
 class StdLibJsonEncoder:

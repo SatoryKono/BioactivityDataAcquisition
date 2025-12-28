@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal, Protocol, runtime_checkable
 
+from bioetl.domain.locking import LockContext
+
 from bioetl.domain.types import (
     ArrowSchema,
     BatchID,
@@ -39,6 +41,7 @@ class StoragePort(Protocol):
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
+        lock_context: LockContext | None = None,
     ) -> Path:
         """Write raw records to the Bronze layer.
 
@@ -67,6 +70,7 @@ class StoragePort(Protocol):
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        lock_context: LockContext | None = None,
     ) -> None:
         """Write transformed records to the Silver layer.
 
@@ -97,6 +101,7 @@ class StoragePort(Protocol):
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        lock_context: LockContext | None = None,
     ) -> None:
         """Write aggregated or validated records to the Gold layer.
 
