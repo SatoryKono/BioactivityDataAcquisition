@@ -153,12 +153,15 @@ class TestPubChemAdapter:
         )
 
         # Mock compound object
+        # Uses connectivity_smiles/smiles (pubchempy 1.0.5 replacements)
         class MockCompound:
             cid = 2244
             molecular_formula = "C9H8O4"
             molecular_weight = 180.16
-            canonical_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-            isomeric_smiles = None
+            # connectivity_smiles replaces deprecated canonical_smiles
+            connectivity_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
+            # smiles replaces deprecated isomeric_smiles
+            smiles = None
             inchi = (
                 "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
             )
