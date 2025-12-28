@@ -37,7 +37,7 @@ from __future__ import annotations
 import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from uuid import uuid4
 
 import polars as pl
@@ -318,7 +318,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
-            df = pl.from_arrow(dt.to_pyarrow_table())
+            df = cast(pl.DataFrame, pl.from_arrow(dt.to_pyarrow_table()))
 
             # Filter by pipeline
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -359,7 +359,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
-            df = pl.from_arrow(dt.to_pyarrow_table())
+            df = cast(pl.DataFrame, pl.from_arrow(dt.to_pyarrow_table()))
 
             # Filter by pipeline
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -398,7 +398,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.transformation_table_path))
-            df = pl.from_arrow(dt.to_pyarrow_table())
+            df = cast(pl.DataFrame, pl.from_arrow(dt.to_pyarrow_table()))
 
             # Filter by pipeline and entity_id
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -432,7 +432,7 @@ class LineageTracker:
         """
         try:
             dt = DeltaTable(str(self.batch_table_path))
-            df = pl.from_arrow(dt.to_pyarrow_table())
+            df = cast(pl.DataFrame, pl.from_arrow(dt.to_pyarrow_table()))
 
             # Filter by pipeline and layer
             df = df.filter(pl.col("pipeline_name") == self.pipeline_name)
@@ -450,13 +450,20 @@ class LineageTracker:
                 }
 
             total_batches = df.height
-            total_records = df["record_count"].sum()
-            avg_batch_size = df["record_count"].mean()
+            record_count_series = df.get_column("record_count")
+            total_records = record_count_series.sum()
+            avg_batch_size = record_count_series.mean()
+
+            # Cast to numeric types (Polars returns scalar values for aggregations)
+            total_records_int = int(total_records) if total_records is not None else 0
+            avg_batch_float = (
+                float(cast(float, avg_batch_size)) if avg_batch_size is not None else 0.0
+            )
 
             return {
                 "total_batches": total_batches,
-                "total_records": int(total_records or 0),
-                "avg_batch_size": float(avg_batch_size) if avg_batch_size is not None else 0.0,
+                "total_records": total_records_int,
+                "avg_batch_size": avg_batch_float,
             }
 
         except Exception as e:

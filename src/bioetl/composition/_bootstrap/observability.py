@@ -48,7 +48,7 @@ def validate_observability_preflight(
     tracer: TracingPort,
     metrics: MetricsPort,
     environment: str,
-    logger: structlog.BoundLogger,
+    logger: structlog.stdlib.BoundLogger,
 ) -> None:
     """Validate observability components for production readiness.
 
@@ -91,7 +91,7 @@ def validate_observability_preflight(
 
 def bootstrap_logger(
     pipeline: str, run_id: UUID, log_level: str = "INFO"
-) -> structlog.BoundLogger:
+) -> structlog.stdlib.BoundLogger:
     """Create a logger for the application layer (e.g., CLI)."""
     return create_infra_logger(
         pipeline=pipeline, run_id=run_id, log_level=log_level, json_format=True
