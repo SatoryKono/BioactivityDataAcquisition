@@ -48,7 +48,7 @@ class TestFileSizeLimits:
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly
-        "services_factory.py": 450,  # 422 LOC - merged base_services + services_builder + runner_services
+        "services_factory.py": 470,  # 460 LOC - merged base_services + services_builder + runner_services + LockContextHolder
         # Infrastructure layer exemptions
         "delta_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
