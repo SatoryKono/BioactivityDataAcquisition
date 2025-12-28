@@ -19,7 +19,7 @@ class TransformCallback(Protocol):
     """Bronze to Silver transformation callback."""
 
     def __call__(
-        self, context: PipelineContext, record: dict[str, Any]
+        self, context: PipelineContext, record: dict[str, Any], index: int
     ) -> Awaitable[dict[str, Any] | None]:
         """Execute transformation."""
         ...
@@ -57,7 +57,7 @@ class TransformerPort(Protocol):
     Example:
         >>> class MyTransformer:
         ...     async def transform(
-        ...         self, context: PipelineContext, record: BronzeRecord
+        ...         self, context: PipelineContext, record: BronzeRecord, index: int
         ...     ) -> SilverRecord | None:
         ...         # Transform logic here
         ...         return silver_record
@@ -68,12 +68,14 @@ class TransformerPort(Protocol):
         self,
         context: PipelineContext,
         record: BronzeRecord,
+        index: int,
     ) -> SilverRecord | None:
         """Transform a Bronze record to Silver format.
 
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from data source.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             SilverRecord if transformation successful, None if record should be skipped.
