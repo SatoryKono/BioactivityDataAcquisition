@@ -9,7 +9,6 @@ to improve maintainability and reduce file size.
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -20,11 +19,6 @@ from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 from .storage_adapter import StorageAdapter
-
-
-def _is_test_mode() -> bool:
-    """Check if running in test mode (disables lock requirement)."""
-    return os.environ.get("BIOETL_TEST_MODE", "").lower() in ("true", "1", "yes")
 
 if TYPE_CHECKING:
     from typing import Any
@@ -125,9 +119,6 @@ class StorageFactory:
             logger, json_path, silver_csv_exporter, gold_csv_exporter
         )
         save_json = bronze_config.save_json if bronze_config else False
-
-        # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
-        require_lock = not _is_test_mode()
 
         adapter = StorageAdapter(
             bronze_writer=BronzeWriter(
