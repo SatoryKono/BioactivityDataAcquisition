@@ -16,8 +16,7 @@ Unified HTTP client with rate limiting, circuit breaker, and observability.
             - __init__
             - get
             - post
-            - health_check
-            - aclose
+            - head
 
 ### TokenBucket
 

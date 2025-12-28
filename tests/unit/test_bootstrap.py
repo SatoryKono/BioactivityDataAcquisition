@@ -214,13 +214,20 @@ class TestBootstrapPipeline:
 
     @patch("bioetl.composition.bootstrap.get_settings")
     @patch("bioetl.composition.bootstrap.get_default_registry")
+    @patch("bioetl.composition.bootstrap.bootstrap_observability")
     def test_bootstrap_pipeline_chembl_activity(
-        self, mock_get_registry, mock_get_settings, mock_settings, mock_logger
+        self,
+        mock_observability,
+        mock_get_registry,
+        mock_get_settings,
+        mock_settings,
+        mock_logger,
     ):
         """Test bootstrap_pipeline creates chembl_activity pipeline."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
 
         mock_get_settings.return_value = mock_settings
+        mock_observability.return_value = MagicMock()  # Mock observability result
         mock_pipeline = MagicMock()
         mock_factory = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
