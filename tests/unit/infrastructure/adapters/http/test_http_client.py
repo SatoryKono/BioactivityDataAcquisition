@@ -664,7 +664,7 @@ class TestUnifiedHTTPClientObservability:
         self, http_client_with_observability, mock_circuit_breaker, mock_metrics
     ):
         """Test successful request records duration histogram."""
-        mock_response = MagicMock()
+        mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
