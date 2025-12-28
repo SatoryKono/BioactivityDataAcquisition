@@ -265,7 +265,7 @@ class TestRecordProcessorProcessBatch:
     ):
         """Test that transform errors result in quarantine."""
 
-        async def failing_transform(ctx, record):
+        async def failing_transform(ctx, record, index):
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -312,7 +312,7 @@ class TestRecordProcessorProcessBatch:
         """Test that non-data-quality errors are re-raised."""
         from bioetl.domain.exceptions import LockLostError
 
-        async def failing_transform(ctx, record):
+        async def failing_transform(ctx, record, index):
             raise LockLostError("resource_key", "test_run_id")
 
         config = RecordProcessorConfig(
