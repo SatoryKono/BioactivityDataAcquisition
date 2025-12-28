@@ -464,6 +464,35 @@ class LegacyAdapter(BaseSyncAdapter):
     - **Запуск**: `pytest tests/e2e/ -v -m e2e`.
 - **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов.
 
+#### 4.2.1. Тестовые Зависимости и Установка
+
+Проект использует optional dependency группы в `pyproject.toml`:
+
+| Группа | Установка | Назначение |
+|--------|-----------|------------|
+| `tests` | `pip install .[tests]` | Минимальный набор для запуска тестов |
+| `dev` | `pip install .[dev]` | Полный набор для разработки (включает tests + linting + security) |
+| `tracing` | `pip install .[tracing]` | OpenTelemetry для production tracing |
+| `docs` | `pip install .[docs]` | MkDocs для генерации документации |
+
+**Группа `tests` включает:**
+- `pytest>=8.0`, `pytest-cov>=4.0`, `pytest-asyncio>=0.23`, `pytest-xdist>=3.5` — основа тестирования
+- `respx>=0.21` — HTTP-мокирование для тестов адаптеров
+- `hypothesis>=6.100` — property-based тестирование
+- `vcrpy>=6.0`, `pytest-vcr>=1.0` — VCR-кассеты для integration-тестов
+- `syrupy>=4.0` — snapshot-тестирование
+
+**Рекомендуемый способ установки:**
+```bash
+# Для разработки (полный набор)
+make install  # Эквивалент: pip install -e ".[dev]"
+
+# Только для запуска тестов (CI/lightweight)
+pip install -e ".[tests]"
+```
+
+**ВАЖНО**: При использовании `pip install .[tests]` убедитесь, что все тестовые зависимости доступны. Если тесты падают с `ModuleNotFoundError`, проверьте версию `pyproject.toml` и выполните `pip install -e ".[tests]"` заново.
+
 ### 4.3. Детерминизм и Воспроизводимость
 См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md).
 
