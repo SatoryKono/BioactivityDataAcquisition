@@ -15,11 +15,13 @@ from bioetl.infrastructure.observability.metrics import (
     CIRCUIT_BREAKER_STATE,
     CIRCUIT_BREAKER_SUCCESS_TOTAL,
     CIRCUIT_BREAKER_TRIPS_TOTAL,
+    DATA_FRESHNESS_SECONDS,
     DQ_ANOMALY_DETECTED,
     DQ_BASELINE_SAMPLES,
     DQ_BASELINE_UPDATED,
     DQ_CHECK_DURATION_MS,
     DQ_RECORDS_QUARANTINED_TOTAL,
+    DQ_VALIDATION_SCORE,
     ERRORS_TOTAL,
     FILTER_IDS_DUPLICATES_TOTAL,
     FILTER_IDS_LOADED_TOTAL,
@@ -58,6 +60,8 @@ COUNTERS = {
 GAUGES = {
     "circuit_breaker_state": CIRCUIT_BREAKER_STATE,
     "dq_baseline_samples": DQ_BASELINE_SAMPLES,
+    "dq_validation_score": DQ_VALIDATION_SCORE,
+    "data_freshness_seconds": DATA_FRESHNESS_SECONDS,
 }
 
 
