@@ -84,6 +84,7 @@ class RecordProcessor:
             error_classifier=error_classifier,
             batch_metrics=self._batch_metrics,
             tracer=tracer,
+            lock_context_provider=lock_context_provider,
         )
 
     async def process_batch(
