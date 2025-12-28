@@ -46,9 +46,9 @@ def mock_config_minimal():
     """Minimal pipeline config without export options."""
     config = MagicMock()
     config.sink = {
-        "bronze": MagicMock(save_json=False),
-        "silver": MagicMock(csv_export=MagicMock(enabled=False)),
-        "gold": MagicMock(csv_export=MagicMock(enabled=False)),
+        "bronze": MagicMock(save_json=False, path=None),
+        "silver": MagicMock(csv_export=MagicMock(enabled=False), path=None),
+        "gold": MagicMock(csv_export=MagicMock(enabled=False), path=None),
     }
     return config
 
@@ -60,6 +60,7 @@ def mock_config_with_exports():
 
     bronze_config = MagicMock()
     bronze_config.save_json = True
+    bronze_config.path = None  # Use settings fallback
 
     silver_csv = MagicMock()
     silver_csv.enabled = True
@@ -70,6 +71,7 @@ def mock_config_with_exports():
 
     silver_config = MagicMock()
     silver_config.csv_export = silver_csv
+    silver_config.path = None  # Use settings fallback
 
     gold_csv = MagicMock()
     gold_csv.enabled = True
@@ -80,6 +82,7 @@ def mock_config_with_exports():
 
     gold_config = MagicMock()
     gold_config.csv_export = gold_csv
+    gold_config.path = None  # Use settings fallback
 
     config.sink = {
         "bronze": bronze_config,
@@ -162,6 +165,48 @@ class TestStorageFactoryLocal:
             assert result.silver_path == mock_settings.silver_path
             assert result.gold_path == mock_settings.gold_path
             assert result.checkpoints_path == mock_settings.checkpoint_path
+
+    def test_local_run_uses_yaml_paths_when_specified(
+        self,
+        mock_settings,
+        mock_logger,
+        mock_metrics,
+    ):
+        """Test that YAML paths override settings paths when specified."""
+        config = MagicMock()
+        config.sink = {
+            "bronze": MagicMock(save_json=False, path="custom/bronze"),
+            "silver": MagicMock(csv_export=MagicMock(enabled=False), path="custom/silver"),
+            "gold": MagicMock(csv_export=MagicMock(enabled=False), path="custom/gold"),
+        }
+        mock_settings.test_mode = False
+
+        with (
+            patch("bioetl.composition.factories.storage_factory.BronzeWriter") as mock_bronze,
+            patch("bioetl.composition.factories.storage_factory.DeltaWriter") as mock_delta,
+            patch("bioetl.composition.factories.storage_factory.GoldWriter") as mock_gold,
+        ):
+            result = StorageFactory.create(
+                settings=mock_settings,
+                config=config,
+                logger=mock_logger,
+                metrics=mock_metrics,
+            )
+
+            # Verify YAML paths are used
+            assert result.bronze_path == Path("custom/bronze")
+            assert result.silver_path == Path("custom/silver")
+            assert result.gold_path == Path("custom/gold")
+
+            # Verify writers received YAML paths
+            bronze_call = mock_bronze.call_args[1]
+            assert bronze_call["base_path"] == Path("custom/bronze")
+
+            delta_call = mock_delta.call_args[1]
+            assert delta_call["base_path"] == Path("custom/silver")
+
+            gold_call = mock_gold.call_args[1]
+            assert gold_call["base_path"] == Path("custom/gold")
 
     def test_local_run_with_json_export(
         self,
