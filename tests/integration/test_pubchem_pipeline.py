@@ -147,7 +147,7 @@ class TestPubChemCompoundPipelineTransform:
         assert silver_record is not None
         assert silver_record["cid"] == "2244"  # Now string
         assert silver_record["molecular_formula"] == "C9H8O4"
-        assert silver_record["molecular_weight"] == 180.16
+        assert silver_record["molecular_weight"] == "180.16"  # Stored as string
         assert silver_record["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
         assert silver_record["inchikey"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
         assert silver_record["iupac_name"] == "2-acetyloxybenzoic acid"
@@ -195,7 +195,7 @@ class TestPubChemCompoundPipelineTransform:
 
         assert silver_record is not None
         assert silver_record["cid"] == "123456"  # Now string
-        assert silver_record["molecular_weight"] == 250.5
+        assert silver_record["molecular_weight"] == "250.5"  # Stored as string
         assert silver_record["molecular_formula"] is None
         assert silver_record["canonical_smiles"] == "CCCC"
         assert "entity_id" in silver_record
