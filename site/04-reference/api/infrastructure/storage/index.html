@@ -2200,45 +2200,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#silverwritemode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SilverWriteMode
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SilverWriteMode
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="SilverWriteMode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode.from_string" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        from_string
-      
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -3247,45 +3208,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#silverwritemode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SilverWriteMode
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SilverWriteMode
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="SilverWriteMode">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode.from_string" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        from_string
-      
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -4154,164 +4076,6 @@ MUST be injected through constructor without fallback defaults.</p>
 
     </div>
 
-</div><h3 id="silverwritemode">SilverWriteMode<a class="headerlink" href="#silverwritemode" title="Permanent link">&para;</a></h3>
-<p>Write mode enum for Silver layer operations.</p>
-
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="bioetl.infrastructure.storage.delta_writer.SilverWriteMode" class="doc doc-heading">
-            <code>bioetl.infrastructure.storage.delta_writer.SilverWriteMode</code>
-
-
-<a href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode" class="headerlink" title="Permanent link">&para;</a></h2>
-
-
-    <div class="doc doc-contents first">
-            <p class="doc doc-class-bases">
-              Bases: <code><span title="str">str</span></code>, <code><span title="enum.Enum">Enum</span></code></p>
-
-
-
-        <p>Allowed write modes for Silver layer.</p>
-<p>Domain enum consolidating Silver layer write semantics.
-Used by domain/config.py and infrastructure storage adapters.</p>
-
-
-<details class="values" open>
-  <summary>Values</summary>
-  <p>MERGE: Upsert records based on primary keys (default, idempotent)
-APPEND: Add records without deduplication
-DELETE: Delete and replace all data in the table (rebuild only)</p>
-</details>
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="bioetl.infrastructure.storage.delta_writer.SilverWriteMode.from_string" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">from_string</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
-  </span>
-
-<a href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode.from_string" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Convert string to SilverWriteMode with validation.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>value</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>String value (e.g., "merge", "append", "delete")</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="bioetl.infrastructure.storage.delta_writer.SilverWriteMode (bioetl.domain.medallion.SilverWriteMode)" href="#bioetl.infrastructure.storage.delta_writer.SilverWriteMode">SilverWriteMode</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Corresponding SilverWriteMode enum value</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If value is not a valid Silver write mode</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
 </div><p><strong>Features</strong>:
 - ACID transactions via Delta Lake
 - Merge/upsert by content hash
@@ -4572,46 +4336,47 @@ MUST be injected through constructor without fallback defaults.</p>
 </code></pre></div>
 <h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bioetl.infrastructure.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">BronzeWriter</span><span class="p">,</span> <span class="n">DeltaWriter</span><span class="p">,</span> <span class="n">GoldWriter</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Bronze: raw data storage</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">bronze</span> <span class="o">=</span> <span class="n">BronzeWriter</span><span class="p">(</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">base_path</span><span class="o">=</span><span class="s2">&quot;/data/bronze&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">await</span> <span class="n">bronze</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">records</span><span class="o">=</span><span class="n">raw_records</span><span class="p">,</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">provider</span><span class="o">=</span><span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;activity&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">,</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p">)</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="c1"># Silver: normalized data</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="n">silver</span> <span class="o">=</span> <span class="n">DeltaWriter</span><span class="p">(</span>
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="n">base_path</span><span class="o">=</span><span class="s2">&quot;/data/silver&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;chembl_activity&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="n">primary_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;activity_id&quot;</span><span class="p">],</span>
-<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="p">)</span>
-<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="k">await</span> <span class="n">silver</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="n">records</span><span class="o">=</span><span class="n">silver_records</span><span class="p">,</span>
-<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
-<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>    <span class="n">mode</span><span class="o">=</span><span class="n">SilverWriteMode</span><span class="o">.</span><span class="n">MERGE</span><span class="p">,</span>
-<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="p">)</span>
-<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
-<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="c1"># Gold: validated data</span>
-<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="n">gold</span> <span class="o">=</span> <span class="n">GoldWriter</span><span class="p">(</span>
-<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>    <span class="n">base_path</span><span class="o">=</span><span class="s2">&quot;/data/gold&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;chembl_activity&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>    <span class="n">primary_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;activity_id&quot;</span><span class="p">],</span>
-<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>    <span class="n">schema</span><span class="o">=</span><span class="n">activity_schema</span><span class="p">,</span>
-<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a><span class="p">)</span>
-<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a><span class="k">await</span> <span class="n">gold</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-<a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>    <span class="n">records</span><span class="o">=</span><span class="n">gold_records</span><span class="p">,</span>
-<a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
-<a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">bioetl.domain.medallion</span><span class="w"> </span><span class="kn">import</span> <span class="n">SilverWriteMode</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Bronze: raw data storage</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">bronze</span> <span class="o">=</span> <span class="n">BronzeWriter</span><span class="p">(</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">base_path</span><span class="o">=</span><span class="s2">&quot;/data/bronze&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">)</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">await</span> <span class="n">bronze</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">records</span><span class="o">=</span><span class="n">raw_records</span><span class="p">,</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">provider</span><span class="o">=</span><span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;activity&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">,</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">)</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="c1"># Silver: normalized data</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="n">silver</span> <span class="o">=</span> <span class="n">DeltaWriter</span><span class="p">(</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="n">base_path</span><span class="o">=</span><span class="s2">&quot;/data/silver&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;chembl_activity&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="n">primary_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;activity_id&quot;</span><span class="p">],</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="p">)</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="k">await</span> <span class="n">silver</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="n">records</span><span class="o">=</span><span class="n">silver_records</span><span class="p">,</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="n">mode</span><span class="o">=</span><span class="n">SilverWriteMode</span><span class="o">.</span><span class="n">MERGE</span><span class="p">,</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="p">)</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="c1"># Gold: validated data</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="n">gold</span> <span class="o">=</span> <span class="n">GoldWriter</span><span class="p">(</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>    <span class="n">base_path</span><span class="o">=</span><span class="s2">&quot;/data/gold&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;chembl_activity&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>    <span class="n">primary_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;activity_id&quot;</span><span class="p">],</span>
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>    <span class="n">schema</span><span class="o">=</span><span class="n">activity_schema</span><span class="p">,</span>
+<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a><span class="p">)</span>
+<a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a><span class="k">await</span> <span class="n">gold</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+<a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>    <span class="n">records</span><span class="o">=</span><span class="n">gold_records</span><span class="p">,</span>
+<a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>    <span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span>
+<a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a><span class="p">)</span>
 </code></pre></div>
 <h2 id="audit-trail">Audit Trail<a class="headerlink" href="#audit-trail" title="Permanent link">&para;</a></h2>
 <p>All writers support audit logging:</p>
