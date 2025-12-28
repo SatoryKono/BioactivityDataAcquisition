@@ -162,6 +162,70 @@ class UnifiedHTTPClient:
                     delay = float(retry_after)
         await asyncio.sleep(delay)
 
+    def _record_request_metrics(
+        self,
+        method: str,
+        duration: float,
+        status_code: int,
+        retries: int,
+        last_error: Exception | None,
+    ) -> None:
+        """Record HTTP request metrics."""
+        labels = {
+            "provider": self.provider,
+            "method": method.upper(),
+            "status": str(status_code) if status_code else "error",
+        }
+        self._metrics.observe_histogram(
+            "http_request_duration_seconds",
+            duration,
+            labels,
+        )
+        if retries > 0:
+            self._metrics.increment_counter(
+                "http_retries_total",
+                retries,
+                {"provider": self.provider, "method": method.upper()},
+            )
+        if last_error is not None or status_code >= 400:
+            error_type = (
+                type(last_error).__name__ if last_error else f"http_{status_code}"
+            )
+            self._metrics.increment_counter(
+                "http_request_errors_total",
+                1,
+                {"provider": self.provider, "method": method.upper(), "error_type": error_type},
+            )
+
+    def _log_retry(
+        self, url: str, method: str, attempt: int, *, status_code: int | None = None, error: str | None = None
+    ) -> None:
+        """Log retry attempt if logger is configured."""
+        if not self.logger:
+            return
+        kwargs: dict[str, Any] = {
+            "url": url,
+            "method": method,
+            "attempt": attempt + 1,
+            "provider": self.provider,
+        }
+        if status_code is not None:
+            kwargs["status_code"] = status_code
+        if error is not None:
+            kwargs["error"] = error
+        self.logger.debug("http_retry", **kwargs)
+
+    async def _execute_single_attempt(
+        self,
+        client: httpx.AsyncClient,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> httpx.Response:
+        """Execute a single HTTP request attempt."""
+        await self.rate_limiter.acquire()
+        return await self.circuit_breaker.call(client.request, method, url, **kwargs)
+
     async def _request_with_retry(
         self,
         method: str,
@@ -194,66 +258,17 @@ class UnifiedHTTPClient:
 
         try:
             for attempt in range(self.retry_policy.max_attempts):
-                try:
-                    await self.rate_limiter.acquire()
-                    response = await self.circuit_breaker.call(
-                        client.request, method, url, **kwargs
-                    )
-                    status_code = response.status_code
-
-                    if _is_retryable_status(
-                        response.status_code
-                    ) and not self.retry_policy.is_last_attempt(attempt):
-                        retries += 1
-                        if self.logger:
-                            self.logger.debug(
-                                "http_retry",
-                                url=url,
-                                method=method,
-                                status_code=status_code,
-                                attempt=attempt + 1,
-                                provider=self.provider,
-                            )
-                        await self._handle_retry_delay(attempt, url, response)
-                        continue
-
-                    response.raise_for_status()
-                    span.set_attribute("http.status_code", status_code)
-                    return response
-
-                except CircuitBreakerOpenError as exc:
-                    span.set_attribute("error", True)
-                    span.set_attribute("error.type", "circuit_breaker_open")
-                    span.record_exception(exc)
-                    if self.logger:
-                        self.logger.warning(
-                            "http_circuit_breaker_open",
-                            url=url,
-                            method=method,
-                            provider=self.provider,
-                        )
-                    raise
-
-                except Exception as exc:
-                    last_error = exc
-                    if not _is_retryable_error(exc):
-                        span.set_attribute("error", True)
-                        span.set_attribute("error.type", type(exc).__name__)
-                        span.record_exception(exc)
-                        raise
-
-                    retries += 1
-                    if not self.retry_policy.is_last_attempt(attempt):
-                        if self.logger:
-                            self.logger.debug(
-                                "http_retry",
-                                url=url,
-                                method=method,
-                                error=str(exc),
-                                attempt=attempt + 1,
-                                provider=self.provider,
-                            )
-                        await self._handle_retry_delay(attempt, url)
+                result = await self._attempt_request(
+                    client, method, url, attempt, span, kwargs
+                )
+                if isinstance(result, httpx.Response):
+                    status_code = result.status_code
+                    return result
+                # Result is a tuple: (should_retry, status_code, retries_increment, error)
+                should_retry, status_code, retries_inc, last_error = result
+                retries += retries_inc
+                if not should_retry:
+                    break
 
             # All retries exhausted
             span.set_attribute("error", True)
@@ -267,36 +282,57 @@ class UnifiedHTTPClient:
             span.set_attribute("http.retries", retries)
             span.set_attribute("bioetl.duration_ms", duration * 1000)
             span.__exit__(None, None, None)
+            self._record_request_metrics(method, duration, status_code, retries, last_error)
 
-            # Record metrics
-            labels = {
-                "provider": self.provider,
-                "method": method.upper(),
-                "status": str(status_code) if status_code else "error",
-            }
-            self._metrics.observe_histogram(
-                "http_request_duration_seconds",
-                duration,
-                labels,
-            )
-            if retries > 0:
-                self._metrics.increment_counter(
-                    "http_retries_total",
-                    retries,
-                    {"provider": self.provider, "method": method.upper()},
+    async def _attempt_request(
+        self,
+        client: httpx.AsyncClient,
+        method: str,
+        url: str,
+        attempt: int,
+        span: Any,
+        kwargs: dict[str, Any],
+    ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
+        """Execute a single request attempt, returning response or retry info.
+
+        Returns:
+            Either httpx.Response on success, or a tuple of
+            (should_retry, status_code, retries_increment, error) for retry handling.
+        """
+        try:
+            response = await self._execute_single_attempt(client, method, url, **kwargs)
+            status_code = response.status_code
+
+            if _is_retryable_status(status_code) and not self.retry_policy.is_last_attempt(attempt):
+                self._log_retry(url, method, attempt, status_code=status_code)
+                await self._handle_retry_delay(attempt, url, response)
+                return (True, status_code, 1, None)
+
+            response.raise_for_status()
+            span.set_attribute("http.status_code", status_code)
+            return response
+
+        except CircuitBreakerOpenError as exc:
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", "circuit_breaker_open")
+            span.record_exception(exc)
+            if self.logger:
+                self.logger.warning(
+                    "http_circuit_breaker_open", url=url, method=method, provider=self.provider
                 )
-            if last_error is not None or status_code >= 400:
-                self._metrics.increment_counter(
-                    "http_request_errors_total",
-                    1,
-                    {
-                        "provider": self.provider,
-                        "method": method.upper(),
-                        "error_type": type(last_error).__name__
-                        if last_error
-                        else f"http_{status_code}",
-                    },
-                )
+            raise
+
+        except Exception as exc:
+            if not _is_retryable_error(exc):
+                span.set_attribute("error", True)
+                span.set_attribute("error.type", type(exc).__name__)
+                span.record_exception(exc)
+                raise
+
+            if not self.retry_policy.is_last_attempt(attempt):
+                self._log_retry(url, method, attempt, error=str(exc))
+                await self._handle_retry_delay(attempt, url)
+            return (True, 0, 1, exc)
 
     async def get(
         self,
