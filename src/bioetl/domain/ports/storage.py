@@ -43,7 +43,6 @@ class StoragePort(Protocol):
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
-        **kwargs: Any,
     ) -> Path:
         """Write raw records to the Bronze layer.
 
@@ -57,8 +56,9 @@ class StoragePort(Protocol):
             run_type: The type of pipeline run (incremental, backfill, rebuild).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
-            lock_context: Optional lock context for write validation.
-            **kwargs: Additional implementation-specific arguments.
+            lock_context: Optional lock context for safety guard validation.
+                         If provided, implementation SHOULD validate ownership
+                         before writing (see ADR-014).
 
         Returns:
             Path: Relative path to the written file.
@@ -75,7 +75,6 @@ class StoragePort(Protocol):
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         lock_context: LockContext | None = None,
-        **kwargs: Any,
     ) -> None:
         """Write transformed records to the Silver layer.
 
@@ -90,8 +89,7 @@ class StoragePort(Protocol):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
-            lock_context: Optional lock context for write validation.
-            **kwargs: Additional implementation-specific arguments.
+            lock_context: Optional lock context for safety guard validation.
 
         Raises:
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
@@ -109,7 +107,6 @@ class StoragePort(Protocol):
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         lock_context: LockContext | None = None,
-        **kwargs: Any,
     ) -> None:
         """Write aggregated or validated records to the Gold layer.
 
@@ -122,8 +119,7 @@ class StoragePort(Protocol):
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for audit.
             run_id: Run identifier for audit correlation across layers.
-            lock_context: Optional lock context for write validation.
-            **kwargs: Additional implementation-specific arguments.
+            lock_context: Optional lock context for safety guard validation.
 
         Raises:
             ValueError: If schema validation fails (strict=True required).

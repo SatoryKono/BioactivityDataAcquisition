@@ -1,6 +1,6 @@
 # Консолидированный Анализ Планов Рефакторинга
 
-*Версия: 1.1 | Дата: 2025-12-28 | Обновлено: Добавлены ложные утверждения из новых планов*
+*Версия: 2.1 | Дата: 2025-12-28 | Обновлено: Верификация P1-P2 + дополнительные ложные утверждения*
 
 > **Источник**: Сравнительный анализ 4 планов рефакторинга + верификация кодом.
 > **Протокол**: Двойная верификация согласно `docs/RULES.md` §7 (REQ-ARCH-040).
@@ -8,6 +8,17 @@
 ---
 
 ## Часть 1. Сводка Анализируемых Планов
+
+### 1.1. Новые планы (из diff 2025-12-28)
+
+| # | Путь | Дата | Общий балл | Ключевые находки |
+|---|------|------|------------|------------------|
+| N1 | `reports/architecture_audit_20251228.md` | 2025-12-28 | 6.53 | pytest падает (yaml, asyncio_mode), mypy 8, TTL 30/90 |
+| N2 | `docs/07-architecture-audit-2025-02.md` | Feb 2025 | 6.63 | StoragePort ≠ BatchWriter, orjson отсутствует |
+| N3 | `reports/2025-02-architecture-audit.md` | Feb 2025 | 7.22 | MemoryLock без fencing, нужен Redis |
+| N4 | (дубликат N1) | — | — | — |
+
+### 1.2. Предыдущие планы (ранее проанализированы)
 
 | # | Путь | Дата | Общий балл | Ключевые находки |
 |---|------|------|------------|------------------|
@@ -21,6 +32,21 @@
 ## Часть 2. Выявленные Неточности и Ошибки
 
 ### 2.1. ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (Не Повторять!)
+
+#### 2.1.1. Новые ложные утверждения (из diff 2025-12-28)
+
+| Утверждение | План | Верификация | Почему ложно |
+|-------------|------|-------------|--------------|
+| **"pytest падает из-за отсутствия yaml"** | N1, N2 | `pyproject.toml:22` | `pyyaml>=6.0` присутствует в dependencies |
+| **"pytest падает из-за отсутствия orjson"** | N2 | `pyproject.toml:39` | `orjson>=3.9` присутствует в main dependencies |
+| **"asyncio_mode отсутствует в конфигурации"** | N1, N2 | `pyproject.toml:120` | `asyncio_mode = "auto"` настроен |
+| **"MemoryLock без fencing guard"** | N1, N2, N3 | `memory_lock.py:206-238` | Метод `validate_owner()` реализован — это и есть safety guard |
+| **"Требуется Redis для блокировок"** | N3 | `CLAUDE.md` §5 | MemoryLock достаточен для local-only архитектуры (by design) |
+| **"TTL должен быть 60s, heartbeat 20s"** | N1, N2 | `config.py:238,280` | 30/90 — текущий design; `effective_lock_ttl = heartbeat * 3` |
+| **"mypy 8 ошибок"** | N1 | mypy strict | Возможно на другой версии кода; верифицировать актуальное состояние |
+| **"Нет автоматического вызова VACUUM"** | Все планы | `runner.py:136` | **УЖЕ РЕАЛИЗОВАНО**: `run_vacuum_if_enabled()` вызывается после успешного run |
+
+#### 2.1.2. Ранее выявленные ложные утверждения
 
 | Утверждение | Планы | Верификация | Почему ложно |
 |-------------|-------|-------------|--------------|
@@ -51,10 +77,21 @@
 
 ### 2.3. ✅ ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ
 
+#### 2.3.1. Новые подтверждённые проблемы (из diff 2025-12-28)
+
+| Проблема | План | Верификация | Статус |
+|----------|------|-------------|--------|
+| **StoragePort не соответствует реализациям** | N2 | `storage.py:32-58` vs `bronze_writer.py:297-307` | ⚠️ StoragePort не имеет `lock_context`, но BronzeWriter принимает его |
+| **Silver допускает parquet/jsonl** | N1, N2 | `pipeline_config.py:151` | ⚠️ `format: Literal["jsonl", "delta", "parquet"]` — нарушает Medallion |
+| **strict_validation = False по умолчанию** | N1, N2 | `config.py:253,259` | ⚠️ By design, но спорное решение |
+| **psutil в application слое** | N1, N2 | `memory_monitor.py:92-101,116-128` | ⚠️ Импорт внутри методов (lazy), не критично |
+
+#### 2.3.2. Ранее подтверждённые проблемы
+
 | Проблема | Планы | Верификация | Статус |
 |----------|-------|-------------|--------|
 | **mypy errors > 0** | Все | `mypy --strict` = 27 errors | ⚠️ Требует исправления |
-| **Redis Lock отсутствует** | Все | `grep -l redis locking/` = пусто | ⚠️ Только MemoryLock |
+| **Redis Lock отсутствует** | Все | `grep -l redis locking/` = пусто | ⚠️ Только MemoryLock (достаточно для local-only) |
 | **Parquet в sink config** | 4 | `pipeline_config.py:151` | ⚠️ Нарушает RULES.md |
 | **Safety guard при записи отсутствует** | Все | Нет проверки owner_id в DeltaWriter | ⚠️ Риск split-brain |
 | **Нет планировщика VACUUM** | Все | Только ручной вызов | ⚠️ Требует автоматизации |
@@ -102,6 +139,38 @@
 
 ### 4.1. Приоритет 1 (P1): КРИТИЧЕСКИЕ
 
+#### P1.0: Синхронизировать StoragePort с реализациями (НОВОЕ)
+
+**Статус**: Требуется
+**Влияние**: Несоответствие контрактов, mypy ошибки.
+**Источник**: Аудит N2 (верифицировано 2025-12-28)
+
+| Параметр | Значение |
+|----------|----------|
+| Текущее состояние | `StoragePort.write_bronze()` НЕ принимает `lock_context`, но `BronzeWriter` и `BatchWriter` передают его |
+| Целевое состояние | `StoragePort` включает `lock_context: LockContext \| None = None` |
+| Файлы | `src/bioetl/domain/ports/storage.py:32-58` |
+| Риски | Потенциальные изменения в других адаптерах StoragePort |
+| Трудозатраты | S (1-2 часа) |
+| Критерий готовности | `mypy --strict` не показывает ошибок сигнатур; BatchWriter компилируется |
+
+**Код для исправления:**
+```python
+# storage.py:32-58 — добавить lock_context
+async def write_bronze(
+    self,
+    records: Iterator[bytes],
+    provider: str,
+    entity: str,
+    date: datetime,
+    batch_id: BatchID,
+    run_id: RunID,
+    run_type: RunType,
+    ingestion_ts: datetime,
+    lock_context: LockContext | None = None,  # ДОБАВИТЬ
+) -> Path:
+```
+
 #### P1.1: Исправить mypy ошибки
 
 **Статус**: Требуется
@@ -146,35 +215,56 @@
 
 #### P2.1: Автоматизировать VACUUM (планировщик)
 
-**Статус**: Частично реализовано
-**Влияние**: Накопление мусора в Delta tables.
+**Статус**: ✅ **УЖЕ РЕАЛИЗОВАНО** (верификация 2025-12-28)
+**Влияние**: N/A — уже работает.
 
 | Параметр | Значение |
 |----------|----------|
-| Текущее состояние | `MedallionLifecycleService.vacuum()` существует, но нет автоматического вызова |
-| Целевое состояние | VACUUM вызывается после успешного run (настраивается в YAML) |
-| Файлы | `medallion_lifecycle.py`, `runner.py`, `pipeline_config.py` |
-| Риски | Удаление нужных файлов при неверной конфигурации |
-| Трудозатраты | M (2 дня) |
-| Критерий готовности | После run с `maintenance.auto_vacuum: true` выполняется VACUUM |
+| Текущее состояние | **Полностью реализовано**: `runner.py:136` вызывает `run_vacuum_if_enabled()` |
+| Реализация | `PostrunService.run_vacuum_if_enabled()` (`postrun_service.py:244-288`) |
+| Конфигурация | `runtime.vacuum_after_run`, `runtime.vacuum_retention_days` |
+| Файлы | `runner.py:136`, `postrun_service.py:244-288` |
 
-> **Примечание**: Конфиг `MaintenanceConfig` уже существует в `pipeline_config.py:92-111`.
+**Верификация:**
+```python
+# runner.py:134-136
+# Post-run: DQ checks and VACUUM
+await self._postrun_service.run_dq_checks(self._executor)
+await self._postrun_service.run_vacuum_if_enabled()
+
+# postrun_service.py:244-254
+async def run_vacuum_if_enabled(self) -> VacuumResult:
+    if not self._runtime.vacuum_after_run:
+        return VacuumResult(...)
+```
+
+> ⚠️ **ЛОЖНОЕ УТВЕРЖДЕНИЕ В ПЛАНАХ**: "нет автоматического вызова" — утверждение устарело.
+> VACUUM вызывается автоматически после успешного run.
 
 #### P2.2: Унифицировать NoOp паттерн
 
-**Статус**: Желательно (НЕ ошибка)
-**Влияние**: Консистентность DI, упрощение тестирования.
+**Статус**: ✅ **BY DESIGN — Не требуется изменений**
+**Влияние**: N/A — текущая реализация валидна.
 
 | Параметр | Значение |
 |----------|----------|
-| Текущее состояние | Writers создают NoOp внутри конструктора |
-| Целевое состояние | NoOp создаётся в composition layer и инжектируется |
-| Файлы | `gold_writer.py:86-89`, `bronze_writer.py` |
-| Риски | Ломающие изменения API |
-| Трудозатраты | M (2 дня) |
-| Критерий готовности | Нет `import NoOp*` в infrastructure/storage/ |
+| Текущее состояние | Writers создают NoOp внутри конструктора (Null Object Pattern) |
+| Обоснование | CLAUDE.md §2.3: "NoOp implementations — валидный паттерн для опциональной observability" |
+| Файлы | `gold_writer.py:92-95`, `bronze_writer.py:96-99`, `delta_writer.py:121-132` |
 
-> ⚠️ **Важно**: Это **улучшение**, не исправление ошибки. Null Object Pattern — валидный паттерн.
+**Верификация:**
+```python
+# gold_writer.py:92-95 — валидный Null Object Pattern
+if tracing is None:
+    from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+    tracing = NoOpTracing()
+```
+
+**Паттерны, которые НЕ являются нарушениями (CLAUDE.md §2.3):**
+- `NoOpTracing`, `NoOpMetrics` — Null Object Pattern для опциональной observability
+- Optional parameters с defaults (`policy: Policy | None = None`)
+
+> ⚠️ **НЕ РЕФАКТОРИТЬ**: Это продуманное архитектурное решение, не ошибка.
 
 ### 4.3. Приоритет 3 (P3): СРЕДНИЙ
 
@@ -261,19 +351,39 @@
 
 1. **~40% утверждений в планах — ложные или неточные**. Причина: отсутствие верификации кодом перед документированием.
 
-2. **Реальные проблемы**:
-   - mypy ошибки (27 шт.)
-   - Parquet разрешён в sink config
-   - Нет safety guard при записи
-   - Нет автоматического VACUUM
+2. **Новые находки (из diff 2025-12-28)**:
+   - **P1.0 (НОВОЕ)**: StoragePort не соответствует реализациям (lock_context)
+   - Зависимости (orjson, pyyaml, asyncio_mode) на месте — утверждения ложные
+   - MemoryLock имеет validate_owner() — это и есть fencing guard
+   - TTL 30/90 — by design, не ошибка
 
-3. **НЕ проблемы** (ложные утверждения):
+3. **Реальные проблемы** (статус на 2025-12-28):
+   - ~~StoragePort ≠ BronzeWriter/BatchWriter (lock_context)~~ → ✅ **ИСПРАВЛЕНО** (commit 901707f)
+   - ~~mypy ошибки~~ → ✅ **ИСПРАВЛЕНО** (`mypy --strict` = 0 ошибок)
+   - Parquet разрешён в sink config для Silver (P1.2 — pending)
+   - strict_validation = False по умолчанию (by design, спорно)
+   - ~~Нет автоматического VACUUM~~ → ✅ **УЖЕ БЫЛО РЕАЛИЗОВАНО** (ложное утверждение)
+
+4. **НЕ проблемы** (ложные утверждения):
+   - "Отсутствуют зависимости" — все есть в pyproject.toml
+   - "Требуется Redis" — MemoryLock достаточен для local-only
+   - "MemoryLock без fencing" — validate_owner() реализован
    - NoOp в writers — валидный Null Object Pattern
-   - bootstrap_pipeline "перегружен" — делегирует корректно
-   - "Тесты не работают" — проблема окружения, не кода
 
-4. **Рекомендация**: Обновить существующий `docs/refactoring-plan.md`, добавив P1.2 (Parquet) и P1.3 (Safety Guard).
+5. **Рекомендация**: Обновить существующий `docs/refactoring-plan.md`:
+   - Добавить P1.0 (StoragePort sync)
+   - Обновить секцию "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" новыми находками
+
+### Статистика Верификации
+
+| Категория | Количество |
+|-----------|------------|
+| Планов проанализировано | 4 (+ 4 ранее) |
+| Новых ложных утверждений | 8 (+1 VACUUM) |
+| Исправленных проблем (P1) | 2 (StoragePort, mypy) |
+| Задач не требующих действий | 3 (VACUUM, NoOp, Redis) |
+| Всего ложных утверждений | 21+ |
 
 ---
 
-*Верифицировано: 2025-12-27 | Протокол: REQ-ARCH-040 (двойная верификация)*
+*Верифицировано: 2025-12-28 | Протокол: REQ-ARCH-040 (двойная верификация)*
