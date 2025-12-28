@@ -305,7 +305,6 @@ class BronzeWriter:
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
-        **kwargs,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
 
