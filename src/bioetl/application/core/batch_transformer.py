@@ -102,13 +102,14 @@ class BatchTransformer:
         self._gold_transform = gold_transform_callback
 
     async def transform_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID
+        self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
         """Transform all records in batch, returning silver, gold, and quarantine count.
 
         Args:
             records: Raw Bronze records to transform.
             batch_id: Identifier for the current batch.
+            start_index: The starting index for records in this batch.
 
         Returns:
             TransformResult with silver records, gold records, and quarantine count.
@@ -121,7 +122,7 @@ class BatchTransformer:
         gold_records: list[dict[str, Any]] = []
         records_quarantined = 0
 
-        for index, raw_record in enumerate(records):
+        for index, raw_record in enumerate(records, start=start_index):
             record_context = self._context.bind_logger(
                 batch_id=str(batch_id),
                 entity_id=raw_record.get("activity_id"),
