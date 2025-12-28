@@ -95,9 +95,9 @@ Prometheus-compatible metrics interface.
         show_root_heading: true
         show_source: false
         members:
-            - increment
-            - gauge
-            - histogram
+            - increment_counter
+            - set_gauge
+            - observe_histogram
             - close
 
 ### TracingPort
@@ -109,7 +109,6 @@ Distributed tracing interface (OpenTelemetry compatible).
         show_root_heading: true
         show_source: false
         members:
-            - start_span
             - get_tracer
             - close
 
@@ -126,6 +125,7 @@ Structured logging interface.
             - warning
             - error
             - debug
+            - exception
             - bind
 
 ## Validation Ports
@@ -139,13 +139,26 @@ Schema validation interface for Gold layer.
         show_root_heading: true
         show_source: false
 
+## Filtering Ports
+
+### InputFilterPort
+
+Interface for loading filter IDs from external sources.
+
+::: bioetl.domain.ports.InputFilterPort
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - load_filter_ids
+
 ## Usage Example
 
 ```python
 from bioetl.domain.ports import StoragePort, DataSourcePort
 
 # Ports are structural types (Protocols)
-def process_data(
+async def process_data(
     source: DataSourcePort,
     storage: StoragePort,
 ) -> None:

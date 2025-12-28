@@ -366,4 +366,4 @@ def handle_error(error: BioETLError) -> None:
 
 - [Types](types.md) - ErrorType enum for classification
 - [Circuit Breaker ADR](../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) - Circuit breaker pattern
-- [Error Handling ADR](../../../02-architecture/decisions/ADR-003-error-handling.md) - Error handling strategy
+- [Error Handling ADR](../../../02-architecture/decisions/ADR-016-error-handling-strategy.md) - Error handling strategy

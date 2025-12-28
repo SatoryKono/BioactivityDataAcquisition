@@ -256,12 +256,13 @@ jobs:
       - lint
       - unit-tests
       - integration-tests
+      - arch-tests
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
       - name: Final status
         run: |
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.unit-tests.result }}" != "success" || "${{ needs['integration-tests'].result }}" != "success" ]]; then
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.unit-tests.result }}" != "success" || "${{ needs['integration-tests'].result }}" != "success" || "${{ needs['arch-tests'].result }}" != "success" ]]; then
             echo "One or more checks failed"
             exit 1
           fi
