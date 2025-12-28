@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
     ArrowSchema,
@@ -18,6 +18,9 @@ from bioetl.domain.types import (
     RunID,
     RunType,
 )
+
+if TYPE_CHECKING:
+    from bioetl.domain.locking import LockContext
 
 
 @runtime_checkable
@@ -39,6 +42,8 @@ class StoragePort(Protocol):
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
+        lock_context: LockContext | None = None,
+        **kwargs: Any,
     ) -> Path:
         """Write raw records to the Bronze layer.
 
@@ -52,6 +57,8 @@ class StoragePort(Protocol):
             run_type: The type of pipeline run (incremental, backfill, rebuild).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+            lock_context: Optional lock context for write validation.
+            **kwargs: Additional implementation-specific arguments.
 
         Returns:
             Path: Relative path to the written file.
@@ -67,6 +74,8 @@ class StoragePort(Protocol):
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        lock_context: LockContext | None = None,
+        **kwargs: Any,
     ) -> None:
         """Write transformed records to the Silver layer.
 
@@ -81,6 +90,8 @@ class StoragePort(Protocol):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            lock_context: Optional lock context for write validation.
+            **kwargs: Additional implementation-specific arguments.
 
         Raises:
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
@@ -97,6 +108,8 @@ class StoragePort(Protocol):
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        lock_context: LockContext | None = None,
+        **kwargs: Any,
     ) -> None:
         """Write aggregated or validated records to the Gold layer.
 
@@ -109,6 +122,8 @@ class StoragePort(Protocol):
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for audit.
             run_id: Run identifier for audit correlation across layers.
+            lock_context: Optional lock context for write validation.
+            **kwargs: Additional implementation-specific arguments.
 
         Raises:
             ValueError: If schema validation fails (strict=True required).
