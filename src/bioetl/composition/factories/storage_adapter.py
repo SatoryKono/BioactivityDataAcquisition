@@ -98,6 +98,7 @@ class StorageAdapter:
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        lock_context: LockContext | None = None,
     ) -> None:
         """Write transformed records to Silver layer."""
         await self.silver.write_silver(
@@ -108,6 +109,7 @@ class StorageAdapter:
             mode=mode,
             partition_cols=partition_cols,
             on_schema_mismatch=on_schema_mismatch,
+            lock_context=lock_context,
         )
 
     async def write_gold(
@@ -120,6 +122,7 @@ class StorageAdapter:
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        lock_context: LockContext | None = None,
     ) -> None:
         """Write aggregated records to Gold layer.
 
@@ -131,6 +134,7 @@ class StorageAdapter:
             mode: Write mode
             ingestion_ts: Ingestion timestamp for audit (ADR-014)
             run_id: Run identifier for audit correlation
+            lock_context: Lock context for validation (RULES.md §3.3).
         """
         await self.gold.write_gold(
             table_name=table_name,
@@ -140,6 +144,7 @@ class StorageAdapter:
             mode=mode,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
+            lock_context=lock_context,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
