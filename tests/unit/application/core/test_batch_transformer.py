@@ -55,7 +55,7 @@ def mock_batch_metrics():
 def transform_callback():
     """Create mock transform callback."""
 
-    async def transform(ctx, record):
+    async def transform(ctx, record, index):
         return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
 
     return transform
