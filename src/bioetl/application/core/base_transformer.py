@@ -19,6 +19,8 @@ import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
+import orjson
+
 from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.domain.types import ContentHash, EntityID
@@ -303,7 +305,8 @@ class BaseTransformer(ABC):
         Used for storing nested structures in Silver layer as JSON strings.
         - Empty collections ([], {}) are treated as None for semantic consistency
         - Single-element lists are unwrapped: [x] → x
-        - Uses sort_keys=True for deterministic output (RULES.md §2.8.1)
+        - Uses orjson with OPT_SORT_KEYS for deterministic output (RULES.md §2.8.1)
+        - Output is compact (no spaces) for efficiency and consistency with Bronze/Hashing.
 
         Args:
             value: Value to serialize.
@@ -318,7 +321,7 @@ class BaseTransformer(ABC):
         if isinstance(value, dict):
             if len(value) == 0:
                 return None
-            return json.dumps(value, sort_keys=True, ensure_ascii=False)
+            return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
         if isinstance(value, list):
             if len(value) == 0:
                 return None
@@ -326,9 +329,11 @@ class BaseTransformer(ABC):
             if len(value) == 1:
                 item = value[0]
                 if isinstance(item, dict):
-                    return json.dumps(item, sort_keys=True, ensure_ascii=False)
+                    return orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode(
+                        "utf-8"
+                    )
                 return str(item)
-            return json.dumps(value, sort_keys=True, ensure_ascii=False)
+            return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
         return str(value)
 
     @staticmethod
