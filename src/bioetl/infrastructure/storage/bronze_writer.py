@@ -358,8 +358,10 @@ class BronzeWriter:
                 records = self._validate_json_records(records)
 
             date_str = date.strftime("%Y-%m-%d")
+            # FIX: Removed redundant 'bronze/' prefix.
+            # base_path already points to 'data/output/bronze'
             relative_path = (
-                f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+                f"v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
@@ -557,7 +559,8 @@ class BronzeWriter:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        prefix = f"bronze/v1/{provider}/{entity}/"
+        # FIX: Removed redundant 'bronze/' prefix here too
+        prefix = f"v1/{provider}/{entity}/"
         if date:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
