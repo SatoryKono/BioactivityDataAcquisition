@@ -1,0 +1,118 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+classDiagram
+    direction TB
+
+    class StoragePort {
+        <<Protocol>>
+        +write_bronze(records, provider, entity) BronzeWriteResult
+        +write_silver(records, table, mode) WriteResult
+        +write_gold(records, table, schema) WriteResult
+        +clear_silver(table) int
+        +clear_gold(table) int
+        +vacuum(table, retention_days) None
+        +archive(source, dest) None
+        +health_check() bool
+    }
+
+    class DeltaWriter {
+        -_base_path: str
+        -_logger: LoggerPort
+        -_metrics: MetricsPort | None
+        -_csv_exporter: CsvExporter | None
+        -_write_policy: WriteModePolicy | None
+        -_lock: LockPort | None
+        -_require_lock: bool = True
+        -_writer_version: str = "2"
+        -_reader_version: str = "1"
+
+        +merge(records: list~dict~, table: str, primary_key: list~str~) WriteResult
+        +append(records: list~dict~, table: str) WriteResult
+        +overwrite(records: list~dict~, table: str) WriteResult
+        +clear_data(table: str) int
+        +vacuum(table: str, retention_days: int = 7) None
+        +get_table_version(table: str) int
+
+        -_validate_lock_before_write() bool
+        -_validate_lock_after_write() bool
+        -_to_arrow_table(records: list~dict~) pa.Table
+        -_get_table_path(table: str) str
+        -_execute_merge(source: pa.Table, target_path: str, primary_key: list~str~) MergeResult
+        -_execute_append(source: pa.Table, target_path: str) WriteResult
+        -_execute_overwrite(source: pa.Table, target_path: str) WriteResult
+        -_log_write_metrics(result: WriteResult, operation: str) None
+        -_export_csv_if_enabled(records: list~dict~, table: str) None
+    }
+
+    class WriteResult {
+        <<dataclass>>
+        +success: bool
+        +records_written: int
+        +version: int
+        +files_added: list~str~
+        +duration_ms: float
+        +error_message: str | None
+    }
+
+    class MergeResult {
+        <<dataclass>>
+        +version: int
+        +files_added: list~str~
+        +rows_inserted: int
+        +rows_updated: int
+        +rows_deleted: int
+        +source_rows_total: int
+    }
+
+    class SilverWriteMode {
+        <<enumeration>>
+        MERGE = "merge"
+        APPEND = "append"
+        DELETE = "delete"
+    }
+
+    class WriteModePolicy {
+        <<dataclass>>
+        +default_mode: SilverWriteMode = MERGE
+        +backfill_mode: SilverWriteMode = MERGE
+        +rebuild_mode: SilverWriteMode = DELETE
+
+        +get_mode_for_run_type(run_type: RunType) SilverWriteMode
+    }
+
+    class CsvExporter {
+        -_base_path: str
+        -_logger: LoggerPort
+
+        +export(df: pl.DataFrame, path: str) str
+        +export_from_records(records: list~dict~, path: str) str
+    }
+
+    class LockNotHeldError {
+        <<Exception>>
+        +key: str
+        +owner_id: str
+        +message: str
+    }
+
+    %% Relationships
+    StoragePort <|.. DeltaWriter : implements
+
+    DeltaWriter --> WriteResult : returns
+    DeltaWriter --> MergeResult : uses
+    DeltaWriter --> WriteModePolicy : uses
+    DeltaWriter --> CsvExporter : optional
+    DeltaWriter --> SilverWriteMode : uses
+    DeltaWriter ..> LockNotHeldError : throws
+
+    WriteModePolicy --> SilverWriteMode : contains
+
+    %% External dependencies
+    DeltaWriter ..> deltalake : "uses delta-rs"
+    DeltaWriter ..> pyarrow : "uses pa.Table"
+    DeltaWriter ..> polars : "uses pl.DataFrame"
+
+    note for DeltaWriter "Silver Layer Writer\n━━━━━━━━━━━━━━━━━━━━━━\nACID transactions via delta-rs\n\nKey Features:\n• Merge/Upsert by content_hash\n• Optimistic concurrency\n• Pre/post write lock validation\n• Optional CSV export\n\nDefault Parameters:\n• require_lock: True\n• writer_version: 2\n• reader_version: 1"
+
+    note for WriteResult "Returned by all write operations.\nContains:\n• Transaction version\n• Files added\n• Duration metrics\n• Error details if failed"
+
+    note for MergeResult "Extended result for MERGE operations.\nIncludes row-level statistics:\n• Inserted vs Updated\n• Deleted (for SCD2)\n• Source total for ratio"

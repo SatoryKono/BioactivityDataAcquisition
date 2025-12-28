@@ -1,0 +1,108 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph External["External APIs"]
+        ChEMBL_API["🌐 ChEMBL API<br/>ebi.ac.uk/chembl"]
+        PubChem_API["🌐 PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
+        UniProt_API["🌐 UniProt API<br/>uniprot.org"]
+        PubMed_API["🌐 PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
+    end
+
+    subgraph AWS["AWS Region (us-east-1)"]
+        subgraph VPC["VPC (10.0.0.0/16)"]
+            subgraph PrivateSubnet["Private Subnet"]
+                subgraph ECS["ECS Fargate Cluster"]
+                    chembl_activity["📦 chembl_activity<br/>worker task"]
+                    chembl_assay["📦 chembl_assay<br/>worker task"]
+                    chembl_target["📦 chembl_target<br/>worker task"]
+                    chembl_molecule["📦 chembl_molecule<br/>worker task"]
+                    pubchem_compound["📦 pubchem_compound<br/>worker task"]
+                    uniprot_protein["📦 uniprot_protein<br/>worker task"]
+                end
+
+                subgraph ElastiCache["ElastiCache"]
+                    Redis[("🔴 Redis Cluster<br/>lock coordination<br/>(future scaling)")]
+                end
+            end
+
+            subgraph PublicSubnet["Public Subnet"]
+                NAT["NAT Gateway"]
+            end
+        end
+
+        subgraph S3["S3 Buckets"]
+            subgraph DataLake["bioetl-prod-datalake"]
+                Bronze[("📁 bronze/<br/>JSONL+zstd<br/>90 days retention")]
+                Silver[("📁 silver/<br/>Delta Lake<br/>permanent")]
+                Gold[("📁 gold/<br/>Delta/Parquet<br/>permanent")]
+            end
+
+            subgraph Operational["bioetl-prod-ops"]
+                Quarantine[("📁 quarantine/<br/>Parquet<br/>30 days")]
+                Checkpoints[("📁 checkpoints/<br/>JSON<br/>7 days")]
+                Lineage[("📁 lineage/<br/>Parquet<br/>permanent")]
+            end
+        end
+
+        subgraph Monitoring["CloudWatch"]
+            Logs["📋 CloudWatch Logs<br/>/bioetl/pipeline/*"]
+            Metrics["📊 CloudWatch Metrics<br/>bioetl/*"]
+            Alarms["🚨 CloudWatch Alarms<br/>DQ thresholds<br/>Circuit breaker"]
+            Dashboard["📈 Dashboard<br/>Pipeline health"]
+        end
+
+        subgraph Security["Security"]
+            Secrets["🔐 Secrets Manager<br/>API keys<br/>Credentials"]
+            IAM["👤 IAM Roles<br/>Task execution<br/>S3 access"]
+        end
+
+        subgraph EventBridge["EventBridge"]
+            Schedule["⏰ Scheduled Rules<br/>Daily incremental<br/>Weekly backfill"]
+        end
+    end
+
+    %% External API connections
+    ChEMBL_API --> NAT
+    PubChem_API --> NAT
+    UniProt_API --> NAT
+    PubMed_API --> NAT
+    NAT --> chembl_activity
+    NAT --> pubchem_compound
+    NAT --> uniprot_protein
+
+    %% ECS to Redis
+    chembl_activity -.->|lock| Redis
+    chembl_assay -.->|lock| Redis
+    chembl_target -.->|lock| Redis
+    chembl_molecule -.->|lock| Redis
+
+    %% ECS to S3
+    chembl_activity --> Bronze
+    chembl_activity --> Silver
+    chembl_activity --> Gold
+    chembl_activity --> Quarantine
+    chembl_activity --> Checkpoints
+
+    %% ECS to Monitoring
+    chembl_activity --> Logs
+    chembl_activity --> Metrics
+
+    %% ECS to Security
+    chembl_activity --> Secrets
+    IAM --> chembl_activity
+
+    %% EventBridge scheduling
+    Schedule --> chembl_activity
+    Schedule --> chembl_assay
+    Schedule --> chembl_target
+    Schedule --> chembl_molecule
+
+    %% Alarms from metrics
+    Metrics --> Alarms
+    Alarms --> Dashboard
+
+    %% Styling
+    style Bronze fill:#CD7F32,color:#fff
+    style Silver fill:#C0C0C0,color:#000
+    style Gold fill:#FFD700,color:#000
+    style Quarantine fill:#FF6B6B,color:#fff
+    style Redis fill:#DC382D,color:#fff

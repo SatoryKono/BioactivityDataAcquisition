@@ -1,0 +1,93 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart LR
+    subgraph External["External API"]
+        API["🌐 ChEMBL API<br/>/activities endpoint"]
+    end
+
+    subgraph Extract["Extract Phase"]
+        E1["📥 Fetch activity_id batch<br/>(ChemblAdapter)"]
+        E2["🔗 Fetch related entities<br/>assay_id, molecule_id, target_id"]
+        E3["💾 Write Bronze<br/>JSONL + zstd"]
+        E4["📊 Record Lineage<br/>batch_id, paths"]
+    end
+
+    subgraph Transform["Transform Phase"]
+        T1["🔧 Normalize units<br/>nM → μM standardization"]
+        T2["📝 Add metadata<br/>_run_id, _run_type, _ingestion_ts"]
+        T3["🔐 Compute content_hash<br/>sha256(provider + canonical_json)"]
+        T4["🏗️ Create Activity entity"]
+    end
+
+    subgraph Validate["Validate Phase"]
+        V1["📋 ActivityTableSchema<br/>(Pandera)"]
+        V2["✅ Check standard_value range<br/>0 < value < 1e12"]
+        V3["🧪 Validate SMILES if present<br/>(optional field)"]
+        V4{{"📊 Error Rate Check"}}
+    end
+
+    subgraph Load["Load Phase"]
+        L1[("🥈 Silver Layer<br/>silver/chembl/activity/<br/>year=/month=/")]
+        L2[("🥇 Gold Layer<br/>gold/activity_by_target/<br/>target_id=/")]
+    end
+
+    subgraph Related["Related Entities (Silver)"]
+        Assay[("📊 Assay<br/>silver/chembl/assay/")]
+        Molecule[("🧬 Molecule<br/>silver/chembl/molecule/")]
+        Target[("🎯 Target<br/>silver/chembl/target/")]
+    end
+
+    subgraph Quarantine["DQ Failures"]
+        Q[("🗑️ Quarantine<br/>quarantine/chembl_activity/")]
+    end
+
+    %% Extract flow
+    API --> E1
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+
+    %% Transform flow
+    E4 --> T1
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+
+    %% Validate flow
+    T4 --> V1
+    V1 --> V2
+    V2 --> V3
+    V3 --> V4
+
+    %% Load flow
+    V4 -->|"✅ Pass"| L1
+    V4 -->|"❌ Fail"| Q
+    L1 --> L2
+
+    %% Foreign key relationships
+    L1 -.->|"assay_id FK"| Assay
+    L1 -.->|"molecule_id FK"| Molecule
+    L1 -.->|"target_id FK"| Target
+
+    %% Styling
+    style API fill:#E3F2FD
+    style E3 fill:#CD7F32,color:#fff
+    style L1 fill:#C0C0C0,color:#000
+    style L2 fill:#FFD700,color:#000
+    style Q fill:#FF6B6B,color:#fff
+
+    %% Activity Schema annotation
+    subgraph Schema["Activity Silver Schema"]
+        direction TB
+        S1["activity_id: str (PK)"]
+        S2["assay_id: str (FK)"]
+        S3["molecule_id: str (FK)"]
+        S4["target_id: str | None (FK)"]
+        S5["standard_type: str"]
+        S6["standard_value: float | None"]
+        S7["standard_units: str | None"]
+        S8["pchembl_value: float | None"]
+        S9["_content_hash: str"]
+        S10["_run_id: UUID"]
+        S11["_run_type: str"]
+        S12["_ingestion_ts: datetime"]
+    end
