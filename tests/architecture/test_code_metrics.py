@@ -54,7 +54,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         # Interfaces layer exemptions
-        "cli.py": 450,  # 420 LOC - CLI commands and options
+        "cli.py": 520,  # 510 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
         "storage_factory.py": 400, # Extracted from storage.py
         "observability.py": 450, # Bootstrap observability
