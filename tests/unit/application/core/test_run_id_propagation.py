@@ -118,7 +118,7 @@ class TestRunIdPropagation:
 
         # Create a transform that returns the record with lineage fields
         # (simulating what BaseTransformer.entity_to_silver_record does)
-        async def transform(ctx, record):
+        async def transform(ctx, record, index):
             return {
                 "id": str(record.get("id")),
                 "value": record.get("value"),
@@ -184,7 +184,7 @@ class TestRunIdPropagation:
     ) -> None:
         """Test that the same run_id is used across multiple batches."""
 
-        async def transform(ctx, record):
+        async def transform(ctx, record, index):
             return {
                 "id": str(record.get("id")),
                 "value": record.get("value"),
@@ -257,7 +257,7 @@ class TestRunIdPropagation:
                 logger=mock_logger,
             )
 
-            async def transform(ctx, record):
+            async def transform(ctx, record, index):
                 return {
                     "id": str(record.get("id")),
                     "value": record.get("value"),

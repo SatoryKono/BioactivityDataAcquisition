@@ -373,7 +373,7 @@ class TestRecordProcessorProcessBatch:
 
         config = get_pipeline_config(pipeline_name)
 
-        async def transform(ctx, record):
+        async def transform(ctx, record, index):
             if record.get("id") == "bad":
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -428,7 +428,7 @@ class TestRecordProcessorProcessBatch:
 
         config = get_pipeline_config(pipeline_name)
 
-        async def transform(ctx, record):
+        async def transform(ctx, record, index):
             if record.get("id") == "bad":
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
