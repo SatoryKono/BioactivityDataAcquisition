@@ -4821,11 +4821,19 @@
     RecoverableError &lt;|-- ApiError
     RecoverableError &lt;|-- CircuitBreakerOpenError
     RecoverableError &lt;|-- RetryExhaustedError
+    RecoverableError &lt;|-- StorageError
+
+    StorageError &lt;|-- BucketNotFoundError
+    StorageError &lt;|-- UploadError
+    StorageError &lt;|-- TableNotFoundError
+    StorageError &lt;|-- SchemaEvolutionError
+    StorageError &lt;|-- BronzeValidationError
 
     DataQualityError &lt;|-- SchemaViolationError
     DataQualityError &lt;|-- MissingRequiredFieldError
     DataQualityError &lt;|-- InvalidDataFormatError
-    DataQualityError &lt;|-- DataQualityThresholdError</code></pre>
+
+    BioETLError &lt;|-- DataQualityThresholdError</code></pre>
 <h2 id="error-classification">Error Classification<a class="headerlink" href="#error-classification" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
