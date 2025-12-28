@@ -654,7 +654,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 > Утверждения делались без проверки фактического состояния кода.
 
 > **⚠️ ОБЯЗАТЕЛЬНО**: Перед предложением рефакторинга **MUST** выполнить верификацию согласно
-> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/REFACTORING_PLAN.md`.
+> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/refactoring-plan.md`.
 
 При проведении архитектурных обзоров **MUST** выполнять двойную верификацию каждой найденной проблемы:
 
@@ -671,7 +671,7 @@ grep -c "def \|async def " src/bioetl/path/to/file.py
 grep -n "self\._.*\." src/bioetl/path/to/file.py | head -20
 
 # 3. Сверить с известными ложными утверждениями
-grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/REFACTORING_PLAN.md
+grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/refactoring-plan.md
 
 # 4. Найти существующие реализации
 grep -r "class ClassName\|def method_name" src/bioetl/
@@ -696,7 +696,7 @@ grep -r "class ClassName\|def method_name" src/bioetl/
 | **Размер** | LOC и количество методов |
 | **Структура** | Описание публичных методов и делегирования |
 | **Дата верификации** | Дата проверки кода |
-| **Проверено** | "Нет в REFACTORING_PLAN.md:ЛОЖНЫЕ УТВЕРЖДЕНИЯ ✅" |
+| **Проверено** | "Нет в refactoring-plan.md:ЛОЖНЫЕ УТВЕРЖДЕНИЯ ✅" |
 
 **Пример верифицированного утверждения:**
 
@@ -707,7 +707,7 @@ grep -r "class ClassName\|def method_name" src/bioetl/
 - **Файл**: `runner.py:116-123` (175 строк, 9 методов)
 - **Код**: `observer = PipelineObserver(...)`
 - **Дата**: 2025-12-27
-- **Проверено**: Нет в REFACTORING_PLAN.md:ЛОЖНЫЕ УТВЕРЖДЕНИЯ ✅
+- **Проверено**: Нет в refactoring-plan.md:ЛОЖНЫЕ УТВЕРЖДЕНИЯ ✅
 
 ### Текущее состояние
 PipelineRunner.run() создаёт PipelineObserver напрямую вместо получения через DI.
@@ -747,7 +747,7 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 | **Отсутствие верификации кодом** | Утверждения без проверки фактического состояния | `grep`, `wc -l`, чтение файла |
 | **Ложная корреляция размер → сложность** | 500+ LOC автоматически считается "монолитом" | Анализ делегирования (см. 7.1.6) |
 | **Неверная интерпретация паттернов** | NoOp как нарушение DI, shim как дублирование | Знание Null Object Pattern, backward-compat |
-| **Устаревшие знания** | Задача уже реализована, но это не проверено | Сверка с `REFACTORING_PLAN.md` |
+| **Устаревшие знания** | Задача уже реализована, но это не проверено | Сверка с `refactoring-plan.md` |
 
 #### 7.1.6. Анализ Делегирования (MUST перед "god object")
 
@@ -764,7 +764,7 @@ grep -o "self\._[a-z_]*" src/bioetl/path/to/file.py | sort -u | wc -l
 grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 
 # 4. Сверить с известными ложными утверждениями
-grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/REFACTORING_PLAN.md
+grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/refactoring-plan.md
 ```
 
 **Критерии "монолита" (ВСЕ должны выполняться):**
@@ -782,14 +782,14 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/REFACTORING_PLAN.md
 
 При обнаружении ложного утверждения **MUST**:
 
-1. Добавить в `docs/REFACTORING_PLAN.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+1. Добавить в `docs/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
 2. Указать причину, почему утверждение ложно
 3. Добавить ссылку на код (`файл:строка`)
 4. Закоммитить изменения
 
 При реализации задачи **MUST**:
 
-1. Переместить в `docs/REFACTORING_PLAN.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
+1. Переместить в `docs/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
 2. Добавить ссылку на коммит или файл
 3. Указать дату реализации
 
@@ -810,7 +810,7 @@ grep "^from\|^import" src/bioetl/path/to/file.py | head -20
 find tests -name "*.py" -exec grep -l "ClassName" {} \;
 
 # Проверка в списке ложных утверждений
-grep -B2 -A2 "ComponentName" docs/REFACTORING_PLAN.md
+grep -B2 -A2 "ComponentName" docs/refactoring-plan.md
 ```
 
 ---
@@ -1018,7 +1018,7 @@ fields:
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) | Observability Architecture | Accepted | 2025-12-26 |
 
 ## История Изменений (Changelog)
-- **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с CLAUDE.md §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в REFACTORING_PLAN.md.
+- **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с CLAUDE.md §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в refactoring-plan.md.
 - **5.6** (2025-12-27): Anti-False-Claims Protocol (REQ-ARCH-041). Расширена §7 с детальными правилами анализа делегирования (§7.1.6), причинами ложных утверждений (§7.1.5), контрпримерами (ChemblAdapter, GoldWriter, PreflightService). Добавлены конкретные примеры из кодовой базы в §7.1.4.
 - **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
 - **5.4** (2025-12-25): Architecture Documentation Update. Добавлены §1.1.2 (Health Check Protocol), §2.4.2 (Medallion Clear Policy), §4.4 (Python Standards), §5.3.2 (Async Cleanup). Реестр ADR расширен (011-015). Добавлено ограничение на structlog в application/interfaces (§4.3, тест `test_no_structlog_in_application_interfaces`). Добавлен deterministic mode для retry jitter (§3.1.3).
