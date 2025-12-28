@@ -35,7 +35,11 @@ class PubMedAdapter(BaseHttpAdapter):
     Args:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
         logger: LoggerPort instance for structured logging.
-        email: Email address for NCBI API (required).
+        email: Technical email for NCBI API tool identification (required).
+            NOTE: This is NOT PII (Personally Identifiable Information).
+            NCBI requires this for API usage tracking and rate limiting.
+            Typically set to application/developer contact email, not end-user data.
+            See: https://www.ncbi.nlm.nih.gov/books/NBK25497/
         api_key: Optional NCBI API key for higher rate limits.
         batch_size: Number of records to fetch per batch.
         metrics: Optional MetricsPort for recording adapter metrics.
