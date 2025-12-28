@@ -138,23 +138,26 @@ async def test_pubchem_compound_pipeline(
 
     logger = structlog.get_logger()
 
-    # Create storage adapter
+    # Create storage adapter with require_lock=False for tests
     bronze_writer = BronzeWriter(
         base_path=str(e2e_temp_storage["bronze"]),
         logger=logger,
         metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
+        require_lock=False,
     )
 
     silver_writer = DeltaWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
+        require_lock=False,
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
         logger=logger,
+        require_lock=False,
     )
 
     storage_adapter = StorageAdapter(

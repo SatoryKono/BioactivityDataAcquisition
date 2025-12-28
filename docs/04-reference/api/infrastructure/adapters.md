@@ -87,11 +87,11 @@ Storage adapter for local filesystem (Bronze layer).
 
 ## Lock Adapters
 
-### MemoryLockAdapter
+### MemoryLock
 
 In-memory lock implementation (Local-Only).
 
-::: bioetl.infrastructure.adapters.lock.memory_lock.MemoryLockAdapter
+::: bioetl.infrastructure.locking.memory_lock.MemoryLock
     options:
         show_root_heading: true
         show_source: false
@@ -102,11 +102,11 @@ In-memory lock implementation (Local-Only).
 
 ## Checkpoint Adapters
 
-### LocalCheckpointAdapter
+### LocalCheckpoint
 
 Local filesystem checkpoint implementation.
 
-::: bioetl.infrastructure.adapters.checkpoint.local_checkpoint.LocalCheckpointAdapter
+::: bioetl.infrastructure.checkpoint.local_checkpoint.LocalCheckpoint
     options:
         show_root_heading: true
         show_source: false
