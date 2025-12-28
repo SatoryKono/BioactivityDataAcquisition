@@ -687,11 +687,11 @@ class TestUnifiedHTTPClientObservability:
         self, http_client_with_observability, mock_circuit_breaker, mock_metrics
     ):
         """Test retry increments retry counter."""
-        mock_response_503 = MagicMock()
+        mock_response_503 = MagicMock(spec=httpx.Response)
         mock_response_503.status_code = 503
         mock_response_503.headers = {}
 
-        mock_response_200 = MagicMock()
+        mock_response_200 = MagicMock(spec=httpx.Response)
         mock_response_200.status_code = 200
         mock_response_200.raise_for_status = MagicMock()
 
