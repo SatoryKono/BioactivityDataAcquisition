@@ -18,6 +18,7 @@ Health Check:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, NoReturn
 
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -128,6 +129,28 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         if self.mailto:
             params["mailto"] = self.mailto
         return params
+
+    @staticmethod
+    def _format_date_filter(dt: date | datetime | str) -> str:
+        """Format date for OpenAlex filter.
+
+        OpenAlex accepts dates in YYYY-MM-DD format for filters like:
+        - from_updated_date:2023-01-01
+        - from_publication_date:2023-01-01
+
+        Args:
+            dt: Date as date object, datetime object, or ISO string.
+
+        Returns:
+            Date string in YYYY-MM-DD format.
+
+        """
+        if isinstance(dt, datetime):
+            return dt.date().isoformat()
+        if isinstance(dt, date):
+            return dt.isoformat()
+        # Assume string is already in correct format or close to it
+        return str(dt)[:10]  # Take first 10 chars (YYYY-MM-DD)
 
     def _get_entity_endpoint(self, entity_type: str) -> str:
         """Get API endpoint URL for entity type.
@@ -378,6 +401,9 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         entity_type: str,
         limit: int | None,
         query: str | None = None,
+        from_updated_date: date | datetime | str | None = None,
+        from_publication_date: date | datetime | str | None = None,
+        additional_filters: dict[str, str] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Perform standard cursor-based paginated fetch.
 
@@ -385,6 +411,10 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             entity_type: Type of entity to fetch.
             limit: Maximum records to fetch.
             query: Optional search query.
+            from_updated_date: Only fetch records updated on or after this date.
+                Useful for incremental fetches (RULES.md incremental support).
+            from_publication_date: Only fetch records published on or after this date.
+            additional_filters: Additional filter key-value pairs.
 
         Yields:
             Records from OpenAlex API.
@@ -392,8 +422,24 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         """
         url = self._get_entity_endpoint(entity_type)
 
+        # Build filter string from date parameters
+        filter_parts: list[str] = []
+        if from_updated_date:
+            date_str = self._format_date_filter(from_updated_date)
+            filter_parts.append(f"from_updated_date:{date_str}")
+        if from_publication_date:
+            date_str = self._format_date_filter(from_publication_date)
+            filter_parts.append(f"from_publication_date:{date_str}")
+        if additional_filters:
+            for key, value in additional_filters.items():
+                filter_parts.append(f"{key}:{value}")
+
+        combined_filter = ",".join(filter_parts) if filter_parts else None
+
         async def _pagination_callback(
-            cursor: str | None, fetched: int
+            cursor: str | None,
+            fetched: int,
+            filter_string: str | None = combined_filter,
         ) -> tuple[list[dict[str, Any]], str | None]:
             params = self._build_base_params()
             params["per_page"] = self._get_effective_per_page()
@@ -407,6 +453,10 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             # Optional search filter
             if query:
                 params["search"] = query
+
+            # Add combined filter if present
+            if filter_string:
+                params["filter"] = filter_string
 
             results, next_cursor = await self._fetch_page(url, params, entity_type)
 
@@ -525,6 +575,9 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        from_updated_date: date | datetime | str | None = None,
+        from_publication_date: date | datetime | str | None = None,
+        additional_filters: dict[str, str] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from OpenAlex.
 
@@ -536,6 +589,10 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             query: Optional search query.
             filter_ids: Optional list of IDs to filter by.
             filter_field: Field name to filter on.
+            from_updated_date: Only fetch records updated on or after this date.
+                Useful for incremental fetches.
+            from_publication_date: Only fetch records published on or after this date.
+            additional_filters: Additional filter key-value pairs.
 
         Yields:
             Dictionary records from OpenAlex API.
@@ -547,7 +604,14 @@ class OpenAlexAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             ):
                 yield record
         else:
-            async for record in self._fetch_standard(entity_type, limit, query):
+            async for record in self._fetch_standard(
+                entity_type,
+                limit,
+                query,
+                from_updated_date=from_updated_date,
+                from_publication_date=from_publication_date,
+                additional_filters=additional_filters,
+            ):
                 yield record
 
     async def fetch_filtered(

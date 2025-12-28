@@ -1,0 +1,220 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-httpx
+    method: GET
+    uri: https://api.openalex.org/works?mailto=test@example.com&per_page=2&cursor=*
+  response:
+    body:
+      string: |
+        {
+          "meta": {
+            "count": 100,
+            "db_response_time_ms": 25,
+            "page": 1,
+            "per_page": 2,
+            "next_cursor": "IlsxNzM1MzA3MjAwMDAwLCAnaHR0cHM6Ly9vcGVuYWxleC5vcmcvVzQ0MDU3ODU2NjUnXSI="
+          },
+          "results": [
+            {
+              "id": "https://openalex.org/W4405785665",
+              "doi": "https://doi.org/10.1038/s41586-024-07487-w",
+              "display_name": "A machine learning approach for drug discovery",
+              "publication_year": 2024,
+              "publication_date": "2024-06-15",
+              "type": "article",
+              "language": "en",
+              "authorships": [
+                {
+                  "author": {
+                    "id": "https://openalex.org/A5000000001",
+                    "display_name": "John Smith"
+                  },
+                  "author_position": "first",
+                  "institutions": [
+                    {
+                      "id": "https://openalex.org/I1234567890",
+                      "display_name": "MIT"
+                    }
+                  ]
+                }
+              ],
+              "primary_location": {
+                "source": {
+                  "id": "https://openalex.org/S1234567890",
+                  "display_name": "Nature",
+                  "issn_l": "0028-0836",
+                  "type": "journal"
+                },
+                "landing_page_url": "https://www.nature.com/articles/s41586-024-07487-w",
+                "pdf_url": null,
+                "version": "publishedVersion",
+                "license": "cc-by"
+              },
+              "open_access": {
+                "is_oa": true,
+                "oa_status": "gold",
+                "oa_url": "https://www.nature.com/articles/s41586-024-07487-w.pdf",
+                "any_repository_has_fulltext": true
+              },
+              "cited_by_count": 15,
+              "referenced_works_count": 45,
+              "is_retracted": false,
+              "is_paratext": false,
+              "abstract_inverted_index": {
+                "Machine": [0],
+                "learning": [1, 10],
+                "is": [2],
+                "transforming": [3],
+                "drug": [4],
+                "discovery": [5],
+                "by": [6],
+                "enabling": [7],
+                "faster": [8],
+                "compound": [9]
+              },
+              "primary_topic": {
+                "id": "https://openalex.org/T10000",
+                "display_name": "Drug Discovery",
+                "score": 0.95,
+                "subfield": {
+                  "id": "https://openalex.org/SF100",
+                  "display_name": "Pharmacology"
+                },
+                "field": {
+                  "id": "https://openalex.org/F100",
+                  "display_name": "Medicine"
+                },
+                "domain": {
+                  "id": "https://openalex.org/D100",
+                  "display_name": "Health Sciences"
+                }
+              },
+              "keywords": [
+                {"display_name": "machine learning"},
+                {"display_name": "drug discovery"},
+                {"display_name": "AI"}
+              ],
+              "concepts": [
+                {"display_name": "Machine Learning", "score": 0.9},
+                {"display_name": "Drug Discovery", "score": 0.85}
+              ],
+              "ids": {
+                "openalex": "https://openalex.org/W4405785665",
+                "doi": "https://doi.org/10.1038/s41586-024-07487-w",
+                "pmid": "https://pubmed.ncbi.nlm.nih.gov/12345678"
+              },
+              "biblio": {
+                "volume": "630",
+                "issue": "8018",
+                "first_page": "123",
+                "last_page": "130"
+              }
+            },
+            {
+              "id": "https://openalex.org/W4405785666",
+              "doi": "https://doi.org/10.1126/science.abcd1234",
+              "display_name": "Deep learning in genomics",
+              "publication_year": 2024,
+              "publication_date": "2024-05-20",
+              "type": "article",
+              "language": "en",
+              "authorships": [
+                {
+                  "author": {
+                    "id": "https://openalex.org/A5000000002",
+                    "display_name": "Jane Doe"
+                  },
+                  "author_position": "first",
+                  "institutions": [
+                    {
+                      "id": "https://openalex.org/I9876543210",
+                      "display_name": "Stanford University"
+                    }
+                  ]
+                }
+              ],
+              "primary_location": {
+                "source": {
+                  "id": "https://openalex.org/S9876543210",
+                  "display_name": "Science",
+                  "issn_l": "0036-8075",
+                  "type": "journal"
+                },
+                "landing_page_url": "https://www.science.org/doi/10.1126/science.abcd1234",
+                "pdf_url": null,
+                "version": "publishedVersion",
+                "license": null
+              },
+              "open_access": {
+                "is_oa": false,
+                "oa_status": "closed",
+                "oa_url": null,
+                "any_repository_has_fulltext": false
+              },
+              "cited_by_count": 8,
+              "referenced_works_count": 32,
+              "is_retracted": false,
+              "is_paratext": false,
+              "abstract_inverted_index": {
+                "Deep": [0],
+                "learning": [1],
+                "has": [2],
+                "revolutionized": [3],
+                "genomics": [4],
+                "research": [5]
+              },
+              "primary_topic": {
+                "id": "https://openalex.org/T20000",
+                "display_name": "Genomics",
+                "score": 0.92,
+                "subfield": {
+                  "id": "https://openalex.org/SF200",
+                  "display_name": "Genetics"
+                },
+                "field": {
+                  "id": "https://openalex.org/F200",
+                  "display_name": "Biology"
+                },
+                "domain": {
+                  "id": "https://openalex.org/D200",
+                  "display_name": "Life Sciences"
+                }
+              },
+              "keywords": [
+                {"display_name": "deep learning"},
+                {"display_name": "genomics"}
+              ],
+              "concepts": [
+                {"display_name": "Deep Learning", "score": 0.88},
+                {"display_name": "Genomics", "score": 0.9}
+              ],
+              "ids": {
+                "openalex": "https://openalex.org/W4405785666",
+                "doi": "https://doi.org/10.1126/science.abcd1234"
+              },
+              "biblio": {
+                "volume": "384",
+                "issue": "6695",
+                "first_page": "456",
+                "last_page": "462"
+              }
+            }
+          ],
+          "group_by": []
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

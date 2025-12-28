@@ -1,0 +1,127 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-httpx
+    method: GET
+    uri: https://api.openalex.org/works?mailto=test@example.com&per_page=2&cursor=*&filter=from_updated_date:2024-01-01
+  response:
+    body:
+      string: |
+        {
+          "meta": {
+            "count": 50,
+            "db_response_time_ms": 18,
+            "page": 1,
+            "per_page": 2,
+            "next_cursor": "IlsxNzM1MzA3MjAwMDAwLCAnaHR0cHM6Ly9vcGVuYWxleC5vcmcvVzQ0MDU3ODU2NjUnXSI="
+          },
+          "results": [
+            {
+              "id": "https://openalex.org/W4405785700",
+              "doi": "https://doi.org/10.1038/s41586-024-08001-x",
+              "display_name": "CRISPR-Cas9 gene editing advances",
+              "publication_year": 2024,
+              "publication_date": "2024-02-10",
+              "type": "article",
+              "language": "en",
+              "updated_date": "2024-06-15T12:00:00.000000",
+              "authorships": [
+                {
+                  "author": {
+                    "id": "https://openalex.org/A5000000010",
+                    "display_name": "Alice Johnson"
+                  },
+                  "author_position": "first",
+                  "institutions": [
+                    {
+                      "id": "https://openalex.org/I1111111111",
+                      "display_name": "Harvard University"
+                    }
+                  ]
+                }
+              ],
+              "primary_location": {
+                "source": {
+                  "id": "https://openalex.org/S1234567890",
+                  "display_name": "Nature",
+                  "issn_l": "0028-0836",
+                  "type": "journal"
+                },
+                "landing_page_url": "https://www.nature.com/articles/s41586-024-08001-x",
+                "pdf_url": null,
+                "version": "publishedVersion",
+                "license": "cc-by"
+              },
+              "open_access": {
+                "is_oa": true,
+                "oa_status": "gold",
+                "oa_url": "https://www.nature.com/articles/s41586-024-08001-x.pdf",
+                "any_repository_has_fulltext": true
+              },
+              "cited_by_count": 25,
+              "referenced_works_count": 60,
+              "is_retracted": false,
+              "is_paratext": false,
+              "abstract_inverted_index": {
+                "CRISPR": [0],
+                "technology": [1],
+                "enables": [2],
+                "precise": [3],
+                "gene": [4],
+                "editing": [5]
+              },
+              "primary_topic": {
+                "id": "https://openalex.org/T30000",
+                "display_name": "Gene Editing",
+                "score": 0.98,
+                "subfield": {
+                  "id": "https://openalex.org/SF300",
+                  "display_name": "Molecular Biology"
+                },
+                "field": {
+                  "id": "https://openalex.org/F300",
+                  "display_name": "Biology"
+                },
+                "domain": {
+                  "id": "https://openalex.org/D300",
+                  "display_name": "Life Sciences"
+                }
+              },
+              "keywords": [
+                {"display_name": "CRISPR"},
+                {"display_name": "gene editing"}
+              ],
+              "concepts": [
+                {"display_name": "CRISPR", "score": 0.95},
+                {"display_name": "Gene Editing", "score": 0.92}
+              ],
+              "ids": {
+                "openalex": "https://openalex.org/W4405785700",
+                "doi": "https://doi.org/10.1038/s41586-024-08001-x",
+                "pmid": "https://pubmed.ncbi.nlm.nih.gov/98765432"
+              },
+              "biblio": {
+                "volume": "625",
+                "issue": "7994",
+                "first_page": "200",
+                "last_page": "210"
+              }
+            }
+          ],
+          "group_by": []
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

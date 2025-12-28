@@ -1,38 +1,48 @@
-# configs/pipelines/openalex/publication_enrichment.yaml
-# Конфигурация пайплайна для обогащения публикаций из OpenAlex.
+# configs/pipelines/openalex/works.yaml
+# Configuration for fetching OpenAlex works (publications).
+#
+# Supports incremental fetch via from_updated_date filter.
+# Uses cursor-based pagination for stable results.
 
-pipeline_name: openalex_publication_enrichment
+pipeline_name: openalex_works
 provider: openalex
 entity_type: works
 version: "1.0.0"
-description: "Enrich publication records with OpenAlex metadata (citations, authors, concepts)"
+description: "Fetch scholarly works from OpenAlex open index"
 
 primary_keys: ["openalex_id"]
 silver_table: "openalex_works"
 
-# Ссылка на файл с конфигурацией источника данных
+# Reference to data source configuration
 source_file: ../../sources/openalex.yaml
 
-# Gold layer filters - retain high-quality publication metadata
+# Gold layer filters - retain high-quality publications
 gold_filters:
     columns:
         type: [article, book, book-chapter, dissertation, preprint, review]
+        oa_status: [gold, green, hybrid, bronze, closed]
     ranges:
-        cited_by_count:
-            min: 0
-            include_min: true
+        publication_year:
+            min: 1800
+            max: 2030
     required_fields:
         - openalex_id
-        - title
+        - display_name
+        - type
 
 transform:
     version: "1.0.0"
+    class: "bioetl.application.pipelines.openalex.OpenAlexWorkTransformer"
     steps:
         - extract_openalex_id
+        - flatten_primary_location
+        - flatten_open_access
+        - flatten_primary_topic
         - reconstruct_abstract
         - extract_authors
         - extract_institutions
         - normalize_doi
+        - extract_keywords
         - calculate_content_hash
 
 sink:
@@ -40,6 +50,7 @@ sink:
         path: "data/output/bronze"
         format: jsonl
         save_json: true
+        compression: zstd
 
     silver:
         path: "data/output/silver"
@@ -70,10 +81,12 @@ sink:
             header: true
             encoding: "utf-8"
 
+# Data quality rules
 dq_rules:
     soft_fail_threshold: 0.05
     hard_fail_threshold: 0.20
 
+# Circuit breaker for API resilience
 circuit_breaker:
     failure_threshold: 5
     recovery_timeout: 300
@@ -90,10 +103,8 @@ incremental:
     filter_param: from_updated_date
     lookback_days: 1  # Overlap to catch late updates
 
-# Input filter configuration (for DOI-based filtering)
-input_filter:
-    enabled: true
-    source_path: "data/input/dois.csv"
-    column_name: "doi"
-    filter_field: "doi"
-    batch_size: 50
+# Fetch configuration
+fetch:
+    per_page: 200  # Max allowed by OpenAlex
+    # Default limit: None (fetch all matching records)
+    # Set limit in CLI for testing: --limit 100
