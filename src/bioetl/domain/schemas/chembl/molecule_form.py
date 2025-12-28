@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -21,10 +19,10 @@ class MoleculeFormSchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    parent_molregno: Optional[Series[int]] = pa.Field(
+    parent_molregno: Series[int] | None = pa.Field(
         nullable=True, description="FK to parent molecule."
     )
-    active_molregno: Optional[Series[int]] = pa.Field(
+    active_molregno: Series[int] | None = pa.Field(
         nullable=True, description="FK to active molecule."
     )
 

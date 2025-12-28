@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -29,7 +27,7 @@ class TargetRelationSchema(ETLRecordSchema):
     )
 
     # === Metadata ===
-    relationship: Optional[Series[str]] = pa.Field(
+    relationship: Series[str] | None = pa.Field(
         nullable=True,
         isin=["EQUIVALENT TO", "SUBSET OF", "SUPERSET OF", "OVERLAPS WITH"],
         description="Relationship type.",

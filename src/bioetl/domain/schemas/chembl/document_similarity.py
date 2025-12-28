@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -29,33 +27,33 @@ class DocumentSimilaritySchema(ETLRecordSchema):
     )
 
     # === Identifiers ===
-    pubmed_id1: Optional[Series[int]] = pa.Field(
+    pubmed_id1: Series[int] | None = pa.Field(
         nullable=True, description="PubMed ID 1."
     )
-    pubmed_id2: Optional[Series[int]] = pa.Field(
+    pubmed_id2: Series[int] | None = pa.Field(
         nullable=True, description="PubMed ID 2."
     )
 
     # === Metrics ===
-    tid_tani: Optional[Series[float]] = pa.Field(
+    tid_tani: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         le=1,
         description="Tanimoto coefficient (TID).",
     )
-    mol_tani: Optional[Series[float]] = pa.Field(
+    mol_tani: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         le=1,
         description="Tanimoto coefficient (MOL).",
     )
-    avg_tani: Optional[Series[float]] = pa.Field(
+    avg_tani: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         le=1,
         description="Average Tanimoto coefficient.",
     )
-    max_tani: Optional[Series[float]] = pa.Field(
+    max_tani: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         le=1,

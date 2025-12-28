@@ -6,13 +6,11 @@ Source: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
 from __future__ import annotations
 
 from datetime import date
-from typing import Optional
 
 import pandera as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-
 
 # === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
@@ -33,12 +31,12 @@ class ArticleSchema(ETLRecordSchema):
     )
 
     # === External Identifiers ===
-    doi: Optional[Series[str]] = pa.Field(
+    doi: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^10\.\d{4,}/.+$",
         description="Digital Object Identifier"
     )
-    pmc_id: Optional[Series[str]] = pa.Field(
+    pmc_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^PMC\d+$",
         description="PubMed Central ID"
@@ -50,136 +48,136 @@ class ArticleSchema(ETLRecordSchema):
         str_length={"min_value": 1},
         description="Article title (required)"
     )
-    abstract: Optional[Series[str]] = pa.Field(
+    abstract: Series[str] | None = pa.Field(
         nullable=True,
         description="Abstract text (may be structured)"
     )
-    abstract_structured: Optional[Series[bool]] = pa.Field(
+    abstract_structured: Series[bool] | None = pa.Field(
         nullable=True,
         description="Whether abstract has NLM sections"
     )
-    vernacular_title: Optional[Series[str]] = pa.Field(
+    vernacular_title: Series[str] | None = pa.Field(
         nullable=True,
         description="Original non-English title"
     )
-    language: Optional[Series[str]] = pa.Field(
+    language: Series[str] | None = pa.Field(
         nullable=True,
         str_length={"min_value": 2, "max_value": 3},
         description="MARC language code (e.g., 'eng')"
     )
 
     # === Journal Information ===
-    journal_title: Optional[Series[str]] = pa.Field(
+    journal_title: Series[str] | None = pa.Field(
         nullable=True,
         description="Full journal name"
     )
-    journal_iso_abbrev: Optional[Series[str]] = pa.Field(
+    journal_iso_abbrev: Series[str] | None = pa.Field(
         nullable=True,
         description="ISO journal abbreviation"
     )
-    journal_issn: Optional[Series[str]] = pa.Field(
+    journal_issn: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^\d{4}-\d{3}[\dX]$",
         description="ISSN (print or electronic)"
     )
-    journal_issn_type: Optional[Series[str]] = pa.Field(
+    journal_issn_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=ISSN_TYPES,
         description="ISSN type"
     )
-    nlm_unique_id: Optional[Series[str]] = pa.Field(
+    nlm_unique_id: Series[str] | None = pa.Field(
         nullable=True,
         description="NLM catalog ID"
     )
-    country: Optional[Series[str]] = pa.Field(
+    country: Series[str] | None = pa.Field(
         nullable=True,
         description="Journal country of publication"
     )
 
     # === Publication Details ===
-    volume: Optional[Series[str]] = pa.Field(
+    volume: Series[str] | None = pa.Field(
         nullable=True,
         description="Journal volume"
     )
-    issue: Optional[Series[str]] = pa.Field(
+    issue: Series[str] | None = pa.Field(
         nullable=True,
         description="Journal issue"
     )
-    medline_pgn: Optional[Series[str]] = pa.Field(
+    medline_pgn: Series[str] | None = pa.Field(
         nullable=True,
         description="Page numbers (MEDLINE format)"
     )
-    pub_year: Optional[Series[int]] = pa.Field(
+    pub_year: Series[int] | None = pa.Field(
         nullable=True,
         ge=1800,
         le=2100,
         description="Publication year"
     )
-    pub_month: Optional[Series[int]] = pa.Field(
+    pub_month: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         le=12,
         description="Publication month"
     )
-    pub_day: Optional[Series[int]] = pa.Field(
+    pub_day: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         le=31,
         description="Publication day"
     )
-    publication_status: Optional[Series[str]] = pa.Field(
+    publication_status: Series[str] | None = pa.Field(
         nullable=True,
         isin=PUBLICATION_STATUSES,
         description="Publication status"
     )
-    publication_type_list: Optional[Series[str]] = pa.Field(
+    publication_type_list: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of publication types"
     )
 
     # === Dates ===
-    date_completed: Optional[Series[date]] = pa.Field(
+    date_completed: Series[date] | None = pa.Field(
         nullable=True,
         description="MEDLINE processing completion date"
     )
-    date_revised: Optional[Series[date]] = pa.Field(
+    date_revised: Series[date] | None = pa.Field(
         nullable=True,
         description="Record revision date"
     )
 
     # === Metadata ===
-    citation_subset: Optional[Series[str]] = pa.Field(
+    citation_subset: Series[str] | None = pa.Field(
         nullable=True,
         description="Citation subset codes (e.g., 'AIM')"
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Optional[Series[int]] = pa.Field(
+    author_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of authors"
     )
-    mesh_heading_count: Optional[Series[int]] = pa.Field(
+    mesh_heading_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of MeSH headings"
     )
-    keyword_count: Optional[Series[int]] = pa.Field(
+    keyword_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of keywords"
     )
-    grant_count: Optional[Series[int]] = pa.Field(
+    grant_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of grants"
     )
-    reference_count: Optional[Series[int]] = pa.Field(
+    reference_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of references"
     )
-    chemical_count: Optional[Series[int]] = pa.Field(
+    chemical_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of chemicals"

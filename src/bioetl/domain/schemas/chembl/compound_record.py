@@ -5,7 +5,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 from __future__ import annotations
 
 from datetime import date
-from typing import Optional
 
 import pandera as pa
 from pandera.typing import Series
@@ -22,62 +21,62 @@ class CompoundRecordSchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    molregno: Optional[Series[int]] = pa.Field(
+    molregno: Series[int] | None = pa.Field(
         nullable=True, description="FK to molecule."
     )
-    doc_id: Optional[Series[int]] = pa.Field(
+    doc_id: Series[int] | None = pa.Field(
         nullable=True, description="FK to document."
     )
 
     # === Identifiers ===
-    compound_key: Optional[Series[str]] = pa.Field(
+    compound_key: Series[str] | None = pa.Field(
         nullable=True, description="Compound key."
     )
-    compound_name: Optional[Series[str]] = pa.Field(
+    compound_name: Series[str] | None = pa.Field(
         nullable=True, description="Compound name."
     )
-    src_id: Optional[Series[int]] = pa.Field(
+    src_id: Series[int] | None = pa.Field(
         nullable=True, description="Source ID."
     )
-    src_compound_id: Optional[Series[str]] = pa.Field(
+    src_compound_id: Series[str] | None = pa.Field(
         nullable=True, description="Source compound ID."
     )
-    src_compound_id_version: Optional[Series[int]] = pa.Field(
+    src_compound_id_version: Series[int] | None = pa.Field(
         nullable=True, description="Source compound ID version."
     )
 
     # === Metadata ===
-    filename: Optional[Series[str]] = pa.Field(
+    filename: Series[str] | None = pa.Field(
         nullable=True, description="Filename."
     )
-    load_date: Optional[Series[date]] = pa.Field(
+    load_date: Series[date] | None = pa.Field(
         nullable=True, description="Load date."
     )
-    ridx: Optional[Series[str]] = pa.Field(
+    ridx: Series[str] | None = pa.Field(
         nullable=True, description="Record index."
     )
-    cidx: Optional[Series[str]] = pa.Field(
+    cidx: Series[str] | None = pa.Field(
         nullable=True, description="Compound index."
     )
-    molregno_comment: Optional[Series[str]] = pa.Field(
+    molregno_comment: Series[str] | None = pa.Field(
         nullable=True, description="Molregno comment."
     )
-    molregno_sv: Optional[Series[float]] = pa.Field(
+    molregno_sv: Series[float] | None = pa.Field(
         nullable=True, description="Molregno SV."
     )
 
     # === Flags ===
-    removed: Optional[Series[int]] = pa.Field(
+    removed: Series[int] | None = pa.Field(
         nullable=True,
         isin=[0, 1],
         description="Removed flag.",
     )
-    curated: Optional[Series[int]] = pa.Field(
+    curated: Series[int] | None = pa.Field(
         nullable=True,
         isin=[0, 1],
         description="Curated flag.",
     )
-    molregno_fixed: Optional[Series[int]] = pa.Field(
+    molregno_fixed: Series[int] | None = pa.Field(
         nullable=True,
         isin=[0, 1],
         description="Molregno fixed flag.",

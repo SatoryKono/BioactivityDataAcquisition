@@ -6,7 +6,6 @@ and can be instantiated with valid configuration data.
 
 from __future__ import annotations
 
-import pytest
 
 from bioetl.domain.config_types import (
     BronzeSinkDict,
@@ -17,7 +16,6 @@ from bioetl.domain.config_types import (
     GoldFiltersDict,
     GoldRangeDict,
     GoldSinkDict,
-    GoldValidationDict,
     InputFilterDict,
     PipelineConfigDict,
     ProviderConfigDict,

@@ -6,8 +6,9 @@ Extracted from RecordProcessor for single responsibility (SRP).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import orjson
 

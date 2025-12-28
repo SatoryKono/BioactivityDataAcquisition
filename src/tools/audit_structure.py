@@ -19,10 +19,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
-
 
 # =============================================================================
 # Configuration: Allowed directories and paths
