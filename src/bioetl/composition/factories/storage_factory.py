@@ -82,20 +82,24 @@ class StorageFactory:
         silver_config = config.sink.get("silver")
         gold_config = config.sink.get("gold")
 
-        # Use YAML paths if specified, otherwise fall back to settings
+        # Use YAML paths if specified, otherwise fall back to settings.
+        # In test mode (BIOETL_TEST_MODE=true), always use settings to respect
+        # test isolation with temp directories.
+        use_yaml_paths = not settings.test_mode
+
         bronze_path = (
             Path(bronze_config.path)
-            if bronze_config and bronze_config.path
+            if use_yaml_paths and bronze_config and bronze_config.path
             else settings.bronze_path
         )
         silver_path = (
             Path(silver_config.path)
-            if silver_config and silver_config.path
+            if use_yaml_paths and silver_config and silver_config.path
             else settings.silver_path
         )
         gold_path = (
             Path(gold_config.path)
-            if gold_config and gold_config.path
+            if use_yaml_paths and gold_config and gold_config.path
             else settings.gold_path
         )
         checkpoints_path = settings.checkpoint_path
@@ -107,11 +111,20 @@ class StorageFactory:
         # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
         require_lock = not settings.test_mode
 
+        # Log path sources for debugging
+        bronze_from_yaml = use_yaml_paths and bronze_config and bronze_config.path
+        silver_from_yaml = use_yaml_paths and silver_config and silver_config.path
+        gold_from_yaml = use_yaml_paths and gold_config and gold_config.path
+
         logger.info(
             "Using local storage",
             bronze_path=str(bronze_path),
             silver_path=str(silver_path),
             gold_path=str(gold_path),
+            bronze_from_yaml=bool(bronze_from_yaml),
+            silver_from_yaml=bool(silver_from_yaml),
+            gold_from_yaml=bool(gold_from_yaml),
+            test_mode=settings.test_mode,
             require_lock=require_lock,
         )
 

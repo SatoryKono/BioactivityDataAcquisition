@@ -38,6 +38,7 @@ def mock_settings(tmp_path):
     settings.gold_path = tmp_path / "gold"
     settings.checkpoint_path = tmp_path / "checkpoints"
     settings.data_dir = tmp_path
+    settings.test_mode = True  # Default to test mode
     return settings
 
 
