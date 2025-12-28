@@ -459,6 +459,7 @@ class DeltaWriter:
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         lock_context: LockContext | None = None,
+        **kwargs,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -475,6 +476,7 @@ class DeltaWriter:
                 - 'ignore': Proceed without changes (filter to existing schema)
             lock_context: Lock context from LockManager. Required unless
                          require_lock=False was passed to constructor (RULES.md §3.3).
+            **kwargs: Additional arguments for compatibility (ignored).
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
