@@ -153,7 +153,7 @@ UniProt provides protein sequence and annotation data.
 
 ### Protein Transformer
 
-::: bioetl.application.pipelines.uniprot.transformer.UniProtTransformer
+::: bioetl.application.pipelines.uniprot.transformer.UniProtProteinTransformer
     options:
         show_root_heading: true
         show_source: false
@@ -171,7 +171,7 @@ PubMed provides scientific publication metadata.
 
 ### Publications Transformer
 
-::: bioetl.application.pipelines.pubmed.transformer.PubMedTransformer
+::: bioetl.application.pipelines.pubmed.transformer.PubMedPublicationTransformer
     options:
         show_root_heading: true
         show_source: false
