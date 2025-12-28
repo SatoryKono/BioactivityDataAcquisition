@@ -1,0 +1,31 @@
+@startuml
+title Pipeline Execution Sequence
+
+actor User
+participant CLI
+participant "Pipeline Orchestrator" as Orchestrator
+participant "Extractor"
+participant "Transformer"
+participant "Loader"
+database "Data Lake" as Lake
+
+User -> CLI: bioetl run --pipeline chembl_activity
+CLI -> "bootstrap.py": bootstrap_pipeline("chembl_activity")
+"bootstrap.py" -> "GenericPipelineFactory": create_with_services()
+"GenericPipelineFactory" -> "DataSourceRegistry": get_creator("chembl")
+"GenericPipelineFactory" -> "StorageFactory": create()
+"GenericPipelineFactory" --> CLI: Pipeline instance created
+
+CLI -> Orchestrator: start_pipeline(pipeline_instance)
+
+Orchestrator -> Extractor: run()
+Extractor -> Lake: write to Bronze
+Orchestrator -> Transformer: run()
+Transformer -> Lake: read from Bronze
+Transformer -> Lake: write to Silver
+Orchestrator -> Loader: run()
+Loader -> Lake: read from Silver
+Loader -> Lake: write to Gold
+
+Orchestrator --> User: Pipeline finished
+@enduml

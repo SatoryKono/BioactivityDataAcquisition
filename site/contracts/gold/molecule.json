@@ -1,0 +1,135 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ChEMBL Molecule Data Contract",
+    "description": "Defines the schema for the gold 'Molecule' entity. Contains flattened fields only - JSON fields (molecule_hierarchy, molecule_properties, etc.) are retained in Silver for forensic purposes.",
+    "type": "object",
+    "properties": {
+        "molecule_chembl_id": {
+            "type": "string",
+            "description": "Primary identifier for the molecule.",
+            "pattern": "^CHEMBL\\d+$"
+        },
+        "pref_name": {
+            "type": ["string", "null"],
+            "description": "Preferred name of the molecule."
+        },
+        "molecule_type": {
+            "type": ["string", "null"],
+            "description": "Type of molecule (e.g., 'Small molecule', 'Antibody')."
+        },
+        "structure_type": {
+            "type": ["string", "null"],
+            "description": "Structure type classification."
+        },
+        "max_phase": {
+            "type": ["number", "null"],
+            "description": "Maximum clinical phase reached (0-4).",
+            "minimum": 0,
+            "maximum": 4
+        },
+        "first_approval": {
+            "type": ["number", "null"],
+            "description": "Year of first approval."
+        },
+        "oral": {
+            "type": ["boolean", "null"],
+            "description": "Whether the molecule is orally administered."
+        },
+        "parenteral": {
+            "type": ["boolean", "null"],
+            "description": "Whether the molecule is parenterally administered."
+        },
+        "topical": {
+            "type": ["boolean", "null"],
+            "description": "Whether the molecule is topically administered."
+        },
+        "therapeutic_flag": {
+            "type": ["boolean", "null"],
+            "description": "Whether the molecule has therapeutic use."
+        },
+        "withdrawn_flag": {
+            "type": ["boolean", "null"],
+            "description": "Whether the molecule has been withdrawn."
+        },
+        "black_box_warning": {
+            "type": ["number", "null"],
+            "description": "Black box warning status."
+        },
+        "hierarchy_parent_chembl_id": {
+            "type": ["string", "null"],
+            "description": "Parent molecule ChEMBL ID (flattened from molecule_hierarchy)."
+        },
+        "hierarchy_active_chembl_id": {
+            "type": ["string", "null"],
+            "description": "Active molecule ChEMBL ID (flattened from molecule_hierarchy)."
+        },
+        "property_mw_freebase": {
+            "type": ["number", "null"],
+            "description": "Molecular weight of freebase (flattened from molecule_properties)."
+        },
+        "property_alogp": {
+            "type": ["number", "null"],
+            "description": "ALogP value (flattened from molecule_properties)."
+        },
+        "property_hba": {
+            "type": ["number", "null"],
+            "description": "Hydrogen bond acceptor count (flattened from molecule_properties)."
+        },
+        "property_hbd": {
+            "type": ["number", "null"],
+            "description": "Hydrogen bond donor count (flattened from molecule_properties)."
+        },
+        "property_psa": {
+            "type": ["number", "null"],
+            "description": "Polar surface area (flattened from molecule_properties)."
+        },
+        "property_rtb": {
+            "type": ["number", "null"],
+            "description": "Rotatable bond count (flattened from molecule_properties)."
+        },
+        "property_ro5_violations": {
+            "type": ["number", "null"],
+            "description": "Number of Rule of 5 violations (0-4).",
+            "minimum": 0,
+            "maximum": 4
+        },
+        "property_qed_weighted": {
+            "type": ["number", "null"],
+            "description": "QED weighted score (0-1).",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "property_full_molformula": {
+            "type": ["string", "null"],
+            "description": "Full molecular formula."
+        },
+        "structure_canonical_smiles": {
+            "type": ["string", "null"],
+            "description": "Canonical SMILES representation (flattened from molecule_structures)."
+        },
+        "structure_standard_inchi": {
+            "type": ["string", "null"],
+            "description": "Standard InChI (flattened from molecule_structures)."
+        },
+        "structure_standard_inchi_key": {
+            "type": ["string", "null"],
+            "description": "Standard InChI Key (flattened from molecule_structures)."
+        },
+        "_run_id": {
+            "type": "string",
+            "description": "Pipeline run identifier.",
+            "format": "uuid"
+        },
+        "_ingestion_ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the record was ingested."
+        }
+    },
+    "required": [
+        "molecule_chembl_id",
+        "_run_id",
+        "_ingestion_ts"
+    ],
+    "additionalProperties": true
+}

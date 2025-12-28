@@ -1,0 +1,41 @@
+@startuml
+title Pipeline Locking Mechanism (Local-Only)
+
+note right of Worker
+  Local-Only Deployment (ADR-010):
+  Используется MemoryLock для локального
+  процесса. Redis-блокировки отложены
+  для будущего распределённого развёртывания.
+end note
+
+participant "Pipeline Worker" as Worker
+participant "MemoryLock\n(In-Process)" as LockManager
+database "Data Lake\n(Local FS)" as Lake
+
+== Incremental Run ==
+Worker -> LockManager: acquire("lock:chembl_activity")
+alt Lock acquired successfully
+    LockManager --> Worker: Lock granted
+    Worker -> Lake: Write Bronze/Silver/Gold
+    Worker -> LockManager: release()
+else Lock is already held
+    LockManager --> Worker: Lock denied (another pipeline running)
+    Worker --> Worker: Abort with error
+end
+
+== Exclusive Run (Backfill/Rebuild) ==
+Worker -> LockManager: acquire("lock:chembl_activity:exclusive")
+alt Lock acquired
+    LockManager --> Worker: Exclusive lock granted
+    Worker -> Lake: Clear & rebuild data
+    Worker -> LockManager: release()
+else Active incremental lock exists
+    LockManager --> Worker: Lock denied
+    Worker --> Worker: Wait or abort
+end
+
+note over Worker, Lake
+  Lock Max Duration: 4 hours
+  После истечения - принудительное снятие
+end note
+@enduml
