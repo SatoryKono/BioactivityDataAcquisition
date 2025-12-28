@@ -272,24 +272,24 @@ data_source_factory = DataSourceFactory()
 storage_factory = StorageFactory()
 
 # Create pipeline factory
-factory = GenericPipelineFactory(
-    data_source_factory=data_source_factory,
-    storage_factory=storage_factory,
-    config=pipeline_config,
-)
+# factory = GenericPipelineFactory(
+#     data_source_factory=data_source_factory,
+#     storage_factory=storage_factory,
+#     config=pipeline_config,
+# )
 
 # Create runner
-runner = factory.create_runner(
-    ctx=ctx,
-    services=services,
-    checkpoint_manager=checkpoint_manager,
-)
+# runner = factory.create_runner(
+#     ctx=ctx,
+#     services=services,
+#     checkpoint_manager=checkpoint_manager,
+# )
 
 # Or use the pre-configured factory
 from bioetl.composition.factories import chembl_activity_factory
 
-runner = chembl_activity_factory(ctx)
-await runner.run()
+# runner = chembl_activity_factory(ctx)
+# await runner.run()
 ```
 
 ## See Also
