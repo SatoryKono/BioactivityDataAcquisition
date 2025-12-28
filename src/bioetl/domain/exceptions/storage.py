@@ -50,6 +50,18 @@ class TableNotFoundError(StorageError):
         super().__init__(f"Table not found: '{table_path}'")
 
 
+def _build_schema_error_message(
+    table: str, new_fields: set[str], removed_fields: set[str]
+) -> str:
+    """Build error message for schema evolution error."""
+    parts = [f"Schema drift detected for '{table}'"]
+    if new_fields:
+        parts.append(f"new fields: {sorted(new_fields)}")
+    if removed_fields:
+        parts.append(f"removed fields: {sorted(removed_fields)}")
+    return ", ".join(parts)
+
+
 class SchemaEvolutionError(StorageError):
     """Raised when schema drift is detected and on_schema_mismatch='error'.
 
@@ -68,12 +80,7 @@ class SchemaEvolutionError(StorageError):
         self.table = table
         self.new_fields = new_fields or set()
         self.removed_fields = removed_fields or set()
-        parts = [f"Schema drift detected for '{table}'"]
-        if self.new_fields:
-            parts.append(f"new fields: {sorted(self.new_fields)}")
-        if self.removed_fields:
-            parts.append(f"removed fields: {sorted(self.removed_fields)}")
-        super().__init__(", ".join(parts))
+        super().__init__(_build_schema_error_message(table, self.new_fields, self.removed_fields))
 
 
 class BronzeValidationError(StorageError):
