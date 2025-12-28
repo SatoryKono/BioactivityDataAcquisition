@@ -1,0 +1,88 @@
+# configs/pipelines/crossref/publication.yaml
+# Configuration for CrossRef publication pipeline.
+
+pipeline_name: crossref_publication
+provider: crossref
+entity_type: publication
+version: "1.0.0"
+description: "Extract publication metadata from CrossRef API"
+
+primary_keys: ["doi"]
+silver_table: "crossref_publication"
+gold_table: "crossref_publication"
+
+# Reference to source configuration file
+source_file: ../../sources/crossref.yaml
+
+# Pipeline-specific source configuration
+source:
+    # Optional search query for bibliographic search
+    # search_term: "bioinformatics AND drug discovery"
+    # Email for polite pool access (recommended for higher rate limits)
+    email: "${BIOETL_CROSSREF_EMAIL}"
+
+# Gold layer filters
+gold_filters:
+    required_fields:
+        - doi
+        - title
+    columns: {}
+
+transform:
+    version: "1.0.0"
+    steps:
+        - normalize_doi
+        - extract_metadata
+        - clean_abstract
+
+sink:
+    bronze:
+        path: "data/bronze/crossref/publication"
+        format: jsonl
+        save_json: true
+
+    silver:
+        path: "data/silver/crossref/publication"
+        format: delta
+        mode: merge
+        primary_key: ["doi"]
+        partition_by: ["year"]
+        classification: public
+        forensic_retention: true
+        csv_export:
+            enabled: true
+            path: "data/output/csv/silver"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+    gold:
+        enabled: true
+        validation:
+            strict: true
+        path: "data/gold/crossref/publication"
+        format: delta
+        mode: overwrite
+        csv_export:
+            enabled: true
+            path: "data/output/csv/gold"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+dq_rules:
+    soft_fail_threshold: 0.05
+    hard_fail_threshold: 0.20
+
+circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+
+# Input filter configuration (for CSV-based DOI filtering)
+# CLI options --input-csv, --filter-column, --filter-field override these
+input_filter:
+    enabled: true
+    source_path: "data/input/crossref.csv"
+    column_name: "doi"
+    filter_field: "doi"
+    batch_size: 50

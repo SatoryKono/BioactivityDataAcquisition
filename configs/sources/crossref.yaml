@@ -1,0 +1,24 @@
+# configs/sources/crossref.yaml
+# Configuration for CrossRef data source.
+
+source:
+    type: api
+    load_strategy: full
+    batch_size: 100
+    provider_config:
+        provider: crossref
+        base_url: https://api.crossref.org
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        batch_size: 100
+
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    rate_limit:
+        # With mailto parameter (polite pool): 50 req/sec guaranteed
+        # Without mailto: best effort ~50 req/sec
+        requests_per_second: 50.0
+        burst: 100

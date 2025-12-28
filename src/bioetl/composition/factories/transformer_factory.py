@@ -116,6 +116,9 @@ def register_all_transformers() -> None:
         TargetComponentTransformer,
     )
     from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+    from bioetl.application.pipelines.crossref.transformer import (
+        CrossRefPublicationTransformer,
+    )
     from bioetl.application.pipelines.pubchem.transformer import (
         PubChemCompoundTransformer,
     )
@@ -133,6 +136,9 @@ def register_all_transformers() -> None:
     register_transformer("chembl", "molecule", MoleculeTransformer)
     register_transformer("chembl", "target", TargetTransformer)
     register_transformer("chembl", "target_component", TargetComponentTransformer)
+
+    # CrossRef transformers
+    register_transformer("crossref", "publication", CrossRefPublicationTransformer)
 
     # PubChem transformers
     register_transformer("pubchem", "compound", PubChemCompoundTransformer)

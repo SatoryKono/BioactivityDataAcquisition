@@ -25,6 +25,7 @@ from bioetl.composition.providers.provider_registry import (
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
@@ -247,6 +248,43 @@ def _create_pubmed_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_crossref_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create CrossRef data source with optional CSV filtering.
+
+    Args:
+        settings: Application settings.
+        pipeline_config: Pipeline YAML configuration.
+        logger: LoggerPort for structured logging.
+        filter_config: Optional input filter configuration.
+        metrics: Optional metrics port.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured CrossRefAdapter, optionally wrapped with FilteredDataSource.
+    """
+    DataSourceFactory, HttpClientFactory = _get_factories()
+    http_client = HttpClientFactory.create_for_provider("crossref", settings)
+
+    # Get mailto from pipeline config or settings
+    mailto = pipeline_config.source.email or settings.default_email
+
+    data_source = DataSourceFactory.create(
+        "crossref",
+        http_client=http_client,
+        logger=logger,
+        mailto=mailto,
+        metrics=metrics,
+    )
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
+
+
 # =============================================================================
 # Provider registration
 # =============================================================================
@@ -333,5 +371,22 @@ def register_all_providers() -> None:
                 requires_logger=True,
                 custom_creator=_create_pubmed_adapter,
                 data_source_creator=_create_pubmed_data_source,
+            ),
+        )
+
+    # CrossRef - async HTTP adapter for DOI-based publication metadata
+    # Rate limit: 50 req/sec with mailto (polite pool)
+    if not ProviderRegistry.is_registered("crossref"):
+        ProviderRegistry.register(
+            "crossref",
+            ProviderConfig(
+                adapter_class=CrossRefAdapter,
+                http_config=HttpConfig(
+                    rate=50.0,
+                    capacity=100,
+                ),
+                requires_http_client=True,
+                requires_logger=True,
+                data_source_creator=_create_crossref_data_source,
             ),
         )

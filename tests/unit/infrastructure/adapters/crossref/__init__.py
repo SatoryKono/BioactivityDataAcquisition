@@ -1,0 +1,1 @@
+"""CrossRef adapter unit tests."""
