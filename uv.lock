@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -196,11 +196,15 @@ docs = [
     { name = "pymdown-extensions" },
 ]
 tests = [
+    { name = "hypothesis" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "pytest-vcr" },
     { name = "pytest-xdist" },
+    { name = "respx" },
     { name = "syrupy" },
+    { name = "vcrpy" },
 ]
 tracing = [
     { name = "opentelemetry-api" },
@@ -239,6 +243,7 @@ requires-dist = [
     { name = "deltalake", specifier = ">=0.18" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.100" },
+    { name = "hypothesis", marker = "extra == 'tests'", specifier = ">=6.100" },
     { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6" },
@@ -271,17 +276,20 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=4.0" },
     { name = "pytest-vcr", marker = "extra == 'dev'", specifier = ">=1.0" },
+    { name = "pytest-vcr", marker = "extra == 'tests'", specifier = ">=1.0" },
     { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.5" },
     { name = "pytest-xdist", marker = "extra == 'tests'", specifier = ">=3.5" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "radon", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "respx", marker = "extra == 'dev'", specifier = ">=0.21" },
+    { name = "respx", marker = "extra == 'tests'", specifier = ">=0.21" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
     { name = "safety", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "structlog", specifier = ">=24.0" },
     { name = "syrupy", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "syrupy", marker = "extra == 'tests'", specifier = ">=4.0" },
     { name = "vcrpy", marker = "extra == 'dev'", specifier = ">=6.0" },
+    { name = "vcrpy", marker = "extra == 'tests'", specifier = ">=6.0" },
     { name = "vulture", marker = "extra == 'dev'", specifier = ">=2.11" },
     { name = "xenon", marker = "extra == 'dev'", specifier = ">=0.9" },
     { name = "zstandard", specifier = ">=0.22" },
