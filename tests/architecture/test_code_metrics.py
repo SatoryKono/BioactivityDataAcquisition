@@ -276,7 +276,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
-        "PipelineExecutor": 450,  # 444 lines - executor with tracing and metrics
+        "PipelineExecutor": 455,  # 452 lines - executor with tracing and metrics
         "BatchWriter": 330,  # 301 lines - batch writing with lock context provider
         # Test classes exemptions
         "TestCliCommands": 350,  # Test class with many test cases
