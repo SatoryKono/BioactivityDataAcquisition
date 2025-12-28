@@ -51,7 +51,7 @@ class TestFileSizeLimits:
         "services_factory.py": 450,  # 422 LOC - merged base_services + services_builder + runner_services
         # Infrastructure layer exemptions
         "delta_writer.py": 820,  # 808 LOC - schema drift detection + merge logic + audit
-        "gold_writer.py": 750,  # 739 LOC - SCD Type 2 + audit logging
+        "gold_writer.py": 750,  # 739 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         # Interfaces layer exemptions
         "cli.py": 450,  # 420 LOC - CLI commands and options
@@ -131,7 +131,7 @@ class TestFunctionComplexity:
         "execute": 22,  # Pipeline executor with multiple execution paths and audit
         "_validate_config": 8,  # PipelineConfig validation logic
         "PipelineConfig": 8,  # PipelineConfig post-init logic
-        "_request_with_retry": 18,  # HTTP retry logic with circuit breaker
+        "_request_with_retry": 18,  # HTTP client retry logic with circuit breaker
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -268,8 +268,8 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 500,
         "BaseTransformer": 480,  # 477 lines - Template Method with helpers
-        "DeltaWriter": 760,  # 745 lines - includes schema drift detection (M4) + audit
-        "GoldWriter": 700,  # 689 lines - includes SCD Type 2 with ingestion_ts per ADR-014
+        "DeltaWriter": 750,  # 745 lines - includes schema drift detection (M4) + audit + lock validation
+        "GoldWriter": 700,  # 689 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "LineageTracker": 400,
         "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
