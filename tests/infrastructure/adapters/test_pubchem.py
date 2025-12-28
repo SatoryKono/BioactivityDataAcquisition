@@ -61,8 +61,10 @@ def mock_pcp_compound():
     compound.cid = 123
     compound.molecular_formula = "C9H8O4"
     compound.molecular_weight = 180.16
-    compound.canonical_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-    compound.isomeric_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
+    # connectivity_smiles replaces deprecated canonical_smiles (pubchempy 1.0.5)
+    compound.connectivity_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
+    # smiles replaces deprecated isomeric_smiles (pubchempy 1.0.5)
+    compound.smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
     compound.inchi = (
         "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
     )
