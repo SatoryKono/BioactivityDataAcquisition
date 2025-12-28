@@ -1,5 +1,6 @@
 # Naming Compliance Report
 *Generated: 2025-12-28 UTC*
+*Updated: 2025-12-28 UTC — All violations resolved*
 *Scope: src/bioetl/, docs/, configs/, tests/*
 *Reference: RULES.md v5.0, docs/00-project_rules/01-project-rules.md §2*
 
@@ -7,11 +8,15 @@
 
 ## Executive Summary
 
-This audit evaluates the BioETL codebase against the naming conventions specified in RULES.md §2. The overall compliance rate is **high**, with most violations concentrated in documentation file naming.
+This audit evaluates the BioETL codebase against the naming conventions specified in RULES.md §2.
+
+**✅ STATUS: ALL VIOLATIONS RESOLVED**
+
+All 9 documentation files have been renamed to kebab-case, cross-references updated, and automated tooling added.
 
 ---
 
-## Summary
+## Summary (After Fixes)
 
 | Категория | Всего | Нарушений | % соответствия |
 |-----------|-------|-----------|----------------|
@@ -19,14 +24,16 @@ This audit evaluates the BioETL codebase against the naming conventions specifie
 | Модули (Python) | 217 | 0 | 100% |
 | Функции (module-level) | 154 | 0 | 100% |
 | Методы | 905 | 0 | 100% |
-| Документация | 107 | 11 | 89.7% |
+| Документация | 107 | 0 | 100% |
 | YAML Конфиги | 13 | 0 | 100% |
 
-**Общий статус: 97.1% соответствия**
+**Общий статус: 100% соответствия**
 
 ---
 
 ## Violations
+
+> **Note**: All violations listed below have been **RESOLVED** in commit `20dfb99`.
 
 ### Classes
 
@@ -85,7 +92,7 @@ This audit evaluates the BioETL codebase against the naming conventions specifie
 
 ### Documentation
 
-**Статус: ⚠️ 11 НАРУШЕНИЙ**
+**Статус: ✅ ИСПРАВЛЕНО (было 9 нарушений)**
 
 Согласно правилам, документация должна использовать `kebab-case` для файлов без числового префикса. Обнаружены файлы с `UPPER_SNAKE_CASE` или `snake_case`:
 
