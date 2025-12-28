@@ -80,6 +80,7 @@ class BaseEntity:
         run_type: Type of run for merge priority (REQUIRED)
         source_batch_id: Batch context ID (OPTIONAL, may be None)
         ingestion_ts: Ingestion timestamp from context (REQUIRED)
+        _index: Sequential index of the record in the pipeline run.
     """
 
     # REQUIRED: Business identity
@@ -90,6 +91,7 @@ class BaseEntity:
     run_id: RunID
     run_type: RunType
     ingestion_ts: datetime  # Required: pass context.started_at (ADR-014)
+    _index: int  # Sequential index of the record in the pipeline run
 
     # OPTIONAL: Batch context (None when batch context unavailable)
     source_batch_id: BatchID | None = None
@@ -100,3 +102,5 @@ class BaseEntity:
             raise ValueError("Entity ID cannot be empty")
         if not self.content_hash:
             raise ValueError("Content hash cannot be empty")
+        if self._index < 0:
+            raise ValueError("_index cannot be negative")
