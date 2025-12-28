@@ -1,6 +1,6 @@
 # Консолидированный Анализ Планов Рефакторинга
 
-*Версия: 2.0 | Дата: 2025-12-28 | Обновлено: Анализ новых 4 планов из diff*
+*Версия: 2.1 | Дата: 2025-12-28 | Обновлено: Верификация P1-P2 + дополнительные ложные утверждения*
 
 > **Источник**: Сравнительный анализ 4 планов рефакторинга + верификация кодом.
 > **Протокол**: Двойная верификация согласно `docs/RULES.md` §7 (REQ-ARCH-040).
@@ -44,6 +44,7 @@
 | **"Требуется Redis для блокировок"** | N3 | `CLAUDE.md` §5 | MemoryLock достаточен для local-only архитектуры (by design) |
 | **"TTL должен быть 60s, heartbeat 20s"** | N1, N2 | `config.py:238,280` | 30/90 — текущий design; `effective_lock_ttl = heartbeat * 3` |
 | **"mypy 8 ошибок"** | N1 | mypy strict | Возможно на другой версии кода; верифицировать актуальное состояние |
+| **"Нет автоматического вызова VACUUM"** | Все планы | `runner.py:136` | **УЖЕ РЕАЛИЗОВАНО**: `run_vacuum_if_enabled()` вызывается после успешного run |
 
 #### 2.1.2. Ранее выявленные ложные утверждения
 
@@ -214,35 +215,56 @@ async def write_bronze(
 
 #### P2.1: Автоматизировать VACUUM (планировщик)
 
-**Статус**: Частично реализовано
-**Влияние**: Накопление мусора в Delta tables.
+**Статус**: ✅ **УЖЕ РЕАЛИЗОВАНО** (верификация 2025-12-28)
+**Влияние**: N/A — уже работает.
 
 | Параметр | Значение |
 |----------|----------|
-| Текущее состояние | `MedallionLifecycleService.vacuum()` существует, но нет автоматического вызова |
-| Целевое состояние | VACUUM вызывается после успешного run (настраивается в YAML) |
-| Файлы | `medallion_lifecycle.py`, `runner.py`, `pipeline_config.py` |
-| Риски | Удаление нужных файлов при неверной конфигурации |
-| Трудозатраты | M (2 дня) |
-| Критерий готовности | После run с `maintenance.auto_vacuum: true` выполняется VACUUM |
+| Текущее состояние | **Полностью реализовано**: `runner.py:136` вызывает `run_vacuum_if_enabled()` |
+| Реализация | `PostrunService.run_vacuum_if_enabled()` (`postrun_service.py:244-288`) |
+| Конфигурация | `runtime.vacuum_after_run`, `runtime.vacuum_retention_days` |
+| Файлы | `runner.py:136`, `postrun_service.py:244-288` |
 
-> **Примечание**: Конфиг `MaintenanceConfig` уже существует в `pipeline_config.py:92-111`.
+**Верификация:**
+```python
+# runner.py:134-136
+# Post-run: DQ checks and VACUUM
+await self._postrun_service.run_dq_checks(self._executor)
+await self._postrun_service.run_vacuum_if_enabled()
+
+# postrun_service.py:244-254
+async def run_vacuum_if_enabled(self) -> VacuumResult:
+    if not self._runtime.vacuum_after_run:
+        return VacuumResult(...)
+```
+
+> ⚠️ **ЛОЖНОЕ УТВЕРЖДЕНИЕ В ПЛАНАХ**: "нет автоматического вызова" — утверждение устарело.
+> VACUUM вызывается автоматически после успешного run.
 
 #### P2.2: Унифицировать NoOp паттерн
 
-**Статус**: Желательно (НЕ ошибка)
-**Влияние**: Консистентность DI, упрощение тестирования.
+**Статус**: ✅ **BY DESIGN — Не требуется изменений**
+**Влияние**: N/A — текущая реализация валидна.
 
 | Параметр | Значение |
 |----------|----------|
-| Текущее состояние | Writers создают NoOp внутри конструктора |
-| Целевое состояние | NoOp создаётся в composition layer и инжектируется |
-| Файлы | `gold_writer.py:86-89`, `bronze_writer.py` |
-| Риски | Ломающие изменения API |
-| Трудозатраты | M (2 дня) |
-| Критерий готовности | Нет `import NoOp*` в infrastructure/storage/ |
+| Текущее состояние | Writers создают NoOp внутри конструктора (Null Object Pattern) |
+| Обоснование | CLAUDE.md §2.3: "NoOp implementations — валидный паттерн для опциональной observability" |
+| Файлы | `gold_writer.py:92-95`, `bronze_writer.py:96-99`, `delta_writer.py:121-132` |
 
-> ⚠️ **Важно**: Это **улучшение**, не исправление ошибки. Null Object Pattern — валидный паттерн.
+**Верификация:**
+```python
+# gold_writer.py:92-95 — валидный Null Object Pattern
+if tracing is None:
+    from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+    tracing = NoOpTracing()
+```
+
+**Паттерны, которые НЕ являются нарушениями (CLAUDE.md §2.3):**
+- `NoOpTracing`, `NoOpMetrics` — Null Object Pattern для опциональной observability
+- Optional parameters с defaults (`policy: Policy | None = None`)
+
+> ⚠️ **НЕ РЕФАКТОРИТЬ**: Это продуманное архитектурное решение, не ошибка.
 
 ### 4.3. Приоритет 3 (P3): СРЕДНИЙ
 
@@ -335,12 +357,12 @@ async def write_bronze(
    - MemoryLock имеет validate_owner() — это и есть fencing guard
    - TTL 30/90 — by design, не ошибка
 
-3. **Реальные проблемы**:
-   - StoragePort ≠ BronzeWriter/BatchWriter (lock_context)
-   - mypy ошибки (6-27 шт. в зависимости от версии кода)
-   - Parquet разрешён в sink config для Silver
-   - strict_validation = False по умолчанию
-   - Нет автоматического VACUUM
+3. **Реальные проблемы** (статус на 2025-12-28):
+   - ~~StoragePort ≠ BronzeWriter/BatchWriter (lock_context)~~ → ✅ **ИСПРАВЛЕНО** (commit 901707f)
+   - ~~mypy ошибки~~ → ✅ **ИСПРАВЛЕНО** (`mypy --strict` = 0 ошибок)
+   - Parquet разрешён в sink config для Silver (P1.2 — pending)
+   - strict_validation = False по умолчанию (by design, спорно)
+   - ~~Нет автоматического VACUUM~~ → ✅ **УЖЕ БЫЛО РЕАЛИЗОВАНО** (ложное утверждение)
 
 4. **НЕ проблемы** (ложные утверждения):
    - "Отсутствуют зависимости" — все есть в pyproject.toml
@@ -357,9 +379,10 @@ async def write_bronze(
 | Категория | Количество |
 |-----------|------------|
 | Планов проанализировано | 4 (+ 4 ранее) |
-| Новых ложных утверждений | 7 |
-| Новых подтверждённых проблем | 4 |
-| Всего ложных утверждений | 20+ |
+| Новых ложных утверждений | 8 (+1 VACUUM) |
+| Исправленных проблем (P1) | 2 (StoragePort, mypy) |
+| Задач не требующих действий | 3 (VACUUM, NoOp, Redis) |
+| Всего ложных утверждений | 21+ |
 
 ---
 
