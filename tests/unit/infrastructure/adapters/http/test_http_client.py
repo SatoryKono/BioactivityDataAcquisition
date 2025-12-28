@@ -482,7 +482,7 @@ class TestUnifiedHTTPClientRequestMethods:
     @pytest.mark.asyncio
     async def test_get_with_params_and_headers(self, http_client, mock_circuit_breaker):
         """Test GET request with params and headers."""
-        mock_response = MagicMock()
+        mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
