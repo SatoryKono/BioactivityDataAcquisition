@@ -58,11 +58,10 @@ class TargetSchema(ETLRecordSchema):
         nullable=True,
         description="Species group flag.",
     )
-    # downgraded: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[0, 1],
-    #     description="Downgraded flag.",
-    # )
+    downgraded: Optional[Series[bool]] = pa.Field(
+        nullable=True,
+        description="Downgraded flag.",
+    )
 
     # === Complex Fields (JSON Strings) ===
     target_components: Optional[Series[str]] = pa.Field(

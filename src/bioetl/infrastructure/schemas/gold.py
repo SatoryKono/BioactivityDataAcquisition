@@ -264,7 +264,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
     species_group_flag: Series[bool] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
-    downgraded: Series[bool] = pa.Field(nullable=True)
+    downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
     dap_id: Series[float] = pa.Field(nullable=True, coerce=True) # int64
     pipeline_stages: Series[str] = pa.Field(nullable=True)
     target_constraints: Series[str] = pa.Field(nullable=True)

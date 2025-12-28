@@ -45,7 +45,7 @@ sink:
         format: delta
         mode: overwrite
         validation:
-            strict: false  # UPDATED: Allow extra columns to ensure identical schema with Silver
+            strict: true  # REQ-DATA-009: Gold validation must be strict
         csv_export:
             enabled: true
             path: "data/output/csv/gold"
