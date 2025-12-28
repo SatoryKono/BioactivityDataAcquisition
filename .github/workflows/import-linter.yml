@@ -157,8 +157,8 @@ jobs:
           print(f"Domain/Application coverage: {domain_app:.2f}%")
 
           errors = []
-          if overall < 80:
-            errors.append(f"Overall coverage below 80%: {overall:.2f}%")
+          if overall < 85:
+            errors.append(f"Overall coverage below 85%: {overall:.2f}%")
           if domain_app < 90:
             errors.append(
               f"Domain/Application coverage below 90%: {domain_app:.2f}%"
@@ -238,8 +238,8 @@ jobs:
           print(f"Domain/Application coverage: {domain_app:.2f}%")
 
           errors = []
-          if overall < 80:
-            errors.append(f"Overall coverage below 80%: {overall:.2f}%")
+          if overall < 85:
+            errors.append(f"Overall coverage below 85%: {overall:.2f}%")
           if domain_app < 90:
             errors.append(
               f"Domain/Application coverage below 90%: {domain_app:.2f}%"
