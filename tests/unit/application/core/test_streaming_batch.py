@@ -58,7 +58,7 @@ def mock_batch_metrics():
 def transform_callback():
     """Create transform callback."""
 
-    async def transform(ctx, record):
+    async def transform(ctx, record, index):
         return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
 
     return transform
@@ -153,7 +153,7 @@ class TestTransformSingle:
     ):
         """Test quarantine on DQ error."""
 
-        async def failing_transform(ctx, record):
+        async def failing_transform(ctx, record, index):
             raise DataQualityError("Invalid data")
 
         config = RecordProcessorConfig(
@@ -216,7 +216,7 @@ class TestTransformStream:
     ):
         """Test streaming handles errors correctly."""
 
-        async def selective_transform(ctx, record):
+        async def selective_transform(ctx, record, index):
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -367,7 +367,7 @@ class TestIntegration:
     ):
         """Test processing a larger batch efficiently."""
 
-        async def transform(ctx, record):
+        async def transform(ctx, record, index):
             return {"entity_id": record["id"], "value": record["value"]}
 
         def gold_filter(ctx, record):
