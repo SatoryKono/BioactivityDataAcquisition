@@ -33,6 +33,7 @@ class LockManager:
         logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
+        context_holder: LockContextHolder | None = None,
     ) -> None:
         """Initialize LockManager with explicit dependencies.
         No infrastructure details should be present here.
@@ -48,6 +49,7 @@ class LockManager:
         self._logger = logger
         self._shutdown_signal = shutdown_signal
         self._checkpoint_manager = checkpoint_manager
+        self._context_holder = context_holder
         self._heartbeat_task: asyncio.Task[None] | None = None
         self._acquired_at: float | None = None  # monotonic timestamp when lock acquired
 
