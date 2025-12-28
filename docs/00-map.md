@@ -43,6 +43,17 @@ docs/
 │   ├── 06-rules-mapping.md      # RULES.md to docs mapping
 │   └── 07-consistency-check.md  # Consistency verification guide
 │
+├── domain/                      # Domain model documentation
+│   └── schemas/                 # Schema documentation by provider
+│       ├── chembl/              # ChEMBL entity schemas
+│       │   ├── activity-schema.md
+│       │   ├── molecule-schema.md
+│       │   ├── target-schema.md
+│       │   └── assay-schema.md
+│       ├── pubchem/             # PubChem entity schemas
+│       ├── uniprot/             # UniProt entity schemas
+│       └── pubmed/              # PubMed entity schemas
+│
 ├── 02-architecture/             # System architecture
 │   ├── 01-domain-layer.md       # Domain layer architecture
 │   ├── 02-application-layer.md  # Application layer architecture
@@ -135,6 +146,15 @@ docs/
 | Backfill/Replay  | [01-project-rules.md](00-project_rules/01-project-rules.md)            | §2.4     |
 | Quarantine       | [01-project-rules.md](00-project_rules/01-project-rules.md) | §2.6     |
 | Content Hash     | [system-context.md](02-architecture/system-context.md)                                              | §2.8     |
+
+### Schema Documentation
+
+| Provider | Entity | Schema Document | RULES.md |
+|----------|--------|-----------------|----------|
+| ChEMBL | Activity | [activity-schema.md](domain/schemas/chembl/activity-schema.md) | §2.8 |
+| ChEMBL | Molecule | [molecule-schema.md](domain/schemas/chembl/molecule-schema.md) | §2.8 |
+| ChEMBL | Target | [target-schema.md](domain/schemas/chembl/target-schema.md) | §2.8 |
+| ChEMBL | Assay | [assay-schema.md](domain/schemas/chembl/assay-schema.md) | §2.8 |
 
 ### Operations
 
@@ -292,12 +312,13 @@ graph TD
 | RULES.md (docs/)         | 2025-12-27   | v5.7 (Pre-Refactoring)       |
 | refactoring-plan.md      | 2025-12-27   | v5.6 (Consolidated)          |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
-| 00-map.md                | 2025-12-27   | v5.7 Synced, structure clean |
+| 00-map.md                | 2025-12-28   | v5.8 Schema docs added       |
 | 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
 | 03-guides/               | 2025-12-20   | Consolidated (10 guides)     |
 | ADR-001..020             | 2025-12-27   | All 20 ADRs documented       |
 | 05-operations/runbooks/  | 2025-12-27   | 4 active runbooks            |
+| domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 
 ---
 
-*Last updated: 2025-12-27. Update when adding new documentation.*
+*Last updated: 2025-12-28. Update when adding new documentation.*
