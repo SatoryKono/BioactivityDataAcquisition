@@ -125,7 +125,7 @@ class TestActivityTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test ActivityTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -165,7 +165,7 @@ class TestAssayTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test AssayTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -207,7 +207,7 @@ class TestDocumentTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test DocumentTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -261,7 +261,7 @@ class TestMoleculeTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test MoleculeTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -308,7 +308,7 @@ class TestTargetTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test TargetTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -348,7 +348,7 @@ class TestTargetComponentTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test TargetComponentTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -383,7 +383,7 @@ class TestPubChemCompoundTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test PubChemCompoundTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
 
@@ -423,6 +423,6 @@ class TestUniProtProteinTransformerSnapshot:
         snapshot: Any,
     ) -> None:
         """Test UniProtProteinTransformer output matches snapshot."""
-        result = await transformer.transform(mock_context, sample_record)
+        result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot

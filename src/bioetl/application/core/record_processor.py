@@ -170,25 +170,7 @@ class RecordProcessor:
         """Execute transformation with extended span attributes."""
         span = self._start_span("transform", batch_id, len(records), input_count=True)
         try:
-            # Pass start_index to transform_stream (which is used by transform_batch internally in BatchTransformer)
-            # Wait, BatchTransformer has transform_batch and transform_stream.
-            # transform_batch iterates and calls transform callback.
-            # I need to update BatchTransformer.transform_batch to accept start_index.
-            # I already did that in Step 4.
-            # But here I am calling transform_batch.
-            # Wait, in Step 4 I updated transform_batch to enumerate.
-            # But I need to pass start_index to enumerate(records, start=start_index).
-
-            # Let's re-check Step 4 code.
-            # for index, raw_record in enumerate(records):
-            #     transformed = await self._transform(record_context, raw_record, index)
-
-            # This starts index at 0 for every batch! This is wrong.
-            # I need to fix BatchTransformer.transform_batch to accept start_index and use it in enumerate.
-
-            result = await self._transformer.transform_batch(records, batch_id) # Missing start_index here?
-            # I need to update BatchTransformer signature first.
-
+            result = await self._transformer.transform_batch(records, batch_id, start_index=start_index)
             if span:
                 span.set_attribute("bioetl.silver_count", len(result.silver_records))
                 span.set_attribute("bioetl.gold_count", len(result.gold_records))

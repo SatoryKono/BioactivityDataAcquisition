@@ -53,7 +53,7 @@ class TestAssayTransformer:
             "confidence_score": 9,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["assay_chembl_id"] == "CHEMBL1234567"
@@ -72,7 +72,7 @@ class TestAssayTransformer:
             "assay_type": "B",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -85,7 +85,7 @@ class TestAssayTransformer:
             "assay_parameters": [{"param": "IC50"}],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # JSON fields should be serialized as strings
@@ -107,7 +107,7 @@ class TestAssayTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # Flattened variant fields
@@ -128,7 +128,7 @@ class TestAssayTransformer:
             "variant_sequence": None,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["variant_accession"] is None
@@ -151,7 +151,7 @@ class TestAssayTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["variant_accession"] == "P12345"
@@ -167,7 +167,7 @@ class TestAssayTransformer:
         transformer = AssayTransformer(provider="custom_provider")
         record = {"assay_chembl_id": "CUSTOM123"}
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert "entity_id" in result
@@ -195,7 +195,7 @@ class TestDocumentTransformer:
             "year": 2024,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["document_chembl_id"] == "CHEMBL1234567"
@@ -214,7 +214,7 @@ class TestDocumentTransformer:
             "title": "Test Document",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -240,7 +240,7 @@ class TestDocumentTransformer:
             "src_id": 1,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["journal_full_title"] == "Full Journal Name"
@@ -267,7 +267,7 @@ class TestMoleculeTransformer:
             "first_approval": 1950,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["molecule_chembl_id"] == "CHEMBL25"
@@ -286,7 +286,7 @@ class TestMoleculeTransformer:
             "molecule_type": "Small molecule",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -306,7 +306,7 @@ class TestMoleculeTransformer:
             "withdrawn_flag": False,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["oral"] is True
@@ -325,7 +325,7 @@ class TestMoleculeTransformer:
             "atc_classifications": ["N02BA01"],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # JSON fields should be serialized
@@ -344,7 +344,7 @@ class TestMoleculeTransformer:
             "helm_notation": "PEPTIDE1{A.G.K}$$$$",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["chirality"] == 1
@@ -365,7 +365,7 @@ class TestMoleculeTransformer:
             "withdrawn_flag": True,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["withdrawn_flag"] is True
@@ -381,7 +381,7 @@ class TestMoleculeTransformer:
             "usan_year": 2015,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["usan_stem"] == "-mab"
@@ -407,7 +407,7 @@ class TestMoleculeTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["property_alogp"] == 2.5
@@ -428,7 +428,7 @@ class TestMoleculeTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["hierarchy_parent_chembl_id"] == "CHEMBL1000"
@@ -456,7 +456,7 @@ class TestTargetTransformer:
             "tax_id": 9606,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["target_chembl_id"] == "CHEMBL1862"
@@ -475,7 +475,7 @@ class TestTargetTransformer:
             "organism": "Homo sapiens",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -497,7 +497,7 @@ class TestTargetTransformer:
             "species_group_flag": True,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert isinstance(result.get("target_components"), str)
@@ -543,7 +543,7 @@ class TestTargetTransformer:
             ],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         import json
@@ -567,7 +567,7 @@ class TestTargetTransformer:
             ],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cross_references"] is None
@@ -580,7 +580,7 @@ class TestTargetTransformer:
             "target_components": [],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cross_references"] is None
@@ -591,7 +591,7 @@ class TestTargetTransformer:
         transformer = TargetTransformer(provider="custom_target_provider")
         record = {"target_chembl_id": "CUSTOM123"}
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
 
@@ -607,7 +607,7 @@ class TestTargetTransformer:
             "dap_id": 12345,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["description"] == "Prostaglandin G/H synthase 2"
@@ -625,7 +625,7 @@ class TestTargetTransformer:
             "target_constraints": [{"constraint_type": "assay"}],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert isinstance(result.get("pipeline_stages"), str)
@@ -662,7 +662,7 @@ class TestTargetTransformer:
             ],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["component_organisms"] == ["Homo sapiens", "Mus musculus"]
@@ -679,7 +679,7 @@ class TestTargetTransformer:
             # No description, downgraded, dap_id, pipeline_stages, target_constraints
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["description"] is None
@@ -710,7 +710,7 @@ class TestTargetComponentTransformer:
             "tax_id": 9606,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["component_id"] == 123
@@ -729,7 +729,7 @@ class TestTargetComponentTransformer:
             "component_type": "PROTEIN",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -742,7 +742,7 @@ class TestTargetComponentTransformer:
             "target_component_xrefs": [{"xref_id": "X123"}],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert isinstance(result.get("target_component_synonyms"), str)
@@ -766,7 +766,7 @@ class TestTargetComponentTransformer:
             ],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
 

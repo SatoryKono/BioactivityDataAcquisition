@@ -16,9 +16,10 @@ class TargetSchema(ETLRecordSchema):
     """Target validation schema for Silver layer."""
 
     # === Primary Key ===
-    tid: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    # tid: Series[int] = pa.Field(
+    #     nullable=False, description="Primary key."
+    # )
+    # Removed tid as it is not in Silver schema. target_chembl_id is the PK.
 
     # === Identifiers ===
     target_chembl_id: Series[str] = pa.Field(
@@ -37,11 +38,11 @@ class TargetSchema(ETLRecordSchema):
         ],
         description="Target type.",
     )
-    target_parent_type: Optional[Series[str]] = pa.Field(
-        nullable=True,
-        isin=["MOLECULAR", "NON-MOLECULAR", "PROTEIN", "UNDEFINED"],
-        description="Target parent type.",
-    )
+    # target_parent_type: Optional[Series[str]] = pa.Field(
+    #     nullable=True,
+    #     isin=["MOLECULAR", "NON-MOLECULAR", "PROTEIN", "UNDEFINED"],
+    #     description="Target parent type.",
+    # )
 
     # === Metadata ===
     pref_name: Optional[Series[str]] = pa.Field(
@@ -53,19 +54,44 @@ class TargetSchema(ETLRecordSchema):
     organism: Optional[Series[str]] = pa.Field(
         nullable=True, description="Organism."
     )
-    species_group_flag: Optional[Series[int]] = pa.Field(
+    species_group_flag: Optional[Series[bool]] = pa.Field(
         nullable=True,
-        isin=[0, 1],
         description="Species group flag.",
     )
-    downgraded: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Downgraded flag.",
+    # downgraded: Optional[Series[int]] = pa.Field(
+    #     nullable=True,
+    #     isin=[0, 1],
+    #     description="Downgraded flag.",
+    # )
+
+    # === Complex Fields (JSON Strings) ===
+    target_components: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of target components."
+    )
+    cross_references: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of cross references."
+    )
+
+    # === Flattened Component Fields (Lists) ===
+    # Note: Pandera Series[object] is used for lists, validation is limited
+    component_accessions: Optional[Series[object]] = pa.Field(
+        nullable=True, description="List of component accessions."
+    )
+    component_ids: Optional[Series[object]] = pa.Field(
+        nullable=True, description="List of component IDs."
+    )
+    component_types: Optional[Series[object]] = pa.Field(
+        nullable=True, description="List of component types."
+    )
+    component_relationships: Optional[Series[object]] = pa.Field(
+        nullable=True, description="List of component relationships."
+    )
+    component_descriptions: Optional[Series[object]] = pa.Field(
+        nullable=True, description="List of component descriptions."
     )
 
     class Config:
         """Pandera configuration."""
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
