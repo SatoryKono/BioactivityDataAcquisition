@@ -435,7 +435,7 @@ def test_get_error_stats(adapter):
 
     assert stats["consecutive_errors"] == 2
     assert stats["total_errors"] == 5
-    assert stats["health_status"] == "degraded"
+    assert stats["health_status"] == "DEGRADED"
 
 
 # =============================================================================

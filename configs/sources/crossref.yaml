@@ -3,15 +3,18 @@
 
 source:
     type: api
-    load_strategy: full
-    batch_size: 100
+    load_strategy: incremental
+    # CrossRef uses 'indexed' date for incremental sync
+    # See: https://api.crossref.org/works?filter=from-index-date:2024-01-01
+    watermark_field: indexed
+    batch_size: 1000  # CrossRef supports up to 1000 rows per request
     provider_config:
         provider: crossref
         base_url: https://api.crossref.org
         client:
             timeout_sec: 30.0
             max_retries: 3
-        batch_size: 100
+        batch_size: 1000
 
     circuit_breaker:
         failure_threshold: 5
@@ -22,3 +25,8 @@ source:
         # Without mailto: best effort ~50 req/sec
         requests_per_second: 50.0
         burst: 100
+
+    # Polite pool access (recommended)
+    # Set BIOETL_CROSSREF_EMAIL env var for 50 req/sec guaranteed
+    polite_pool:
+        email: "${BIOETL_CROSSREF_EMAIL}"

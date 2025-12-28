@@ -11,6 +11,10 @@ primary_keys: ["doi"]
 silver_table: "crossref_publication"
 gold_table: "crossref_publication"
 
+# Incremental strategy with indexed date watermark
+load_strategy: incremental
+watermark_field: indexed
+
 # Reference to source configuration file
 source_file: ../../sources/crossref.yaml
 
@@ -73,6 +77,18 @@ sink:
 dq_rules:
     soft_fail_threshold: 0.05
     hard_fail_threshold: 0.20
+    # Quarantine rules for CrossRef:
+    # - Missing DOI: Critical (record skipped, quarantined)
+    # - Missing title: Warning (record processed, logged)
+    quarantine:
+        missing_doi:
+            severity: critical
+            action: skip
+            error_code: MISSING_REQUIRED_FIELD
+        missing_title:
+            severity: warning
+            action: process
+            error_code: DATA_QUALITY
 
 circuit_breaker:
     failure_threshold: 5

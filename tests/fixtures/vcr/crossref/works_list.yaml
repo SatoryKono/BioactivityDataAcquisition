@@ -1,0 +1,186 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0.0 (mailto:test@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?rows=5&cursor=*&mailto=test@example.com
+  response:
+    body:
+      string: |
+        {
+          "status": "ok",
+          "message-type": "work-list",
+          "message-version": "1.0.0",
+          "message": {
+            "facets": {},
+            "total-results": 157892345,
+            "items": [
+              {
+                "DOI": "10.1234/test.2024.001",
+                "title": ["CRISPR-Based Gene Editing in Drug Discovery"],
+                "author": [
+                  {"given": "John", "family": "Smith", "affiliation": [{"name": "MIT"}]},
+                  {"given": "Jane", "family": "Doe", "affiliation": [{"name": "Harvard"}]}
+                ],
+                "container-title": ["Nature Biotechnology"],
+                "publisher": "Nature Publishing Group",
+                "published-print": {"date-parts": [[2024, 3, 15]]},
+                "type": "journal-article",
+                "is-referenced-by-count": 42,
+                "references-count": 85,
+                "ISSN": ["1087-0156", "1546-1696"],
+                "subject": ["Biotechnology", "Molecular Biology"],
+                "URL": "https://doi.org/10.1234/test.2024.001",
+                "indexed": {"date-parts": [[2024, 12, 1]], "timestamp": 1701388800000}
+              },
+              {
+                "DOI": "10.5678/bioinfo.2024.002",
+                "title": ["Machine Learning for Drug Target Identification"],
+                "author": [
+                  {"given": "Alice", "family": "Johnson", "ORCID": "https://orcid.org/0000-0001-2345-6789"}
+                ],
+                "container-title": ["Bioinformatics"],
+                "publisher": "Oxford University Press",
+                "published-online": {"date-parts": [[2024, 2, 28]]},
+                "type": "journal-article",
+                "is-referenced-by-count": 15,
+                "references-count": 52,
+                "ISSN": ["1367-4803"],
+                "abstract": "<jats:p>Machine learning approaches for identifying novel drug targets...</jats:p>",
+                "URL": "https://doi.org/10.5678/bioinfo.2024.002",
+                "indexed": {"date-parts": [[2024, 12, 2]], "timestamp": 1701475200000}
+              },
+              {
+                "DOI": "10.9999/pharma.2024.003",
+                "title": ["Novel Small Molecule Inhibitors of Kinase XYZ"],
+                "author": [
+                  {"given": "Bob", "family": "Williams"},
+                  {"given": "Carol", "family": "Brown"},
+                  {"given": "David", "family": "Lee"}
+                ],
+                "container-title": ["Journal of Medicinal Chemistry"],
+                "publisher": "American Chemical Society",
+                "published-print": {"date-parts": [[2024, 1, 10]]},
+                "type": "journal-article",
+                "is-referenced-by-count": 8,
+                "references-count": 120,
+                "ISSN": ["0022-2623"],
+                "volume": "67",
+                "issue": "1",
+                "page": "123-145",
+                "URL": "https://doi.org/10.9999/pharma.2024.003",
+                "indexed": {"date-parts": [[2024, 12, 3]], "timestamp": 1701561600000}
+              },
+              {
+                "DOI": "10.1111/review.2024.004",
+                "title": ["Advances in Antibody Drug Conjugates: A Review"],
+                "author": [
+                  {"given": "Emily", "family": "Chen"}
+                ],
+                "container-title": ["Drug Discovery Today"],
+                "publisher": "Elsevier",
+                "published-print": {"date-parts": [[2024, 4, 1]]},
+                "type": "journal-article",
+                "is-referenced-by-count": 23,
+                "references-count": 200,
+                "ISSN": ["1359-6446"],
+                "license": [{"URL": "https://creativecommons.org/licenses/by/4.0/"}],
+                "URL": "https://doi.org/10.1111/review.2024.004",
+                "indexed": {"date-parts": [[2024, 12, 4]], "timestamp": 1701648000000}
+              },
+              {
+                "DOI": "10.2222/preprint.2024.005",
+                "title": ["Computational Approaches to PROTAC Design"],
+                "author": [
+                  {"given": "Frank", "family": "Miller"},
+                  {"name": "BioTech Research Group"}
+                ],
+                "container-title": ["bioRxiv"],
+                "publisher": "Cold Spring Harbor Laboratory",
+                "published-online": {"date-parts": [[2024, 5, 20]]},
+                "type": "posted-content",
+                "is-referenced-by-count": 3,
+                "references-count": 45,
+                "URL": "https://doi.org/10.2222/preprint.2024.005",
+                "indexed": {"date-parts": [[2024, 12, 5]], "timestamp": 1701734400000}
+              }
+            ],
+            "items-per-page": 5,
+            "query": {},
+            "next-cursor": "DnF1ZXJ5VGhlbkZldGNoGgAAAA"
+          }
+        }
+    headers:
+      Access-Control-Allow-Headers:
+      - X-Requested-With, Accept, Accept-Encoding, Content-Type
+      Access-Control-Allow-Origin:
+      - '*'
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 28 Dec 2024 10:00:00 GMT
+      X-Rate-Limit-Interval:
+      - 1s
+      X-Rate-Limit-Limit:
+      - '50'
+    status:
+      code: 200
+      message: OK
+
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0.0 (mailto:test@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?rows=1&mailto=test@example.com
+  response:
+    body:
+      string: |
+        {
+          "status": "ok",
+          "message-type": "work-list",
+          "message-version": "1.0.0",
+          "message": {
+            "total-results": 157892345,
+            "items": [
+              {
+                "DOI": "10.1234/health.check",
+                "title": ["Health Check Publication"],
+                "type": "journal-article"
+              }
+            ],
+            "items-per-page": 1
+          }
+        }
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 28 Dec 2024 10:00:01 GMT
+    status:
+      code: 200
+      message: OK
+version: 1

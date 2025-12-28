@@ -63,13 +63,20 @@ class CrossRefPublicationTransformer(BaseTransformer):
         Returns:
             SilverRecord if transformation successful, None if record should be skipped.
 
+        Quarantine Rules:
+            - Missing DOI: Critical → skip record (quarantined)
+            - Missing title: Warning → process record (logged)
+
         """
-        # Get DOI as primary key
+        # Get DOI as primary key (Critical: missing DOI → quarantine)
         raw_doi = record.get("DOI")
         if not raw_doi or not isinstance(raw_doi, str):
             context.logger.warning(
                 "crossref_missing_doi",
                 provider=self.provider,
+                severity="critical",
+                action="skip",
+                error_code="MISSING_REQUIRED_FIELD",
             )
             return None
 
@@ -78,6 +85,17 @@ class CrossRefPublicationTransformer(BaseTransformer):
 
         # Extract business data
         business_data = self._extract_business_data(record, doi)
+
+        # Warning: Missing title is allowed but logged
+        if not business_data.get("title"):
+            context.logger.warning(
+                "crossref_missing_title",
+                provider=self.provider,
+                doi=doi,
+                severity="warning",
+                action="process",
+                error_code="DATA_QUALITY",
+            )
 
         # Generate entity ID
         entity_id = generate_entity_id(
