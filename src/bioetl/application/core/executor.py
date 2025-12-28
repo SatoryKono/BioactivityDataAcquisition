@@ -215,7 +215,9 @@ class PipelineExecutor:
             )
 
             if len(batch) >= current_batch_size:
-                await self._process_and_update_counts(batch)
+                # Calculate start index for this batch
+                start_index = self.records_fetched - len(batch)
+                await self._process_and_update_counts(batch, start_index)
                 batch = []
                 current_batch_size = self._maybe_recover_batch_size(current_batch_size)
 
@@ -223,7 +225,8 @@ class PipelineExecutor:
                 await self._checkpoint_manager.save_checkpoint(self.records_fetched)
 
         if batch:
-            await self._process_and_update_counts(batch)
+            start_index = self.records_fetched - len(batch)
+            await self._process_and_update_counts(batch, start_index)
 
     def _check_memory_pressure(self, current_size: int, check_interval: int) -> int:
         """Check memory pressure and adjust batch size if needed.
@@ -402,7 +405,9 @@ class PipelineExecutor:
 
         return current_size
 
-    async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:
+    async def _process_and_update_counts(
+        self, batch: list[dict[str, Any]], start_index: int
+    ) -> None:
         """Process batch with tracing span.
 
         Creates a root span for the batch with attributes:
@@ -424,13 +429,14 @@ class PipelineExecutor:
                 if self._run_type
                 else "unknown",
                 "bioetl.entity_type": self._entity_type,
+                "bioetl.start_index": start_index,
             },
         )
         span.__enter__()
 
         try:
             result = await self._record_processor.process_batch(
-                records=batch, batch_id=batch_id
+                records=batch, batch_id=batch_id, start_index=start_index
             )
             self.records_bronze += result.bronze_count
             self.records_silver += result.silver_count

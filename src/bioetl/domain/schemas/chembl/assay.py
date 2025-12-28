@@ -16,9 +16,10 @@ class AssaySchema(ETLRecordSchema):
     """Assay validation schema for Silver layer."""
 
     # === Primary Key ===
-    assay_id: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    # assay_id: Series[int] = pa.Field(
+    #     nullable=False, description="Primary key."
+    # )
+    # Removed assay_id as it is not in Silver schema. assay_chembl_id is the PK.
 
     # === Identifiers ===
     assay_chembl_id: Series[str] = pa.Field(
@@ -45,6 +46,9 @@ class AssaySchema(ETLRecordSchema):
         nullable=True,
         isin=["screening", "confirmatory", "panel", "summary", "other"],
         description="Assay category.",
+    )
+    assay_group: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Assay group."
     )
 
     # === Biological Context ===
@@ -78,22 +82,28 @@ class AssaySchema(ETLRecordSchema):
         isin=["D", "H", "M", "N", "S", "U"],
         description="Relationship type.",
     )
+    relationship_description: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Relationship description."
+    )
     confidence_score: Optional[Series[int]] = pa.Field(
         nullable=True,
         ge=0,
         le=9,
         description="Confidence score.",
     )
+    confidence_description: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Confidence description."
+    )
 
     # === Curation & Metadata ===
-    curated_by: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Curator."
-    )
-    activity_count: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Activity count.",
-    )
+    # curated_by: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Curator."
+    # )
+    # activity_count: Optional[Series[int]] = pa.Field(
+    #     nullable=True,
+    #     ge=0,
+    #     description="Activity count.",
+    # )
     src_id: Optional[Series[int]] = pa.Field(
         nullable=True, description="Source ID."
     )
@@ -105,17 +115,23 @@ class AssaySchema(ETLRecordSchema):
         str_matches=r"^CHEMBL\d+$",
         description="Document ChEMBL ID.",
     )
+    assay_pref_name: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Preferred name."
+    )
+    score: Optional[Series[float]] = pa.Field(
+        nullable=True, description="Score."
+    )
 
     # === Foreign Keys ===
-    cell_id: Optional[Series[int]] = pa.Field(
+    cell_chembl_id: Optional[Series[str]] = pa.Field(
         nullable=True, description="FK to cell_line."
     )
-    tissue_id: Optional[Series[int]] = pa.Field(
+    tissue_chembl_id: Optional[Series[str]] = pa.Field(
         nullable=True, description="FK to tissue."
     )
-    variant_id: Optional[Series[int]] = pa.Field(
-        nullable=True, description="FK to variant_sequences."
-    )
+    # variant_id: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="FK to variant_sequences."
+    # )
 
     # === Other Fields ===
     bao_format: Optional[Series[str]] = pa.Field(
@@ -123,45 +139,65 @@ class AssaySchema(ETLRecordSchema):
         str_matches=r"^BAO:\d+$",
         description="BAO format.",
     )
-    a2t_complex: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Assay-to-target complex flag.",
+    bao_label: Optional[Series[str]] = pa.Field(
+        nullable=True, description="BAO label."
     )
-    a2t_multi: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Assay-to-target multi flag.",
-    )
-    mc_tax_id: Optional[Series[int]] = pa.Field(
-        nullable=True, description="MC Tax ID."
-    )
-    mc_organism: Optional[Series[str]] = pa.Field(
-        nullable=True, description="MC Organism."
-    )
-    mc_target_type: Optional[Series[str]] = pa.Field(
-        nullable=True, description="MC Target Type."
-    )
-    mc_target_name: Optional[Series[str]] = pa.Field(
-        nullable=True, description="MC Target Name."
-    )
-    mc_target_accession: Optional[Series[str]] = pa.Field(
-        nullable=True, description="MC Target Accession."
-    )
+    # a2t_complex: Optional[Series[int]] = pa.Field(
+    #     nullable=True,
+    #     isin=[0, 1],
+    #     description="Assay-to-target complex flag.",
+    # )
+    # a2t_multi: Optional[Series[int]] = pa.Field(
+    #     nullable=True,
+    #     isin=[0, 1],
+    #     description="Assay-to-target multi flag.",
+    # )
+    # mc_tax_id: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="MC Tax ID."
+    # )
+    # mc_organism: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="MC Organism."
+    # )
+    # mc_target_type: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="MC Target Type."
+    # )
+    # mc_target_name: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="MC Target Name."
+    # )
+    # mc_target_accession: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="MC Target Accession."
+    # )
     aidx: Optional[Series[str]] = pa.Field(
         nullable=True, description="Assay index."
     )
-    ridx: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Record index."
+    # ridx: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Record index."
+    # )
+    # tid_fixed: Optional[Series[int]] = pa.Field(
+    #     nullable=True,
+    #     isin=[0, 1],
+    #     description="TID fixed flag.",
+    # )
+
+    # === Variant Information (Flattened) ===
+    variant_accession: Optional[Series[str]] = pa.Field(nullable=True)
+    variant_isoform: Optional[Series[str]] = pa.Field(nullable=True)
+    variant_mutation: Optional[Series[str]] = pa.Field(nullable=True)
+    variant_organism: Optional[Series[str]] = pa.Field(nullable=True)
+    variant_sequence: Optional[Series[str]] = pa.Field(nullable=True)
+    variant_tax_id: Optional[Series[int]] = pa.Field(nullable=True)
+    variant_sequence_json: Optional[Series[str]] = pa.Field(nullable=True)
+
+    # === Complex Fields (JSON) ===
+    assay_classifications: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of assay classifications."
     )
-    tid_fixed: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="TID fixed flag.",
+    assay_parameters: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of assay parameters."
     )
 
     class Config:
         """Pandera configuration."""
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
