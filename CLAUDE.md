@@ -9,11 +9,15 @@
 ## TL;DR — Быстрый Старт
 
 ```bash
+# Автоматическая настройка окружения (рекомендуется)
+./dev_setup.sh          # Полная настройка с тестами
+./dev_setup.sh --quick  # Быстрая установка без тестов
+
 # Проверка перед работой
 make lint && make test
 
 # Основные команды
-make install          # Создание venv, установка зависимостей
+make install          # Создание venv, установка зависимостей (альтернатива dev_setup.sh)
 make test             # Все тесты (unit + integration)
 make lint             # ruff + mypy
 make run-local        # Запуск на фикстурах
