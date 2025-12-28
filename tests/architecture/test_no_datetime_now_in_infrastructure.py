@@ -1,8 +1,11 @@
-"""Architecture test: datetime.now() only in application/composition layers.
+"""Architecture test: datetime.now()/utcnow() only in application/composition layers.
 
 REQ-ARCH-031: Single source of truth for timestamps.
 Timestamps should be created in application layer and passed down.
 See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
+
+Note: datetime.utcnow() is deprecated in Python 3.12+ (PEP 692).
+Use datetime.now(UTC) instead for timezone-aware UTC timestamps.
 """
 
 from __future__ import annotations
@@ -71,13 +74,12 @@ class TestNoDatetimeNowInInfrastructure:
     def test_no_datetime_now_in_infrastructure(
         self, infrastructure_python_files: list[Path]
     ) -> None:
-        """Infrastructure MUST NOT call datetime.now() directly.
+        """Infrastructure MUST NOT call datetime.now() or datetime.utcnow() directly.
 
         Timestamps should be created in application layer (e.g., PipelineContext)
         and passed as parameters to infrastructure components.
 
-        Exceptions:
-        - operations.py: Uses datetime.now() for calculating retention cutoffs
+        Note: datetime.utcnow() is deprecated in Python 3.12+ (PEP 692).
         """
         violations = []
 
@@ -90,10 +92,10 @@ class TestNoDatetimeNowInInfrastructure:
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
-                    # Check for datetime.now() patterns
+                    # Check for datetime.now() and datetime.utcnow() patterns
                     if isinstance(node.func, ast.Attribute):
-                        if node.func.attr == "now":
-                            # datetime.now() after "from datetime import datetime"
+                        if node.func.attr in ("now", "utcnow"):
+                            # datetime.now()/utcnow() after "from datetime import datetime"
                             if isinstance(node.func.value, ast.Name):
                                 if node.func.value.id == "datetime":
                                     relative_path = py_file.relative_to(
@@ -103,9 +105,9 @@ class TestNoDatetimeNowInInfrastructure:
                                         / INFRASTRUCTURE_DIR
                                     )
                                     violations.append(
-                                        f"{relative_path}:{node.lineno}: datetime.now()"
+                                        f"{relative_path}:{node.lineno}: datetime.{node.func.attr}()"
                                     )
-                            # datetime.datetime.now() - full path
+                            # datetime.datetime.now()/utcnow() - full path
                             elif isinstance(node.func.value, ast.Attribute):
                                 if node.func.value.attr == "datetime":
                                     relative_path = py_file.relative_to(
@@ -115,11 +117,11 @@ class TestNoDatetimeNowInInfrastructure:
                                         / INFRASTRUCTURE_DIR
                                     )
                                     violations.append(
-                                        f"{relative_path}:{node.lineno}: datetime.datetime.now()"
+                                        f"{relative_path}:{node.lineno}: datetime.datetime.{node.func.attr}()"
                                     )
 
         assert not violations, (
-            "datetime.now() found in infrastructure layer:\n"
+            "datetime.now()/utcnow() found in infrastructure layer:\n"
             + "\n".join(f"  - {v}" for v in violations)
             + "\n\nTimestamps should be created in application layer "
             "(e.g., PipelineContext.started_at) and passed as parameters. "
