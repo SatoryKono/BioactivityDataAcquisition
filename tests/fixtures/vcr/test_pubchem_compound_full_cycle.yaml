@@ -210,8 +210,6 @@ interactions:
       - Apache
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       X-Throttling-Control:
@@ -220,6 +218,191 @@ interactions:
       X-UA-Compatible:
       - IE=Edge
       X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: cid=962
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '7'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.11
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 962\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3\n        ],\n        \"element\":
+        [\n          8,\n          1,\n          1\n        ]\n      },\n      \"bonds\":
+        {\n        \"aid1\": [\n          1,\n          1\n        ],\n        \"aid2\":
+        [\n          2,\n          3\n        ],\n        \"order\": [\n          1,\n
+        \         1\n        ]\n      },\n      \"coords\": [\n        {\n          \"type\":
+        [\n            1,\n            5,\n            255\n          ],\n          \"aid\":
+        [\n            1,\n            2,\n            3\n          ],\n          \"conformers\":
+        [\n            {\n              \"x\": [\n                2.5369,\n                3.0739,\n
+        \               2\n              ],\n              \"y\": [\n                -0.155,\n
+        \               0.155,\n                0.155\n              ]\n            }\n
+        \         ]\n        }\n      ],\n      \"charge\": 0,\n      \"props\": [\n
+        \       {\n          \"urn\": {\n            \"label\": \"Compound\",\n            \"name\":
+        \"Canonicalized\",\n            \"datatype\": 5,\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"ival\":
+        1\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound Complexity\",\n            \"datatype\": 7,\n            \"implementation\":
+        \"E_COMPLEXITY\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"fval\":
+        0\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Acceptor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHACCEPTORS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"ival\": 1\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Donor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHDONORS\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"ival\":
+        1\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Rotatable Bond\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NROTBONDS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"ival\": 0\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Fingerprint\",\n
+        \           \"name\": \"SubStructure Keys\",\n            \"datatype\": 16,\n
+        \           \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371000020000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"water\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"oxidane\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"oxidane\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"oxidane\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"oxidane\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"water\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.2\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.04.14\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/H2O/h1H2\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.2\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.04.14\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"XLYOFNOQVPJJNP-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Log P\",\n            \"name\": \"XLogP3-AA\",\n            \"datatype\":
+        7,\n            \"version\": \"3.0\",\n            \"source\": \"sioc-ccbg.ac.cn\",\n
+        \           \"release\": \"2025.04.14\"\n          },\n          \"value\":
+        {\n            \"fval\": -0.5\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\":
+        1,\n            \"version\": \"2.2\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.04.14\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"18.010564683\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"H2O\"\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Molecular Weight\",\n
+        \           \"datatype\": 1,\n            \"version\": \"2.2\",\n            \"software\":
+        \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"18.015\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"SMILES\",\n            \"name\": \"Absolute\",\n            \"datatype\":
+        1,\n            \"version\": \"2.3.0\",\n            \"software\": \"OEChem\",\n
+        \           \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"O\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"SMILES\",\n            \"name\": \"Connectivity\",\n            \"datatype\":
+        1,\n            \"version\": \"2.3.0\",\n            \"software\": \"OEChem\",\n
+        \           \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.06.30\"\n          },\n          \"value\": {\n            \"sval\":
+        \"O\"\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"fval\": 1\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"18.010564683\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 1,\n        \"atom_chiral\":
+        0,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 0,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 1,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - private
+      connection:
+      - close
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json
+      date:
+      - Sun, 28 Dec 2025 01:46:12 GMT
+      expires:
+      - Sun, 28 Dec 2025 02:46:12 GMT
+      ncbi-phid:
+      - 95B7FD8D9508BE410000000000000001.m_1
+      ncbi-sid:
+      - 95B7FD8D9508BE41_0000SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Apache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-throttling-control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (23%)'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
       - 1; mode=block
     status:
       code: 200
