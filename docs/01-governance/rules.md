@@ -1,6 +1,6 @@
 # Governance Rules
 
-*Reference: [RULES.md](../../RULES.md)*
+*Reference: [RULES.md](../RULES.md)*
 
 This section contains the governance rules for the BioETL project.
 
@@ -22,4 +22,4 @@ The project follows a strict set of rules to ensure code quality, maintainabilit
 4.  **Graceful Shutdown**: Handle SIGTERM/SIGINT correctly.
 5.  **Observability**: Structured logging, Prometheus metrics, Tracing.
 
-For the full set of rules, please refer to the root [RULES.md](../../RULES.md) file.
+For the full set of rules, please refer to the root [RULES.md](../RULES.md) file.
