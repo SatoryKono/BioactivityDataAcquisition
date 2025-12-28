@@ -50,10 +50,6 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
-    # Metadata (use alias for underscore-prefixed columns)
-    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
-    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
-
     class Config:
         """Pandera configuration."""
 
