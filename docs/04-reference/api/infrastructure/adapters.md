@@ -115,34 +115,9 @@ Local filesystem checkpoint implementation.
             - load
             - delete
 
-## Observability Adapters
+## Observability
 
-### StructLogAdapter
-
-Structured logging adapter.
-
-::: bioetl.infrastructure.adapters.observability.structlog_adapter.StructLogAdapter
-    options:
-        show_root_heading: true
-        show_source: false
-
-### PrometheusMetricsAdapter
-
-Prometheus metrics adapter.
-
-::: bioetl.infrastructure.adapters.observability.prometheus_adapter.PrometheusMetricsAdapter
-    options:
-        show_root_heading: true
-        show_source: false
-
-### OpenTelemetryTracingAdapter
-
-OpenTelemetry tracing adapter.
-
-::: bioetl.infrastructure.adapters.observability.opentelemetry_adapter.OpenTelemetryTracingAdapter
-    options:
-        show_root_heading: true
-        show_source: false
+Observability components are documented in [Observability](observability.md).
 
 ## Usage Example
 
