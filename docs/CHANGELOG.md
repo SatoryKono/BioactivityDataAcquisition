@@ -1,6 +1,6 @@
 # Changelog
 
-> **Canonical Source**: [`CHANGELOG.md`](../CHANGELOG.md) (project root)
+> **Canonical Source**: [`CHANGELOG.md`](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) (project root)
 
 See the root CHANGELOG.md for the complete version history.
 

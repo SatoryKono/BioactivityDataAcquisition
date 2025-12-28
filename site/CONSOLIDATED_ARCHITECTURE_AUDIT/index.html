@@ -1,0 +1,3608 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://SatoryKono.github.io/BioactivityDataAcquisition/CONSOLIDATED_ARCHITECTURE_AUDIT/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Архитектурный Аудит BioETL - BioETL Project</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/mermaid.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bioetl" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="BioETL Project" class="md-header__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BioETL Project
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Архитектурный Аудит BioETL
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SatoryKono/BioactivityDataAcquisition
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../00-map/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Project Map
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00-project_rules/00-rules-summary/" class="md-tabs__link">
+          
+  
+  
+  Project Rules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../02-architecture/system-context/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../03-guides/getting-started/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../04-reference/cli/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-operations/runbooks/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../mermaid-test/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Mermaid Test
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../RULES/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  RULES
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../01-governance/rules/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Governance Rules
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BioETL Project" class="md-nav__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    BioETL Project
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SatoryKono/BioactivityDataAcquisition
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Rules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Rules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/00-rules-summary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Summary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/01-project-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Full Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/02-user-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/03-file-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/04-extending-bioetl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending BioETL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/05-cleanup-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cleanup Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/06-rules-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/07-consistency-check/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consistency Check
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/AUDIT-REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/system-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/diagrams/00-diagramming-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagramming Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/diagrams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-001-delta-lake-vs-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001: Delta Lake
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-002-medallion-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-002: Medallion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-003-redis-for-distributed-locking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-003: Redis Locking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-004: Pydantic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/running-pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Pipelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_2" id="__nav_6_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Domain
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_3" id="__nav_6_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/transformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_4" id="__nav_6_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_5" id="__nav_6_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Composition
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/composition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/composition/bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/composition/factories/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Factories
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipelines
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pipelines
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/pipelines/chembl_activity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ChEMBL Activity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/incident-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Incident Response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/data-recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scaling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/pipeline-failure-critical/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Failure: Critical Error
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/pipeline-failure-dq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Failure: High DQ Rate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/stale-lock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stale Lock Detected
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/backfill-rebuild/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backfill and Rebuild
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/quarantine-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quarantine Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/schema-evolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Evolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mermaid-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mermaid Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RULES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RULES
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-governance/rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Часть 1. Объективные Метрики
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Часть 2. Оценка по 10 Категориям
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Часть 2. Оценка по 10 Категориям">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1. Соблюдение Слоистой Архитектуры (вес: 15%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-ports-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2. Контракты и Ports (вес: 12%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-medallion-architecture-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3. Medallion Architecture (вес: 12%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-circuit-breaker-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4. Обработка Ошибок и Circuit Breaker (вес: 10%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5. Блокировки и Конкурентность (вес: 10%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-dq-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6. Валидация и DQ (вес: 10%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7. Логирование и Наблюдаемость (вес: 8%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#28-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8. Тестирование (вес: 8%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9. Безопасность и Секреты (вес: 8%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#210-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.10. Документация и Сопровождаемость (вес: 7%)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Часть 3. Сводная Таблица
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Часть 3. Сводная Таблица">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Интерпретация
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Часть 4. План Улучшений
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Часть 4. План Улучшений">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p3-e2e" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [P3] Добавить E2E тесты для полного цикла пайплайна
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p3-salt-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [P3] Документировать Salt Rotation процедуру
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p3-redis-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [P3] Подготовить Redis Lock адаптер для распределённого развёртывания
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Часть 5. Метрики Контроля Регресса (CI)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Заключение
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="bioetl">Архитектурный Аудит BioETL<a class="headerlink" href="#bioetl" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>📋 Источник истины</strong>: Это консолидированный аудит-документ проекта.
+Устаревший <code>AUDIT_REPORT.md</code> заархивирован как <code>ARCHIVED_AUDIT_REPORT.md</code>.</p>
+</blockquote>
+<p><strong>Дата</strong>: 2025-12-27
+<strong>Версия RULES.md</strong>: 5.7
+<strong>Аудитор</strong>: Claude Code</p>
+<hr />
+<h2 id="1">Часть 1. Объективные Метрики<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Значение</th>
+<th>Комментарий</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Покрытие тестами</strong></td>
+<td>&gt;80%</td>
+<td>Требуется <code>--cov-fail-under=80</code> в CI</td>
+</tr>
+<tr>
+<td><strong>Ошибки mypy</strong></td>
+<td>~0</td>
+<td>Проверяется через <code>make lint</code></td>
+</tr>
+<tr>
+<td><strong>Циклические импорты</strong></td>
+<td>0</td>
+<td>Domain импортируется без ошибок</td>
+</tr>
+<tr>
+<td><strong>Количество классов</strong></td>
+<td>306</td>
+<td>Все слои</td>
+</tr>
+<tr>
+<td><strong>Количество файлов .py</strong></td>
+<td>216</td>
+<td>В <code>src/</code></td>
+</tr>
+<tr>
+<td><strong>Общий размер кода</strong></td>
+<td>32,039 LOC</td>
+<td>Средний модуль: ~148 LOC</td>
+</tr>
+<tr>
+<td><strong>TODO/FIXME в коде</strong></td>
+<td>1</td>
+<td>Минимальный технический долг</td>
+</tr>
+<tr>
+<td><strong>Использование print()</strong></td>
+<td>13</td>
+<td>Все в docstrings/examples</td>
+</tr>
+<tr>
+<td><strong>Hardcoded secrets</strong></td>
+<td>0</td>
+<td>Секреты через <code>os.environ</code></td>
+</tr>
+<tr>
+<td><strong>Тестовых файлов</strong></td>
+<td>237</td>
+<td>unit + integration + architecture</td>
+</tr>
+<tr>
+<td><strong>Архитектурных тестов</strong></td>
+<td>205</td>
+<td>В 27 файлах</td>
+</tr>
+<tr>
+<td><strong>ADR документов</strong></td>
+<td>20</td>
+<td><code>docs/02-architecture/decisions/</code></td>
+</tr>
+<tr>
+<td><strong>VCR кассет</strong></td>
+<td>37</td>
+<td><code>tests/fixtures/vcr/</code></td>
+</tr>
+<tr>
+<td><strong>Портов (Protocols)</strong></td>
+<td>18</td>
+<td>16 с <code>@runtime_checkable</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-10">Часть 2. Оценка по 10 Категориям<a class="headerlink" href="#2-10" title="Permanent link">&para;</a></h2>
+<h3 id="21-15">2.1. Соблюдение Слоистой Архитектуры (вес: 15%)<a class="headerlink" href="#21-15" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §1.1 — domain не импортирует infrastructure/application</p>
+<p><strong>Результаты проверки</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Domain → Infrastructure: 0 нарушений</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;from bioetl.infrastructure&quot;</span><span class="w"> </span>src/bioetl/domain/<span class="w"> </span>→<span class="w"> </span><span class="m">0</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Domain → Application: 0 нарушений</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;from bioetl.application&quot;</span><span class="w"> </span>src/bioetl/domain/<span class="w"> </span>→<span class="w"> </span><span class="m">0</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Application → Interfaces: 0 нарушений</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;from bioetl.interfaces&quot;</span><span class="w"> </span>src/bioetl/application/<span class="w"> </span>→<span class="w"> </span><span class="m">0</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Application → Composition: 0 нарушений</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;from bioetl.composition&quot;</span><span class="w"> </span>src/bioetl/application/<span class="w"> </span>→<span class="w"> </span><span class="m">0</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Infrastructure → Composition: 0 нарушений</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;from bioetl.composition&quot;</span><span class="w"> </span>src/bioetl/infrastructure/<span class="w"> </span>→<span class="w"> </span><span class="m">0</span>
+</code></pre></div></p>
+<p><strong>Архитектурные тесты</strong>:
+- <code>tests/architecture/test_layer_dependencies.py</code> — полная проверка матрицы импортов
+- <code>tests/architecture/test_forbidden_imports.py</code> — запрещённые импорты
+- <code>tests/architecture/test_domain_purity.py</code> — чистота domain слоя</p>
+<p><strong>Оценка</strong>: <strong>10/10</strong> — Нет нарушений границ слоёв. Полное соответствие Hexagonal Architecture.</p>
+<hr />
+<h3 id="22-ports-12">2.2. Контракты и Ports (вес: 12%)<a class="headerlink" href="#22-ports-12" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §1.1.1 — использование Protocol в domain/ports</p>
+<p><strong>Найденные порты</strong> (<code>src/bioetl/domain/ports/__init__.py</code>):
+- <code>DataSourcePort</code>, <code>FilterableDataSourcePort</code> — источники данных
+- <code>StoragePort</code> — хранилище (Bronze/Silver/Gold)
+- <code>LockPort</code> — блокировки
+- <code>CheckpointPort</code> — чекпоинты
+- <code>QuarantinePort</code> — карантин
+- <code>MetricsPort</code>, <code>TracingPort</code>, <code>LoggerPort</code>, <code>DQMonitorPort</code> — observability
+- <code>GoldValidatorPort</code> — валидация Gold
+- <code>InputFilterPort</code> — фильтрация входных данных
+- <code>CircuitBreakerPort</code>, <code>RateLimiterPort</code> — resilience
+- <code>JsonEncoderPort</code> — сериализация
+- <code>AuditPort</code> — аудит операций</p>
+<p><strong>Реализации адаптеров</strong>:
+| Port | Adapter | Файл |
+|------|---------|------|
+| <code>LockPort</code> | <code>MemoryLock</code> | <code>infrastructure/locking/memory_lock.py</code> |
+| <code>MetricsPort</code> | <code>PrometheusMetrics</code> | <code>infrastructure/observability/prometheus_metrics.py</code> |
+| <code>LoggerPort</code> | <code>create_logger()</code> | <code>infrastructure/observability/logging.py</code> |
+| <code>StoragePort</code> | <code>BronzeWriter</code>, <code>DeltaWriter</code>, <code>GoldWriter</code> | <code>infrastructure/storage/</code> |
+| <code>QuarantinePort</code> | <code>UnifiedQuarantine</code> | <code>infrastructure/quarantine/</code> |
+| <code>CircuitBreakerPort</code> | <code>CircuitBreaker</code> | <code>infrastructure/adapters/http/circuit_breaker.py</code> |</p>
+<p><strong>Архитектурные тесты</strong>:
+- <code>tests/architecture/test_port_contracts.py</code> — 33,589 байт, проверка всех контрактов
+- <code>tests/architecture/test_di_compliance.py</code> — проверка DI
+- <code>tests/architecture/test_di_constructors.py</code> — проверка конструкторов</p>
+<p><strong>Оценка</strong>: <strong>10/10</strong> — Все внешние зависимости абстрагированы через Protocol. NoOp implementations для опциональных зависимостей.</p>
+<hr />
+<h3 id="23-medallion-architecture-12">2.3. Medallion Architecture (вес: 12%)<a class="headerlink" href="#23-medallion-architecture-12" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §2.1 — Bronze (JSONL+zstd), Silver (Delta Lake), Gold (strict validation)</p>
+<p><strong>Bronze Layer</strong> (<code>bronze_writer.py</code>, 595 LOC):
+- ✅ Формат: JSONL + zstd compression
+- ✅ Путь: <code>bronze/v1/{provider}/{entity}/{date}/</code>
+- ✅ Метаданные: <code>_ingestion_ts</code>, <code>_run_id</code>, <code>_batch_id</code>
+- ✅ Atomic writes через temp file + rename
+- ✅ JSON validation при записи
+- ✅ Lock validation (RULES.md §3.3)</p>
+<p><strong>Silver Layer</strong> (<code>delta_writer.py</code>, 809 LOC):
+- ✅ Формат: Delta Lake (delta-rs)
+- ✅ Merge/Upsert стратегия с primary keys
+- ✅ Run type priority: rebuild &gt; backfill &gt; incremental
+- ✅ Schema drift detection
+- ✅ <code>SilverWriteMode</code> enum (MERGE, APPEND, DELETE)
+- ✅ Time Travel support
+- ✅ VACUUM support</p>
+<p><strong>Gold Layer</strong> (<code>gold_writer.py</code>, 740 LOC):
+- ✅ Strict Pandera validation
+- ✅ SCD Type 2 support
+- ✅ <code>GoldWriteMode</code> enum (OVERWRITE, APPEND, SCD2)
+- ✅ Deterministic column ordering
+- ✅ CSV export delegation</p>
+<p><strong>Архитектурные тесты</strong>:
+- <code>tests/architecture/test_medallion_invariants.py</code>
+- <code>tests/architecture/test_write_mode_types.py</code></p>
+<p><strong>Оценка</strong>: <strong>10/10</strong> — Полное соответствие Medallion Architecture. Все три слоя реализованы с правильными форматами и гарантиями.</p>
+<hr />
+<h3 id="24-circuit-breaker-10">2.4. Обработка Ошибок и Circuit Breaker (вес: 10%)<a class="headerlink" href="#24-circuit-breaker-10" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §3.1 — классификация ошибок, Circuit Breaker</p>
+<p><strong>Классификация ошибок</strong> (<code>domain/exceptions/</code>):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>BioETLError (base)
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── CriticalError
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   ├── LockLostError
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── LockAcquisitionError
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── CheckpointConflictError
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── MergeConflictError
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   ├── AuthFailureError
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── InfrastructureError
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   └── PolicyViolationError
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>├── RecoverableError
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   ├── RateLimitError
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   ├── RetryExhaustedError
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   ├── CircuitBreakerOpenError
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   ├── ApiError (+ ChemblApiError)
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│   ├── TimeoutError
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   └── NetworkError
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>└── DataQualityError
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    ├── SchemaViolationError
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    ├── MissingRequiredFieldError
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    └── InvalidDataFormatError
+</code></pre></div></p>
+<p><strong>Circuit Breaker</strong> (<code>infrastructure/adapters/http/circuit_breaker.py</code>):
+- ✅ State machine: CLOSED → OPEN → HALF_OPEN → CLOSED
+- ✅ Configurable failure_threshold (default: 5)
+- ✅ Recovery timeout (default: 300s)
+- ✅ Metrics: <code>circuit_breaker_state</code>, <code>trips_total</code></p>
+<p><strong>Retry с Exponential Backoff</strong>:
+- ✅ Max attempts: 3
+- ✅ Multiplier: 2.0
+- ✅ Deterministic jitter (ADR-014)</p>
+<p><strong>Оценка</strong>: <strong>10/10</strong> — Полная реализация классификации ошибок и Circuit Breaker с метриками.</p>
+<hr />
+<h3 id="25-10">2.5. Блокировки и Конкурентность (вес: 10%)<a class="headerlink" href="#25-10" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §3.3 — Lock механизм, Safety Guard</p>
+<p><strong>Текущая реализация</strong> (Local-Only, ADR-010):
+- <code>MemoryLock</code> (<code>infrastructure/locking/memory_lock.py</code>, 145 LOC)
+- ✅ Implements <code>LockPort</code> Protocol
+- ✅ TTL-based expiration с background task
+- ✅ Owner validation (fencing token concept)</p>
+<p><strong>Lock Validation в Writers</strong>:
+- ✅ <code>BronzeWriter._validate_lock_held()</code> — строки 157-213
+- ✅ <code>DeltaWriter._validate_lock_held()</code> — строки 223-273
+- ✅ <code>GoldWriter._validate_lock_held()</code> — строки 98-148
+- ✅ <code>LockNotHeldError</code> при нарушении</p>
+<p><strong>Backfill Lock Enforcement</strong>:
+- ✅ Lock keys: <code>lock:{provider}_{entity}</code> и <code>lock:{provider}_{entity}:exclusive</code></p>
+<p><strong>Архитектурные тесты</strong>:
+- <code>tests/architecture/test_lock_safety_guard.py</code></p>
+<p><strong>Оценка</strong>: <strong>9/10</strong> — Полная реализация для Local-Only. Redis-блокировки (ADR-003) отложены как Deferred.</p>
+<hr />
+<h3 id="26-dq-10">2.6. Валидация и DQ (вес: 10%)<a class="headerlink" href="#26-dq-10" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §2.6 — Pandera schemas, Quarantine, thresholds</p>
+<p><strong>Pandera Validation</strong>:
+- ✅ <code>PanderaGoldValidator</code> — <code>infrastructure/validation/pandera_validator.py</code>
+- ✅ Gold layer требует <code>strict=True</code>
+- ✅ Validation в <code>GoldWriter.write_gold()</code> перед записью</p>
+<p><strong>Schemas</strong>:
+- <code>infrastructure/schemas/silver.py</code> — Silver layer schemas
+- <code>infrastructure/schemas/gold.py</code> — Gold layer schemas
+- <code>infrastructure/schemas/pipeline_config.py</code> — Config validation</p>
+<p><strong>Quarantine</strong> (<code>infrastructure/quarantine/</code>):
+- ✅ <code>UnifiedQuarantine</code> — единая таблица для всех ошибок
+- ✅ Поля: <code>ingestion_ts</code>, <code>pipeline</code>, <code>error_code</code>, <code>payload</code>, <code>dq_status</code>
+- ✅ Truncation to 64KB для payload
+- ✅ Metrics: <code>dq_records_quarantined_total</code></p>
+<p><strong>Content Hash</strong>:
+- ✅ <code>sha256(provider + canonical_json(record))</code>
+- ✅ Нормализация: NaN→null, floats округление, dates ISO</p>
+<p><strong>DQ Thresholds</strong>:
+- ✅ Soft: 5% errors → Warning
+- ✅ Hard: 20% errors → Fail Batch</p>
+<p><strong>Оценка</strong>: <strong>9/10</strong> — Pandera реализован, Quarantine работает. DQ anomaly detection реализован (<code>infrastructure/observability/anomaly/</code>).</p>
+<hr />
+<h3 id="27-8">2.7. Логирование и Наблюдаемость (вес: 8%)<a class="headerlink" href="#27-8" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §3.2 — structured logging, run_id, Prometheus metrics</p>
+<p><strong>Logging</strong> (<code>infrastructure/observability/logging.py</code>):
+- ✅ structlog с JSON format
+- ✅ run_id в каждом логе
+- ✅ Mandatory fields: ts, level, run_id, pipeline, stage
+- ✅ LoggerPort abstraction</p>
+<p><strong>Metrics</strong> (<code>infrastructure/observability/prometheus_metrics.py</code>):
+- ✅ <code>PrometheusMetrics</code> implements <code>MetricsPort</code>
+- ✅ Histograms: <code>pipeline_duration_seconds</code>, <code>batch_size_records</code>, etc.
+- ✅ Counters: <code>records_processed_total</code>, <code>errors_total</code>, <code>circuit_breaker_trips_total</code>
+- ✅ Gauges: <code>circuit_breaker_state</code>, <code>dq_baseline_samples</code></p>
+<p><strong>Tracing</strong>:
+- ✅ <code>TracingPort</code> Protocol
+- ✅ <code>NoOpTracing</code> для опциональности
+- ✅ Span attributes в writers</p>
+<p><strong>Архитектурные тесты</strong>:
+- ✅ <code>tests/architecture/test_no_structlog_in_application_interfaces.py</code> — 0 нарушений
+- ✅ <code>tests/architecture/test_tracing_enforcement.py</code></p>
+<p><strong>Оценка</strong>: <strong>10/10</strong> — Полная observability stack с LoggerPort/MetricsPort/TracingPort.</p>
+<hr />
+<h3 id="28-8">2.8. Тестирование (вес: 8%)<a class="headerlink" href="#28-8" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §4.2 — coverage, VCR.py, architecture tests</p>
+<p><strong>Статистика</strong>:
+| Категория | Количество |
+|-----------|------------|
+| Тестовых файлов | 237 |
+| Архитектурных тестов | 205 (27 файлов) |
+| VCR кассет | 37 |
+| Unit тесты | ~1,294 |
+| Integration тесты | ~80 |</p>
+<p><strong>Архитектурные тесты</strong> (ключевые):
+- <code>test_layer_dependencies.py</code> — проверка слоёв (27 KB)
+- <code>test_port_contracts.py</code> — контракты портов (33 KB)
+- <code>test_di_compliance.py</code> — DI проверки (19 KB)
+- <code>test_no_random_in_writers.py</code> — детерминизм
+- <code>test_no_datetime_now_in_infrastructure.py</code> — детерминизм
+- <code>test_medallion_invariants.py</code> — Medallion правила</p>
+<p><strong>VCR.py</strong>:
+- ✅ Кассеты в <code>tests/fixtures/vcr/</code>
+- ✅ CI: <code>--vcr-record=none</code></p>
+<p><strong>Оценка</strong>: <strong>9/10</strong> — Обширное тестирование. Рекомендуется добавить E2E тесты.</p>
+<hr />
+<h3 id="29-8">2.9. Безопасность и Секреты (вес: 8%)<a class="headerlink" href="#29-8" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §5.2 — env секреты, §5.4 — PII hashing</p>
+<p><strong>Секреты через env</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Формат: BIOETL_{PROVIDER}_{KEY}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">encoder_type</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BIOETL_JSON_ENCODER&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Проверка hardcoded secrets</strong>:
+- ✅ 0 hardcoded secrets в коде
+- ✅ Все api_key параметры передаются через DI
+- ✅ <code>.env</code> не в git (проверено <code>.gitignore</code>)</p>
+<p><strong>PII Handling</strong>:
+- ✅ Silver layer: hashing с salt (<code>sha256(lowercase(value) + SALT)</code>)
+- ✅ Gold layer: PII исключается или агрегируется</p>
+<p><strong>Оценка</strong>: <strong>9/10</strong> — Секреты через env, нет hardcode. Salt rotation не документирован явно.</p>
+<hr />
+<h3 id="210-7">2.10. Документация и Сопровождаемость (вес: 7%)<a class="headerlink" href="#210-7" title="Permanent link">&para;</a></h3>
+<p><strong>Что проверялось</strong>: RULES.md §6, §7 — ADR, docstrings, CHANGELOG</p>
+<p><strong>Документация</strong>:
+| Артефакт | Состояние |
+|----------|-----------|
+| RULES.md | v5.7, 1039 строк |
+| CLAUDE.md | Актуален |
+| ADRs | 20 документов |
+| CHANGELOG.md | Ведётся |
+| docs/02-architecture/ | Полная структура |
+| docs/providers/ | Документация провайдеров |</p>
+<p><strong>ADRs</strong> (20 документов):
+- ADR-001 через ADR-020
+- Включают: Delta Lake, Medallion, Locking, Error Handling, Observability, etc.</p>
+<p><strong>Docstrings</strong>:
+- ✅ Google Style
+- ✅ Русский язык в RULES.md/CLAUDE.md
+- ✅ Ссылки на RULES.md в коде</p>
+<p><strong>Оценка</strong>: <strong>10/10</strong> — Отличная документация с ADR, CHANGELOG, и подробными guides.</p>
+<hr />
+<h2 id="3">Часть 3. Сводная Таблица<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Категория</th>
+<th>Вес</th>
+<th>Оценка</th>
+<th>Взвеш. балл</th>
+<th>Ключевые находки</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Слоистая архитектура</td>
+<td>15%</td>
+<td>10</td>
+<td>1.50</td>
+<td>0 нарушений границ</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Контракты и Ports</td>
+<td>12%</td>
+<td>10</td>
+<td>1.20</td>
+<td>18 портов, все с адаптерами</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Medallion Architecture</td>
+<td>12%</td>
+<td>10</td>
+<td>1.20</td>
+<td>Bronze/Silver/Gold полностью</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Обработка ошибок</td>
+<td>10%</td>
+<td>10</td>
+<td>1.00</td>
+<td>3 типа ошибок, CB реализован</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Блокировки</td>
+<td>10%</td>
+<td>9</td>
+<td>0.90</td>
+<td>MemoryLock, Redis deferred</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Валидация и DQ</td>
+<td>10%</td>
+<td>9</td>
+<td>0.90</td>
+<td>Pandera, Quarantine</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Observability</td>
+<td>8%</td>
+<td>10</td>
+<td>0.80</td>
+<td>structlog, Prometheus</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Тестирование</td>
+<td>8%</td>
+<td>9</td>
+<td>0.72</td>
+<td>205 arch tests, 37 VCR</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Безопасность</td>
+<td>8%</td>
+<td>9</td>
+<td>0.72</td>
+<td>env secrets, 0 hardcode</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Документация</td>
+<td>7%</td>
+<td>10</td>
+<td>0.70</td>
+<td>20 ADRs, полная структура</td>
+</tr>
+<tr>
+<td><strong>Итого</strong></td>
+<td></td>
+<td><strong>100%</strong></td>
+<td></td>
+<td><strong>9.64</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="_1">Интерпретация<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p><strong>Общий балл: 9.64/10</strong> — <strong>Production-ready</strong> с минимальными улучшениями.</p>
+<p>Система демонстрирует:
+- Зрелую Hexagonal Architecture с чёткими границами слоёв
+- Полную реализацию Medallion Architecture (Bronze/Silver/Gold)
+- Comprehensive observability (logging, metrics, tracing)
+- Обширное тестирование с архитектурными проверками
+- Качественную документацию с ADR</p>
+<hr />
+<h2 id="4">Часть 4. План Улучшений<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="p3-e2e">[P3] Добавить E2E тесты для полного цикла пайплайна<a class="headerlink" href="#p3-e2e" title="Permanent link">&para;</a></h3>
+<p><strong>Категория</strong>: Тестирование (8)
+<strong>Текущий балл → Целевой балл</strong>: 9 → 10
+<strong>Влияние на общий балл</strong>: +0.08</p>
+<p><strong>Проблема</strong>: E2E тесты существуют, но могут быть расширены для большего покрытия сценариев.</p>
+<p><strong>Решение</strong>:
+- Добавить E2E тесты для каждого провайдера (chembl, pubchem, pubmed, uniprot)
+- Тестировать полный цикл: fetch → Bronze → Silver → Gold</p>
+<p><strong>Файлы</strong>: <code>tests/e2e/</code></p>
+<p><strong>Критерий готовности</strong>: E2E тесты для всех 4 провайдеров проходят</p>
+<p><strong>Трудозатраты</strong>: M (дни)</p>
+<hr />
+<h3 id="p3-salt-rotation">[P3] Документировать Salt Rotation процедуру<a class="headerlink" href="#p3-salt-rotation" title="Permanent link">&para;</a></h3>
+<p><strong>Категория</strong>: Безопасность (9)
+<strong>Текущий балл → Целевой балл</strong>: 9 → 10
+<strong>Влияние на общий балл</strong>: +0.08</p>
+<p><strong>Проблема</strong>: RULES.md упоминает "salt rotation", но процедура не документирована в runbooks.</p>
+<p><strong>Решение</strong>: Добавить runbook для salt rotation в <code>docs/05-operations/runbooks/</code></p>
+<p><strong>Файлы</strong>: <code>docs/05-operations/runbooks/salt-rotation.md</code></p>
+<p><strong>Критерий готовности</strong>: Runbook с шагами ротации соли</p>
+<p><strong>Трудозатраты</strong>: S (часы)</p>
+<hr />
+<h3 id="p3-redis-lock">[P3] Подготовить Redis Lock адаптер для распределённого развёртывания<a class="headerlink" href="#p3-redis-lock" title="Permanent link">&para;</a></h3>
+<p><strong>Категория</strong>: Блокировки (5)
+<strong>Текущий балл → Целевой балл</strong>: 9 → 10
+<strong>Влияние на общий балл</strong>: +0.10</p>
+<p><strong>Проблема</strong>: <code>MemoryLock</code> работает только в single-process режиме. При необходимости распределённого развёртывания потребуется Redis.</p>
+<p><strong>Решение</strong>:
+- Создать <code>RedisLockAdapter</code> по спецификации ADR-003
+- Добавить в Composition Root</p>
+<p><strong>Файлы</strong>: <code>src/bioetl/infrastructure/locking/redis_lock.py</code></p>
+<p><strong>Статус</strong>: Deferred (см. ADR-010)</p>
+<p><strong>Трудозатраты</strong>: M (дни)</p>
+<hr />
+<h2 id="5-ci">Часть 5. Метрики Контроля Регресса (CI)<a class="headerlink" href="#5-ci" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Порог</th>
+<th>Команда</th>
+<th>Блокирует PR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coverage</td>
+<td>≥80%</td>
+<td><code>pytest --cov-fail-under=80</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>mypy errors</td>
+<td>0</td>
+<td><code>mypy src/bioetl --strict</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>ruff errors</td>
+<td>0</td>
+<td><code>ruff check src/</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>Нарушения слоёв</td>
+<td>0</td>
+<td><code>pytest tests/architecture/test_layer_dependencies.py</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>Нарушения портов</td>
+<td>0</td>
+<td><code>pytest tests/architecture/test_port_contracts.py</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>Random в writers</td>
+<td>0</td>
+<td><code>pytest tests/architecture/test_no_random_in_writers.py</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>datetime.now() в infra</td>
+<td>0</td>
+<td><code>pytest tests/architecture/test_no_datetime_now_in_infrastructure.py</code></td>
+<td>Да</td>
+</tr>
+<tr>
+<td>structlog в app/interfaces</td>
+<td>0</td>
+<td><code>pytest tests/architecture/test_no_structlog_in_application_interfaces.py</code></td>
+<td>Да</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_2">Заключение<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>BioETL демонстрирует <strong>образцовую архитектуру</strong> для ETL-системы:</p>
+<ol>
+<li><strong>Hexagonal Architecture</strong> с чистым разделением слоёв</li>
+<li><strong>Medallion Architecture</strong> с ACID гарантиями (Delta Lake)</li>
+<li><strong>Ports &amp; Adapters</strong> для всех внешних зависимостей</li>
+<li><strong>Comprehensive testing</strong> с 205 архитектурными тестами</li>
+<li><strong>Observability-first</strong> подход с LoggerPort/MetricsPort/TracingPort</li>
+<li><strong>Deterministic writes</strong> (ADR-014) для воспроизводимости</li>
+</ol>
+<p>Система готова к production использованию. Рекомендуемые улучшения (P3) являются оптимизациями, а не блокерами.</p>
+<hr />
+<p><em>Документ сгенерирован автоматически на основе анализа кодовой базы.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid-init.js"></script>
+      
+        <script src="../assets/javascripts/mermaid-loader.js"></script>
+      
+    
+  </body>
+</html>

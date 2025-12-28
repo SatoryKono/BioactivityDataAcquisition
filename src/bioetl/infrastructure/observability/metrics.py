@@ -104,6 +104,18 @@ ARCHIVE_DURATION_SECONDS = Histogram(
 )
 
 # Data Quality Monitor metrics
+DQ_VALIDATION_SCORE = Gauge(
+    "bioetl_dq_validation_score",
+    "Data quality validation score (0.0-1.0, where 1.0 = all records valid)",
+    ["pipeline", "entity"],
+)
+
+DATA_FRESHNESS_SECONDS = Gauge(
+    "bioetl_data_freshness_seconds",
+    "Seconds since last successful data ingestion for pipeline/entity",
+    ["pipeline", "entity"],
+)
+
 DQ_ANOMALY_DETECTED = Counter(
     "bioetl_dq_anomaly_detected",
     "Total number of data quality anomalies detected",

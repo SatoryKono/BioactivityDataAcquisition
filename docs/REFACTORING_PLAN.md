@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.6 | Дата: 2025-12-27 | Обновлено: T1-T4 помечены как ✅ РЕАЛИЗОВАНО*
+*Версия: 5.7 | Дата: 2025-12-28 | Обновлено: Добавлены ложные утверждения о MemoryLock, MemoryMonitor, DQ метриках*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -78,6 +78,12 @@
 | "PipelineRunner не выпускает метрики по стадиям" | Использует `PipelineObserver` через `RunnerServices.observer` как context manager | `runner.py:89,117` |
 | "Нет валидации write mode через Enum" | **Реализовано**: `SilverWriteMode` enum (`delta_writer.py:53-64`), `GoldWriteMode` enum (`gold_writer.py:42-54`) с валидацией | M1, M2 в этом документе |
 | "Архитектурные тесты не связаны с метриками" | 187 архитектурных тестов в `tests/architecture/`, `make arch-test` в CI | `Makefile:arch-test` |
+| "Требуется Redis для распределённых блокировок" | **MemoryLock достаточен** для локального запуска. Проект by design использует локальные пайплайны. Redis нужен только при масштабировании на несколько workers. | `CLAUDE.md` §5, `memory_lock.py` (256 строк, полный функционал) |
+| "MemoryMonitor возвращает захардкоженные нули/значения — баг" | **Graceful degradation** — при недоступности psutil возвращает консервативные оценки (50% использования), не нули. Это валидный паттерн для кросс-платформенности. | `memory_monitor.py:170-180` (`_get_stats_estimate`) |
+| "DQ метрики не экспортируются в Prometheus" | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq_soft_threshold_exceeded` (counter), `dq_check_duration_ms` (histogram). | `domain/config.py:28-40` (`DQConfig`), `postrun_service.py:122-163` |
+| "protocols.py пустой файл с нулевым покрытием" | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort` | `application/core/protocols.py` |
+| "TTL по умолчанию 3600s не соответствует требованиям" | Фактический TTL = `heartbeat_interval * 3` = 90s по умолчанию. `LockContext.is_valid(ttl_seconds=3600)` — backward-compat check, не фактический TTL. | `domain/config.py:291-293` (`effective_lock_ttl`) |
+| "Email в config требует хэширования как PII" | `default_email` — технический идентификатор для NCBI API, **НЕ персональные данные**. NCBI требует email для идентификации инструмента. | `CLAUDE.md` §2.3, `pubmed_client.py:38-42` |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
