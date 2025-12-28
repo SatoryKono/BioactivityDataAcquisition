@@ -140,4 +140,3 @@ response = await client.get("https://www.ebi.ac.uk/chembl/api/data/activity")
 ## See Also
 
 - [Domain Ports](../domain/ports.md) - Interfaces implemented by adapters
-- [Configuration](../domain/config.md) - Adapter configuration

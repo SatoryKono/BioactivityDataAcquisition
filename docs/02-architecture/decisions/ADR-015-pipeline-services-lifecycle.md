@@ -139,4 +139,4 @@ class TestObservabilityPortLifecycle:
 
 - [ADR-006: Logger and Metrics as Ports](ADR-006-logger-metrics-ports.md)
 - [ADR-008: Graceful Shutdown Strategy](ADR-008-graceful-shutdown-strategy.md)
-- [0005: BasePipeline Decomposition](0005-basepipeline-decomposition.md)
+- [ADR-020: BasePipeline Decomposition](ADR-020-basepipeline-decomposition.md)
