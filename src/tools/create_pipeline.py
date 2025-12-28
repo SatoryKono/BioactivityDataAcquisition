@@ -101,21 +101,23 @@ from bioetl.domain.context import PipelineContext
 class ${class_prefix}Transformer(BaseTransformer):
     \"\"\"Transformer for ${provider_title} ${entity_title} records.\"\"\"
 
-    async def _transform_record(
+    async def _transform_impl(
         self,
         context: PipelineContext,
-        record: dict[str, Any]
+        record: dict[str, Any],
+        index: int,
     ) -> dict[str, Any] | None:
         \"\"\"Transform a single raw record.
 
         Args:
             context: Pipeline context (run_id, etc.)
             record: Raw dictionary from Bronze layer
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             Transformed dictionary or None to skip.
         \"\"\"
-        # TODO: Implement mapping logic
+        # Implement mapping logic
         # Example:
         # if "id" not in record:
         #     return None
@@ -159,7 +161,7 @@ class Test${class_prefix}Transformer:
         # Setup context.started_at etc.
 
         raw_record = {"id": "123", "data": "value"}
-        result = await transformer._transform_record(context, raw_record)
+        result = await transformer._transform_impl(context, raw_record, 0)
 
         assert result is not None
         assert result["${entity}_id"] == "123"
