@@ -361,9 +361,13 @@ class Settings(BaseSettings):
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
 
     # Provider-specific settings
+    # NOTE: default_email is NOT PII (Personally Identifiable Information).
+    # It is a technical API identifier required by NCBI E-utilities for
+    # tool identification and rate limit management, not user personal data.
+    # See: https://www.ncbi.nlm.nih.gov/books/NBK25497/#chapter2.Usage_Guidelines_and_Requiremen
     default_email: str = Field(
         default="default@example.com",
-        description="Default email for NCBI API",
+        description="Technical email for NCBI API tool identification (NOT user PII)",
     )
     pubmed_api_key: SecretStr | None = Field(
         default=None,
