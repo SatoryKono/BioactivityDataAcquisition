@@ -27,7 +27,7 @@
 | **"GoldWriter создаёт NoOpTracing — нарушение DI"** | 1, 2, 3 | `gold_writer.py:86-89` | Null Object Pattern — валидный паттерн (см. CLAUDE.md §2.3). Optional dependency с fallback — НЕ нарушение. |
 | **"bootstrap_pipeline 140+ строк, перегружен"** | 3, 4 | `bootstrap.py` — **182 строки** | Делегирует через `FilterConfigBuilder.build()`, `factory.create_runner()`. Функция ~115 строк (`bootstrap.py:68-182`), остальное — импорты. |
 | **"GoldWriter 593 строки"** | 3 | `gold_writer.py` — **674 строки** | Неточный подсчёт. Делегирует CSV в `CsvExporter`, audit в `AuditPort`. |
-| **"PipelineRunner 173 строки"** | REFACTORING_PLAN.md | `runner.py` — **166 строк** | Незначительное расхождение, но показывает устаревшие данные. |
+| **"PipelineRunner 173 строки"** | refactoring-plan.md | `runner.py` — **166 строк** | Незначительное расхождение, но показывает устаревшие данные. |
 | **"Тесты не запускаются из-за отсутствия orjson"** | 1, 2, 4 | `tests/architecture/` — 20+ файлов | Проблема окружения, НЕ кода. При наличии venv тесты работают. |
 | **"Нет архитектурных тестов"** | 1, 2 | `tests/architecture/` | **20+ архитектурных тестов** существуют и работают. |
 | **"CircuitBreaker без метрик"** | 1, 2, 3 | `circuit_breaker.py` | Частично верно для внутреннего CB, но `UnifiedHTTPClient` интегрирует `MetricsPort`. |
@@ -272,7 +272,7 @@
    - bootstrap_pipeline "перегружен" — делегирует корректно
    - "Тесты не работают" — проблема окружения, не кода
 
-4. **Рекомендация**: Обновить существующий `docs/REFACTORING_PLAN.md`, добавив P1.2 (Parquet) и P1.3 (Safety Guard).
+4. **Рекомендация**: Обновить существующий `docs/refactoring-plan.md`, добавив P1.2 (Parquet) и P1.3 (Safety Guard).
 
 ---
 
