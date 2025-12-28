@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2025-12-28
+
+### Fixed
+
+- **Test Dependencies**: Добавлены недостающие зависимости в `[project.optional-dependencies].tests`:
+  - `respx>=0.21` — HTTP-мокирование для тестов адаптеров
+  - `hypothesis>=6.100` — property-based тестирование для domain-тестов
+  - `vcrpy>=6.0` и `pytest-vcr>=1.0` — VCR-кассеты для integration-тестов
+  - Исправляет `ModuleNotFoundError` при запуске тестов с `pip install .[tests]`
+
+- **Mypy/Pandera Compatibility**: Добавлен `# type: ignore[misc]` для `DataFrameModel` subclass
+  - Pandera не имеет полных type stubs, вызывая ошибку mypy `--strict` при наследовании
+  - Затронутый файл: `src/bioetl/domain/schemas/base.py`
+
+### Changed
+
+- **Test Dependency Documentation**: Обновлены `docs/RULES.md` и `CLAUDE.md`:
+  - Добавлена секция о тестовых зависимостях и их установке
+  - Документированы все optional dependency группы (`tests`, `dev`, `tracing`, `docs`)
+
 ## [5.0.0] - 2025-12-27
 
 ### Removed (Documentation Audit)
