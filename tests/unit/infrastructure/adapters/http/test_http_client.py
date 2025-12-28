@@ -634,7 +634,7 @@ class TestUnifiedHTTPClientObservability:
         """Test successful request creates tracing span with correct attributes."""
         tracer, span = mock_tracer
 
-        mock_response = MagicMock()
+        mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
         mock_circuit_breaker.call.return_value = mock_response
