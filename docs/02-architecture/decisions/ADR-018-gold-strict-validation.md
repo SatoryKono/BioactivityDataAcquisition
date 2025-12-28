@@ -1,7 +1,8 @@
 # ADR-018: Строгая валидация Gold-схем
 
-*   **Status**: Proposed
+*   **Status**: Accepted
 *   **Date**: 2025-12-26
+*   **Accepted**: 2025-12-28
 *   **Context**: Gold-слой должен гарантировать качество данных для downstream consumers. Текущая реализация позволяет пайплайнам работать без определённой Gold-схемы, что может привести к несогласованности данных и проблемам интеграции.
 
 ## The Decision
@@ -305,6 +306,23 @@ def test_non_strict_validation_warns_without_schema(caplog):
 - **Дополнительная конфигурация**: Каждый пайплайн требует gold_schema
 - **Начальные усилия**: Нужно определить схемы для существующих пайплайнов
 - **Сложность**: Дополнительный слой валидации в pipeline
+
+## Implementation Status (2025-12-28)
+
+Все основные механизмы реализованы:
+
+| Компонент | Статус | Расположение |
+|-----------|--------|--------------|
+| `strict_gold_validation` флаг | ✅ Реализован | `domain/config.py:259` |
+| `GoldValidatorPort` протокол | ✅ Реализован | `domain/ports/validation.py:41-61` |
+| `PanderaGoldValidator` | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210` |
+| `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232` |
+| `NoOpGoldValidator` | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
+
+**Отличия от первоначального предложения:**
+- Вместо `SchemaValidationError` используется `ValidationResult` с errors — более гибкий подход
+- Валидация интегрирована в `GoldWriter` через `_validate_schema_strict()` проверку
+- Feature flag находится в `RuntimeConfig` вместо `PipelineConfig` — централизованное управление
 
 ## Related ADRs
 

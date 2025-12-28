@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -38,20 +36,20 @@ class MoleculeSchema(ETLRecordSchema):
     # )
 
     # === Core Properties ===
-    pref_name: Optional[Series[str]] = pa.Field(
+    pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    max_phase: Optional[Series[float]] = pa.Field(
+    max_phase: Series[float] | None = pa.Field(
         nullable=True,
         isin=[-1, 0, 0.5, 1, 2, 3, 4],
         description="Maximum clinical phase.",
     )
-    structure_type: Optional[Series[str]] = pa.Field(
+    structure_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=["MOL", "SEQ", "BOTH", "NONE"],
         description="Structure type.",
     )
-    molecule_type: Optional[Series[str]] = pa.Field(
+    molecule_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
             "Small molecule", "Inorganic small molecule", "Polymeric small molecule",
@@ -60,7 +58,7 @@ class MoleculeSchema(ETLRecordSchema):
         ],
         description="Molecule type.",
     )
-    first_approval: Optional[Series[int]] = pa.Field(
+    first_approval: Series[int] | None = pa.Field(
         nullable=True, description="Year of first approval."
     )
     # chirality: Optional[Series[int]] = pa.Field(
@@ -70,40 +68,40 @@ class MoleculeSchema(ETLRecordSchema):
     # )
 
     # === Flags ===
-    therapeutic_flag: Optional[Series[bool]] = pa.Field(
+    therapeutic_flag: Series[bool] | None = pa.Field(
         nullable=True, description="Therapeutic flag."
     )
     # dosed_ingredient: Optional[Series[int]] = pa.Field(
     #     nullable=True, isin=[0, 1], description="Dosed ingredient flag."
     # )
-    oral: Optional[Series[bool]] = pa.Field(
+    oral: Series[bool] | None = pa.Field(
         nullable=True, description="Oral administration flag."
     )
-    parenteral: Optional[Series[bool]] = pa.Field(
+    parenteral: Series[bool] | None = pa.Field(
         nullable=True, description="Parenteral administration flag."
     )
-    topical: Optional[Series[bool]] = pa.Field(
+    topical: Series[bool] | None = pa.Field(
         nullable=True, description="Topical administration flag."
     )
-    black_box_warning: Optional[Series[int]] = pa.Field(
+    black_box_warning: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Black box warning flag."
     )
-    natural_product: Optional[Series[int]] = pa.Field(
+    natural_product: Series[int] | None = pa.Field(
         nullable=True, isin=[-1, 0, 1], description="Natural product flag."
     )
-    first_in_class: Optional[Series[int]] = pa.Field(
+    first_in_class: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="First in class flag."
     )
-    prodrug: Optional[Series[int]] = pa.Field(
+    prodrug: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Prodrug flag."
     )
-    inorganic_flag: Optional[Series[int]] = pa.Field(
+    inorganic_flag: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Inorganic flag."
     )
-    polymer_flag: Optional[Series[int]] = pa.Field(
+    polymer_flag: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Polymer flag."
     )
-    withdrawn_flag: Optional[Series[bool]] = pa.Field(
+    withdrawn_flag: Series[bool] | None = pa.Field(
         nullable=True, description="Withdrawn flag."
     )
     # downgraded: Optional[Series[int]] = pa.Field(
@@ -155,22 +153,22 @@ class MoleculeSchema(ETLRecordSchema):
     # )
 
     # === Complex Fields (JSON Strings) ===
-    molecule_hierarchy: Optional[Series[str]] = pa.Field(
+    molecule_hierarchy: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of molecule hierarchy."
     )
-    molecule_properties: Optional[Series[str]] = pa.Field(
+    molecule_properties: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of molecule properties."
     )
-    molecule_structures: Optional[Series[str]] = pa.Field(
+    molecule_structures: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of molecule structures."
     )
-    molecule_synonyms: Optional[Series[str]] = pa.Field(
+    molecule_synonyms: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of molecule synonyms."
     )
-    cross_references: Optional[Series[str]] = pa.Field(
+    cross_references: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of cross references."
     )
-    atc_classifications: Optional[Series[str]] = pa.Field(
+    atc_classifications: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of ATC classifications."
     )
 

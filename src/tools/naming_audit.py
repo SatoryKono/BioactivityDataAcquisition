@@ -22,10 +22,10 @@ import argparse
 import ast
 import re
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Iterator
 
 
 class ViolationType(str, Enum):

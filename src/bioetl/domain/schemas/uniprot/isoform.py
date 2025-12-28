@@ -4,13 +4,10 @@ Aligned with RULES.md v5.0 and UniProt REST API.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-
 
 # === Fixed Value Constants ===
 SEQUENCE_STATUSES = ["displayed", "described", "not described", "external"]
@@ -35,26 +32,26 @@ class IsoformSchema(ETLRecordSchema):
     )
 
     # === Isoform Details ===
-    isoform_name: Optional[Series[str]] = pa.Field(
+    isoform_name: Series[str] | None = pa.Field(
         nullable=True,
         description="Isoform name"
     )
-    sequence_status: Optional[Series[str]] = pa.Field(
+    sequence_status: Series[str] | None = pa.Field(
         nullable=True,
         isin=SEQUENCE_STATUSES,
         description="Sequence display status"
     )
-    sequence: Optional[Series[str]] = pa.Field(
+    sequence: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^[ACDEFGHIKLMNPQRSTVWY]+$",
         description="Isoform amino acid sequence"
     )
-    sequence_length: Optional[Series[int]] = pa.Field(
+    sequence_length: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Isoform sequence length"
     )
-    note: Optional[Series[str]] = pa.Field(
+    note: Series[str] | None = pa.Field(
         nullable=True,
         description="Isoform description/note"
     )

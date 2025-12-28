@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -27,55 +25,55 @@ class DocumentSchema(ETLRecordSchema):
         str_matches=r"^CHEMBL\d+$",
         description="ChEMBL ID.",
     )
-    pubmed_id: Optional[Series[int]] = pa.Field(
+    pubmed_id: Series[int] | None = pa.Field(
         nullable=True, description="PubMed ID."
     )
-    doi: Optional[Series[str]] = pa.Field(
+    doi: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^10\.\d+/.+$",
         description="DOI.",
     )
-    patent_id: Optional[Series[str]] = pa.Field(
+    patent_id: Series[str] | None = pa.Field(
         nullable=True, description="Patent ID."
     )
-    src_id: Optional[Series[int]] = pa.Field(
+    src_id: Series[int] | None = pa.Field(
         nullable=True, description="Source ID."
     )
 
     # === Metadata ===
-    title: Optional[Series[str]] = pa.Field(
+    title: Series[str] | None = pa.Field(
         nullable=True, description="Title."
     )
-    doc_type: Optional[Series[str]] = pa.Field(
+    doc_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
         description="Document type.",
     )
-    authors: Optional[Series[str]] = pa.Field(
+    authors: Series[str] | None = pa.Field(
         nullable=True, description="Authors."
     )
-    abstract: Optional[Series[str]] = pa.Field(
+    abstract: Series[str] | None = pa.Field(
         nullable=True, description="Abstract."
     )
-    journal: Optional[Series[str]] = pa.Field(
+    journal: Series[str] | None = pa.Field(
         nullable=True, description="Journal."
     )
-    journal_full_title: Optional[Series[str]] = pa.Field(
+    journal_full_title: Series[str] | None = pa.Field(
         nullable=True, description="Full journal title."
     )
-    year: Optional[Series[int]] = pa.Field(
+    year: Series[int] | None = pa.Field(
         nullable=True, description="Year."
     )
-    volume: Optional[Series[str]] = pa.Field(
+    volume: Series[str] | None = pa.Field(
         nullable=True, description="Volume."
     )
-    issue: Optional[Series[str]] = pa.Field(
+    issue: Series[str] | None = pa.Field(
         nullable=True, description="Issue."
     )
-    first_page: Optional[Series[str]] = pa.Field(
+    first_page: Series[str] | None = pa.Field(
         nullable=True, description="First page."
     )
-    last_page: Optional[Series[str]] = pa.Field(
+    last_page: Series[str] | None = pa.Field(
         nullable=True, description="Last page."
     )
     # ridx: Optional[Series[str]] = pa.Field(
