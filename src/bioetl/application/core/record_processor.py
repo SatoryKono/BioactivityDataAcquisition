@@ -52,6 +52,7 @@ class RecordProcessor:
         gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
+        lock_context_provider: Callable[[], LockContext | None] | None = None,
     ):
         self._context = context
         self._tracer = tracer
