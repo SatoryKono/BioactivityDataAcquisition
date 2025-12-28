@@ -164,7 +164,13 @@ find tests -name "*test_*" | xargs grep -l "ClassName"
 
 ### 4.3. Конкурентность и Блокировки
 
-> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
+> **CRITICAL: Local-Only Deployment & Redis Lock REJECTION**
+> См. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)
+
+**Строгие Запреты:**
+- ❌ **Множественные инстансы:** ЗАПРЕЩЕНО запускать >1 экземпляра пайплайна (Single Instance Only).
+- ❌ **Redis Lock:** ОТКАЗ от распределенных блокировок. Redis Lock **ЗАПРЕЩЕН**.
+- ❌ **Горизонтальное масштабирование:** ЗАПРЕЩЕНО.
 
 **Текущая реализация (Local-Only):**
 - **Механизм:** In-memory блокировки (`MemoryLock`)
