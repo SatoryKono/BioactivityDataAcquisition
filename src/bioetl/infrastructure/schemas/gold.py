@@ -13,19 +13,93 @@ from pandera.typing import Series
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Activity in Gold layer."""
 
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     # Core identifiers
     activity_id: Series[str] = pa.Field(nullable=False)
     molecule_chembl_id: Series[str] = pa.Field(nullable=False)
     target_chembl_id: Series[str] = pa.Field(nullable=False)
+    assay_chembl_id: Series[str] = pa.Field(nullable=True)
+    document_chembl_id: Series[str] = pa.Field(nullable=True)
+    record_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Values
+    # Molecule data
+    canonical_smiles: Series[str] = pa.Field(nullable=True)
+    molecule_pref_name: Series[str] = pa.Field(nullable=True)
+    parent_molecule_chembl_id: Series[str] = pa.Field(nullable=True)
+
+    # Target data
+    target_pref_name: Series[str] = pa.Field(nullable=True)
+    target_organism: Series[str] = pa.Field(nullable=True)
+    target_tax_id: Series[str] = pa.Field(nullable=True)
+
+    # Assay data
+    assay_type: Series[str] = pa.Field(nullable=True)
+    assay_description: Series[str] = pa.Field(nullable=True)
+    assay_variant_accession: Series[str] = pa.Field(nullable=True)
+    assay_variant_mutation: Series[str] = pa.Field(nullable=True)
+
+    # BAO
+    bao_endpoint: Series[str] = pa.Field(nullable=True)
+    bao_format: Series[str] = pa.Field(nullable=True)
+    bao_label: Series[str] = pa.Field(nullable=True)
+
+    # Raw activity values
+    type: Series[str] = pa.Field(nullable=True)
+    value: Series[float] = pa.Field(nullable=True, coerce=True)
+    units: Series[str] = pa.Field(nullable=True)
+    relation: Series[str] = pa.Field(nullable=True)
+    upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    text_value: Series[str] = pa.Field(nullable=True)
+
+    # Standardized values
     standard_type: Series[str] = pa.Field(nullable=True)
     standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_units: Series[str] = pa.Field(nullable=True)
+    standard_relation: Series[str] = pa.Field(nullable=True)
+    standard_upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    standard_text_value: Series[str] = pa.Field(nullable=True)
+    standard_flag: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Derived metrics
     pchembl_value: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+
+    # Ligand efficiency
+    ligand_efficiency_bei: Series[float] = pa.Field(nullable=True, coerce=True)
+    ligand_efficiency_le: Series[float] = pa.Field(nullable=True, coerce=True)
+    ligand_efficiency_lle: Series[float] = pa.Field(nullable=True, coerce=True)
+    ligand_efficiency_sei: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Units ontology
+    qudt_units: Series[str] = pa.Field(nullable=True)
+    uo_units: Series[str] = pa.Field(nullable=True)
+
+    # Document data
+    document_journal: Series[str] = pa.Field(nullable=True)
+    document_year: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Quality annotations
+    activity_comment: Series[str] = pa.Field(nullable=True)
+    data_validity_comment: Series[str] = pa.Field(nullable=True)
+    data_validity_description: Series[str] = pa.Field(nullable=True)
+    potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Action type
+    action_type_action_type: Series[str] = pa.Field(nullable=True)
+    action_type_description: Series[str] = pa.Field(nullable=True)
+    action_type_parent_type: Series[str] = pa.Field(nullable=True)
+
+    # Activity properties
+    activity_properties: Series[str] = pa.Field(nullable=True)
+    toid: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -36,6 +110,9 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
 class PubChemCompoundGoldSchema(pa.DataFrameModel):
     """Schema for PubChem Compound in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     cid: Series[str] = pa.Field(nullable=False)
     molecular_formula: Series[str] = pa.Field(nullable=True)
@@ -48,6 +125,8 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -59,13 +138,20 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
 class UniProtProteinGoldSchema(pa.DataFrameModel):
     """Schema for UniProt Protein in Gold layer."""
 
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
     protein_name: Series[str] = pa.Field(nullable=True)
+    gene_names: Series[object] = pa.Field(nullable=True)  # List[str]
+    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)
     sequence_length: Series[int] = pa.Field(nullable=True, ge=0, coerce=True)
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -80,6 +166,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     Fields match Publication entity from domain/entities.py.
     See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
     """
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifiers
     pmid: Series[str] = pa.Field(nullable=False)
@@ -98,6 +187,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     issue: Series[str] = pa.Field(nullable=True)
     pages: Series[str] = pa.Field(nullable=True)
 
+    # Authors
+    authors: Series[object] = pa.Field(nullable=True)  # List[str]
+
     # Dates
     pub_date: Series[str] = pa.Field(nullable=True)
     pub_year: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -107,18 +199,25 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     revised_date: Series[str] = pa.Field(nullable=True)
     epub_date: Series[str] = pa.Field(nullable=True)
 
+    # Classification
+    publication_types: Series[object] = pa.Field(nullable=True)  # List[str]
+    keywords: Series[object] = pa.Field(nullable=True)  # List[str]
+    mesh_terms: Series[object] = pa.Field(nullable=True)  # List[str]
+
     # Additional metadata
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
 
     # Pipeline metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
         """Pandera configuration."""
 
-        strict = True  # Gold layer requires strict validation (REQ-DATA-009) (authors, keywords, mesh_terms, etc.)
+        strict = True  # Gold layer requires strict validation (REQ-DATA-009)
 
 
 class ChEMBLAssayGoldSchema(pa.DataFrameModel):
@@ -127,24 +226,67 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     Validated fields for high-quality assay data export.
     """
 
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     # Core identifiers
     assay_chembl_id: Series[str] = pa.Field(nullable=False)
     target_chembl_id: Series[str] = pa.Field(nullable=True)
     document_chembl_id: Series[str] = pa.Field(nullable=True)
+    cell_chembl_id: Series[str] = pa.Field(nullable=True)
+    tissue_chembl_id: Series[str] = pa.Field(nullable=True)
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    src_assay_id: Series[str] = pa.Field(nullable=True)
+    aidx: Series[str] = pa.Field(nullable=True)
 
     # Assay type
     assay_type: Series[str] = pa.Field(nullable=False)
     assay_type_description: Series[str] = pa.Field(nullable=True)
+    assay_category: Series[str] = pa.Field(nullable=True)
+    assay_test_type: Series[str] = pa.Field(nullable=True)
+    assay_group: Series[str] = pa.Field(nullable=True)
+
+    # Biological context
+    assay_organism: Series[str] = pa.Field(nullable=True)
+    assay_tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    assay_cell_type: Series[str] = pa.Field(nullable=True)
+    assay_tissue: Series[str] = pa.Field(nullable=True)
+    assay_strain: Series[str] = pa.Field(nullable=True)
+    assay_subcellular_fraction: Series[str] = pa.Field(nullable=True)
 
     # BAO annotations
     bao_format: Series[str] = pa.Field(nullable=True)
     bao_label: Series[str] = pa.Field(nullable=True)
 
+    description: Series[str] = pa.Field(nullable=True)
+
     # Quality indicators
     confidence_score: Series[int] = pa.Field(nullable=True, ge=0, le=9, coerce=True)
+    confidence_description: Series[str] = pa.Field(nullable=True)
+    relationship_type: Series[str] = pa.Field(nullable=True)
+    relationship_description: Series[str] = pa.Field(nullable=True)
+
+    # Additional metadata
+    assay_pref_name: Series[str] = pa.Field(nullable=True)
+    score: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Variant information
+    variant_accession: Series[str] = pa.Field(nullable=True)
+    variant_isoform: Series[str] = pa.Field(nullable=True)
+    variant_mutation: Series[str] = pa.Field(nullable=True)
+    variant_organism: Series[str] = pa.Field(nullable=True)
+    variant_sequence: Series[str] = pa.Field(nullable=True)
+    variant_tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    variant_sequence_json: Series[str] = pa.Field(nullable=True)
+
+    # Complex fields (stored as JSON strings)
+    assay_classifications: Series[str] = pa.Field(nullable=True)
+    assay_parameters: Series[str] = pa.Field(nullable=True)
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -159,6 +301,9 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     Validated fields for high-quality target data export.
     """
 
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     # Primary identifier
     target_chembl_id: Series[str] = pa.Field(nullable=False)
 
@@ -167,11 +312,23 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     target_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
-    # Note: protein_classifications not available in /target endpoint
-    # Use ChEMBLTargetComponentGoldSchema for protein classification data
+    species_group_flag: Series[bool] = pa.Field(nullable=True)
+
+    # Complex fields
+    target_components: Series[str] = pa.Field(nullable=True)
+    cross_references: Series[str] = pa.Field(nullable=True)
+
+    # Flattened component fields
+    component_accessions: Series[object] = pa.Field(nullable=True)  # List[str]
+    component_ids: Series[object] = pa.Field(nullable=True)  # List[int]
+    component_types: Series[object] = pa.Field(nullable=True)  # List[str]
+    component_relationships: Series[object] = pa.Field(nullable=True)  # List[str]
+    component_descriptions: Series[object] = pa.Field(nullable=True)  # List[str]
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -186,21 +343,31 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     Validated fields for high-quality target component data export.
     """
 
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     # Primary identifier
     component_id: Series[int] = pa.Field(nullable=False)
 
     # Key metadata
     accession: Series[str] = pa.Field(nullable=True)
     component_type: Series[str] = pa.Field(nullable=True)
+    description: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
     tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
-    protein_classifications: Series[str] = pa.Field(nullable=True)  # Forensic JSON
+
+    # Complex fields (JSON strings)
+    target_component_synonyms: Series[str] = pa.Field(nullable=True)
+    target_component_xrefs: Series[str] = pa.Field(nullable=True)
+    protein_classifications: Series[str] = pa.Field(nullable=True)
 
     # Flattened fields (extracted from protein_classifications)
     protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -215,20 +382,38 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     Validated fields for high-quality document data export.
     """
 
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
     # Primary identifier
     document_chembl_id: Series[str] = pa.Field(nullable=False)
 
     # Key metadata
     title: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
     doc_type: Series[str] = pa.Field(nullable=True)
-    year: Series[float] = pa.Field(nullable=True, ge=1800, le=2100, coerce=True)
 
-    # External identifiers (float due to pandas NaN handling)
+    # Journal information
+    journal: Series[str] = pa.Field(nullable=True)
+    journal_full_title: Series[str] = pa.Field(nullable=True)
+    year: Series[float] = pa.Field(nullable=True, ge=1800, le=2100, coerce=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
+    first_page: Series[str] = pa.Field(nullable=True)
+    last_page: Series[str] = pa.Field(nullable=True)
+
+    # External identifiers
     pubmed_id: Series[float] = pa.Field(nullable=True, coerce=True)
     doi: Series[str] = pa.Field(nullable=True)
+    patent_id: Series[str] = pa.Field(nullable=True)
+
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
@@ -240,11 +425,12 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Molecule in Gold layer.
 
-    Flat fields only - no JSON strings.
-    JSON fields (molecule_hierarchy, molecule_properties, molecule_structures,
-    molecule_synonyms, cross_references, atc_classifications) are excluded
-    from Gold and retained only in Silver for forensic purposes.
+    Includes JSON fields from Silver layer for complete data parity,
+    plus flattened fields for analytics convenience.
     """
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
     molecule_chembl_id: Series[str] = pa.Field(nullable=False)
@@ -265,12 +451,24 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     therapeutic_flag: Series[bool] = pa.Field(nullable=True)
     withdrawn_flag: Series[bool] = pa.Field(nullable=True)
     black_box_warning: Series[float] = pa.Field(nullable=True, coerce=True)
+    natural_product: Series[float] = pa.Field(nullable=True, coerce=True)
+    first_in_class: Series[float] = pa.Field(nullable=True, coerce=True)
+    prodrug: Series[float] = pa.Field(nullable=True, coerce=True)
+    inorganic_flag: Series[float] = pa.Field(nullable=True, coerce=True)
+    polymer_flag: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Hierarchy (flattened from molecule_hierarchy)
+    # Complex fields (JSON strings from Silver)
+    molecule_hierarchy: Series[str] = pa.Field(nullable=True)
+    molecule_properties: Series[str] = pa.Field(nullable=True)
+    molecule_structures: Series[str] = pa.Field(nullable=True)
+    molecule_synonyms: Series[str] = pa.Field(nullable=True)
+    cross_references: Series[str] = pa.Field(nullable=True)
+    atc_classifications: Series[str] = pa.Field(nullable=True)
+
+    # Flattened Convenience Fields (Derived)
     hierarchy_parent_chembl_id: Series[str] = pa.Field(nullable=True)
     hierarchy_active_chembl_id: Series[str] = pa.Field(nullable=True)
 
-    # Physicochemical properties (flattened from molecule_properties)
     property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
     property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
     property_hba: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -285,13 +483,14 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     )
     property_full_molformula: Series[str] = pa.Field(nullable=True)
 
-    # Structural identifiers (flattened from molecule_structures)
     structure_canonical_smiles: Series[str] = pa.Field(nullable=True)
     structure_standard_inchi: Series[str] = pa.Field(nullable=True)
     structure_standard_inchi_key: Series[str] = pa.Field(nullable=True)
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=False, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     class Config:
