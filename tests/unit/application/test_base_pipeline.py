@@ -114,7 +114,6 @@ async def test_base_pipeline_accepts_five_params():
     assert pipeline.transformer == transformer
 
 
-@pytest.mark.skip(reason="Suspected .pyc cache issue - run with --cache-clear")
 async def test_base_pipeline_properties(mock_pipeline):
     """Test all convenience properties."""
     # Test run_id property

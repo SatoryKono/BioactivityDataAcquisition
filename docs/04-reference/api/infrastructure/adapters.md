@@ -87,11 +87,11 @@ Storage adapter for local filesystem (Bronze layer).
 
 ## Lock Adapters
 
-### MemoryLockAdapter
+### MemoryLock
 
 In-memory lock implementation (Local-Only).
 
-::: bioetl.infrastructure.adapters.lock.memory_lock.MemoryLockAdapter
+::: bioetl.infrastructure.locking.memory_lock.MemoryLock
     options:
         show_root_heading: true
         show_source: false
@@ -102,11 +102,11 @@ In-memory lock implementation (Local-Only).
 
 ## Checkpoint Adapters
 
-### LocalCheckpointAdapter
+### LocalCheckpoint
 
 Local filesystem checkpoint implementation.
 
-::: bioetl.infrastructure.adapters.checkpoint.local_checkpoint.LocalCheckpointAdapter
+::: bioetl.infrastructure.checkpoint.local_checkpoint.LocalCheckpoint
     options:
         show_root_heading: true
         show_source: false
@@ -115,40 +115,15 @@ Local filesystem checkpoint implementation.
             - load
             - delete
 
-## Observability Adapters
+## Observability
 
-### StructLogAdapter
-
-Structured logging adapter.
-
-::: bioetl.infrastructure.adapters.observability.structlog_adapter.StructLogAdapter
-    options:
-        show_root_heading: true
-        show_source: false
-
-### PrometheusMetricsAdapter
-
-Prometheus metrics adapter.
-
-::: bioetl.infrastructure.adapters.observability.prometheus_adapter.PrometheusMetricsAdapter
-    options:
-        show_root_heading: true
-        show_source: false
-
-### OpenTelemetryTracingAdapter
-
-OpenTelemetry tracing adapter.
-
-::: bioetl.infrastructure.adapters.observability.opentelemetry_adapter.OpenTelemetryTracingAdapter
-    options:
-        show_root_heading: true
-        show_source: false
+Observability components are documented in [Observability](observability.md).
 
 ## Usage Example
 
 ```python
-from bioetl.infrastructure.adapters.http.client.UnifiedHTTPClient import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter.TokenBucket import TokenBucket
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 # Create rate limiter
 limiter = TokenBucket(rate=5.0, capacity=10)
