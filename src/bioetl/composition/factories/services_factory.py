@@ -225,6 +225,7 @@ class ServicesBuilder:
         gold_transform_callback: Any,
         *,
         strict_gold_validation: bool = False,
+        lock_context_holder: LockContextHolder | None = None,
     ) -> RecordProcessor:
         """Create configured RecordProcessor.
 
@@ -248,6 +249,7 @@ class ServicesBuilder:
             gold_transform_callback: Silver to Gold transformation callback
             strict_gold_validation: If True, validation fails when gold_schema is None.
                 Default False for backward compatibility.
+            lock_context_holder: Optional holder for lock context.
 
         Returns:
             Configured RecordProcessor instance
@@ -278,6 +280,11 @@ class ServicesBuilder:
             gold_schema, strict=strict_gold_validation
         )
 
+        # Create lock context provider if holder is available
+        lock_context_provider = None
+        if lock_context_holder:
+            lock_context_provider = lock_context_holder.get
+
         return RecordProcessor(
             services=services,
             error_classifier=error_classifier,
@@ -287,6 +294,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=gold_validator,
+            lock_context_provider=lock_context_provider,
         )
 
     @staticmethod
@@ -296,6 +304,7 @@ class ServicesBuilder:
         gold_schema: Any,
         *,
         strict_gold_validation: bool = False,
+        lock_context_holder: LockContextHolder | None = None,
     ) -> RecordProcessor:
         """Create RecordProcessor from pipeline instance.
 
@@ -307,6 +316,7 @@ class ServicesBuilder:
             gold_schema: Pandera schema for Gold layer
             strict_gold_validation: If True, validation fails when gold_schema is None.
                 Default False for backward compatibility.
+            lock_context_holder: Optional holder for lock context.
 
         Returns:
             Configured RecordProcessor instance
@@ -351,6 +361,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_cb,
             gold_transform_callback=gold_transform_cb,
             strict_gold_validation=strict_gold_validation,
+            lock_context_holder=lock_context_holder,
         )
 
 
@@ -389,6 +400,9 @@ def build_runner_services(
     Returns:
         RunnerServices bundle with all required services.
     """
+    # Create shared LockContextHolder to pass context from LockManager to RecordProcessor
+    context_holder = LockContextHolder()
+
     lock_manager = LockManager.create(
         lock_port=services.lock,
         run_id=context.run_id,
@@ -402,6 +416,7 @@ def build_runner_services(
         logger=logger,
         shutdown_signal=shutdown_signal,
         checkpoint_manager=checkpoint_manager,
+        context_holder=context_holder,
     )
 
     preflight_service = PreflightService(
@@ -441,4 +456,5 @@ def build_runner_services(
         postrun=postrun_service,
         lifecycle_orch=lifecycle_orchestrator,
         observer=observer,
+        context_holder=context_holder,
     )
