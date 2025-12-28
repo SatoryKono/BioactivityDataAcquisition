@@ -102,6 +102,8 @@ where = ["src"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+# Base options without parallelization (compatible with pytest-benchmark)
+# For parallel execution, use: pytest -n auto --dist loadscope
 addopts = [
     "-ra",
     "-q",
@@ -118,6 +120,7 @@ markers = [
     "performance: Performance regression tests (optional CI stage)",
 ]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
@@ -125,6 +128,8 @@ filterwarnings = [
     "ignore:NoOpMetrics is being used:UserWarning",
     # Pytest cleanup warnings (sockets/event loops not closed during teardown)
     "ignore::pytest.PytestUnraisableExceptionWarning",
+    # pytest-benchmark warning when xdist is active (expected in parallel mode)
+    "ignore:Benchmarks are automatically disabled:pytest_benchmark.logger.PytestBenchmarkWarning",
 ]
 
 # ============ COVERAGE ============
