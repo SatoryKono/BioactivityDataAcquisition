@@ -1,0 +1,184 @@
+# Naming Convention Exceptions
+# This file documents allowed exceptions to the naming conventions in RULES.md §2.
+# Version: 1.0
+# Last Updated: 2025-12-28
+
+# Documentation files that are allowed to use UPPER_CASE names.
+# These are conventional files recognized by GitHub and standard tooling.
+documentation_exceptions:
+  - README.md           # Standard project readme
+  - CHANGELOG.md        # Standard changelog (Keep a Changelog format)
+  - REQUIREMENTS.md     # Project requirements document
+  - RULES.md            # Project rules/constitution
+  - CONTRIBUTING.md     # Contribution guidelines
+  - SECURITY.md         # Security policy
+  - LICENSE.md          # License file
+  - CLAUDE.md           # Claude Code instructions
+  - AGENT.md            # Agent instructions (Jules)
+
+# Root-level files that may use non-standard naming
+root_file_exceptions:
+  - Makefile            # Standard build file
+  - Dockerfile          # Standard container file
+  - pyproject.toml      # Standard Python project config
+
+# Classes without standard suffixes (domain entities, enums, value objects)
+# These are exempt from the suffix requirement in RULES.md §2.1
+class_suffix_exceptions:
+  # Domain Entities (business objects)
+  domain_entities:
+    - Activity
+    - Assay
+    - Target
+    - TargetComponent
+    - Molecule
+    - Document
+    - Compound
+    - Protein
+    - Publication
+
+  # Enums (inherently self-describing)
+  enums:
+    - Layer
+    - WriteMode
+    - SilverWriteMode
+    - GoldWriteMode
+    - ClearPolicy
+    - RunType
+    - HealthStatus
+    - DriftLevel
+    - CircuitBreakerState
+    - DataClassification
+    - ErrorType
+    - DQStatus
+    - LifecyclePhase
+    - AuditOperation
+    - AuditLayer
+    - AnomalyType
+    - AnomalySeverity
+
+  # TypedDict classes (suffix 'Dict' is implicit)
+  typed_dicts:
+    - BronzeRecord
+    - SilverRecord
+    - RawDate
+    - NormalizedDate
+    - RawAuthor
+    - RawIdentifiers
+    - NormalizedIdentifiers
+    - RawClassification
+    - NormalizedClassification
+    # And all *Dict classes
+
+  # Value objects and simple results
+  value_objects:
+    - Anomaly
+    - ClearDecision
+    - ClearResult
+    - CleanupPreview
+    - CleanupResult
+    - LayerInfo
+    - TransformResult
+    - TransformedRecord
+    - BatchResult
+    - DQResult
+    - VacuumResult
+    - ValidationResult
+    - HealthReport
+    - PreflightReport
+    - ComponentHealthResult
+    - FilterLoadResult
+    - MemoryStats
+    - ProviderHealthState
+    - ShutdownSignal
+    - AuditEntry
+    - LockContext
+    - PipelineEvent
+    - RetryPolicy
+    - LineageRecord
+    - BatchLineage
+
+  # Context and configuration objects
+  contexts:
+    - InputFilterContext
+    - VacuumConfig
+    - PipelineContext
+    - PipelineRunContext
+    - StorageContext
+    - ObservabilityBundle
+    - RunnerServices
+    - PipelineServices
+    - PipelineDefinition
+    - ProviderConfig
+    - HttpConfig
+    - RunOptions
+    - VacuumOptions
+    - ArchiveOptions
+    - RecordProcessorConfig
+    - MemoryConfig
+
+  # Base classes (prefix 'Base' is sufficient)
+  base_classes:
+    - BaseEntity
+    - BasePipeline
+    - BaseTransformer
+    - BaseHttpAdapter
+    - BaseSyncAdapter
+    - BaseFieldExtractor
+    - BaseChemblTransformer
+    - BaseServicesFactory
+    - RequiredEntityFields
+
+  # Policy classes
+  policies:
+    - MedallionPolicy
+    - WriteModePolicy
+
+  # Filter classes
+  filters:
+    - GoldRangeFilter
+    - GoldColumnFilter
+    - GoldListLengthFilter
+    - GoldListContainsFilter
+    - GoldFilterConfig
+    - InputFilterConfig
+    - FilteredDataSource
+
+# Function prefix exceptions
+# Functions that don't require standard prefixes (get_, fetch_, create_, etc.)
+function_prefix_exceptions:
+  # CLI entry points
+  - main
+  - cli
+  - run
+
+  # Event handlers (naming is descriptive)
+  - vacuum_command
+  - archive_command
+  - quarantine
+  - checkpoint
+  - maintenance
+
+  # Magic/dunder methods are exempt
+  # - __init__, __call__, etc.
+
+# Pipeline naming format
+# Pipeline IDs follow the format: {provider}_{entity}
+# This is an exception to general snake_case for uniqueness
+pipeline_id_format:
+  pattern: "{provider}_{entity}"
+  examples:
+    - chembl_activity
+    - chembl_assay
+    - chembl_target
+    - chembl_molecule
+    - chembl_document
+    - chembl_target_component
+    - pubchem_compound
+    - uniprot_protein
+    - pubmed_publications
+
+# Notes on enforcement
+# - The naming_audit.py tool uses this file's content as reference
+# - Violations against these exceptions should NOT be flagged
+# - Add new exceptions here with justification

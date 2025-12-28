@@ -1,7 +1,7 @@
 # Архитектурный аудит BioETL
 
 > ⚠️ **АРХИВ**: Этот документ устарел. Актуальный аудит см. в
-> [`CONSOLIDATED_ARCHITECTURE_AUDIT.md`](./CONSOLIDATED_ARCHITECTURE_AUDIT.md).
+> [`consolidated-architecture-audit.md`](./consolidated-architecture-audit.md).
 
 ## Сводная таблица
 
