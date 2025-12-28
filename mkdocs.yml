@@ -114,7 +114,7 @@ nav:
                             -   Bootstrap: 04-reference/api/composition/bootstrap.md
                             -   Factories: 04-reference/api/composition/factories.md
             -   Pipelines:
-                    -   "ChEMBL Activity": 04-reference/pipelines/chembl_activity.md
+                    -   "ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
     -   Operations:
             -   Overview: 05-operations/runbooks/index.md
             -   "Incident Response": 05-operations/runbooks/incident-response.md
