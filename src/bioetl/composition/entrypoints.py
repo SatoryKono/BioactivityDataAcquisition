@@ -59,24 +59,6 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
 
-__all__ = [
-    "ArchiveOptions",
-    "RunOptions",
-    "VacuumOptions",
-    "archive_table",
-    "build_pipeline_context",
-    "create_pipeline_runner",
-    "get_checkpoint_manager",
-    "get_lifecycle_service",
-    "get_quarantine_manager",
-    "inspect_quarantine",
-    "list_checkpoints",
-    "load_pipeline_config",
-    "preview_cleanup",
-    "run_pipeline",
-    "vacuum_table",
-]
-
 
 @dataclass(frozen=True)
 class RunOptions:
