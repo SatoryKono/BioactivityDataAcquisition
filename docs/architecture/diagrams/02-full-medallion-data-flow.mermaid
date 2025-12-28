@@ -1,0 +1,62 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart LR
+    subgraph Sources["External Sources"]
+        ChEMBL["ChEMBL API"]
+        PubChem["PubChem API"]
+        UniProt["UniProt API"]
+        PubMed["PubMed API"]
+    end
+
+    subgraph Bronze_Layer["Bronze Layer"]
+        direction TB
+        BronzeWriter["BronzeWriter"]
+        Bronze[("Bronze Storage\n━━━━━━━━━━━━━━━\n📁 Format: JSONL + zstd\n⏱️ Retention: 90 days\n✅ Validation: None\n📍 Path: bronze/v1/\n    {provider}/{entity}/{date}/")]
+    end
+
+    subgraph Silver_Layer["Silver Layer"]
+        direction TB
+        DeltaWriter["DeltaWriter"]
+        Silver[("Silver Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta Lake\n⏱️ Retention: Permanent\n✅ Validation: Pandera (soft)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash")]
+    end
+
+    subgraph Gold_Layer["Gold Layer"]
+        direction TB
+        GoldWriter["GoldWriter"]
+        Gold[("Gold Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta/Parquet\n⏱️ Retention: Permanent\n✅ Validation: Pandera (strict)\n🔄 Strategy: SCD2/Append")]
+    end
+
+    subgraph DQ_Branch["Data Quality Branch"]
+        DQValidator["DQ Validator\n━━━━━━━━━━━━━━━\n⚠️ Soft: >5% errors\n❌ Hard: >20% errors"]
+        Quarantine[("Quarantine\n━━━━━━━━━━━━━━━\n📁 Format: Parquet\n⏱️ Retention: 30 days\n📊 States: NEW→IGNORED\n           →REPROCESSED")]
+    end
+
+    subgraph Lineage["Lineage Tracking"]
+        LineageLog[("Lineage Log\n━━━━━━━━━━━━━━━\nbatch_id\nbronze_paths\ntransform_version\nrun_params")]
+    end
+
+    %% Main flow
+    ChEMBL --> BronzeWriter
+    PubChem --> BronzeWriter
+    UniProt --> BronzeWriter
+    PubMed --> BronzeWriter
+
+    BronzeWriter --> Bronze
+    Bronze --> DeltaWriter
+
+    DeltaWriter --> DQValidator
+    DQValidator -->|"✅ Pass"| Silver
+    DQValidator -->|"❌ Fail"| Quarantine
+
+    Silver --> GoldWriter
+    GoldWriter --> Gold
+
+    %% Lineage tracking
+    Bronze -.->|"batch_id"| LineageLog
+    Silver -.->|"transform_version"| LineageLog
+
+    %% Styling
+    style Bronze fill:#CD7F32,color:#fff
+    style Silver fill:#C0C0C0,color:#000
+    style Gold fill:#FFD700,color:#000
+    style Quarantine fill:#FF6B6B,color:#fff
+    style LineageLog fill:#87CEEB,color:#000

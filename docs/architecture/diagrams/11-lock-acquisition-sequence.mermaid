@@ -1,0 +1,81 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+sequenceDiagram
+    autonumber
+    participant WorkerA as Worker A<br/>(owner=worker_a_uuid)
+    participant WorkerB as Worker B<br/>(owner=worker_b_uuid)
+    participant Lock as MemoryLock
+    participant HeartbeatA as Heartbeat Thread A
+    participant Storage as DeltaWriter
+
+    Note over Lock: Lock Key: lock:chembl_activity<br/>TTL: 90s, Heartbeat: 30s
+
+    rect rgb(230, 255, 230)
+        Note over WorkerA,Lock: Worker A acquires lock successfully
+        WorkerA->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_a_uuid",<br/>ttl=90s, wait=False)
+        Lock->>Lock: Check key not exists
+        Lock->>Lock: Store (owner, expires_at=now+90s)
+        Lock-->>WorkerA: True (acquired)
+
+        WorkerA->>HeartbeatA: start(interval=30s)
+        activate HeartbeatA
+    end
+
+    rect rgb(255, 230, 230)
+        Note over WorkerB,Lock: Worker B fails to acquire (lock held)
+        WorkerB->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_b_uuid",<br/>ttl=90s, wait=False)
+        Lock->>Lock: Check key exists
+        Lock->>Lock: Owner != worker_b_uuid
+        Lock-->>WorkerB: False (not acquired)
+
+        Note over WorkerB: Worker B can either:<br/>1. wait=True (block until available)<br/>2. Exit with error
+    end
+
+    rect rgb(240, 248, 255)
+        Note over HeartbeatA,Lock: Heartbeat keeps lock alive
+        loop Every 30 seconds
+            HeartbeatA->>Lock: heartbeat(key="chembl_activity",<br/>owner_id="worker_a_uuid")
+            Lock->>Lock: Verify owner == worker_a_uuid
+            Lock->>Lock: Update expires_at = now + 90s
+            Lock-->>HeartbeatA: True (refreshed)
+        end
+    end
+
+    rect rgb(255, 250, 205)
+        Note over WorkerA,Storage: Worker A performs safe write
+        WorkerA->>Lock: validate_owner(key="chembl_activity",<br/>owner_id="worker_a_uuid")
+        Lock->>Lock: Check owner == worker_a_uuid
+        Lock->>Lock: Check not expired
+        Lock-->>WorkerA: True (valid)
+
+        WorkerA->>Storage: merge(records, table)
+        activate Storage
+        Note over Storage: Delta Lake ACID transaction
+        Storage-->>WorkerA: WriteResult(success=true)
+        deactivate Storage
+
+        WorkerA->>Lock: validate_owner(key="chembl_activity",<br/>owner_id="worker_a_uuid")
+        Lock-->>WorkerA: True (still valid, post-write check)
+    end
+
+    rect rgb(230, 255, 230)
+        Note over WorkerA,Lock: Worker A releases lock
+        WorkerA->>HeartbeatA: stop()
+        deactivate HeartbeatA
+
+        WorkerA->>Lock: release(key="chembl_activity",<br/>owner_id="worker_a_uuid")
+        Lock->>Lock: Verify owner == worker_a_uuid
+        Lock->>Lock: Delete lock entry
+        Lock-->>WorkerA: True (released)
+    end
+
+    rect rgb(255, 240, 245)
+        Note over Lock: TTL Expiration (failure scenario)
+        Note right of Lock: If Worker A crashes without release:<br/>1. Heartbeat stops<br/>2. TTL checker runs every 1s<br/>3. After 90s, lock auto-expires<br/>4. Lock becomes available
+    end
+
+    rect rgb(230, 255, 230)
+        Note over WorkerB,Lock: Worker B can now acquire
+        WorkerB->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_b_uuid",<br/>ttl=90s, wait=False)
+        Lock->>Lock: Key expired/deleted
+        Lock-->>WorkerB: True (acquired)
+    end

@@ -1,0 +1,109 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TD
+    subgraph Prepare["Phase 1: Prepare"]
+        A1[Load YAML Config] --> A2[Validate Parameters]
+        A2 --> A3{Resume Mode?}
+        A3 -->|Yes| A4[Load Checkpoint]
+        A3 -->|No| A5[Fresh Start]
+        A4 --> A6[Acquire Lock]
+        A5 --> A6
+        A6 --> A7[Start Heartbeat Thread]
+        A7 --> A8[Run Preflight Checks]
+    end
+
+    subgraph Extract["Phase 2: Extract"]
+        B1[Fetch from API] --> B2{Circuit Breaker\nState?}
+        B2 -->|CLOSED| B3[Rate Limiter Acquire]
+        B2 -->|OPEN| B_ERR[CircuitOpenError]
+        B3 --> B4[HTTP Request]
+        B4 --> B5{Response OK?}
+        B5 -->|Yes| B6[Parse Response]
+        B5 -->|No| B7{Retriable?}
+        B7 -->|Yes| B8[Backoff & Retry]
+        B7 -->|No| B_ERR
+        B8 --> B4
+        B6 --> B9[Write to Bronze]
+        B9 --> B10[Record Lineage]
+        B10 --> B11{More Batches?}
+        B11 -->|Yes| B1
+        B11 -->|No| C1
+    end
+
+    subgraph Transform["Phase 3: Transform"]
+        C1[Load Bronze Records] --> C2[Normalize Values]
+        C2 --> C3[Add Metadata]
+        C3 --> C4[Compute content_hash]
+        C4 --> C5[Create Entity Objects]
+
+        subgraph Normalize["Normalization Rules"]
+            N1["NaN/Inf → null"]
+            N2["Floats → round(10)"]
+            N3["Dates → ISO YYYY-MM-DD"]
+            N4["Strings → strip()"]
+        end
+
+        subgraph Metadata["Metadata Fields"]
+            M1["_run_id: UUID"]
+            M2["_run_type: INCREMENTAL|BACKFILL|REBUILD"]
+            M3["_ingestion_ts: datetime"]
+            M4["_source_batch_id: UUID"]
+        end
+    end
+
+    subgraph Validate["Phase 4: Validate"]
+        D1[Pandera Schema Check] --> D2{Error Rate?}
+        D2 -->|0%| D3[All Pass]
+        D2 -->|"< 5%"| D4[Soft Threshold]
+        D2 -->|"5-20%"| D5[Warning Zone]
+        D2 -->|"> 20%"| D6[Hard Threshold]
+        D3 --> D7[Continue to Load]
+        D4 --> D8[Route Failures to Quarantine]
+        D8 --> D7
+        D5 --> D9[Set _dq_warn=true]
+        D9 --> D8
+        D6 --> D10[FAIL Batch]
+        D10 --> E_ERR[Alert & Exit]
+    end
+
+    subgraph Load["Phase 5: Load"]
+        E1[Validate Lock Ownership] --> E2{Lock Valid?}
+        E2 -->|No| E_ERR2[LockNotHeldError]
+        E2 -->|Yes| E3[Delta Lake Merge]
+        E3 --> E4[Upsert by content_hash]
+        E4 --> E5[Write Gold Layer]
+        E5 --> E6[Pandera Strict Validation]
+        E6 --> E7[Post-Write Lock Check]
+        E7 --> F1
+    end
+
+    subgraph Finalize["Phase 6: Finalize"]
+        F1[Export DQ Metrics] --> F2[Delete Checkpoint]
+        F2 --> F3[Release Lock]
+        F3 --> F4[Stop Heartbeat]
+        F4 --> F5[Publish Final Metrics]
+        F5 --> F6[Exit 0]
+    end
+
+    subgraph Parallel["Parallel Processes"]
+        direction LR
+        P1["⏱️ Heartbeat Thread\nEvery 30s: refresh TTL"]
+        P2["📊 Metrics Export\nPrometheus/CloudWatch"]
+    end
+
+    %% Flow connections
+    A8 --> B1
+    C5 --> D1
+    D7 --> E1
+
+    %% Error paths
+    B_ERR --> E_ERR
+    E_ERR2 --> E_ERR
+
+    %% Styling
+    style Prepare fill:#E8F5E9
+    style Extract fill:#E3F2FD
+    style Transform fill:#FFF3E0
+    style Validate fill:#FCE4EC
+    style Load fill:#F3E5F5
+    style Finalize fill:#E0F7FA
+    style Parallel fill:#FFFDE7

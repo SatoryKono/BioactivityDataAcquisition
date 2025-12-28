@@ -1,0 +1,232 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+classDiagram
+    direction TB
+
+    namespace Ports {
+        class DataSourcePort {
+            <<Protocol>>
+            +fetch(query: Query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+            +aclose() None
+        }
+
+        class FilterableDataSourcePort {
+            <<Protocol>>
+            +fetch_filtered(filters: FilterConfig) AsyncIterator~BronzeRecord~
+        }
+
+        class StoragePort {
+            <<Protocol>>
+            +write_bronze(records, provider, entity) BronzeWriteResult
+            +write_silver(records, table, mode) WriteResult
+            +write_gold(records, table, schema) WriteResult
+            +clear_silver(table) int
+            +clear_gold(table) int
+            +vacuum(table, retention_days) None
+            +archive(source, dest) None
+            +health_check() bool
+        }
+
+        class LockPort {
+            <<Protocol>>
+            +acquire(key, owner_id, ttl, wait, timeout, exclusive) bool
+            +release(key, owner_id, exclusive) bool
+            +heartbeat(key, owner_id, exclusive) bool
+            +validate_owner(key, owner_id) bool
+            +aclose() None
+        }
+
+        class CheckpointPort {
+            <<Protocol>>
+            +save(key, state) None
+            +load(key) CheckpointState?
+            +list_all() list~str~
+            +delete(key) None
+        }
+
+        class QuarantinePort {
+            <<Protocol>>
+            +write(record: QuarantineRecord) None
+            +inspect(pipeline, limit) list~QuarantineRecord~
+            +get_stats(pipeline) QuarantineStats
+            +aclose() None
+        }
+
+        class MetricsPort {
+            <<Protocol>>
+            +observe_histogram(name, value, labels) None
+            +increment_counter(name, labels, value) None
+            +set_gauge(name, value, labels) None
+            +close() None
+        }
+
+        class TracingPort {
+            <<Protocol>>
+            +get_tracer(name) Tracer
+            +close() None
+        }
+
+        class LoggerPort {
+            <<Protocol>>
+            +bind(**context) LoggerPort
+            +info(msg, **kwargs) None
+            +warning(msg, **kwargs) None
+            +error(msg, **kwargs) None
+            +debug(msg, **kwargs) None
+            +exception(msg, **kwargs) None
+        }
+
+        class CircuitBreakerPort {
+            <<Protocol>>
+            +get_state() CircuitState
+            +get_failure_count() int
+            +call(func, *args) T
+            +reset() None
+        }
+
+        class RateLimiterPort {
+            <<Protocol>>
+            +acquire() None
+            +try_acquire() bool
+            +available_tokens() int
+        }
+    }
+
+    namespace Entities {
+        class BaseEntity {
+            <<abstract>>
+            +entity_id: EntityID
+            +content_hash: ContentHash
+            +run_id: RunID
+            +run_type: RunType
+            +ingestion_ts: datetime
+        }
+
+        class Activity {
+            +activity_id: str
+            +assay_id: str
+            +molecule_id: str
+            +target_id: str?
+            +standard_type: str
+            +standard_value: float?
+            +standard_units: str?
+            +pchembl_value: float?
+        }
+
+        class Molecule {
+            +molecule_id: str
+            +pref_name: str?
+            +molecule_type: str
+            +canonical_smiles: str?
+            +standard_inchi_key: str?
+            +molecular_weight: float?
+            +parent_molecule_id: str?
+        }
+
+        class Assay {
+            +assay_id: str
+            +assay_type: str
+            +description: str?
+            +target_id: str?
+            +document_id: str?
+        }
+
+        class Target {
+            +target_id: str
+            +target_type: str
+            +pref_name: str?
+            +organism: str?
+            +tax_id: int?
+            +uniprot_accessions: list~str~?
+        }
+
+        class Document {
+            +document_id: str
+            +doc_type: str
+            +doi: str?
+            +pmid: int?
+            +title: str?
+        }
+    }
+
+    namespace Config {
+        class PipelineConfig {
+            <<frozen dataclass>>
+            +provider: str
+            +entity: str
+            +table_config: TableConfig
+            +dq_config: DQConfig
+        }
+
+        class RuntimeConfig {
+            +run_id: RunID
+            +run_type: RunType
+            +limit: int?
+            +resume: bool
+            +dry_run: bool
+            +filters: FilterConfig?
+        }
+
+        class DQConfig {
+            <<frozen dataclass>>
+            +soft_fail_threshold: float = 0.05
+            +hard_fail_threshold: float = 0.20
+            +strict_validation: bool = False
+        }
+
+        class TableConfig {
+            <<frozen dataclass>>
+            +primary_keys: tuple~str~
+            +silver_table: str?
+            +gold_table: str?
+            +silver_write_mode: SilverWriteMode
+            +gold_write_mode: GoldWriteMode
+            +partition_cols: tuple~str~
+        }
+    }
+
+    namespace Types {
+        class RunType {
+            <<enumeration>>
+            INCREMENTAL
+            BACKFILL
+            REBUILD
+        }
+
+        class SilverWriteMode {
+            <<enumeration>>
+            MERGE
+            APPEND
+            DELETE
+        }
+
+        class GoldWriteMode {
+            <<enumeration>>
+            APPEND
+            OVERWRITE
+            SCD2
+        }
+
+        class CircuitState {
+            <<enumeration>>
+            CLOSED = 0
+            HALF_OPEN = 1
+            OPEN = 2
+        }
+    }
+
+    %% Inheritance
+    BaseEntity <|-- Activity
+    BaseEntity <|-- Molecule
+    BaseEntity <|-- Assay
+    BaseEntity <|-- Target
+    BaseEntity <|-- Document
+
+    FilterableDataSourcePort --|> DataSourcePort
+
+    %% Associations
+    PipelineConfig --> TableConfig
+    PipelineConfig --> DQConfig
+    RuntimeConfig --> RunType
+    TableConfig --> SilverWriteMode
+    TableConfig --> GoldWriteMode
