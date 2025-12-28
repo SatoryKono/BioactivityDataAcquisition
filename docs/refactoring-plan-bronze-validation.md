@@ -6,7 +6,7 @@
 >
 > Все утверждения в этом документе проверены согласно `RULES.md` §7:
 > - Первая проверка: Анализ кода с точными ссылками
-> - Вторая проверка: Сверка с `docs/REFACTORING_PLAN.md`
+> - Вторая проверка: Сверка с `docs/refactoring-plan.md`
 
 ---
 
@@ -24,7 +24,7 @@
 
 | Задача | Приоритет | Статус верификации | Требуется работа |
 |--------|-----------|-------------------|------------------|
-| Bronze Validation Enhancement | P2 | ✅ УЖЕ РЕАЛИЗОВАНО | Нет (обновить REFACTORING_PLAN.md) |
+| Bronze Validation Enhancement | P2 | ✅ УЖЕ РЕАЛИЗОВАНО | Нет (обновить refactoring-plan.md) |
 | Provider Health Monitoring | P2 | ⏳ ЧАСТИЧНО | Да (централизованный мониторинг) |
 | Gold Contracts Documentation | P3 | ✅ УЖЕ РЕАЛИЗОВАНО | Нет |
 | Safety Guard для Storage Writers | P3 | ❌ НЕ РЕАЛИЗОВАНО | Да (полная реализация) |
@@ -35,7 +35,7 @@
 
 ### Статус: ✅ УЖЕ РЕАЛИЗОВАНО
 
-> **ВЕРИФИКАЦИЯ**: Задача M3 в `docs/REFACTORING_PLAN.md:125` помечена как ⏳,
+> **ВЕРИФИКАЦИЯ**: Задача M3 в `docs/refactoring-plan.md:125` помечена как ⏳,
 > но код показывает полную реализацию.
 
 ### Доказательства реализации
@@ -69,7 +69,7 @@ def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
 
 ### Рекомендуемые действия
 
-1. **Обновить `docs/REFACTORING_PLAN.md:125`**:
+1. **Обновить `docs/refactoring-plan.md:125`**:
    ```diff
    - ⏳ M3: Bronze validation
    + ✅ M3: Bronze validation (реализовано bronze_writer.py:151-178)
@@ -876,9 +876,9 @@ class TestWriterLockValidation:
 
 ---
 
-## Приложение: Обновление REFACTORING_PLAN.md
+## Приложение: Обновление refactoring-plan.md
 
-После выполнения задач, обновить `docs/REFACTORING_PLAN.md`:
+После выполнения задач, обновить `docs/refactoring-plan.md`:
 
 ### Строка 125 (M3)
 ```diff

@@ -23,9 +23,9 @@
 
 | # | Документ | Версия | Ключевой фокус |
 |---|----------|--------|----------------|
-| 1 | `docs/REFACTORING_PLAN.md` | v5.6 | Детерминизм, Medallion, единый источник времени |
-| 2 | `docs/REFACTORING_PLAN_BRONZE_VALIDATION.md` | v1.0 | Bronze Validation, Safety Guards |
-| 3 | `docs/CONSOLIDATED_REFACTORING_ANALYSIS.md` | v1.0 | Сводный анализ 4 аудитов |
+| 1 | `docs/refactoring-plan.md` | v5.6 | Детерминизм, Medallion, единый источник времени |
+| 2 | `docs/refactoring-plan-bronze-validation.md` | v1.0 | Bronze Validation, Safety Guards |
+| 3 | `docs/consolidated-refactoring-analysis.md` | v1.0 | Сводный анализ 4 аудитов |
 | 4 | `docs/06-architecture-audit.md` (diff) | v1 | Архитектурный аудит с балльной оценкой |
 
 ### Ключевые выводы
@@ -57,7 +57,7 @@
 
 | Файл | Утверждение | Реальность | Расхождение |
 |------|-------------|------------|-------------|
-| `runner.py` | 173 строки (REFACTORING_PLAN.md) | **166 строк** | -7 строк |
+| `runner.py` | 173 строки (refactoring-plan.md) | **166 строк** | -7 строк |
 | `bootstrap.py` | ~100-140 строк (несколько планов) | **182 строки** | +42-82 строки |
 | `gold_writer.py` | 593-674 строки (разные планы) | **740 строк** | +66-147 строк |
 | Arch tests | "нет" или "20+" | **26 файлов** | — |
@@ -159,7 +159,7 @@ maintenance:
 
 | Параметр | Значение |
 |----------|----------|
-| Файлы | `docs/REFACTORING_PLAN.md`, `docs/REFACTORING_PLAN_BRONZE_VALIDATION.md`, `docs/CONSOLIDATED_REFACTORING_ANALYSIS.md` |
+| Файлы | `docs/refactoring-plan.md`, `docs/refactoring-plan-bronze-validation.md`, `docs/consolidated-refactoring-analysis.md` |
 | Действие | Пометить реализованные задачи как ✅, удалить дублирующие документы |
 | Трудозатраты | S (0.5 дня) |
 
