@@ -90,7 +90,7 @@ class MemoryMonitor:
     def _check_psutil(self) -> bool:
         """Check if psutil is available for memory monitoring."""
         try:
-            import psutil  # noqa: F401  # type: ignore[import-untyped]
+            import psutil  # noqa: F401
 
             return True
         except ImportError:
