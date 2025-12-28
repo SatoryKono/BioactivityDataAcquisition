@@ -43,6 +43,7 @@ class BatchWriter:
         error_classifier: ErrorClassifier,
         batch_metrics: BatchMetricsRecorder,
         tracer: TracingPort | None = None,
+        lock_context_provider: Callable[[], LockContext | None] | None = None,
     ) -> None:
         """Initialize batch writer.
 
@@ -54,6 +55,7 @@ class BatchWriter:
             error_classifier: Service for error classification.
             batch_metrics: Metrics recorder for batch processing.
             tracer: Optional tracing port for distributed tracing.
+            lock_context_provider: Callable returning current lock context.
 
         """
         self._storage = storage
@@ -63,6 +65,7 @@ class BatchWriter:
         self._error_classifier = error_classifier
         self._batch_metrics = batch_metrics
         self._tracer = tracer
+        self._get_lock_context = lock_context_provider or (lambda: None)
 
         # Convenience properties
         self._provider = config.provider
@@ -154,6 +157,7 @@ class BatchWriter:
                 run_id=self._context.run_id,
                 run_type=self._context.run_type,
                 ingestion_ts=ingestion_ts,
+                lock_context=self._get_lock_context(),
             )
             self._end_span(span)
         except Exception as e:
