@@ -139,11 +139,11 @@ Data lineage tracking for audit and debugging.
 
 ## Anomaly Detection
 
-### AnomalyMonitor
+### DataQualityMonitor
 
 Monitors metrics for anomalies in batch processing.
 
-::: bioetl.infrastructure.observability.anomaly.monitor.AnomalyMonitor
+::: bioetl.infrastructure.observability.anomaly.monitor.DataQualityMonitor
     options:
         show_root_heading: true
         show_source: false
@@ -158,19 +158,18 @@ Monitors metrics for anomalies in batch processing.
 
 ## Metrics Server
 
-### MetricsServer
+### start_metrics_server
 
 HTTP server for Prometheus scraping.
 
-::: bioetl.infrastructure.observability.server.MetricsServer
+::: bioetl.infrastructure.observability.server.start_metrics_server
     options:
         show_root_heading: true
         show_source: false
 
 ```python
 # Start metrics server
-server = MetricsServer(port=9090)
-await server.start()
+start_metrics_server(port=9090)
 
 # Prometheus can scrape at http://localhost:9090/metrics
 ```
