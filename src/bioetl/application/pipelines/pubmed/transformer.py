@@ -51,7 +51,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         )
 
     async def _transform_impl(
-        self, context: PipelineContext, record: BronzeRecord
+        self, context: PipelineContext, record: BronzeRecord, index: int
     ) -> SilverRecord | None:
         """Transform raw PubMed XML record to Silver format."""
         raw_xml = record.get("_raw_xml")
@@ -74,6 +74,7 @@ class PubMedPublicationTransformer(BaseTransformer):
                 context,
                 entity_id=entity_id,
                 content_hash=content_hash,
+                index=index,
                 **business_data,
             )
             return cast("SilverRecord", self.entity_to_silver_record(entity))

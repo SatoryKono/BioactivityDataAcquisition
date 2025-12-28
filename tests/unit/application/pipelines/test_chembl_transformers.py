@@ -789,7 +789,7 @@ class TestTargetComponentTransformer:
         """Test transformation handles empty/None protein_classifications."""
         # Test with None
         record_none = {"component_id": 789, "accession": "Q99999"}
-        result_none = await transformer.transform(mock_context, record_none)
+        result_none = await transformer.transform(mock_context, record_none, index=0)
         assert result_none is not None
         assert result_none.get("protein_classification_ids") is None
 
@@ -799,6 +799,6 @@ class TestTargetComponentTransformer:
             "accession": "Q99998",
             "protein_classifications": [],
         }
-        result_empty = await transformer.transform(mock_context, record_empty)
+        result_empty = await transformer.transform(mock_context, record_empty, index=0)
         assert result_empty is not None
         assert result_empty.get("protein_classification_ids") is None

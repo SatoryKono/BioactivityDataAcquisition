@@ -102,6 +102,7 @@ class UniProtProteinTransformer(BaseTransformer):
             context,
             entity_id=entity_id,
             content_hash=content_hash,
+            index=index,
             **business_data,
         )
 

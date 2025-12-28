@@ -1,6 +1,7 @@
 # serializer version: 1
 # name: TestActivityTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -62,6 +63,7 @@
 # ---
 # name: TestAssayTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -109,6 +111,7 @@
 # ---
 # name: TestDocumentTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -135,6 +138,7 @@
 # ---
 # name: TestMoleculeTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -196,6 +200,7 @@
 # ---
 # name: TestPubChemCompoundTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -214,6 +219,7 @@
 # ---
 # name: TestTargetComponentTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -234,6 +240,7 @@
 # ---
 # name: TestTargetTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -275,6 +282,7 @@
 # ---
 # name: TestUniProtProteinTransformerSnapshot.test_transform_snapshot
   dict({
+    '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
