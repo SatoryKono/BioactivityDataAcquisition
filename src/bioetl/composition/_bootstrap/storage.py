@@ -45,6 +45,9 @@ def bootstrap_storage() -> StorageAdapter:
     noop_metrics = NoOpMetrics()
     noop_tracing = NoOpTracing()
 
+    # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
+    require_lock = not settings.test_mode
+
     return StorageAdapter(
         bronze_writer=BronzeWriter(
             base_path=settings.bronze_path,
@@ -53,18 +56,21 @@ def bootstrap_storage() -> StorageAdapter:
             save_json=False,
             json_path=None,
             tracing=noop_tracing,
+            require_lock=require_lock,
         ),
         silver_writer=DeltaWriter(
             base_path=settings.silver_path,
             logger=noop_logger,
             csv_exporter=None,
             tracing=noop_tracing,
+            require_lock=require_lock,
         ),
         gold_writer=GoldWriter(
             base_path=settings.gold_path,
             logger=noop_logger,
             csv_exporter=None,
             tracing=noop_tracing,
+            require_lock=require_lock,
         ),
     )
 

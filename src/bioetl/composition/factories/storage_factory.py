@@ -98,11 +98,15 @@ class StorageFactory:
         silver_csv_exporter: CsvExporter | None = None
         gold_csv_exporter: CsvExporter | None = None
 
+        # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
+        require_lock = not settings.test_mode
+
         logger.info(
             "Using local storage",
             bronze_path=str(bronze_path),
             silver_path=str(silver_path),
             gold_path=str(gold_path),
+            require_lock=require_lock,
         )
 
         if bronze_config and bronze_config.save_json:
