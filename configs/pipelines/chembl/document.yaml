@@ -58,7 +58,7 @@ sink:
     gold:
         enabled: true
         validation:
-            strict: false  # UPDATED: Allow extra columns to ensure identical schema with Silver
+            strict: true  # REQ-DATA-009: Gold validation must be strict
         path: "data/output/gold"
         format: delta
         mode: overwrite

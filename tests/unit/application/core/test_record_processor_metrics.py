@@ -151,7 +151,7 @@ class TestRecordProcessorMetrics:
         mock_error_classifier.classify.return_value = ErrorType.DATA_QUALITY
 
         # Create processor with failing transform callback
-        async def failing_transform(ctx, record):
+        async def failing_transform(ctx, record, index):
             raise DataQualityError("DQ Fail")
 
         config = RecordProcessorConfig(
