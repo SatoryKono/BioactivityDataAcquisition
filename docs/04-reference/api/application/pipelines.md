@@ -21,7 +21,7 @@ ChEMBL provides bioactivity data from medicinal chemistry literature.
 
 Bioactivity measurements (IC50, Ki, EC50, etc.).
 
-::: bioetl.application.pipelines.chembl.activity.ActivityPipeline
+::: bioetl.application.pipelines.chembl.activity.ChEMBLActivityPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -37,7 +37,7 @@ Bioactivity measurements (IC50, Ki, EC50, etc.).
 
 Experimental assay descriptions.
 
-::: bioetl.application.pipelines.chembl.assay.AssayPipeline
+::: bioetl.application.pipelines.chembl.assay.ChEMBLAssayPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -53,7 +53,7 @@ Experimental assay descriptions.
 
 Chemical compound structures.
 
-::: bioetl.application.pipelines.chembl.molecule.MoleculePipeline
+::: bioetl.application.pipelines.chembl.molecule.ChEMBLMoleculePipeline
     options:
         show_root_heading: true
         show_source: false
@@ -69,7 +69,7 @@ Chemical compound structures.
 
 Biological targets (proteins, genes).
 
-::: bioetl.application.pipelines.chembl.target.TargetPipeline
+::: bioetl.application.pipelines.chembl.target.ChEMBLTargetPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -85,7 +85,7 @@ Biological targets (proteins, genes).
 
 Publications and patents.
 
-::: bioetl.application.pipelines.chembl.document.DocumentPipeline
+::: bioetl.application.pipelines.chembl.document.ChEMBLDocumentPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -101,7 +101,7 @@ Publications and patents.
 
 Target components (protein chains, domains).
 
-::: bioetl.application.pipelines.chembl.target_component.TargetComponentPipeline
+::: bioetl.application.pipelines.chembl.target_component.ChEMBLTargetComponentPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -128,7 +128,7 @@ PubChem provides chemical compound data.
 
 ### Compound Pipeline
 
-::: bioetl.application.pipelines.pubchem.compound.CompoundPipeline
+::: bioetl.application.pipelines.pubchem.compound.PubChemCompoundPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -146,7 +146,7 @@ UniProt provides protein sequence and annotation data.
 
 ### Protein Pipeline
 
-::: bioetl.application.pipelines.uniprot.protein.ProteinPipeline
+::: bioetl.application.pipelines.uniprot.protein.UniProtProteinPipeline
     options:
         show_root_heading: true
         show_source: false
@@ -164,7 +164,7 @@ PubMed provides scientific publication metadata.
 
 ### Publications Pipeline
 
-::: bioetl.application.pipelines.pubmed.publications.PublicationsPipeline
+::: bioetl.application.pipelines.pubmed.publications.PubMedPublicationsPipeline
     options:
         show_root_heading: true
         show_source: false
