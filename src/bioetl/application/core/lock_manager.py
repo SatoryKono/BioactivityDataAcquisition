@@ -68,6 +68,7 @@ class LockManager:
         logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManager | None = None,
+        context_holder: LockContextHolder | None = None,
     ) -> LockManager:
         """Create a LockManager instance.
 
@@ -106,6 +107,7 @@ class LockManager:
             logger=logger,
             shutdown_signal=shutdown_signal,
             checkpoint_manager=checkpoint_manager,
+            context_holder=context_holder,
         )
 
     async def acquire(self) -> bool:
