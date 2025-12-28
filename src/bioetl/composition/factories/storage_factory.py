@@ -77,14 +77,28 @@ class StorageFactory:
         Returns:
             StorageContext with adapter and paths
         """
-        bronze_path = settings.bronze_path
-        silver_path = settings.silver_path
-        gold_path = settings.gold_path
-        checkpoints_path = settings.checkpoint_path
-
+        # Get layer configs from YAML
         bronze_config = config.sink.get("bronze")
         silver_config = config.sink.get("silver")
         gold_config = config.sink.get("gold")
+
+        # Use YAML paths if specified, otherwise fall back to settings
+        bronze_path = (
+            Path(bronze_config.path)
+            if bronze_config and bronze_config.path
+            else settings.bronze_path
+        )
+        silver_path = (
+            Path(silver_config.path)
+            if silver_config and silver_config.path
+            else settings.silver_path
+        )
+        gold_path = (
+            Path(gold_config.path)
+            if gold_config and gold_config.path
+            else settings.gold_path
+        )
+        checkpoints_path = settings.checkpoint_path
 
         json_path = None
         silver_csv_exporter: CsvExporter | None = None
@@ -102,7 +116,8 @@ class StorageFactory:
         )
 
         if bronze_config and bronze_config.save_json:
-            json_path = str(settings.data_dir / "json")
+            # JSON path is sibling to bronze path
+            json_path = str(bronze_path.parent / "json")
 
         if silver_config:
             silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(

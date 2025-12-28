@@ -13,6 +13,30 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 from uuid import uuid4
 
+__all__ = [
+    # Configuration
+    "load_pipeline_config",
+    # Option classes
+    "RunOptions",
+    "VacuumOptions",
+    "ArchiveOptions",
+    # Pipeline operations
+    "build_pipeline_context",
+    "create_pipeline_runner",
+    "run_pipeline",
+    # Resource management
+    "get_quarantine_manager",
+    "get_checkpoint_manager",
+    "get_lifecycle_service",
+    # Maintenance operations
+    "vacuum_table",
+    "archive_table",
+    "preview_cleanup",
+    # Inspection
+    "inspect_quarantine",
+    "list_checkpoints",
+]
+
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint_manager,
     bootstrap_cleanup,

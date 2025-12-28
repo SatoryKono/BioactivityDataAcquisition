@@ -467,7 +467,14 @@ class GoldWriter:
         if self.csv_exporter:
             # Match CSV append behavior to Delta mode
             csv_append = mode != "overwrite"
-            await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
+            # Pass primary_keys to CSV exporter for deduplication if mode is merge/append
+            csv_primary_keys = primary_keys if mode != "overwrite" else None
+            await self.csv_exporter.export(
+                table_name,
+                arrow_data,
+                append=csv_append,
+                primary_keys=csv_primary_keys
+            )
 
     async def _write_scd2(
         self,
