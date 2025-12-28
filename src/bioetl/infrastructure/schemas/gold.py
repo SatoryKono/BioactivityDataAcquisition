@@ -103,6 +103,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -127,6 +128,7 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -149,6 +151,7 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -189,6 +192,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -242,6 +246,7 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -271,6 +276,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -297,6 +303,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -329,6 +336,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True
@@ -368,6 +376,7 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
         strict = True

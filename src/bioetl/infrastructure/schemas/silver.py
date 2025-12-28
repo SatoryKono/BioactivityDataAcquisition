@@ -85,6 +85,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -105,6 +106,7 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -123,6 +125,7 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -170,6 +173,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -232,6 +236,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -266,6 +271,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -295,6 +301,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -331,6 +338,7 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
 
@@ -373,5 +381,6 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
     ]
 )
