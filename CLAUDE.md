@@ -266,7 +266,7 @@ grep -r "SilverWriteMode\|GoldWriteMode" src/bioetl/
 # 3. Проверить архитектурные тесты
 ls tests/architecture/
 
-# 4. Сверить с REFACTORING_PLAN.md
+# 4. Сверить с refactoring-plan.md
 cat docs/refactoring-plan.md | head -60
 ```
 
