@@ -188,11 +188,11 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         AssertionError: Если файлы не найдены
 
     Note:
-        Path structure is: data_dir/bronze/bronze/v1/{provider}/{entity}/
-        (double 'bronze' due to BronzeWriter appending 'bronze/v1/...' to base_path)
+        Path structure is: data_dir/bronze/v1/{provider}/{entity}/
+        (base_path is data_dir/bronze, BronzeWriter appends 'v1/...')
     """
-    # Note: BronzeWriter uses base_path + "bronze/v1/..." so there's a double bronze
-    bronze_path = data_dir / "bronze" / "bronze" / "v1" / provider / entity
+    # BronzeWriter uses base_path + "v1/{provider}/..." path format
+    bronze_path = data_dir / "bronze" / "v1" / provider / entity
     if not bronze_path.exists():
         raise AssertionError(f"Bronze path does not exist: {bronze_path}")
 
