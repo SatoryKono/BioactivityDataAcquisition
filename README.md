@@ -74,6 +74,27 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with clear layer se
 
 ### Installation
 
+#### Option A: Automated Setup (Recommended)
+
+Use the `dev_setup.sh` script for a complete automated setup:
+
+```bash
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
+cd BioactivityDataAcquisition
+./dev_setup.sh
+```
+
+The script will:
+- Check prerequisites (Python 3.11+, Git, Make)
+- Create virtual environment and install dependencies
+- Set up pre-commit hooks
+- Configure environment variables
+- Run verification checks
+
+For quick setup without tests: `./dev_setup.sh --quick`
+
+#### Option B: Manual Setup
+
 1. **Clone and Install**:
    Initialize the virtual environment and install project dependencies.
    ```bash
@@ -199,6 +220,7 @@ Access the docs at `http://localhost:8000`.
 │           └── orchestration/ # Runner, signals, Prefect
 ├── tests/                    # Unit, Integration & Architecture tests
 ├── .env.example              # Environment variables template
+├── dev_setup.sh              # Automated development environment setup
 ├── Makefile                  # Automation commands
 ├── pyproject.toml            # Dependencies & Tool configuration
 └── README.md                 # Project documentation
