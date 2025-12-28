@@ -6,7 +6,6 @@ performing write operations.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
@@ -16,10 +15,12 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.locking import LockContext, LockNotHeldError
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+    from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+    from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @pytest.fixture
@@ -160,7 +161,7 @@ class TestDeltaWriterLockValidation:
     """Tests for DeltaWriter lock validation."""
 
     @pytest.fixture
-    def delta_writer(self, tmp_path: Path, mock_logger: MagicMock) -> "DeltaWriter":
+    def delta_writer(self, tmp_path: Path, mock_logger: MagicMock) -> DeltaWriter:
         """Create DeltaWriter with require_lock=True."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -173,7 +174,7 @@ class TestDeltaWriterLockValidation:
     @pytest.fixture
     def delta_writer_no_lock(
         self, tmp_path: Path, mock_logger: MagicMock
-    ) -> "DeltaWriter":
+    ) -> DeltaWriter:
         """Create DeltaWriter with require_lock=False."""
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
@@ -192,7 +193,7 @@ class TestDeltaWriterLockValidation:
         ])
 
     def test_validate_lock_held_no_context(
-        self, delta_writer: "DeltaWriter", mock_logger: MagicMock
+        self, delta_writer: DeltaWriter, mock_logger: MagicMock
     ) -> None:
         """Test validation fails when no lock context provided."""
         with pytest.raises(LockNotHeldError) as exc_info:
@@ -203,7 +204,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_held_wrong_table(
         self,
-        delta_writer: "DeltaWriter",
+        delta_writer: DeltaWriter,
         wrong_table_lock_context: LockContext,
         mock_logger: MagicMock,
     ) -> None:
@@ -216,7 +217,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_held_valid(
         self,
-        delta_writer: "DeltaWriter",
+        delta_writer: DeltaWriter,
         valid_lock_context: LockContext,
     ) -> None:
         """Test validation passes with valid lock context."""
@@ -225,7 +226,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_held_exclusive_accepted(
         self,
-        delta_writer: "DeltaWriter",
+        delta_writer: DeltaWriter,
         exclusive_lock_context: LockContext,
     ) -> None:
         """Test exclusive lock is accepted for normal writes."""
@@ -234,7 +235,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_disabled(
         self,
-        delta_writer_no_lock: "DeltaWriter",
+        delta_writer_no_lock: DeltaWriter,
     ) -> None:
         """Test validation is skipped when require_lock=False."""
         # Should not raise even with None
@@ -242,7 +243,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_held_wrong_owner_id(
         self,
-        delta_writer: "DeltaWriter",
+        delta_writer: DeltaWriter,
         wrong_owner_lock_context: LockContext,
         run_id: RunID,
         mock_logger: MagicMock,
@@ -260,7 +261,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_held_matching_owner_id(
         self,
-        delta_writer: "DeltaWriter",
+        delta_writer: DeltaWriter,
         valid_lock_context: LockContext,
         run_id: RunID,
     ) -> None:
@@ -274,7 +275,7 @@ class TestDeltaWriterLockValidation:
 
     def test_validate_lock_held_no_expected_owner_skips_check(
         self,
-        delta_writer: "DeltaWriter",
+        delta_writer: DeltaWriter,
         valid_lock_context: LockContext,
     ) -> None:
         """Test validation passes when expected_owner_id is None (backward compat)."""
@@ -290,7 +291,7 @@ class TestGoldWriterLockValidation:
     """Tests for GoldWriter lock validation."""
 
     @pytest.fixture
-    def gold_writer(self, tmp_path: Path, mock_logger: MagicMock) -> "GoldWriter":
+    def gold_writer(self, tmp_path: Path, mock_logger: MagicMock) -> GoldWriter:
         """Create GoldWriter with require_lock=True."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
@@ -303,7 +304,7 @@ class TestGoldWriterLockValidation:
     @pytest.fixture
     def gold_writer_no_lock(
         self, tmp_path: Path, mock_logger: MagicMock
-    ) -> "GoldWriter":
+    ) -> GoldWriter:
         """Create GoldWriter with require_lock=False."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
@@ -314,7 +315,7 @@ class TestGoldWriterLockValidation:
         )
 
     def test_validate_lock_held_no_context(
-        self, gold_writer: "GoldWriter", mock_logger: MagicMock
+        self, gold_writer: GoldWriter, mock_logger: MagicMock
     ) -> None:
         """Test validation fails when no lock context provided."""
         with pytest.raises(LockNotHeldError) as exc_info:
@@ -325,7 +326,7 @@ class TestGoldWriterLockValidation:
 
     def test_validate_lock_held_valid(
         self,
-        gold_writer: "GoldWriter",
+        gold_writer: GoldWriter,
         valid_lock_context: LockContext,
     ) -> None:
         """Test validation passes with valid lock context."""
@@ -334,7 +335,7 @@ class TestGoldWriterLockValidation:
 
     def test_validate_lock_disabled(
         self,
-        gold_writer_no_lock: "GoldWriter",
+        gold_writer_no_lock: GoldWriter,
     ) -> None:
         """Test validation is skipped when require_lock=False."""
         # Should not raise even with None
@@ -342,7 +343,7 @@ class TestGoldWriterLockValidation:
 
     def test_validate_lock_held_wrong_owner_id(
         self,
-        gold_writer: "GoldWriter",
+        gold_writer: GoldWriter,
         wrong_owner_lock_context: LockContext,
         run_id: RunID,
         mock_logger: MagicMock,
@@ -360,7 +361,7 @@ class TestGoldWriterLockValidation:
 
     def test_validate_lock_held_matching_owner_id(
         self,
-        gold_writer: "GoldWriter",
+        gold_writer: GoldWriter,
         valid_lock_context: LockContext,
         run_id: RunID,
     ) -> None:
@@ -379,7 +380,7 @@ class TestBronzeWriterLockValidation:
     @pytest.fixture
     def bronze_writer(
         self, tmp_path: Path, mock_logger: MagicMock, mock_metrics: MagicMock
-    ) -> "BronzeWriter":
+    ) -> BronzeWriter:
         """Create BronzeWriter with require_lock=True."""
         from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
@@ -393,7 +394,7 @@ class TestBronzeWriterLockValidation:
     @pytest.fixture
     def bronze_writer_no_lock(
         self, tmp_path: Path, mock_logger: MagicMock, mock_metrics: MagicMock
-    ) -> "BronzeWriter":
+    ) -> BronzeWriter:
         """Create BronzeWriter with require_lock=False."""
         from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
@@ -405,7 +406,7 @@ class TestBronzeWriterLockValidation:
         )
 
     def test_validate_lock_held_no_context(
-        self, bronze_writer: "BronzeWriter", mock_logger: MagicMock
+        self, bronze_writer: BronzeWriter, mock_logger: MagicMock
     ) -> None:
         """Test validation fails when no lock context provided."""
         with pytest.raises(LockNotHeldError) as exc_info:
@@ -417,7 +418,7 @@ class TestBronzeWriterLockValidation:
 
     def test_validate_lock_held_wrong_provider(
         self,
-        bronze_writer: "BronzeWriter",
+        bronze_writer: BronzeWriter,
         wrong_table_lock_context: LockContext,
         mock_logger: MagicMock,
     ) -> None:
@@ -431,7 +432,7 @@ class TestBronzeWriterLockValidation:
 
     def test_validate_lock_held_valid(
         self,
-        bronze_writer: "BronzeWriter",
+        bronze_writer: BronzeWriter,
         valid_lock_context: LockContext,
     ) -> None:
         """Test validation passes with valid lock context."""
@@ -440,7 +441,7 @@ class TestBronzeWriterLockValidation:
 
     def test_validate_lock_disabled(
         self,
-        bronze_writer_no_lock: "BronzeWriter",
+        bronze_writer_no_lock: BronzeWriter,
     ) -> None:
         """Test validation is skipped when require_lock=False."""
         # Should not raise even with None
@@ -448,7 +449,7 @@ class TestBronzeWriterLockValidation:
 
     def test_validate_lock_held_wrong_owner_id(
         self,
-        bronze_writer: "BronzeWriter",
+        bronze_writer: BronzeWriter,
         wrong_owner_lock_context: LockContext,
         run_id: RunID,
         mock_logger: MagicMock,
@@ -467,7 +468,7 @@ class TestBronzeWriterLockValidation:
 
     def test_validate_lock_held_matching_owner_id(
         self,
-        bronze_writer: "BronzeWriter",
+        bronze_writer: BronzeWriter,
         valid_lock_context: LockContext,
         run_id: RunID,
     ) -> None:

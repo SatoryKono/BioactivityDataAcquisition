@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -21,37 +19,37 @@ class ProteinClassificationSchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    parent_id: Optional[Series[int]] = pa.Field(
+    parent_id: Series[int] | None = pa.Field(
         nullable=True, description="FK to parent classification."
     )
-    replaced_by: Optional[Series[int]] = pa.Field(
+    replaced_by: Series[int] | None = pa.Field(
         nullable=True, description="FK to replacement classification."
     )
 
     # === Metadata ===
-    pref_name: Optional[Series[str]] = pa.Field(
+    pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    short_name: Optional[Series[str]] = pa.Field(
+    short_name: Series[str] | None = pa.Field(
         nullable=True, description="Short name."
     )
-    protein_class_desc: Optional[Series[str]] = pa.Field(
+    protein_class_desc: Series[str] | None = pa.Field(
         nullable=True, description="Description."
     )
-    definition: Optional[Series[str]] = pa.Field(
+    definition: Series[str] | None = pa.Field(
         nullable=True, description="Definition."
     )
-    class_level: Optional[Series[int]] = pa.Field(
+    class_level: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Class level.",
     )
-    sort_order: Optional[Series[int]] = pa.Field(
+    sort_order: Series[int] | None = pa.Field(
         nullable=True, description="Sort order."
     )
 
     # === Flags ===
-    downgraded: Optional[Series[int]] = pa.Field(
+    downgraded: Series[int] | None = pa.Field(
         nullable=True,
         isin=[0, 1],
         description="Downgraded flag.",
