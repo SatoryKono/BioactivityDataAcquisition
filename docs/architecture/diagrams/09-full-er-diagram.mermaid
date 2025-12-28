@@ -1,0 +1,171 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+erDiagram
+    Activity ||--o{ Assay : "assay_id FK"
+    Activity ||--o{ Molecule : "molecule_id FK"
+    Activity ||--o| Target : "target_id FK (nullable)"
+    Assay ||--o| Target : "target_id FK"
+    Assay ||--o| Document : "document_id FK"
+    Molecule ||--o| Molecule : "parent_molecule_id FK"
+    Target ||--o{ TargetComponent : "has components"
+    LineageLog ||--o{ Activity : "batch contains"
+    Quarantine ||--o| LineageLog : "bronze_batch_id FK"
+
+    Activity {
+        string activity_id PK "ChEMBL activity ID"
+        string assay_id FK "Reference to Assay"
+        string molecule_id FK "Reference to Molecule"
+        string target_id FK "Reference to Target (nullable)"
+        string standard_type "Activity type (IC50, Ki, etc.)"
+        float standard_value "Measured value (nullable)"
+        string standard_units "Units (nM, uM, etc.)"
+        string standard_relation "Relation (=, <, >)"
+        float pchembl_value "Normalized potency (nullable)"
+        string data_validity_comment "Validity status"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "INCREMENTAL|BACKFILL|REBUILD"
+        uuid _source_batch_id "Bronze batch reference"
+        timestamp _ingestion_ts "Ingestion timestamp"
+        bool _dq_warn "DQ warning flag"
+    }
+
+    Assay {
+        string assay_id PK "ChEMBL assay ID"
+        string assay_type "Binding, Functional, ADMET"
+        string description "Assay description (nullable)"
+        string assay_organism "Test organism"
+        string assay_strain "Organism strain"
+        string assay_cell_type "Cell type used"
+        string target_id FK "Reference to Target (nullable)"
+        string document_id FK "Reference to Document (nullable)"
+        int src_id "Source database ID"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    Target {
+        string target_id PK "ChEMBL target ID"
+        string target_type "PROTEIN, CELL-LINE, etc."
+        string pref_name "Preferred name (nullable)"
+        string organism "Source organism"
+        int tax_id "NCBI taxonomy ID (nullable)"
+        json uniprot_accessions "UniProt IDs (nullable)"
+        json gene_names "Gene symbols (nullable)"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    TargetComponent {
+        string component_id PK "Component ID"
+        string target_id FK "Parent target"
+        string accession "UniProt accession"
+        string component_type "PROTEIN, DNA, etc."
+        string description "Component description"
+    }
+
+    Molecule {
+        string molecule_id PK "ChEMBL molecule ID"
+        string pref_name "Preferred name (nullable)"
+        string molecule_type "Small molecule, Antibody, etc."
+        int max_phase "Max clinical phase"
+        string canonical_smiles "SMILES string (nullable)"
+        string standard_inchi "InChI string (nullable)"
+        string standard_inchi_key "InChIKey (nullable)"
+        string molecular_formula "Chemical formula"
+        float molecular_weight "Molecular weight (nullable)"
+        string parent_molecule_id FK "Parent molecule (nullable)"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    Document {
+        string document_id PK "ChEMBL document ID"
+        string doc_type "PUBLICATION, PATENT, etc."
+        string doi "DOI (nullable)"
+        int pmid "PubMed ID (nullable)"
+        string title "Document title (nullable)"
+        json authors "Author list (nullable)"
+        string journal "Journal name"
+        int year "Publication year"
+        string volume "Journal volume"
+        string first_page "First page"
+        string abstract "Abstract text (nullable)"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        string _run_type "Run type enum"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    LineageLog {
+        uuid batch_id PK "Unique batch identifier"
+        string pipeline "Pipeline name"
+        json bronze_paths "List of Bronze file paths"
+        string transform_version "Transformer version"
+        json run_params "Runtime parameters"
+        timestamp created_at "Creation timestamp"
+    }
+
+    Quarantine {
+        timestamp ingestion_ts PK "Ingestion timestamp"
+        string pipeline "Source pipeline"
+        string error_code "Error classification"
+        string error_message "Human-readable message"
+        string payload "Truncated record (64KB max)"
+        string payload_hash "Hash of full payload"
+        uuid bronze_batch_id FK "Reference to LineageLog"
+        string bronze_file_uri "Bronze file location"
+        string dq_status "NEW|IGNORED|REPROCESSED"
+        timestamp updated_at "Last status update"
+    }
+
+    Protein {
+        string protein_id PK "UniProt accession"
+        string entry_name "UniProt entry name"
+        string protein_name "Full protein name"
+        string organism "Source organism"
+        int tax_id "NCBI taxonomy ID"
+        string sequence "Amino acid sequence"
+        int sequence_length "Sequence length"
+        json features "Protein features"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    Compound {
+        string compound_id PK "PubChem CID"
+        string iupac_name "IUPAC name"
+        string canonical_smiles "Canonical SMILES"
+        string isomeric_smiles "Isomeric SMILES"
+        string inchi "InChI string"
+        string inchikey "InChIKey"
+        float molecular_weight "Molecular weight"
+        string molecular_formula "Chemical formula"
+        float xlogp "Calculated LogP"
+        int h_bond_donor_count "H-bond donors"
+        int h_bond_acceptor_count "H-bond acceptors"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }
+
+    Publication {
+        string pubmed_id PK "PubMed ID"
+        string title "Article title"
+        string abstract "Abstract text"
+        json authors "Author list"
+        string journal "Journal name"
+        string publication_date "Publication date"
+        string doi "DOI"
+        json mesh_terms "MeSH terms"
+        json keywords "Keywords"
+        string _content_hash "SHA256 hash"
+        uuid _run_id "Pipeline run ID"
+        timestamp _ingestion_ts "Ingestion timestamp"
+    }

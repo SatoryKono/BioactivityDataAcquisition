@@ -1,0 +1,87 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+sequenceDiagram
+    autonumber
+    participant CLI
+    participant Bootstrap as bootstrap_pipeline()
+    participant Runner as PipelineRunner
+    participant Lock as LockManager
+    participant Heartbeat as HeartbeatTask
+    participant Preflight as PreflightService
+    participant Executor as PipelineExecutor
+    participant Adapter as DataSourceAdapter
+    participant Processor as RecordProcessor
+    participant Bronze as BronzeWriter
+    participant Silver as DeltaWriter
+    participant Gold as GoldWriter
+    participant Postrun as PostrunService
+    participant Checkpoint as CheckpointManager
+
+    CLI->>Bootstrap: run(pipeline_name, config)
+    Bootstrap->>Runner: create(services, config)
+
+    rect rgb(240, 248, 255)
+        Note over Runner,Lock: Phase 1: Lock Acquisition
+        Runner->>Lock: acquire_lock(resource, owner_id, ttl=90s)
+        Lock-->>Runner: LockResult(acquired=true)
+        Runner->>Heartbeat: start(interval=30s)
+        activate Heartbeat
+    end
+
+    rect rgb(255, 250, 240)
+        Note over Runner,Preflight: Phase 2: Preflight Checks
+        Runner->>Preflight: run_checks()
+        Preflight->>Adapter: health_check()
+        Adapter-->>Preflight: HealthStatus.HEALTHY
+        Preflight-->>Runner: PreflightResult(passed=true)
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Runner,Gold: Phase 3: ETL Execution
+        Runner->>Executor: execute(pipeline)
+
+        loop For each batch
+            Executor->>Adapter: fetch(query)
+            Adapter-->>Executor: AsyncIterator[BronzeRecord]
+
+            Executor->>Processor: process_batch(records)
+            Processor->>Bronze: write_batch(records)
+            Bronze-->>Processor: BronzeWriteResult
+
+            Processor->>Processor: transform(records)
+            Note right of Processor: normalize_values()<br/>compute_content_hash()<br/>add_metadata()
+
+            Processor->>Silver: merge(records, primary_key)
+            Silver->>Lock: validate_owner()
+            Lock-->>Silver: valid
+            Silver-->>Processor: WriteResult
+
+            Processor->>Gold: write_gold(records, schema)
+            Gold->>Lock: validate_owner()
+            Lock-->>Gold: valid
+            Gold-->>Processor: WriteResult
+
+            Processor-->>Executor: BatchResult
+
+            Note over Heartbeat: Every 30s
+            Heartbeat->>Lock: heartbeat()
+            Lock-->>Heartbeat: TTL refreshed
+        end
+
+        Executor-->>Runner: ExecutionResult
+    end
+
+    rect rgb(255, 240, 245)
+        Note over Runner,Checkpoint: Phase 4: Postrun & Cleanup
+        Runner->>Postrun: run_checks(metrics)
+        Note right of Postrun: DQ threshold validation<br/>dq_soft_threshold_exceeded metric
+        Postrun-->>Runner: PostrunResult
+
+        Runner->>Checkpoint: delete(pipeline_name)
+        Checkpoint-->>Runner: deleted
+
+        Runner->>Lock: release_lock()
+        deactivate Heartbeat
+        Lock-->>Runner: released
+    end
+
+    Runner-->>CLI: RunResult(success=true, metrics)

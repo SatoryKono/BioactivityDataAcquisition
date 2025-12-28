@@ -38,7 +38,7 @@ install: ## Create venv and install dependencies
 
 test: ## Run unit and integration tests
 	@echo "$(BLUE)Running tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html
+	$(VENV_PYTHON) -m pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85
 
 test-unit: ## Run only unit tests (fast, no I/O)
 	@echo "$(BLUE)Running unit tests...$(NC)"

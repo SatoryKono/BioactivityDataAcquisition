@@ -1,0 +1,99 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+sequenceDiagram
+    autonumber
+    participant Processor as RecordProcessor
+    participant Writer as DeltaWriter
+    participant Lock as LockPort
+    participant Arrow as PyArrow
+    participant Delta as deltalake (Rust)
+    participant Storage as Local FS
+    participant Metrics as MetricsPort
+
+    Note over Processor,Writer: Phase 1: Pre-Write Lock Validation
+
+    Processor->>Writer: merge(records, table="silver/chembl/activity", primary_key=["content_hash"])
+    activate Writer
+
+    Writer->>Lock: validate_owner(key="lock:chembl_activity", owner_id)
+    Lock-->>Writer: True (valid)
+
+    Note over Writer,Arrow: Phase 2: Convert to Arrow
+
+    Writer->>Arrow: to_arrow_table(records)
+    activate Arrow
+    Note right of Arrow: Schema inference<br/>Type mapping:<br/>• str → utf8<br/>• int → int64<br/>• float → float64<br/>• datetime → timestamp
+    Arrow-->>Writer: pa.Table
+    deactivate Arrow
+
+    Note over Writer,Delta: Phase 3: Open Delta Table
+
+    Writer->>Delta: open_table(path)
+    activate Delta
+    Delta->>Storage: read _delta_log/
+    Storage-->>Delta: Transaction log entries
+    Delta-->>Writer: DeltaTable(version=N)
+    deactivate Delta
+
+    Note over Writer,Delta: Phase 4: Execute Merge Operation
+
+    alt mode == "merge" (SilverWriteMode.MERGE)
+        Writer->>Delta: merge(source=table, target=path, predicate="content_hash")
+        activate Delta
+        Note right of Delta: MERGE INTO target<br/>USING source<br/>ON source.content_hash = target.content_hash<br/>WHEN MATCHED THEN UPDATE SET *<br/>WHEN NOT MATCHED THEN INSERT *
+
+        Delta->>Delta: Compute diff
+        Note right of Delta: Identify:<br/>• New records (INSERT)<br/>• Changed records (UPDATE)<br/>• Unchanged (skip)
+
+        Delta->>Storage: Write new Parquet files
+        Storage-->>Delta: file_paths
+        Delta->>Storage: Write _delta_log/{version+1}.json
+        Storage-->>Delta: OK
+
+        Delta-->>Writer: MergeResult(inserted, updated, deleted)
+        deactivate Delta
+
+    else mode == "append" (SilverWriteMode.APPEND)
+        Writer->>Delta: write_deltalake(table, mode="append")
+        activate Delta
+        Delta->>Storage: Write Parquet files
+        Storage-->>Delta: file_paths
+        Delta->>Storage: Write _delta_log/{version+1}.json
+        Delta-->>Writer: WriteResult(rows_inserted)
+        deactivate Delta
+
+    else mode == "overwrite" (SilverWriteMode.DELETE)
+        Writer->>Delta: write_deltalake(table, mode="overwrite")
+        activate Delta
+        Delta->>Storage: Write new Parquet files
+        Delta->>Storage: Write _delta_log with tombstones
+        Delta-->>Writer: WriteResult(rows_inserted)
+        deactivate Delta
+    end
+
+    Note over Writer,Lock: Phase 5: Post-Write Lock Validation
+
+    Writer->>Lock: validate_owner(key="lock:chembl_activity", owner_id)
+    Lock-->>Writer: True (still valid)
+
+    Note right of Writer: Safety Guard Pattern:<br/>If lock lost during write,<br/>another process may have<br/>written conflicting data.<br/>This check ensures consistency.
+
+    Note over Writer,Metrics: Phase 6: Emit Metrics
+
+    Writer->>Metrics: observe_histogram("silver_write_duration_ms", duration)
+    Writer->>Metrics: increment_counter("silver_records_written", count)
+    Writer->>Metrics: set_gauge("silver_table_version", version)
+
+    Writer-->>Processor: WriteResult
+    deactivate Writer
+
+    Note over Processor: WriteResult contains:<br/>• success: bool<br/>• records_written: int<br/>• version: int<br/>• files_added: list[str]<br/>• merge_stats: MergeStats
+
+    rect rgb(255, 250, 205)
+        Note over Writer,Delta: ACID Properties
+        Note right of Delta: Delta Lake guarantees:<br/>• Atomicity: All-or-nothing writes<br/>• Consistency: Schema enforcement<br/>• Isolation: Optimistic concurrency<br/>• Durability: Transaction log
+    end
+
+    rect rgb(255, 240, 245)
+        Note over Writer: Error Handling
+        Note right of Writer: On lock validation failure:<br/>1. Abort transaction<br/>2. Raise LockNotHeldError<br/>3. DO NOT commit partial writes
+    end
