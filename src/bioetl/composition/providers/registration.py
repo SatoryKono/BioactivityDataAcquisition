@@ -25,6 +25,7 @@ from bioetl.composition.providers.provider_registry import (
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.gtopdb.client import GtopdbAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
@@ -247,6 +248,25 @@ def _create_pubmed_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_gtopdb_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create GtoPdb data source with optional CSV filtering."""
+    DataSourceFactory, HttpClientFactory = _get_factories()
+    http_client = HttpClientFactory.create_for_provider("gtopdb", settings)
+    base_adapter = DataSourceFactory.create(
+        "gtopdb", http_client=http_client, logger=logger
+    )
+    return _wrap_with_filter(
+        base_adapter, filter_config, logger, metrics, pipeline_name
+    )
+
+
 # =============================================================================
 # Provider registration
 # =============================================================================
@@ -333,5 +353,21 @@ def register_all_providers() -> None:
                 requires_logger=True,
                 custom_creator=_create_pubmed_adapter,
                 data_source_creator=_create_pubmed_data_source,
+            ),
+        )
+
+    # GtoPdb - async HTTP adapter (conservative rate limit, public API)
+    if not ProviderRegistry.is_registered("gtopdb"):
+        ProviderRegistry.register(
+            "gtopdb",
+            ProviderConfig(
+                adapter_class=GtopdbAdapter,
+                http_config=HttpConfig(
+                    rate=1.0,  # Conservative rate limit
+                    capacity=5,
+                ),
+                requires_http_client=True,
+                requires_logger=True,
+                data_source_creator=_create_gtopdb_data_source,
             ),
         )
