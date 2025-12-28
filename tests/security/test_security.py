@@ -264,16 +264,29 @@ class TestPIIHandling:
 
     IMPORTANT: Known False Positives (NOT actual PII):
     -------------------------------------------------
-    - `email` in config.py and pubmed_client.py: This is a technical API identifier
-      required by NCBI E-utilities for tool identification, NOT user personal data.
-      NCBI mandates this for rate limiting and contact purposes.
+    - `email` in config.py, pubmed_client.py, pipeline_config.py, client.py:
+      These are technical API identifiers required by NCBI E-utilities for
+      tool identification, NOT user personal data. NCBI mandates this for
+      rate limiting and contact purposes.
       See: https://www.ncbi.nlm.nih.gov/books/NBK25497/
+
+    - `issn` (matched by `ssn` pattern): ISSN is International Standard Serial
+      Number for journals, NOT Social Security Number.
 
     This test uses pytest.skip() (not assert fail) because:
     1. Pattern matching may catch false positives like API identifiers
     2. Some fields may be intentionally excluded from Silver layer
     3. Manual review is needed to distinguish real PII from technical identifiers
     """
+
+    # Files with known technical email usage (NOT user PII)
+    # These are API identifiers required by external services
+    KNOWN_TECHNICAL_EMAIL_FILES = frozenset({
+        "config.py",              # NCBI API tool identification (default_email)
+        "pubmed_client.py",       # NCBI API tool identification
+        "pipeline_config.py",     # NCBI API source config
+        "client.py",              # User-Agent header identification
+    })
 
     def test_silver_layer_uses_hashing(self) -> None:
         """Verify Silver layer transformers use hashing for PII fields.
@@ -288,24 +301,33 @@ class TestPIIHandling:
         application_files = list((SRC_DIR / "application").rglob("*.py"))
 
         all_files = infrastructure_files + application_files
+
+        # PII patterns with more precise matching:
+        # - Use word boundaries to avoid false positives like issn -> ssn
+        # - email pattern excludes known technical API identifier files
         pii_patterns = [
-            r"email",
-            r"phone",
-            r"address",
-            r"ssn",
-            r"social_security",
+            (r"\bemail\b", "email"),
+            (r"\bphone\b", "phone"),
+            (r"\baddress\b", "address"),
+            # Use word boundary to avoid matching 'issn' (International Standard Serial Number)
+            (r"\bssn\b", "ssn"),
+            (r"\bsocial_security\b", "social_security"),
         ]
 
         files_with_pii = []
         for py_file in all_files:
             content = py_file.read_text(encoding="utf-8")
-            for pattern in pii_patterns:
-                if re.search(pattern, content, re.IGNORECASE):
+            for regex_pattern, pattern_name in pii_patterns:
+                if re.search(regex_pattern, content, re.IGNORECASE):
+                    # Skip known technical email files (documented as NOT PII)
+                    if pattern_name == "email" and py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
+                        continue
+
                     # Check if sha256 or hashing is mentioned nearby
                     if not re.search(r"sha256|hash|anonymize", content, re.IGNORECASE):
                         rel_path = py_file.relative_to(PROJECT_ROOT)
                         files_with_pii.append(
-                            f"{rel_path}: PII field '{pattern}' without hashing"
+                            f"{rel_path}: PII field '{pattern_name}' without hashing"
                         )
 
         # This is informational - PII fields without explicit hashing may be OK
