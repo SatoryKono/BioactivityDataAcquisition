@@ -135,7 +135,7 @@ PubChem provides chemical compound data.
 
 ### Compound Transformer
 
-::: bioetl.application.pipelines.pubchem.transformer.PubChemTransformer
+::: bioetl.application.pipelines.pubchem.transformer.PubChemCompoundTransformer
     options:
         show_root_heading: true
         show_source: false
