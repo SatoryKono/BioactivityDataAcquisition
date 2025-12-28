@@ -323,7 +323,8 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 ### 3.3. Конкурентность и Блокировки
 
-> **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
+> **CRITICAL: Local-Only Deployment & Redis Lock REJECTION**
+> См. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)
 
 #### Strict Single Instance Policy (Local-Only)
 **ЗАПРЕЩЕНО** запускать несколько экземпляров одного пайплайна. Система разработана как **Single Instance Application**.
@@ -338,13 +339,13 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`
 - **Lock Max Duration**: **4 часа**. Принудительное снятие по истечении.
 
-#### Распределённое развёртывание (Deferred)
+#### Распределённое развёртывание (REJECTED)
 
-> **Status: Deferred** — см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)
->
-> При необходимости распределённого развёртывания можно реализовать `RedisLockAdapter`
-> на основе спецификации ADR-003. Hexagonal-архитектура позволяет добавить адаптер
-> без изменения domain/application слоёв.
+> **Status: REJECTED** — см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)
+
+**ОТКАЗ ОТ REDIS LOCK**: Использование `RedisLockAdapter` и распределенных блокировок **ЗАПРЕЩЕНО**.
+Архитектура проекта строго ограничена Local-Only Deployment. Любые попытки внедрить распределенные блокировки
+будут отклонены как нарушение архитектурного стандарта (ADR-010).
 
 **Invariant** (применимо ко всем вариантам развёртывания):
 - Потеря блокировки = Потеря права на запись.

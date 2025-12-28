@@ -204,7 +204,10 @@ Access the docs at `http://localhost:8000`.
 └── README.md                 # Project documentation
 ```
 
-## 🐳 Legacy Distributed Mode (Optional)
+## 🐳 Legacy Distributed Mode (REJECTED / UNSUPPORTED)
+
+> **CRITICAL WARNING**: Distributed deployment and Redis Locking are **STRICTLY PROHIBITED** by [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md).
+> The instructions below are for historical reference only and must NOT be used for new deployments.
 
 For distributed deployments with Redis locking and S3-compatible storage, you can use Docker Compose:
 
@@ -219,7 +222,7 @@ make test-e2e
 make docker-down
 ```
 
-> **Note**: This mode is deprecated for local development. See [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) for the rationale behind the Local-Only architecture.
+> **Decision**: We have officially abandoned Redis Locks in favor of a strictly Local-Only architecture.
 
 ## 🔒 Security
 
