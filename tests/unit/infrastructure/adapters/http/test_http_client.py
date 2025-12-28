@@ -557,11 +557,11 @@ class TestUnifiedHTTPClientRequestMethods:
         self, http_client, mock_circuit_breaker
     ):
         """Test retryable status code triggers retry."""
-        mock_response_503 = MagicMock()
+        mock_response_503 = MagicMock(spec=httpx.Response)
         mock_response_503.status_code = 503
         mock_response_503.headers = {}
 
-        mock_response_200 = MagicMock()
+        mock_response_200 = MagicMock(spec=httpx.Response)
         mock_response_200.status_code = 200
         mock_response_200.raise_for_status = MagicMock()
 
