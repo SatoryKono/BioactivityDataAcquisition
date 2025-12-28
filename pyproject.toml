@@ -118,6 +118,7 @@ markers = [
     "security: Security tests",
     "vcr: VCR.py recorded HTTP interactions",
     "performance: Performance regression tests (optional CI stage)",
+    "asyncio: AsyncIO-based tests",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
@@ -129,7 +130,7 @@ filterwarnings = [
     # Pytest cleanup warnings (sockets/event loops not closed during teardown)
     "ignore::pytest.PytestUnraisableExceptionWarning",
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
-    "ignore:Benchmarks are automatically disabled:pytest_benchmark.logger.PytestBenchmarkWarning",
+    "ignore:Benchmarks are automatically disabled::",
 ]
 
 # ============ COVERAGE ============
