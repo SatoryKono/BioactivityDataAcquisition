@@ -199,13 +199,21 @@ class PubChemAdapter(BaseSyncAdapter):
         Returns:
             Dictionary with compound data
 
+        Note:
+            Uses connectivity_smiles and smiles properties instead of deprecated
+            canonical_smiles and isomeric_smiles (deprecated in pubchempy 1.0.5).
+            Output keys remain canonical_smiles/isomeric_smiles for backward
+            compatibility with domain entities and schemas.
+
         """
         return {
             "cid": compound.cid,
             "molecular_formula": compound.molecular_formula,
             "molecular_weight": compound.molecular_weight,
-            "canonical_smiles": compound.canonical_smiles,
-            "isomeric_smiles": compound.isomeric_smiles,
+            # Use connectivity_smiles (replaces deprecated canonical_smiles)
+            "canonical_smiles": compound.connectivity_smiles,
+            # Use smiles (replaces deprecated isomeric_smiles)
+            "isomeric_smiles": compound.smiles,
             "inchi": compound.inchi,
             "inchikey": compound.inchikey,
             "iupac_name": compound.iupac_name,
