@@ -41,6 +41,14 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     molecular_formula: Series[str] = pa.Field(nullable=True)
     molecular_weight: Series[str] = pa.Field(nullable=True)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
+    isomeric_smiles: Series[str] = pa.Field(nullable=True)
+    inchi: Series[str] = pa.Field(nullable=True)
+    inchikey: Series[str] = pa.Field(nullable=True)
+    iupac_name: Series[str] = pa.Field(nullable=True)
+
+    # Metadata (use alias for underscore-prefixed columns)
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 
     # Metadata (use alias for underscore-prefixed columns)
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
