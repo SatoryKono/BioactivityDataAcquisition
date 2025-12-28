@@ -7,7 +7,7 @@ import contextlib
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.locking import LockContext
+from bioetl.domain.locking import LockContext, LockContextHolder
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:

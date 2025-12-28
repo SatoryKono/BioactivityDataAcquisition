@@ -4,6 +4,7 @@ Implements RULES.md §3.3 - Writers MUST verify lock held before write.
 
 This module provides:
 - LockContext: Immutable value object representing a held lock
+- LockContextHolder: Mutable holder for sharing lock context between components
 - LockNotHeldError: Exception raised when write attempted without lock
 """
 
@@ -121,3 +122,55 @@ class LockContext:
         exclusive_key = f"lock:{table_name}:exclusive"
 
         return self.key in (expected_key, exclusive_key)
+
+
+class LockContextHolder:
+    """Mutable holder for sharing lock context between components.
+
+    Used to pass lock context from LockManager (which acquires lock)
+    to writers (which need to verify lock is held).
+
+    Thread-safe for single-writer, multiple-reader scenarios.
+
+    Example:
+        >>> holder = LockContextHolder()
+        >>> # LockManager sets context after acquiring lock
+        >>> holder.set(LockContext.create("chembl", "activity", run_id))
+        >>> # Writers retrieve context when writing
+        >>> context = holder.get()
+        >>> if context:
+        ...     writer.write_bronze(..., lock_context=context)
+    """
+
+    __slots__ = ("_context",)
+
+    def __init__(self) -> None:
+        """Initialize with no lock context."""
+        self._context: LockContext | None = None
+
+    def set(self, context: LockContext) -> None:
+        """Set the current lock context.
+
+        Called by LockManager after successfully acquiring a lock.
+
+        Args:
+            context: The acquired lock context.
+        """
+        self._context = context
+
+    def get(self) -> LockContext | None:
+        """Get the current lock context.
+
+        Called by writers to verify lock is held.
+
+        Returns:
+            Current LockContext if lock is held, None otherwise.
+        """
+        return self._context
+
+    def clear(self) -> None:
+        """Clear the lock context.
+
+        Called by LockManager after releasing the lock.
+        """
+        self._context = None
