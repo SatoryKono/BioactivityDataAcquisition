@@ -68,6 +68,7 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
 
 
 @pytest.mark.e2e
+@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_pipeline_idempotency(e2e_data_dir: Path):
     """E2E: Pipeline runs are idempotent.
@@ -101,6 +102,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
 
 
 @pytest.mark.e2e
+@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     """E2E: Pipeline can resume from checkpoint.
