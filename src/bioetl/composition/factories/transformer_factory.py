@@ -122,6 +122,9 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.pubmed.transformer import (
         PubMedPublicationTransformer,
     )
+    from bioetl.application.pipelines.semantic_scholar.transformer import (
+        S2PublicationTransformer,
+    )
     from bioetl.application.pipelines.uniprot.transformer import (
         UniProtProteinTransformer,
     )
@@ -142,6 +145,9 @@ def register_all_transformers() -> None:
 
     # PubMed transformers
     register_transformer("pubmed", "publications", PubMedPublicationTransformer)
+
+    # Semantic Scholar transformers
+    register_transformer("semantic_scholar", "paper", S2PublicationTransformer)
 
 
 __all__ = [

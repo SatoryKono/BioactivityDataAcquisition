@@ -33,6 +33,9 @@ from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
     PubMedAdapter,
     _create_pubmed_adapter,
 )
+from bioetl.infrastructure.adapters.semantic_scholar.client import (
+    SemanticScholarAdapter,
+)
 from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
 if TYPE_CHECKING:
@@ -247,6 +250,105 @@ def _create_pubmed_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_semantic_scholar_adapter(
+    http_client: UnifiedHTTPClient | None = None,
+    logger: LoggerPort | None = None,
+    settings: Settings | None = None,
+    **kwargs: Any,
+) -> DataSourcePort:
+    """Create Semantic Scholar adapter with all dependencies injected.
+
+    This is the custom_creator for Semantic Scholar that creates all dependencies
+    in the Composition Root before creating the adapter.
+
+    Args:
+        http_client: Not used for Semantic Scholar (uses semanticscholar SDK).
+        logger: LoggerPort instance for structured logging.
+        settings: Application settings.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Configured SemanticScholarAdapter instance.
+
+    Raises:
+        ValueError: If logger is not provided.
+    """
+    if logger is None:
+        raise ValueError(
+            "Semantic Scholar adapter requires logger but none was provided. "
+            "Ensure logger is passed from Composition Root."
+        )
+
+    # Get configuration parameters
+    # Rate limit: 100 req/5min = ~0.33 req/sec without API key
+    rate = kwargs.pop("rate", 0.33)
+    capacity = kwargs.pop("capacity", 10)
+    circuit_breaker_threshold = kwargs.pop("circuit_breaker_threshold", 5)
+    circuit_breaker_timeout = kwargs.pop("circuit_breaker_timeout", 300)
+    max_workers = kwargs.pop("max_workers", 4)
+    strict_error_handling = kwargs.pop("strict_error_handling", False)
+    metrics = kwargs.pop("metrics", None)
+    api_key = kwargs.pop("api_key", None)
+    include_embedding = kwargs.pop("include_embedding", False)
+
+    # Create dependencies in Composition Root (DI pattern)
+    rate_limiter = TokenBucket(
+        rate=rate, capacity=capacity, provider="semantic_scholar"
+    )
+    circuit_breaker = CircuitBreaker(
+        provider="semantic_scholar",
+        failure_threshold=circuit_breaker_threshold,
+        recovery_timeout=circuit_breaker_timeout,
+        metrics=metrics,
+    )
+    thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+
+    # Create adapter with injected dependencies
+    return SemanticScholarAdapter(
+        logger=logger,
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        thread_pool=thread_pool,
+        api_key=api_key,
+        include_embedding=include_embedding,
+        strict_error_handling=strict_error_handling,
+        metrics=metrics,
+    )
+
+
+def _create_semantic_scholar_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create Semantic Scholar data source with optional CSV filtering."""
+    # Get API key from config or settings
+    api_key = pipeline_config.source.api_key or (
+        settings.semantic_scholar_api_key.get_secret_value()
+        if hasattr(settings, "semantic_scholar_api_key")
+        and settings.semantic_scholar_api_key
+        else None
+    )
+
+    # Higher rate with API key: 1 req/sec
+    rate = 1.0 if api_key else 0.33
+
+    # Create adapter via custom creator with all dependencies injected
+    data_source = _create_semantic_scholar_adapter(
+        http_client=None,
+        logger=logger,
+        settings=settings,
+        rate=rate,
+        api_key=api_key,
+        include_embedding=True,  # Include embeddings for enrichment
+        strict_error_handling=settings.strict_error_handling,
+    )
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
+
+
 # =============================================================================
 # Provider registration
 # =============================================================================
@@ -263,6 +365,7 @@ def register_all_providers() -> None:
     - PubChem: 5 req/sec, capacity 10 (sync via ThreadPoolExecutor)
     - UniProt: 10 req/sec, 100 with API key, capacity 20 (async HTTP client)
     - PubMed: 3 req/sec, 10 with API key, capacity 6 (async HTTP client)
+    - Semantic Scholar: 0.33 req/sec, 1 with API key, capacity 10 (sync via ThreadPool)
 
     Each provider now includes a data_source_creator for unified registry access.
     """
@@ -333,5 +436,25 @@ def register_all_providers() -> None:
                 requires_logger=True,
                 custom_creator=_create_pubmed_adapter,
                 data_source_creator=_create_pubmed_data_source,
+            ),
+        )
+
+    # Semantic Scholar - sync adapter with DI-compliant custom creator
+    # Uses semanticscholar SDK (sync), wrapped via ThreadPoolExecutor
+    # Rate limit: 100 req/5min (~0.33 req/sec) without API key, 1 req/sec with key
+    if not ProviderRegistry.is_registered("semantic_scholar"):
+        ProviderRegistry.register(
+            "semantic_scholar",
+            ProviderConfig(
+                adapter_class=SemanticScholarAdapter,
+                http_config=HttpConfig(
+                    rate=0.33,  # 100 req/5min without key
+                    capacity=10,
+                    rate_overrides={"semantic_scholar_api_key": 1.0},
+                ),
+                requires_http_client=False,
+                requires_logger=True,
+                custom_creator=_create_semantic_scholar_adapter,
+                data_source_creator=_create_semantic_scholar_data_source,
             ),
         )

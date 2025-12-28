@@ -30,6 +30,7 @@ from bioetl.domain.entities.chembl_structures import (
 )
 from bioetl.domain.entities.pubchem import Compound
 from bioetl.domain.entities.pubmed import Publication
+from bioetl.domain.entities.semantic_scholar import SemanticScholarPaper
 from bioetl.domain.entities.uniprot import Protein
 
 __all__ = [
@@ -42,6 +43,7 @@ __all__ = [
     "Protein",
     "Publication",
     "RequiredEntityFields",
+    "SemanticScholarPaper",
     "Target",
     "TargetComponent",
 ]
