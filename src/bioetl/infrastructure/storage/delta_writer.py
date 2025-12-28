@@ -539,7 +539,14 @@ class DeltaWriter:
 
             if self.csv_exporter:
                 csv_append = mode != "delete"
-                await self.csv_exporter.export(table_name, arrow_data, append=csv_append)
+                # Pass primary_keys to CSV exporter for deduplication if mode is merge
+                csv_primary_keys = primary_keys if validated_mode == SilverWriteMode.MERGE else None
+                await self.csv_exporter.export(
+                    table_name,
+                    arrow_data,
+                    append=csv_append,
+                    primary_keys=csv_primary_keys
+                )
 
             # Log audit entry for write operation
             if self._audit and records:
