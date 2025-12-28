@@ -412,8 +412,17 @@ class TestGoldMethods:
     def test_transform_for_gold_removes_excluded_fields(
         self, mock_context: PipelineContext
     ) -> None:
-        """Test transform_for_gold removes defined excluded fields."""
-        transformer = ConcreteTransformer(provider="test")
+        """Test transform_for_gold removes defined excluded fields.
+
+        Note: BaseTransformer.GOLD_EXCLUDE_FIELDS is empty by default.
+        Column filtering now happens in BatchWriter.write_gold() based on Gold schema.
+        This test uses a custom transformer with GOLD_EXCLUDE_FIELDS to test the behavior.
+        """
+
+        class TransformerWithExclusions(ConcreteTransformer):
+            GOLD_EXCLUDE_FIELDS = frozenset({"content_hash", "molecule_properties"})
+
+        transformer = TransformerWithExclusions(provider="test")
         silver_record = {
             "valid_field": "keep_me",
             "content_hash": "remove_me",

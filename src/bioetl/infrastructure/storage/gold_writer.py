@@ -438,19 +438,24 @@ class GoldWriter:
         if primary_keys:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
 
+        # UPDATED: Use schema_mode="overwrite" if mode is "overwrite" to allow schema evolution
+        schema_mode = "overwrite" if mode == "overwrite" else None
+
         for attempt in range(3):
             try:
                 await self._run_in_executor(
                     lambda table_or_uri=table_path,
                     data=arrow_data,
                     mode=mode,
-                    partition_by=partition_cols: write_deltalake(
+                    partition_by=partition_cols,
+                    schema_mode=schema_mode: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
                         ),
                         mode=mode,
                         partition_by=partition_by,
+                        schema_mode=schema_mode,
                     )
                 )
                 break
