@@ -216,6 +216,7 @@ class BatchWriter:
                 schema=self._silver_schema,
                 mode=silver_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
+                lock_context=self._get_lock_context(),
             )
             self._end_span(span)
         except Exception as e:
@@ -275,6 +276,7 @@ class BatchWriter:
                 mode=gold_mode,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
+                lock_context=self._get_lock_context(),
             )
             self._end_span(span)
         except Exception as e:

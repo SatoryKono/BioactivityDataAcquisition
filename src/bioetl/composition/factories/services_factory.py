@@ -25,6 +25,7 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.domain.locking import LockContextHolder
 
 # Re-export RunnerServices from application layer for backwards compatibility
 from bioetl.application.core.runner_services import RunnerServices
