@@ -240,11 +240,14 @@ class BatchWriter:
 
         try:
             gold_schema = self._config.gold_schema
-            # UPDATED: Removed column filtering to ensure identical columns in Silver and Gold.
-            # Previously: schema_columns = self._get_schema_columns(gold_schema)
-            # Previously: records = [{k: r[k] for k in schema_columns if k in r} for r in records]
-            # Now we pass all columns from Silver (minus GOLD_EXCLUDE_FIELDS which is empty).
-            # This relies on gold_schema validation being non-strict or matching Silver schema.
+
+            # Filter records to only include columns defined in Gold schema
+            # This ensures strict schema validation passes (REQ-DATA-009)
+            schema_columns = self._get_schema_columns(gold_schema)
+            if schema_columns:
+                records = [
+                    {k: r[k] for k in schema_columns if k in r} for r in records
+                ]
 
             # Validate Gold records
             result = self._gold_validator.validate(records)
