@@ -14,7 +14,7 @@ flowchart LR
     subgraph Transform["BaseTransformer"]
         T1[_transform_impl]
         T2[entity_to_silver_record]
-        T3[to_gold_record]
+        T3[transform_for_gold]
     end
 
     Bronze --> T1
@@ -40,7 +40,8 @@ Abstract base class implementing Template Method pattern for transformations.
             - compute_content_hash
             - serialize_json
             - entity_to_silver_record
-            - to_gold_record
+            - transform_for_gold
+            - should_write_gold
             - GOLD_EXCLUDE_FIELDS
 
 ### TransformationError
@@ -176,24 +177,20 @@ The `BaseTransformer` implements Template Method for consistent transformation:
 class BaseTransformer(ABC):
     """Template Method pattern for transformations."""
 
-    def transform(self, record: BronzeRecord) -> SilverRecord | None:
+    async def transform(self, context: PipelineContext, record: BronzeRecord) -> SilverRecord | None:
         """Template method - fixed algorithm structure."""
         try:
             # 1. Abstract hook - implemented by subclasses
-            entity = self._transform_impl(record)
-            if entity is None:
-                return None
-
-            # 2. Convert entity to Silver record (fixed step)
-            return self.entity_to_silver_record(entity)
+            silver_record = await self._transform_impl(context, record)
+            return silver_record
 
         except TransformationError as e:
-            # 3. Handle errors uniformly (fixed step)
+            # 2. Handle errors uniformly (fixed step)
             self._log_transformation_error(e)
             return None
 
     @abstractmethod
-    def _transform_impl(self, record: BronzeRecord) -> BaseEntity | None:
+    async def _transform_impl(self, context: PipelineContext, record: BronzeRecord) -> SilverRecord | None:
         """Abstract hook - subclasses implement entity-specific logic."""
         ...
 ```
@@ -207,21 +204,25 @@ from bioetl.domain.entities import Activity
 class ActivityTransformer(BaseTransformer):
     """Transform ChEMBL activity records."""
 
-    def _transform_impl(self, record: dict) -> Activity | None:
+    async def _transform_impl(self, context: PipelineContext, record: dict) -> SilverRecord | None:
         # Extract required fields
         activity_id = self._get_required_field(record, "activity_id")
         molecule_id = self._get_required_field(record, "molecule_chembl_id")
 
         # Create entity with lineage
-        return self._create_entity(
+        entity = self._create_entity(
             Activity,
+            context,
             entity_id=str(activity_id),
+            content_hash=self.compute_content_hash(record),
             activity_id=activity_id,
             molecule_chembl_id=molecule_id,
             standard_type=record.get("standard_type"),
             standard_value=record.get("standard_value"),
             standard_units=record.get("standard_units"),
         )
+        
+        return self.entity_to_silver_record(entity)
 ```
 
 ## Content Hash Generation
@@ -230,7 +231,7 @@ Content hash ensures record deduplication:
 
 ```python
 # Hash computed from canonical JSON representation
-hash = compute_content_hash(provider="chembl", record=record)
+hash = compute_content_hash(business_data, exclude_none=True)
 
 # Normalization rules:
 # - NaN/Inf → null

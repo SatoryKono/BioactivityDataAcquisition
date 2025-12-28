@@ -27,11 +27,19 @@ classDiagram
     RecoverableError <|-- ApiError
     RecoverableError <|-- CircuitBreakerOpenError
     RecoverableError <|-- RetryExhaustedError
+    RecoverableError <|-- StorageError
+
+    StorageError <|-- BucketNotFoundError
+    StorageError <|-- UploadError
+    StorageError <|-- TableNotFoundError
+    StorageError <|-- SchemaEvolutionError
+    StorageError <|-- BronzeValidationError
 
     DataQualityError <|-- SchemaViolationError
     DataQualityError <|-- MissingRequiredFieldError
     DataQualityError <|-- InvalidDataFormatError
-    DataQualityError <|-- DataQualityThresholdError
+    
+    BioETLError <|-- DataQualityThresholdError
 ```
 
 ## Error Classification
