@@ -7,7 +7,14 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.entities import Activity, Compound, Protein
+from bioetl.domain.entities import (
+    Activity,
+    Compound,
+    GtopdbInteraction,
+    GtopdbLigand,
+    GtopdbTarget,
+    Protein,
+)
 from bioetl.domain.types import ContentHash, EntityID, RunType
 
 
@@ -359,3 +366,261 @@ class TestProtein:
         )
         with pytest.raises(AttributeError):
             protein.accession = "P99999"
+
+
+@pytest.mark.unit
+class TestGtopdbTarget:
+    """Tests for GtopdbTarget entity."""
+
+    def test_target_creation_success(self, base_entity_kwargs):
+        """Test successful GtopdbTarget creation."""
+        target = GtopdbTarget(
+            **base_entity_kwargs,
+            target_id=1,
+            name="5-HT1A receptor",
+            abbreviation="5-HT1A",
+            target_type="gpcr",
+            species="Human",
+        )
+        assert target.target_id == 1
+        assert target.name == "5-HT1A receptor"
+        assert target.abbreviation == "5-HT1A"
+        assert target.target_type == "gpcr"
+        assert target.species == "Human"
+
+    def test_target_with_all_optional_fields(self, base_entity_kwargs):
+        """Test GtopdbTarget with all optional fields."""
+        target = GtopdbTarget(
+            **base_entity_kwargs,
+            target_id=42,
+            name="Dopamine D2 receptor",
+            abbreviation="D2",
+            systematic_name="D(2) dopamine receptor",
+            target_type="gpcr",
+            family_id=1,
+            family_name="Dopamine receptors",
+            species="Human",
+            species_id=9606,
+            gene_symbol="DRD2",
+            gene_id=1813,
+            ensembl_gene_id="ENSG00000149295",
+            hgnc_id=3023,
+            hgnc_symbol="DRD2",
+            nomenclature_status="approved",
+        )
+        assert target.gene_symbol == "DRD2"
+        assert target.gene_id == 1813
+        assert target.hgnc_id == 3023
+        assert target.nomenclature_status == "approved"
+
+    def test_target_requires_target_id(self, base_entity_kwargs):
+        """Test that missing target_id raises ValueError."""
+        with pytest.raises(ValueError, match="GtoPdb Target ID is required"):
+            GtopdbTarget(
+                **base_entity_kwargs,
+                target_id=0,  # 0 is falsy
+                name="Test Target",
+            )
+
+    def test_target_minimal_valid(self, base_entity_kwargs):
+        """Test GtopdbTarget with only required field."""
+        target = GtopdbTarget(
+            **base_entity_kwargs,
+            target_id=123,
+        )
+        assert target.target_id == 123
+        assert target.name is None
+        assert target.species is None
+
+    def test_target_is_frozen(self, base_entity_kwargs):
+        """Test that GtopdbTarget is immutable."""
+        target = GtopdbTarget(
+            **base_entity_kwargs,
+            target_id=1,
+            name="Test",
+        )
+        with pytest.raises(AttributeError):
+            target.target_id = 999
+
+
+@pytest.mark.unit
+class TestGtopdbLigand:
+    """Tests for GtopdbLigand entity."""
+
+    def test_ligand_creation_success(self, base_entity_kwargs):
+        """Test successful GtopdbLigand creation."""
+        ligand = GtopdbLigand(
+            **base_entity_kwargs,
+            ligand_id=1,
+            name="aspirin",
+            ligand_type="Synthetic organic",
+            approved=True,
+            smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
+        )
+        assert ligand.ligand_id == 1
+        assert ligand.name == "aspirin"
+        assert ligand.ligand_type == "Synthetic organic"
+        assert ligand.approved is True
+        assert ligand.smiles == "CC(=O)OC1=CC=CC=C1C(=O)O"
+
+    def test_ligand_with_all_optional_fields(self, base_entity_kwargs):
+        """Test GtopdbLigand with all optional fields."""
+        ligand = GtopdbLigand(
+            **base_entity_kwargs,
+            ligand_id=101,
+            name="ibuprofen",
+            ligand_type="Synthetic organic",
+            approved=True,
+            withdrawn=False,
+            labelled=False,
+            radioactive=False,
+            smiles="CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
+            inchi="InChI=1S/C13H18O2/c1-9(2)8-11-4-6-12(7-5-11)10(3)13(14)15",
+            inchi_key="HEFNNWSXXWATRW-UHFFFAOYSA-N",
+            iupac_name="2-(4-isobutylphenyl)propanoic acid",
+            inn="ibuprofen",
+            approved_source="FDA",
+            pubchem_cid=3672,
+            chembl_id="CHEMBL521",
+            drugbank_id="DB01050",
+            cas_number="15687-27-1",
+        )
+        assert ligand.inn == "ibuprofen"
+        assert ligand.pubchem_cid == 3672
+        assert ligand.chembl_id == "CHEMBL521"
+        assert ligand.cas_number == "15687-27-1"
+
+    def test_ligand_requires_ligand_id(self, base_entity_kwargs):
+        """Test that missing ligand_id raises ValueError."""
+        with pytest.raises(ValueError, match="GtoPdb Ligand ID is required"):
+            GtopdbLigand(
+                **base_entity_kwargs,
+                ligand_id=0,  # 0 is falsy
+                name="Test Ligand",
+            )
+
+    def test_ligand_minimal_valid(self, base_entity_kwargs):
+        """Test GtopdbLigand with only required field."""
+        ligand = GtopdbLigand(
+            **base_entity_kwargs,
+            ligand_id=456,
+        )
+        assert ligand.ligand_id == 456
+        assert ligand.name is None
+        assert ligand.smiles is None
+
+    def test_ligand_is_frozen(self, base_entity_kwargs):
+        """Test that GtopdbLigand is immutable."""
+        ligand = GtopdbLigand(
+            **base_entity_kwargs,
+            ligand_id=1,
+            name="Test",
+        )
+        with pytest.raises(AttributeError):
+            ligand.ligand_id = 999
+
+
+@pytest.mark.unit
+class TestGtopdbInteraction:
+    """Tests for GtopdbInteraction entity."""
+
+    def test_interaction_creation_success(self, base_entity_kwargs):
+        """Test successful GtopdbInteraction creation."""
+        interaction = GtopdbInteraction(
+            **base_entity_kwargs,
+            interaction_id=1,
+            target_id=42,
+            ligand_id=101,
+            interaction_type="Agonist",
+            action="Activation",
+            affinity_value=8.5,
+        )
+        assert interaction.interaction_id == 1
+        assert interaction.target_id == 42
+        assert interaction.ligand_id == 101
+        assert interaction.interaction_type == "Agonist"
+        assert interaction.action == "Activation"
+        assert interaction.affinity_value == 8.5
+
+    def test_interaction_with_all_optional_fields(self, base_entity_kwargs):
+        """Test GtopdbInteraction with all optional fields."""
+        interaction = GtopdbInteraction(
+            **base_entity_kwargs,
+            interaction_id=123,
+            target_id=42,
+            ligand_id=101,
+            interaction_type="Antagonist",
+            action="Inhibition",
+            action_comment="Competitive antagonist",
+            selectivity="Selective",
+            affinity_type="pKi",
+            affinity_value=9.2,
+            affinity_low=9.0,
+            affinity_high=9.5,
+            affinity_median=9.2,
+            affinity_units="M",
+            affinity_qualifier="=",
+            species="Human",
+            species_id=9606,
+            endogenous=False,
+            primary_target=True,
+        )
+        assert interaction.selectivity == "Selective"
+        assert interaction.affinity_type == "pKi"
+        assert interaction.affinity_high == 9.5
+        assert interaction.primary_target is True
+
+    def test_interaction_requires_interaction_id(self, base_entity_kwargs):
+        """Test that missing interaction_id raises ValueError."""
+        with pytest.raises(ValueError, match="GtoPdb Interaction ID is required"):
+            GtopdbInteraction(
+                **base_entity_kwargs,
+                interaction_id=0,  # 0 is falsy
+                target_id=42,
+                ligand_id=101,
+            )
+
+    def test_interaction_requires_target_id(self, base_entity_kwargs):
+        """Test that missing target_id raises ValueError."""
+        with pytest.raises(ValueError, match="Target ID is required"):
+            GtopdbInteraction(
+                **base_entity_kwargs,
+                interaction_id=1,
+                target_id=0,  # 0 is falsy
+                ligand_id=101,
+            )
+
+    def test_interaction_requires_ligand_id(self, base_entity_kwargs):
+        """Test that missing ligand_id raises ValueError."""
+        with pytest.raises(ValueError, match="Ligand ID is required"):
+            GtopdbInteraction(
+                **base_entity_kwargs,
+                interaction_id=1,
+                target_id=42,
+                ligand_id=0,  # 0 is falsy
+            )
+
+    def test_interaction_minimal_valid(self, base_entity_kwargs):
+        """Test GtopdbInteraction with only required fields."""
+        interaction = GtopdbInteraction(
+            **base_entity_kwargs,
+            interaction_id=1,
+            target_id=42,
+            ligand_id=101,
+        )
+        assert interaction.interaction_id == 1
+        assert interaction.target_id == 42
+        assert interaction.ligand_id == 101
+        assert interaction.interaction_type is None
+        assert interaction.affinity_value is None
+
+    def test_interaction_is_frozen(self, base_entity_kwargs):
+        """Test that GtopdbInteraction is immutable."""
+        interaction = GtopdbInteraction(
+            **base_entity_kwargs,
+            interaction_id=1,
+            target_id=42,
+            ligand_id=101,
+        )
+        with pytest.raises(AttributeError):
+            interaction.interaction_id = 999
