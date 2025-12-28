@@ -25,7 +25,6 @@ from tests.e2e.conftest import create_test_context
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: Delta Lake Arrow schema compatibility issues")
 class TestChEMBLPipelineE2E:
     """E2E tests for ChEMBL Activity pipeline."""
 
@@ -122,7 +121,6 @@ class TestChEMBLPipelineE2E:
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: PubChem query requirements")
 async def test_pubchem_compound_pipeline(
     e2e_temp_storage,
     e2e_redis_client,
@@ -203,7 +201,6 @@ async def test_pubchem_compound_pipeline(
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: Delta Lake Arrow schema compatibility issues")
 async def test_pipeline_resume_after_failure(
     e2e_temp_storage,
     e2e_redis_client,
@@ -294,7 +291,6 @@ async def test_pipeline_resume_after_failure(
 
 @pytest.mark.e2e
 @pytest.mark.slow
-@pytest.mark.skip(reason="Full pipeline E2E tests require fixing: Delta Lake Arrow schema compatibility issues")
 async def test_pipeline_idempotency(
     e2e_temp_storage,
     e2e_redis_client,

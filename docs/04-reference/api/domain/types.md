@@ -1,182 +1,201 @@
 # Domain Types
 
-Core type definitions, enumerations, and type aliases used throughout BioETL.
+Core domain types and value objects.
 
 ## Identifiers
 
 ### RunID
 
-UUID-based unique identifier for pipeline runs.
+Unique identifier for a pipeline run (UUID).
 
 ::: bioetl.domain.types.RunID
     options:
         show_root_heading: true
         show_source: false
 
+### EntityID
+
+Business key for an entity (e.g., 'CHEMBL123').
+
+::: bioetl.domain.types.EntityID
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ContentHash
+
+SHA256 hash of canonical record representation.
+
+::: bioetl.domain.types.ContentHash
+    options:
+        show_root_heading: true
+        show_source: false
+
 ### BatchID
 
-UUID-based unique identifier for record batches.
+Unique identifier for a data batch.
 
 ::: bioetl.domain.types.BatchID
     options:
         show_root_heading: true
         show_source: false
 
-## Enumerations
+## Enums
 
 ### RunType
 
-Pipeline execution mode.
+Type of pipeline run (incremental, backfill, rebuild).
 
 ::: bioetl.domain.types.RunType
     options:
         show_root_heading: true
-        show_source: true
-        members:
-            - INCREMENTAL
-            - BACKFILL
-            - REBUILD
+        show_source: false
 
-| Value | Description | Lock Type |
-|-------|-------------|-----------|
-| `INCREMENTAL` | Delta updates (production default) | Shared |
-| `BACKFILL` | Historical data loading | Exclusive |
-| `REBUILD` | Full table refresh | Exclusive |
+### DriftLevel
+
+Schema drift severity levels.
+
+::: bioetl.domain.types.DriftLevel
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### HealthStatus
 
-Component health state.
+Provider health status.
 
 ::: bioetl.domain.types.HealthStatus
     options:
         show_root_heading: true
-        show_source: true
-        members:
-            - HEALTHY
-            - DEGRADED
-            - UNHEALTHY
-
-### WriteMode
-
-Silver layer write strategy.
-
-::: bioetl.domain.types.WriteMode
-    options:
-        show_root_heading: true
-        show_source: true
-
-| Value | Description |
-|-------|-------------|
-| `MERGE` | Upsert by primary key (default) |
-| `APPEND` | Append-only |
-| `OVERWRITE` | Replace partition/table |
+        show_source: false
 
 ### CircuitBreakerState
 
-Circuit breaker state machine.
+Circuit breaker state machine states.
 
 ::: bioetl.domain.types.CircuitBreakerState
     options:
         show_root_heading: true
-        show_source: true
-        members:
-            - CLOSED
-            - OPEN
-            - HALF_OPEN
+        show_source: false
 
-## Record Types
+### DataClassification
+
+Data sensitivity classification.
+
+::: bioetl.domain.types.DataClassification
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ErrorType
+
+Error classification for handling strategy.
+
+::: bioetl.domain.types.ErrorType
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DQStatus
+
+Quarantine record status.
+
+::: bioetl.domain.types.DQStatus
+    options:
+        show_root_heading: true
+        show_source: false
+
+### WriteMode
+
+Write mode for data operations.
+
+::: bioetl.domain.medallion.WriteMode
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Records
 
 ### BronzeRecord
 
-Raw record from data source (unprocessed).
+Untyped dictionary representing a raw record.
 
-```python
-BronzeRecord = dict[str, Any]
-```
+::: bioetl.domain.types.BronzeRecord
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### SilverRecord
 
-Normalized record with metadata.
+Normalized record for Silver layer.
 
-```python
-SilverRecord = dict[str, Any]
-# Required fields: _run_id, _run_type, _ingestion_ts, _content_hash
-```
+::: bioetl.domain.types.SilverRecord
+    options:
+        show_root_heading: true
+        show_source: false
 
-### GoldRecord
-
-Validated, analytics-ready record.
-
-```python
-GoldRecord = dict[str, Any]
-# Schema-validated, flattened structure
-```
-
-## Validation Types
+## Reports
 
 ### ValidationResult
 
-Result of schema validation.
+Result of record validation.
 
 ::: bioetl.domain.types.ValidationResult
     options:
         show_root_heading: true
         show_source: false
 
-## Configuration Types
+### ConfigValidationError
 
-### RuntimeConfig
+Single configuration validation error.
 
-Pipeline runtime configuration.
-
-::: bioetl.domain.config.RuntimeConfig
+::: bioetl.domain.types.ConfigValidationError
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - run_type
-            - resume
-            - limit
-            - dry_run
 
-### PipelineConfig
+### ComponentHealthResult
 
-Pipeline-specific configuration.
+Result of a single component health check.
 
-::: bioetl.domain.config.PipelineConfig
+::: bioetl.domain.types.ComponentHealthResult
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - pipeline_name
-            - provider
-            - entity_type
-            - primary_keys
-            - batch_size
+
+### HealthReport
+
+Aggregated health check report.
+
+::: bioetl.domain.types.HealthReport
+    options:
+        show_root_heading: true
+        show_source: false
+
+### PreflightReport
+
+Preflight validation report.
+
+::: bioetl.domain.types.PreflightReport
+    options:
+        show_root_heading: true
+        show_source: false
 
 ## Usage Example
 
 ```python
-from bioetl.domain.types import RunType, HealthStatus, RunID
-from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.types import RunType, HealthStatus
+
+# Using enums
+run_type = RunType.INCREMENTAL
+status = HealthStatus.HEALTHY
+
+# Using NewType
 from uuid import uuid4
-
-# Create runtime configuration
-config = RuntimeConfig(
-    run_type=RunType.INCREMENTAL,
-    resume=True,
-    limit=1000,
-)
-
-# Generate run ID
-run_id: RunID = RunID(uuid4())
-
-# Check health status
-if status == HealthStatus.UNHEALTHY:
-    raise InfrastructureError("Component unhealthy")
+run_id = RunID(uuid4())
 ```
 
 ## See Also
 
-- [Ports](ports.md) - Port interfaces using these types
-- [Entities](entities.md) - Domain entity dataclasses
+- [Entities](entities.md) - Domain entities
+- [Exceptions](exceptions.md) - Domain exceptions
