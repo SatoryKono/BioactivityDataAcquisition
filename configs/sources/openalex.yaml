@@ -1,0 +1,36 @@
+# configs/sources/openalex.yaml
+# Конфигурация источника данных OpenAlex API.
+
+source:
+    type: api
+    load_strategy: full
+    batch_size: 50
+    provider_config:
+        provider: openalex
+        base_url: https://api.openalex.org
+        # Email for polite pool access (10 req/sec)
+        # Set via BIOETL_OPENALEX_EMAIL environment variable
+        mailto: ${BIOETL_OPENALEX_EMAIL}
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        per_page: 200
+        # Cursor-based pagination
+        pagination:
+            type: cursor
+            initial_cursor: "*"
+
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    rate_limit:
+        # Polite pool: 10 req/sec with mailto
+        requests_per_second: 10
+        burst: 20
+
+    health_check:
+        endpoint: /works
+        params:
+            per_page: 1
+        timeout: 5
