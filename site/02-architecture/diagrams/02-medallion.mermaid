@@ -1,0 +1,30 @@
+graph TD
+    subgraph Bronze["Bronze Layer"]
+        B1[Raw Data - JSONL + Zstandard]
+        B2[Append-Only]
+        B3[Retention: 90 days]
+    end
+
+    subgraph Silver["Silver Layer"]
+        S1[Normalized Data - Delta Lake]
+        S2[Merge by entity_id]
+        S3[Schema Enforcement]
+    end
+
+    subgraph Gold["Gold Layer"]
+        G1[Business Data - Delta Lake]
+        G2[Strict Validation - Pandera]
+        G3[SCD Type 2 / Overwrite]
+    end
+
+    subgraph Quarantine["Quarantine"]
+        Q1[Failed Records]
+        Q2[Error Metadata]
+        Q3[Replay Support]
+    end
+
+    Bronze --> Silver
+    Silver --> Gold
+    Bronze -.-> Quarantine
+    Silver -.-> Quarantine
+    Quarantine -.-> Bronze

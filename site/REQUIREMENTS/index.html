@@ -1,0 +1,6437 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://SatoryKono.github.io/BioactivityDataAcquisition/REQUIREMENTS/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>BioETL: Требования к Проекту - BioETL Project</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/mermaid.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bioetl" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="BioETL Project" class="md-header__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BioETL Project
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              BioETL: Требования к Проекту
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SatoryKono/BioactivityDataAcquisition
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../00-map/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Project Map
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../00-project_rules/00-rules-summary/" class="md-tabs__link">
+          
+  
+  
+  Project Rules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../02-architecture/system-context/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../03-guides/getting-started/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../04-reference/cli/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-operations/runbooks/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../mermaid-test.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Mermaid Test
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../RULES/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  RULES
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../01-governance/rules.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Governance Rules
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BioETL Project" class="md-nav__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    BioETL Project
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SatoryKono/BioactivityDataAcquisition
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Rules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Rules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/00-rules-summary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Summary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/01-project-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Full Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/02-user-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/03-file-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/04-extending-bioetl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extending BioETL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/05-cleanup-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cleanup Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/06-rules-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/07-consistency-check/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consistency Check
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-project_rules/AUDIT-REPORT.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/system-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/diagrams/00-diagramming-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagramming Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/diagrams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-001-delta-lake-vs-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001: Delta Lake
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-002-medallion-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-002: Medallion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-003-redis-for-distributed-locking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-003: Redis Locking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-004: Pydantic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/running-pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Pipelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_2" id="__nav_6_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Domain
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/domain/exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_3" id="__nav_6_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/transformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/application/pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_4" id="__nav_6_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/infrastructure/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_5" id="__nav_6_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Composition
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/composition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/composition/bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/api/composition/factories/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Factories
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipelines
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pipelines
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-reference/pipelines/chembl_activity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ChEMBL Activity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/incident-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Incident Response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/data-recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scaling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/pipeline-failure-critical.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Failure: Critical Error
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/pipeline-failure-dq.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Failure: High DQ Rate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/stale-lock.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stale Lock Detected
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/backfill-rebuild.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backfill and Rebuild
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/quarantine-management.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quarantine Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operations/runbooks/schema-evolution.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Evolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mermaid-test.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mermaid Test
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RULES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RULES
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-governance/rules.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Формат Требований
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Архитектура и Слои
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Архитектура и Слои">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-arch-007" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ARCH-007
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-medallion-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Поток Данных и Medallion Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Поток Данных и Medallion Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-bronze-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Bronze Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1 Bronze Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-data-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-silver-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Silver Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 Silver Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-data-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-007" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-007
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-008" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-008
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-gold-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Gold Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 Gold Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-data-009" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-009
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-data-010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DATA-010
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-delta-lake-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Delta Lake Infrastructure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 Delta Lake Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-delta-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DELTA-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-delta-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DELTA-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-delta-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DELTA-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Schema Drift
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 Schema Drift">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-schema-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SCHEMA-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-schema-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SCHEMA-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-schema-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SCHEMA-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-schema-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SCHEMA-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-data-lineage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Data Lineage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6 Data Lineage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-lineage-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LINEAGE-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lineage-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LINEAGE-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lineage-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LINEAGE-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-backfill-replay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Backfill / Replay
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7 Backfill / Replay">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-backfill-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-BACKFILL-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-backfill-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-BACKFILL-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-backfill-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-BACKFILL-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-backfill-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-BACKFILL-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-backfill-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-BACKFILL-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#271-medallion-clear-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.1 Medallion Clear Policy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7.1 Medallion Clear Policy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-clear-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEAR-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-clear-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEAR-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-clear-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEAR-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-clear-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEAR-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Партиционирование
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8 Партиционирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-partition-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PARTITION-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-partition-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PARTITION-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-partition-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PARTITION-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-partition-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PARTITION-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#29-null" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 NULL и Пропущенные Значения
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.9 NULL и Пропущенные Значения">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-null-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-NULL-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-null-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-NULL-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-null-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-NULL-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-null-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-NULL-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#210-quarantine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.10 Quarantine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.10 Quarantine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-quarantine-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-QUARANTINE-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-quarantine-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-QUARANTINE-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-quarantine-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-QUARANTINE-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-quarantine-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-QUARANTINE-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#211-load-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.11 Load Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.11 Load Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-load-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOAD-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-load-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOAD-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#212-entity-id-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.12 Entity ID Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.12 Entity ID Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-id-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-007" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-007
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-id-008" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ID-008
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Обработка Ошибок и Наблюдаемость
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Обработка Ошибок и Наблюдаемость">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Классификация Ошибок
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Классификация Ошибок">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-err-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ERR-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-err-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ERR-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-err-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ERR-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Пороги Ошибок
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Пороги Ошибок">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-threshold-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-THRESHOLD-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-threshold-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-THRESHOLD-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-retry-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Retry (Backoff)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 Retry (Backoff)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-retry-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-RETRY-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-retry-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-RETRY-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-retry-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-RETRY-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-circuit-breaker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Circuit Breaker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Circuit Breaker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-cb-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CB-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cb-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CB-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cb-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CB-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cb-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CB-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cb-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CB-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Observability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.5 Observability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-obs-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-OBS-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-obs-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-OBS-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-obs-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-OBS-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-obs-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-OBS-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-obs-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-OBS-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-obs-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-OBS-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Concurrency и Блокировки
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.6 Concurrency и Блокировки">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-007" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-007
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-lock-008" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-LOCK-008
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-dq-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 DQ Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.7 DQ Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-dq-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DQ-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dq-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DQ-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dq-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DQ-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-dq-anomaly-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 DQ Anomaly Detection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.8 DQ Anomaly Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-anomaly-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ANOMALY-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-anomaly-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ANOMALY-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-anomaly-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ANOMALY-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-anomaly-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ANOMALY-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-anomaly-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ANOMALY-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-anomaly-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ANOMALY-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-provider-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Provider Health
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.9 Provider Health">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-health-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-HEALTH-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-health-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-HEALTH-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-health-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-HEALTH-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Стандарты Кода и Тестирование
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Стандарты Кода и Тестирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Стек
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 Стек">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-stack-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-STACK-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-stack-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-STACK-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-stack-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-STACK-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-stack-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-STACK-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#411-python-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.1 Python Standards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1.1 Python Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-python-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PYTHON-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-python-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PYTHON-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-python-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PYTHON-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Тестирование
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 Тестирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-test-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-TEST-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-test-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-TEST-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-test-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-TEST-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-test-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-TEST-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-test-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-TEST-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-test-006" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-TEST-006
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Операции
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Операции">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Rate Limiting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1 Rate Limiting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-rate-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-RATE-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-rate-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-RATE-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Секреты
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 Секреты">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-secret-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SECRET-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-secret-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SECRET-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-secret-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SECRET-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-secret-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SECRET-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-graceful-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Graceful Shutdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3 Graceful Shutdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-shutdown-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SHUTDOWN-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-shutdown-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SHUTDOWN-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-shutdown-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SHUTDOWN-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-shutdown-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SHUTDOWN-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-checkpoint-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Checkpoint Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4 Checkpoint Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-checkpoint-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CHECKPOINT-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-checkpoint-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CHECKPOINT-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-checkpoint-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CHECKPOINT-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-checkpoint-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CHECKPOINT-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#541-async-resource-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4.1 Async Resource Cleanup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4.1 Async Resource Cleanup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-cleanup-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEANUP-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cleanup-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEANUP-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cleanup-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEANUP-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-cleanup-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CLEANUP-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5 Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-sec-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SEC-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-sec-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SEC-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-sec-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SEC-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-sec-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-SEC-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-dr-disaster-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 DR (Disaster Recovery)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.6 DR (Disaster Recovery)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-dr-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DR-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dr-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DR-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dr-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DR-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 Environments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.7 Environments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-env-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ENV-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-env-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ENV-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-env-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ENV-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Документация
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Документация">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-doc-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DOC-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-doc-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DOC-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Управление Изменениями
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Управление Изменениями">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-data-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Data Contracts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.1 Data Contracts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-contract-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CONTRACT-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-contract-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CONTRACT-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-contract-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CONTRACT-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-contract-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-CONTRACT-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Rollback
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-rollback-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ROLLBACK-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-rollback-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-ROLLBACK-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-developer-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Developer Experience
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Developer Experience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-dx-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DX-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dx-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DX-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dx-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DX-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dx-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DX-004
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dx-005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DX-005
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Приложение: Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Приложение: Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-dep-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DEP-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-dep-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-DEP-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-health-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Приложение: Provider Health Checks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Приложение: Provider Health Checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#req-provider-001" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PROVIDER-001
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-provider-002" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PROVIDER-002
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#req-provider-003" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REQ-PROVIDER-003
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Сводка Требований
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        История Изменений
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="bioetl">BioETL: Требования к Проекту<a class="headerlink" href="#bioetl" title="Permanent link">&para;</a></h1>
+<p><em>Версия: 1.2, 2025-12-27</em>
+<em>Синхронизировано с: RULES.md v5.6</em></p>
+<hr />
+<h2 id="_1">Формат Требований<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Каждое требование имеет:
+- <strong>ID</strong>: Уникальный идентификатор <code>REQ-{раздел}-{номер}</code>
+- <strong>Уровень</strong>: MUST / SHOULD / MAY (по RFC 2119)
+- <strong>Описание</strong>: Что требуется
+- <strong>Проверка</strong>: Как можно протестировать</p>
+<hr />
+<h2 id="1">1. Архитектура и Слои<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<h3 id="req-arch-001">REQ-ARCH-001<a class="headerlink" href="#req-arch-001" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Интерфейсы (Ports) определяются в пакете <code>domain/ports/</code> через <code>typing.Protocol</code>. Импорт <strong>MUST</strong> быть из фасада (<code>from bioetl.domain.ports import ...</code>).</li>
+<li><strong>Проверка</strong>: Статический анализ — проверить наличие пакета и использование Protocol. Архитектурный тест <code>test_ports_imported_only_from_facade</code>.</li>
+</ul>
+<h3 id="req-arch-002">REQ-ARCH-002<a class="headerlink" href="#req-arch-002" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>mypy --strict</code> проверяет соответствие типов во время сборки без ошибок</li>
+<li><strong>Проверка</strong>: Запуск <code>mypy --strict</code> возвращает код 0</li>
+</ul>
+<h3 id="req-arch-003">REQ-ARCH-003<a class="headerlink" href="#req-arch-003" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Доменный слой (Domain) не содержит операций ввода-вывода (I/O)</li>
+<li><strong>Проверка</strong>: Статический анализ импортов в <code>domain/</code> — отсутствие httpx, requests, sqlite3, psycopg2, boto3 и т.д.</li>
+</ul>
+<h3 id="req-arch-004">REQ-ARCH-004<a class="headerlink" href="#req-arch-004" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: SHOULD</li>
+<li><strong>Описание</strong>: Критичные адаптеры используют <code>@runtime_checkable</code> декоратор</li>
+<li><strong>Проверка</strong>: Проверить наличие декоратора на Protocol классах для критичных адаптеров</li>
+</ul>
+<h3 id="req-arch-005">REQ-ARCH-005<a class="headerlink" href="#req-arch-005" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Все адаптеры реализуют асинхронный метод <code>health_check()</code> возвращающий <code>HealthStatus</code> enum</li>
+<li><strong>Проверка</strong>: Проверить наличие <code>async def health_check(self) -&gt; HealthStatus</code> в каждом адаптере</li>
+</ul>
+<h3 id="req-arch-006">REQ-ARCH-006<a class="headerlink" href="#req-arch-006" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>health_check()</code> использует lightweight probe (не тяжёлые запросы)</li>
+<li><strong>Проверка</strong>: Проверить что health check не загружает большие данные</li>
+</ul>
+<h3 id="req-arch-007">REQ-ARCH-007<a class="headerlink" href="#req-arch-007" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: <code>health_check()</code> не должен выбрасывать исключения — ловить и возвращать <code>UNHEALTHY</code></li>
+<li><strong>Проверка</strong>: Тест — исключение в health check возвращает UNHEALTHY</li>
+</ul>
+<hr />
+<h2 id="2-medallion-architecture">2. Поток Данных и Medallion Architecture<a class="headerlink" href="#2-medallion-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="21-bronze-layer">2.1 Bronze Layer<a class="headerlink" href="#21-bronze-layer" title="Permanent link">&para;</a></h3>
+<h4 id="req-data-001">REQ-DATA-001<a class="headerlink" href="#req-data-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Bronze данные хранятся в формате JSONL + zstd компрессия</li>
+<li><strong>Проверка</strong>: Проверить расширения файлов в Bronze директории (.jsonl.zst)</li>
+</ul>
+<h4 id="req-data-002">REQ-DATA-002<a class="headerlink" href="#req-data-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Bronze путь соответствует формату <code>bronze/{format_version}/{provider}/{entity}/{date}/</code></li>
+<li><strong>Проверка</strong>: Regex валидация путей Bronze файлов</li>
+</ul>
+<h4 id="req-data-003">REQ-DATA-003<a class="headerlink" href="#req-data-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Bronze данные — append-only (только добавление)</li>
+<li><strong>Проверка</strong>: Отсутствие операций UPDATE/DELETE на Bronze данных</li>
+</ul>
+<h4 id="req-data-004">REQ-DATA-004<a class="headerlink" href="#req-data-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Изменение формата Bronze требует новой ветки пути (/v2/), миграция in-place запрещена</li>
+<li><strong>Проверка</strong>: Версия в пути соответствует версии формата данных</li>
+</ul>
+<h4 id="req-data-005">REQ-DATA-005<a class="headerlink" href="#req-data-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Bronze retention — 90 дней hot, затем архив (S3 Lifecycle)</li>
+<li><strong>Проверка</strong>: Проверить S3 Lifecycle policy на Bronze бакете</li>
+</ul>
+<h3 id="22-silver-layer">2.2 Silver Layer<a class="headerlink" href="#22-silver-layer" title="Permanent link">&para;</a></h3>
+<h4 id="req-data-006">REQ-DATA-006<a class="headerlink" href="#req-data-006" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Silver данные хранятся в формате Delta Lake или Iceberg (ACID обязателен)</li>
+<li><strong>Проверка</strong>: Проверить наличие <code>_delta_log/</code> директории или Iceberg metadata</li>
+</ul>
+<h4 id="req-data-007">REQ-DATA-007<a class="headerlink" href="#req-data-007" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Raw Parquet без ACID в Silver запрещен</li>
+<li><strong>Проверка</strong>: Отсутствие .parquet файлов без Delta/Iceberg metadata в Silver</li>
+</ul>
+<h4 id="req-data-008">REQ-DATA-008<a class="headerlink" href="#req-data-008" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Silver использует стратегию Merge/Upsert</li>
+<li><strong>Проверка</strong>: Код пайплайна использует merge операции для Silver</li>
+</ul>
+<h3 id="23-gold-layer">2.3 Gold Layer<a class="headerlink" href="#23-gold-layer" title="Permanent link">&para;</a></h3>
+<h4 id="req-data-009">REQ-DATA-009<a class="headerlink" href="#req-data-009" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Gold данные проходят строгую валидацию (<code>strict=True</code>)</li>
+<li><strong>Проверка</strong>: Конфиг пайплайна содержит strict=True для Gold</li>
+</ul>
+<h4 id="req-data-010">REQ-DATA-010<a class="headerlink" href="#req-data-010" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Gold использует версионированные снимки (SCD Type 2) или партиционирование по дате</li>
+<li><strong>Проверка</strong>: Наличие полей версионирования или date партиций в Gold</li>
+</ul>
+<h3 id="24-delta-lake-infrastructure">2.4 Delta Lake Infrastructure<a class="headerlink" href="#24-delta-lake-infrastructure" title="Permanent link">&para;</a></h3>
+<h4 id="req-delta-001">REQ-DELTA-001<a class="headerlink" href="#req-delta-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Использовать <code>delta-rs</code> (Rust core) для Python-воркеров</li>
+<li><strong>Проверка</strong>: Import проверка — <code>import deltalake</code> (delta-rs)</li>
+</ul>
+<h4 id="req-delta-002">REQ-DELTA-002<a class="headerlink" href="#req-delta-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: VACUUM запускается еженедельно с <code>retention_period=7 days</code></li>
+<li><strong>Проверка</strong>: Проверить наличие scheduled job для VACUUM</li>
+</ul>
+<h4 id="req-delta-003">REQ-DELTA-003<a class="headerlink" href="#req-delta-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Forensic retention по умолчанию 7 дней, до 30 дней для critical таблиц через конфиг</li>
+<li><strong>Проверка</strong>: Проверить значение forensic_retention в конфигах пайплайнов</li>
+</ul>
+<h3 id="25-schema-drift">2.5 Schema Drift<a class="headerlink" href="#25-schema-drift" title="Permanent link">&para;</a></h3>
+<h4 id="req-schema-001">REQ-SCHEMA-001<a class="headerlink" href="#req-schema-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: При исчезновении обязательного поля (ID) пайплайн блокируется (Critical drift)</li>
+<li><strong>Проверка</strong>: Unit-тест — удаление ID поля вызывает исключение и остановку</li>
+</ul>
+<h4 id="req-schema-002">REQ-SCHEMA-002<a class="headerlink" href="#req-schema-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Появление новых опциональных полей логируется (Info drift)</li>
+<li><strong>Проверка</strong>: Проверить логирование при добавлении нового поля</li>
+</ul>
+<h4 id="req-schema-003">REQ-SCHEMA-003<a class="headerlink" href="#req-schema-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Появление &gt;3 новых полей требует ревью (Warn drift)</li>
+<li><strong>Проверка</strong>: Проверить генерацию warning при &gt;3 новых полях</li>
+</ul>
+<h4 id="req-schema-004">REQ-SCHEMA-004<a class="headerlink" href="#req-schema-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: SLA на реакцию для WARN дрейфа — 48 часов, нерешенный дрейф блокирует релиз</li>
+<li><strong>Проверка</strong>: Проверить наличие механизма отслеживания дрейфа и блокировки релиза</li>
+</ul>
+<h3 id="26-data-lineage">2.6 Data Lineage<a class="headerlink" href="#26-data-lineage" title="Permanent link">&para;</a></h3>
+<h4 id="req-lineage-001">REQ-LINEAGE-001<a class="headerlink" href="#req-lineage-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Silver записи содержат <code>_source_batch_id</code> (FK)</li>
+<li><strong>Проверка</strong>: Проверить наличие поля <code>_source_batch_id</code> в Silver схеме</li>
+</ul>
+<h4 id="req-lineage-002">REQ-LINEAGE-002<a class="headerlink" href="#req-lineage-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Таблица <code>sys.lineage_log</code> хранит маппинг batch_id -&gt; Bronze файлы</li>
+<li><strong>Проверка</strong>: Проверить существование и схему таблицы lineage_log</li>
+</ul>
+<h4 id="req-lineage-003">REQ-LINEAGE-003<a class="headerlink" href="#req-lineage-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Полные пути к файлам в каждой строке данных запрещены (избыточность)</li>
+<li><strong>Проверка</strong>: Отсутствие полных S3 путей в колонках Silver записей</li>
+</ul>
+<h3 id="27-backfill-replay">2.7 Backfill / Replay<a class="headerlink" href="#27-backfill-replay" title="Permanent link">&para;</a></h3>
+<h4 id="req-backfill-001">REQ-BACKFILL-001<a class="headerlink" href="#req-backfill-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Все записи содержат <code>_run_id</code> (UUID) и <code>_run_type</code> (<code>incremental</code> | <code>backfill</code> | <code>rebuild</code>)</li>
+<li><strong>Проверка</strong>: Проверить наличие обязательных мета-полей в схеме</li>
+</ul>
+<h4 id="req-backfill-002">REQ-BACKFILL-002<a class="headerlink" href="#req-backfill-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Приоритет merge: <code>rebuild</code> &gt; <code>backfill</code> &gt; <code>incremental</code></li>
+<li><strong>Проверка</strong>: Unit-тест конфликта версий — rebuild побеждает</li>
+</ul>
+<h4 id="req-backfill-003">REQ-BACKFILL-003<a class="headerlink" href="#req-backfill-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Параллельный запуск rebuild/backfill для одной сущности запрещен</li>
+<li><strong>Проверка</strong>: Тест concurrent запуска — второй процесс получает ошибку блокировки</li>
+</ul>
+<h4 id="req-backfill-004">REQ-BACKFILL-004<a class="headerlink" href="#req-backfill-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Lock key для exclusive операций: <code>lock:{provider}_{entity}:exclusive</code></li>
+<li><strong>Проверка</strong>: Проверить формат lock key в Redis при backfill/rebuild</li>
+</ul>
+<h4 id="req-backfill-005">REQ-BACKFILL-005<a class="headerlink" href="#req-backfill-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Default timeout для <code>--wait-for-lock</code>: 300 секунд</li>
+<li><strong>Проверка</strong>: Проверить значение по умолчанию в конфигурации</li>
+</ul>
+<h3 id="271-medallion-clear-policy">2.7.1 Medallion Clear Policy<a class="headerlink" href="#271-medallion-clear-policy" title="Permanent link">&para;</a></h3>
+<h4 id="req-clear-001">REQ-CLEAR-001<a class="headerlink" href="#req-clear-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: REBUILD и BACKFILL run types вызывают <code>clear_silver()</code> перед execute</li>
+<li><strong>Проверка</strong>: Integration тест <code>test_rebuild_lifecycle_order</code> — clear вызывается</li>
+</ul>
+<h4 id="req-clear-002">REQ-CLEAR-002<a class="headerlink" href="#req-clear-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: REBUILD и BACKFILL run types вызывают <code>clear_gold()</code> перед execute (если gold_table настроен)</li>
+<li><strong>Проверка</strong>: Integration тест — gold очищается при rebuild</li>
+</ul>
+<h4 id="req-clear-003">REQ-CLEAR-003<a class="headerlink" href="#req-clear-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: INCREMENTAL run type НЕ вызывает <code>clear_silver()</code> или <code>clear_gold()</code></li>
+<li><strong>Проверка</strong>: Integration тест <code>test_incremental_skips_clear</code> — clear НЕ вызывается</li>
+</ul>
+<h4 id="req-clear-004">REQ-CLEAR-004<a class="headerlink" href="#req-clear-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Очистка storage выполняется асинхронно через <code>async def _clear_exports()</code></li>
+<li><strong>Проверка</strong>: Проверить сигнатуру метода — <code>async def</code></li>
+</ul>
+<h3 id="28">2.8 Партиционирование<a class="headerlink" href="#28" title="Permanent link">&para;</a></h3>
+<h4 id="req-partition-001">REQ-PARTITION-001<a class="headerlink" href="#req-partition-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Bronze партиционируется по <code>ingestion_date</code> (YYYY-MM-DD)</li>
+<li><strong>Проверка</strong>: Проверить структуру директорий Bronze</li>
+</ul>
+<h4 id="req-partition-002">REQ-PARTITION-002<a class="headerlink" href="#req-partition-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Warning при &gt;10,000 партиций или &gt;100 файлов в партиции</li>
+<li><strong>Проверка</strong>: Мониторинг метрик партиционирования, алерты</li>
+</ul>
+<h4 id="req-partition-003">REQ-PARTITION-003<a class="headerlink" href="#req-partition-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Pipeline Fail при &gt;50,000 партиций</li>
+<li><strong>Проверка</strong>: Тест — превышение лимита вызывает ошибку пайплайна</li>
+</ul>
+<h4 id="req-partition-004">REQ-PARTITION-004<a class="headerlink" href="#req-partition-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Запрещены ключи партиционирования: UUID, Hash, Free-text</li>
+<li><strong>Проверка</strong>: Статический анализ конфигов — partition_by не содержит запрещенных типов</li>
+</ul>
+<h3 id="29-null">2.9 NULL и Пропущенные Значения<a class="headerlink" href="#29-null" title="Permanent link">&para;</a></h3>
+<h4 id="req-null-001">REQ-NULL-001<a class="headerlink" href="#req-null-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Отсутствующие в источнике значения заменяются на NULL</li>
+<li><strong>Проверка</strong>: Unit-тест — отсутствующее поле преобразуется в NULL</li>
+</ul>
+<h4 id="req-null-002">REQ-NULL-002<a class="headerlink" href="#req-null-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Sentinel values (-1, "N/A", 9999) запрещены</li>
+<li><strong>Проверка</strong>: Статический анализ кода на использование sentinel values</li>
+</ul>
+<h4 id="req-null-003">REQ-NULL-003<a class="headerlink" href="#req-null-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Поля, допускающие NULL, явно маркируются <code>nullable=True</code> в Pandera</li>
+<li><strong>Проверка</strong>: Проверить Pandera схемы на явную маркировку nullable полей</li>
+</ul>
+<h4 id="req-null-004">REQ-NULL-004<a class="headerlink" href="#req-null-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Критичные DQ ошибки направляются в Unified Quarantine таблицу</li>
+<li><strong>Проверка</strong>: Integration тест — невалидная запись попадает в quarantine</li>
+</ul>
+<h3 id="210-quarantine">2.10 Quarantine<a class="headerlink" href="#210-quarantine" title="Permanent link">&para;</a></h3>
+<h4 id="req-quarantine-001">REQ-QUARANTINE-001<a class="headerlink" href="#req-quarantine-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Единая таблица <code>common.quarantine</code> для всех сущностей</li>
+<li><strong>Проверка</strong>: Проверить существование таблицы и её схему</li>
+</ul>
+<h4 id="req-quarantine-002">REQ-QUARANTINE-002<a class="headerlink" href="#req-quarantine-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Quarantine payload обрезается до 64KB</li>
+<li><strong>Проверка</strong>: Тест — большой payload обрезается</li>
+</ul>
+<h4 id="req-quarantine-003">REQ-QUARANTINE-003<a class="headerlink" href="#req-quarantine-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Quarantine retention — 30 дней</li>
+<li><strong>Проверка</strong>: Проверить S3 Lifecycle или retention policy</li>
+</ul>
+<h4 id="req-quarantine-004">REQ-QUARANTINE-004<a class="headerlink" href="#req-quarantine-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Quarantine записи содержат ссылку на Bronze файл (bronze_file_uri или batch_id)</li>
+<li><strong>Проверка</strong>: Проверить наличие обязательного поля в схеме quarantine</li>
+</ul>
+<h3 id="211-load-strategy">2.11 Load Strategy<a class="headerlink" href="#211-load-strategy" title="Permanent link">&para;</a></h3>
+<h4 id="req-load-001">REQ-LOAD-001<a class="headerlink" href="#req-load-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Для инкрементальной загрузки хранить <code>last_successful_watermark</code></li>
+<li><strong>Проверка</strong>: Проверить сохранение watermark после успешного запуска</li>
+</ul>
+<h4 id="req-load-002">REQ-LOAD-002<a class="headerlink" href="#req-load-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Incremental обязателен при объёме данных &gt; 1M записей</li>
+<li><strong>Проверка</strong>: Проверить конфигурацию пайплайнов с большими объемами</li>
+</ul>
+<h3 id="212-entity-id-generation">2.12 Entity ID Generation<a class="headerlink" href="#212-entity-id-generation" title="Permanent link">&para;</a></h3>
+<h4 id="req-id-001">REQ-ID-001<a class="headerlink" href="#req-id-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Алгоритм Content Hash: <code>sha256(provider + canonical_json_dumps(record))</code></li>
+<li><strong>Проверка</strong>: Unit-тест генерации ID — результат соответствует алгоритму</li>
+</ul>
+<h4 id="req-id-002">REQ-ID-002<a class="headerlink" href="#req-id-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Canonical JSON: <code>json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)</code></li>
+<li><strong>Проверка</strong>: Unit-тест — JSON формат соответствует спецификации</li>
+</ul>
+<h4 id="req-id-003">REQ-ID-003<a class="headerlink" href="#req-id-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Float значения округляются до 10 знаков: <code>round(val, 10)</code></li>
+<li><strong>Проверка</strong>: Unit-тест — float округление в ID генерации</li>
+</ul>
+<h4 id="req-id-004">REQ-ID-004<a class="headerlink" href="#req-id-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: NaN/Inf заменяются на <code>null</code> перед генерацией хэша</li>
+<li><strong>Проверка</strong>: Unit-тест — NaN/Inf нормализация</li>
+</ul>
+<h4 id="req-id-005">REQ-ID-005<a class="headerlink" href="#req-id-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Даты приводятся к ISO-формату <code>YYYY-MM-DD</code></li>
+<li><strong>Проверка</strong>: Unit-тест — нормализация дат</li>
+</ul>
+<h4 id="req-id-006">REQ-ID-006<a class="headerlink" href="#req-id-006" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Строки обрезаются по краям (<code>strip()</code>)</li>
+<li><strong>Проверка</strong>: Unit-тест — пробелы удаляются</li>
+</ul>
+<h4 id="req-id-007">REQ-ID-007<a class="headerlink" href="#req-id-007" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Мета-поля (<code>_ingestion_ts</code>, <code>_run_id</code>, <code>_run_type</code>, <code>_dq_*</code>) исключаются из хэша</li>
+<li><strong>Проверка</strong>: Unit-тест — мета-поля не влияют на хэш</li>
+</ul>
+<h4 id="req-id-008">REQ-ID-008<a class="headerlink" href="#req-id-008" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: При коллизии хэшей (разные <code>_source_record_id</code>) — логировать обе записи</li>
+<li><strong>Проверка</strong>: Тест детекции коллизий</li>
+</ul>
+<hr />
+<h2 id="3">3. Обработка Ошибок и Наблюдаемость<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 Классификация Ошибок<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<h4 id="req-err-001">REQ-ERR-001<a class="headerlink" href="#req-err-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Критические ошибки (Auth, Schema Gold, DB unavailable) вызывают падение пайплайна</li>
+<li><strong>Проверка</strong>: Тест — 401 ошибка останавливает пайплайн</li>
+</ul>
+<h4 id="req-err-002">REQ-ERR-002<a class="headerlink" href="#req-err-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Восстановимые ошибки (429, 502/504) повторяются N раз с backoff</li>
+<li><strong>Проверка</strong>: Тест — 429 вызывает retry с exponential backoff</li>
+</ul>
+<h4 id="req-err-003">REQ-ERR-003<a class="headerlink" href="#req-err-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Ошибки качества данных логируются и запись пропускается (не роняет батч)</li>
+<li><strong>Проверка</strong>: Тест — невалидный SMILES не останавливает обработку</li>
+</ul>
+<h3 id="32">3.2 Пороги Ошибок<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<h4 id="req-threshold-001">REQ-THRESHOLD-001<a class="headerlink" href="#req-threshold-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: &gt;5% DQ ошибок — Warning (Soft Threshold)</li>
+<li><strong>Проверка</strong>: Тест — 6% ошибок генерирует warning</li>
+</ul>
+<h4 id="req-threshold-002">REQ-THRESHOLD-002<a class="headerlink" href="#req-threshold-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: &gt;20% DQ ошибок — Fail Batch (Hard Threshold)</li>
+<li><strong>Проверка</strong>: Тест — 21% ошибок останавливает батч</li>
+</ul>
+<h3 id="33-retry-backoff">3.3 Retry (Backoff)<a class="headerlink" href="#33-retry-backoff" title="Permanent link">&para;</a></h3>
+<h4 id="req-retry-001">REQ-RETRY-001<a class="headerlink" href="#req-retry-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Max Attempts: 3</li>
+<li><strong>Проверка</strong>: Тест — после 3 неудач операция прекращается</li>
+</ul>
+<h4 id="req-retry-002">REQ-RETRY-002<a class="headerlink" href="#req-retry-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Multiplier: 2.0 (wait 1s, 2s, 4s...)</li>
+<li><strong>Проверка</strong>: Тест — интервалы между retry соответствуют multiplier</li>
+</ul>
+<h4 id="req-retry-003">REQ-RETRY-003<a class="headerlink" href="#req-retry-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: SHOULD</li>
+<li><strong>Описание</strong>: Jitter: Random(0.1s, 0.5s) для избежания thundering herd</li>
+<li><strong>Проверка</strong>: Проверить наличие jitter в retry логике</li>
+</ul>
+<h3 id="34-circuit-breaker">3.4 Circuit Breaker<a class="headerlink" href="#34-circuit-breaker" title="Permanent link">&para;</a></h3>
+<h4 id="req-cb-001">REQ-CB-001<a class="headerlink" href="#req-cb-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Trigger: 5 последовательных ошибок соединения/таймаута</li>
+<li><strong>Проверка</strong>: Тест — после 5 ошибок circuit открывается</li>
+</ul>
+<h4 id="req-cb-002">REQ-CB-002<a class="headerlink" href="#req-cb-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Open Duration: 5 минут (по умолчанию)</li>
+<li><strong>Проверка</strong>: Тест — circuit остается открытым 5 минут</li>
+</ul>
+<h4 id="req-cb-003">REQ-CB-003<a class="headerlink" href="#req-cb-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Recovery: Half-Open → 1 пробный запрос</li>
+<li><strong>Проверка</strong>: Тест — после recovery_timeout делается пробный запрос</li>
+</ul>
+<h4 id="req-cb-004">REQ-CB-004<a class="headerlink" href="#req-cb-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Метрика <code>circuit_breaker_state</code> (0=Closed, 1=Half-Open, 2=Open)</li>
+<li><strong>Проверка</strong>: Проверить экспорт метрики в правильном формате</li>
+</ul>
+<h4 id="req-cb-005">REQ-CB-005<a class="headerlink" href="#req-cb-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Алерт при зависании в Open &gt; 10 минут</li>
+<li><strong>Проверка</strong>: Проверить наличие алерта в мониторинге</li>
+</ul>
+<h3 id="35-observability">3.5 Observability<a class="headerlink" href="#35-observability" title="Permanent link">&para;</a></h3>
+<h4 id="req-obs-001">REQ-OBS-001<a class="headerlink" href="#req-obs-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>run_id</code> обязателен во всех логах, метриках и блокировках</li>
+<li><strong>Проверка</strong>: Статический анализ — все log вызовы содержат run_id</li>
+</ul>
+<h4 id="req-obs-002">REQ-OBS-002<a class="headerlink" href="#req-obs-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Логи хранятся 30 дней</li>
+<li><strong>Проверка</strong>: Проверить retention policy логов</li>
+</ul>
+<h4 id="req-obs-003">REQ-OBS-003<a class="headerlink" href="#req-obs-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Метрики хранятся 90 дней</li>
+<li><strong>Проверка</strong>: Проверить retention policy метрик</li>
+</ul>
+<h4 id="req-obs-004">REQ-OBS-004<a class="headerlink" href="#req-obs-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Логи в формате структурированного JSON</li>
+<li><strong>Проверка</strong>: Проверить формат логов — валидный JSON</li>
+</ul>
+<h4 id="req-obs-005">REQ-OBS-005<a class="headerlink" href="#req-obs-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Log Schema содержит обязательные поля: ts, level, run_id, pipeline, stage</li>
+<li><strong>Проверка</strong>: Валидация схемы логов</li>
+</ul>
+<h4 id="req-obs-006">REQ-OBS-006<a class="headerlink" href="#req-obs-006" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: SHOULD</li>
+<li><strong>Описание</strong>: Log Schema содержит рекомендуемые поля: dataset, record_count</li>
+<li><strong>Проверка</strong>: Проверить наличие дополнительных полей в логах</li>
+</ul>
+<h3 id="36-concurrency">3.6 Concurrency и Блокировки<a class="headerlink" href="#36-concurrency" title="Permanent link">&para;</a></h3>
+<h4 id="req-lock-001">REQ-LOCK-001<a class="headerlink" href="#req-lock-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Механизм блокировки: Redis <code>SETNX</code> + <code>EXPIRE</code></li>
+<li><strong>Проверка</strong>: Проверить использование SETNX в коде блокировок</li>
+</ul>
+<h4 id="req-lock-002">REQ-LOCK-002<a class="headerlink" href="#req-lock-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Lock TTL: 60 секунд</li>
+<li><strong>Проверка</strong>: Проверить значение EXPIRE при создании блокировки</li>
+</ul>
+<h4 id="req-lock-003">REQ-LOCK-003<a class="headerlink" href="#req-lock-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Heartbeat: обновление TTL каждые 20 секунд</li>
+<li><strong>Проверка</strong>: Тест — heartbeat обновляет TTL</li>
+</ul>
+<h4 id="req-lock-004">REQ-LOCK-004<a class="headerlink" href="#req-lock-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Смешивание бэкендов (Redis + DB) для блокировок запрещено</li>
+<li><strong>Проверка</strong>: Статический анализ — один бэкенд для блокировок</li>
+</ul>
+<h4 id="req-lock-005">REQ-LOCK-005<a class="headerlink" href="#req-lock-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Fencing Token: в тело блокировки записывается <code>owner_id</code> (run_id)</li>
+<li><strong>Проверка</strong>: Проверить наличие owner_id в данных блокировки</li>
+</ul>
+<h4 id="req-lock-006">REQ-LOCK-006<a class="headerlink" href="#req-lock-006" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Lock Max Duration: 4 часа, принудительное снятие</li>
+<li><strong>Проверка</strong>: Тест — блокировка снимается после 4 часов</li>
+</ul>
+<h4 id="req-lock-007">REQ-LOCK-007<a class="headerlink" href="#req-lock-007" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Потеря блокировки = потеря права на запись, аварийное завершение</li>
+<li><strong>Проверка</strong>: Тест — при потере heartbeat воркер завершается до коммита</li>
+</ul>
+<h4 id="req-lock-008">REQ-LOCK-008<a class="headerlink" href="#req-lock-008" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Safety Guard: валидация блокировки перед записью в S3/Delta</li>
+<li><strong>Проверка</strong>: Тест — проверка owner_id перед commit</li>
+</ul>
+<h3 id="37-dq-metrics">3.7 DQ Metrics<a class="headerlink" href="#37-dq-metrics" title="Permanent link">&para;</a></h3>
+<h4 id="req-dq-001">REQ-DQ-001<a class="headerlink" href="#req-dq-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Метрики экспортируются в формате Prometheus</li>
+<li><strong>Проверка</strong>: Проверить endpoint /metrics возвращает Prometheus формат</li>
+</ul>
+<h4 id="req-dq-002">REQ-DQ-002<a class="headerlink" href="#req-dq-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Метрика <code>dq_validation_score</code> с лейблами check, column</li>
+<li><strong>Проверка</strong>: Проверить наличие метрики с правильными лейблами</li>
+</ul>
+<h4 id="req-dq-003">REQ-DQ-003<a class="headerlink" href="#req-dq-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Метрика <code>data_freshness_seconds</code></li>
+<li><strong>Проверка</strong>: Проверить наличие метрики freshness</li>
+</ul>
+<h3 id="38-dq-anomaly-detection">3.8 DQ Anomaly Detection<a class="headerlink" href="#38-dq-anomaly-detection" title="Permanent link">&para;</a></h3>
+<h4 id="req-anomaly-001">REQ-ANOMALY-001<a class="headerlink" href="#req-anomaly-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Baseline — скользящее среднее за 30 дней</li>
+<li><strong>Проверка</strong>: Проверить расчет baseline</li>
+</ul>
+<h4 id="req-anomaly-002">REQ-ANOMALY-002<a class="headerlink" href="#req-anomaly-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Warning при росте null_rate &gt;2x baseline</li>
+<li><strong>Проверка</strong>: Тест — 2.5x baseline генерирует warning</li>
+</ul>
+<h4 id="req-anomaly-003">REQ-ANOMALY-003<a class="headerlink" href="#req-anomaly-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Critical при росте null_rate &gt;5x baseline</li>
+<li><strong>Проверка</strong>: Тест — 6x baseline генерирует critical</li>
+</ul>
+<h4 id="req-anomaly-004">REQ-ANOMALY-004<a class="headerlink" href="#req-anomaly-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Warning при падении record_count &lt;70% baseline</li>
+<li><strong>Проверка</strong>: Тест — 60% baseline генерирует warning</li>
+</ul>
+<h4 id="req-anomaly-005">REQ-ANOMALY-005<a class="headerlink" href="#req-anomaly-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Critical при падении record_count &lt;50% baseline</li>
+<li><strong>Проверка</strong>: Тест — 40% baseline генерирует critical</li>
+</ul>
+<h4 id="req-anomaly-006">REQ-ANOMALY-006<a class="headerlink" href="#req-anomaly-006" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Cold Start: Days 1-7 silence, Days 8-30 warning only, Days 30+ full alerting</li>
+<li><strong>Проверка</strong>: Тест — корректное поведение на разных этапах cold start</li>
+</ul>
+<h3 id="39-provider-health">3.9 Provider Health<a class="headerlink" href="#39-provider-health" title="Permanent link">&para;</a></h3>
+<h4 id="req-health-001">REQ-HEALTH-001<a class="headerlink" href="#req-health-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Status Degraded при 1-2 consecutive errors (Timeout ×2, batch_size ÷2)</li>
+<li><strong>Проверка</strong>: Тест — параметры корректируются при degraded</li>
+</ul>
+<h4 id="req-health-002">REQ-HEALTH-002<a class="headerlink" href="#req-health-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Status Unhealthy при ≥3 errors — Pause pipeline, Alert P2</li>
+<li><strong>Проверка</strong>: Тест — пайплайн ставится на паузу</li>
+</ul>
+<h4 id="req-health-003">REQ-HEALTH-003<a class="headerlink" href="#req-health-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Метрика <code>provider_health_status</code> (0=Unhealthy, 1=Degraded, 2=Healthy)</li>
+<li><strong>Проверка</strong>: Проверить экспорт метрики</li>
+</ul>
+<hr />
+<h2 id="4">4. Стандарты Кода и Тестирование<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 Стек<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<h4 id="req-stack-001">REQ-STACK-001<a class="headerlink" href="#req-stack-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: HTTP клиент — httpx с поддержкой async</li>
+<li><strong>Проверка</strong>: Проверить использование httpx в адаптерах</li>
+</ul>
+<h4 id="req-stack-002">REQ-STACK-002<a class="headerlink" href="#req-stack-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Legacy библиотеки без async — через <code>run_in_executor</code></li>
+<li><strong>Проверка</strong>: Проверить обёртки для pubchempy, biopython</li>
+</ul>
+<h4 id="req-stack-003">REQ-STACK-003<a class="headerlink" href="#req-stack-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Валидация — Pandera для DataFrames</li>
+<li><strong>Проверка</strong>: Проверить использование Pandera схем</li>
+</ul>
+<h4 id="req-stack-004">REQ-STACK-004<a class="headerlink" href="#req-stack-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Линтер — Ruff</li>
+<li><strong>Проверка</strong>: Проверить наличие ruff в dev dependencies и CI</li>
+</ul>
+<h3 id="411-python-standards">4.1.1 Python Standards<a class="headerlink" href="#411-python-standards" title="Permanent link">&para;</a></h3>
+<h4 id="req-python-001">REQ-PYTHON-001<a class="headerlink" href="#req-python-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Все Python-файлы начинаются с <code>from __future__ import annotations</code></li>
+<li><strong>Проверка</strong>: <code>ruff check --select FA</code> проходит без ошибок</li>
+</ul>
+<h4 id="req-python-002">REQ-PYTHON-002<a class="headerlink" href="#req-python-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Использовать новый стиль типов: <code>list[str]</code> вместо <code>List[str]</code></li>
+<li><strong>Проверка</strong>: Отсутствие импортов <code>from typing import List, Dict, Set, Tuple</code></li>
+</ul>
+<h4 id="req-python-003">REQ-PYTHON-003<a class="headerlink" href="#req-python-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Использовать <code>X | None</code> вместо <code>Optional[X]</code></li>
+<li><strong>Проверка</strong>: Отсутствие импортов <code>from typing import Optional</code></li>
+</ul>
+<h3 id="42">4.2 Тестирование<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<h4 id="req-test-001">REQ-TEST-001<a class="headerlink" href="#req-test-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Unit тесты — только доменная логика, in-memory фейки</li>
+<li><strong>Проверка</strong>: Проверить отсутствие моков внешних библиотек в unit тестах</li>
+</ul>
+<h4 id="req-test-002">REQ-TEST-002<a class="headerlink" href="#req-test-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Моки (mocks) внешних библиотек в unit тестах запрещены</li>
+<li><strong>Проверка</strong>: Статический анализ тестов на использование mock</li>
+</ul>
+<h4 id="req-test-003">REQ-TEST-003<a class="headerlink" href="#req-test-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Integration тесты — VCR.py для записи ответов API</li>
+<li><strong>Проверка</strong>: Проверить наличие cassettes в <code>tests/fixtures/vcr/</code></li>
+</ul>
+<h4 id="req-test-004">REQ-TEST-004<a class="headerlink" href="#req-test-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: VCR санитизация: удаление Authorization, X-API-Key, PII</li>
+<li><strong>Проверка</strong>: Проверить хук <code>before_record</code> в конфиге VCR</li>
+</ul>
+<h4 id="req-test-005">REQ-TEST-005<a class="headerlink" href="#req-test-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: CI падает при отсутствии cassette (<code>pytest --vcr-record=none</code>)</li>
+<li><strong>Проверка</strong>: Проверить pytest команду в CI</li>
+</ul>
+<h4 id="req-test-006">REQ-TEST-006<a class="headerlink" href="#req-test-006" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Contract Tests — ежемесячный запуск против реальных API</li>
+<li><strong>Проверка</strong>: Проверить наличие scheduled workflow для contract tests</li>
+</ul>
+<hr />
+<h2 id="5">5. Операции<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51-rate-limiting">5.1 Rate Limiting<a class="headerlink" href="#51-rate-limiting" title="Permanent link">&para;</a></h3>
+<h4 id="req-rate-001">REQ-RATE-001<a class="headerlink" href="#req-rate-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Каждый адаптер реализует <code>TokenBucket</code> или аналог</li>
+<li><strong>Проверка</strong>: Проверить наличие rate limiter в каждом адаптере</li>
+</ul>
+<h4 id="req-rate-002">REQ-RATE-002<a class="headerlink" href="#req-rate-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Backpressure: при заполнении очереди &gt;80% — дросселирование</li>
+<li><strong>Проверка</strong>: Тест — при заполненной очереди скорость чтения снижается</li>
+</ul>
+<h3 id="52">5.2 Секреты<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<h4 id="req-secret-001">REQ-SECRET-001<a class="headerlink" href="#req-secret-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Секреты из переменных окружения (<code>os.environ</code>)</li>
+<li><strong>Проверка</strong>: Проверить источник секретов в коде</li>
+</ul>
+<h4 id="req-secret-002">REQ-SECRET-002<a class="headerlink" href="#req-secret-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Формат: <code>BIOETL_{PROVIDER}_{KEY}</code></li>
+<li><strong>Проверка</strong>: Проверить имена переменных окружения</li>
+</ul>
+<h4 id="req-secret-003">REQ-SECRET-003<a class="headerlink" href="#req-secret-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Хардкод секретов запрещен</li>
+<li><strong>Проверка</strong>: Статический анализ на хардкод секретов (API keys, passwords)</li>
+</ul>
+<h4 id="req-secret-004">REQ-SECRET-004<a class="headerlink" href="#req-secret-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: Файлы .env в git запрещены</li>
+<li><strong>Проверка</strong>: Проверить .gitignore содержит .env</li>
+</ul>
+<h3 id="53-graceful-shutdown">5.3 Graceful Shutdown<a class="headerlink" href="#53-graceful-shutdown" title="Permanent link">&para;</a></h3>
+<h4 id="req-shutdown-001">REQ-SHUTDOWN-001<a class="headerlink" href="#req-shutdown-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: При SIGTERM/SIGINT — прекратить fetch новых записей</li>
+<li><strong>Проверка</strong>: Тест — SIGTERM останавливает извлечение</li>
+</ul>
+<h4 id="req-shutdown-002">REQ-SHUTDOWN-002<a class="headerlink" href="#req-shutdown-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Дождаться завершения записи текущего батча</li>
+<li><strong>Проверка</strong>: Тест — текущий батч дописывается до конца</li>
+</ul>
+<h4 id="req-shutdown-003">REQ-SHUTDOWN-003<a class="headerlink" href="#req-shutdown-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Сохранить чекпоинт в S3 с If-Match/ETag</li>
+<li><strong>Проверка</strong>: Тест — чекпоинт сохраняется атомарно</li>
+</ul>
+<h4 id="req-shutdown-004">REQ-SHUTDOWN-004<a class="headerlink" href="#req-shutdown-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Выход с кодом 0 при graceful shutdown</li>
+<li><strong>Проверка</strong>: Тест — exit code = 0</li>
+</ul>
+<h3 id="54-checkpoint-recovery">5.4 Checkpoint Recovery<a class="headerlink" href="#54-checkpoint-recovery" title="Permanent link">&para;</a></h3>
+<h4 id="req-checkpoint-001">REQ-CHECKPOINT-001<a class="headerlink" href="#req-checkpoint-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: При запуске — проверка наличия чекпоинта в S3</li>
+<li><strong>Проверка</strong>: Тест — при старте проверяется S3</li>
+</ul>
+<h4 id="req-checkpoint-002">REQ-CHECKPOINT-002<a class="headerlink" href="#req-checkpoint-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: С флагом <code>--resume</code> — продолжение с <code>last_processed_id + 1</code></li>
+<li><strong>Проверка</strong>: Тест — resume начинает с правильной позиции</li>
+</ul>
+<h4 id="req-checkpoint-003">REQ-CHECKPOINT-003<a class="headerlink" href="#req-checkpoint-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Без флага при найденном чекпоинте — Warning</li>
+<li><strong>Проверка</strong>: Тест — генерируется warning о stale checkpoint</li>
+</ul>
+<h4 id="req-checkpoint-004">REQ-CHECKPOINT-004<a class="headerlink" href="#req-checkpoint-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: После успешного завершения — удалить чекпоинт</li>
+<li><strong>Проверка</strong>: Тест — чекпоинт удаляется при успехе</li>
+</ul>
+<h3 id="541-async-resource-cleanup">5.4.1 Async Resource Cleanup<a class="headerlink" href="#541-async-resource-cleanup" title="Permanent link">&para;</a></h3>
+<h4 id="req-cleanup-001">REQ-CLEANUP-001<a class="headerlink" href="#req-cleanup-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Все адаптеры и сервисы реализуют асинхронный метод <code>aclose()</code> для освобождения ресурсов</li>
+<li><strong>Проверка</strong>: Проверить наличие <code>async def aclose(self) -&gt; None</code> в адаптерах</li>
+</ul>
+<h4 id="req-cleanup-002">REQ-CLEANUP-002<a class="headerlink" href="#req-cleanup-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>aclose()</code> должен быть идемпотентным (безопасен для повторных вызовов)</li>
+<li><strong>Проверка</strong>: Тест — повторный вызов <code>aclose()</code> не вызывает ошибку</li>
+</ul>
+<h4 id="req-cleanup-003">REQ-CLEANUP-003<a class="headerlink" href="#req-cleanup-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: <code>aclose()</code> не должен выбрасывать исключения</li>
+<li><strong>Проверка</strong>: Тест — исключения внутри aclose перехватываются</li>
+</ul>
+<h4 id="req-cleanup-004">REQ-CLEANUP-004<a class="headerlink" href="#req-cleanup-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: PipelineServices реализует async context manager (<code>__aenter__</code>/<code>__aexit__</code>)</li>
+<li><strong>Проверка</strong>: Проверить использование <code>async with services:</code> в runner</li>
+</ul>
+<h3 id="55-security">5.5 Security<a class="headerlink" href="#55-security" title="Permanent link">&para;</a></h3>
+<h4 id="req-sec-001">REQ-SEC-001<a class="headerlink" href="#req-sec-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: IAM: Least Privilege, разделение ролей writer/reader</li>
+<li><strong>Проверка</strong>: Проверить IAM policies</li>
+</ul>
+<h4 id="req-sec-002">REQ-SEC-002<a class="headerlink" href="#req-sec-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Silver: PII хэшируется с солью <code>sha256(lowercase(value) + SALT)</code></li>
+<li><strong>Проверка</strong>: Проверить хэширование PII в Silver трансформациях</li>
+</ul>
+<h4 id="req-sec-003">REQ-SEC-003<a class="headerlink" href="#req-sec-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: PII поля обязательно с солью (salted)</li>
+<li><strong>Проверка</strong>: Тест — хэширование без соли вызывает ошибку</li>
+</ul>
+<h4 id="req-sec-004">REQ-SEC-004<a class="headerlink" href="#req-sec-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Gold: PII исключается или агрегируется</li>
+<li><strong>Проверка</strong>: Проверить отсутствие PII полей в Gold схемах</li>
+</ul>
+<h3 id="56-dr-disaster-recovery">5.6 DR (Disaster Recovery)<a class="headerlink" href="#56-dr-disaster-recovery" title="Permanent link">&para;</a></h3>
+<h4 id="req-dr-001">REQ-DR-001<a class="headerlink" href="#req-dr-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: RPO: 24 часа</li>
+<li><strong>Проверка</strong>: Проверить backup schedule обеспечивает RPO</li>
+</ul>
+<h4 id="req-dr-002">REQ-DR-002<a class="headerlink" href="#req-dr-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: RTO: 4 часа</li>
+<li><strong>Проверка</strong>: Провести DR drill и замерить время восстановления</li>
+</ul>
+<h4 id="req-dr-003">REQ-DR-003<a class="headerlink" href="#req-dr-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: SHOULD</li>
+<li><strong>Описание</strong>: Game Days проводятся ежегодно</li>
+<li><strong>Проверка</strong>: Проверить наличие запланированных Game Days</li>
+</ul>
+<h3 id="57-environments">5.7 Environments<a class="headerlink" href="#57-environments" title="Permanent link">&para;</a></h3>
+<h4 id="req-env-001">REQ-ENV-001<a class="headerlink" href="#req-env-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: S3: разные бакеты для dev/staging/prod</li>
+<li><strong>Проверка</strong>: Проверить конфигурации бакетов</li>
+</ul>
+<h4 id="req-env-002">REQ-ENV-002<a class="headerlink" href="#req-env-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Redis: разные префиксы ключей или DB</li>
+<li><strong>Проверка</strong>: Проверить изоляцию Redis</li>
+</ul>
+<h4 id="req-env-003">REQ-ENV-003<a class="headerlink" href="#req-env-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Prod секреты доступны только CI Runner</li>
+<li><strong>Проверка</strong>: Проверить IAM и secrets access</li>
+</ul>
+<hr />
+<h2 id="6">6. Документация<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<h4 id="req-doc-001">REQ-DOC-001<a class="headerlink" href="#req-doc-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Схемы генерируются скриптами в CI</li>
+<li><strong>Проверка</strong>: Проверить CI workflow генерации документации</li>
+</ul>
+<h4 id="req-doc-002">REQ-DOC-002<a class="headerlink" href="#req-doc-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Именование: <code>src/bioetl/.../{provider}/</code> &lt;-&gt; <code>docs/providers/{provider}/</code></li>
+<li><strong>Проверка</strong>: Проверить соответствие структур папок</li>
+</ul>
+<hr />
+<h2 id="7">7. Управление Изменениями<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71-data-contracts">7.1 Data Contracts<a class="headerlink" href="#71-data-contracts" title="Permanent link">&para;</a></h3>
+<h4 id="req-contract-001">REQ-CONTRACT-001<a class="headerlink" href="#req-contract-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Gold-схемы публикуются в <code>docs/contracts/gold/{entity}.json</code></li>
+<li><strong>Проверка</strong>: Проверить наличие JSON Schema файлов</li>
+</ul>
+<h4 id="req-contract-002">REQ-CONTRACT-002<a class="headerlink" href="#req-contract-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Версионирование: <code>{entity}_v{major}.{minor}</code></li>
+<li><strong>Проверка</strong>: Проверить формат версий в схемах</li>
+</ul>
+<h4 id="req-contract-003">REQ-CONTRACT-003<a class="headerlink" href="#req-contract-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: PR с изменением Gold-схемы имеет лейбл <code>breaking-change</code></li>
+<li><strong>Проверка</strong>: CI проверка наличия лейбла при изменении схемы</li>
+</ul>
+<h4 id="req-contract-004">REQ-CONTRACT-004<a class="headerlink" href="#req-contract-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Период депрекации: 2 недели до удаления поля</li>
+<li><strong>Проверка</strong>: Проверить наличие deprecated маркеров в схемах</li>
+</ul>
+<h3 id="72-rollback">7.2 Rollback<a class="headerlink" href="#72-rollback" title="Permanent link">&para;</a></h3>
+<h4 id="req-rollback-001">REQ-ROLLBACK-001<a class="headerlink" href="#req-rollback-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Auto Rollback при Error Rate &gt; 10%</li>
+<li><strong>Проверка</strong>: Проверить настройку auto rollback в CI/CD</li>
+</ul>
+<h4 id="req-rollback-002">REQ-ROLLBACK-002<a class="headerlink" href="#req-rollback-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST NOT</li>
+<li><strong>Описание</strong>: DQ ошибки не триггерят автоматический откат версии</li>
+<li><strong>Проверка</strong>: Тест — DQ ошибки не вызывают rollback</li>
+</ul>
+<hr />
+<h2 id="8-developer-experience">8. Developer Experience<a class="headerlink" href="#8-developer-experience" title="Permanent link">&para;</a></h2>
+<h4 id="req-dx-001">REQ-DX-001<a class="headerlink" href="#req-dx-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>make install</code> — создание venv, установка зависимостей</li>
+<li><strong>Проверка</strong>: Команда выполняется без ошибок</li>
+</ul>
+<h4 id="req-dx-002">REQ-DX-002<a class="headerlink" href="#req-dx-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>make test</code> — unit + integration тесты</li>
+<li><strong>Проверка</strong>: Команда выполняется и запускает все тесты</li>
+</ul>
+<h4 id="req-dx-003">REQ-DX-003<a class="headerlink" href="#req-dx-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>make lint</code> — ruff + mypy</li>
+<li><strong>Проверка</strong>: Команда выполняется и запускает линтеры</li>
+</ul>
+<h4 id="req-dx-004">REQ-DX-004<a class="headerlink" href="#req-dx-004" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Docker Compose для локальных зависимостей</li>
+<li><strong>Проверка</strong>: docker-compose.yml существует и запускается</li>
+</ul>
+<h4 id="req-dx-005">REQ-DX-005<a class="headerlink" href="#req-dx-005" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: .env.example — шаблон переменных окружения</li>
+<li><strong>Проверка</strong>: Файл существует и содержит все необходимые переменные</li>
+</ul>
+<hr />
+<h2 id="dependencies">Приложение: Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
+<h4 id="req-dep-001">REQ-DEP-001<a class="headerlink" href="#req-dep-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Точные версии в <code>pyproject.toml</code> (pinning)</li>
+<li><strong>Проверка</strong>: Все зависимости имеют точные версии (==)</li>
+</ul>
+<h4 id="req-dep-002">REQ-DEP-002<a class="headerlink" href="#req-dep-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: <code>pip-audit</code> в CI, блокировка мержа при CVE &gt;= HIGH</li>
+<li><strong>Проверка</strong>: Проверить наличие pip-audit в CI workflow</li>
+</ul>
+<hr />
+<h2 id="provider-health-checks">Приложение: Provider Health Checks<a class="headerlink" href="#provider-health-checks" title="Permanent link">&para;</a></h2>
+<h4 id="req-provider-001">REQ-PROVIDER-001<a class="headerlink" href="#req-provider-001" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: ChEMBL health check: <code>GET /chembl/api/data/status.json</code></li>
+<li><strong>Проверка</strong>: Проверить реализацию health check для ChEMBL</li>
+</ul>
+<h4 id="req-provider-002">REQ-PROVIDER-002<a class="headerlink" href="#req-provider-002" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: PubChem health check: lightweight compound query</li>
+<li><strong>Проверка</strong>: Проверить реализацию health check для PubChem</li>
+</ul>
+<h4 id="req-provider-003">REQ-PROVIDER-003<a class="headerlink" href="#req-provider-003" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Уровень</strong>: MUST</li>
+<li><strong>Описание</strong>: Generic Probe для API без dedicated health endpoint (timeout 5s)</li>
+<li><strong>Проверка</strong>: Проверить fallback health check с timeout</li>
+</ul>
+<hr />
+<h2 id="_2">Сводка Требований<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Категория</th>
+<th>MUST</th>
+<th>SHOULD</th>
+<th>MUST NOT</th>
+<th>Всего</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Архитектура</td>
+<td>5</td>
+<td>1</td>
+<td>1</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Данные/Medallion</td>
+<td>37</td>
+<td>0</td>
+<td>1</td>
+<td>38</td>
+</tr>
+<tr>
+<td>Ошибки/Observability</td>
+<td>32</td>
+<td>2</td>
+<td>0</td>
+<td>34</td>
+</tr>
+<tr>
+<td>Код/Тесты</td>
+<td>13</td>
+<td>0</td>
+<td>0</td>
+<td>13</td>
+</tr>
+<tr>
+<td>Операции</td>
+<td>27</td>
+<td>1</td>
+<td>1</td>
+<td>29</td>
+</tr>
+<tr>
+<td>Документация</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Изменения</td>
+<td>6</td>
+<td>0</td>
+<td>0</td>
+<td>6</td>
+</tr>
+<tr>
+<td>DX</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Dependencies</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Providers</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr>
+<td><strong>Итого</strong></td>
+<td><strong>132</strong></td>
+<td><strong>4</strong></td>
+<td><strong>3</strong></td>
+<td><strong>139</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_3">История Изменений<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>1.1</strong> (2025-12-25): Добавлены требования REQ-ARCH-005..007 (Health Check), REQ-CLEAR-001..004 (Medallion Clear Policy), REQ-PYTHON-001..003 (Future Annotations), REQ-CLEANUP-001..004 (Async Resource Cleanup). Синхронизировано с RULES.md v5.4.</li>
+<li><strong>1.0</strong> (2025-12-15): Первоначальная версия. Извлечено из RULES.md v5.0.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid.min.js"></script>
+      
+        <script src="../assets/javascripts/mermaid-init.js"></script>
+      
+        <script src="../assets/javascripts/mermaid-loader.js"></script>
+      
+    
+  </body>
+</html>
