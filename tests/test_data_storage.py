@@ -77,9 +77,8 @@ def test_req_data_008_silver_is_merge(config_path):
 def test_req_data_009_gold_is_strict(config_path):
     """Gold data must have strict validation if it exists."""
     # Known exceptions due to type coercion issues (tracked for fix)
-    KNOWN_EXCEPTIONS = {"target.yaml"}  # downgraded field bool/object mismatch
-
-    if config_path.name in KNOWN_EXCEPTIONS:
+    # target.yaml: downgraded field bool/object mismatch
+    if "target.yaml" in str(config_path) and "target_component" not in str(config_path):
         pytest.skip(f"Known exception: {config_path.name} has type coercion issues")
 
     with config_path.open(encoding="utf-8") as f:

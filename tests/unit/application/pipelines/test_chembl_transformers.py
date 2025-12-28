@@ -603,7 +603,7 @@ class TestTargetTransformer:
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
             "description": "Prostaglandin G/H synthase 2",
-            "downgraded": False,
+            "downgraded": 0,
             "dap_id": 12345,
         }
 
@@ -683,7 +683,7 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result["description"] is None
-        assert result["downgraded"] is None
+        assert result["downgraded"] is False  # Default value
         assert result["dap_id"] is None
         assert result["pipeline_stages"] is None
         assert result["target_constraints"] is None

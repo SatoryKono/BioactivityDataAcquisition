@@ -208,6 +208,7 @@ class TestFunctionLength:
         "_transform_impl": 120,  # Transform implementations
         "_clear_exports_legacy": 70,
         "create_logger": 55,  # Logger setup with many handlers
+        "vacuum_all_command": 90,  # CLI command with multiple suboperations
     }
 
     # Maximum allowed violations (for tracking technical debt)
