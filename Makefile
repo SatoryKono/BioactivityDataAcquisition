@@ -66,6 +66,10 @@ test-e2e-local: ## Run E2E tests (assumes Docker services already running)
 test-watch: ## Run tests in watch mode
 	$(VENV_PYTHON) -m pytest tests/ --looponfail
 
+test-failed: ## Run only the tests that failed in the last run
+	@echo "$(BLUE)Running failed tests...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/ -v --lf
+
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
 	$(VENV_PYTHON) -m pytest tests/test_architecture_enforcement.py -v --tb=short
