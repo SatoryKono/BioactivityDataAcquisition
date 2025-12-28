@@ -157,8 +157,6 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 2. Timestamp необходим для real-time мониторинга/операций
 3. Timestamp не используется в данных Bronze/Silver/Gold
 
-**TODO:** Рассмотреть передачу timestamp для SCD2 в `gold_writer.py` как параметр (см. комментарий в коде).
-
 ## Alternatives Considered
 
 ### 1. Глобальная фиксация времени через context manager
