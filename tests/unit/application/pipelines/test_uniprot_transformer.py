@@ -50,7 +50,7 @@ class TestUniProtProteinTransformer:
             "sequence": {"length": 604},
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["accession"] == "P12345"
@@ -76,7 +76,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
         mock_context.logger.warning.assert_called()
@@ -91,7 +91,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
         mock_context.logger.warning.assert_called()
@@ -110,7 +110,7 @@ class TestUniProtProteinTransformer:
             "proteinDescription": {},  # No recommendedName
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["accession"] == "P12345"
@@ -129,7 +129,7 @@ class TestUniProtProteinTransformer:
             # No proteinDescription - protein_name will be None
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["accession"] == "Q99999"
@@ -155,7 +155,7 @@ class TestUniProtProteinTransformer:
             ],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["gene_names"] == ["GENE1", "GENE2", "GENE3"]
@@ -172,7 +172,7 @@ class TestUniProtProteinTransformer:
             "genes": [],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["gene_names"] == []
@@ -194,7 +194,7 @@ class TestUniProtProteinTransformer:
             ],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["gene_names"] == ["VALID"]
@@ -210,7 +210,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert "entity_id" in result
@@ -229,8 +229,8 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result1 = await transformer.transform(mock_context, record)
-        result2 = await transformer.transform(mock_context, record)
+        result1 = await transformer.transform(mock_context, record, index=0)
+        result2 = await transformer.transform(mock_context, record, index=0)
 
         assert result1 is not None
         assert result2 is not None
@@ -250,7 +250,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert "custom_uniprot" in result["entity_id"]
@@ -266,7 +266,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -281,7 +281,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # Lineage fields should be present with underscore prefix
@@ -308,7 +308,7 @@ class TestUniProtProteinTransformer:
             "sequence": {"length": -100},  # Invalid: negative
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         # Entity validation should fail due to invariant
         assert result is None
@@ -326,7 +326,7 @@ class TestUniProtProteinTransformer:
             "sequence": {"length": 0},  # Invalid: zero
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         # Entity validation should fail due to invariant
         assert result is None
@@ -345,7 +345,7 @@ class TestUniProtProteinTransformer:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["protein_name"] == "Deeply Nested Protein Name"
@@ -362,7 +362,7 @@ class TestUniProtProteinTransformer:
             "organism": {"taxonId": 10090},  # Mus musculus
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["organism_id"] == 10090

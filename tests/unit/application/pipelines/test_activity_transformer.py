@@ -57,7 +57,7 @@ class TestActivityTransformerTransform:
             "pchembl_value": 8.0,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["activity_id"] == "12345"
@@ -78,7 +78,7 @@ class TestActivityTransformerTransform:
             "target_chembl_id": "CHEMBL1862",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -90,7 +90,7 @@ class TestActivityTransformerTransform:
             "target_chembl_id": "CHEMBL1862",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -108,7 +108,7 @@ class TestActivityTransformerTransform:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["ligand_efficiency_bei"] == pytest.approx(14.06)
@@ -137,7 +137,7 @@ class TestActivityTransformerTransform:
             "assay_description": "Binding assay",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["canonical_smiles"] == "CC(=O)Oc1ccccc1C(=O)O"
@@ -167,7 +167,7 @@ class TestActivityTransformerTransform:
             "standard_flag": 1,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["type"] == "IC50"
@@ -187,7 +187,7 @@ class TestActivityTransformerTransform:
             "potential_duplicate": 0,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["activity_comment"] == "Potent inhibitor"
@@ -203,7 +203,7 @@ class TestActivityTransformerTransform:
             "activity_properties": [{"type": "Ki", "value": 5.0}],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # Single-element list is unwrapped to just the dict
@@ -218,7 +218,7 @@ class TestActivityTransformerTransform:
             "activity_properties": [{"type": "Ki"}, {"type": "IC50"}],
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # Multi-element list stays as array
@@ -235,7 +235,7 @@ class TestActivityTransformerTransform:
             "activity_properties": [],  # Empty array from ChEMBL API
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # Empty collections are treated as None for semantic consistency
@@ -254,7 +254,7 @@ class TestActivityTransformerTransform:
             },
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["action_type_action_type"] == "INHIBITOR"
@@ -273,7 +273,7 @@ class TestActivityTransformerTransform:
             "action_type": None,
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["action_type_action_type"] is None
@@ -289,7 +289,7 @@ class TestActivityTransformerTransform:
             "molecule_chembl_id": "CHEMBL25",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert "entity_id" in result

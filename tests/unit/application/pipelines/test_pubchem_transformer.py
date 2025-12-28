@@ -48,7 +48,7 @@ class TestPubChemCompoundTransformer:
             "iupac_name": "2-acetoxybenzoic acid",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cid"] == "2244"
@@ -70,7 +70,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
         mock_context.logger.warning.assert_called()
@@ -91,7 +91,7 @@ class TestPubChemCompoundTransformer:
             # Missing: canonical_smiles, isomeric_smiles, inchi
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
         mock_context.logger.warning.assert_called()
@@ -106,7 +106,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "CCO",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cid"] == "12345"
@@ -120,7 +120,7 @@ class TestPubChemCompoundTransformer:
             "isomeric_smiles": "C[C@H](O)CC",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cid"] == "12345"
@@ -134,7 +134,7 @@ class TestPubChemCompoundTransformer:
             "inchi": "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cid"] == "12345"
@@ -148,7 +148,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "C",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cid"] == "1"
@@ -165,7 +165,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "C",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert result["cid"] == "99999999"
@@ -179,7 +179,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert "entity_id" in result
@@ -195,8 +195,8 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
-        result1 = await transformer.transform(mock_context, record)
-        result2 = await transformer.transform(mock_context, record)
+        result1 = await transformer.transform(mock_context, record, index=0)
+        result2 = await transformer.transform(mock_context, record, index=0)
 
         assert result1 is not None
         assert result2 is not None
@@ -213,7 +213,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "C",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert "custom_pubchem" in result["entity_id"]
@@ -226,7 +226,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "C",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
@@ -238,7 +238,7 @@ class TestPubChemCompoundTransformer:
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         # Lineage fields should be present with underscore prefix

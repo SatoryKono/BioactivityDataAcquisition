@@ -30,7 +30,7 @@ from bioetl.domain.types import RunType
 class ConcreteTransformer(BaseTransformer):
     """Concrete implementation for testing."""
 
-    async def _transform_impl(self, context, record):
+    async def _transform_impl(self, context, record, index):
         """Simple implementation that uses helper methods."""
         pk = self._get_required_field(record, "id")
         return {"id": pk, "value": record.get("value")}
@@ -230,6 +230,7 @@ class TestCreateEntity:
             mock_context,
             entity_id="test:activity:123",
             content_hash="abc123",
+            index=0,
             activity_id="123",
             molecule_chembl_id="CHEMBL25",
         )
@@ -241,6 +242,7 @@ class TestCreateEntity:
         assert entity.source_batch_id is None
         assert entity.activity_id == "123"
         assert entity.molecule_chembl_id == "CHEMBL25"
+        assert entity._index == 0
 
     def test_raises_on_invalid_entity_data(
         self, transformer: ConcreteTransformer, mock_context: PipelineContext
@@ -252,6 +254,7 @@ class TestCreateEntity:
                 mock_context,
                 entity_id="test:activity:123",
                 content_hash="abc123",
+                index=0,
                 activity_id="",  # Invalid: empty activity_id
                 molecule_chembl_id="CHEMBL25",
             )
@@ -267,7 +270,7 @@ class TestTemplateMethodPattern:
     ) -> None:
         """Test transform() delegates to _transform_impl()."""
         record = {"id": "123", "value": "test"}
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
         assert result == {"id": "123", "value": "test"}
 
     @pytest.mark.asyncio
@@ -276,7 +279,7 @@ class TestTemplateMethodPattern:
     ) -> None:
         """Test transform() handles TransformationError and returns None."""
         record = {"value": "test"}  # Missing required 'id' field
-        result = await transformer.transform(mock_context, record)
+        result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
         mock_context.logger.warning.assert_called_once()
@@ -290,11 +293,11 @@ class TestTemplateMethodPattern:
         """Test transform() handles ValueError and returns None."""
 
         class FailingTransformer(BaseTransformer):
-            async def _transform_impl(self, context, record):
+            async def _transform_impl(self, context, record, index):
                 raise ValueError("Entity validation failed")
 
         transformer = FailingTransformer(provider="test")
-        result = await transformer.transform(mock_context, {"id": "123"})
+        result = await transformer.transform(mock_context, {"id": "123"}, index=0)
 
         assert result is None
         mock_context.logger.warning.assert_called_once()

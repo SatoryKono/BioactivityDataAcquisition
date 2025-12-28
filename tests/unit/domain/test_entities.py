@@ -21,6 +21,7 @@ def base_entity_kwargs():
         "run_type": RunType.INCREMENTAL,
         "source_batch_id": uuid4(),
         "ingestion_ts": datetime.now(UTC),
+        "_index": 0,
     }
 
 

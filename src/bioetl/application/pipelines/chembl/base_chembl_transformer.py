@@ -77,6 +77,7 @@ class BaseChemblTransformer(BaseTransformer):
         self,
         context: PipelineContext,
         record: BronzeRecord,
+        index: int,
     ) -> SilverRecord | None:
         """Template method implementing common ChEMBL transformation flow.
 
@@ -91,6 +92,7 @@ class BaseChemblTransformer(BaseTransformer):
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from ChEMBL API.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             SilverRecord if transformation successful, None if skipped.
@@ -118,6 +120,7 @@ class BaseChemblTransformer(BaseTransformer):
             context,
             entity_id=entity_id,
             content_hash=content_hash,
+            index=index,
             **business_data,
         )
 

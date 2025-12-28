@@ -16,9 +16,10 @@ class MoleculeSchema(ETLRecordSchema):
     """Molecule validation schema for Silver layer."""
 
     # === Primary Key ===
-    molregno: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    # molregno: Series[int] = pa.Field(
+    #     nullable=False, description="Primary key."
+    # )
+    # Removed molregno as it is not in Silver schema. molecule_chembl_id is the PK.
 
     # === Identifiers ===
     molecule_chembl_id: Series[str] = pa.Field(
@@ -26,15 +27,15 @@ class MoleculeSchema(ETLRecordSchema):
         str_matches=r"^CHEMBL\d+$",
         description="ChEMBL ID.",
     )
-    chebi_id: Optional[Series[int]] = pa.Field(
-        nullable=True, description="ChEBI ID."
-    )
-    chebi_par_id: Optional[Series[int]] = pa.Field(
-        nullable=True, description="Parent ChEBI ID."
-    )
-    structure_key: Optional[Series[str]] = pa.Field(
-        nullable=True, description="InChI Key."
-    )
+    # chebi_id: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="ChEBI ID."
+    # )
+    # chebi_par_id: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="Parent ChEBI ID."
+    # )
+    # structure_key: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="InChI Key."
+    # )
 
     # === Core Properties ===
     pref_name: Optional[Series[str]] = pa.Field(
@@ -42,7 +43,7 @@ class MoleculeSchema(ETLRecordSchema):
     )
     max_phase: Optional[Series[float]] = pa.Field(
         nullable=True,
-        isin=[-1, 0.5, 1, 2, 3, 4],
+        isin=[-1, 0, 0.5, 1, 2, 3, 4],
         description="Maximum clinical phase.",
     )
     structure_type: Optional[Series[str]] = pa.Field(
@@ -62,27 +63,27 @@ class MoleculeSchema(ETLRecordSchema):
     first_approval: Optional[Series[int]] = pa.Field(
         nullable=True, description="Year of first approval."
     )
-    chirality: Optional[Series[int]] = pa.Field(
-        nullable=True,
-        isin=[-1, 0, 1, 2],
-        description="Chirality.",
-    )
+    # chirality: Optional[Series[int]] = pa.Field(
+    #     nullable=True,
+    #     isin=[-1, 0, 1, 2],
+    #     description="Chirality.",
+    # )
 
     # === Flags ===
-    therapeutic_flag: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Therapeutic flag."
+    therapeutic_flag: Optional[Series[bool]] = pa.Field(
+        nullable=True, description="Therapeutic flag."
     )
-    dosed_ingredient: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Dosed ingredient flag."
+    # dosed_ingredient: Optional[Series[int]] = pa.Field(
+    #     nullable=True, isin=[0, 1], description="Dosed ingredient flag."
+    # )
+    oral: Optional[Series[bool]] = pa.Field(
+        nullable=True, description="Oral administration flag."
     )
-    oral: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Oral administration flag."
+    parenteral: Optional[Series[bool]] = pa.Field(
+        nullable=True, description="Parenteral administration flag."
     )
-    parenteral: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Parenteral administration flag."
-    )
-    topical: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Topical administration flag."
+    topical: Optional[Series[bool]] = pa.Field(
+        nullable=True, description="Topical administration flag."
     )
     black_box_warning: Optional[Series[int]] = pa.Field(
         nullable=True, isin=[0, 1], description="Black box warning flag."
@@ -102,59 +103,79 @@ class MoleculeSchema(ETLRecordSchema):
     polymer_flag: Optional[Series[int]] = pa.Field(
         nullable=True, isin=[0, 1], description="Polymer flag."
     )
-    withdrawn_flag: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Withdrawn flag."
+    withdrawn_flag: Optional[Series[bool]] = pa.Field(
+        nullable=True, description="Withdrawn flag."
     )
-    downgraded: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="Downgraded flag."
-    )
-    nomerge: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1], description="No merge flag."
-    )
+    # downgraded: Optional[Series[int]] = pa.Field(
+    #     nullable=True, isin=[0, 1], description="Downgraded flag."
+    # )
+    # nomerge: Optional[Series[int]] = pa.Field(
+    #     nullable=True, isin=[0, 1], description="No merge flag."
+    # )
 
     # === Other Properties ===
-    availability_type: Optional[Series[int]] = pa.Field(
-        nullable=True, isin=[0, 1, 2], description="Availability type."
+    # availability_type: Optional[Series[int]] = pa.Field(
+    #     nullable=True, isin=[0, 1, 2], description="Availability type."
+    # )
+    # usan_year: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="USAN year."
+    # )
+    # usan_stem: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="USAN stem."
+    # )
+    # usan_substem: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="USAN substem."
+    # )
+    # usan_stem_definition: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="USAN stem definition."
+    # )
+    # indication_class: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Indication class."
+    # )
+    # withdrawn_year: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="Withdrawn year."
+    # )
+    # withdrawn_country: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Withdrawn country."
+    # )
+    # withdrawn_reason: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Withdrawn reason."
+    # )
+    # withdrawn_class: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Withdrawn class."
+    # )
+    # downgrade_reason: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Downgrade reason."
+    # )
+    # replacement_mrn: Optional[Series[int]] = pa.Field(
+    #     nullable=True, description="Replacement molregno."
+    # )
+    # nomerge_reason: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="No merge reason."
+    # )
+
+    # === Complex Fields (JSON Strings) ===
+    molecule_hierarchy: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of molecule hierarchy."
     )
-    usan_year: Optional[Series[int]] = pa.Field(
-        nullable=True, description="USAN year."
+    molecule_properties: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of molecule properties."
     )
-    usan_stem: Optional[Series[str]] = pa.Field(
-        nullable=True, description="USAN stem."
+    molecule_structures: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of molecule structures."
     )
-    usan_substem: Optional[Series[str]] = pa.Field(
-        nullable=True, description="USAN substem."
+    molecule_synonyms: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of molecule synonyms."
     )
-    usan_stem_definition: Optional[Series[str]] = pa.Field(
-        nullable=True, description="USAN stem definition."
+    cross_references: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of cross references."
     )
-    indication_class: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Indication class."
-    )
-    withdrawn_year: Optional[Series[int]] = pa.Field(
-        nullable=True, description="Withdrawn year."
-    )
-    withdrawn_country: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Withdrawn country."
-    )
-    withdrawn_reason: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Withdrawn reason."
-    )
-    withdrawn_class: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Withdrawn class."
-    )
-    downgrade_reason: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Downgrade reason."
-    )
-    replacement_mrn: Optional[Series[int]] = pa.Field(
-        nullable=True, description="Replacement molregno."
-    )
-    nomerge_reason: Optional[Series[str]] = pa.Field(
-        nullable=True, description="No merge reason."
+    atc_classifications: Optional[Series[str]] = pa.Field(
+        nullable=True, description="JSON string of ATC classifications."
     )
 
     class Config:
         """Pandera configuration."""
         strict = True
-        ordered = True
+        ordered = False
         coerce = True

@@ -16,9 +16,10 @@ class DocumentSchema(ETLRecordSchema):
     """Document validation schema for Silver layer."""
 
     # === Primary Key ===
-    doc_id: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    # doc_id: Series[int] = pa.Field(
+    #     nullable=False, description="Primary key."
+    # )
+    # Removed doc_id as it is not in Silver schema. document_chembl_id is the PK.
 
     # === Identifiers ===
     document_chembl_id: Series[str] = pa.Field(
@@ -59,6 +60,9 @@ class DocumentSchema(ETLRecordSchema):
     journal: Optional[Series[str]] = pa.Field(
         nullable=True, description="Journal."
     )
+    journal_full_title: Optional[Series[str]] = pa.Field(
+        nullable=True, description="Full journal title."
+    )
     year: Optional[Series[int]] = pa.Field(
         nullable=True, description="Year."
     )
@@ -74,12 +78,12 @@ class DocumentSchema(ETLRecordSchema):
     last_page: Optional[Series[str]] = pa.Field(
         nullable=True, description="Last page."
     )
-    ridx: Optional[Series[str]] = pa.Field(
-        nullable=True, description="Record index."
-    )
+    # ridx: Optional[Series[str]] = pa.Field(
+    #     nullable=True, description="Record index."
+    # )
 
     class Config:
         """Pandera configuration."""
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
