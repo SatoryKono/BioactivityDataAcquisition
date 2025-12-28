@@ -36,13 +36,17 @@ install: ## Create venv and install dependencies
 	$(VENV_PIP) install -e ".[dev]"
 	@echo "$(GREEN)Installation complete! Activate venv with: $(VENV_BIN)/activate$(NC)"
 
-test: ## Run unit and integration tests
+test: ## Run unit and integration tests (serial, with coverage)
 	@echo "$(BLUE)Running tests...$(NC)"
 	$(VENV_PYTHON) -m pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html
 
+test-fast: ## Run tests in parallel (faster, no benchmarks)
+	@echo "$(BLUE)Running tests (parallel mode)...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/ -v -n auto --dist loadscope --ignore=tests/benchmarks --cov=src/bioetl --cov-report=term-missing
+
 test-unit: ## Run only unit tests (fast, no I/O)
 	@echo "$(BLUE)Running unit tests...$(NC)"
-	$(VENV_PYTHON) -m pytest tests/ -v -m unit
+	$(VENV_PYTHON) -m pytest tests/ -v -m unit -n auto --dist loadscope --ignore=tests/benchmarks
 
 test-integration: ## Run integration tests
 	@echo "$(BLUE)Running integration tests...$(NC)"

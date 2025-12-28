@@ -195,20 +195,77 @@ def clear_settings_cache():
         yield
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def token_bucket():
-    """Token bucket rate limiter for testing."""
+    """Token bucket rate limiter for testing.
+
+    Module-scoped for performance: TokenBucket is stateless for tests.
+    """
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
     return TokenBucket(rate=100.0, capacity=100)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def circuit_breaker():
-    """Circuit breaker for testing."""
+    """Circuit breaker for testing.
+
+    Module-scoped for performance: CircuitBreaker state is reset per module.
+    """
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
     return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=60)
+
+
+# =============================================================================
+# Shared Mock Fixtures (Performance Optimization)
+# Consolidates commonly duplicated fixtures across test modules
+# =============================================================================
+
+
+@pytest.fixture
+def mock_logger():
+    """Create a mock logger for testing.
+
+    Consolidated fixture to avoid duplication across test modules.
+    Provides bind() method that returns self for chaining.
+    """
+    logger = MagicMock()
+    logger.bind = MagicMock(return_value=logger)
+    return logger
+
+
+@pytest.fixture(scope="module")
+def noop_logger():
+    """Provide a NoOpLogger for tests.
+
+    Module-scoped for performance: NoOpLogger is stateless.
+    """
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    return NoOpLogger()
+
+
+@pytest.fixture(scope="module")
+def noop_metrics():
+    """Provide NoOpMetrics for tests.
+
+    Module-scoped for performance: NoOpMetrics is stateless.
+    """
+    from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+
+    return NoOpMetrics()
+
+
+@pytest.fixture(scope="module")
+def noop_tracer():
+    """Provide NoOpTracing for tests.
+
+    Module-scoped for performance: NoOpTracing is stateless.
+    """
+    from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+    return NoOpTracing()
 
 
 # =============================================================================
