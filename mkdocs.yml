@@ -107,6 +107,7 @@ nav:
                             -   Overview: 04-reference/api/infrastructure.md
                             -   Adapters: 04-reference/api/infrastructure/adapters.md
                             -   Storage: 04-reference/api/infrastructure/storage.md
+                            -   Locking: 04-reference/api/infrastructure/locking.md
                             -   Observability: 04-reference/api/infrastructure/observability.md
                     -   Composition:
                             -   Overview: 04-reference/api/composition.md
