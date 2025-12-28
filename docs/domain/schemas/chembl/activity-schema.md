@@ -462,7 +462,7 @@ Gold layer contains only records passing gold_filters:
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0.0 | 2024-12-28 | Initial schema documentation |
+| 1.0.0 | 2025-12-28 | Initial schema documentation |
 
 ---
 
