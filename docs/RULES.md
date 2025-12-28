@@ -61,7 +61,7 @@ class DataSourcePort(Protocol):
 ```
 
 ### 1.1.2. Health Check Protocol
-Все адаптеры **MUST** реализовывать асинхронный метод `health_check()`:
+Все адаптеры **MUST** реализовывать асинхронный метод `health_check()` возвращающий `HealthStatus` enum:
 
 ```python
 from bioetl.domain.types import HealthStatus
@@ -229,7 +229,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 | Сценарий | Стратегия ID | 
 |----------|--------------| 
 | Источник предоставляет стабильный ID | Использовать как есть (`chembl_id`, `pubchem_cid`) | 
-| ID отсутствует | **Content Hash**: `sha256(provider + canonical_json_dumps(record))`. | 
+| ID отсутствует | **Content Hash**: `sha256(provider + canonical_json_dumps(record))` | 
  
 - **Алгоритм**: `sha256(provider + canonical_json_dumps(record))` 
 - **Canonical JSON**: `json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)`. 
@@ -736,7 +736,7 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 | Паттерн | Почему ошибочен | Пример из кодовой базы |
 |---------|-----------------|------------------------|
 | "500+ LOC = god object" | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (517 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
-| "Монолит требует декомпозиции" | Файл с делегированием — НЕ монолит | `GoldWriter` (593 LOC) делегирует `CsvExporter`, `AuditPort` |
+| "Монолит требует декомпозиции" | Файл с делегированием — НЕ монолит | `GoldWriter` (593 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны |
 | "NoOp default = нарушение DI" | Null Object Pattern валиден для опциональных зависимостей | `NoOpMetrics`, `NoOpTracing` |
 | "Optional parameter = нарушение DI" | `policy: Policy | None = None` — допустимый паттерн для value objects | `timeout: float = 30.0` |
 | "click.echo в CLI = нарушение" | User-facing output — законная ответственность interfaces слоя | `cli.py` confirmation prompts |
