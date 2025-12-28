@@ -338,7 +338,7 @@ class TestBatchTransformerDQThresholds:
     ):
         """Test that below thresholds results in no warnings."""
 
-        async def transform(ctx, record):
+        async def transform(ctx, record, index):
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         config = RecordProcessorConfig(
