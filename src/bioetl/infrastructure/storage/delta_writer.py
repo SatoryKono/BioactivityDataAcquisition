@@ -52,8 +52,13 @@ if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
-    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
-    from bioetl.domain.ports.validation import SilverValidatorPort
+    from bioetl.domain.ports import (
+        AuditPort,
+        LoggerPort,
+        MetricsPort,
+        SilverValidatorPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
