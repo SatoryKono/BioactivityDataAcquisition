@@ -133,7 +133,7 @@ class TestDQSoftThreshold:
         # Create transformer with 10% error rate (above soft, below hard)
         error_count = 0
 
-        async def failing_transform(ctx, record):
+        async def failing_transform(ctx, record, index):
             nonlocal error_count
             error_count += 1
             if error_count <= 10:  # First 10 of 100 records fail = 10%
@@ -211,7 +211,7 @@ class TestDQSoftThreshold:
         # Only 2% error rate (below soft threshold)
         error_count = 0
 
-        async def low_error_transform(ctx, record):
+        async def low_error_transform(ctx, record, index):
             nonlocal error_count
             error_count += 1
             if error_count <= 2:  # 2 of 100 = 2%
@@ -291,7 +291,7 @@ class TestDQHardThreshold:
         # 25% error rate (above hard threshold)
         error_count = 0
 
-        async def high_error_transform(ctx, record):
+        async def high_error_transform(ctx, record, index):
             nonlocal error_count
             error_count += 1
             if error_count <= 25:  # 25 of 100 = 25%
@@ -355,7 +355,7 @@ class TestDQHardThreshold:
         # Exactly 20% error rate
         error_count = 0
 
-        async def exact_threshold_transform(ctx, record):
+        async def exact_threshold_transform(ctx, record, index):
             nonlocal error_count
             error_count += 1
             if error_count <= 20:  # 20 of 100 = exactly 20%
@@ -416,7 +416,7 @@ class TestDQHardThreshold:
         # 19% error rate (just below hard threshold)
         error_count = 0
 
-        async def below_hard_transform(ctx, record):
+        async def below_hard_transform(ctx, record, index):
             nonlocal error_count
             error_count += 1
             if error_count <= 19:  # 19 of 100 = 19%
@@ -490,7 +490,7 @@ class TestDQQuarantineBehavior:
         # Fail specific records
         failed_ids = {"2", "5", "7"}
 
-        async def selective_transform(ctx, record):
+        async def selective_transform(ctx, record, index):
             if record["id"] in failed_ids:
                 raise ForcedDQError(record["id"])
             return {"entity_id": f"entity_{record['id']}", "value": 1}
