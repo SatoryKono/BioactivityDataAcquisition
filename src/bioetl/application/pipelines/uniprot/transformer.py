@@ -54,12 +54,14 @@ class UniProtProteinTransformer(BaseTransformer):
         self,
         context: PipelineContext,
         record: BronzeRecord,
+        index: int,
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format.
 
         Args:
             context: Pipeline context with run_id, run_type, logger.
             record: Raw Bronze record from UniProt.
+            index: Sequential index of the record in the pipeline run.
 
         Returns:
             SilverRecord if transformation successful, None if skipped.
