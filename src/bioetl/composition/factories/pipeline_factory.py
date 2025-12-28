@@ -421,24 +421,6 @@ def assemble_runner(
         resume=pipeline.runtime.resume,
     )
 
-    record_processor = ServicesBuilder.create_record_processor_from_pipeline(
-        pipeline=pipeline,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
-    )
-
-    # Create Executor
-    executor = PipelineExecutor(
-        services=pipeline.services,
-        record_processor=record_processor,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        entity_type=pipeline.config.entity_type,
-        batch_size=pipeline.config.batch_size,
-        checkpoint_interval=pipeline.config.checkpoint_interval,
-    )
-
     # Create lifecycle service (M5)
     lifecycle_service = MedallionLifecycleService(
         storage=pipeline.services.storage,
@@ -456,6 +438,26 @@ def assemble_runner(
         checkpoint_manager=checkpoint_manager,
         lifecycle_service=lifecycle_service,
         tracer=observability.tracer,
+    )
+
+    # Create RecordProcessor with lock context holder from runner services
+    record_processor = ServicesBuilder.create_record_processor_from_pipeline(
+        pipeline=pipeline,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        strict_gold_validation=strict_gold_validation,
+        lock_context_holder=runner_services.context_holder,
+    )
+
+    # Create Executor
+    executor = PipelineExecutor(
+        services=pipeline.services,
+        record_processor=record_processor,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=pipeline.shutdown_signal,
+        entity_type=pipeline.config.entity_type,
+        batch_size=pipeline.config.batch_size,
+        checkpoint_interval=pipeline.config.checkpoint_interval,
     )
 
     # Assemble Runner with injected RunnerServices bundle
