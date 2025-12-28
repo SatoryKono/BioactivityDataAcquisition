@@ -40,7 +40,7 @@ from bioetl.domain.ports.quarantine import QuarantinePort
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.storage import StoragePort
-from bioetl.domain.ports.validation import GoldValidatorPort
+from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
     "AuditEntry",
@@ -63,6 +63,7 @@ __all__ = [
     "NoOpTracing",
     "QuarantinePort",
     "RateLimiterPort",
+    "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
 ]

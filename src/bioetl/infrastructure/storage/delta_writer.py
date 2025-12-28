@@ -53,6 +53,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports.validation import SilverValidatorPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
@@ -79,6 +80,7 @@ class DeltaWriter:
         audit: AuditPort | None = None,
         tracing: TracingPort | None = None,
         require_lock: bool = True,
+        silver_validator: SilverValidatorPort | None = None,
     ) -> None:
         """Initialize Delta writer.
 
@@ -96,6 +98,8 @@ class DeltaWriter:
             require_lock: If True, write operations require valid LockContext.
                          Default is True per RULES.md §3.3.
                          Set to False only for testing or non-concurrent scenarios.
+            silver_validator: Optional SilverValidatorPort for Pandera validation.
+                            Use NoOpSilverValidator if validation is not required.
 
         Note: LoggerPort is required per RULES.md DI requirements. All dependencies
         MUST be injected through constructor without fallback defaults.
@@ -113,6 +117,14 @@ class DeltaWriter:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
             tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
+
+        # Use NoOpSilverValidator if not provided
+        if silver_validator is None:
+            from bioetl.infrastructure.validation.pandera_validator import (
+                NoOpSilverValidator,
+            )
+            silver_validator = NoOpSilverValidator()
+        self._silver_validator: SilverValidatorPort = silver_validator
 
     def _prepare_arrow_data(
         self,
@@ -367,6 +379,33 @@ class DeltaWriter:
                     missing=optional_missing,
                 )
 
+    def _validate_silver_pandera(
+        self, records: list[dict[str, Any]], table_name: str
+    ) -> None:
+        """Validate records using Pandera schema before writing to Silver.
+
+        Args:
+            records: List of record dictionaries to validate.
+            table_name: Target table name for error context.
+
+        Raises:
+            SchemaViolationError: If Pandera validation fails.
+        """
+        result = self._silver_validator.validate(records)
+        if not result.valid:
+            self.logger.error(
+                "Silver Pandera validation failed",
+                table=table_name,
+                errors=result.errors,
+            )
+            if self._metrics:
+                self._metrics.increment_counter(
+                    "silver_validation_failures_total",
+                    1,
+                    {"table": table_name},
+                )
+            raise SchemaViolationError(table_name, result.errors)
+
     async def _dispatch_write(
         self,
         validated_mode: SilverWriteMode,
@@ -483,6 +522,7 @@ class DeltaWriter:
             ValueError: If mode is invalid or records are missing required fields
             PolicyViolationError: If mode is not allowed for Silver layer
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
+            SchemaViolationError: If Pandera validation fails
             LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
         """
         tracer = self._tracing.get_tracer(__name__)
@@ -516,6 +556,9 @@ class DeltaWriter:
             self._enforce_write_policy(validated_mode, table_name)
 
             self._validate_records(records, table_name, schema)
+
+            # Validate records using Pandera schema (if configured)
+            self._validate_silver_pandera(records, table_name)
 
             # Check for schema drift before writing
             await self._check_schema_drift(table_name, records, on_schema_mismatch)
