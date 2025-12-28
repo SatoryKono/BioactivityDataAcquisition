@@ -118,7 +118,11 @@ def validate_lock_for_write(
     if not require_lock:
         return  # Lock validation disabled (e.g., for tests)
 
-    expected_key = f"lock:{table_name}"
+    # Normalize table name to match lock key format (provider_entity)
+    # If table_name is "chembl.activity", convert to "chembl_activity"
+    normalized_table_name = table_name.replace(".", "_")
+
+    expected_key = f"lock:{normalized_table_name}"
     base_log_context = {"table": table_name, "expected_key": expected_key}
     if log_context:
         base_log_context.update(log_context)
@@ -126,6 +130,8 @@ def validate_lock_for_write(
     _check_lock_present(lock_context, operation, expected_key, logger, base_log_context)
     # At this point lock_context is not None
     assert lock_context is not None  # for type checker
-    _check_lock_matches_table(lock_context, table_name, operation, expected_key, logger, base_log_context)
+
+    # Use normalized table name for matching
+    _check_lock_matches_table(lock_context, normalized_table_name, operation, expected_key, logger, base_log_context)
     _check_lock_valid(lock_context, operation, expected_key, logger, base_log_context)
     _check_owner_id(lock_context, expected_owner_id, operation, expected_key, logger, base_log_context)
