@@ -1,0 +1,113 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+stateDiagram-v2
+    [*] --> HEALTHY: Initial state
+
+    state HEALTHY {
+        [*] --> NormalOperation
+        NormalOperation: ✅ All systems operational
+        NormalOperation: timeout = default (30s)
+        NormalOperation: batch_size = default (1000)
+        NormalOperation: retry_count = 0
+        NormalOperation: metric provider_health = 2
+
+        state "Request Processing" as HP {
+            [*] --> ProcessingRequest
+            ProcessingRequest --> RequestSuccess: 2xx response
+            ProcessingRequest --> MinorError: 1-2 consecutive errors
+            RequestSuccess --> ProcessingRequest: next request
+        }
+    }
+
+    HEALTHY --> DEGRADED: 1-2 consecutive errors\nOR latency > 2x baseline
+
+    state DEGRADED {
+        [*] --> ReducedCapacity
+        ReducedCapacity: ⚠️ Reduced performance mode
+        ReducedCapacity: timeout = default × 2 (60s)
+        ReducedCapacity: batch_size = default ÷ 2 (500)
+        ReducedCapacity: circuit_breaker = monitoring
+        ReducedCapacity: metric provider_health = 1
+
+        state "Recovery Monitoring" as DM {
+            [*] --> WatchingErrors
+            WatchingErrors --> ErrorAccumulating: error received
+            WatchingErrors --> RecoveryProgress: success received
+            ErrorAccumulating --> WatchingErrors: count < threshold
+            RecoveryProgress --> WatchingErrors: < 5 minutes stable
+        }
+    }
+
+    DEGRADED --> HEALTHY: 0 errors for 5 minutes
+    DEGRADED --> UNHEALTHY: ≥3 consecutive errors\nOR health_check fails
+
+    state UNHEALTHY {
+        [*] --> Paused
+        Paused: ❌ Pipeline paused
+        Paused: All requests blocked
+        Paused: Alert P2 triggered
+        Paused: metric provider_health = 0
+
+        state "Health Probe" as UH {
+            [*] --> WaitingForProbe
+            WaitingForProbe: Wait recovery_timeout (300s)
+            WaitingForProbe --> SendProbe: timeout elapsed
+            SendProbe --> ProbeResult: health_check()
+        }
+    }
+
+    UNHEALTHY --> DEGRADED: 1 successful health_check
+    UNHEALTHY --> UNHEALTHY: health_check fails\n(restart timer)
+
+    note right of HEALTHY
+        Provider: ChEMBL
+        Base URL: ebi.ac.uk/chembl
+        Health Endpoint: /chembl/api/data/status.json
+        Rate Limit: None
+    end note
+
+    note right of DEGRADED
+        Adaptive Behavior:
+        • Reduce batch size by 50%
+        • Double request timeout
+        • Increase retry delays
+        • Log warning for each error
+    end note
+
+    note left of UNHEALTHY
+        Alert Triggers:
+        • P2 Alert: pipeline paused
+        • Slack notification
+        • CloudWatch alarm
+
+        Recovery:
+        • Probe every 5 minutes
+        • Requires successful health_check
+    end note
+
+    ---
+
+    state ProviderSpecificBehavior {
+        state "ChEMBL" as ChEMBL {
+            ChEMBL: Rate Limit: None
+            ChEMBL: Health: /status.json
+            ChEMBL: Batch: 1000 records
+        }
+
+        state "PubChem" as PubChem {
+            PubChem: Rate Limit: 5 req/sec
+            PubChem: Health: compound probe
+            PubChem: Batch: 100 compounds
+        }
+
+        state "UniProt" as UniProt {
+            UniProt: Rate Limit: 100 req/sec (API key)
+            UniProt: Health: search probe
+            UniProt: Batch: 500 proteins
+        }
+
+        state "PubMed" as PubMed {
+            PubMed: Rate Limit: 3 req/sec (10 w/ key)
+            PubMed: Health: efetch probe
+            PubMed: Batch: 200 articles
+        }
+    }
