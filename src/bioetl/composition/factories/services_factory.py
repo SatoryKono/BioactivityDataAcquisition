@@ -25,7 +25,6 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.domain.locking import LockContextHolder
 
 # Re-export RunnerServices from application layer for backwards compatibility
 from bioetl.application.core.runner_services import RunnerServices
@@ -33,6 +32,7 @@ from bioetl.application.observability.observer import PipelineObserver
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.locking import LockContextHolder
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics

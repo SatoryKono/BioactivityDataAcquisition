@@ -4,8 +4,6 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera as pa
 from pandera.typing import Series
 
@@ -29,7 +27,7 @@ class TargetSchema(ETLRecordSchema):
     )
 
     # === Classification ===
-    target_type: Optional[Series[str]] = pa.Field(
+    target_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
             "SINGLE PROTEIN", "PROTEIN FAMILY", "PROTEIN COMPLEX", "PROTEIN COMPLEX GROUP",
@@ -45,47 +43,47 @@ class TargetSchema(ETLRecordSchema):
     # )
 
     # === Metadata ===
-    pref_name: Optional[Series[str]] = pa.Field(
+    pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    tax_id: Optional[Series[int]] = pa.Field(
+    tax_id: Series[int] | None = pa.Field(
         nullable=True, description="NCBI Taxonomy ID."
     )
-    organism: Optional[Series[str]] = pa.Field(
+    organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    species_group_flag: Optional[Series[bool]] = pa.Field(
+    species_group_flag: Series[bool] | None = pa.Field(
         nullable=True,
         description="Species group flag.",
     )
-    downgraded: Optional[Series[bool]] = pa.Field(
+    downgraded: Series[bool] | None = pa.Field(
         nullable=True,
         description="Downgraded flag.",
     )
 
     # === Complex Fields (JSON Strings) ===
-    target_components: Optional[Series[str]] = pa.Field(
+    target_components: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of target components."
     )
-    cross_references: Optional[Series[str]] = pa.Field(
+    cross_references: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of cross references."
     )
 
     # === Flattened Component Fields (Lists) ===
     # Note: Pandera Series[object] is used for lists, validation is limited
-    component_accessions: Optional[Series[object]] = pa.Field(
+    component_accessions: Series[object] | None = pa.Field(
         nullable=True, description="List of component accessions."
     )
-    component_ids: Optional[Series[object]] = pa.Field(
+    component_ids: Series[object] | None = pa.Field(
         nullable=True, description="List of component IDs."
     )
-    component_types: Optional[Series[object]] = pa.Field(
+    component_types: Series[object] | None = pa.Field(
         nullable=True, description="List of component types."
     )
-    component_relationships: Optional[Series[object]] = pa.Field(
+    component_relationships: Series[object] | None = pa.Field(
         nullable=True, description="List of component relationships."
     )
-    component_descriptions: Optional[Series[object]] = pa.Field(
+    component_descriptions: Series[object] | None = pa.Field(
         nullable=True, description="List of component descriptions."
     )
 
