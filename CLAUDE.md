@@ -174,6 +174,10 @@ src/bioetl/
 | **PipelineRunner** | "Не выпускает метрики по стадиям" | Использует `PipelineObserver` через `RunnerServices.observer` (`runner.py:89,117`) |
 | **Write mode validation** | "Нет валидации через Enum" | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`) |
 | **Архитектурные тесты** | "Не связаны с метриками" | 187 тестов в `tests/architecture/`, `make arch-test` в CI |
+| **MemoryLock** | "Требуется Redis для распределённых блокировок" | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки. |
+| **MemoryMonitor** | "Возвращает захардкоженные нули, баг" | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180` |
+| **DQ метрики** | "Не экспортируются в Prometheus" | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq_soft_threshold_exceeded` (counter), `dq_check_duration_ms` (histogram). `DQConfig` имеет `soft_fail_threshold=0.05`, `hard_fail_threshold=0.20` |
+| **protocols.py** | "Пустой файл с нулевым покрытием" | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort`. См. `application/core/protocols.py` |
 
 **Паттерны, которые НЕ являются нарушениями:**
 
@@ -196,6 +200,18 @@ src/bioetl/
 5. **Большой файл с делегированием** (500+ LOC):
    - Размер ≠ god object, если есть делегирование
    - Проверять через `grep "self._" file.py | sort -u`
+
+6. **Graceful degradation в MemoryMonitor**:
+   - При недоступности psutil возвращает **консервативные оценки** (50% памяти), не нули
+   - Это **безопасный fallback** — лучше переоценить нагрузку, чем недооценить
+   - Реализация: `memory_monitor.py:170-180` (`_get_stats_estimate`)
+   - **НЕ баг**, а продуманное поведение для кросс-платформенности
+
+7. **DQ метрики уже реализованы**:
+   - `DQConfig` в `domain/config.py:28-40` с `soft_fail_threshold=0.05`, `hard_fail_threshold=0.20`
+   - `postrun_service.py:122-163` проверяет пороги и эмитит метрики
+   - Счётчик `dq_soft_threshold_exceeded` и гистограмма `dq_check_duration_ms`
+   - **НЕ требуется** дополнительная реализация
 
 ### 2.3.1. Причины Ложных Утверждений (Избегать!)
 
@@ -349,11 +365,38 @@ sha256(provider + canonical_json(record))
 |----------|----------|
 | Механизм | In-memory (MemoryLock) |
 | Область | Локальный процесс |
+| TTL по умолчанию | `heartbeat_interval * 3` = 90s |
+| Heartbeat | 30s (настраивается в `RuntimeConfig`) |
 
-**Примечание**: Для локального развертывания используется in-memory блокировка.
-Распределённые блокировки не требуются, так как пайплайны запускаются локально.
+### 5.1. ⚠️ MemoryLock Достаточен для Локального Запуска
 
-### Lock Keys
+> **ВАЖНО**: Это **архитектурное решение**, а не недостаток!
+
+**Почему НЕ нужен Redis:**
+1. Пайплайны запускаются **локально** на одной машине
+2. Нет распределённых workers — нет split-brain
+3. `MemoryLock` полностью реализует `LockPort`:
+   - TTL-based автоматическое освобождение (`_ttl_checker_loop`)
+   - Heartbeat для продления блокировки (`heartbeat()`)
+   - Валидация владельца (`validate_owner()`)
+   - Safety guard перед записью (`LockNotHeldError`)
+
+**Реализация:** `src/bioetl/infrastructure/locking/memory_lock.py` (256 строк)
+
+```python
+# Полный функционал MemoryLock:
+async def acquire(key, owner_id, ttl, wait, wait_timeout, exclusive) -> bool
+async def release(key, owner_id, exclusive) -> bool
+async def heartbeat(key, owner_id, exclusive) -> bool  # Продление TTL
+async def validate_owner(key, owner_id) -> bool        # Safety guard
+async def aclose() -> None                             # Graceful shutdown
+```
+
+**Когда понадобится Redis:**
+- Только при масштабировании на несколько workers
+- Текущая архитектура этого не предполагает
+
+### 5.2. Lock Keys
 
 - Incremental: `lock:{provider}_{entity}`
 - Backfill/Rebuild: `lock:{provider}_{entity}:exclusive`
