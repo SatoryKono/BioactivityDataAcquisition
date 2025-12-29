@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.3] - 2025-12-29
+
+### Added
+
+- **Bronze Retention CLI**: Новая команда `bioetl maintenance bronze-cleanup`:
+  - Удаляет Bronze-файлы старше указанного срока (по умолчанию 90 дней)
+  - Реализует RULES.md §2.1 Bronze retention для локальных развёртываний
+  - Опции: `--retention-days`, `--dry-run`
+  - Пример: `bioetl maintenance bronze-cleanup --dry-run`
+
+- **BronzeWriter.cleanup_old_files()**: Метод для программной очистки Bronze:
+  - Удаляет файлы старше указанного retention period
+  - Возвращает статистику: files_removed, bytes_freed, directories_removed
+  - Логирует операции через LoggerPort
+
+### Changed
+
+- **Writer DI Simplification**: Удалён `DeprecationWarning` для `tracing=None`:
+  - `BronzeWriter`, `DeltaWriter`, `GoldWriter` теперь молча используют `NoOpTracing`
+  - Production код продолжает использовать явную инъекцию через composition
+  - Упрощает тестирование без лишних предупреждений
+  - Docstrings обновлены: "Production code SHOULD always inject tracing explicitly"
+
+### Documentation
+
+- **Architecture Audit v2**: Добавлен верифицированный отчёт аудита:
+  - `reports/architecture-audit-2025-02.md`
+  - Исправлены 6 ложных утверждений из оригинального аудита
+  - Общая оценка скорректирована с 6.94 до 8.86
+
 ## [5.0.2] - 2025-12-29
 
 ### Fixed

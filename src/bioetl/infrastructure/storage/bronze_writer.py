@@ -73,9 +73,9 @@ class BronzeWriter:
             logger: Structured logger for observability (MUST be injected)
             metrics: Metrics port for observability (MUST be injected).
                      Use NoOpMetrics from composition layer if metrics disabled.
-            tracing: TracingPort for distributed tracing (SHOULD be injected).
-                    Use NoOpTracing from composition layer if tracing disabled.
-                    Passing None is deprecated and will raise error in future.
+            tracing: TracingPort for distributed tracing. Use NoOpTracing from
+                    composition layer if tracing is disabled. If None, NoOpTracing
+                    is used automatically (for test convenience).
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
             validate_json: If True, validate each record is valid JSON bytes
@@ -87,19 +87,12 @@ class BronzeWriter:
                          Default is True per RULES.md §3.3.
                          Set to False only for testing or non-concurrent scenarios.
 
+        Note: Production code SHOULD always inject tracing explicitly via composition.
         """
-        # Backward compatibility: create NoOp if not provided (deprecated)
+        # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
-            import warnings
-
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
-            warnings.warn(
-                "Passing tracing=None is deprecated. "
-                "Explicitly pass NoOpTracing() from composition layer.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
             tracing = NoOpTracing()
 
         self.base_path = Path(base_path)
@@ -580,3 +573,58 @@ class BronzeWriter:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
         return self._list_batches_local(prefix, date)
+
+    def _find_old_date_dirs(self, cutoff_str: str) -> list[Path]:
+        """Find date directories older than cutoff."""
+        version_path = self.base_path / self.BRONZE_FORMAT_VERSION
+        if not version_path.exists():
+            return []
+        old_dirs: list[Path] = []
+        for prov in version_path.iterdir():
+            if not prov.is_dir():
+                continue
+            for ent in prov.iterdir():
+                if not ent.is_dir():
+                    continue
+                for date_dir in ent.iterdir():
+                    is_old = (
+                        date_dir.is_dir()
+                        and len(date_dir.name) == 10
+                        and date_dir.name < cutoff_str
+                    )
+                    if is_old:
+                        old_dirs.append(date_dir)
+        return old_dirs
+
+    async def cleanup_old_files(
+        self, cutoff_date: datetime, dry_run: bool = False
+    ) -> dict[str, int]:
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Args:
+            cutoff_date: Files older than this will be removed (UTC, per ADR-014).
+            dry_run: If True, only count files without removing them.
+
+        Returns:
+            Dict with files_removed, bytes_freed, directories_removed counts.
+        """
+        cutoff_str = cutoff_date.strftime("%Y-%m-%d")
+        files, bytes_total, dirs = 0, 0, 0
+
+        for date_dir in self._find_old_date_dirs(cutoff_str):
+            for fp in date_dir.glob("*"):
+                if fp.is_file():
+                    bytes_total += fp.stat().st_size
+                    files += 1
+                    if not dry_run:
+                        fp.unlink()
+            if dry_run or not any(date_dir.iterdir()):
+                dirs += 1
+                if not dry_run:
+                    date_dir.rmdir()
+
+        self.logger.info(
+            "bronze_cleanup_complete", cutoff=cutoff_str, dry_run=dry_run,
+            files_removed=files, bytes_freed=bytes_total, dirs_removed=dirs,
+        )
+        return {"files_removed": files, "bytes_freed": bytes_total, "directories_removed": dirs}
