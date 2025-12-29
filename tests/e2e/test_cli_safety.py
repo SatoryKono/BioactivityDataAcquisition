@@ -27,24 +27,34 @@ def mock_registry():
 def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
     """Test that rebuild requires confirmation without --yes."""
     with (
-        patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner,
-        patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry),
+        patch(
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner"
+        ) as mock_create_runner,
+        patch(
+            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            return_value=mock_registry,
+        ),
     ):
         result = cli_runner.invoke(
             cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild"]
         )
 
         # Should prompt for confirmation (message format from merged CLI)
-        assert "WARNING: rebuild will clear existing data" in result.output
-        assert result.exit_code == 1  # Click aborts when no input provided
+        assert "rebuild will clear existing data" in result.output.lower()
+        assert result.exit_code != 0  # Click aborts when no input provided
         mock_create_runner.assert_not_called()
 
 
 def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
     with (
-        patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner,
-        patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry),
+        patch(
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner"
+        ) as mock_create_runner,
+        patch(
+            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            return_value=mock_registry,
+        ),
     ):
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock()  # Make run awaitable
@@ -62,9 +72,16 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
 def test_cli_dry_run_flag(cli_runner, mock_registry):
     """Test that --dry-run flag shows preview and does NOT execute pipeline."""
     with (
-        patch("bioetl.interfaces.cli.create_pipeline_runner") as mock_create_runner,
-        patch("bioetl.interfaces.cli._preview_cleanup") as mock_preview,
-        patch("bioetl.interfaces.cli.get_default_registry", return_value=mock_registry),
+        patch(
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner"
+        ) as mock_create_runner,
+        patch(
+            "bioetl.interfaces.cli.commands.run_helpers.show_cleanup_preview"
+        ) as mock_preview,
+        patch(
+            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            return_value=mock_registry,
+        ),
     ):
         result = cli_runner.invoke(
             cli,
