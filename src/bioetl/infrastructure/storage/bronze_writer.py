@@ -264,6 +264,7 @@ class BronzeWriter:
         record_count = 0
         uncompressed_size = 0
         chunk_buffer = bytearray()
+        newline = b"\n"
 
         try:
             with (
@@ -274,8 +275,10 @@ class BronzeWriter:
             ):
                 for record in records:
                     chunk_buffer.extend(record)
+                    chunk_buffer.extend(newline)
                     record_count += 1
-                    uncompressed_size += len(record)
+                    # Record length + newline byte
+                    uncompressed_size += len(record) + 1
 
                     if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
                         writer.write(chunk_buffer)
@@ -480,7 +483,8 @@ class BronzeWriter:
         json_relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl"
 
         # Combine all records into single JSONL content
-        jsonl_content = b"".join(records)
+        # Join with newline and append trailing newline
+        jsonl_content = b"\n".join(records) + b"\n"
 
         json_full_path = Path(self.json_path) / json_relative_path
         json_full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -546,7 +550,8 @@ class BronzeWriter:
         with decompressor.stream_reader(compressed_data) as reader:
             decompressed_data = reader.read()
 
-        for line in decompressed_data.decode("utf-8").splitlines():
+        # Optimize: split bytes directly instead of decoding full blob
+        for line in decompressed_data.splitlines():
             if line.strip():
                 yield orjson.loads(line)
 

@@ -146,11 +146,10 @@ class BatchWriter:
             # Sort bytes for deterministic file content
             json_bytes_list.sort()
 
-            # Create generator for bytes with newlines
-            record_bytes = (b + b"\n" for b in json_bytes_list)
-
+            # Pass raw sorted bytes; writer handles newline delimiters efficiently
+            # Optimization: Avoids N allocations of (b + b"\n")
             await self._storage.write_bronze(
-                records=record_bytes,
+                records=iter(json_bytes_list),
                 provider=self._provider,
                 entity=self._entity_type,
                 date=ingestion_ts,

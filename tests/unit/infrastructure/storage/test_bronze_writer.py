@@ -63,7 +63,8 @@ def sample_records() -> list[bytes]:
         {"id": 2, "name": "test2", "value": 200},
         {"id": 3, "name": "test3", "value": 300},
     ]
-    return [json.dumps(r).encode("utf-8") + b"\n" for r in records]
+    # Note: BronzeWriter now expects records WITHOUT newlines
+    return [json.dumps(r).encode("utf-8") for r in records]
 
 
 @pytest.mark.unit
@@ -496,6 +497,13 @@ class TestBronzeWriterCompress:
             require_lock=False,
         )
 
+        # _compress_records is DEPRECATED and was not updated to add newlines
+        # because it is not used in production path.
+        # But if we update tests to pass raw bytes, we should check if
+        # _compress_records handles them.
+        # It blindly extends buffer. So output will have NO newlines.
+        # This confirms it writes what it gets.
+
         compressed, record_count, uncompressed_size = writer._compress_records(
             iter(sample_records)
         )
@@ -533,9 +541,9 @@ class TestBronzeWriterCompress:
             require_lock=False,
         )
 
-        # Create large records
+        # Create large records (NO newlines, testing raw bytes)
         large_record = {"data": "x" * 500_000}
-        records = [json.dumps(large_record).encode("utf-8") + b"\n" for _ in range(5)]
+        records = [json.dumps(large_record).encode("utf-8") for _ in range(5)]
 
         compressed, record_count, uncompressed_size = writer._compress_records(
             iter(records)
@@ -614,7 +622,8 @@ class TestBronzeWriterWriteLocal:
         decompressor = zstd.ZstdDecompressor()
         with decompressor.stream_reader(compressed_data) as reader:
             decompressed = reader.read()
-        expected = b"".join(sample_records)
+        # Expect newlines to be added by writer
+        expected = b"\n".join(sample_records) + b"\n"
         assert decompressed == expected
 
     @pytest.mark.asyncio
@@ -702,7 +711,8 @@ class TestBronzeWriterWriteLocal:
         # Verify JSON content
         with open(json_files[0], "rb") as f:
             content = f.read()
-        expected = b"".join(sample_records)
+        # Expect newlines to be added by writer
+        expected = b"\n".join(sample_records) + b"\n"
         assert content == expected
 
     @pytest.mark.asyncio
@@ -1621,13 +1631,14 @@ class TestBronzeWriterJsonValidation:
             require_lock=False,
         )
 
+        # Removed newlines to match new behavior
         valid_records = [
-            b'{"id": 1, "name": "test"}\n',
-            b'{"id": 2, "value": 100}\n',
-            b"[1, 2, 3]\n",
-            b'"string"\n',
-            b"123\n",
-            b"null\n",
+            b'{"id": 1, "name": "test"}',
+            b'{"id": 2, "value": 100}',
+            b"[1, 2, 3]",
+            b'"string"',
+            b"123",
+            b"null",
         ]
 
         validated = list(writer._validate_json_records(iter(valid_records)))
@@ -1644,10 +1655,11 @@ class TestBronzeWriterJsonValidation:
             require_lock=False,
         )
 
+        # Removed newlines
         invalid_records = [
-            b'{"id": 1}\n',
-            b"not valid json\n",  # This is invalid
-            b'{"id": 3}\n',
+            b'{"id": 1}',
+            b"not valid json",  # This is invalid
+            b'{"id": 3}',
         ]
 
         with pytest.raises(BronzeValidationError) as exc_info:
@@ -1703,8 +1715,8 @@ class TestBronzeWriterJsonValidation:
         )
 
         valid_records = [
-            b'{"id": 1}\n',
-            b'{"id": 2}\n',
+            b'{"id": 1}',
+            b'{"id": 2}',
         ]
 
         # Getting the generator should not consume any records
@@ -1713,7 +1725,7 @@ class TestBronzeWriterJsonValidation:
 
         # First record should be validated on demand
         first = next(gen)
-        assert first == b'{"id": 1}\n'
+        assert first == b'{"id": 1}'
 
     @pytest.mark.asyncio
     async def test_write_bronze_validates_json_by_default(
@@ -1737,8 +1749,8 @@ class TestBronzeWriterJsonValidation:
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
         invalid_records = [
-            b'{"valid": true}\n',
-            b"invalid json here\n",
+            b'{"valid": true}',
+            b"invalid json here",
         ]
 
         with pytest.raises(BronzeValidationError) as exc_info:
@@ -1779,8 +1791,8 @@ class TestBronzeWriterJsonValidation:
         # These are invalid JSON but should still be written when validation disabled
         # Note: They still need to be bytes
         invalid_records = [
-            b"not json but bytes\n",
-            b"another invalid line\n",
+            b"not json but bytes",
+            b"another invalid line",
         ]
 
         # Should not raise - writes the bytes as-is
