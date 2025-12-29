@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -199,6 +199,9 @@ docs = [
     { name = "mkdocstrings", extra = ["python"] },
     { name = "pymdown-extensions" },
 ]
+performance = [
+    { name = "orjson" },
+]
 tests = [
     { name = "hypothesis" },
     { name = "opentelemetry-api" },
@@ -269,7 +272,8 @@ requires-dist = [
     { name = "opentelemetry-sdk", marker = "extra == 'dev'", specifier = ">=1.20" },
     { name = "opentelemetry-sdk", marker = "extra == 'tests'", specifier = ">=1.20" },
     { name = "opentelemetry-sdk", marker = "extra == 'tracing'", specifier = ">=1.20" },
-    { name = "orjson", specifier = ">=3.9" },
+    { name = "orjson", specifier = ">=3.11.0,<4.0" },
+    { name = "orjson", marker = "extra == 'performance'", specifier = ">=3.11.0,<4.0" },
     { name = "pandas", specifier = ">=2.0" },
     { name = "pandera", specifier = ">=0.20" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.7" },
