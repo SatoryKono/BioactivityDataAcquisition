@@ -508,12 +508,17 @@ class TestRealProviderRegistration:
         load_providers(force=True)
 
     def test_chembl_is_registered(self):
-        """Verify ChEMBL provider is registered."""
+        """Verify ChEMBL provider is registered with values from source config."""
+        from bioetl.infrastructure.config import load_source_config
+
         assert ProviderRegistry.is_registered("chembl")
 
         config = ProviderRegistry.get("chembl")
         assert config.http_config is not None
-        assert config.http_config.rate == 10.0
+
+        # Rate should match configs/sources/chembl.yaml
+        source_config = load_source_config("chembl")
+        assert config.http_config.rate == source_config.rate_limit.requests_per_second
 
     def test_pubchem_is_registered(self):
         """Verify PubChem provider is registered."""
@@ -531,13 +536,18 @@ class TestRealProviderRegistration:
         assert "uniprot_api_key" in config.http_config.rate_overrides
 
     def test_pubmed_is_registered(self):
-        """Verify PubMed provider is registered."""
+        """Verify PubMed provider is registered with values from source config."""
+        from bioetl.infrastructure.config import load_source_config
+
         assert ProviderRegistry.is_registered("pubmed")
 
         config = ProviderRegistry.get("pubmed")
         assert config.custom_creator is not None
         assert config.http_config is not None
-        assert config.http_config.rate == 3.0
+
+        # Rate should match configs/sources/pubmed.yaml
+        source_config = load_source_config("pubmed")
+        assert config.http_config.rate == source_config.rate_limit.requests_per_second
 
     def test_all_providers_listed(self):
         """Verify all expected providers are listed."""
