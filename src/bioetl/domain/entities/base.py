@@ -22,43 +22,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
-
-
-@runtime_checkable
-class RequiredEntityFields(Protocol):
-    """Protocol defining the minimum required fields for all entities.
-
-    All domain entities MUST have these fields with non-None values.
-    Use isinstance(entity, RequiredEntityFields) for runtime checks.
-    """
-
-    @property
-    def entity_id(self) -> EntityID:
-        """Unique business identifier for the entity."""
-        ...
-
-    @property
-    def content_hash(self) -> ContentHash:
-        """SHA256 hash of canonical record representation."""
-        ...
-
-    @property
-    def run_id(self) -> RunID:
-        """Correlation ID for the pipeline run."""
-        ...
-
-    @property
-    def run_type(self) -> RunType:
-        """Type of pipeline run (incremental/backfill/rebuild)."""
-        ...
-
-    @property
-    def ingestion_ts(self) -> datetime:
-        """Timestamp when the record was ingested."""
-        ...
 
 
 @dataclass(frozen=True, kw_only=True)
