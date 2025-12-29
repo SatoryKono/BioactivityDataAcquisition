@@ -834,6 +834,69 @@ class TestJsonEncoderPortContract:
         ), "JsonEncoderPort MUST be decorated with @runtime_checkable"
 
 
+# ============================================================================
+# Logger Implementation Contract Tests
+# ============================================================================
+
+
+class TestLoggerImplementationContract:
+    """Tests that logger implementations satisfy LoggerPort contract.
+
+    StructlogLogger MUST implement LoggerPort protocol.
+    NoOpLogger MUST implement LoggerPort protocol.
+    """
+
+    def test_structlog_logger_implements_logger_port(self) -> None:
+        """StructlogLogger MUST satisfy LoggerPort contract.
+
+        Ensures formal adapter replaces duck typing with explicit
+        protocol implementation.
+        """
+        from uuid import uuid4
+
+        from bioetl.infrastructure.observability.logging import create_logger
+
+        logger = create_logger(pipeline="test", run_id=uuid4())
+
+        assert isinstance(logger, ports.LoggerPort), (
+            "StructlogLogger MUST implement LoggerPort protocol. "
+            "Check that all required methods are present: "
+            "bind, info, warning, error, debug, exception."
+        )
+
+    def test_structlog_logger_bind_returns_logger_port(self) -> None:
+        """StructlogLogger.bind() MUST return LoggerPort, not raw BoundLogger.
+
+        This ensures type consistency across bound loggers.
+        """
+        from uuid import uuid4
+
+        from bioetl.infrastructure.observability.logging import create_logger
+
+        logger = create_logger(pipeline="test", run_id=uuid4())
+        bound = logger.bind(extra_context="value")
+
+        assert isinstance(bound, ports.LoggerPort), (
+            "StructlogLogger.bind() MUST return LoggerPort. "
+            "Returning raw structlog.BoundLogger breaks type safety."
+        )
+
+    def test_noop_logger_implements_logger_port(self) -> None:
+        """NoOpLogger MUST satisfy LoggerPort contract.
+
+        NoOpLogger is used as fallback in adapters without explicit
+        logger injection. It MUST implement the full LoggerPort interface.
+        """
+        from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+        logger = NoOpLogger()
+
+        assert isinstance(logger, ports.LoggerPort), (
+            "NoOpLogger MUST implement LoggerPort protocol. "
+            "Check that all required methods are present."
+        )
+
+
 class TestJsonEncoderImplementationContract:
     """Tests that JSON encoder implementations satisfy port contracts."""
 
