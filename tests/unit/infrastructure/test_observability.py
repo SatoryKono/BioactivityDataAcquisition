@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from prometheus_client import CollectorRegistry
@@ -15,6 +15,12 @@ from bioetl.infrastructure.observability.anomaly import (
 )
 from bioetl.infrastructure.observability.lineage import LineageTracker
 from bioetl.infrastructure.observability.metrics import MetricsCollector
+
+
+@pytest.fixture
+def mock_logger() -> MagicMock:
+    """Create a mock logger for tests."""
+    return MagicMock()
 
 
 @pytest.fixture
@@ -64,15 +70,21 @@ class TestMetricsCollector:
 class TestLineageTracker:
     """Test LineageTracker functionality."""
 
-    def test_lineage_tracker_initialization(self, tmp_path):
+    def test_lineage_tracker_initialization(self, tmp_path, mock_logger):
         """Test LineageTracker can be initialized."""
-        tracker = LineageTracker(delta_path=tmp_path, pipeline_name="test_pipeline")
+        tracker = LineageTracker(
+            delta_path=tmp_path, pipeline_name="test_pipeline", logger=mock_logger
+        )
         assert tracker.pipeline_name == "test_pipeline"
         assert tracker.delta_path == tmp_path
 
-    def test_record_bronze_creates_batch_lineage(self, tmp_path, mock_write_deltalake):
+    def test_record_bronze_creates_batch_lineage(
+        self, tmp_path, mock_write_deltalake, mock_logger
+    ):
         """Test that record_bronze creates proper batch lineage."""
-        tracker = LineageTracker(delta_path=tmp_path, pipeline_name="test_pipeline")
+        tracker = LineageTracker(
+            delta_path=tmp_path, pipeline_name="test_pipeline", logger=mock_logger
+        )
 
         # Record bronze layer ingestion
         tracker.record_bronze(
