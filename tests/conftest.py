@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -21,6 +22,41 @@ except ImportError:
     VCR_AVAILABLE = False
 
 
+def _is_plugin_available(module_name: str) -> bool:
+    return importlib.util.find_spec(module_name) is not None
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Register placeholders for missing optional plugins."""
+    if not _is_plugin_available("pytest_asyncio"):
+        parser.addini(
+            "asyncio_mode",
+            "Asyncio plugin not installed; placeholder ini option to avoid config error",
+            default="auto",
+        )
+        parser.addini(
+            "asyncio_default_fixture_loop_scope",
+            "Asyncio plugin not installed; placeholder ini option to avoid config error",
+            default="function",
+        )
+
+    if not _is_plugin_available("pytest_cov"):
+        parser.addoption(
+            "--cov",
+            action="append",
+            dest="cov",
+            default=[],
+            help="pytest-cov not installed; install extras via pip install -e '.[dev]'",
+        )
+        parser.addoption(
+            "--cov-report",
+            action="append",
+            dest="cov_report",
+            default=[],
+            help="pytest-cov not installed; install extras via pip install -e '.[dev]'",
+        )
+
+
 def pytest_configure() -> None:
     """Add src directory to Python path and mock missing modules."""
     import os
@@ -38,6 +74,25 @@ def pytest_configure() -> None:
         __import__("pubchempy")
     except ImportError:
         sys.modules["pubchempy"] = MagicMock()
+
+    missing_plugins = []
+    for plugin_name, install_hint in (
+        ("pytest_asyncio", "pip install -e '.[dev]'"),
+        ("pytest_cov", "pip install -e '.[dev]'"),
+    ):
+        if not _is_plugin_available(plugin_name):
+            missing_plugins.append((plugin_name, install_hint))
+
+    if missing_plugins:
+        formatted = "\n".join(
+            f"- {name} (установите: {hint})" for name, hint in missing_plugins
+        )
+        pytest.exit(
+            "Отсутствуют обязательные плагины для тестов:\n"
+            f"{formatted}\n"
+            "Повторите установку зависимостей: pip install -e '.[dev]'",
+            returncode=3,
+        )
 
 
 @pytest.fixture(scope="session")
