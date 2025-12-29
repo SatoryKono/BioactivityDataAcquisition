@@ -281,12 +281,14 @@ class TestPIIHandling:
 
     # Files with known technical email usage (NOT user PII)
     # These are API identifiers required by external services
-    KNOWN_TECHNICAL_EMAIL_FILES = frozenset({
-        "config.py",              # NCBI API tool identification (default_email)
-        "pubmed_client.py",       # NCBI API tool identification
-        "pipeline_config.py",     # NCBI API source config
-        "client.py",              # User-Agent header identification
-    })
+    KNOWN_TECHNICAL_EMAIL_FILES = frozenset(
+        {
+            "config.py",  # NCBI API tool identification (default_email)
+            "pubmed_client.py",  # NCBI API tool identification
+            "pipeline_config.py",  # NCBI API source config
+            "client.py",  # User-Agent header identification
+        }
+    )
 
     def test_silver_layer_uses_hashing(self) -> None:
         """Verify Silver layer transformers use hashing for PII fields.
@@ -320,7 +322,10 @@ class TestPIIHandling:
             for regex_pattern, pattern_name in pii_patterns:
                 if re.search(regex_pattern, content, re.IGNORECASE):
                     # Skip known technical email files (documented as NOT PII)
-                    if pattern_name == "email" and py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
+                    if (
+                        pattern_name == "email"
+                        and py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES
+                    ):
                         continue
 
                     # Check if sha256 or hashing is mentioned nearby

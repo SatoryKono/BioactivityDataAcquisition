@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -14,9 +15,7 @@ class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""
 
     # === Primary Key ===
-    activity_id: Series[str] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    activity_id: Series[str] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
     assay_chembl_id: Series[str] = pa.Field(
@@ -57,7 +56,21 @@ class ActivitySchema(ETLRecordSchema):
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
         # Expanded list to avoid false positives on valid data
-        isin=["IC50", "EC50", "Ki", "Kd", "AC50", "GI50", "Potency", "Inhibition", "% Inhibition", "Activity", "Ratio", "ED50", "ID50"],
+        isin=[
+            "IC50",
+            "EC50",
+            "Ki",
+            "Kd",
+            "AC50",
+            "GI50",
+            "Potency",
+            "Inhibition",
+            "% Inhibition",
+            "Activity",
+            "Ratio",
+            "ED50",
+            "ID50",
+        ],
         description="Standardized measurement type.",
     )
     standard_flag: Series[int] | None = pa.Field(
@@ -108,32 +121,20 @@ class ActivitySchema(ETLRecordSchema):
         str_matches=r"^UO:\d+$",
         description="Units Ontology ID.",
     )
-    qudt_units: Series[str] | None = pa.Field(
-        nullable=True, description="QUDT unit."
-    )
+    qudt_units: Series[str] | None = pa.Field(nullable=True, description="QUDT unit.")
 
     # === Original Values & Other Fields ===
-    src_id: Series[int] | None = pa.Field(
-        nullable=True, description="Source ID."
-    )
+    src_id: Series[int] | None = pa.Field(nullable=True, description="Source ID.")
     record_id: Series[int] | None = pa.Field(
         nullable=True, description="FK to compound_record."
     )
-    type: Series[str] | None = pa.Field(
-        nullable=True, description="Original type."
-    )
+    type: Series[str] | None = pa.Field(nullable=True, description="Original type.")
     relation: Series[str] | None = pa.Field(
         nullable=True, description="Original operator."
     )
-    value: Series[float] | None = pa.Field(
-        nullable=True, description="Original value."
-    )
-    units: Series[str] | None = pa.Field(
-        nullable=True, description="Original units."
-    )
-    text_value: Series[str] | None = pa.Field(
-        nullable=True, description="Text value."
-    )
+    value: Series[float] | None = pa.Field(nullable=True, description="Original value.")
+    units: Series[str] | None = pa.Field(nullable=True, description="Original units.")
+    text_value: Series[str] | None = pa.Field(nullable=True, description="Text value.")
     standard_text_value: Series[str] | None = pa.Field(
         nullable=True, description="Standardized text value."
     )
@@ -143,9 +144,7 @@ class ActivitySchema(ETLRecordSchema):
     standard_upper_value: Series[float] | None = pa.Field(
         nullable=True, description="Standardized upper bound."
     )
-    toid: Series[int] | None = pa.Field(
-        nullable=True, description="Test Occasion ID."
-    )
+    toid: Series[int] | None = pa.Field(nullable=True, description="Test Occasion ID.")
     # manual_curation_flag: Optional[Series[int]] = pa.Field(
     #     nullable=True,
     #     isin=[0, 1],
@@ -190,6 +189,7 @@ class ActivitySchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = False
         coerce = True

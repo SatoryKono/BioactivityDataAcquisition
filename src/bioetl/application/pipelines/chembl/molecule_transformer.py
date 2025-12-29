@@ -155,7 +155,13 @@ class MoleculeTransformer(BaseChemblTransformer):
             **self._map_molecule_flags(record),
             **self._map_additional_metadata(record),
             **self._map_complex_fields(record),
-            **_extract_hierarchy(cast("dict[str, Any] | None", record.get("molecule_hierarchy"))),
-            **_extract_properties(cast("dict[str, Any] | None", record.get("molecule_properties"))),
-            **_extract_structures(cast("dict[str, Any] | None", record.get("molecule_structures"))),
+            **_extract_hierarchy(
+                cast("dict[str, Any] | None", record.get("molecule_hierarchy"))
+            ),
+            **_extract_properties(
+                cast("dict[str, Any] | None", record.get("molecule_properties"))
+            ),
+            **_extract_structures(
+                cast("dict[str, Any] | None", record.get("molecule_structures"))
+            ),
         }

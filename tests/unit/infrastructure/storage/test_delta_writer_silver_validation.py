@@ -239,7 +239,9 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
     """Tests for write_silver with Pandera validation integration."""
 
     @pytest.mark.asyncio
-    async def test_write_silver_pandera_validation_fails(self, valid_records, noop_logger):
+    async def test_write_silver_pandera_validation_fails(
+        self, valid_records, noop_logger
+    ):
         """Test write_silver raises SchemaViolationError when Pandera validation fails."""
         import pandera as pa
         import pyarrow as arrow_pa
@@ -284,7 +286,9 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
         assert exc_info.value.table == "test.table"
 
     @pytest.mark.asyncio
-    async def test_write_silver_pandera_validation_passes(self, valid_records, noop_logger):
+    async def test_write_silver_pandera_validation_passes(
+        self, valid_records, noop_logger
+    ):
         """Test write_silver proceeds when Pandera validation passes."""
         import pandera as pa
         import pyarrow as arrow_pa
@@ -340,7 +344,9 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
             mock_write.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_write_silver_noop_validator_allows_write(self, valid_records, noop_logger):
+    async def test_write_silver_noop_validator_allows_write(
+        self, valid_records, noop_logger
+    ):
         """Test write_silver with NoOp validator allows write without Pandera."""
         import pyarrow as arrow_pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError

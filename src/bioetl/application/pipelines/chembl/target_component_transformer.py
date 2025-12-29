@@ -60,7 +60,9 @@ class TargetComponentTransformer(BaseChemblTransformer):
             ),
             # Flattened fields (extracted from protein_classifications)
             "protein_classification_ids": extract_list_field(
-                cast("list[dict[str, Any]] | None", record.get("protein_classifications")),
+                cast(
+                    "list[dict[str, Any]] | None", record.get("protein_classifications")
+                ),
                 "protein_classification_id",
                 safe_int,
             ),

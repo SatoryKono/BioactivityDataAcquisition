@@ -188,9 +188,7 @@ class PipelineExecutor:
         span.__enter__()
         return span
 
-    async def _run_extraction_loop(
-        self, limit: int | None, query: str | None
-    ) -> None:
+    async def _run_extraction_loop(self, limit: int | None, query: str | None) -> None:
         """Run the main extraction and processing loop.
 
         Args:
@@ -425,9 +423,9 @@ class PipelineExecutor:
             attributes={
                 "bioetl.batch_id": str(batch_id),
                 "bioetl.record_count": len(batch),
-                "bioetl.run_type": self._run_type.value
-                if self._run_type
-                else "unknown",
+                "bioetl.run_type": (
+                    self._run_type.value if self._run_type else "unknown"
+                ),
                 "bioetl.entity_type": self._entity_type,
                 "bioetl.start_index": start_index,
             },

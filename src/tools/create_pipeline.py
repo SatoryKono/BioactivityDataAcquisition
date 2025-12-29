@@ -19,7 +19,8 @@ from pathlib import Path
 from string import Template
 
 # Templates
-YAML_TEMPLATE = Template("""# Pipeline Configuration for ${provider} ${entity}
+YAML_TEMPLATE = Template(
+    """# Pipeline Configuration for ${provider} ${entity}
 pipeline_name: "${provider}_${entity}"
 provider: "${provider}"
 entity_type: "${entity}"
@@ -61,9 +62,11 @@ dq:
   soft_fail_threshold: 0.05
   hard_fail_threshold: 0.20
   strict_validation: true
-""")
+"""
+)
 
-PIPELINE_TEMPLATE = Template("""\"\"\"${provider_title} ${entity_title} Pipeline.
+PIPELINE_TEMPLATE = Template(
+    """\"\"\"${provider_title} ${entity_title} Pipeline.
 
 Defines the pipeline structure for ${provider_title} ${entity_title} data.
 Transformation logic is delegated to ${entity_title}Transformer.
@@ -83,9 +86,11 @@ class ${class_prefix}Pipeline(BasePipeline):
     Transformation logic is injected via DI (GenericPipelineFactory).
     \"\"\"
     pass
-""")
+"""
+)
 
-TRANSFORMER_TEMPLATE = Template("""\"\"\"${provider_title} ${entity_title} Transformer.
+TRANSFORMER_TEMPLATE = Template(
+    """\"\"\"${provider_title} ${entity_title} Transformer.
 
 Handles transformation from Bronze (JSON) to Silver (Standardized) format.
 \"\"\"
@@ -132,9 +137,11 @@ class ${class_prefix}Transformer(BaseTransformer):
         \"\"\"Get configuration for Gold layer filtering.\"\"\"
         # If needed, override to provide custom filter config
         return super()._get_gold_filter_config()
-""")
+"""
+)
 
-TEST_TEMPLATE = Template("""\"\"\"Unit tests for ${provider_title} ${entity_title} Pipeline.\"\"\"
+TEST_TEMPLATE = Template(
+    """\"\"\"Unit tests for ${provider_title} ${entity_title} Pipeline.\"\"\"
 
 from __future__ import annotations
 
@@ -165,7 +172,8 @@ class Test${class_prefix}Transformer:
 
         assert result is not None
         assert result["${entity}_id"] == "123"
-""")
+"""
+)
 
 
 def to_pascal_case(snake_str: str) -> str:
@@ -180,9 +188,15 @@ def to_title_case(snake_str: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate BioETL Pipeline Boilerplate")
-    parser.add_argument("--provider", required=True, help="Provider name (snake_case, e.g., 'chembl')")
-    parser.add_argument("--entity", required=True, help="Entity name (snake_case, e.g., 'activity')")
-    parser.add_argument("--dry-run", action="store_true", help="Print plans without creating files")
+    parser.add_argument(
+        "--provider", required=True, help="Provider name (snake_case, e.g., 'chembl')"
+    )
+    parser.add_argument(
+        "--entity", required=True, help="Entity name (snake_case, e.g., 'activity')"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print plans without creating files"
+    )
 
     args = parser.parse_args()
 
@@ -210,33 +224,35 @@ def main() -> int:
     test_dir = Path("tests/unit/pipelines") / provider
 
     files_to_create = {
-        config_dir / f"{entity}.yaml": YAML_TEMPLATE.substitute(
-            provider=provider,
-            entity=entity,
-            pipeline_name=pipeline_name
+        config_dir
+        / f"{entity}.yaml": YAML_TEMPLATE.substitute(
+            provider=provider, entity=entity, pipeline_name=pipeline_name
         ),
-        pipeline_dir / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
+        pipeline_dir
+        / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
             entity_title=entity_title,
             pipeline_name=pipeline_name,
-            class_prefix=class_prefix
+            class_prefix=class_prefix,
         ),
-        pipeline_dir / "transformer.py": TRANSFORMER_TEMPLATE.substitute(
+        pipeline_dir
+        / "transformer.py": TRANSFORMER_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
             entity_title=entity_title,
-            class_prefix=class_prefix
+            class_prefix=class_prefix,
         ),
-        test_dir / f"test_{entity}_pipeline.py": TEST_TEMPLATE.substitute(
+        test_dir
+        / f"test_{entity}_pipeline.py": TEST_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
             entity_title=entity_title,
-            class_prefix=class_prefix
-        )
+            class_prefix=class_prefix,
+        ),
     }
 
     # Check for existing transformer file to avoid overwrite if multiple entities per provider
@@ -244,10 +260,12 @@ def main() -> int:
     # For simplicity in this tool, if transformer.py exists, we will use {entity}_transformer.py
     transformer_path = pipeline_dir / "transformer.py"
     if transformer_path.exists() and not args.dry_run:
-         new_transformer_path = pipeline_dir / f"{entity}_transformer.py"
-         content = files_to_create.pop(transformer_path)
-         files_to_create[new_transformer_path] = content
-         print(f"Note: {transformer_path} exists. Creating {new_transformer_path} instead.")
+        new_transformer_path = pipeline_dir / f"{entity}_transformer.py"
+        content = files_to_create.pop(transformer_path)
+        files_to_create[new_transformer_path] = content
+        print(
+            f"Note: {transformer_path} exists. Creating {new_transformer_path} instead."
+        )
 
     if args.dry_run:
         print("Dry Run - Files to be created:")
@@ -274,7 +292,9 @@ def main() -> int:
     print("\nDone! Don't forget to:")
     print("1. Implement transformation logic in transformer.py")
     print("2. Define validation schema in src/bioetl/infrastructure/schemas/gold.py")
-    print("3. Register any new factories if needed (though GenericPipelineFactory should handle it)")
+    print(
+        "3. Register any new factories if needed (though GenericPipelineFactory should handle it)"
+    )
 
     return 0
 

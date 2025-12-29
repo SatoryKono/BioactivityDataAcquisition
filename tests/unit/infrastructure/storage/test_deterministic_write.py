@@ -84,9 +84,9 @@ class TestDeterministicCsvExport:
                 outputs.append(f.read())
 
         # All outputs should be identical
-        assert outputs[0] == outputs[1] == outputs[2], (
-            "CSV exports should be identical regardless of input order"
-        )
+        assert (
+            outputs[0] == outputs[1] == outputs[2]
+        ), "CSV exports should be identical regardless of input order"
 
     async def test_csv_export_with_complex_types_sorted(
         self, csv_exporter: CsvExporter, tmp_path: Path
@@ -168,10 +168,10 @@ class TestDeterministicCsvFilterRead:
 
     async def test_csv_filter_reader_returns_sorted_tuple(self, tmp_path: Path):
         """Test that CsvFilterReader returns FilterLoadResult with sorted IDs."""
+        from bioetl.domain.filter_config import FilterLoadResult
         from bioetl.infrastructure.adapters.input.csv_filter_reader import (
             CsvFilterReader,
         )
-        from bioetl.domain.filter_config import FilterLoadResult
 
         # Create CSV with IDs in random order
         csv_file = tmp_path / "filter_ids.csv"
@@ -182,9 +182,13 @@ class TestDeterministicCsvFilterRead:
 
         assert isinstance(result, FilterLoadResult), "Should return FilterLoadResult"
         assert isinstance(result.ids, tuple), "IDs should be a tuple"
-        assert result.ids == ("A_ID", "B_ID", "C_ID", "D_ID", "Z_ID"), (
-            "IDs should be sorted alphabetically"
-        )
+        assert result.ids == (
+            "A_ID",
+            "B_ID",
+            "C_ID",
+            "D_ID",
+            "Z_ID",
+        ), "IDs should be sorted alphabetically"
 
     async def test_csv_filter_reader_deterministic_across_runs(self, tmp_path: Path):
         """Test that multiple reads produce identical results."""
@@ -203,9 +207,9 @@ class TestDeterministicCsvFilterRead:
             results.append(result.ids)
 
         # All reads should produce identical results
-        assert all(r == results[0] for r in results), (
-            "Multiple reads should produce identical sorted results"
-        )
+        assert all(
+            r == results[0] for r in results
+        ), "Multiple reads should produce identical sorted results"
         assert results[0] == ("ID_1", "ID_2", "ID_3")
 
 

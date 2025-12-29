@@ -379,7 +379,9 @@ class StreamingBatchProcessor:
                 )
 
             chunk = records[i : i + current_chunk_size]
-            result = await self._transformer.transform_stream(chunk, batch_id, start_index + i)
+            result = await self._transformer.transform_stream(
+                chunk, batch_id, start_index + i
+            )
 
             yield result
 

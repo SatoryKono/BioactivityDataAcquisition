@@ -52,14 +52,20 @@ class TestBronzeWriter:
     def test_bronze_writer_initialization(self, tmp_path, noop_logger):
         """Test BronzeWriter can be initialized."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
         assert writer.base_path == tmp_path
 
     async def test_write_bronze_creates_file(self, tmp_path, noop_logger):
         """Test write_bronze creates file in local storage."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         records = [b'{"id": 1, "data": "test"}\n']
@@ -83,7 +89,10 @@ class TestBronzeWriter:
     async def test_write_bronze_generates_correct_key(self, tmp_path, noop_logger):
         """Test that write_bronze generates the correct path."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         records = [b'{"id": 1}\n']
@@ -112,7 +121,10 @@ class TestBronzeWriter:
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
         """REQ-DATA-001: Test that data is compressed with zstandard."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         records = [b'{"id": 1, "data": "test"}\n']
@@ -147,7 +159,10 @@ class TestBronzeWriter:
     async def test_write_bronze_with_no_records(self, tmp_path, noop_logger):
         """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         records = []
@@ -223,7 +238,10 @@ class TestBronzeWriter:
         test_file.write_bytes(compressed)
 
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         # Read it back
@@ -239,7 +257,10 @@ class TestBronzeWriter:
     async def test_list_batches(self, tmp_path, noop_logger):
         """Test list_batches."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         # Write two batches
@@ -265,7 +286,10 @@ class TestBronzeWriter:
     async def test_list_batches_nonexistent(self, tmp_path, noop_logger):
         """Test list_batches returns empty for nonexistent path."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         batches = await writer.list_batches("nonexistent", "entity", datetime.now())
@@ -275,7 +299,10 @@ class TestBronzeWriter:
     async def test_writes_metadata_file(self, tmp_path, noop_logger):
         """Test that write_bronze creates metadata file."""
         writer = BronzeWriter(
-            base_path=tmp_path, logger=noop_logger, metrics=NoOpMetrics(), require_lock=False
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            require_lock=False,
         )
 
         records = [b'{"id": 1}\n']
@@ -311,7 +338,9 @@ class TestDeltaWriter:
 
     def test_delta_writer_initialization(self, noop_logger):
         """Test DeltaWriter can be initialized."""
-        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+        )
         assert writer.base_path == "/tmp/delta"
 
     async def test_write_silver_creates_new_table(self, mock_delta_writer, noop_logger):
@@ -321,7 +350,9 @@ class TestDeltaWriter:
         mock_delta_table, mock_write_deltalake = mock_delta_writer
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+        )
 
         records = [
             {
@@ -383,7 +414,9 @@ class TestDeltaWriter:
         mock_merge.when_matched_update_all.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
-        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+        )
 
         records = [
             {
@@ -408,7 +441,9 @@ class TestDeltaWriter:
 
     @pytest.mark.usefixtures("mock_delta_writer")
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
-        writer = DeltaWriter(base_path="/tmp/delta", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+        )
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
@@ -442,7 +477,9 @@ class TestGoldWriter:
 
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 
-        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger, require_lock=False)
+        writer = GoldWriter(
+            base_path="/tmp/gold", logger=noop_logger, require_lock=False
+        )
 
         # Records with mixed key order
         records = [
@@ -477,6 +514,8 @@ class TestGoldWriter:
         schema = data.schema
         column_names = schema.names
 
-        assert column_names == ["a", "b", "c"], (
-            f"Expected sorted columns ['a', 'b', 'c'], got {column_names}"
-        )
+        assert column_names == [
+            "a",
+            "b",
+            "c",
+        ], f"Expected sorted columns ['a', 'b', 'c'], got {column_names}"
