@@ -8,6 +8,7 @@ See the root CHANGELOG.md for the complete version history.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 5.0.4 | 2025-12-29 | Remove Prefect integration references, update orchestration docs |
 | 5.0.2 | 2025-12-29 | Mypy strict compliance (4 errors fixed), consolidated refactoring plan v2 |
 | 5.0.1 | 2025-12-28 | Test dependency fixes (respx, hypothesis, vcrpy), mypy/pandera compatibility |
 | 5.3.3 | 2025-12-26 | Architecture test fixes (base_metrics, events export) |

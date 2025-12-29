@@ -2,11 +2,11 @@
 
 These tests verify that certain frameworks and modules are only used
 in appropriate layers:
-- Orchestration frameworks (Prefect, Celery) only in interfaces
+- External orchestration frameworks are not imported in application layer
 - Metrics server initialization only in composition
 - Ports imported only from facade module
 
-REQ-ARCH-APP-001: Orchestration frameworks isolated in interfaces/orchestration.
+REQ-ARCH-APP-001: External orchestration frameworks must not be used in application layer.
 REQ-ARCH-OBS-001: Observability initialization only in composition root.
 REQ-ARCH-027: Ports must be imported from facade only.
 
@@ -25,10 +25,11 @@ class TestOrchestrationIsolation:
     """Tests ensuring orchestration frameworks are properly isolated."""
 
     def test_application_layer_no_orchestration_imports(self, src_dir: Path) -> None:
-        """Application layer must not import orchestration frameworks directly.
+        """Application layer must not import external orchestration frameworks.
 
-        REQ-ARCH-APP-001: Prefect, Celery, Airflow etc. must be isolated
-        in interfaces/orchestration layer.
+        REQ-ARCH-APP-001: External workflow frameworks (Celery, Airflow, etc.)
+        must not be imported in application layer. BioETL uses its own
+        lightweight PipelineRunner for orchestration.
         """
         application_path = src_dir / "bioetl" / "application"
         if not application_path.exists():
@@ -247,7 +248,7 @@ class TestInterfacesBootstrapIsolation:
         This separation ensures:
         - Clean layer boundaries (interfaces → entrypoints → bootstrap)
         - Easier testing of CLI without full bootstrap machinery
-        - Single entry point for orchestration layers (CLI, Prefect, REST)
+        - Single entry point for orchestration layers (CLI, REST API)
         """
         interfaces_path = src_dir / "bioetl" / "interfaces"
         if not interfaces_path.exists():
