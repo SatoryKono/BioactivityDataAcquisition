@@ -451,15 +451,28 @@ class TestPortDefinitionQuality:
                             body = item.body
 
                             # Allow: docstring + Ellipsis, or just Ellipsis
+                            # Note: ast.Ellipsis was removed in Python 3.12,
+                            # now ellipsis is ast.Constant with value=...
+                            def _is_ellipsis(node: ast.expr) -> bool:
+                                """Check if AST node is ellipsis (compatible with Python 3.8-3.12+)."""
+                                if isinstance(node, ast.Constant) and node.value is ...:
+                                    return True
+                                # For Python < 3.12 compatibility
+                                if hasattr(ast, "Ellipsis") and isinstance(
+                                    node, ast.Ellipsis  # type: ignore[attr-defined]
+                                ):
+                                    return True
+                                return False
+
                             if len(body) == 1:
                                 if isinstance(body[0], ast.Expr):
                                     # Just docstring or ellipsis
                                     if isinstance(body[0].value, ast.Constant):
-                                        continue  # docstring only
-                                    if isinstance(body[0].value, ast.Ellipsis) or (
-                                        isinstance(body[0].value, ast.Constant)
-                                        and body[0].value.value is ...
-                                    ):
+                                        if isinstance(body[0].value.value, str):
+                                            continue  # docstring only
+                                        if body[0].value.value is ...:
+                                            continue  # ellipsis only
+                                    if _is_ellipsis(body[0].value):
                                         continue  # ellipsis only
                             elif len(body) == 2:
                                 # docstring + ellipsis
@@ -468,12 +481,8 @@ class TestPortDefinitionQuality:
                                     and isinstance(body[0].value, ast.Constant)
                                     and isinstance(body[0].value.value, str)
                                 ):
-                                    if isinstance(body[1], ast.Expr) and (
-                                        isinstance(body[1].value, ast.Ellipsis)
-                                        or (
-                                            isinstance(body[1].value, ast.Constant)
-                                            and body[1].value.value is ...
-                                        )
+                                    if isinstance(body[1], ast.Expr) and _is_ellipsis(
+                                        body[1].value
                                     ):
                                         continue
 
