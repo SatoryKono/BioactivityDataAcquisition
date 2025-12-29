@@ -41,6 +41,7 @@ from bioetl.domain.entities import (
     RequiredEntityFields,
     Target,
     TargetComponent,
+    Work,
 )
 
 # Error classifier
@@ -60,6 +61,7 @@ from bioetl.domain.exceptions import (
     ChemblApiError,
     CircuitBreakerOpenError,
     CriticalError,
+    CrossRefApiError,
     DataQualityError,
     DataQualityThresholdError,
     InfrastructureError,
@@ -192,6 +194,7 @@ __all__ = [
     "RequiredEntityFields",
     "Target",
     "TargetComponent",
+    "Work",
     # Error classifier
     "ErrorClassifier",
     # Events
@@ -215,6 +218,7 @@ __all__ = [
     # Exceptions - Recoverable
     "ChemblApiError",
     "CircuitBreakerOpenError",
+    "CrossRefApiError",
     "NetworkError",
     "PolicyViolationError",
     "RateLimitError",

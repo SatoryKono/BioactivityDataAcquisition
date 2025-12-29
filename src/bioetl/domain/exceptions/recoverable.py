@@ -86,6 +86,12 @@ class ChemblApiError(ApiError):
     error_type = ErrorType.NETWORK_ERROR
 
 
+class CrossRefApiError(ApiError):
+    """Raised when CrossRef API returns an error."""
+
+    error_type = ErrorType.NETWORK_ERROR
+
+
 class TimeoutError(RecoverableError):
     """Raised when request times out (502, 504, gateway errors).
 

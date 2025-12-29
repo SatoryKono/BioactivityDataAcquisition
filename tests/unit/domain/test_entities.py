@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.entities import Activity, Compound, Protein
+from bioetl.domain.entities import Activity, Compound, Protein, Work
 from bioetl.domain.types import ContentHash, EntityID, RunType
 
 
@@ -359,3 +359,100 @@ class TestProtein:
         )
         with pytest.raises(AttributeError):
             protein.accession = "P99999"
+
+
+@pytest.mark.unit
+class TestWork:
+    """Tests for CrossRef Work entity."""
+
+    def test_work_creation_success(self, base_entity_kwargs):
+        """Test successful Work creation."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1234/test.article",
+        )
+        assert work.doi == "10.1234/test.article"
+        assert work.source == "crossref"
+        assert work.doc_type == "PUBLICATION"
+
+    def test_work_with_all_optional_fields(self, base_entity_kwargs):
+        """Test Work with all optional fields."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1038/nature12373",
+            title="The complete genome sequence",
+            abstract="This is the abstract",
+            authors=["Kay Prüfer", "Fernando Racimo"],
+            journal="Nature",
+            issn=["0028-0836", "1476-4687"],
+            publisher="Springer Nature",
+            volume="499",
+            issue="7461",
+            first_page="480",
+            last_page="485",
+            year=2023,
+            published_print="2023-07-25",
+            published_online="2023-07-20",
+            doc_type="PUBLICATION",
+            citation_count=2847,
+            reference_count=50,
+            language="en",
+            license_url="https://creativecommons.org/licenses/by/4.0/",
+            subjects=["Genetics", "Genomics"],
+        )
+        assert work.title == "The complete genome sequence"
+        assert work.journal == "Nature"
+        assert work.year == 2023
+        assert work.citation_count == 2847
+        assert len(work.authors) == 2
+        assert len(work.issn) == 2
+
+    def test_work_requires_doi(self, base_entity_kwargs):
+        """Test that empty doi raises ValueError."""
+        with pytest.raises(ValueError, match="CrossRef Work DOI is required"):
+            Work(
+                **base_entity_kwargs,
+                doi="",
+            )
+
+    def test_work_preprint_doc_type(self, base_entity_kwargs):
+        """Test Work with PREPRINT doc_type."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1101/2023.01.01.123456",
+            doc_type="PREPRINT",
+        )
+        assert work.doc_type == "PREPRINT"
+
+    def test_work_default_authors_empty_list(self, base_entity_kwargs):
+        """Test that authors defaults to empty list."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+        )
+        assert work.authors == []
+
+    def test_work_default_issn_empty_list(self, base_entity_kwargs):
+        """Test that issn defaults to empty list."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+        )
+        assert work.issn == []
+
+    def test_work_default_subjects_empty_list(self, base_entity_kwargs):
+        """Test that subjects defaults to empty list."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+        )
+        assert work.subjects == []
+
+    def test_work_is_frozen(self, base_entity_kwargs):
+        """Test that Work is immutable."""
+        work = Work(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+        )
+        with pytest.raises(AttributeError):
+            work.doi = "10.9999/changed"
