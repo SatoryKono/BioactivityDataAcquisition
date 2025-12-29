@@ -32,6 +32,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "annotations",
         # Submodules (imported but not re-exported individually)
         "config",
+        "configs",  # Submodule for value object configs
         "config_types",  # TypedDict definitions for YAML config (not public API)
         "context",
         "entities",
@@ -49,6 +50,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "transformations",
         "types",
         "validation",  # REFACTOR-004: functions are re-exported, not module
+        "value_objects",  # Submodule for value objects
     }
 
     # Get all attributes from the module
@@ -152,7 +154,15 @@ def test_domain_no_infrastructure_types_in_all() -> None:
         "Reader",
     ]
 
+    # Domain config objects that happen to contain infrastructure-like patterns
+    # but are actually domain-level configuration DTOs
+    allowed_exceptions = {
+        "BaseClientConfig",  # Domain config DTO for client settings
+    }
+
     for symbol in domain.__all__:
+        if symbol in allowed_exceptions:
+            continue
         for pattern in infrastructure_patterns:
             assert pattern not in symbol, (
                 f"Symbol '{symbol}' appears to be infrastructure type "
