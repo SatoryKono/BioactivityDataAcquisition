@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.8 | Дата: 2025-12-29 | Обновлено: Добавлены ложные утверждения из консолидированного анализа 4 аудитов*
+*Версия: 5.9 | Дата: 2025-12-29 | Обновлено: Интегрирован консолидированный анализ 4 аудитов*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -8,7 +8,9 @@
 > 1. **Первая проверка** — при обнаружении проблемы (размер, структура, делегирование)
 > 2. **Вторая проверка** — при документировании (точные ссылки `файл:строка`, дата)
 >
-> Невыполнение протокола привело к ~50% ложных утверждений в предыдущих планах.
+> Невыполнение протокола привело к ~60% ложных утверждений в 4 предыдущих аудитах.
+>
+> **📊 Консолидированный анализ:** [`reports/consolidated-refactoring-analysis.md`](../reports/consolidated-refactoring-analysis.md)
 
 ---
 
@@ -89,6 +91,10 @@
 | "VACUUM не автоматизирован, требуется планировщик" | **УЖЕ РЕАЛИЗОВАНО**: `PostrunService.run_vacuum_if_enabled()` вызывается автоматически после каждого успешного run | `runner.py:134-136`, `postrun_service.py:244-288` |
 | "DQ-пороги не реализованы, только логирование" | **УЖЕ РЕАЛИЗОВАНО**: `DQConfig` (soft=0.05, hard=0.20), `_check_hard_threshold()` выбрасывает `DataQualityThresholdError`, метрики Prometheus | `postrun_service.py:122-163`, `domain/config.py:28-40` |
 | "MemoryLock без TTL, требуется Redis" | **MemoryLock полон**: TTL через `_ttl_checker_loop()`, heartbeat через `heartbeat()`, safety guard через `validate_owner()`. Redis — только при масштабировании. | `memory_lock.py:1-256` (верификация 2025-12-29) |
+| "Pandera strict=False — баг, нужен strict=True" | `strict=False` — **преднамеренно** для backward-compat. При `strict=True` и отсутствии схемы возвращается ошибка. Это documented behavior, не баг. | `pandera_validator.py:33-44` (верификация 2025-12-29) |
+| "Content hash не исключает _ingestion_ts, _run_id" | **Уже исключает**: `META_FIELDS` set в `transformations.py:29-36` содержит `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`, `_source_batch_id` | `transformations.py:29-36,83-87` (верификация 2025-12-29) |
+| "psutil в MemoryMonitor нарушает DI" | psutil — data source для системных метрик, аналогично `os.environ`. Graceful degradation реализована в `_get_stats_estimate()`. Port добавит accidental complexity. | `memory_monitor.py:86-180` (верификация 2025-12-29) |
+| "CLI click.echo нарушает logging" | `click.echo` для human-readable вывода — **корректно** для CLI (interfaces слой). JSON-логи для machine processing, не для CLI interaction. | CLAUDE.md §2.3 (верификация 2025-12-29) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
@@ -755,60 +761,46 @@ def test_no_datetime_now_in_infrastructure():
 
 ---
 
-### O2: TracingContext в PipelineExecutor
+### O2: TracingContext в PipelineExecutor ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `executor.py:167-189,421-457` (верификация 2025-12-29)
 
 **Файл:** `src/bioetl/application/core/executor.py`
 
-#### Требуемые изменения
-
-| № | Изменение | Описание |
-|---|-----------|----------|
-| 1 | Root span для batch | `with tracer.start_span(f"batch_{batch_id}"):` |
-| 2 | Nested spans | fetch → transform → write_bronze → write_silver → write_gold |
-| 3 | Span attributes | batch_id, record_count, run_type |
+| № | Изменение | Статус | Строки |
+|---|-----------|--------|--------|
+| 1 | Root span для batch | ✅ | `executor.py:421-433` |
+| 2 | Nested spans | ✅ | `executor.py:153-165,409-457` |
+| 3 | Span attributes | ✅ | `executor.py:270-276,445-449` |
 
 ---
 
-### O3: Graceful shutdown для tracer
+### O3: Graceful shutdown для tracer ✅ РЕАЛИЗОВАНО
 
-**Файл:** `src/bioetl/application/core/runner.py`
+> **Статус:** Реализовано в `observer.py:149-160` (верификация 2025-12-29)
 
-#### Требуемые изменения
+**Файл:** `src/bioetl/application/observability/observer.py`
 
-```python
-async def run(self) -> None:
-    try:
-        await self._execute_pipeline()
-    finally:
-        await self._cleanup()
-
-async def _cleanup(self) -> None:
-    """Cleanup all resources including observability."""
-    # Existing cleanup...
-
-    # Flush tracer spans
-    if hasattr(self._services, 'tracer') and self._services.tracer:
-        try:
-            self._services.tracer.close()
-        except Exception as e:
-            self._context.logger.warning(
-                "Failed to close tracer",
-                error=str(e),
-            )
-```
+Graceful shutdown реализован в `PipelineObserver.__exit__()`:
+- Try/except вокруг span cleanup (строки 150-160)
+- Ошибки tracer НЕ проваливают pipeline
+- Тест: `test_observer_handles_close_error`
 
 ---
 
-### O4: Тесты observer
+### O4: Тесты observer ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `test_observer.py` — 30+ тестов (верификация 2025-12-29)
 
 **Файл:** `tests/unit/application/observability/test_observer.py`
 
-| Тест | Описание |
-|------|----------|
-| `test_observer_records_duration` | Histogram записывается с корректными labels |
-| `test_observer_tracks_errors` | Counter инкрементируется по error_type |
-| `test_observer_graceful_shutdown` | Spans flushed при close() |
-| `test_observer_handles_close_error` | Ошибка close() не падает pipeline |
+| Тест | Статус | Строки |
+|------|--------|--------|
+| `test_observer_records_duration` | ✅ | 138-168 |
+| `test_observer_tracks_errors` | ✅ | 170-195 |
+| `test_observer_graceful_shutdown` | ✅ | 198-222 |
+| `test_observer_handles_close_error` | ✅ | 224-246 |
+| Lifecycle event tests | ✅ | 249-634 |
 
 ---
 
