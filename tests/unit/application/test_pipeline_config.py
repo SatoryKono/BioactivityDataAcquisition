@@ -213,3 +213,66 @@ class TestRuntimeConfig:
             strict_gold_validation=True,
         )
         assert runtime.strict_gold_validation is True
+
+    def test_lock_defaults(self):
+        """Test that lock parameters have correct defaults (20s/60s).
+
+        REQ-LOCK-001: heartbeat_interval=20s, lock_ttl=60s to reduce
+        split-brain window compared to previous 30s/90s defaults.
+        """
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+
+        assert runtime.heartbeat_interval == 20
+        assert runtime.lock_ttl == 60
+
+    def test_effective_lock_ttl_with_explicit_value(self):
+        """Test effective_lock_ttl returns explicit lock_ttl when set."""
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            lock_ttl=120,
+        )
+
+        assert runtime.effective_lock_ttl == 120
+
+    def test_effective_lock_ttl_with_none(self):
+        """Test effective_lock_ttl calculates from heartbeat when lock_ttl is None."""
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            heartbeat_interval=15,
+            lock_ttl=None,
+        )
+
+        # Should be heartbeat_interval * 3
+        assert runtime.effective_lock_ttl == 45
+
+    def test_effective_lock_ttl_default(self):
+        """Test effective_lock_ttl with default values returns 60s."""
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+
+        # With default lock_ttl=60, effective_lock_ttl should be 60
+        assert runtime.effective_lock_ttl == 60
+
+    def test_lock_ttl_ratio(self):
+        """Test that default TTL is 3x heartbeat interval.
+
+        This ratio ensures at least 2 heartbeats before TTL expiration,
+        providing safety margin for heartbeat failures.
+        """
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+
+        # Default: heartbeat=20, ttl=60 → ratio = 3
+        assert runtime.lock_ttl / runtime.heartbeat_interval == 3
+
+    def test_invalid_heartbeat_interval_raises(self):
+        """Test that non-positive heartbeat_interval raises ValueError."""
+        with pytest.raises(ValueError, match="heartbeat_interval must be positive"):
+            RuntimeConfig(
+                run_type=RunType.INCREMENTAL,
+                heartbeat_interval=0,
+            )
+
+        with pytest.raises(ValueError, match="heartbeat_interval must be positive"):
+            RuntimeConfig(
+                run_type=RunType.INCREMENTAL,
+                heartbeat_interval=-1,
+            )
