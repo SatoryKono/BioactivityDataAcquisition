@@ -94,6 +94,42 @@ lock = RedisDistributedLock(redis_client)
 lock = MemoryLock()
 ```
 
+#### MemoryLock Features (RULES.md §3.3)
+
+Хотя MemoryLock работает только в пределах одного процесса, он реализует **полный функционал LockPort**:
+
+| Функционал | Реализация | Файл:строки |
+|------------|------------|-------------|
+| **TTL-based expiration** | `_ttl_checker_loop()` — фоновая задача проверяет и освобождает просроченные блокировки | `memory_lock.py:43-64` |
+| **Heartbeat** | `heartbeat()` — продлевает TTL блокировки на original_ttl | `memory_lock.py:176-204` |
+| **Safety Guard** | `validate_owner()` — проверяет владельца перед записью в storage | `memory_lock.py:206-238` |
+| **Graceful Shutdown** | `aclose()` — отменяет TTL checker и освобождает все блокировки | `memory_lock.py:240-256` |
+
+**Конфигурация по умолчанию** (из `RuntimeConfig`):
+- `heartbeat_interval = 30s`
+- `effective_lock_ttl = heartbeat_interval * 3 = 90s`
+- TTL check interval = 1s
+
+**Пример использования:**
+
+```python
+lock = MemoryLock()
+await lock.acquire(key="pipeline:chembl", owner_id=run_id, ttl=90)
+
+# В пайплайне — периодически продлевать
+await lock.heartbeat(key="pipeline:chembl", owner_id=run_id)
+
+# Перед записью — проверить владельца (Safety Guard)
+if not await lock.validate_owner(key="pipeline:chembl", owner_id=run_id):
+    raise LockNotHeldError("Lock lost during processing")
+
+await lock.release(key="pipeline:chembl", owner_id=run_id)
+```
+
+**Ограничения:**
+- Не защищает от гонок между процессами (by design)
+- Требует single-instance deployment (см. Strict Single Instance Constraint)
+
 ### Checkpoints
 
 ```python
