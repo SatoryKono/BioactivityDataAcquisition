@@ -161,10 +161,13 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   If you prefer to run the command manually, activate the local virtual environment first to avoid `--cov` argument errors:
   ```bash
   source .venv/bin/activate
+  # Install test extras so pytest-asyncio/pytest-cov options are available
+  pip install -e ".[dev,tests]"
   python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
   With `uv`, the equivalent is:
   ```bash
+  uv sync --extra dev --extra tests
   uv run python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
 
