@@ -16,11 +16,9 @@ Field Classification:
 - REQUIRED: Fields validated in __post_init__ (must be non-None)
 - API-OPTIONAL: Fields from external APIs (may be None)
 - COMPUTED: Derived fields (calculated from other fields)
-
-See base.py for RequiredEntityFields Protocol for type-safe required field checks.
 """
 
-from bioetl.domain.entities.base import BaseEntity, RequiredEntityFields
+from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.chembl_activity import Activity, Assay
 from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
@@ -46,7 +44,6 @@ __all__ = [
     "Molecule",
     "Protein",
     "Publication",
-    "RequiredEntityFields",
     "Target",
     "TargetComponent",
     "Work",

@@ -40,7 +40,6 @@ from bioetl.domain.entities import (
     Molecule,
     Protein,
     Publication,
-    RequiredEntityFields,
     Target,
     TargetComponent,
     Work,
@@ -130,12 +129,7 @@ from bioetl.domain.ports import (
 )
 
 # Resilience (domain value objects)
-from bioetl.domain.resilience import (
-    AGGRESSIVE_RETRY_POLICY,
-    CONSERVATIVE_RETRY_POLICY,
-    DEFAULT_RETRY_POLICY,
-    RetryPolicy,
-)
+from bioetl.domain.resilience import RetryPolicy
 
 # Pure domain transformations
 from bioetl.domain.transformations import (
@@ -195,7 +189,6 @@ __all__ = [
     "Molecule",
     "Protein",
     "Publication",
-    "RequiredEntityFields",
     "Target",
     "TargetComponent",
     "Work",
@@ -276,9 +269,6 @@ __all__ = [
     "StoragePort",
     "TracingPort",
     # Resilience
-    "AGGRESSIVE_RETRY_POLICY",
-    "CONSERVATIVE_RETRY_POLICY",
-    "DEFAULT_RETRY_POLICY",
     "RetryPolicy",
     # Transformations (pure functions)
     "META_FIELDS",

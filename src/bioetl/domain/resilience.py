@@ -79,24 +79,3 @@ class RetryPolicy:
             True if no more attempts allowed after this one
         """
         return attempt >= self.max_attempts - 1
-
-
-# Pre-configured policies for common scenarios
-DEFAULT_RETRY_POLICY = RetryPolicy()
-"""Default retry policy: 3 attempts, 1s base delay, 2x multiplier."""
-
-AGGRESSIVE_RETRY_POLICY = RetryPolicy(
-    max_attempts=5,
-    base_delay=0.5,
-    max_delay=30.0,
-    multiplier=1.5,
-)
-"""Aggressive retry policy for critical operations: 5 attempts, faster backoff."""
-
-CONSERVATIVE_RETRY_POLICY = RetryPolicy(
-    max_attempts=3,
-    base_delay=2.0,
-    max_delay=120.0,
-    multiplier=3.0,
-)
-"""Conservative retry policy for rate-limited APIs: longer delays."""
