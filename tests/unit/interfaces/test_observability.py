@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-# This module tests the observability interface.
-# The observability module starts a metrics server internally by setting `_SERVER_STARTED` to `True`.
-# Below are the test functions to ensure server initialization behaviour.
-
 from unittest import mock
 
 import pytest
 
 from bioetl.infrastructure.observability import server as obs_server
 from bioetl.interfaces import observability
+
+# This module tests the observability interface.
+# The observability module starts a metrics server internally by setting `_SERVER_STARTED` to `True`.
+# Below are the test functions to ensure server initialization behaviour.
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.

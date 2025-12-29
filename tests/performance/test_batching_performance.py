@@ -77,7 +77,9 @@ def logger() -> NoOpLogger:
 @pytest.fixture
 def bronze_writer(tmp_path: Path, logger: NoOpLogger) -> BronzeWriter:
     """Create BronzeWriter for performance tests."""
-    return BronzeWriter(base_path=tmp_path, logger=logger, metrics=NoOpMetrics(), require_lock=False)
+    return BronzeWriter(
+        base_path=tmp_path, logger=logger, metrics=NoOpMetrics(), require_lock=False
+    )
 
 
 @pytest.fixture
@@ -401,9 +403,9 @@ class TestScalabilityPerformance:
         # If 1k write is extremely fast, we assume linear scaling is fine if 5k is also fast.
         if time_1k < 0.1:
             # If 1k took < 100ms, 5k should take < 1s (generous buffer)
-            assert time_5k < 1.0, (
-                f"Small batch was fast ({time_1k:.3f}s) but large batch was slow ({time_5k:.3f}s)"
-            )
+            assert (
+                time_5k < 1.0
+            ), f"Small batch was fast ({time_1k:.3f}s) but large batch was slow ({time_5k:.3f}s)"
         else:
             scaling_factor = time_5k / time_1k
             assert scaling_factor < 7.0, (

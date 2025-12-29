@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -30,9 +31,20 @@ class TargetSchema(ETLRecordSchema):
     target_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
-            "SINGLE PROTEIN", "PROTEIN FAMILY", "PROTEIN COMPLEX", "PROTEIN COMPLEX GROUP",
-            "SELECTIVITY GROUP", "CHIMERIC PROTEIN", "CELL-LINE", "TISSUE", "ORGANISM",
-            "MACROMOLECULE", "SMALL MOLECULE", "LIPID", "METAL", "UNKNOWN",
+            "SINGLE PROTEIN",
+            "PROTEIN FAMILY",
+            "PROTEIN COMPLEX",
+            "PROTEIN COMPLEX GROUP",
+            "SELECTIVITY GROUP",
+            "CHIMERIC PROTEIN",
+            "CELL-LINE",
+            "TISSUE",
+            "ORGANISM",
+            "MACROMOLECULE",
+            "SMALL MOLECULE",
+            "LIPID",
+            "METAL",
+            "UNKNOWN",
         ],
         description="Target type.",
     )
@@ -49,9 +61,7 @@ class TargetSchema(ETLRecordSchema):
     tax_id: Series[int] | None = pa.Field(
         nullable=True, description="NCBI Taxonomy ID."
     )
-    organism: Series[str] | None = pa.Field(
-        nullable=True, description="Organism."
-    )
+    organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
     species_group_flag: Series[bool] | None = pa.Field(
         nullable=True,
         description="Species group flag.",
@@ -89,6 +99,7 @@ class TargetSchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = False
         coerce = True

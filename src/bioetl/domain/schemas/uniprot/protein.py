@@ -3,6 +3,7 @@
 Aligned with RULES.md v5.0 and UniProt REST API.
 Source: https://rest.uniprot.org/uniprotkb/
 """
+
 from __future__ import annotations
 
 from datetime import date
@@ -18,7 +19,7 @@ PROTEIN_EXISTENCE_LEVELS = [
     "Evidence at transcript level",
     "Inferred from homology",
     "Predicted",
-    "Uncertain"
+    "Uncertain",
 ]
 
 
@@ -32,185 +33,142 @@ class ProteinSchema(ETLRecordSchema):
     accession: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$",
-        description="UniProt accession (PK)"
+        description="UniProt accession (PK)",
     )
     entry_name: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^\w+_\w+$",
-        description="Entry name (e.g., MK01_HUMAN)"
+        description="Entry name (e.g., MK01_HUMAN)",
     )
 
     # === Protein Names ===
     protein_name: Series[str] = pa.Field(
-        nullable=False,
-        description="Recommended protein name"
+        nullable=False, description="Recommended protein name"
     )
     protein_short_names: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of short names"
+        nullable=True, description="JSON array of short names"
     )
     protein_ec_numbers: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of EC numbers"
+        nullable=True, description="JSON array of EC numbers"
     )
 
     # === Gene Names ===
     gene_primary: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Primary gene name"
+        nullable=True, description="Primary gene name"
     )
     gene_synonyms: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of gene synonyms"
+        nullable=True, description="JSON array of gene synonyms"
     )
     gene_orf_names: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of ORF names"
+        nullable=True, description="JSON array of ORF names"
     )
 
     # === Organism ===
     organism_scientific: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Scientific organism name"
+        nullable=True, description="Scientific organism name"
     )
     organism_common: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Common organism name"
+        nullable=True, description="Common organism name"
     )
     taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=1,
-        description="NCBI Taxonomy ID"
+        nullable=True, ge=1, description="NCBI Taxonomy ID"
     )
     lineage: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of taxonomic lineage"
+        nullable=True, description="JSON array of taxonomic lineage"
     )
 
     # === Evidence & Quality ===
     protein_existence: Series[str] | None = pa.Field(
         nullable=True,
         isin=PROTEIN_EXISTENCE_LEVELS,
-        description="Evidence level for existence"
+        description="Evidence level for existence",
     )
     annotation_score: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=1,
-        le=5,
-        description="Annotation quality (1-5 stars)"
+        nullable=True, ge=1, le=5, description="Annotation quality (1-5 stars)"
     )
     reviewed: Series[bool] = pa.Field(
-        nullable=False,
-        description="Swiss-Prot (True) vs TrEMBL (False)"
+        nullable=False, description="Swiss-Prot (True) vs TrEMBL (False)"
     )
 
     # === Sequence ===
     sequence: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^[ACDEFGHIKLMNPQRSTVWY]+$",
-        description="Amino acid sequence"
+        description="Amino acid sequence",
     )
     sequence_length: Series[int] = pa.Field(
-        nullable=False,
-        ge=1,
-        description="Sequence length"
+        nullable=False, ge=1, description="Sequence length"
     )
     sequence_mass: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=1,
-        description="Molecular mass (Da)"
+        nullable=True, ge=1, description="Molecular mass (Da)"
     )
     sequence_checksum: Series[str] | None = pa.Field(
-        nullable=True,
-        description="CRC64 checksum"
+        nullable=True, description="CRC64 checksum"
     )
     sequence_modified: Series[date] | None = pa.Field(
-        nullable=True,
-        description="Sequence last modified date"
+        nullable=True, description="Sequence last modified date"
     )
 
     # === Entry Metadata ===
     entry_version: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=1,
-        description="Entry version number"
+        nullable=True, ge=1, description="Entry version number"
     )
     entry_created: Series[date] | None = pa.Field(
-        nullable=True,
-        description="Entry creation date"
+        nullable=True, description="Entry creation date"
     )
     entry_modified: Series[date] | None = pa.Field(
-        nullable=True,
-        description="Entry last modified date"
+        nullable=True, description="Entry last modified date"
     )
 
     # === Functional Annotation ===
     function_comment: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Function description"
+        nullable=True, description="Function description"
     )
     catalytic_activity: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of catalytic reactions"
+        nullable=True, description="JSON array of catalytic reactions"
     )
     pathway: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of pathways"
+        nullable=True, description="JSON array of pathways"
     )
     subcellular_location: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of subcellular locations"
+        nullable=True, description="JSON array of subcellular locations"
     )
     tissue_specificity: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Tissue expression pattern"
+        nullable=True, description="Tissue expression pattern"
     )
     disease_involvement: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of disease associations"
+        nullable=True, description="JSON array of disease associations"
     )
     pharmaceutical_use: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Pharmaceutical applications"
+        nullable=True, description="Pharmaceutical applications"
     )
     similarity_comment: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Family and domain information"
+        nullable=True, description="Family and domain information"
     )
     caution: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Warnings about this entry"
+        nullable=True, description="Warnings about this entry"
     )
 
     # === Counts ===
     cross_reference_count: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of database cross-references"
+        nullable=True, ge=0, description="Number of database cross-references"
     )
     feature_count: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of sequence features"
+        nullable=True, ge=0, description="Number of sequence features"
     )
     keyword_count: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of keywords"
+        nullable=True, ge=0, description="Number of keywords"
     )
     publication_count: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of publications"
+        nullable=True, ge=0, description="Number of publications"
     )
     isoform_count: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of isoforms"
+        nullable=True, ge=0, description="Number of isoforms"
     )
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = True
         coerce = True

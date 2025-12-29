@@ -392,7 +392,9 @@ async def _vacuum_table(
     """Vacuum a single table. Returns (files_removed, error_message or None)."""
     try:
         action = "Would vacuum" if dry_run else "Vacuuming"
-        click.echo(f"{'[DRY-RUN] ' if dry_run else ''}{action} {table_layer}/{table_name}...")
+        click.echo(
+            f"{'[DRY-RUN] ' if dry_run else ''}{action} {table_layer}/{table_name}..."
+        )
 
         files_removed = await lifecycle.vacuum(
             table=table_name,

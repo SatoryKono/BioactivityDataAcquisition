@@ -7,7 +7,6 @@ all required composition layer types.
 from __future__ import annotations
 
 
-
 class TestTypesModuleExports:
     """Tests for composition/types.py exports."""
 
@@ -97,9 +96,7 @@ class TestTypesReExports:
 
     def test_storage_adapter_is_same(self) -> None:
         """StorageAdapter from types is same as from storage factory."""
-        from bioetl.composition.factories.storage import (
-            StorageAdapter as DirectAdapter,
-        )
+        from bioetl.composition.factories.storage import StorageAdapter as DirectAdapter
         from bioetl.composition.types import StorageAdapter as ReExportedAdapter
 
         assert DirectAdapter is ReExportedAdapter

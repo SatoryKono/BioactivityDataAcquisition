@@ -118,8 +118,14 @@ class TableConfig:
         if isinstance(self.partition_cols, list):
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
         # Convert string write modes to enums (backward compatibility)
-        object.__setattr__(self, "silver_write_mode", _convert_silver_write_mode(self.silver_write_mode))
-        object.__setattr__(self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode))
+        object.__setattr__(
+            self,
+            "silver_write_mode",
+            _convert_silver_write_mode(self.silver_write_mode),
+        )
+        object.__setattr__(
+            self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode)
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -178,8 +184,12 @@ class PipelineConfig:
 
     def _convert_write_modes(self) -> None:
         """Convert string write modes to enums (backward compatibility)."""
-        object.__setattr__(self, "write_mode", _convert_silver_write_mode(self.write_mode))
-        object.__setattr__(self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode))
+        object.__setattr__(
+            self, "write_mode", _convert_silver_write_mode(self.write_mode)
+        )
+        object.__setattr__(
+            self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode)
+        )
 
     def _validate_config(self) -> None:
         """Validate configuration values."""
@@ -265,10 +275,22 @@ class RuntimeConfig:
     def _validate_positive_values(self) -> None:
         """Validate that numeric fields have positive values."""
         validations = [
-            (self.limit is not None and self.limit <= 0, f"limit must be positive or None, got {self.limit}"),
-            (self.heartbeat_interval <= 0, f"heartbeat_interval must be positive, got {self.heartbeat_interval}"),
-            (self.lock_wait_timeout <= 0, f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}"),
-            (self.vacuum_retention_days <= 0, f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}"),
+            (
+                self.limit is not None and self.limit <= 0,
+                f"limit must be positive or None, got {self.limit}",
+            ),
+            (
+                self.heartbeat_interval <= 0,
+                f"heartbeat_interval must be positive, got {self.heartbeat_interval}",
+            ),
+            (
+                self.lock_wait_timeout <= 0,
+                f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}",
+            ),
+            (
+                self.vacuum_retention_days <= 0,
+                f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}",
+            ),
         ]
         for condition, message in validations:
             if condition:

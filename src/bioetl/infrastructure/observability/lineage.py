@@ -457,7 +457,9 @@ class LineageTracker:
             # Cast to numeric types (Polars returns scalar values for aggregations)
             total_records_int = int(total_records) if total_records is not None else 0
             avg_batch_float = (
-                float(cast(float, avg_batch_size)) if avg_batch_size is not None else 0.0
+                float(cast(float, avg_batch_size))
+                if avg_batch_size is not None
+                else 0.0
             )
 
             return {

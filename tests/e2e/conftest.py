@@ -79,9 +79,9 @@ def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
 
     # 3. Verify settings use correct path
     settings = get_settings()
-    assert str(data_dir) in str(settings.bronze_path), (
-        f"Settings not using test data dir. Expected {data_dir} in {settings.bronze_path}"
-    )
+    assert str(data_dir) in str(
+        settings.bronze_path
+    ), f"Settings not using test data dir. Expected {data_dir} in {settings.bronze_path}"
 
     yield data_dir
 

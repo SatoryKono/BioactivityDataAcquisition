@@ -221,10 +221,10 @@ def test_no_silent_degradation_in_batch_writer() -> None:
     # Check that the old silent degradation pattern is gone
     assert 'if write_mode == "overwrite":' not in source, (
         "Silent degradation pattern still exists in batch_writer.py. "
-        "Remove the 'if write_mode == \"overwrite\": write_mode = \"append\"' logic."
+        'Remove the \'if write_mode == "overwrite": write_mode = "append"\' logic.'
     )
 
     # Check that new pattern is present
-    assert "Pass write mode directly without silent degradation" in source, (
-        "R1 refactoring comment should be present in batch_writer.py"
-    )
+    assert (
+        "Pass write mode directly without silent degradation" in source
+    ), "R1 refactoring comment should be present in batch_writer.py"

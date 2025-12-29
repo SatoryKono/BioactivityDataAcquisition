@@ -21,7 +21,6 @@ from uuid import uuid4
 import pytest
 
 
-
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""
