@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
@@ -43,7 +42,7 @@ class StoragePort(Protocol):
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
-    ) -> Path:
+    ) -> str:
         """Write raw records to the Bronze layer.
 
         Args:
@@ -61,7 +60,7 @@ class StoragePort(Protocol):
                          before writing (see ADR-014).
 
         Returns:
-            Path: Relative path to the written file.
+            str: Relative path to the written file.
         """
         ...
 

@@ -311,7 +311,7 @@ class BronzeWriter:
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
-    ) -> Path:
+    ) -> str:
         """Write raw records to Bronze layer (JSONL + zstd).
 
         Streams records through zstd compressor directly to disk.
@@ -466,7 +466,7 @@ class BronzeWriter:
             span.set_attribute("record_count", record_count)
             span.set_attribute("compressed_size", compressed_size)
 
-            return Path(relative_path)
+            return relative_path
 
     async def _write_json_copy(
         self,
