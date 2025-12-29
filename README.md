@@ -158,6 +158,16 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   ```
   The helper bootstraps the virtual environment (installs `pytest-cov`, `orjson`, `syrupy`, and other test-only dependencies) and reproduces the default CI command with coverage output.
 
+  If you prefer to run the command manually, activate the local virtual environment first to avoid `--cov` argument errors:
+  ```bash
+  source .venv/bin/activate
+  python -m pytest tests --cov=src/bioetl --cov-report=term
+  ```
+  With `uv`, the equivalent is:
+  ```bash
+  uv run python -m pytest tests --cov=src/bioetl --cov-report=term
+  ```
+
 * **Run All Tests**:
   ```bash
   make test
