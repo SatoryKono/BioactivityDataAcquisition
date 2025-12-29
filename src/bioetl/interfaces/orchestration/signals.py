@@ -1,50 +1,78 @@
 """OS Signal Handling for Graceful Shutdown.
 
-This module provides a concrete implementation for listening to OS signals
-(SIGTERM, SIGINT) and translating them into an application-level
-ShutdownSignal request.
+Minimal interfaces layer: registers OS signals and delegates to ShutdownPort.
+See ADR-008 for graceful shutdown strategy details.
 """
 
 from __future__ import annotations
 
+import asyncio
 import signal
-from typing import TYPE_CHECKING, Any
-
-from bioetl.application.core.shutdown import ShutdownSignal
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
+    from asyncio import Task
+
     from bioetl.domain.ports import LoggerPort
+
+# Module-level storage for background tasks to prevent garbage collection
+_background_tasks: set[Task[None]] = set()
+
+
+@runtime_checkable
+class _ShutdownSignalLike(Protocol):
+    """Protocol for backward compatibility with ShutdownSignal."""
+
+    def request(self) -> None: ...
+
+
+@runtime_checkable
+class _ShutdownServiceLike(Protocol):
+    """Protocol for new ShutdownService."""
+
+    async def initiate_shutdown(self, reason: str) -> None: ...
+
+
+def register_signal_handlers(
+    shutdown_service: _ShutdownServiceLike,
+    logger: LoggerPort | None = None,
+) -> None:
+    """Register OS signal handlers for graceful shutdown.
+
+    Args:
+        shutdown_service: Service implementing ShutdownPort for shutdown coordination.
+        logger: Optional logger for signal events.
+    """
+
+    def handler(signum: int, _: Any) -> None:
+        reason = f"signal {signum} ({signal.strsignal(signum)})"
+        task = asyncio.create_task(shutdown_service.initiate_shutdown(reason))
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+
+    try:
+        signal.signal(signal.SIGTERM, handler)
+        signal.signal(signal.SIGINT, handler)
+    except ValueError:
+        if logger:
+            logger.warning("Cannot set signal handlers outside main thread")
 
 
 def setup_shutdown_handlers(
-    shutdown_signal: ShutdownSignal,
+    shutdown_signal: _ShutdownSignalLike,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Setup signal handlers to trigger the application's shutdown signal.
+    """Setup signal handlers (backward-compatible).
+
+    Deprecated: Use register_signal_handlers() with ShutdownService instead.
 
     Args:
-        shutdown_signal: The application's shared shutdown signal instance.
-        logger: Logger port for logging signal events. If None, signals are
-            handled silently (useful for testing).
+        shutdown_signal: Legacy ShutdownSignal instance.
+        logger: Optional logger for signal events.
     """
 
-    def signal_handler(signum: int, _: Any) -> None:
-        """Handle OS termination signals for graceful shutdown.
-
-        This callback is registered with signal.signal() for SIGTERM and SIGINT.
-        When triggered, it logs the signal (if logger available) and requests
-        application shutdown via the ShutdownSignal instance.
-
-        Args:
-            signum: The signal number received (e.g., SIGTERM=15, SIGINT=2).
-            _: Stack frame (unused, required by signal handler signature).
-
-        Note:
-            Logger is optional to support testing scenarios where logging
-            infrastructure may not be available. See ADR-008 for graceful
-            shutdown strategy details.
-        """
-        if logger is not None:
+    def handler(signum: int, _: Any) -> None:
+        if logger:
             logger.warning(
                 "Received signal, initiating graceful shutdown",
                 signal_name=signal.strsignal(signum),
@@ -53,9 +81,8 @@ def setup_shutdown_handlers(
         shutdown_signal.request()
 
     try:
-        signal.signal(signal.SIGTERM, signal_handler)
-        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, handler)
+        signal.signal(signal.SIGINT, handler)
     except ValueError:
-        # This can happen if not in the main thread
-        if logger is not None:
-            logger.warning("Cannot set signal handlers in a non-main thread")
+        if logger:
+            logger.warning("Cannot set signal handlers outside main thread")
