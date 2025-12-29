@@ -1,12 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.7 | Last updated: 2025-12-27*
+*Synced with RULES.md v5.8 | Last updated: 2025-12-29*
 
 ## Quick Links
 
 | Need to...              | Go to                                                                  |
 |-------------------------|------------------------------------------------------------------------|
-| Understand the rules    | [00-project_rules/01-project-rules.md](00-project_rules/01-project-rules.md)                 |
+| Understand the rules    | [RULES.md](RULES.md)                 |
 | Create a new pipeline   | [00-project_rules/04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)      |
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
@@ -35,7 +35,6 @@ docs/
 │
 ├── 00-project_rules/            # Project governance
 │   ├── 00-rules-summary.md      # TL;DR of RULES.md
-│   ├── 01-project-rules.md      # Pointer to RULES.md
 │   ├── 02-user-rules.md         # Guidelines for contributors
 │   ├── 03-file-policy.md        # File/directory structure
 │   ├── 04-extending-bioetl.md   # How to add providers/pipelines
@@ -90,7 +89,7 @@ docs/
 │
 ├── providers/                   # Provider-specific documentation
 │
-├── RULES.md                     # Canonical rules document (v5.7)
+├── RULES.md                     # Canonical rules document (v5.8)
 ├── REQUIREMENTS.md              # Testable requirements
 ├── refactoring-plan.md          # Current refactoring roadmap
 │
@@ -103,7 +102,7 @@ docs/
 
 ### Getting Started
 
-1. [01-project-rules.md](00-project_rules/01-project-rules.md) - Project rules (start here)
+1. [RULES.md](RULES.md) - Project rules (start here)
 2. [00-rules-summary.md](00-project_rules/00-rules-summary.md) - Quick reference
 3. [02-user-rules.md](00-project_rules/02-user-rules.md) - Contributor guidelines
 
