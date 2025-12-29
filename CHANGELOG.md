@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.0.5] - 2025-12-29
 
+### Added
+
+- **Ubiquitous Language Glossary**: New `docs/glossary.md` documenting canonical terminology:
+  - Entity terminology (Molecule, Compound, Activity, Target, Publication, etc.)
+  - ETL process terminology (Pipeline, Run, Batch, Stage)
+  - Data quality terminology (Validation, Quarantine, Schema)
+  - Identifier terminology (Entity ID, Content Hash, Run ID)
+  - Provider-specific variations (ChEMBL vs PubChem terminology)
+  - Deprecated terms to avoid
+
+- **Terminology Linter**: New `scripts/lint_terminology.py` for enforcing Ubiquitous Language:
+  - Detects deprecated terms (workflow → pipeline, job → run, etc.)
+  - Flags generic technical names (Loader, Handler)
+  - Supports strict mode for context-sensitive terms
+  - JSON output for CI integration
+
+### Changed
+
+- **PubMed Extractors**: Fixed terminology in docstrings:
+  - `base.py`: "workflow" → "process" / "процесс обработки"
+  - `__init__.py`: "workflow" → "sequence"
+
+### Documentation
+
+- **Project Navigator**: Updated `docs/00-map.md`:
+  - Added glossary to Quick Links
+  - Added glossary to Documentation Structure
+  - Added glossary to Key Files
 ### Removed
 
 - **Dead Code Cleanup**: Удалены избыточные абстракции согласно принципу "прагматичной инженерии" (RULES.md §1):

@@ -7,6 +7,7 @@
 | Need to...              | Go to                                                                  |
 |-------------------------|------------------------------------------------------------------------|
 | Understand the rules    | [RULES.md](RULES.md)                 |
+| Look up terminology     | [glossary.md](glossary.md)           |
 | Create a new pipeline   | [00-project_rules/04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)      |
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
@@ -32,6 +33,7 @@
 ```
 docs/
 ├── 00-map.md                    # This file (Project Navigator)
+├── glossary.md                  # Ubiquitous Language terminology
 │
 ├── 00-project_rules/            # Project governance
 │   ├── 00-rules-summary.md      # TL;DR of RULES.md
@@ -285,6 +287,7 @@ graph TD
 | File                                               | Purpose                   |
 |----------------------------------------------------|---------------------------|
 | `docs/RULES.md`                                    | Master rules document     |
+| `docs/glossary.md`                                 | Ubiquitous Language terminology |
 | `CHANGELOG.md`                                     | Version history           |
 | `configs/pipelines/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
@@ -310,7 +313,8 @@ graph TD
 | RULES.md (docs/)         | 2025-12-27   | v5.7 (Pre-Refactoring)       |
 | refactoring-plan.md      | 2025-12-27   | v5.6 (Consolidated)          |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
-| 00-map.md                | 2025-12-28   | v5.8 Schema docs added       |
+| glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
+| 00-map.md                | 2025-12-29   | v5.9 Glossary added          |
 | 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
 | 03-guides/               | 2025-12-20   | Consolidated (10 guides)     |
 | ADR-001..020             | 2025-12-27   | All 20 ADRs documented       |
@@ -319,4 +323,4 @@ graph TD
 
 ---
 
-*Last updated: 2025-12-28. Update when adding new documentation.*
+*Last updated: 2025-12-29. Update when adding new documentation.*
