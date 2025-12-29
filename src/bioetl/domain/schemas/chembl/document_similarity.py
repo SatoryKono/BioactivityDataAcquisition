@@ -1,6 +1,10 @@
 """Pandera schema for ChEMBL Document Similarity entity.
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+See: https://www.ebi.ac.uk/chembl/api/data/document_similarity
+
+Note: Pair is normalized so document_1_chembl_id < document_2_chembl_id
+lexicographically for determinism (stores only upper triangle of matrix).
 """
 
 from __future__ import annotations
@@ -12,48 +16,41 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 
 class DocumentSimilaritySchema(ETLRecordSchema):
-    """Document Similarity validation schema for Silver layer."""
+    """Document Similarity validation schema for Silver layer.
 
-    # === Primary Key ===
-    sim_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
+    Pairwise similarity matrix for documents. Used for recommendations
+    and publication clustering.
+    """
 
-    # === Foreign Keys ===
-    doc_1: Series[int] = pa.Field(nullable=False, description="FK to document 1.")
-    doc_2: Series[int] = pa.Field(nullable=False, description="FK to document 2.")
-
-    # === Identifiers ===
-    pubmed_id1: Series[int] | None = pa.Field(nullable=True, description="PubMed ID 1.")
-    pubmed_id2: Series[int] | None = pa.Field(nullable=True, description="PubMed ID 2.")
-
-    # === Metrics ===
-    tid_tani: Series[float] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        le=1,
-        description="Tanimoto coefficient (TID).",
+    # === Composite Primary Key ===
+    document_1_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^CHEMBL\d+$",
+        description="ChEMBL ID for document 1 (PK part 1, lexicographically smaller).",
     )
+    document_2_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^CHEMBL\d+$",
+        description="ChEMBL ID for document 2 (PK part 2, lexicographically larger).",
+    )
+
+    # === Similarity Metrics (Tanimoto coefficients) ===
     mol_tani: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         le=1,
-        description="Tanimoto coefficient (MOL).",
+        description="Tanimoto similarity coefficient (molecules) in [0, 1].",
     )
-    avg_tani: Series[float] | None = pa.Field(
+    tid_tani: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         le=1,
-        description="Average Tanimoto coefficient.",
-    )
-    max_tani: Series[float] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        le=1,
-        description="Max Tanimoto coefficient.",
+        description="Tanimoto similarity coefficient (targets) in [0, 1].",
     )
 
     class Config:
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True

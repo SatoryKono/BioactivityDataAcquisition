@@ -1,6 +1,7 @@
 """ChEMBL structural domain entities.
 
-Contains Document, Target, TargetComponent, CellLine, and Molecule entities.
+Contains Document, DocumentSimilarity, Target, TargetComponent, CellLine,
+and Molecule entities.
 """
 
 from __future__ import annotations
@@ -53,6 +54,52 @@ class Document(BaseEntity):
             raise ValueError("Document ChEMBL ID is required")
         if self.year is not None and (self.year < 1800 or self.year > 2100):
             raise ValueError(f"Year must be between 1800-2100, got {self.year}")
+
+
+@dataclass(frozen=True, kw_only=True)
+class DocumentSimilarity(BaseEntity):
+    """Represents document similarity pair (ChEMBL Document Similarity).
+
+    Pairwise similarity matrix for documents. Used for recommendations
+    and publication clustering.
+
+    Contains all fields from ChEMBL document_similarity API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/document_similarity
+
+    Note: Pair is normalized so document_1_chembl_id < document_2_chembl_id
+    lexicographically for determinism and to store only upper triangle.
+    """
+
+    # Primary identifiers (composite key)
+    document_1_chembl_id: str
+    document_2_chembl_id: str
+
+    # Similarity metrics (Tanimoto coefficients in [0, 1])
+    mol_tani: float | None = None  # Tanimoto similarity (molecules)
+    tid_tani: float | None = None  # Tanimoto similarity (targets)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.document_1_chembl_id:
+            raise ValueError("document_1_chembl_id is required")
+        if not self.document_2_chembl_id:
+            raise ValueError("document_2_chembl_id is required")
+        if self.document_1_chembl_id == self.document_2_chembl_id:
+            raise ValueError("Self-similarity not allowed: doc1 must differ from doc2")
+        # Validate normalized order
+        if self.document_1_chembl_id > self.document_2_chembl_id:
+            raise ValueError(
+                f"Pair must be normalized: {self.document_1_chembl_id} > "
+                f"{self.document_2_chembl_id}. Expected doc1 < doc2."
+            )
+        # Validate Tanimoto bounds [0, 1]
+        if self.mol_tani is not None and not (0 <= self.mol_tani <= 1):
+            raise ValueError(f"mol_tani must be in [0, 1], got {self.mol_tani}")
+        if self.tid_tani is not None and not (0 <= self.tid_tani <= 1):
+            raise ValueError(f"tid_tani must be in [0, 1], got {self.tid_tani}")
 
 
 @dataclass(frozen=True, kw_only=True)

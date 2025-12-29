@@ -33,7 +33,17 @@ from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+from bioetl.application.pipelines.chembl.cell_line import ChEMBLCellLinePipeline
+from bioetl.application.pipelines.chembl.cell_line_transformer import (
+    CellLineTransformer,
+)
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_similarity import (
+    ChEMBLDocumentSimilarityPipeline,
+)
+from bioetl.application.pipelines.chembl.document_similarity_transformer import (
+    DocumentSimilarityTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
@@ -56,7 +66,9 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
+    ChEMBLCellLineGoldSchema,
     ChEMBLDocumentGoldSchema,
+    ChEMBLDocumentSimilarityGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
@@ -67,7 +79,9 @@ from bioetl.infrastructure.schemas.gold import (
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
+    CHEMBL_CELL_LINE_SCHEMA,
     CHEMBL_DOCUMENT_SCHEMA,
+    CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
@@ -103,6 +117,16 @@ chembl_assay_factory = GenericPipelineFactory(
     transformer_class=AssayTransformer,
 )
 
+# ChEMBL Cell Line Pipeline
+chembl_cell_line_factory = GenericPipelineFactory(
+    pipeline_name="chembl_cell_line",
+    pipeline_class=ChEMBLCellLinePipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_CELL_LINE_SCHEMA,
+    gold_schema=ChEMBLCellLineGoldSchema,
+    transformer_class=CellLineTransformer,
+)
+
 # ChEMBL Document Pipeline
 chembl_document_factory = GenericPipelineFactory(
     pipeline_name="chembl_document",
@@ -111,6 +135,16 @@ chembl_document_factory = GenericPipelineFactory(
     silver_schema=CHEMBL_DOCUMENT_SCHEMA,
     gold_schema=ChEMBLDocumentGoldSchema,
     transformer_class=DocumentTransformer,
+)
+
+# ChEMBL Document Similarity Pipeline
+chembl_document_similarity_factory = GenericPipelineFactory(
+    pipeline_name="chembl_document_similarity",
+    pipeline_class=ChEMBLDocumentSimilarityPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
+    gold_schema=ChEMBLDocumentSimilarityGoldSchema,
+    transformer_class=DocumentSimilarityTransformer,
 )
 
 # ChEMBL Target Pipeline
@@ -226,7 +260,9 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     """
     registry.register_factory(chembl_activity_factory)
     registry.register_factory(chembl_assay_factory)
+    registry.register_factory(chembl_cell_line_factory)
     registry.register_factory(chembl_document_factory)
+    registry.register_factory(chembl_document_similarity_factory)
     registry.register_factory(chembl_target_factory)
     registry.register_factory(chembl_target_component_factory)
     registry.register_factory(chembl_molecule_factory)
@@ -265,7 +301,9 @@ def reset_registration() -> None:
 __all__ = [
     "chembl_activity_factory",
     "chembl_assay_factory",
+    "chembl_cell_line_factory",
     "chembl_document_factory",
+    "chembl_document_similarity_factory",
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",

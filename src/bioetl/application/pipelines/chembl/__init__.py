@@ -20,6 +20,12 @@ from bioetl.application.pipelines.chembl.cell_line_transformer import (
     CellLineTransformer,
 )
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_similarity import (
+    ChEMBLDocumentSimilarityPipeline,
+)
+from bioetl.application.pipelines.chembl.document_similarity_transformer import (
+    DocumentSimilarityTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import (
     DocumentTransformer,
 )
@@ -45,9 +51,11 @@ __all__ = [
     "ChEMBLAssayPipeline",
     "ChEMBLCellLinePipeline",
     "ChEMBLDocumentPipeline",
+    "ChEMBLDocumentSimilarityPipeline",
     "ChEMBLMoleculePipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "DocumentSimilarityTransformer",
     "DocumentTransformer",
     "MoleculeTransformer",
     "TargetComponentTransformer",

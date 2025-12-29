@@ -25,6 +25,7 @@ from bioetl.domain.entities.chembl_activity import Activity, Assay
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
     Document,
+    DocumentSimilarity,
     Molecule,
     Target,
     TargetComponent,
@@ -41,6 +42,7 @@ __all__ = [
     "CellLine",
     "Compound",
     "Document",
+    "DocumentSimilarity",
     "Molecule",
     "Protein",
     "Publication",

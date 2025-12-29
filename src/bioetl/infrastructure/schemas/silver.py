@@ -379,6 +379,28 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Document Similarity
+# See: https://www.ebi.ac.uk/chembl/api/data/document_similarity
+CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Composite primary key (normalized: doc1 < doc2 lexicographically)
+        pa.field("document_1_chembl_id", pa.string()),
+        pa.field("document_2_chembl_id", pa.string()),
+        # Similarity metrics (Tanimoto coefficients in [0, 1])
+        pa.field("mol_tani", pa.float64()),
+        pa.field("tid_tani", pa.float64()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for ChEMBL Molecule
 # See: https://www.ebi.ac.uk/chembl/api/data/molecule
 CHEMBL_MOLECULE_SCHEMA = pa.schema(
