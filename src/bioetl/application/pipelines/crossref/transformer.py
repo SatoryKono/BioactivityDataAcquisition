@@ -1,30 +1,35 @@
 """CrossRef Transformer.
 
 Transforms Bronze records to Silver format (Work entity inflation).
-Contains business logic for CrossRef data transformation per Hexagonal Architecture.
+Contains orchestration logic for CrossRef data transformation per Hexagonal Architecture.
 
 This module was refactored from infrastructure/adapters/crossref/mappers.py
 to properly separate business logic from infrastructure concerns.
+
+Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 """
 
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, Work
+from bioetl.domain.normalization import (
+    extract_first_string,
+    format_date_parts,
+    normalize_doi,
+    parse_page_range,
+    strip_html_tags,
+)
 from bioetl.domain.transformations import generate_entity_id
+from bioetl.domain.validation import validate_year_range
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
-
-
-# HTML tag pattern for stripping from abstract
-_HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 
 
 class CrossRefTransformer(BaseTransformer):
@@ -60,41 +65,14 @@ class CrossRefTransformer(BaseTransformer):
         )
 
     # ========================================================================
-    # Field Extraction Methods (Business Logic)
+    # Field Extraction Methods (Orchestration - delegates to domain)
     # ========================================================================
 
     @staticmethod
-    def normalize_doi(doi: str) -> str:
-        """Normalize DOI to lowercase, stripped format.
-
-        Args:
-            doi: Raw DOI string from API.
-
-        Returns:
-            Normalized DOI (lowercase, stripped).
-
-        """
-        return doi.strip().lower()
-
-    @staticmethod
-    def extract_title(work: dict[str, Any]) -> str | None:
-        """Extract first title from work response.
-
-        Args:
-            work: CrossRef work record.
-
-        Returns:
-            First title or None.
-
-        """
-        titles = work.get("title", [])
-        if titles and len(titles) > 0:
-            return str(titles[0]).strip()
-        return None
-
-    @staticmethod
-    def extract_authors(work: dict[str, Any]) -> list[str]:
+    def _extract_authors(work: dict[str, Any]) -> list[str]:
         """Extract author names in 'given family' format.
+
+        This is CrossRef-specific extraction logic (not generic normalization).
 
         Args:
             work: CrossRef work record.
@@ -116,26 +94,11 @@ class CrossRefTransformer(BaseTransformer):
         return authors
 
     @staticmethod
-    def extract_journal(work: dict[str, Any]) -> str | None:
-        """Extract journal name from container-title.
-
-        Args:
-            work: CrossRef work record.
-
-        Returns:
-            First container title or None.
-
-        """
-        container = work.get("container-title", [])
-        if container and len(container) > 0:
-            return str(container[0]).strip()
-        return None
-
-    @staticmethod
-    def extract_year(work: dict[str, Any]) -> int | None:
+    def _extract_year(work: dict[str, Any]) -> int | None:
         """Extract publication year from date-parts.
 
         Tries published-print, then published-online, then issued.
+        Delegates validation to domain.validation.validate_year_range.
 
         Args:
             work: CrossRef work record.
@@ -149,113 +112,12 @@ class CrossRefTransformer(BaseTransformer):
             date_parts = date_info.get("date-parts", [[]])
             if date_parts and date_parts[0] and len(date_parts[0]) > 0:
                 year = date_parts[0][0]
-                if isinstance(year, int) and 1800 <= year <= 2100:
+                if isinstance(year, int) and validate_year_range(year):
                     return year
         return None
 
     @staticmethod
-    def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
-        """Format date-parts to ISO date string.
-
-        Args:
-            date_parts: CrossRef date-parts array [[year, month, day]].
-
-        Returns:
-            ISO date string (YYYY-MM-DD, YYYY-MM, or YYYY).
-
-        """
-        if not date_parts or not date_parts[0]:
-            return None
-
-        parts = date_parts[0]
-        if len(parts) >= 3:
-            return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
-        elif len(parts) >= 2:
-            return f"{parts[0]:04d}-{parts[1]:02d}"
-        elif len(parts) >= 1:
-            return f"{parts[0]:04d}"
-        return None
-
-    @staticmethod
-    def extract_pages(work: dict[str, Any]) -> tuple[str | None, str | None]:
-        """Extract first and last page from page field.
-
-        Args:
-            work: CrossRef work record.
-
-        Returns:
-            Tuple of (first_page, last_page).
-
-        """
-        page = work.get("page", "")
-        if not page:
-            return None, None
-
-        if "-" in page:
-            parts = page.split("-", 1)
-            first = parts[0].strip() or None
-            last = parts[1].strip() if len(parts) > 1 else None
-            return first, last
-        return page.strip() or None, None
-
-    @staticmethod
-    def strip_html_tags(text: str) -> str:
-        """Strip HTML tags from abstract text.
-
-        Args:
-            text: Abstract text potentially containing HTML.
-
-        Returns:
-            Plain text with HTML tags removed.
-
-        """
-        return _HTML_TAG_PATTERN.sub("", text).strip()
-
-    @staticmethod
-    def extract_abstract(work: dict[str, Any]) -> str | None:
-        """Extract and clean abstract text.
-
-        Args:
-            work: CrossRef work record.
-
-        Returns:
-            Clean abstract text or None.
-
-        """
-        abstract = work.get("abstract", "")
-        if not abstract:
-            return None
-        return CrossRefTransformer.strip_html_tags(abstract) or None
-
-    @staticmethod
-    def map_doc_type(crossref_type: str) -> str:
-        """Map CrossRef type to internal document type.
-
-        Args:
-            crossref_type: CrossRef work type.
-
-        Returns:
-            Internal document type (PUBLICATION or PREPRINT).
-
-        """
-        return CROSSREF_TYPE_MAP.get(crossref_type, "PUBLICATION")
-
-    @staticmethod
-    def extract_issn(work: dict[str, Any]) -> list[str]:
-        """Extract ISSN list from work.
-
-        Args:
-            work: CrossRef work record.
-
-        Returns:
-            List of ISSNs.
-
-        """
-        issns: list[str] = work.get("ISSN", [])
-        return issns
-
-    @staticmethod
-    def extract_license_url(work: dict[str, Any]) -> str | None:
+    def _extract_license_url(work: dict[str, Any]) -> str | None:
         """Extract license URL from work.
 
         Args:
@@ -271,26 +133,14 @@ class CrossRefTransformer(BaseTransformer):
             return url
         return None
 
-    @staticmethod
-    def extract_subjects(work: dict[str, Any]) -> list[str]:
-        """Extract subject areas from work.
-
-        Args:
-            work: CrossRef work record.
-
-        Returns:
-            List of subject areas.
-
-        """
-        subjects: list[str] = work.get("subject", [])
-        return subjects
-
     # ========================================================================
     # Main Transformation
     # ========================================================================
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract Work business data from bronze record.
+
+        Delegates normalization to domain layer per REFACTOR-004.
 
         Args:
             record: Raw Bronze record from CrossRef API.
@@ -299,38 +149,43 @@ class CrossRefTransformer(BaseTransformer):
             Dictionary of Work business fields.
 
         """
-        doi = self.normalize_doi(record.get("DOI", ""))
-        first_page, last_page = self.extract_pages(record)
+        # Use domain functions for normalization
+        doi = normalize_doi(record.get("DOI", "")) or ""
+        first_page, last_page = parse_page_range(record.get("page"))
 
-        # Extract date fields
+        # Extract date fields using domain functions
         published_print = record.get("published-print", {})
         published_online = record.get("published-online", {})
 
+        # Extract abstract with HTML stripping via domain function
+        abstract_raw = record.get("abstract", "")
+        abstract = strip_html_tags(abstract_raw) if abstract_raw else None
+
         return {
             "doi": doi,
-            "title": self.extract_title(record),
-            "abstract": self.extract_abstract(record),
-            "authors": self.extract_authors(record),
-            "journal": self.extract_journal(record),
-            "issn": self.extract_issn(record),
+            "title": extract_first_string(record.get("title", [])),
+            "abstract": abstract,
+            "authors": self._extract_authors(record),
+            "journal": extract_first_string(record.get("container-title", [])),
+            "issn": record.get("ISSN", []),
             "publisher": record.get("publisher"),
             "volume": record.get("volume"),
             "issue": record.get("issue"),
             "first_page": first_page,
             "last_page": last_page,
-            "year": self.extract_year(record),
-            "published_print": self.format_date_parts(
+            "year": self._extract_year(record),
+            "published_print": format_date_parts(
                 published_print.get("date-parts") if isinstance(published_print, dict) else None
             ),
-            "published_online": self.format_date_parts(
+            "published_online": format_date_parts(
                 published_online.get("date-parts") if isinstance(published_online, dict) else None
             ),
-            "doc_type": self.map_doc_type(record.get("type", "")),
+            "doc_type": CROSSREF_TYPE_MAP.get(record.get("type", ""), "PUBLICATION"),
             "citation_count": record.get("is-referenced-by-count"),
             "reference_count": record.get("references-count"),
             "language": record.get("language"),
-            "license_url": self.extract_license_url(record),
-            "subjects": self.extract_subjects(record),
+            "license_url": self._extract_license_url(record),
+            "subjects": record.get("subject", []),
             "source": "crossref",
         }
 
