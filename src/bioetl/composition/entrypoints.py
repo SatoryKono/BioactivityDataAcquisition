@@ -46,6 +46,7 @@ __all__ = [
     "get_checkpoint_service",
     "get_quarantine_service",
     "get_bronze_cleanup_service",
+    "get_vacuum_service",
     # Maintenance operations
     "vacuum_table",
     "archive_table",
@@ -56,6 +57,12 @@ __all__ = [
     "list_checkpoints",
 ]
 
+from bioetl.composition._bootstrap import (
+    bootstrap_bronze_cleanup_service,
+    bootstrap_checkpoint_service,
+    bootstrap_quarantine_service,
+    bootstrap_vacuum_service,
+)
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint_manager,
     bootstrap_cleanup,
@@ -63,11 +70,6 @@ from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
     bootstrap_quarantine_manager,
     load_pipeline_config,
-)
-from bioetl.composition._bootstrap import (
-    bootstrap_bronze_cleanup_service,
-    bootstrap_checkpoint_service,
-    bootstrap_quarantine_service,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
@@ -84,6 +86,7 @@ if TYPE_CHECKING:
         CheckpointService,
         CleanupResult,
         QuarantineService,
+        VacuumService,
     )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
@@ -599,6 +602,25 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
     """
     _ensure_registrations()
     return bootstrap_bronze_cleanup_service()
+
+
+def get_vacuum_service() -> VacuumService:
+    """Get a vacuum service for batch vacuum operations.
+
+    Used for vacuuming multiple Delta tables at once.
+    This is the recommended way to vacuum tables from CLI.
+
+    Returns:
+        VacuumService instance.
+
+    Example:
+        >>> service = get_vacuum_service()
+        >>> tables = service.collect_tables(layer="all")
+        >>> result = await service.vacuum_all(tables, retention_days=7)
+        >>> print(f"Removed {result.total_files_removed} files")
+    """
+    _ensure_registrations()
+    return bootstrap_vacuum_service()
 
 
 async def cleanup_bronze(

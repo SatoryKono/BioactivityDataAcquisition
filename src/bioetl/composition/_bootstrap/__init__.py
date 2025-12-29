@@ -32,6 +32,7 @@ from bioetl.composition._bootstrap.storage import (
     bootstrap_cleanup,
     bootstrap_lifecycle_service,
     bootstrap_storage,
+    bootstrap_vacuum_service,
 )
 
 __all__ = [
@@ -50,5 +51,6 @@ __all__ = [
     "bootstrap_quarantine_service",
     "bootstrap_storage",
     "bootstrap_tracer",
+    "bootstrap_vacuum_service",
     "validate_observability_preflight",
 ]
