@@ -1,0 +1,34 @@
+# configs/sources/crossref.yaml
+# Configuration for CrossRef API data source.
+# Provides publication metadata via DOI resolution.
+
+source:
+    type: api
+    load_strategy: full
+    batch_size: 50  # Max DOIs per batch request
+    provider_config:
+        provider: crossref
+        base_url: https://api.crossref.org
+        mailto: ${BIOETL_CROSSREF_EMAIL}  # Required for polite pool access
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        batch_size: 50  # DOIs per batch
+        cursor_pagination: true  # Uses cursor-based pagination
+
+    # Circuit breaker settings (per ADR-007)
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    # Rate limits for polite pool (50 req/sec with mailto)
+    rate_limit:
+        requests_per_second: 50
+        burst: 100
+
+    # Health check configuration
+    health_check:
+        endpoint: /works
+        params:
+            rows: 1
+        timeout: 5
