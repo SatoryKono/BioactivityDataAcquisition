@@ -1,0 +1,78 @@
+# configs/pipelines/_defaults.yaml
+# Default settings for all pipelines.
+#
+# These defaults are merged with entity-specific configs.
+# Entity configs can override any setting.
+#
+# Usage in entity config:
+#   # Entity-specific settings only
+#   pipeline_name: chembl_activity
+#   provider: chembl
+#   entity_type: activity
+#   # ... rest is inherited from _defaults.yaml
+
+# Version for this defaults file
+defaults_version: "1.0.0"
+
+# =============================================================================
+# Data Quality Rules (identical across all pipelines)
+# =============================================================================
+dq_rules:
+  soft_fail_threshold: 0.05
+  hard_fail_threshold: 0.20
+
+# =============================================================================
+# Circuit Breaker Settings (identical across all pipelines)
+# =============================================================================
+circuit_breaker:
+  failure_threshold: 5
+  recovery_timeout: 300
+
+# =============================================================================
+# Sink Configuration Defaults
+# =============================================================================
+sink:
+  bronze:
+    format: jsonl
+    save_json: true
+    deterministic: true
+
+  silver:
+    format: delta
+    mode: merge
+    on_schema_mismatch: evolve
+    classification: public
+    forensic_retention: true
+    deterministic: true
+    csv_export:
+      enabled: true
+      delimiter: ","
+      header: true
+      encoding: "utf-8"
+
+  gold:
+    enabled: true
+    validation:
+      strict: true
+    format: delta
+    mode: overwrite
+    deterministic: true
+    csv_export:
+      enabled: true
+      delimiter: ","
+      header: true
+      encoding: "utf-8"
+
+# =============================================================================
+# Maintenance Settings
+# =============================================================================
+maintenance:
+  auto_vacuum: false
+  vacuum_retention_days: 7
+
+# =============================================================================
+# Input Filter Defaults
+# =============================================================================
+input_filter:
+  enabled: false
+  batch_size: 100

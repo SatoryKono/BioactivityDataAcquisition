@@ -16,6 +16,7 @@ from __future__ import annotations
 import dataclasses
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
 import orjson
@@ -335,6 +336,34 @@ class BaseTransformer(ABC):
             list_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
             return list_bytes.decode("utf-8")
         return str(value)
+
+    @classmethod
+    def serialize_json_fields(
+        cls,
+        record: dict[str, Any],
+        field_names: Sequence[str],
+    ) -> dict[str, str | None]:
+        """Serialize multiple JSON fields at once.
+
+        Convenience method to reduce repetitive serialize_json() calls
+        in transformers with many nested JSON fields.
+
+        Args:
+            record: Source record dictionary.
+            field_names: Names of fields to serialize.
+
+        Returns:
+            Dictionary with serialized JSON strings (or None for empty/missing).
+
+        Example:
+            >>> result = self.serialize_json_fields(record, [
+            ...     "molecule_hierarchy",
+            ...     "molecule_properties",
+            ...     "cross_references",
+            ... ])
+            # Returns: {"molecule_hierarchy": "{...}", "molecule_properties": "{...}", ...}
+        """
+        return {name: cls.serialize_json(record.get(name)) for name in field_names}
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
