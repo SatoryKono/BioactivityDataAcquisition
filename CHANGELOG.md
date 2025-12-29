@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.6] - 2025-12-29
+
+### Added
+
+- **Unified `to_domain()` Pattern**: Added consistent `to_domain()` methods to Pydantic models:
+  - `GoldFiltersConfig.to_domain()` → `GoldFilterConfig` (domain dataclass)
+  - `PipelineYamlConfig.to_domain()` → `PipelineConfig` (domain dataclass)
+  - Consolidates conversion logic and eliminates duplication
+  - All Pydantic config models now follow the same pattern for converting to domain
+
+### Changed
+
+- **Simplified `_build_gold_filters()`**: Now delegates to `GoldFiltersConfig.to_domain()`
+  - Reduces code duplication between infrastructure and domain
+  - Centralizes conversion logic in the Pydantic model
+
+### Tests
+
+- **Updated `TestYamlConfigToDomain`**: Migrated from MagicMock to real Pydantic models
+  - `test_basic_mapping`, `test_fields_extraction`, `test_dq_config_mapping` use real objects
+  - Added `test_pipeline_yaml_config_to_domain_method` for new `to_domain()` method
+  - Added `test_gold_filters_config_to_domain_method` for `GoldFiltersConfig.to_domain()`
+  - Improves test reliability by testing real integration
 ## [Unreleased]
 
 ### Removed

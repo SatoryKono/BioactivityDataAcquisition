@@ -108,6 +108,19 @@ from bioetl.domain.locking import LockContext, LockNotHeldError
 # Medallion policies
 from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 
+# Pure domain normalization (REFACTOR-004)
+from bioetl.domain.normalization import (
+    extract_first_item,
+    extract_first_string,
+    format_date_parts,
+    normalize_doi,
+    normalize_string,
+    normalize_to_string,
+    parse_date_field,
+    parse_page_range,
+    strip_html_tags,
+)
+
 # Ports
 from bioetl.domain.ports import (
     AuditEntry,
@@ -139,19 +152,6 @@ from bioetl.domain.ports import (
 # Resilience (domain value objects)
 from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
 
-# Pure domain normalization (REFACTOR-004)
-from bioetl.domain.normalization import (
-    extract_first_item,
-    extract_first_string,
-    format_date_parts,
-    normalize_doi,
-    normalize_string,
-    normalize_to_string,
-    parse_date_field,
-    parse_page_range,
-    strip_html_tags,
-)
-
 # Pure domain transformations
 from bioetl.domain.transformations import (
     META_FIELDS,
@@ -166,16 +166,6 @@ from bioetl.domain.transformations import (
     safe_float,
     safe_int,
     safe_str,
-)
-
-# Pure domain validation (REFACTOR-004)
-from bioetl.domain.validation import (
-    validate_doi,
-    validate_non_empty_string,
-    validate_non_negative,
-    validate_positive_int,
-    validate_smiles,
-    validate_year_range,
 )
 
 # Types
@@ -198,6 +188,16 @@ from bioetl.domain.types import (
     RunType,
     SilverRecord,
     ValidationResult,
+)
+
+# Pure domain validation (REFACTOR-004)
+from bioetl.domain.validation import (
+    validate_doi,
+    validate_non_empty_string,
+    validate_non_negative,
+    validate_positive_int,
+    validate_smiles,
+    validate_year_range,
 )
 
 # Value Objects

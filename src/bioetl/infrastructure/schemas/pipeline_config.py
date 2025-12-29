@@ -27,6 +27,8 @@ from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 
 if TYPE_CHECKING:
+    from bioetl.domain.config import PipelineConfig
+    from bioetl.domain.filtering.gold_config import GoldFilterConfig
     from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
@@ -267,7 +269,10 @@ class GoldListContainsFilterConfig(BaseModel):
 
 
 class GoldFiltersConfig(BaseModel):
-    """Schema for gold_filters in YAML."""
+    """Schema for gold_filters in YAML.
+
+    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    """
 
     columns: dict[str, list[str]] = Field(default_factory=dict)
     ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
@@ -276,9 +281,59 @@ class GoldFiltersConfig(BaseModel):
     required_fields: list[str] = Field(default_factory=list)
     exclude_if_present: list[str] = Field(default_factory=list)
 
+    def to_domain(self) -> GoldFilterConfig:
+        """Convert to domain GoldFilterConfig dataclass.
+
+        Returns:
+            GoldFilterConfig: Immutable domain configuration.
+        """
+        from bioetl.domain.filtering import (
+            GoldColumnFilter,
+            GoldFilterConfig,
+            GoldListContainsFilter,
+            GoldListLengthFilter,
+            GoldRangeFilter,
+        )
+
+        return GoldFilterConfig(
+            column_filters=tuple(
+                GoldColumnFilter(column=col, values=frozenset(vals))
+                for col, vals in self.columns.items()
+            ),
+            range_filters=tuple(
+                GoldRangeFilter(
+                    column=col,
+                    min_value=r.min,
+                    max_value=r.max,
+                    include_min=r.include_min,
+                    include_max=r.include_max,
+                )
+                for col, r in self.ranges.items()
+            ),
+            list_length_filters=tuple(
+                GoldListLengthFilter(column=col, min_length=r.min, max_length=r.max)
+                for col, r in self.list_lengths.items()
+            ),
+            list_contains_filters=tuple(
+                GoldListContainsFilter(
+                    column=col, values=frozenset(r.values), mode=r.mode
+                )
+                for col, r in self.list_contains.items()
+            ),
+            required_fields=tuple(self.required_fields),
+            exclude_if_present=tuple(self.exclude_if_present),
+        )
+
 
 class PipelineYamlConfig(BaseModel):
-    """Strict schema for pipeline YAML configuration."""
+    """Strict schema for pipeline YAML configuration.
+
+    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+
+    Note:
+        The `to_domain()` method delegates to `yaml_config_to_domain()` in
+        `bioetl.infrastructure.config` to avoid code duplication.
+    """
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
@@ -349,3 +404,17 @@ class PipelineYamlConfig(BaseModel):
             )
 
         return self
+
+    def to_domain(self) -> PipelineConfig:
+        """Convert to domain PipelineConfig dataclass.
+
+        Delegates to `yaml_config_to_domain()` in `bioetl.infrastructure.config`
+        to avoid code duplication. This method provides a consistent API
+        across all Pydantic models.
+
+        Returns:
+            PipelineConfig: Immutable domain configuration.
+        """
+        from bioetl.infrastructure.config import yaml_config_to_domain
+
+        return yaml_config_to_domain(self)
