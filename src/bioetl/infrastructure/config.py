@@ -278,6 +278,9 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     schema to domain model. All validation has already been done by Pydantic
     in PipelineYamlConfig.
 
+    Uses `to_domain()` methods on Pydantic models for conversion to domain
+    dataclasses, providing a clean boundary between infrastructure and domain.
+
     Args:
         yaml_config: Validated PipelineYamlConfig from infrastructure layer
 
@@ -296,6 +299,9 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         if silver_sink:
             on_schema_mismatch = silver_sink.on_schema_mismatch
 
+    # Use to_domain() method for DQConfig conversion (consolidation pattern)
+    dq_config = yaml_config.dq_rules.to_domain()
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
@@ -309,10 +315,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=tuple(source_fields),
-        dq=DomainDQConfig(
-            soft_fail_threshold=yaml_config.dq_rules.soft_fail_threshold,
-            hard_fail_threshold=yaml_config.dq_rules.hard_fail_threshold,
-        ),
+        dq=dq_config,
         on_schema_mismatch=on_schema_mismatch,
     )
 
