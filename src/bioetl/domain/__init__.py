@@ -74,6 +74,7 @@ from bioetl.domain.exceptions import (
     DataQualityThresholdError,
     InfrastructureError,
     InvalidDataFormatError,
+    InvalidStateError,
     LockAcquisitionError,
     LockLostError,
     MergeConflictError,
@@ -277,6 +278,7 @@ __all__ = [
     # Exceptions - Data Quality
     "DataQualityThresholdError",
     "InvalidDataFormatError",
+    "InvalidStateError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
     # Filters
