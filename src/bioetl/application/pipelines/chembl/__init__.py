@@ -19,6 +19,12 @@ from bioetl.application.pipelines.chembl.cell_line import ChEMBLCellLinePipeline
 from bioetl.application.pipelines.chembl.cell_line_transformer import (
     CellLineTransformer,
 )
+from bioetl.application.pipelines.chembl.compound_record import (
+    ChEMBLCompoundRecordPipeline,
+)
+from bioetl.application.pipelines.chembl.compound_record_transformer import (
+    CompoundRecordTransformer,
+)
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
 from bioetl.application.pipelines.chembl.document_transformer import (
     DocumentTransformer,
@@ -44,10 +50,12 @@ __all__ = [
     "ChEMBLActivityPipeline",
     "ChEMBLAssayPipeline",
     "ChEMBLCellLinePipeline",
+    "ChEMBLCompoundRecordPipeline",
     "ChEMBLDocumentPipeline",
     "ChEMBLMoleculePipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "CompoundRecordTransformer",
     "DocumentTransformer",
     "MoleculeTransformer",
     "TargetComponentTransformer",
