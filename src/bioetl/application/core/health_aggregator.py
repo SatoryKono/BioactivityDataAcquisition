@@ -2,6 +2,9 @@
 
 Validates infrastructure readiness before pipeline execution.
 Implements parallel health checks for storage and data source components.
+
+Integrates with ProviderHealthMonitor for centralized health state management
+and P2 alerting on UNHEALTHY status per RULES.md §3.5.
 """
 
 from __future__ import annotations
@@ -15,7 +18,8 @@ from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatu
 
 if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import HealthMonitorPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports.health_check import HealthCheckResult
 
 
 class HealthAggregator:
@@ -24,28 +28,41 @@ class HealthAggregator:
     Performs parallel health validation of storage and data source
     before pipeline execution. Records metrics for observability.
 
+    Integrates with ProviderHealthMonitor for:
+    - Centralized health state tracking
+    - P2 alerting on UNHEALTHY status
+    - Adaptive client configuration based on health
+
     Attributes:
         _metrics: Optional metrics port for recording health check metrics.
         _logger: Logger for health check status reporting.
+        _health_monitor: Optional ProviderHealthMonitor for state tracking.
+
     """
 
     # Metric names following Prometheus conventions
     METRIC_HEALTH_STATUS = "health_check_status"
     METRIC_HEALTH_DURATION = "health_check_duration_seconds"
+    METRIC_HEALTH_LATENCY = "health_check_latency_ms"
 
     def __init__(
         self,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
+        health_monitor: HealthMonitorPort | None = None,
     ) -> None:
         """Initialize HealthAggregator.
 
         Args:
             metrics: Optional metrics port for recording health check metrics.
             logger: Optional logger for health check status reporting.
+            health_monitor: Optional HealthMonitorPort for centralized
+                health state tracking and alerting.
+
         """
         self._metrics = metrics
         self._logger = logger
+        self._health_monitor = health_monitor
 
     async def check_all(self, services: PipelineServices) -> HealthReport:
         """Check health of all critical infrastructure components.
@@ -129,24 +146,50 @@ class HealthAggregator:
     ) -> ComponentHealthResult:
         """Check data source health.
 
+        Uses enhanced check_health() method when available for detailed
+        metrics including latency. Integrates with ProviderHealthMonitor
+        for state tracking and P2 alerting.
+
         Args:
             services: Pipeline services containing data_source.
 
         Returns:
             ComponentHealthResult for data source.
+
         """
         component = "data_source"
         start_time = time.perf_counter()
+        health_result: HealthCheckResult | None = None
 
         try:
-            status = await services.data_source.health_check()
-            duration = time.perf_counter() - start_time
+            # Try using new check_health() method for detailed result
+            if hasattr(services.data_source, "check_health"):
+                health_result = await services.data_source.check_health()
+                status = health_result.status
+                duration = time.perf_counter() - start_time
 
-            result = ComponentHealthResult(
-                component=component,
-                status=status,
-                duration_seconds=duration,
-            )
+                # Update ProviderHealthMonitor if available
+                if self._health_monitor is not None:
+                    self._health_monitor.update_from_health_check_result(
+                        health_result, self._logger
+                    )
+
+                result = ComponentHealthResult(
+                    component=component,
+                    status=status,
+                    duration_seconds=duration,
+                    error_message=health_result.last_error,
+                )
+            else:
+                # Fallback to legacy health_check()
+                status = await services.data_source.health_check()
+                duration = time.perf_counter() - start_time
+
+                result = ComponentHealthResult(
+                    component=component,
+                    status=status,
+                    duration_seconds=duration,
+                )
         except Exception as e:
             duration = time.perf_counter() - start_time
             result = ComponentHealthResult(
@@ -156,15 +199,22 @@ class HealthAggregator:
                 error_message=str(e),
             )
 
-        self._record_metrics(component, result)
+        self._record_metrics(component, result, health_result)
         return result
 
-    def _record_metrics(self, component: str, result: ComponentHealthResult) -> None:
+    def _record_metrics(
+        self,
+        component: str,
+        result: ComponentHealthResult,
+        health_result: HealthCheckResult | None = None,
+    ) -> None:
         """Record health check metrics.
 
         Args:
             component: Component name for metric labels.
             result: Health check result to record.
+            health_result: Optional detailed HealthCheckResult with latency info.
+
         """
         if self._metrics is None:
             return
@@ -184,6 +234,15 @@ class HealthAggregator:
             result.duration_seconds,
             labels,
         )
+
+        # Record latency from HealthCheckResult if available
+        if health_result is not None:
+            provider_labels = {"provider": health_result.provider}
+            self._metrics.observe_histogram(
+                self.METRIC_HEALTH_LATENCY,
+                health_result.latency_ms,
+                provider_labels,
+            )
 
     def _log_report(self, report: HealthReport) -> None:
         """Log health check report.

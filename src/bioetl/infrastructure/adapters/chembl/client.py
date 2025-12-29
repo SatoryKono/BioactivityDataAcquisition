@@ -57,6 +57,8 @@ class ChemblAdapter(BaseHttpAdapter):
         http_client: UnifiedHTTPClient instance
         logger: LoggerPort instance for structured logging
         batch_size: Number of records per API request (default: 1000)
+        filter_batch_size: Number of IDs per filtered API request (default: 20).
+            ChEMBL API returns 500 errors if URL is too long with many IDs.
         thread_pool: ThreadPoolExecutor for sync operations
 
     Health-Aware Behavior (uses circuit breaker state):
@@ -69,6 +71,7 @@ class ChemblAdapter(BaseHttpAdapter):
     http_client: UnifiedHTTPClient
     logger: LoggerPort
     batch_size: int = 1000
+    filter_batch_size: int = 20
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
 
@@ -300,7 +303,7 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
 
-        for id_batch in self._batch_ids(filter_ids, batch_size=100):
+        for id_batch in self._batch_ids(filter_ids, batch_size=self.filter_batch_size):
             async for record in self._fetch_with_filter(
                 entity_type, id_batch, filter_field, limit
             ):
@@ -439,6 +442,15 @@ class ChemblAdapter(BaseHttpAdapter):
 
         """
         return self._get_health_status()
+
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for ChEMBL.
+
+        Returns:
+            ChEMBL status endpoint path.
+
+        """
+        return "/chembl/api/data/status.json"
 
     def _handle_health_response(self, response: Response) -> HealthStatus:
         """Process health check response.

@@ -22,7 +22,59 @@ from typing import TYPE_CHECKING
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports.health_check import HealthCheckResult
+
+
+@dataclass(frozen=True, slots=True)
+class AdjustedClientConfig:
+    """Configuration adjusted based on provider health status.
+
+    Per RULES.md §3.5:
+    - HEALTHY: Normal operation (multiplier=1.0, divisor=1)
+    - DEGRADED: Timeout ×2, batch_size ÷2
+    - UNHEALTHY: Timeout ×4, batch_size ÷4 (aggressive throttling)
+
+    Attributes:
+        timeout_multiplier: Factor to multiply base timeout by.
+        batch_size_divisor: Factor to divide base batch_size by.
+        status: Current health status.
+
+    Example:
+        >>> config = tracker.get_adjusted_config()
+        >>> effective_timeout = base_timeout * config.timeout_multiplier
+        >>> effective_batch_size = base_batch_size // config.batch_size_divisor
+
+    """
+
+    timeout_multiplier: float
+    batch_size_divisor: int
+    status: HealthStatus
+
+    def apply_timeout(self, base_timeout: float) -> float:
+        """Apply timeout multiplier to base timeout.
+
+        Args:
+            base_timeout: Base timeout in seconds.
+
+        Returns:
+            Adjusted timeout value.
+
+        """
+        return base_timeout * self.timeout_multiplier
+
+    def apply_batch_size(self, base_batch_size: int, minimum: int = 1) -> int:
+        """Apply batch size divisor to base batch size.
+
+        Args:
+            base_batch_size: Base batch size.
+            minimum: Minimum allowed batch size (default: 1).
+
+        Returns:
+            Adjusted batch size, at least `minimum`.
+
+        """
+        return max(minimum, base_batch_size // self.batch_size_divisor)
 
 
 @dataclass
@@ -212,3 +264,204 @@ class ProviderHealthMonitor:
             Dictionary of provider name to ProviderHealthState.
         """
         return dict(self._states)
+
+    def update_from_health_check_result(
+        self,
+        result: HealthCheckResult,
+        logger: LoggerPort | None = None,
+    ) -> HealthStatus:
+        """Update state from HealthCheckResult and emit metrics.
+
+        This method provides enhanced integration with HealthCheckResult,
+        recording latency metrics and logging P2 alerts for UNHEALTHY status.
+
+        Args:
+            result: HealthCheckResult from adapter health check.
+            logger: Optional logger for P2 alert on UNHEALTHY.
+
+        Returns:
+            Current HealthStatus after applying transitions.
+
+        """
+        # Record health check latency metric
+        self.metrics.observe_histogram(
+            "health_check_latency_ms",
+            result.latency_ms,
+            labels={"provider": result.provider},
+        )
+
+        # Record health check result metric
+        self.metrics.set_gauge(
+            "provider_health_status",
+            float(result.status.to_metric_value()),
+            labels={"provider": result.provider},
+        )
+
+        # Apply state transitions
+        new_status = self.record_health_check_result(result.provider, result.status)
+
+        # P2 Alert for UNHEALTHY status
+        if new_status == HealthStatus.UNHEALTHY and logger:
+            logger.error(
+                "provider_unhealthy_alert",
+                provider=result.provider,
+                alert_priority="P2",
+                status=new_status.value,
+                consecutive_failures=result.consecutive_failures,
+                last_error=result.last_error,
+                endpoint=result.endpoint,
+                latency_ms=result.latency_ms,
+            )
+
+        return new_status
+
+    def get_adjusted_config(self, provider: str) -> AdjustedClientConfig:
+        """Get adjusted client configuration based on health status.
+
+        Per RULES.md §3.5:
+        - HEALTHY: Normal operation (timeout ×1, batch_size ÷1)
+        - DEGRADED: Timeout ×2, batch_size ÷2
+        - UNHEALTHY: Timeout ×4, batch_size ÷4 (aggressive throttling)
+
+        Args:
+            provider: Provider name.
+
+        Returns:
+            AdjustedClientConfig with multipliers for timeout and batch_size.
+
+        Example:
+            >>> config = monitor.get_adjusted_config("chembl")
+            >>> effective_timeout = 30.0 * config.timeout_multiplier  # 60.0 if DEGRADED
+            >>> effective_batch_size = config.apply_batch_size(1000, minimum=100)
+
+        """
+        timeout_mult, batch_div = self.get_adaptive_params(provider)
+        state = self.get_state(provider)
+        return AdjustedClientConfig(
+            timeout_multiplier=timeout_mult,
+            batch_size_divisor=batch_div,
+            status=state.status,
+        )
+
+
+@dataclass
+class ProviderHealthTracker:
+    """Per-provider health tracker with state machine management.
+
+    Wraps ProviderHealthMonitor for single-provider usage, providing
+    a simpler interface for adapters to track and respond to health changes.
+
+    Implements RULES.md §3.5 state machine:
+    - HEALTHY: Provider operational, no errors
+    - DEGRADED: 1-2 consecutive errors, timeout ×2, batch_size ÷2
+    - UNHEALTHY: ≥3 errors, pipeline paused, P2 alert
+
+    Attributes:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+        monitor: Centralized ProviderHealthMonitor instance.
+        logger: Optional logger for alerts.
+
+    Example:
+        >>> tracker = ProviderHealthTracker("chembl", monitor, logger)
+        >>> tracker.update(health_result)
+        >>> config = tracker.get_adjusted_config()
+        >>> if config.status == HealthStatus.UNHEALTHY:
+        ...     raise CriticalError("Provider unavailable")
+
+    """
+
+    provider: str
+    monitor: ProviderHealthMonitor
+    logger: LoggerPort | None = None
+
+    # Base configuration defaults
+    _base_timeout: float = 30.0
+    _base_batch_size: int = 1000
+
+    def update(self, result: HealthCheckResult) -> HealthStatus:
+        """Update health state from HealthCheckResult.
+
+        Args:
+            result: HealthCheckResult from health check probe.
+
+        Returns:
+            Current HealthStatus after update.
+
+        """
+        return self.monitor.update_from_health_check_result(result, self.logger)
+
+    def record_success(self) -> HealthStatus:
+        """Record successful operation.
+
+        Returns:
+            Current HealthStatus after recording success.
+
+        """
+        return self.monitor.record_success(self.provider)
+
+    def record_error(self) -> HealthStatus:
+        """Record failed operation.
+
+        Returns:
+            Current HealthStatus after recording error.
+
+        """
+        return self.monitor.record_error(self.provider)
+
+    def get_adjusted_config(self) -> AdjustedClientConfig:
+        """Get adjusted client configuration.
+
+        Returns:
+            AdjustedClientConfig with timeout/batch_size adjustments.
+
+        """
+        return self.monitor.get_adjusted_config(self.provider)
+
+    @property
+    def status(self) -> HealthStatus:
+        """Get current health status.
+
+        Returns:
+            Current HealthStatus for this provider.
+
+        """
+        return self.monitor.get_state(self.provider).status
+
+    @property
+    def consecutive_failures(self) -> int:
+        """Get consecutive failure count.
+
+        Returns:
+            Number of consecutive errors.
+
+        """
+        return self.monitor.get_state(self.provider).consecutive_errors
+
+    def is_healthy(self) -> bool:
+        """Check if provider is healthy.
+
+        Returns:
+            True if status is HEALTHY.
+
+        """
+        return self.status == HealthStatus.HEALTHY
+
+    def is_unhealthy(self) -> bool:
+        """Check if provider is unhealthy.
+
+        Returns:
+            True if status is UNHEALTHY.
+
+        """
+        return self.status == HealthStatus.UNHEALTHY
+
+    def should_pause_pipeline(self) -> bool:
+        """Check if pipeline should be paused due to health.
+
+        Per RULES.md §3.5: UNHEALTHY status pauses pipeline.
+
+        Returns:
+            True if pipeline should be paused.
+
+        """
+        return self.is_unhealthy()

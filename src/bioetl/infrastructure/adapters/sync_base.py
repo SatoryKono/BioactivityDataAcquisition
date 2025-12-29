@@ -11,11 +11,13 @@ to circuit breaker assessment on failure.
 from __future__ import annotations
 
 import asyncio
+import time
 import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
+from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -133,6 +135,70 @@ class BaseSyncAdapter(DataSourcePort):
                 {"provider": self.provider_name},
             )
             return self._fallback_health_status()
+
+    async def check_health(self) -> HealthCheckResult:
+        """Perform health check and return detailed result.
+
+        This method provides enhanced health check with latency tracking
+        and error details. It wraps the Template Method pattern used by
+        health_check() with additional metrics.
+
+        Returns:
+            HealthCheckResult with status, latency, and error details.
+
+        Note:
+            This method never raises exceptions. All errors are caught
+            and returned as UNHEALTHY status with error details.
+
+        """
+        start_time = time.monotonic()
+        last_error: str | None = None
+        consecutive_failures = 0
+
+        try:
+            status = await self._probe_health()
+        except Exception as e:
+            last_error = str(e)
+            status = self._fallback_health_status()
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            self.metrics.increment_counter(
+                "health_check_failures_total",
+                1,
+                {"provider": self.provider_name},
+            )
+            # Get failure count from circuit breaker
+            try:
+                consecutive_failures = self.circuit_breaker.get_failure_count()
+            except Exception:
+                consecutive_failures = 1
+
+        latency_ms = (time.monotonic() - start_time) * 1000
+
+        return HealthCheckResult(
+            status=status,
+            latency_ms=latency_ms,
+            provider=self.provider_name,
+            endpoint=self._get_health_endpoint(),
+            last_error=last_error,
+            consecutive_failures=consecutive_failures,
+        )
+
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for this adapter.
+
+        Subclasses SHOULD override this to return the specific endpoint
+        used for health probes. Default returns empty string.
+
+        Returns:
+            Health check endpoint path.
+
+        """
+        return ""
 
     async def _probe_health(self) -> HealthStatus:
         """Perform provider-specific health probe.
