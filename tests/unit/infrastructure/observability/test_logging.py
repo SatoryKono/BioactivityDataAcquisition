@@ -7,36 +7,36 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.ports import LoggerPort
-from bioetl.infrastructure.observability.logging import StructlogLogger, create_logger
+from bioetl.infrastructure.observability.logging import UnifiedLogger, create_logger
 
 
 @pytest.mark.unit
-class TestStructlogLogger:
-    """Tests for StructlogLogger adapter."""
+class TestUnifiedLogger:
+    """Tests for UnifiedLogger adapter."""
 
-    def test_structlog_logger_implements_logger_port(self) -> None:
-        """Test that StructlogLogger implements LoggerPort protocol."""
+    def test_unified_logger_implements_logger_port(self) -> None:
+        """Test that UnifiedLogger implements LoggerPort protocol."""
         run_id = uuid4()
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
         )
 
-        # StructlogLogger must implement LoggerPort
+        # UnifiedLogger must implement LoggerPort
         assert isinstance(logger, LoggerPort)
 
-    def test_structlog_logger_is_structlog_logger_type(self) -> None:
-        """Test that create_logger returns StructlogLogger instance."""
+    def test_unified_logger_is_unified_logger_type(self) -> None:
+        """Test that create_logger returns UnifiedLogger instance."""
         run_id = uuid4()
         logger = create_logger(
             pipeline="test_pipeline",
             run_id=run_id,
         )
 
-        assert isinstance(logger, StructlogLogger)
+        assert isinstance(logger, UnifiedLogger)
 
-    def test_structlog_logger_bind_returns_self_type(self) -> None:
-        """Test that bind() returns StructlogLogger, not BoundLogger."""
+    def test_unified_logger_bind_returns_self_type(self) -> None:
+        """Test that bind() returns UnifiedLogger, not BoundLogger."""
         run_id = uuid4()
         logger = create_logger(
             pipeline="test_pipeline",
@@ -45,12 +45,12 @@ class TestStructlogLogger:
 
         bound = logger.bind(extra_key="value")
 
-        # bind() must return StructlogLogger, not raw BoundLogger
-        assert isinstance(bound, StructlogLogger)
+        # bind() must return UnifiedLogger, not raw BoundLogger
+        assert isinstance(bound, UnifiedLogger)
         assert isinstance(bound, LoggerPort)
 
-    def test_structlog_logger_all_methods(self) -> None:
-        """Test that StructlogLogger has all LoggerPort methods."""
+    def test_unified_logger_all_methods(self) -> None:
+        """Test that UnifiedLogger has all LoggerPort methods."""
         run_id = uuid4()
         logger = create_logger(
             pipeline="test_pipeline",

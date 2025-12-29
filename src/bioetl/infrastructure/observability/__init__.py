@@ -11,7 +11,7 @@ Implements RULES.md §3 (Observability).
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability.logging import StructlogLogger
+from bioetl.infrastructure.observability.logging import UnifiedLogger
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
@@ -24,5 +24,5 @@ __all__ = [
     "NoOpTracing",
     "OpenTelemetryTracer",
     "PrometheusMetrics",
-    "StructlogLogger",
+    "UnifiedLogger",
 ]

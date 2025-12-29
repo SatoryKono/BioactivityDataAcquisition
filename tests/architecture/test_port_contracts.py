@@ -842,12 +842,12 @@ class TestJsonEncoderPortContract:
 class TestLoggerImplementationContract:
     """Tests that logger implementations satisfy LoggerPort contract.
 
-    StructlogLogger MUST implement LoggerPort protocol.
+    UnifiedLogger MUST implement LoggerPort protocol.
     NoOpLogger MUST implement LoggerPort protocol.
     """
 
-    def test_structlog_logger_implements_logger_port(self) -> None:
-        """StructlogLogger MUST satisfy LoggerPort contract.
+    def test_unified_logger_implements_logger_port(self) -> None:
+        """UnifiedLogger MUST satisfy LoggerPort contract.
 
         Ensures formal adapter replaces duck typing with explicit
         protocol implementation.
@@ -859,13 +859,13 @@ class TestLoggerImplementationContract:
         logger = create_logger(pipeline="test", run_id=uuid4())
 
         assert isinstance(logger, ports.LoggerPort), (
-            "StructlogLogger MUST implement LoggerPort protocol. "
+            "UnifiedLogger MUST implement LoggerPort protocol. "
             "Check that all required methods are present: "
             "bind, info, warning, error, debug, exception."
         )
 
-    def test_structlog_logger_bind_returns_logger_port(self) -> None:
-        """StructlogLogger.bind() MUST return LoggerPort, not raw BoundLogger.
+    def test_unified_logger_bind_returns_logger_port(self) -> None:
+        """UnifiedLogger.bind() MUST return LoggerPort, not raw BoundLogger.
 
         This ensures type consistency across bound loggers.
         """
@@ -877,7 +877,7 @@ class TestLoggerImplementationContract:
         bound = logger.bind(extra_context="value")
 
         assert isinstance(bound, ports.LoggerPort), (
-            "StructlogLogger.bind() MUST return LoggerPort. "
+            "UnifiedLogger.bind() MUST return LoggerPort. "
             "Returning raw structlog.BoundLogger breaks type safety."
         )
 

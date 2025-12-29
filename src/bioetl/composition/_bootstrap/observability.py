@@ -5,7 +5,7 @@ monitoring. These functions configure the observability stack for the pipeline.
 
 Unified Observability Contract:
 - bootstrap_observability() always returns valid implementations
-- Logger: StructlogLogger (always valid)
+- Logger: UnifiedLogger (always valid)
 - Metrics: PrometheusMetrics or NoOpMetrics (never None)
 - Tracer: OpenTelemetryTracer or NoOpTracing (never None)
 - DQMonitor: DataQualityMonitor or None (optional)
@@ -93,7 +93,7 @@ def bootstrap_logger(
     """Create a logger for the application layer (e.g., CLI).
 
     Returns:
-        StructlogLogger implementing LoggerPort.
+        UnifiedLogger implementing LoggerPort.
     """
     return create_infra_logger(
         pipeline=pipeline, run_id=run_id, log_level=log_level, json_format=True
@@ -234,7 +234,7 @@ def bootstrap_observability(
 
     Unified Observability Contract:
     - Always returns a valid ObservabilityBundle with non-None logger and metrics
-    - Fallback to StructlogLogger + NoOpMetrics when Prometheus is disabled
+    - Fallback to UnifiedLogger + NoOpMetrics when Prometheus is disabled
     - Tracer and DQ monitor remain optional
 
     Creates a unified observability bundle containing logger, tracer, metrics,

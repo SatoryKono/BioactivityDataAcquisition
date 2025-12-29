@@ -27,7 +27,7 @@ import structlog
 from bioetl.domain.ports import LoggerPort
 
 
-class StructlogLogger:
+class UnifiedLogger:
     """Formal LoggerPort adapter wrapping structlog.
 
     This adapter provides a formal implementation of LoggerPort,
@@ -37,7 +37,7 @@ class StructlogLogger:
     type-safe integration with the domain layer.
 
     Example:
-        >>> logger = StructlogLogger(structlog.get_logger())
+        >>> logger = UnifiedLogger(structlog.get_logger())
         >>> logger.info("event_name", key="value")
         >>> bound = logger.bind(run_id="123")
         >>> bound.warning("another_event")
@@ -56,13 +56,13 @@ class StructlogLogger:
     def bind(self, **kwargs: Any) -> Self:
         """Bind additional context to the logger.
 
-        Returns a new StructlogLogger instance with the bound context.
+        Returns a new UnifiedLogger instance with the bound context.
 
         Args:
             **kwargs: Key-value pairs to bind to the logger context.
 
         Returns:
-            New StructlogLogger with bound context.
+            New UnifiedLogger with bound context.
         """
         bound = self._logger.bind(**kwargs)
         return self.__class__(bound)
@@ -128,7 +128,7 @@ def create_logger(
         json_format: Use JSON output format (default: True).
 
     Returns:
-        StructlogLogger implementing LoggerPort with bound context.
+        UnifiedLogger implementing LoggerPort with bound context.
 
     """
     processors: list[Any] = [
@@ -163,4 +163,4 @@ def create_logger(
         format="%(message)s",
     )
 
-    return StructlogLogger(bound_logger)
+    return UnifiedLogger(bound_logger)

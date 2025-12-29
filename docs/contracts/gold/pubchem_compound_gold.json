@@ -1,0 +1,102 @@
+{
+  "title": "PubChemCompoundGoldSchema",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "entity_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "molecular_formula": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "molecular_weight": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "canonical_smiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isomeric_smiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inchi": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inchikey": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "iupac_name": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "content_hash": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_run_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_run_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_source_batch_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_ingestion_ts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    }
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "title": "PubMedPublicationGoldSchema",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "entity_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "content_hash": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pmid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "doi": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pmc_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "title": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "abstract": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "journal": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "journal_abbrev": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issn": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "volume": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issue": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pub_date": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pub_year": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "publication_year": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "accepted_date": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "received_date": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revised_date": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "epub_date": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "publication_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mesh_terms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "language": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "country": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_run_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_run_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_source_batch_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_ingestion_ts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    }
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "title": "ChEMBLActivityGoldSchema",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "entity_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "content_hash": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "activity_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "molecule_chembl_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_chembl_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assay_chembl_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "document_chembl_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "record_id": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "src_id": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "canonical_smiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "molecule_pref_name": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "parent_molecule_chembl_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_pref_name": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_organism": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_tax_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assay_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assay_description": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assay_variant_accession": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assay_variant_mutation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bao_endpoint": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bao_format": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bao_label": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "value": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "relation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "upper_value": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "text_value": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standard_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standard_value": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "standard_units": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standard_relation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standard_upper_value": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "standard_text_value": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standard_flag": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "pchembl_value": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "ligand_efficiency_bei": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "ligand_efficiency_le": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "ligand_efficiency_lle": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "ligand_efficiency_sei": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "qudt_units": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "uo_units": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "document_journal": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "document_year": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "activity_comment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_validity_comment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_validity_description": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "potential_duplicate": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "action_type_action_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "action_type_description": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "action_type_parent_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "activity_properties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "toid": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "_run_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_run_type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_source_batch_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_ingestion_ts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "_index": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    }
+  }
+}
