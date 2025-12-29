@@ -43,7 +43,7 @@ sink:
         mode: merge
         on_schema_mismatch: evolve
         primary_key: ["record_id"]
-        partition_by: ["src_id"]
+        partition_by: []
         classification: public
         forensic_retention: true
         deterministic: true
