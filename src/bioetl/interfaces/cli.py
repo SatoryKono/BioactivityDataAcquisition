@@ -28,6 +28,9 @@ from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
     from bioetl.domain.ports import LoggerPort
 
 
@@ -363,6 +366,75 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
     asyncio.run(_run())
 
 
+def _collect_vacuum_tables(
+    layer: str,
+) -> list[tuple[str, str]]:
+    """Collect tables to vacuum from all pipeline configs.
+
+    Args:
+        layer: Which layer to collect ("all", "silver", or "gold").
+
+    Returns:
+        List of (table_name, layer_name) tuples.
+    """
+    from bioetl.composition.entrypoints import load_pipeline_config
+    from bioetl.composition.registry import get_default_registry
+
+    registry = get_default_registry()
+    pipelines = registry.list_pipelines()
+
+    silver_tables: set[str] = set()
+    gold_tables: set[str] = set()
+
+    for pipeline_name in pipelines:
+        try:
+            config = load_pipeline_config(pipeline_name)
+            if config.silver_table:
+                silver_tables.add(config.silver_table)
+            if config.gold_table:
+                gold_tables.add(config.gold_table)
+        except FileNotFoundError:
+            click.echo(f"Warning: Config not found for {pipeline_name}", err=True)
+
+    tables: list[tuple[str, str]] = []
+    if layer in ("all", "silver"):
+        tables.extend((t, "silver") for t in sorted(silver_tables))
+    if layer in ("all", "gold"):
+        tables.extend((t, "gold") for t in sorted(gold_tables))
+
+    return tables
+
+
+async def _vacuum_table(
+    lifecycle: MedallionLifecycleService,
+    table_name: str,
+    table_layer: str,
+    retention_days: int,
+    dry_run: bool,
+) -> tuple[int, str | None]:
+    """Vacuum a single table.
+
+    Returns:
+        Tuple of (files_removed, error_message or None).
+    """
+    try:
+        action = "Would vacuum" if dry_run else "Vacuuming"
+        click.echo(f"{'[DRY-RUN] ' if dry_run else ''}{action} {table_layer}/{table_name}...")
+
+        files_removed = await lifecycle.vacuum(
+            table=table_name,
+            retention_days=retention_days,
+            dry_run=dry_run,
+        )
+
+        result_verb = "Would remove" if dry_run else "Removed"
+        click.echo(f"  {result_verb} {files_removed} files")
+        return files_removed, None
+    except Exception as e:
+        click.echo(f"  Error: {e}", err=True)
+        return 0, f"{table_layer}/{table_name}"
+
+
 @maintenance.command("vacuum-all")
 @click.option(
     "--retention-days",
@@ -396,77 +468,28 @@ def vacuum_all_command(retention_days: int, dry_run: bool, layer: str) -> None:
 
         bioetl maintenance vacuum-all --layer silver
     """
-    from bioetl.composition.entrypoints import (
-        get_lifecycle_service,
-        load_pipeline_config,
-    )
-    from bioetl.composition.registry import get_default_registry
-
-    lifecycle = get_lifecycle_service()
-    registry = get_default_registry()
-    pipelines = registry.list_pipelines()
-
-    # Collect unique table names from all pipeline configs
-    silver_tables: set[str] = set()
-    gold_tables: set[str] = set()
-
-    for pipeline_name in pipelines:
-        try:
-            config = load_pipeline_config(pipeline_name)
-            if config.silver_table:
-                silver_tables.add(config.silver_table)
-            if config.gold_table:
-                gold_tables.add(config.gold_table)
-        except FileNotFoundError:
-            click.echo(f"Warning: Config not found for {pipeline_name}", err=True)
-            continue
-
-    # Determine which tables to vacuum
-    tables_to_vacuum: list[tuple[str, str]] = []  # (table_name, layer)
-
-    if layer in ("all", "silver"):
-        for table in sorted(silver_tables):
-            tables_to_vacuum.append((table, "silver"))
-
-    if layer in ("all", "gold"):
-        for table in sorted(gold_tables):
-            tables_to_vacuum.append((table, "gold"))
+    tables_to_vacuum = _collect_vacuum_tables(layer)
 
     if not tables_to_vacuum:
         click.echo("No tables found to vacuum.")
         return
+
+    lifecycle = get_lifecycle_service()
 
     async def _run() -> None:
         total_files = 0
         failed_tables: list[str] = []
 
         for table_name, table_layer in tables_to_vacuum:
-            try:
-                if dry_run:
-                    click.echo(
-                        f"[DRY-RUN] Would vacuum {table_layer}/{table_name} "
-                        f"(retention: {retention_days}d)"
-                    )
-                else:
-                    click.echo(f"Vacuuming {table_layer}/{table_name}...")
+            files, error = await _vacuum_table(
+                lifecycle, table_name, table_layer, retention_days, dry_run
+            )
+            total_files += files
+            if error:
+                failed_tables.append(error)
 
-                files_removed = await lifecycle.vacuum(
-                    table=table_name,
-                    retention_days=retention_days,
-                    dry_run=dry_run,
-                )
-                total_files += files_removed
-
-                if dry_run:
-                    click.echo(f"  Would remove {files_removed} files")
-                else:
-                    click.echo(f"  Removed {files_removed} files")
-
-            except Exception as e:
-                click.echo(f"  Error: {e}", err=True)
-                failed_tables.append(f"{table_layer}/{table_name}")
-
-        click.echo(f"\nTotal: {'would remove' if dry_run else 'removed'} {total_files} files")
+        result_verb = "would remove" if dry_run else "removed"
+        click.echo(f"\nTotal: {result_verb} {total_files} files")
         if failed_tables:
             click.echo(f"Failed tables: {', '.join(failed_tables)}", err=True)
 

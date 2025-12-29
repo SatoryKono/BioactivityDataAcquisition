@@ -207,7 +207,7 @@ class TestActivityTransformerTransform:
 
         assert result is not None
         # Single-element list is unwrapped to just the dict
-        assert result.get("activity_properties") == '{"type": "Ki", "value": 5.0}'
+        assert result.get("activity_properties") == '{"type":"Ki","value":5.0}'
 
     @pytest.mark.asyncio
     async def test_transform_with_json_fields_multiple(self, transformer, mock_context):
@@ -222,7 +222,7 @@ class TestActivityTransformerTransform:
 
         assert result is not None
         # Multi-element list stays as array
-        assert result.get("activity_properties") == '[{"type": "Ki"}, {"type": "IC50"}]'
+        assert result.get("activity_properties") == '[{"type":"Ki"},{"type":"IC50"}]'
 
     @pytest.mark.asyncio
     async def test_transform_with_empty_activity_properties(

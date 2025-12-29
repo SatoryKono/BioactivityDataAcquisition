@@ -10,6 +10,7 @@ Verifies that:
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -91,7 +92,7 @@ class TestObservabilityBundle:
 
         bundle = ObservabilityBundle(logger=mock_logger, metrics=mock_metrics)
 
-        with pytest.raises(Exception):  # FrozenInstanceError
+        with pytest.raises(FrozenInstanceError):
             bundle.metrics = MagicMock()  # type: ignore[misc]
 
 

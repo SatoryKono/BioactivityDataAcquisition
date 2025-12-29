@@ -11,7 +11,7 @@ import pandera as pa
 from pandera.typing import Series
 
 
-class ETLRecordSchema(pa.DataFrameModel):  # type: ignore[misc]
+class ETLRecordSchema(pa.DataFrameModel):
     """Base schema with common system and lineage fields."""
 
     # === System Fields ===
