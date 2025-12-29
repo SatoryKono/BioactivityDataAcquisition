@@ -14,7 +14,6 @@ Implements DRY principle by extracting shared logic from entity transformers.
 from __future__ import annotations
 
 import dataclasses
-import json
 import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
