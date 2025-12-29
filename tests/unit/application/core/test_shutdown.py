@@ -65,6 +65,50 @@ class TestShutdownSignal:
         assert signal.is_requested is True
         await task
 
+    def test_is_shutting_down_alias(self):
+        """Test is_shutting_down() is alias for is_requested."""
+        signal = ShutdownSignal()
+        assert signal.is_shutting_down() is False
+        signal.request()
+        assert signal.is_shutting_down() is True
+
+    @pytest.mark.asyncio
+    async def test_initiate_shutdown_sets_flag(self):
+        """Test initiate_shutdown() sets flag (ShutdownPort compat)."""
+        signal = ShutdownSignal()
+        await signal.initiate_shutdown("test reason")
+        assert signal.is_requested is True
+        assert signal.is_shutting_down() is True
+
+    @pytest.mark.asyncio
+    async def test_wait_for_completion_timeout(self):
+        """Test wait_for_completion returns False on timeout."""
+        signal = ShutdownSignal()
+        result = await signal.wait_for_completion(timeout=0.01)
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_wait_for_completion_success(self):
+        """Test wait_for_completion returns True when marked complete."""
+        signal = ShutdownSignal()
+
+        async def mark_complete_after_delay():
+            await asyncio.sleep(0.05)
+            signal.mark_completed()
+
+        task = asyncio.create_task(mark_complete_after_delay())
+        result = await signal.wait_for_completion(timeout=1.0)
+
+        assert result is True
+        await task
+
+    def test_mark_completed(self):
+        """Test mark_completed sets completion event."""
+        signal = ShutdownSignal()
+        signal.mark_completed()
+        # Completion event should be set
+        assert signal._completion_event.is_set()
+
 
 @pytest.mark.unit
 class TestPipelineShutdownError:

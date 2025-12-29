@@ -83,7 +83,7 @@ class TestSetupShutdownHandlers:
             setup_shutdown_handlers(shutdown_signal, logger=mock_logger)
 
             mock_logger.warning.assert_called_with(
-                "Cannot set signal handlers in a non-main thread"
+                "Cannot set signal handlers outside main thread"
             )
 
     def test_works_without_logger(self):
