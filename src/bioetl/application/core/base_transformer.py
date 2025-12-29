@@ -320,7 +320,9 @@ class BaseTransformer(ABC):
         if isinstance(value, dict):
             if len(value) == 0:
                 return None
-            return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+            # orjson type stubs incomplete, decode returns str
+            result: str = orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+            return result
         if isinstance(value, list):
             if len(value) == 0:
                 return None
@@ -328,11 +330,17 @@ class BaseTransformer(ABC):
             if len(value) == 1:
                 item = value[0]
                 if isinstance(item, dict):
-                    return orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode(
-                        "utf-8"
-                    )
+                    # orjson type stubs incomplete, decode returns str
+                    result_item: str = orjson.dumps(
+                        item, option=orjson.OPT_SORT_KEYS
+                    ).decode("utf-8")
+                    return result_item
                 return str(item)
-            return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+            # orjson type stubs incomplete, decode returns str
+            result_list: str = orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode(
+                "utf-8"
+            )
+            return result_list
         return str(value)
 
     @staticmethod
