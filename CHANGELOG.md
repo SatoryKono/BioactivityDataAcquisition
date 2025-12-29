@@ -23,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **[P2-1] Writer DI Improvement**: Добавлен deprecation warning для `tracing=None` в writers:
+  - `BronzeWriter`, `DeltaWriter`, `GoldWriter` теперь выводят `DeprecationWarning`
+  - Рекомендуется явно передавать `NoOpTracing()` из composition layer
+  - `StorageFactory` обновлён для явной инъекции `NoOpTracing`
+  - Backward-compatible: существующий код продолжает работать
+
 - **Architecture Audit Quality**: Применён протокол двойной верификации (REQ-ARCH-040):
   - Все утверждения проверены через grep/read кода
   - Задокументированы команды верификации
