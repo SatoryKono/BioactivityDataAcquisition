@@ -16,13 +16,16 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.quarantine_manager import QuarantineManager
+    from bioetl.application.services import CheckpointService, QuarantineService
     from bioetl.domain.ports import CheckpointPort, QuarantinePort
 
 __all__ = [
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
+    "bootstrap_checkpoint_service",
     "bootstrap_quarantine",
     "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_service",
 ]
 
 
@@ -91,4 +94,48 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
         pipeline_name=pipeline_name,
         run_id=RunID(uuid4()),  # Dummy run_id for CLI inspection
         resume=False,
+    )
+
+
+def bootstrap_checkpoint_service() -> CheckpointService:
+    """Bootstrap CheckpointService for CLI administrative operations.
+
+    Creates a CheckpointService for checkpoint listing, deletion, and inspection.
+    Uses a generic checkpoint port that can list all pipelines.
+
+    Returns:
+        CheckpointService configured for CLI operations.
+    """
+    from bioetl.application.services import CheckpointService
+
+    settings = get_settings()
+    # Use empty pipeline name for global operations
+    checkpoint_port = LocalCheckpoint(
+        base_path=settings.checkpoint_path,
+        pipeline_name="",
+    )
+    noop_logger = NoOpLogger()
+
+    return CheckpointService(
+        checkpoint_port=checkpoint_port,
+        logger=noop_logger,
+    )
+
+
+def bootstrap_quarantine_service() -> QuarantineService:
+    """Bootstrap QuarantineService for CLI administrative operations.
+
+    Creates a QuarantineService for quarantine inspection, replay, and purge.
+
+    Returns:
+        QuarantineService configured for CLI operations.
+    """
+    from bioetl.application.services import QuarantineService
+
+    quarantine_port = bootstrap_quarantine()
+    noop_logger = NoOpLogger()
+
+    return QuarantineService(
+        quarantine_port=quarantine_port,
+        logger=noop_logger,
     )
