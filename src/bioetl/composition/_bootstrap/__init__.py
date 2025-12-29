@@ -14,8 +14,10 @@ from __future__ import annotations
 from bioetl.composition._bootstrap.checkpoint import (
     bootstrap_checkpoint,
     bootstrap_checkpoint_manager,
+    bootstrap_checkpoint_service,
     bootstrap_quarantine,
     bootstrap_quarantine_manager,
+    bootstrap_quarantine_service,
 )
 from bioetl.composition._bootstrap.observability import (
     bootstrap_dq_monitor,
@@ -26,14 +28,17 @@ from bioetl.composition._bootstrap.observability import (
     validate_observability_preflight,
 )
 from bioetl.composition._bootstrap.storage import (
+    bootstrap_bronze_cleanup_service,
     bootstrap_cleanup,
     bootstrap_lifecycle_service,
     bootstrap_storage,
 )
 
 __all__ = [
+    "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
+    "bootstrap_checkpoint_service",
     "bootstrap_cleanup",
     "bootstrap_dq_monitor",
     "bootstrap_lifecycle_service",
@@ -42,6 +47,7 @@ __all__ = [
     "bootstrap_observability",
     "bootstrap_quarantine",
     "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_service",
     "bootstrap_storage",
     "bootstrap_tracer",
     "validate_observability_preflight",

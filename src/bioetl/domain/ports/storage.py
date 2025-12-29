@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
@@ -43,7 +42,7 @@ class StoragePort(Protocol):
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
-    ) -> Path:
+    ) -> str:
         """Write raw records to the Bronze layer.
 
         Args:
@@ -61,7 +60,7 @@ class StoragePort(Protocol):
                          before writing (see ADR-014).
 
         Returns:
-            Path: Relative path to the written file.
+            str: Relative path to the written file.
         """
         ...
 
@@ -272,6 +271,30 @@ class StoragePort(Protocol):
                 "silver": {"path": str, "file_count": int, "exists": bool},
                 "gold": {"path": str, "file_count": int, "exists": bool} | None,
                 "total_files": int
+            }
+        """
+        ...
+
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Implements Bronze layer retention policy by removing files
+        older than the specified cutoff date.
+
+        Args:
+            cutoff_date: Files older than this date will be removed.
+            dry_run: If True, only count what would be removed.
+
+        Returns:
+            Dictionary with cleanup statistics:
+            {
+                "files_removed": int,
+                "bytes_freed": int,
+                "directories_removed": int
             }
         """
         ...
