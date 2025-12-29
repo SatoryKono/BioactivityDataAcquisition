@@ -31,7 +31,6 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
 from bioetl.domain.filter_config import (
     GoldColumnFilter,
