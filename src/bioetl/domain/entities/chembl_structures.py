@@ -277,3 +277,44 @@ class Molecule(BaseEntity):
             raise ValueError("Molecule ChEMBL ID is required")
         if self.max_phase is not None and not (0 <= self.max_phase <= 4):
             raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProteinClassification(BaseEntity):
+    """Represents a protein classification (ChEMBL Protein Classification).
+
+    Hierarchical classification of proteins (ChEMBL protein family tree).
+    Reference data used for target classification and filtering.
+
+    Contains all fields from ChEMBL protein_classification API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/protein_classification
+    """
+
+    # Primary identifier (REQUIRED)
+    protein_class_id: int
+
+    # Hierarchy information
+    parent_id: int | None = None  # FK to parent (NULL for root nodes)
+    class_level: int | None = None  # Level in hierarchy (1-8)
+
+    # Core metadata
+    pref_name: str | None = None  # Preferred name
+    short_name: str | None = None  # Short name
+    protein_class_desc: str | None = None  # Description
+    definition: str | None = None  # Definition of the class
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.protein_class_id:
+            raise ValueError("Protein class ID is required")
+        if self.protein_class_id < 1:
+            raise ValueError(
+                f"protein_class_id must be >= 1, got {self.protein_class_id}"
+            )
+        if self.class_level is not None and not (1 <= self.class_level <= 8):
+            raise ValueError(f"class_level must be 1-8, got {self.class_level}")
+        if self.parent_id is not None and self.parent_id < 1:
+            raise ValueError(f"parent_id must be >= 1 if set, got {self.parent_id}")

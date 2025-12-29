@@ -426,3 +426,69 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = True
+
+
+class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Cell Line in Gold layer."""
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    cell_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Core metadata
+    cell_name: Series[str] = pa.Field(nullable=False)
+    cell_description: Series[str] = pa.Field(nullable=True)
+
+    # Source information
+    cell_source_tissue: Series[str] = pa.Field(nullable=True)
+    cell_source_organism: Series[str] = pa.Field(nullable=True)
+    cell_source_tax_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # External identifiers
+    cellosaurus_id: Series[str] = pa.Field(nullable=True)
+    cl_lincs_id: Series[str] = pa.Field(nullable=True)
+    efo_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
+
+
+class ChEMBLProteinClassificationGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Protein Classification in Gold layer."""
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    protein_class_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
+
+    # Hierarchy information
+    parent_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    class_level: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # Core metadata
+    pref_name: Series[str] = pa.Field(nullable=True)
+    short_name: Series[str] = pa.Field(nullable=True)
+    protein_class_desc: Series[str] = pa.Field(nullable=True)
+    definition: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True

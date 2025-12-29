@@ -454,3 +454,29 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
     ]
 )
+
+# Schema for ChEMBL Protein Classification
+# See: https://www.ebi.ac.uk/chembl/api/data/protein_classification
+CHEMBL_PROTEIN_CLASSIFICATION_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("protein_class_id", pa.int64()),
+        # Hierarchy information
+        pa.field("parent_id", pa.int64()),
+        pa.field("class_level", pa.int64()),
+        # Core metadata
+        pa.field("pref_name", pa.string()),
+        pa.field("short_name", pa.string()),
+        pa.field("protein_class_desc", pa.string()),
+        pa.field("definition", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)

@@ -33,10 +33,20 @@ from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+from bioetl.application.pipelines.chembl.cell_line import ChEMBLCellLinePipeline
+from bioetl.application.pipelines.chembl.cell_line_transformer import (
+    CellLineTransformer,
+)
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
+from bioetl.application.pipelines.chembl.protein_classification import (
+    ChEMBLProteinClassificationPipeline,
+)
+from bioetl.application.pipelines.chembl.protein_classification_transformer import (
+    ProteinClassificationTransformer,
+)
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
 from bioetl.application.pipelines.chembl.target_component import (
     ChEMBLTargetComponentPipeline,
@@ -56,8 +66,10 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
+    ChEMBLCellLineGoldSchema,
     ChEMBLDocumentGoldSchema,
     ChEMBLMoleculeGoldSchema,
+    ChEMBLProteinClassificationGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
     PubChemCompoundGoldSchema,
@@ -67,8 +79,10 @@ from bioetl.infrastructure.schemas.gold import (
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
+    CHEMBL_CELL_LINE_SCHEMA,
     CHEMBL_DOCUMENT_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
+    CHEMBL_PROTEIN_CLASSIFICATION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
@@ -101,6 +115,16 @@ chembl_assay_factory = GenericPipelineFactory(
     silver_schema=CHEMBL_ASSAY_SCHEMA,
     gold_schema=ChEMBLAssayGoldSchema,
     transformer_class=AssayTransformer,
+)
+
+# ChEMBL Cell Line Pipeline
+chembl_cell_line_factory = GenericPipelineFactory(
+    pipeline_name="chembl_cell_line",
+    pipeline_class=ChEMBLCellLinePipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_CELL_LINE_SCHEMA,
+    gold_schema=ChEMBLCellLineGoldSchema,
+    transformer_class=CellLineTransformer,
 )
 
 # ChEMBL Document Pipeline
@@ -141,6 +165,16 @@ chembl_molecule_factory = GenericPipelineFactory(
     silver_schema=CHEMBL_MOLECULE_SCHEMA,
     gold_schema=ChEMBLMoleculeGoldSchema,
     transformer_class=MoleculeTransformer,
+)
+
+# ChEMBL Protein Classification Pipeline
+chembl_protein_classification_factory = GenericPipelineFactory(
+    pipeline_name="chembl_protein_classification",
+    pipeline_class=ChEMBLProteinClassificationPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_PROTEIN_CLASSIFICATION_SCHEMA,
+    gold_schema=ChEMBLProteinClassificationGoldSchema,
+    transformer_class=ProteinClassificationTransformer,
 )
 
 # PubChem Compound Pipeline
@@ -226,10 +260,12 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     """
     registry.register_factory(chembl_activity_factory)
     registry.register_factory(chembl_assay_factory)
+    registry.register_factory(chembl_cell_line_factory)
     registry.register_factory(chembl_document_factory)
     registry.register_factory(chembl_target_factory)
     registry.register_factory(chembl_target_component_factory)
     registry.register_factory(chembl_molecule_factory)
+    registry.register_factory(chembl_protein_classification_factory)
     registry.register_factory(pubchem_compound_factory)
     registry.register_factory(uniprot_protein_factory)
     registry.register_factory(pubmed_publications_factory)
@@ -265,8 +301,10 @@ def reset_registration() -> None:
 __all__ = [
     "chembl_activity_factory",
     "chembl_assay_factory",
+    "chembl_cell_line_factory",
     "chembl_document_factory",
     "chembl_molecule_factory",
+    "chembl_protein_classification_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
     "is_registered",

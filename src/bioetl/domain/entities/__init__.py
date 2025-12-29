@@ -26,6 +26,7 @@ from bioetl.domain.entities.chembl_structures import (
     CellLine,
     Document,
     Molecule,
+    ProteinClassification,
     Target,
     TargetComponent,
 )
@@ -43,6 +44,7 @@ __all__ = [
     "Document",
     "Molecule",
     "Protein",
+    "ProteinClassification",
     "Publication",
     "RequiredEntityFields",
     "Target",

@@ -27,6 +27,12 @@ from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import (
     MoleculeTransformer,
 )
+from bioetl.application.pipelines.chembl.protein_classification import (
+    ChEMBLProteinClassificationPipeline,
+)
+from bioetl.application.pipelines.chembl.protein_classification_transformer import (
+    ProteinClassificationTransformer,
+)
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
 from bioetl.application.pipelines.chembl.target_component import (
     ChEMBLTargetComponentPipeline,
@@ -46,10 +52,12 @@ __all__ = [
     "ChEMBLCellLinePipeline",
     "ChEMBLDocumentPipeline",
     "ChEMBLMoleculePipeline",
+    "ChEMBLProteinClassificationPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
     "DocumentTransformer",
     "MoleculeTransformer",
+    "ProteinClassificationTransformer",
     "TargetComponentTransformer",
     "TargetTransformer",
 ]
