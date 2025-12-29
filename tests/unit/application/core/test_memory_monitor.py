@@ -345,3 +345,157 @@ class TestMemoryMonitorPsutil:
         assert stats.used_mb >= 0
         assert 0 <= stats.percent_used <= 1
         assert stats.process_mb > 0
+
+
+@pytest.mark.unit
+class TestMemoryMonitorFallback:
+    """Tests for fallback memory monitoring (graceful degradation)."""
+
+    @pytest.fixture
+    def mock_logger(self):
+        """Create mock logger."""
+        return MagicMock()
+
+    def test_get_stats_estimate_returns_conservative_values(self, mock_logger):
+        """Test that fallback returns conservative estimates (50% usage).
+
+        This tests the graceful degradation behavior documented in CLAUDE.md.
+        When psutil is unavailable, the monitor returns safe estimates.
+        """
+        config = MemoryConfig()
+        monitor = MemoryMonitor(config=config, logger=mock_logger)
+
+        # Force use of estimate fallback
+        stats = monitor._get_stats_estimate()
+
+        # Should return 50% usage (conservative estimate)
+        assert stats.percent_used == 0.5
+        assert stats.total_mb == 8192.0  # 8GB assumed
+        assert stats.used_mb == 4096.0
+        assert stats.available_mb == 4096.0
+        assert stats.process_mb == 256.0  # 256MB assumed
+
+    def test_get_stats_estimate_not_zeros(self, mock_logger):
+        """Verify fallback doesn't return zeros (regression test for false claim).
+
+        See: consolidated-refactoring-analysis.md - "MemoryMonitor returns zeros"
+        was a FALSE claim. This test ensures graceful degradation works.
+        """
+        config = MemoryConfig()
+        monitor = MemoryMonitor(config=config, logger=mock_logger)
+
+        stats = monitor._get_stats_estimate()
+
+        # All values must be > 0 (no zeros)
+        assert stats.used_mb > 0
+        assert stats.available_mb > 0
+        assert stats.total_mb > 0
+        assert stats.percent_used > 0
+        assert stats.process_mb > 0
+
+
+@pytest.mark.unit
+class TestMemoryMonitorRecovery:
+    """Tests for memory pressure recovery behavior."""
+
+    @pytest.fixture
+    def mock_logger(self):
+        """Create mock logger."""
+        return MagicMock()
+
+    def test_batch_size_recovery_after_pressure(self, mock_logger):
+        """Test gradual batch size increase after pressure is relieved."""
+        config = MemoryConfig(
+            memory_pressure_threshold=0.8,
+            min_batch_size=10,
+        )
+        monitor = MemoryMonitor(config=config, logger=mock_logger)
+
+        with patch.object(monitor, "get_memory_stats") as mock_stats:
+            # Phase 1: Under pressure - reduce batch size
+            mock_stats.return_value = MemoryStats(
+                used_mb=7000.0,
+                available_mb=1000.0,
+                total_mb=8000.0,
+                percent_used=0.9,
+                process_mb=256.0,
+            )
+            reduced = monitor.get_recommended_batch_size(1000)
+            assert reduced == 500  # 50% reduction
+
+            # Phase 2: Pressure relieved - gradual recovery
+            mock_stats.return_value = MemoryStats(
+                used_mb=4000.0,
+                available_mb=4000.0,
+                total_mb=8000.0,
+                percent_used=0.5,  # Low usage
+                process_mb=256.0,
+            )
+            recovered = monitor.get_recommended_batch_size(reduced)
+
+            # Should increase by 25% but not exceed last known good size
+            expected = min(int(reduced * 1.25), monitor._last_batch_size)
+            assert recovered == expected
+
+    def test_aggressive_reduction_at_5_plus_pressure(self, mock_logger):
+        """Test aggressive 25% reduction factor after 5+ consecutive pressures."""
+        config = MemoryConfig(
+            memory_pressure_threshold=0.8,
+            min_batch_size=10,
+        )
+        monitor = MemoryMonitor(config=config, logger=mock_logger)
+
+        with patch.object(monitor, "get_memory_stats") as mock_stats:
+            mock_stats.return_value = MemoryStats(
+                used_mb=7000.0,
+                available_mb=1000.0,
+                total_mb=8000.0,
+                percent_used=0.9,
+                process_mb=256.0,
+            )
+
+            # Simulate 5+ consecutive pressure events
+            current_size = 1000
+            for i in range(6):
+                current_size = monitor.get_recommended_batch_size(current_size)
+
+            # After 5+ pressure events, reduction should be 0.25
+            assert monitor._consecutive_pressure_count >= 5
+            # Verify the reduction factor
+            assert monitor._get_reduction_factor() == 0.25
+
+
+@pytest.mark.unit
+class TestMemoryMonitorResourceFallback:
+    """Tests for resource module fallback on Unix systems."""
+
+    @pytest.fixture
+    def mock_logger(self):
+        """Create mock logger."""
+        return MagicMock()
+
+    def test_get_stats_fallback_windows_uses_estimate(self, mock_logger):
+        """Test that Windows falls back to estimate."""
+        config = MemoryConfig()
+        monitor = MemoryMonitor(config=config, logger=mock_logger)
+
+        with patch.object(monitor, "_psutil_available", False):
+            with patch("bioetl.application.core.memory_monitor.sys") as mock_sys:
+                mock_sys.platform = "win32"
+
+                stats = monitor._get_stats_fallback()
+
+                # Should use estimate
+                assert stats.percent_used == 0.5
+
+    def test_logging_when_psutil_unavailable(self, mock_logger):
+        """Test debug log when psutil is not available."""
+        config = MemoryConfig()
+
+        with patch(
+            "bioetl.application.core.memory_monitor.MemoryMonitor._check_psutil"
+        ) as mock_check:
+            mock_check.return_value = False
+            monitor = MemoryMonitor(config=config, logger=mock_logger)
+
+            assert monitor._psutil_available is False
