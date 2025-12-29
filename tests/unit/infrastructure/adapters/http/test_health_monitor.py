@@ -6,6 +6,7 @@ Verifies health state transitions and metric emission.
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -15,6 +16,11 @@ from bioetl.infrastructure.adapters.http.health_monitor import (
     ProviderHealthMonitor,
     ProviderHealthState,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.http.health_monitor import (
+        ProviderHealthTracker,
+    )
 
 
 @pytest.fixture
@@ -379,7 +385,7 @@ class TestProviderHealthTracker:
     @pytest.fixture
     def tracker(
         self, monitor: ProviderHealthMonitor, mock_logger: MagicMock
-    ) -> "ProviderHealthTracker":
+    ) -> ProviderHealthTracker:
         """Create ProviderHealthTracker."""
         from bioetl.infrastructure.adapters.http.health_monitor import (
             ProviderHealthTracker,
@@ -392,7 +398,7 @@ class TestProviderHealthTracker:
         )
 
     def test_status_property(
-        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+        self, tracker: ProviderHealthTracker, monitor: ProviderHealthMonitor
     ) -> None:
         """Test status property returns current health status."""
         assert tracker.status == HealthStatus.HEALTHY
@@ -401,7 +407,7 @@ class TestProviderHealthTracker:
         assert tracker.status == HealthStatus.DEGRADED
 
     def test_consecutive_failures_property(
-        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+        self, tracker: ProviderHealthTracker, monitor: ProviderHealthMonitor
     ) -> None:
         """Test consecutive_failures property returns error count."""
         assert tracker.consecutive_failures == 0
@@ -412,12 +418,12 @@ class TestProviderHealthTracker:
         monitor.record_error("chembl")
         assert tracker.consecutive_failures == 2
 
-    def test_is_healthy_method(self, tracker: "ProviderHealthTracker") -> None:
+    def test_is_healthy_method(self, tracker: ProviderHealthTracker) -> None:
         """Test is_healthy returns True when HEALTHY."""
         assert tracker.is_healthy() is True
 
     def test_is_unhealthy_method(
-        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+        self, tracker: ProviderHealthTracker, monitor: ProviderHealthMonitor
     ) -> None:
         """Test is_unhealthy returns True when UNHEALTHY."""
         assert tracker.is_unhealthy() is False
@@ -430,7 +436,7 @@ class TestProviderHealthTracker:
         assert tracker.is_unhealthy() is True
 
     def test_should_pause_pipeline(
-        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+        self, tracker: ProviderHealthTracker, monitor: ProviderHealthMonitor
     ) -> None:
         """Test should_pause_pipeline returns True when UNHEALTHY."""
         assert tracker.should_pause_pipeline() is False
@@ -442,7 +448,7 @@ class TestProviderHealthTracker:
         assert tracker.should_pause_pipeline() is True
 
     def test_record_success_delegates(
-        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+        self, tracker: ProviderHealthTracker, monitor: ProviderHealthMonitor
     ) -> None:
         """Test record_success delegates to monitor."""
         monitor.record_error("chembl")  # DEGRADED
@@ -453,7 +459,7 @@ class TestProviderHealthTracker:
         assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)
 
     def test_record_error_delegates(
-        self, tracker: "ProviderHealthTracker"
+        self, tracker: ProviderHealthTracker
     ) -> None:
         """Test record_error delegates to monitor."""
         status = tracker.record_error()
@@ -461,7 +467,7 @@ class TestProviderHealthTracker:
         assert status == HealthStatus.DEGRADED
 
     def test_get_adjusted_config(
-        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+        self, tracker: ProviderHealthTracker, monitor: ProviderHealthMonitor
     ) -> None:
         """Test get_adjusted_config returns proper config."""
         from bioetl.infrastructure.adapters.http.health_monitor import (

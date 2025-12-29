@@ -13,8 +13,6 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tests.contract.conftest import PUBCHEM_COMPOUND_REQUIRED_FIELDS
-
 PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 
