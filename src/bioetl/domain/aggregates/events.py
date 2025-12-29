@@ -1,0 +1,260 @@
+"""Domain Events for Aggregate Coordination.
+
+Domain events represent something that has happened in the domain.
+They are immutable, named in past tense, and contain all data needed
+for interested parties to react to the event.
+
+Events are collected by aggregates during state transitions and published
+by the application layer after successful persistence.
+
+Usage:
+    >>> run = PipelineRun(run_id=run_id, run_type=RunType.INCREMENTAL)
+    >>> run.start()
+    >>> run.complete()
+    >>> events = run.collect_events()
+    >>> for event in events:
+    ...     event_bus.publish(event)
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
+
+from bioetl.domain.types import BatchID, ContentHash, RunID
+
+
+@dataclass(frozen=True, slots=True)
+class DomainEvent:
+    """Base class for all domain events.
+
+    All domain events are immutable (frozen) and contain:
+    - occurred_at: When the event happened (UTC)
+    - run_id: Correlation ID for tracing
+
+    Events are named in past tense to reflect that something has already happened.
+    """
+
+    occurred_at: datetime
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Pipeline Run Events
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineStarted(DomainEvent):
+    """Event: Pipeline run has started.
+
+    Published when a pipeline transitions from PENDING to RUNNING.
+    """
+
+    run_id: RunID
+    pipeline_name: str
+    run_type: str
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineCompleted(DomainEvent):
+    """Event: Pipeline run completed successfully.
+
+    Published when a pipeline transitions to COMPLETED status.
+    All stages must have succeeded for this event to be emitted.
+    """
+
+    run_id: RunID
+    pipeline_name: str
+    records_processed: int
+    duration_seconds: float
+    stages_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineFailed(DomainEvent):
+    """Event: Pipeline run failed.
+
+    Published when a pipeline transitions to FAILED status.
+    Contains information about the first stage that failed.
+    """
+
+    run_id: RunID
+    pipeline_name: str
+    failed_stage: str
+    error: str
+    error_type: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineShutdown(DomainEvent):
+    """Event: Pipeline was gracefully shutdown.
+
+    Published when a pipeline receives SIGTERM/SIGINT and
+    transitions to SHUTDOWN status.
+    """
+
+    run_id: RunID
+    pipeline_name: str
+    records_processed: int
+
+
+@dataclass(frozen=True, slots=True)
+class StageCompleted(DomainEvent):
+    """Event: A pipeline stage completed.
+
+    Published after each stage (preflight, execution, postrun, etc.)
+    completes, regardless of success or failure.
+    """
+
+    run_id: RunID
+    stage_name: str
+    status: str
+    duration_seconds: float
+    records_processed: int = 0
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Batch Events
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True, slots=True)
+class BatchCreated(DomainEvent):
+    """Event: A new batch has been created.
+
+    Published when a batch is initialized with records.
+    """
+
+    run_id: RunID
+    batch_id: BatchID
+    record_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class BatchSealed(DomainEvent):
+    """Event: A batch has been sealed (no more records can be added).
+
+    Published when a batch transitions from OPEN to SEALED status.
+    After sealing, the batch is ready for writing to storage.
+    """
+
+    run_id: RunID
+    batch_id: BatchID
+    record_count: int
+    valid_count: int
+    quarantined_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class BatchWritten(DomainEvent):
+    """Event: A batch has been written to storage.
+
+    Published after successful write to Bronze/Silver/Gold layers.
+    """
+
+    run_id: RunID
+    batch_id: BatchID
+    layer: str  # "bronze", "silver", "gold"
+    record_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class BatchFailed(DomainEvent):
+    """Event: A batch write failed.
+
+    Published when a batch cannot be written to storage.
+    The batch may be retried or quarantined.
+    """
+
+    run_id: RunID
+    batch_id: BatchID
+    layer: str
+    error: str
+    error_type: str | None = None
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Quarantine Events
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True, slots=True)
+class RecordQuarantined(DomainEvent):
+    """Event: A record was sent to quarantine.
+
+    Published when a record fails validation or transformation
+    and is isolated for later analysis.
+    """
+
+    run_id: RunID
+    batch_id: BatchID
+    record_id: str | None
+    error_code: str
+    error_message: str
+    content_hash: ContentHash | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class QuarantineEntryCreated(DomainEvent):
+    """Event: A quarantine entry was created.
+
+    Contains full context about the quarantined record.
+    """
+
+    run_id: RunID
+    batch_id: BatchID
+    pipeline_name: str
+    error_code: str
+    payload_hash: ContentHash
+    metadata: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class QuarantineEntryResolved(DomainEvent):
+    """Event: A quarantine entry was resolved.
+
+    Published when a quarantine entry is successfully reprocessed
+    or marked as ignored.
+    """
+
+    run_id: RunID
+    entry_id: str
+    resolution: str  # "reprocessed", "ignored"
+    resolved_by: str | None = None
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Data Quality Events
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True, slots=True)
+class DQThresholdExceeded(DomainEvent):
+    """Event: Data quality threshold was exceeded.
+
+    Published when the error rate exceeds soft or hard thresholds.
+    """
+
+    run_id: RunID
+    pipeline_name: str
+    threshold_type: str  # "soft", "hard"
+    threshold_value: float
+    actual_value: float
+    record_count: int
+    error_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class SchemaEvolutionDetected(DomainEvent):
+    """Event: Schema evolution was detected.
+
+    Published when new fields appear or existing fields change.
+    """
+
+    run_id: RunID
+    pipeline_name: str
+    layer: str
+    drift_level: str  # "INFO", "WARN", "CRITICAL"
+    added_fields: tuple[str, ...]
+    removed_fields: tuple[str, ...]
