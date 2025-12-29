@@ -223,6 +223,98 @@ flowchart LR
     SD --> GW --> GD
 ```
 
+## Domain Layer (DDD)
+
+Shows the DDD components in the domain layer:
+
+```mermaid
+flowchart TB
+    subgraph domain["Domain Layer"]
+        subgraph aggregates["DDD Aggregates"]
+            Batch["Batch
+            ─────────
+            add_record()
+            quarantine_record()
+            seal()
+            mark_committed()"]
+
+            PipelineRun["PipelineRun
+            ─────────
+            start()
+            record_stage_success()
+            complete()
+            fail()"]
+        end
+
+        subgraph events["Domain Events"]
+            BatchCreated
+            BatchSealed
+            BatchWritten
+            RunStarted
+            RunCompleted
+        end
+
+        subgraph value_objects["Value Objects"]
+            RunID["RunID"]
+            BatchID["BatchID"]
+            EntityID["EntityID"]
+            ContentHash["ContentHash"]
+        end
+
+        subgraph ports["Ports"]
+            StoragePort
+            LockPort
+            CheckpointPort
+            DataSourcePort
+        end
+    end
+
+    Batch --> BatchCreated
+    Batch --> BatchSealed
+    Batch --> BatchWritten
+    PipelineRun --> RunStarted
+    PipelineRun --> RunCompleted
+    Batch --> RunID
+    Batch --> BatchID
+    PipelineRun --> RunID
+```
+
+See [ADR-021: DDD Aggregates Adoption](decisions/ADR-021-ddd-aggregates-adoption.md) for details.
+
+## Batch State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> OPEN: create()
+    OPEN --> SEALED: seal()
+    SEALED --> WRITING: mark_writing()
+    WRITING --> COMMITTED: mark_committed()
+    WRITING --> FAILED: mark_failed()
+    COMMITTED --> [*]
+    FAILED --> [*]
+
+    note right of OPEN : Records can be added
+    note right of SEALED : No more records
+    note right of WRITING : Writing to storage
+```
+
+## PipelineRun State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING: create()
+    PENDING --> RUNNING: start()
+    RUNNING --> COMPLETED: complete()
+    RUNNING --> FAILED: fail()
+    RUNNING --> SHUTDOWN: shutdown()
+    COMPLETED --> [*]
+    FAILED --> [*]
+    SHUTDOWN --> [*]
+
+    note right of RUNNING : Stages executing
+    note right of SHUTDOWN : Graceful stop
+```
+
 ## C4 Container Diagram
 
 For a more detailed look at the runtime instances and interactions between the services, see the C4 Container Diagram.

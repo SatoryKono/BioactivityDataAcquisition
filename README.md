@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Version](https://img.shields.io/badge/version-5.0.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.0.5-blue)](CHANGELOG.md)
 [![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development%20(55%25)-yellow)](IMPLEMENTATION_ROADMAP.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
 
@@ -23,7 +23,7 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
 
 ## 🏗 Architecture Overview
 
-BioETL follows **Hexagonal Architecture** (Ports & Adapters) with clear layer separation:
+BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Driven Design** patterns:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -33,17 +33,29 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with clear layer se
 │              bootstrap_pipeline() → Factories               │
 ├─────────────────────────────────────────────────────────────┤
 │                     APPLICATION                             │
-│         PipelineRunner → Executor → Transformer             │
+│         PipelineRunner → Executor → BaseTransformer         │
 ├─────────────────────────────────────────────────────────────┤
-│                       DOMAIN                                │
-│              Ports (Interfaces) │ Types │ Entities          │
+│                       DOMAIN (DDD)                          │
+│     Ports │ Aggregates │ Value Objects │ Entities │ Schemas │
 ├─────────────────────────────────────────────────────────────┤
 │                    INFRASTRUCTURE                           │
-│         ChEMBL │ PubChem │ Delta Lake │ Observability       │
+│    ChEMBL │ PubChem │ UniProt │ Delta Lake │ Observability  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 **Data Flow**: External API → Bronze (JSONL+zstd) → Silver (Delta Lake) → Gold (Analytics)
+
+### Domain Layer (DDD)
+
+The domain layer implements Domain-Driven Design patterns:
+
+| Component | Description |
+|-----------|-------------|
+| **Ports** | Protocol interfaces for dependency inversion (`domain/ports/`) |
+| **Aggregates** | Domain aggregates with invariant protection (`domain/aggregates/`) |
+| **Value Objects** | Immutable domain primitives (`domain/value_objects/`) |
+| **Entities** | Domain entities per provider (`domain/entities/`) |
+| **Schemas** | Pydantic models for data validation (`domain/schemas/`) |
 
 ## 📊 Supported Providers
 
@@ -59,8 +71,9 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with clear layer se
 | Document | Description |
 |----------|-------------|
 | [API Reference](docs/04-reference/api/index.md) | Full API documentation with mkdocstrings |
-| [Architecture Decisions](docs/02-architecture/decisions/) | ADRs explaining design choices |
-| [RULES.md](docs/RULES.md) | Project governance and requirements |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 20 ADRs explaining design choices |
+| [Ubiquitous Language](docs/glossary.md) | Domain terminology and canonical naming |
+| [RULES.md](docs/RULES.md) | Project governance and requirements (v5.8) |
 | [CLI Reference](docs/04-reference/cli.md) | Command-line interface documentation |
 | [Operations Runbooks](docs/05-operations/runbooks/) | Incident response and procedures |
 
@@ -227,27 +240,38 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (20 decisions)
+│   ├── glossary.md           # Ubiquitous Language glossary
+│   └── RULES.md              # Project governance (v5.8)
 ├── src/
 │   └── bioetl/
-│       ├── domain/           # Pure business logic & interfaces (Ports)
+│       ├── domain/           # Pure business logic (DDD), NO I/O
+│       │   ├── ports/        # Protocol interfaces (Ports)
+│       │   ├── aggregates/   # DDD Aggregates with invariants
+│       │   ├── value_objects/ # Immutable domain primitives
+│       │   ├── entities/     # Domain entities per provider
+│       │   ├── schemas/      # Pydantic/Pandera validation schemas
+│       │   └── exceptions/   # Classified exceptions (Critical/Recoverable/DQ)
 │       ├── application/      # Pipeline orchestration & services
-│       │   ├── core/         # Base pipeline, executor, shutdown
-│       │   └── pipelines/    # Concrete pipelines (ChEMBL, etc.)
+│       │   ├── core/         # PipelineRunner, Executor, BaseTransformer
+│       │   ├── pipelines/    # Concrete pipelines (ChEMBL, PubChem, UniProt, PubMed)
+│       │   └── services/     # Application services (lifecycle, vacuum, cleanup)
 │       ├── composition/      # Composition Root (DI, bootstrap)
-│       │   └── factories/    # Pipeline factories
+│       │   ├── factories/    # Pipeline, storage, data source factories
+│       │   └── providers/    # Provider registry
 │       ├── infrastructure/   # Adapters (API clients, Delta Lake, Storage)
-│       │   ├── adapters/     # HTTP clients (ChEMBL, PubChem, UniProt)
-│       │   ├── storage/      # Bronze/Silver/Gold writers (local filesystem)
-│       │   └── locking/      # In-memory locks (MemoryLock)
+│       │   ├── adapters/     # HTTP clients with unified resilience
+│       │   ├── storage/      # Bronze/Silver/Gold writers
+│       │   ├── locking/      # In-memory locks (MemoryLock)
+│       │   └── observability/ # Metrics, tracing, logging
 │       └── interfaces/       # External interfaces
-│           ├── cli.py        # Click CLI entry point
+│           ├── cli/          # Click CLI commands
 │           └── orchestration/ # Signal handlers for graceful shutdown
-├── tests/                    # Unit, Integration & Architecture tests
-├── .env.example              # Environment variables template
+├── tests/                    # Unit, Integration, Architecture & E2E tests
+├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
 ├── dev_setup.sh              # Automated development environment setup
 ├── Makefile                  # Automation commands
-├── pyproject.toml            # Dependencies & Tool configuration
-└── README.md                 # Project documentation
+└── pyproject.toml            # Dependencies & Tool configuration
 ```
 
 ## 🐳 Legacy Distributed Mode (REJECTED / UNSUPPORTED)
