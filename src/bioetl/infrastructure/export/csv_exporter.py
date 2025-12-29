@@ -14,15 +14,16 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 import os
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pyarrow as pa
 import pyarrow.csv as pv
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
 
 
 class CsvExporter:
@@ -35,6 +36,7 @@ class CsvExporter:
     def __init__(
         self,
         base_path: str,
+        logger: LoggerPort,
         delimiter: str = ",",
         header: bool = True,
         encoding: str = "utf-8",
@@ -45,6 +47,7 @@ class CsvExporter:
 
         Args:
             base_path: Base directory for CSV files
+            logger: Structured logger for observability (MUST be injected)
             delimiter: Field delimiter (default: ",")
             header: Include header row (default: True)
             encoding: File encoding (default: "utf-8")
@@ -53,6 +56,7 @@ class CsvExporter:
 
         """
         self.base_path = Path(base_path)
+        self._logger = logger
         self.delimiter = delimiter
         self.header = header
         self.encoding = encoding
@@ -81,9 +85,10 @@ class CsvExporter:
                 csv_file.unlink()
                 deleted.append(csv_file)
             except PermissionError:
-                logger.warning(
-                    "Cannot delete locked CSV file: %s (file may be open in another program)",
-                    csv_file,
+                self._logger.warning(
+                    "Cannot delete locked CSV file",
+                    path=str(csv_file),
+                    reason="file may be open in another program",
                 )
 
         return deleted
@@ -171,8 +176,9 @@ class CsvExporter:
         # Verify all primary keys exist in table
         missing_keys = [key for key in primary_keys if key not in table.column_names]
         if missing_keys:
-            logger.warning(
-                "Cannot deduplicate CSV: missing primary keys %s", missing_keys
+            self._logger.warning(
+                "Cannot deduplicate CSV: missing primary keys",
+                missing_keys=missing_keys,
             )
             return table
 
@@ -185,23 +191,23 @@ class CsvExporter:
             dedup_count = len(df)
 
             if dedup_count < original_count:
-                logger.debug(
-                    "Deduplicated CSV data: removed %d rows",
-                    original_count - dedup_count,
+                self._logger.debug(
+                    "Deduplicated CSV data",
+                    removed_rows=original_count - dedup_count,
                 )
 
             # Convert back to PyArrow table
             # Use original schema to preserve types
             return pa.Table.from_pandas(df, schema=table.schema)
         except ImportError:
-            logger.warning("Pandas not available for CSV deduplication")
+            self._logger.warning("Pandas not available for CSV deduplication")
             return table
         except Exception as e:
-            logger.warning("CSV deduplication failed: %s", e)
+            self._logger.warning("CSV deduplication failed", error=str(e))
             return table
 
-    @staticmethod
     def _atomic_csv_write(
+        self,
         data: pa.Table,
         target_path: Path,
         write_options: pv.WriteOptions,
@@ -231,7 +237,9 @@ class CsvExporter:
                 timestamp = int(time.time())
                 backup_path = target_path.with_suffix(f".{timestamp}.csv")
                 temp_path.replace(backup_path)
-                logger.warning("Target CSV locked, wrote to backup: %s", backup_path)
+                self._logger.warning(
+                    "Target CSV locked, wrote to backup", backup_path=str(backup_path)
+                )
                 return
         except Exception:
             if temp_path.exists():
