@@ -59,7 +59,7 @@ class StorageAdapter:
         run_type: RunType,
         ingestion_ts: datetime,
         lock_context: LockContext | None = None,
-    ) -> Path:
+    ) -> str:
         """Write raw records to Bronze layer.
 
         Args:
@@ -75,7 +75,7 @@ class StorageAdapter:
             lock_context: Lock context for validation (RULES.md §3.3).
 
         Returns:
-            Path: Relative path to the written file.
+            str: Relative path to the written file.
         """
         return await self.bronze.write_bronze(
             records=records,
