@@ -19,11 +19,13 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupService
+    from bioetl.application.services import BronzeCleanupService
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
 
 __all__ = [
+    "bootstrap_bronze_cleanup_service",
     "bootstrap_cleanup",
     "bootstrap_lifecycle_service",
     "bootstrap_storage",
@@ -109,3 +111,20 @@ def bootstrap_lifecycle_service() -> MedallionLifecycleService:
     noop_logger = NoOpLogger()
 
     return MedallionLifecycleService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
+    """Bootstrap BronzeCleanupService for CLI maintenance commands.
+
+    Creates a BronzeCleanupService for Bronze layer retention cleanup.
+    Used by CLI for `maintenance bronze-cleanup` command.
+
+    Returns:
+        BronzeCleanupService configured for the current environment.
+    """
+    from bioetl.application.services import BronzeCleanupService
+
+    storage = bootstrap_storage()
+    noop_logger = NoOpLogger()
+
+    return BronzeCleanupService(storage=storage, logger=noop_logger)
