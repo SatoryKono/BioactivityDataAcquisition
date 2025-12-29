@@ -35,6 +35,7 @@ sink:
         path: "data/bronze/uniprot/protein"
         format: jsonl
         save_json: true
+        deterministic: true
 
     silver:
         path: "data/silver/uniprot/protein"
@@ -44,6 +45,7 @@ sink:
         partition_by: ["organism"]
         classification: public
         forensic_retention: true
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/silver"
@@ -58,6 +60,7 @@ sink:
         path: "data/gold/uniprot/protein"
         format: delta
         mode: overwrite
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/gold"

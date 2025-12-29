@@ -41,6 +41,7 @@ sink:
         path: "data/bronze/pubmed/publication"
         format: jsonl
         save_json: true
+        deterministic: true
 
     silver:
         path: "data/silver/pubmed/publication"
@@ -50,6 +51,7 @@ sink:
         partition_by: ["pub_year"]
         classification: public
         forensic_retention: true
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/silver"
@@ -64,6 +66,7 @@ sink:
         path: "data/gold/pubmed/publication"
         format: delta
         mode: overwrite
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/gold"

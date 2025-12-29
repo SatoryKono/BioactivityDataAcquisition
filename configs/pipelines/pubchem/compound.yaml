@@ -32,6 +32,7 @@ sink:
         path: "data/bronze/pubchem/compound"
         format: jsonl
         save_json: true
+        deterministic: true
 
     silver:
         path: "data/silver/pubchem/compound"
@@ -41,6 +42,7 @@ sink:
         partition_by: ["batch_date"]
         classification: public
         forensic_retention: true
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/silver"
@@ -55,6 +57,7 @@ sink:
         path: "data/gold/pubchem/compound"
         format: delta
         mode: overwrite
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/gold"
