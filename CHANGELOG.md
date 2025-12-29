@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `test_pipeline_yaml_config_to_domain_method` for new `to_domain()` method
   - Added `test_gold_filters_config_to_domain_method` for `GoldFiltersConfig.to_domain()`
   - Improves test reliability by testing real integration
+## [Unreleased]
+
+### Removed
+
+- **Dead Code Cleanup (infrastructure)**: Removed unused import in `infrastructure/config.py`:
+  - `DQConfig as DomainDQConfig` import was never used (imported but not referenced)
+  - Identified via vulture + autoflake static analysis
+  - Verified no external consumers via grep search
 
 ## [5.0.5] - 2025-12-29
 
