@@ -145,27 +145,31 @@ class TestYamlConfigToDomain:
     """Tests for yaml_config_to_domain function."""
 
     def test_basic_mapping(self) -> None:
-        """Test basic config mapping."""
-        yaml_config = MagicMock()
-        yaml_config.pipeline_name = "test_pipeline"
-        yaml_config.provider = "test"
-        yaml_config.entity_type = "entity"
-        yaml_config.primary_keys = ["id"]
-        yaml_config.silver_table = "silver_table"
-        yaml_config.gold_table = "gold_table"
-        yaml_config.gold_filters = MagicMock()
-        yaml_config.gold_filters.columns = {}
-        yaml_config.gold_filters.required_fields = []
-        yaml_config.gold_filters.exclude_if_present = []
-        yaml_config.batch_size = 200
-        yaml_config.checkpoint_interval = 2000
-        yaml_config.source = MagicMock()
-        yaml_config.source.fields = []
-        yaml_config.dq_rules = MagicMock()
-        yaml_config.dq_rules.soft_fail_threshold = 0.05
-        yaml_config.dq_rules.hard_fail_threshold = 0.20
-        # Configure sink as empty dict (no custom write modes)
-        yaml_config.sink = {}
+        """Test basic config mapping with real Pydantic models."""
+        from bioetl.infrastructure.schemas.pipeline_config import (
+            DQConfig,
+            GoldFiltersConfig,
+            PipelineYamlConfig,
+            SourceConfig,
+        )
+
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="silver_table",
+            gold_table="gold_table",
+            gold_filters=GoldFiltersConfig(),
+            batch_size=200,
+            checkpoint_interval=2000,
+            source=SourceConfig(),
+            dq_rules=DQConfig(
+                soft_fail_threshold=0.05,
+                hard_fail_threshold=0.20,
+            ),
+            sink={},
+        )
 
         result = yaml_config_to_domain(yaml_config)
 
@@ -181,63 +185,135 @@ class TestYamlConfigToDomain:
 
     def test_fields_extraction(self) -> None:
         """Test field names extraction from source config."""
-        yaml_config = MagicMock()
-        yaml_config.pipeline_name = "test"
-        yaml_config.provider = "test"
-        yaml_config.entity_type = "test"
-        yaml_config.primary_keys = ["id"]
-        yaml_config.silver_table = "silver"
-        yaml_config.gold_table = None
-        yaml_config.gold_filters = MagicMock()
-        yaml_config.gold_filters.columns = {}
-        yaml_config.gold_filters.required_fields = []
-        yaml_config.gold_filters.exclude_if_present = []
-        yaml_config.batch_size = 100
-        yaml_config.checkpoint_interval = 1000
-        yaml_config.source = MagicMock()
-        yaml_config.source.fields = [
-            {"name": "field1", "type": "string"},
-            {"name": "field2", "type": "int"},
-            {"name": "field3", "type": "float"},
-        ]
-        yaml_config.dq_rules = MagicMock()
-        yaml_config.dq_rules.soft_fail_threshold = 0.05
-        yaml_config.dq_rules.hard_fail_threshold = 0.20
-        # Configure sink as empty dict (no custom write modes)
-        yaml_config.sink = {}
+        from bioetl.infrastructure.schemas.pipeline_config import (
+            DQConfig,
+            GoldFiltersConfig,
+            PipelineYamlConfig,
+            SourceConfig,
+        )
+
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_table=None,
+            gold_filters=GoldFiltersConfig(),
+            batch_size=100,
+            checkpoint_interval=1000,
+            source=SourceConfig(
+                fields=[
+                    {"name": "field1", "type": "string"},
+                    {"name": "field2", "type": "int"},
+                    {"name": "field3", "type": "float"},
+                ]
+            ),
+            dq_rules=DQConfig(
+                soft_fail_threshold=0.05,
+                hard_fail_threshold=0.20,
+            ),
+            sink={},
+        )
 
         result = yaml_config_to_domain(yaml_config)
 
         assert result.fields == ("field1", "field2", "field3")
 
     def test_dq_config_mapping(self) -> None:
-        """Test DQ config mapping."""
-        yaml_config = MagicMock()
-        yaml_config.pipeline_name = "test"
-        yaml_config.provider = "test"
-        yaml_config.entity_type = "test"
-        yaml_config.primary_keys = ["id"]
-        yaml_config.silver_table = "silver"
-        yaml_config.gold_table = None
-        yaml_config.gold_filters = MagicMock()
-        yaml_config.gold_filters.columns = {}
-        yaml_config.gold_filters.required_fields = []
-        yaml_config.gold_filters.exclude_if_present = []
-        yaml_config.batch_size = 100
-        yaml_config.checkpoint_interval = 1000
-        yaml_config.source = MagicMock()
-        yaml_config.source.fields = []
-        yaml_config.dq_rules = MagicMock()
-        yaml_config.dq_rules.soft_fail_threshold = 0.10
-        yaml_config.dq_rules.hard_fail_threshold = 0.30
-        # Configure sink as empty dict (no custom write modes)
-        yaml_config.sink = {}
+        """Test DQ config mapping with real Pydantic models."""
+        from bioetl.infrastructure.schemas.pipeline_config import (
+            DQConfig,
+            GoldFiltersConfig,
+            PipelineYamlConfig,
+            SourceConfig,
+        )
+
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_table=None,
+            gold_filters=GoldFiltersConfig(),
+            batch_size=100,
+            checkpoint_interval=1000,
+            source=SourceConfig(),
+            dq_rules=DQConfig(
+                soft_fail_threshold=0.10,
+                hard_fail_threshold=0.30,
+            ),
+            sink={},
+        )
 
         result = yaml_config_to_domain(yaml_config)
 
         assert isinstance(result.dq, DomainDQConfig)
         assert result.dq.soft_fail_threshold == 0.10
         assert result.dq.hard_fail_threshold == 0.30
+
+    def test_pipeline_yaml_config_to_domain_method(self) -> None:
+        """Test PipelineYamlConfig.to_domain() method provides consistent API."""
+        from bioetl.infrastructure.schemas.pipeline_config import (
+            DQConfig,
+            GoldFiltersConfig,
+            PipelineYamlConfig,
+            SourceConfig,
+        )
+
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+            gold_table=None,
+            gold_filters=GoldFiltersConfig(),
+            batch_size=100,
+            checkpoint_interval=1000,
+            source=SourceConfig(),
+            dq_rules=DQConfig(),
+            sink={},
+        )
+
+        # Test that to_domain() method works and is equivalent to yaml_config_to_domain()
+        result_method = yaml_config.to_domain()
+        result_function = yaml_config_to_domain(yaml_config)
+
+        assert isinstance(result_method, PipelineConfig)
+        assert result_method.pipeline_name == result_function.pipeline_name
+        assert result_method.provider == result_function.provider
+        assert result_method.dq.soft_fail_threshold == result_function.dq.soft_fail_threshold
+
+    def test_gold_filters_config_to_domain_method(self) -> None:
+        """Test GoldFiltersConfig.to_domain() method."""
+        from bioetl.domain.filtering import GoldFilterConfig
+        from bioetl.infrastructure.schemas.pipeline_config import (
+            GoldFiltersConfig,
+            GoldListContainsFilterConfig,
+            GoldListLengthFilterConfig,
+            GoldRangeFilterConfig,
+        )
+
+        gold_filters = GoldFiltersConfig(
+            columns={"status": ["active", "approved"]},
+            ranges={"score": GoldRangeFilterConfig(min=0.5, max=1.0)},
+            list_lengths={"targets": GoldListLengthFilterConfig(min=1, max=10)},
+            list_contains={"tags": GoldListContainsFilterConfig(values=["important"])},
+            required_fields=["name", "id"],
+            exclude_if_present=["deprecated"],
+        )
+
+        result = gold_filters.to_domain()
+
+        assert isinstance(result, GoldFilterConfig)
+        assert len(result.column_filters) == 1
+        assert len(result.range_filters) == 1
+        assert len(result.list_length_filters) == 1
+        assert len(result.list_contains_filters) == 1
+        assert result.required_fields == ("name", "id")
+        assert result.exclude_if_present == ("deprecated",)
 
 
 @pytest.mark.unit

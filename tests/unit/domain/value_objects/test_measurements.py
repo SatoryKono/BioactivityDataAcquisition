@@ -5,7 +5,6 @@ Tests for Concentration, ConcentrationUnit, ActivityType, PChemblValue.
 
 from __future__ import annotations
 
-import math
 
 import pytest
 

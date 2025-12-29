@@ -10,7 +10,7 @@ from unittest.mock import Mock
 import pytest
 
 from bioetl.application.core.medallion_validator import MedallionConfigValidator
-from bioetl.domain.types import ConfigValidationError, RunType
+from bioetl.domain.types import RunType
 
 
 @pytest.fixture
