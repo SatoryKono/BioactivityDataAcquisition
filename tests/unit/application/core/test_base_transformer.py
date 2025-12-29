@@ -329,7 +329,7 @@ class TestSerializeJson:
         data = [{"type": "Ki", "value": 5.0}]
         result = BaseTransformer.serialize_json(data)
         # Single dict in list is unwrapped
-        assert result == '{"type": "Ki", "value": 5.0}'
+        assert result == '{"type":"Ki","value":5.0}'
 
     def test_unwraps_single_element_list_with_string(self) -> None:
         """Test unwraps single-element list containing string."""
@@ -341,13 +341,13 @@ class TestSerializeJson:
         """Test keeps multi-element list as array."""
         data = [{"type": "Ki"}, {"type": "IC50"}]
         result = BaseTransformer.serialize_json(data)
-        assert result == '[{"type": "Ki"}, {"type": "IC50"}]'
+        assert result == '[{"type":"Ki"},{"type":"IC50"}]'
 
     def test_serializes_non_empty_dict(self) -> None:
         """Test serializes non-empty dict to JSON string."""
         data = {"key": "value", "number": 42}
         result = BaseTransformer.serialize_json(data)
-        assert result == '{"key": "value", "number": 42}'
+        assert result == '{"key":"value","number":42}'
 
     def test_preserves_unicode(self) -> None:
         """Test preserves unicode characters without escaping."""
