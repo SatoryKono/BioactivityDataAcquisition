@@ -114,16 +114,30 @@ class Concentration:
         return Concentration(value=target_value, unit=target_unit)
 
     def to_molar(self) -> Concentration:
-        """Convert to molar (M)."""
+        """Convert to molar (M).
+
+        Returns:
+            New Concentration object with value in molar units.
+        """
         return self.to_unit(ConcentrationUnit.MOLAR)
 
     def to_nanomolar(self) -> Concentration:
-        """Convert to nanomolar (nM) - common standard unit."""
+        """Convert to nanomolar (nM) - common standard unit in drug discovery.
+
+        Returns:
+            New Concentration object with value in nanomolar units.
+        """
         return self.to_unit(ConcentrationUnit.NANOMOLAR)
 
     @property
     def molar_value(self) -> float:
-        """Get value in molar (M)."""
+        """Get concentration value in molar (M) units.
+
+        Useful for calculations and comparisons across different units.
+
+        Returns:
+            Concentration expressed in molar (M).
+        """
         return self.value * self.unit.to_molar_factor
 
     @classmethod
@@ -157,9 +171,18 @@ class Concentration:
 
 
 class ActivityType(str, Enum):
-    """Types of bioactivity measurements.
+    """Types of bioactivity measurements in drug discovery.
 
-    Common activity types in drug discovery assays.
+    Categorizes different assay endpoints used to measure compound activity.
+    Includes inhibition constants (IC50, Ki), activation constants (EC50),
+    and toxicity measurements (LC50, LD50).
+
+    Usage:
+        >>> activity = ActivityType.IC50
+        >>> activity.is_inhibition_type()
+        True
+        >>> activity.is_binding_type()
+        False
     """
 
     # Inhibition constants
@@ -228,7 +251,14 @@ class ActivityType(str, Enum):
         return activity_type
 
     def is_inhibition_type(self) -> bool:
-        """Check if this is an inhibition-type measurement."""
+        """Check if this is an inhibition-type measurement.
+
+        Inhibition types measure how effectively a compound blocks
+        a biological process or target.
+
+        Returns:
+            True for IC50, IC90, Ki, Inhibition, % Inhibition.
+        """
         return self in {
             ActivityType.IC50,
             ActivityType.IC90,
@@ -238,7 +268,14 @@ class ActivityType(str, Enum):
         }
 
     def is_binding_type(self) -> bool:
-        """Check if this is a binding affinity measurement."""
+        """Check if this is a binding affinity measurement.
+
+        Binding types measure equilibrium constants for
+        compound-target interactions.
+
+        Returns:
+            True for Ki (inhibition constant) and Kd (dissociation constant).
+        """
         return self in {
             ActivityType.KI,
             ActivityType.KD,
@@ -327,30 +364,62 @@ class PChemblValue:
 
     @property
     def is_potent(self) -> bool:
-        """Check if this is considered potent (pChEMBL >= 5)."""
+        """Check if compound is considered potent.
+
+        A pChEMBL value >= 5 corresponds to activity <= 10 μM,
+        which is a common threshold for drug-like activity.
+
+        Returns:
+            True if pChEMBL >= 5.0 (active at micromolar or better).
+        """
         return self.value >= 5.0
 
     @property
     def is_highly_potent(self) -> bool:
-        """Check if this is considered highly potent (pChEMBL >= 7)."""
+        """Check if compound is considered highly potent.
+
+        A pChEMBL value >= 7 corresponds to activity <= 100 nM,
+        indicating strong target engagement.
+
+        Returns:
+            True if pChEMBL >= 7.0 (active at sub-micromolar).
+        """
         return self.value >= 7.0
 
     def __str__(self) -> str:
-        """String representation."""
+        """Return string representation with 2 decimal places.
+
+        Returns:
+            Formatted pChEMBL value (e.g., '6.54').
+        """
         return f"{self.value:.2f}"
 
     def __eq__(self, other: object) -> bool:
-        """Compare by value."""
+        """Compare equality by value.
+
+        Returns:
+            True if values are equal, NotImplemented for non-PChemblValue.
+        """
         if not isinstance(other, PChemblValue):
             return NotImplemented
         return self.value == other.value
 
     def __hash__(self) -> int:
-        """Hash based on value."""
+        """Compute hash based on value for use in sets and dicts.
+
+        Returns:
+            Integer hash of the pChEMBL value.
+        """
         return hash(self.value)
 
     def __lt__(self, other: PChemblValue) -> bool:
-        """Compare for ordering (higher pChEMBL = more potent)."""
+        """Compare for ordering (lower value = less potent).
+
+        Note: Higher pChEMBL values indicate higher potency.
+
+        Returns:
+            True if this value is less than other.
+        """
         if not isinstance(other, PChemblValue):
             return NotImplemented
         return self.value < other.value

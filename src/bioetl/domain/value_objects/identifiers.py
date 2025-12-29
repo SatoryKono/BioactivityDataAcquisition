@@ -68,7 +68,11 @@ class ChemblId(ValueObject[str]):
 
     @property
     def numeric_id(self) -> int:
-        """Get the numeric part of the ChEMBL ID."""
+        """Get the numeric part of the ChEMBL ID.
+
+        Returns:
+            Integer portion of the identifier (e.g., 25 for CHEMBL25).
+        """
         return int(self._value[6:])
 
 
@@ -133,7 +137,14 @@ class UniProtId(ValueObject[str]):
 
     @property
     def is_primary_format(self) -> bool:
-        """Check if this is a primary (6-character) accession."""
+        """Check if this is a primary (6-character) accession.
+
+        Primary format accessions (e.g., P12345) are 6 characters.
+        Extended format accessions (e.g., A0A1B2C3D4) are 10 characters.
+
+        Returns:
+            True if primary format (6 chars), False if extended (10 chars).
+        """
         return len(self._value) == 6
 
 
@@ -200,12 +211,23 @@ class DOI(ValueObject[str]):
 
     @property
     def url(self) -> str:
-        """Get the full DOI URL."""
+        """Get the full DOI URL for web access.
+
+        Returns:
+            Complete HTTPS URL (e.g., 'https://doi.org/10.1038/nature12373').
+        """
         return f"https://doi.org/{self._value}"
 
     @property
     def registrant_code(self) -> str:
-        """Get the registrant code (prefix after 10.)."""
+        """Get the registrant code (organization identifier).
+
+        The registrant code identifies the organization that registered
+        the DOI. It appears after '10.' and before the '/'.
+
+        Returns:
+            Registrant code string (e.g., '1038' for Nature Publishing).
+        """
         # Format: 10.XXXX/suffix
         return self._value.split("/")[0][3:]  # Skip "10."
 
