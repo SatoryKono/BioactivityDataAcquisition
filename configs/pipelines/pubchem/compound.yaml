@@ -1,5 +1,7 @@
 # configs/pipelines/pubchem/compound.yaml
-# Конфигурация пайплайна для сущности Compound из PubChem.
+# Pipeline configuration for PubChem Compound entity.
+#
+# Inherits defaults from ../_defaults.yaml
 
 pipeline_name: pubchem_compound
 provider: pubchem
@@ -11,73 +13,41 @@ primary_keys: ["cid"]
 silver_table: "pubchem_compound"
 gold_table: "pubchem_compound"
 
-# Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/pubchem.yaml
 
-# Gold layer filters
+# Entity-specific gold filters
 gold_filters:
-    required_fields:
-        - cid
-        - molecular_formula
-    columns: {}
+  required_fields:
+    - cid
+    - molecular_formula
+  columns: {}
 
+# Entity-specific transform steps (different from ChEMBL)
 transform:
-    version: "1.0.0"
-    steps:
-        - normalize_fields
-        - generate_content_hash
+  version: "1.0.0"
+  steps:
+    - normalize_fields
+    - generate_content_hash
 
+# Entity-specific sink overrides (custom paths)
 sink:
-    bronze:
-        path: "data/bronze/pubchem/compound"
-        format: jsonl
-        save_json: true
-        deterministic: true
+  bronze:
+    path: "data/bronze/pubchem/compound"
+  silver:
+    path: "data/silver/pubchem/compound"
+    primary_key: ["cid"]
+    partition_by: ["batch_date"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/gold/pubchem/compound"
+    csv_export:
+      path: "data/output/csv/gold"
 
-    silver:
-        path: "data/silver/pubchem/compound"
-        format: delta
-        mode: merge
-        primary_key: ["cid"]
-        partition_by: ["batch_date"]
-        classification: public
-        forensic_retention: true
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/silver"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-    gold:
-        enabled: true
-        validation:
-            strict: true
-        path: "data/gold/pubchem/compound"
-        format: delta
-        mode: overwrite
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/gold"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-dq_rules:
-    soft_fail_threshold: 0.05
-    hard_fail_threshold: 0.20
-
-circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-
-# Input filter configuration (for CSV-based ID filtering)
-# CLI options --input-csv, --filter-column, --filter-field override these
+# Entity-specific input filter (disabled by default)
 input_filter:
-    enabled: false
-    source_path: "data/input/compounds.csv"
-    column_name: "cid"
-    filter_field: "cid"
-    batch_size: 100
+  enabled: false
+  source_path: "data/input/compounds.csv"
+  column_name: "cid"
+  filter_field: "cid"
+  batch_size: 100

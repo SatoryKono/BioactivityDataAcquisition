@@ -1,5 +1,7 @@
 # configs/pipelines/pubmed/publications.yaml
-# Конфигурация пайплайна для сущности Publication из PubMed.
+# Pipeline configuration for PubMed Publication entity.
+#
+# Inherits defaults from ../_defaults.yaml
 
 pipeline_name: pubmed_publications
 provider: pubmed
@@ -11,82 +13,48 @@ primary_keys: ["pmid"]
 silver_table: "pubmed_publication"
 gold_table: "pubmed_publication"
 
-# Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/pubmed.yaml
 
 # Pipeline-specific source configuration
 source:
-    # Search query for Entrez API
-    search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
-    # Overrides/Injections
-    email: "${BIOETL_NCBI_EMAIL}"
-    api_key: "${BIOETL_NCBI_API_KEY}"
+  search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
+  email: "${BIOETL_NCBI_EMAIL}"
+  api_key: "${BIOETL_NCBI_API_KEY}"
 
-# Gold layer filters
+# Entity-specific gold filters
 gold_filters:
-    required_fields:
-        - pmid
-        - title
-    columns: {}
+  required_fields:
+    - pmid
+    - title
+  columns: {}
 
+# Entity-specific transform steps
 transform:
-    version: "1.0.0"
-    steps:
-        - parse_xml
-        - extract_metadata
-        - normalize_dates
+  version: "1.0.0"
+  steps:
+    - parse_xml
+    - extract_metadata
+    - normalize_dates
 
+# Entity-specific sink overrides
 sink:
-    bronze:
-        path: "data/bronze/pubmed/publication"
-        format: jsonl
-        save_json: true
-        deterministic: true
+  bronze:
+    path: "data/bronze/pubmed/publication"
+  silver:
+    path: "data/silver/pubmed/publication"
+    primary_key: ["pmid"]
+    partition_by: ["pub_year"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/gold/pubmed/publication"
+    csv_export:
+      path: "data/output/csv/gold"
 
-    silver:
-        path: "data/silver/pubmed/publication"
-        format: delta
-        mode: merge
-        primary_key: ["pmid"]
-        partition_by: ["pub_year"]
-        classification: public
-        forensic_retention: true
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/silver"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-    gold:
-        enabled: true
-        validation:
-            strict: true
-        path: "data/gold/pubmed/publication"
-        format: delta
-        mode: overwrite
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/gold"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-dq_rules:
-    soft_fail_threshold: 0.05
-    hard_fail_threshold: 0.20
-
-circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-
-# Input filter configuration (for CSV-based ID filtering)
-# CLI options --input-csv, --filter-column, --filter-field override these
+# Entity-specific input filter
 input_filter:
-    enabled: true
-    source_path: "data/input/pubmed.csv"
-    column_name: "pubmed_id"
-    filter_field: "pmid"
-    batch_size: 100
+  enabled: true
+  source_path: "data/input/pubmed.csv"
+  column_name: "pubmed_id"
+  filter_field: "pmid"
+  batch_size: 100

@@ -1,20 +1,64 @@
 """ChEMBL Document Transformer.
 
 Transforms Bronze records to Silver format (Document entity inflation).
+Uses declarative field_specs DSL for mapping.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.field_specs import (
+    FieldGroup,
+    int_fields,
+    map_field_groups,
+    simple_fields,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Document
-from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
+
+
+# Declarative field groups for Document entity
+_PUBLICATION_IDS = FieldGroup(
+    name="publication_ids",
+    fields=(
+        *int_fields("pubmed_id"),
+        *simple_fields("doi", "patent_id"),
+    ),
+)
+
+_CORE_METADATA = FieldGroup(
+    name="core_metadata",
+    fields=simple_fields("title", "authors", "abstract", "doc_type"),
+)
+
+_JOURNAL_INFO = FieldGroup(
+    name="journal_info",
+    fields=(
+        *simple_fields(
+            "journal", "journal_full_title", "volume", "issue", "first_page", "last_page"
+        ),
+        *int_fields("year"),
+    ),
+)
+
+_SOURCE_INFO = FieldGroup(
+    name="source_info",
+    fields=int_fields("src_id"),
+)
+
+# All field groups for Document entity
+_DOCUMENT_GROUPS: tuple[FieldGroup, ...] = (
+    _PUBLICATION_IDS,
+    _CORE_METADATA,
+    _JOURNAL_INFO,
+    _SOURCE_INFO,
+)
 
 
 class DocumentTransformer(BaseChemblTransformer):
@@ -39,25 +83,6 @@ class DocumentTransformer(BaseChemblTransformer):
 
         """
         return {
-            # Primary identifier
             "document_chembl_id": str(primary_id),
-            # Publication identifiers
-            "pubmed_id": safe_int(record.get("pubmed_id")),
-            "doi": record.get("doi"),
-            "patent_id": record.get("patent_id"),
-            # Core metadata
-            "title": record.get("title"),
-            "authors": record.get("authors"),
-            "abstract": record.get("abstract"),
-            "doc_type": record.get("doc_type"),
-            # Journal information
-            "journal": record.get("journal"),
-            "journal_full_title": record.get("journal_full_title"),
-            "year": safe_int(record.get("year")),
-            "volume": record.get("volume"),
-            "issue": record.get("issue"),
-            "first_page": record.get("first_page"),
-            "last_page": record.get("last_page"),
-            # Source information
-            "src_id": safe_int(record.get("src_id")),
+            **map_field_groups(record, _DOCUMENT_GROUPS),
         }

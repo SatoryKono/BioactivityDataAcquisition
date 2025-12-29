@@ -42,6 +42,72 @@ from bioetl.domain.filter_config import (
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+# =============================================================================
+# Configuration Defaults Support
+# =============================================================================
+
+
+def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Deep merge two dictionaries, with override taking precedence.
+
+    Args:
+        base: Base dictionary (defaults).
+        override: Override dictionary (entity-specific config).
+
+    Returns:
+        Merged dictionary where override values replace base values,
+        but nested dicts are merged recursively.
+
+    Example:
+        >>> base = {"a": 1, "b": {"c": 2, "d": 3}}
+        >>> override = {"b": {"c": 10}}
+        >>> _deep_merge(base, override)
+        {'a': 1, 'b': {'c': 10, 'd': 3}}
+    """
+    result = base.copy()
+
+    for key, value in override.items():
+        if (
+            key in result
+            and isinstance(result[key], dict)
+            and isinstance(value, dict)
+        ):
+            # Recursively merge nested dicts
+            result[key] = _deep_merge(result[key], value)
+        else:
+            # Override value directly
+            result[key] = value
+
+    return result
+
+
+def _load_defaults(config_path: Path) -> dict[str, Any]:
+    """Load pipeline defaults from _defaults.yaml.
+
+    Searches for _defaults.yaml in parent directories up to configs/pipelines/.
+
+    Args:
+        config_path: Path to the entity-specific config file.
+
+    Returns:
+        Dictionary with default values, or empty dict if not found.
+    """
+    # Try to find _defaults.yaml in parent directory (configs/pipelines/)
+    defaults_path = config_path.parent.parent / "_defaults.yaml"
+
+    if not defaults_path.exists():
+        # Fallback: try same directory level (for flat structure)
+        defaults_path = config_path.parent / "_defaults.yaml"
+
+    if defaults_path.exists():
+        with open(defaults_path, encoding="utf-8") as f:
+            defaults = yaml.safe_load(f) or {}
+            # Remove meta fields that shouldn't be merged
+            defaults.pop("defaults_version", None)
+            return defaults
+
+    return {}
+
 
 class YamlSettingsSource(PydanticBaseSettingsSource):
     """A settings source that loads variables from a YAML file."""
@@ -93,6 +159,9 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     The pipeline name is expected to follow the pattern '{provider}_{entity}'.
     Example: 'chembl_activity' -> 'configs/pipelines/chembl/activity.yaml'
 
+    Automatically merges defaults from _defaults.yaml if present. Entity-specific
+    settings override defaults using deep merge (nested dicts are merged recursively).
+
     Results are cached for efficiency - YAML files are only read once per pipeline.
 
     Args:
@@ -117,10 +186,17 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     if not config_path.exists():
         raise ValueError(f"Configuration file not found: {config_path}")
 
-    with open(config_path, encoding="utf-8") as f:
-        config = yaml.safe_load(f) or {}
+    # 3. Load defaults from _defaults.yaml (if exists)
+    defaults = _load_defaults(config_path)
 
-    # Load source config from separate file if specified
+    # 4. Load entity-specific config
+    with open(config_path, encoding="utf-8") as f:
+        entity_config = yaml.safe_load(f) or {}
+
+    # 5. Deep merge: defaults + entity_config (entity wins)
+    config = _deep_merge(defaults, entity_config)
+
+    # 6. Load source config from separate file if specified
     if source_file := config.get("source_file"):
         source_path = config_path.parent / source_file
         if source_path.exists():
@@ -129,7 +205,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
             # Merge source config into main config
             config["source"] = source_config.get("source", source_config)
 
-    # Validate against strict schema
+    # 7. Validate against strict schema
     validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
     return validated
 
