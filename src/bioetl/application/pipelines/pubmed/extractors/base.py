@@ -1,6 +1,6 @@
 """Base class for PubMed XML field extractors.
 
-Implements Template Method pattern for consistent extraction workflow.
+Implements Template Method pattern for consistent extraction process.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ class BaseFieldExtractor(ABC):
     """Template Method для извлечения полей из PubMed XML.
 
     Наследники реализуют extract() и normalize() для конкретных полей.
-    Метод process() объединяет их в единый workflow.
+    Метод process() объединяет их в единый процесс обработки.
 
     Example:
         >>> class MyExtractor(BaseFieldExtractor):

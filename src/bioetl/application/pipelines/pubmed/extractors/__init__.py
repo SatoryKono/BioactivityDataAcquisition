@@ -4,7 +4,7 @@ This package provides specialized extractors for parsing PubMed XML elements.
 Each extractor is responsible for a single domain of data extraction.
 
 All extractors inherit from BaseFieldExtractor which implements the Template Method
-pattern with extract() -> normalize() -> process() workflow.
+pattern with extract() -> normalize() -> process() sequence.
 """
 
 from __future__ import annotations
