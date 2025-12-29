@@ -1,5 +1,7 @@
 # configs/pipelines/uniprot/protein.yaml
-# Конфигурация пайплайна для сущности Protein из UniProt.
+# Pipeline configuration for UniProt Protein entity.
+#
+# Inherits defaults from ../_defaults.yaml
 
 pipeline_name: uniprot_protein
 provider: uniprot
@@ -11,76 +13,44 @@ primary_keys: ["accession"]
 silver_table: "uniprot_protein"
 gold_table: "uniprot_protein"
 
-# Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/uniprot.yaml
 
-# Gold layer filters
+# Entity-specific gold filters
 gold_filters:
-    required_fields:
-        - accession
-        - entry_name
-        - organism
-    columns:
-        reviewed: ["true"]  # Swiss-Prot (reviewed) only
+  required_fields:
+    - accession
+    - entry_name
+    - organism
+  columns:
+    reviewed: ["true"]  # Swiss-Prot (reviewed) only
 
+# Entity-specific transform steps (different from ChEMBL)
 transform:
-    version: "1.0.0"
-    steps:
-        - normalize_fields
-        - extract_features
-        - generate_content_hash
+  version: "1.0.0"
+  steps:
+    - normalize_fields
+    - extract_features
+    - generate_content_hash
 
+# Entity-specific sink overrides (custom paths)
 sink:
-    bronze:
-        path: "data/bronze/uniprot/protein"
-        format: jsonl
-        save_json: true
-        deterministic: true
+  bronze:
+    path: "data/bronze/uniprot/protein"
+  silver:
+    path: "data/silver/uniprot/protein"
+    primary_key: ["accession"]
+    partition_by: ["organism"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/gold/uniprot/protein"
+    csv_export:
+      path: "data/output/csv/gold"
 
-    silver:
-        path: "data/silver/uniprot/protein"
-        format: delta
-        mode: merge
-        primary_key: ["accession"]
-        partition_by: ["organism"]
-        classification: public
-        forensic_retention: true
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/silver"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-    gold:
-        enabled: true
-        validation:
-            strict: true
-        path: "data/gold/uniprot/protein"
-        format: delta
-        mode: overwrite
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/gold"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-dq_rules:
-    soft_fail_threshold: 0.05
-    hard_fail_threshold: 0.20
-
-circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-
-# Input filter configuration (for CSV-based ID filtering)
-# CLI options --input-csv, --filter-column, --filter-field override these
+# Entity-specific input filter (disabled by default)
 input_filter:
-    enabled: false
-    source_path: "data/input/protein.csv"
-    column_name: "accession"
-    filter_field: "accession"
-    batch_size: 100
+  enabled: false
+  source_path: "data/input/protein.csv"
+  column_name: "accession"
+  filter_field: "accession"
+  batch_size: 100
