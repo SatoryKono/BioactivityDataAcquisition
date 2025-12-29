@@ -170,6 +170,11 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   uv sync --extra dev --extra tests
   uv run python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
+  Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`), выполните повторную синхронизацию:
+  ```bash
+  uv sync --extra dev --extra tests --extra tracing
+  ```
+  Скрипт `./scripts/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
 
 * **Run All Tests**:
   ```bash
