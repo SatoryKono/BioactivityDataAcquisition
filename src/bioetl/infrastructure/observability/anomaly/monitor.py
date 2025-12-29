@@ -5,7 +5,6 @@ Combines multiple detectors to monitor data quality metrics.
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -15,7 +14,7 @@ from bioetl.infrastructure.observability.anomaly.types import Anomaly, AnomalySe
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-logger = logging.getLogger(__name__)
+    from bioetl.domain.ports import LoggerPort
 
 
 class DataQualityMonitor:
@@ -28,7 +27,7 @@ class DataQualityMonitor:
     - Validation failure rates
 
     Usage:
-        monitor = DataQualityMonitor()
+        monitor = DataQualityMonitor(logger=my_logger)
         monitor.add_metric("record_count", baseline=[1000, 1050, 980])
 
         issues = monitor.check_quality({
@@ -36,15 +35,24 @@ class DataQualityMonitor:
             "error_rate": 0.15,
         })
         for issue in issues:
-            logger.warning(issue)
+            print(issue)
     """
 
     def __init__(
         self,
+        logger: LoggerPort,
         baseline_window: int = 7,
         z_score_threshold: float = 2.5,
     ) -> None:
-        """Initialize data quality monitor."""
+        """Initialize data quality monitor.
+
+        Args:
+            logger: Structured logger for observability (MUST be injected)
+            baseline_window: Number of days to consider for baseline (default: 7)
+            z_score_threshold: Z-score threshold for anomaly detection (default: 2.5)
+
+        """
+        self._logger = logger
         self.detector = AnomalyDetector(
             baseline_window=baseline_window,
             z_score_threshold=z_score_threshold,
@@ -97,8 +105,9 @@ class DataQualityMonitor:
         ]
 
         if critical_anomalies:
-            logger.warning(
-                f"Skipping baseline update due to {len(critical_anomalies)} critical anomalies"
+            self._logger.warning(
+                "Skipping baseline update due to critical anomalies",
+                critical_anomaly_count=len(critical_anomalies),
             )
             return
 
