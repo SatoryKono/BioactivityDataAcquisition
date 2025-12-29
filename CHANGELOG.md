@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Unused Protocol Cleanup**: Удалён неиспользуемый `DataSourceFactoryProtocol`:
+  - Protocol был определён в `composition/factories/services_factory.py`, но нигде не применялся
+  - Упрощает иерархию классов согласно принципу YAGNI
+  - Нет breaking changes — Protocol не экспортировался и не использовался
+
 - **Writer DI Simplification**: Удалён `DeprecationWarning` для `tracing=None`:
   - `BronzeWriter`, `DeltaWriter`, `GoldWriter` теперь молча используют `NoOpTracing`
   - Production код продолжает использовать явную инъекцию через composition
