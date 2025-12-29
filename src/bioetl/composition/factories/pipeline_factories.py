@@ -34,6 +34,10 @@ from bioetl.application.pipelines.chembl.activity_transformer import ActivityTra
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_term import ChEMBLDocumentTermPipeline
+from bioetl.application.pipelines.chembl.document_term_transformer import (
+    DocumentTermTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
@@ -57,6 +61,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLDocumentGoldSchema,
+    ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
@@ -68,6 +73,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_DOCUMENT_SCHEMA,
+    CHEMBL_DOCUMENT_TERM_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
@@ -111,6 +117,16 @@ chembl_document_factory = GenericPipelineFactory(
     silver_schema=CHEMBL_DOCUMENT_SCHEMA,
     gold_schema=ChEMBLDocumentGoldSchema,
     transformer_class=DocumentTransformer,
+)
+
+# ChEMBL Document Term Pipeline
+chembl_document_term_factory = GenericPipelineFactory(
+    pipeline_name="chembl_document_term",
+    pipeline_class=ChEMBLDocumentTermPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
+    gold_schema=ChEMBLDocumentTermGoldSchema,
+    transformer_class=DocumentTermTransformer,
 )
 
 # ChEMBL Target Pipeline
@@ -227,6 +243,7 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     registry.register_factory(chembl_activity_factory)
     registry.register_factory(chembl_assay_factory)
     registry.register_factory(chembl_document_factory)
+    registry.register_factory(chembl_document_term_factory)
     registry.register_factory(chembl_target_factory)
     registry.register_factory(chembl_target_component_factory)
     registry.register_factory(chembl_molecule_factory)
@@ -266,6 +283,7 @@ __all__ = [
     "chembl_activity_factory",
     "chembl_assay_factory",
     "chembl_document_factory",
+    "chembl_document_term_factory",
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",

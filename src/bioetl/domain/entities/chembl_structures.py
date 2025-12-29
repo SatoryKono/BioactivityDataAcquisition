@@ -187,6 +187,47 @@ class CellLine(BaseEntity):
 
 
 @dataclass(frozen=True, kw_only=True)
+class DocumentTerm(BaseEntity):
+    """Represents a document term (ChEMBL Document Term).
+
+    Terms (keywords) extracted from documents. Bag-of-words representation
+    for text search with TF-IDF scoring.
+
+    Contains all fields from ChEMBL document_term API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/document_term
+    """
+
+    # Composite key fields
+    document_chembl_id: str  # FK → document
+    term: str  # Term/keyword (normalized: lowercase, stripped)
+
+    # Frequency metrics (may be null)
+    term_frequency: int | None = None  # Frequency in this document
+    doc_frequency: int | None = None  # Number of documents containing term
+    score: float | None = None  # TF-IDF or similar score
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.document_chembl_id:
+            raise ValueError("Document ChEMBL ID is required")
+        if not self.term:
+            raise ValueError("Term is required")
+        if self.term_frequency is not None and self.term_frequency < 1:
+            raise ValueError(
+                f"term_frequency must be >= 1, got {self.term_frequency}"
+            )
+        if self.doc_frequency is not None and self.doc_frequency < 1:
+            raise ValueError(
+                f"doc_frequency must be >= 1, got {self.doc_frequency}"
+            )
+        if self.score is not None and self.score < 0:
+            raise ValueError(f"score must be >= 0, got {self.score}")
+
+
+@dataclass(frozen=True, kw_only=True)
 class Molecule(BaseEntity):
     """Represents a chemical compound (ChEMBL Molecule).
 

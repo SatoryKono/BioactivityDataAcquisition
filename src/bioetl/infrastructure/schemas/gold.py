@@ -356,6 +356,30 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
         strict = True
 
 
+class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Document Term in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    # Composite key fields
+    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    term: Series[str] = pa.Field(nullable=False)
+    # Frequency metrics
+    term_frequency: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    doc_frequency: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    score: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
+
+
 class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Molecule in Gold layer."""
 

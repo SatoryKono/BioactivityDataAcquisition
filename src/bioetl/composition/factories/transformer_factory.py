@@ -106,6 +106,9 @@ def register_all_transformers() -> None:
         ActivityTransformer,
     )
     from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+    from bioetl.application.pipelines.chembl.document_term_transformer import (
+        DocumentTermTransformer,
+    )
     from bioetl.application.pipelines.chembl.document_transformer import (
         DocumentTransformer,
     )
@@ -130,6 +133,7 @@ def register_all_transformers() -> None:
     register_transformer("chembl", "activity", ActivityTransformer)
     register_transformer("chembl", "assay", AssayTransformer)
     register_transformer("chembl", "document", DocumentTransformer)
+    register_transformer("chembl", "document_term", DocumentTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
     register_transformer("chembl", "target", TargetTransformer)
     register_transformer("chembl", "target_component", TargetComponentTransformer)

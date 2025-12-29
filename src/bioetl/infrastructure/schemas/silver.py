@@ -379,6 +379,29 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Document Term
+# See: https://www.ebi.ac.uk/chembl/api/data/document_term
+CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Composite key fields
+        pa.field("document_chembl_id", pa.string()),
+        pa.field("term", pa.string()),
+        # Frequency metrics
+        pa.field("term_frequency", pa.int64()),
+        pa.field("doc_frequency", pa.int64()),
+        pa.field("score", pa.float64()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for ChEMBL Molecule
 # See: https://www.ebi.ac.uk/chembl/api/data/molecule
 CHEMBL_MOLECULE_SCHEMA = pa.schema(

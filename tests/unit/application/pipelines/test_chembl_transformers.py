@@ -8,6 +8,9 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+from bioetl.application.pipelines.chembl.document_term_transformer import (
+    DocumentTermTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
@@ -802,3 +805,140 @@ class TestTargetComponentTransformer:
         result_empty = await transformer.transform(mock_context, record_empty, index=0)
         assert result_empty is not None
         assert result_empty.get("protein_classification_ids") is None
+
+
+@pytest.mark.unit
+class TestDocumentTermTransformer:
+    """Tests for DocumentTermTransformer."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create DocumentTermTransformer instance."""
+        return DocumentTermTransformer(provider="chembl")
+
+    @pytest.mark.asyncio
+    async def test_transform_valid_record(self, transformer, mock_context):
+        """Test transformation of valid document term record."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "term": "KINASE",
+            "term_frequency": 10,
+            "doc_frequency": 100,
+            "score": 0.85,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["document_chembl_id"] == "CHEMBL1234567"
+        assert result["term"] == "kinase"  # Normalized to lowercase
+        assert result["term_frequency"] == 10
+        assert result["doc_frequency"] == 100
+        assert result["score"] == 0.85
+        assert "entity_id" in result
+        assert "content_hash" in result
+        assert "_run_id" in result
+
+    @pytest.mark.asyncio
+    async def test_transform_missing_document_id(self, transformer, mock_context):
+        """Test transformation returns None when document_chembl_id is missing."""
+        record = {
+            "term": "KINASE",
+            "term_frequency": 10,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_term_normalization(self, transformer, mock_context):
+        """Test term normalization (lowercase, strip, remove special chars)."""
+        record = {
+            "document_chembl_id": "CHEMBL123",
+            "term": "  **Kinase-Inhibitor**  ",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        # Should be stripped, lowercased, leading/trailing special chars removed
+        assert result["term"] == "kinase-inhibitor"
+
+    @pytest.mark.asyncio
+    async def test_transform_frequency_validation(self, transformer, mock_context):
+        """Test frequency validation (must be >= 1 or NULL)."""
+        # Test with zero frequency (should become None)
+        record = {
+            "document_chembl_id": "CHEMBL123",
+            "term": "test",
+            "term_frequency": 0,
+            "doc_frequency": -1,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["term_frequency"] is None
+        assert result["doc_frequency"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_score_validation(self, transformer, mock_context):
+        """Test score validation (must be >= 0 or NULL)."""
+        # Test with negative score (should become None)
+        record = {
+            "document_chembl_id": "CHEMBL123",
+            "term": "test",
+            "score": -0.5,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["score"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_score_rounding(self, transformer, mock_context):
+        """Test score is rounded to 10 decimal places."""
+        record = {
+            "document_chembl_id": "CHEMBL123",
+            "term": "test",
+            "score": 0.123456789012345,  # More than 10 decimal places
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["score"] == round(0.123456789012345, 10)
+
+    @pytest.mark.asyncio
+    async def test_transform_with_null_frequency_fields(self, transformer, mock_context):
+        """Test transformation with null frequency fields."""
+        record = {
+            "document_chembl_id": "CHEMBL123",
+            "term": "test",
+            "term_frequency": None,
+            "doc_frequency": None,
+            "score": None,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["term_frequency"] is None
+        assert result["doc_frequency"] is None
+        assert result["score"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_custom_provider(self, mock_context):
+        """Test transformation with custom provider."""
+        transformer = DocumentTermTransformer(provider="custom_provider")
+        record = {
+            "document_chembl_id": "CUSTOM123",
+            "term": "test",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert "entity_id" in result

@@ -1,0 +1,95 @@
+# configs/pipelines/chembl/document_term.yaml
+# Конфигурация пайплайна для сущности Document Term из ChEMBL.
+#
+# Terms (keywords) extracted from documents. Bag-of-words representation
+# for text search with TF-IDF scoring.
+# Load strategy: full (batch load, large volume - many terms per document).
+
+pipeline_name: chembl_document_term
+provider: chembl
+entity_type: document_term
+version: "1.0.0"
+description: "Extract document terms from ChEMBL API"
+
+primary_keys: ["document_chembl_id", "term"]
+silver_table: "chembl_document_term"
+
+# Ссылка на файл с конфигурацией источника данных
+source_file: ../../sources/chembl.yaml
+
+# Gold filters: terms with valid frequency data
+gold_filters:
+    required_fields:
+        - term
+    ranges:
+        term_frequency:
+            min: 1
+            include_min: true
+
+transform:
+    version: "1.0.0"
+    steps:
+        - normalize_values
+        - add_metadata
+        - calculate_content_hash
+
+sink:
+    bronze:
+        path: "data/output/bronze"
+        format: jsonl
+        save_json: true
+        deterministic: true
+
+    silver:
+        path: "data/output/silver"
+        format: delta
+        mode: merge
+        on_schema_mismatch: evolve  # Allow schema evolution for _index field
+        primary_key: [ "document_chembl_id", "term" ]
+        partition_by: []
+        classification: public
+        forensic_retention: true
+        deterministic: true
+        sort_by:
+            columns: [ "document_chembl_id", "term" ]
+            ascending: true
+        csv_export:
+            enabled: true
+            path: "data/output/csv/silver"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+    gold:
+        enabled: true
+        validation:
+            strict: true
+        path: "data/output/gold"
+        format: delta
+        mode: overwrite
+        deterministic: true
+        sort_by:
+            columns: [ "document_chembl_id", "term" ]
+            ascending: true
+        csv_export:
+            enabled: true
+            path: "data/output/csv/gold"
+            delimiter: ","
+            header: true
+            encoding: "utf-8"
+
+dq_rules:
+    soft_fail_threshold: 0.05
+    hard_fail_threshold: 0.20
+
+circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+
+# Input filter configuration (for CSV-based ID filtering)
+input_filter:
+    enabled: true
+    source_path: "data/input/document_term.csv"
+    column_name: "document_chembl_id"
+    filter_field: "document_chembl_id"
+    batch_size: 50
