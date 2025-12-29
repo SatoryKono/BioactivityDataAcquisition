@@ -5,7 +5,7 @@ Tests the infrastructure health validation before pipeline execution.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, PropertyMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
