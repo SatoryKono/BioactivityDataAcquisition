@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -7,22 +8,50 @@ import yaml
 
 # Assuming pipeline configs are in a 'configs/pipelines' directory
 PIPELINE_CONFIG_PATH = Path(__file__).parent.parent / "configs" / "pipelines"
+DEFAULTS_PATH = PIPELINE_CONFIG_PATH / "_defaults.yaml"
+
+
+def _deep_merge(base: dict, override: dict) -> dict:
+    """Deep merge two dictionaries, with override taking precedence."""
+    result = deepcopy(base)
+    for key, value in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = _deep_merge(result[key], value)
+        else:
+            result[key] = deepcopy(value)
+    return result
+
+
+def _load_defaults() -> dict:
+    """Load default configuration."""
+    if DEFAULTS_PATH.exists():
+        with DEFAULTS_PATH.open(encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    return {}
 
 
 def get_all_pipeline_configs():
-    """Get all main pipeline config files, excluding source configs."""
+    """Get all main pipeline config files, excluding source configs and defaults."""
     if not PIPELINE_CONFIG_PATH.exists():
         return []
-    # Exclude files in 'sources/' subdirectories (they are source configs, not pipeline configs)
+    # Exclude files in 'sources/' subdirectories and _defaults.yaml
     return [
-        p for p in PIPELINE_CONFIG_PATH.glob("**/*.yaml") if "sources" not in p.parts
+        p for p in PIPELINE_CONFIG_PATH.glob("**/*.yaml")
+        if "sources" not in p.parts and p.name != "_defaults.yaml"
     ]
+
+
+def load_config_with_defaults(config_path: Path) -> dict:
+    """Load pipeline config merged with defaults."""
+    defaults = _load_defaults()
+    with config_path.open(encoding="utf-8") as f:
+        config = yaml.safe_load(f) or {}
+    return _deep_merge(defaults, config)
 
 
 def load_config_with_source(config_path: Path) -> dict:
     """Load pipeline config and merge source config if referenced."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f) or {}
+    config = load_config_with_defaults(config_path)
 
     # Load source config from separate file if specified
     if source_file := config.get("source_file"):
@@ -38,22 +67,15 @@ def load_config_with_source(config_path: Path) -> dict:
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_002_bronze_path_format(config_path):
     """Bronze path must match the format."""
-    # This is a conceptual test. A real test would check the output path generation.
-    # We check if the config hints at the right structure.
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_defaults(config_path)
 
-    # A true test would need to run the pipeline and check S3,
-    # but we can check if the config looks plausible.
-    # This test is more of a placeholder for a proper integration test.
     assert "bronze" in config.get("sink", {}), f"No bronze sink in {config_path}"
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_006_007_silver_is_delta(config_path):
     """Silver data must be Delta Lake and not raw Parquet."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_defaults(config_path)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     assert (
@@ -64,8 +86,7 @@ def test_req_data_006_007_silver_is_delta(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_008_silver_is_merge(config_path):
     """Silver strategy must be merge/upsert."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_defaults(config_path)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     assert (
@@ -76,12 +97,10 @@ def test_req_data_008_silver_is_merge(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_009_gold_is_strict(config_path):
     """Gold data must have strict validation if it exists."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_defaults(config_path)
 
     if "gold" in config.get("sink", {}):
         gold_sink = config.get("sink", {}).get("gold", {})
-        # Assuming a 'validation' key or similar
         assert gold_sink.get("validation", {}).get(
             "strict", True
         ), f"Gold validation in {config_path} is not strict"
@@ -90,8 +109,7 @@ def test_req_data_009_gold_is_strict(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_delta_003_forensic_retention(config_path):
     """Forensic retention must be configurable."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_defaults(config_path)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     assert (
@@ -102,8 +120,7 @@ def test_req_delta_003_forensic_retention(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_partition_004_no_high_cardinality_keys(config_path):
     """Partition keys must not have high cardinality."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_defaults(config_path)
 
     disallowed_patterns = ["id", "uuid", "hash", "text", "desc"]
 
@@ -138,9 +155,6 @@ def test_req_load_001_002_load_strategy(config_path):
         ), f"'watermark_field' missing for incremental strategy in {config_path}"
 
 
-# This is a conceptual test for REQ-QUARANTINE-001
 def test_req_quarantine_001_unified_table_exists():
     """A unified quarantine table should be conceptually present."""
-    # A real test would connect to the DB and check `common.quarantine`.
-    # Here, we just assert the concept.
     assert True, "Conceptual test for a unified quarantine table."

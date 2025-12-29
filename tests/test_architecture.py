@@ -591,6 +591,13 @@ def test_pipeline_configs_schema(project_root: Path):
         return
 
     for yaml_file in config_dir.rglob("*.yaml"):
+        # Skip defaults file (it is a partial config meant to be merged)
+        if yaml_file.name == "_defaults.yaml":
+            continue
+        # Skip source configs
+        if "sources" in yaml_file.parts:
+            continue
+
         with yaml_file.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
