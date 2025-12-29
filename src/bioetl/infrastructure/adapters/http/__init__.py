@@ -12,8 +12,9 @@ Provides:
 
 from __future__ import annotations
 
+from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.client import RetryConfig, UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.health_monitor import (
     AdjustedClientConfig,
     ProviderHealthMonitor,

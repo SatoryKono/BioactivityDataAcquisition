@@ -16,7 +16,7 @@ from __future__ import annotations
 import dataclasses
 import time
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
 import orjson
@@ -340,7 +340,7 @@ class BaseTransformer(ABC):
     @classmethod
     def serialize_json_fields(
         cls,
-        record: dict[str, Any],
+        record: Mapping[str, Any],
         field_names: Sequence[str],
     ) -> dict[str, str | None]:
         """Serialize multiple JSON fields at once.

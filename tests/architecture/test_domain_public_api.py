@@ -31,8 +31,10 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         # Special imports (from __future__ import annotations)
         "annotations",
         # Submodules (imported but not re-exported individually)
+        "aggregates",  # Submodule for aggregates like PipelineRun, Batch
         "config",
         "config_types",  # TypedDict definitions for YAML config (not public API)
+        "configs",  # Submodule for consolidated config DTOs
         "context",
         "entities",
         "error_classifier",
@@ -49,6 +51,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "transformations",
         "types",
         "validation",  # REFACTOR-004: functions are re-exported, not module
+        "value_objects",  # Submodule for value objects like identifiers
     }
 
     # Get all attributes from the module
@@ -152,7 +155,14 @@ def test_domain_no_infrastructure_types_in_all() -> None:
         "Reader",
     ]
 
+    # Exemptions for domain config classes that happen to contain infrastructure words
+    exemptions = {
+        "BaseClientConfig",  # Domain config DTO, not infrastructure client
+    }
+
     for symbol in domain.__all__:
+        if symbol in exemptions:
+            continue
         for pattern in infrastructure_patterns:
             assert pattern not in symbol, (
                 f"Symbol '{symbol}' appears to be infrastructure type "

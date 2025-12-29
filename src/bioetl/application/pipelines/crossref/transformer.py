@@ -11,6 +11,7 @@ Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
@@ -69,7 +70,7 @@ class CrossRefTransformer(BaseTransformer):
     # ========================================================================
 
     @staticmethod
-    def _extract_authors(work: dict[str, Any]) -> list[str]:
+    def _extract_authors(work: Mapping[str, Any]) -> list[str]:
         """Extract author names in 'given family' format.
 
         This is CrossRef-specific extraction logic (not generic normalization).
@@ -94,7 +95,7 @@ class CrossRefTransformer(BaseTransformer):
         return authors
 
     @staticmethod
-    def _extract_year(work: dict[str, Any]) -> int | None:
+    def _extract_year(work: Mapping[str, Any]) -> int | None:
         """Extract publication year from date-parts.
 
         Tries published-print, then published-online, then issued.
@@ -117,7 +118,7 @@ class CrossRefTransformer(BaseTransformer):
         return None
 
     @staticmethod
-    def _extract_license_url(work: dict[str, Any]) -> str | None:
+    def _extract_license_url(work: Mapping[str, Any]) -> str | None:
         """Extract license URL from work.
 
         Args:
@@ -149,43 +150,44 @@ class CrossRefTransformer(BaseTransformer):
             Dictionary of Work business fields.
 
         """
-        # Use domain functions for normalization
-        doi = normalize_doi(record.get("DOI", "")) or ""
-        first_page, last_page = parse_page_range(record.get("page"))
+        # Use domain functions for normalization (cast from BronzeRecord to dict)
+        data = cast("dict[str, Any]", record)
+        doi = normalize_doi(cast("str | None", data.get("DOI", ""))) or ""
+        first_page, last_page = parse_page_range(cast("str | None", data.get("page")))
 
         # Extract date fields using domain functions
-        published_print = record.get("published-print", {})
-        published_online = record.get("published-online", {})
+        published_print = data.get("published-print", {})
+        published_online = data.get("published-online", {})
 
         # Extract abstract with HTML stripping via domain function
-        abstract_raw = record.get("abstract", "")
+        abstract_raw = cast("str | None", data.get("abstract", ""))
         abstract = strip_html_tags(abstract_raw) if abstract_raw else None
 
         return {
             "doi": doi,
-            "title": extract_first_string(record.get("title", [])),
+            "title": extract_first_string(cast("list[str] | None", data.get("title", []))),
             "abstract": abstract,
-            "authors": self._extract_authors(record),
-            "journal": extract_first_string(record.get("container-title", [])),
-            "issn": record.get("ISSN", []),
-            "publisher": record.get("publisher"),
-            "volume": record.get("volume"),
-            "issue": record.get("issue"),
+            "authors": self._extract_authors(data),
+            "journal": extract_first_string(cast("list[str] | None", data.get("container-title", []))),
+            "issn": data.get("ISSN", []),
+            "publisher": data.get("publisher"),
+            "volume": data.get("volume"),
+            "issue": data.get("issue"),
             "first_page": first_page,
             "last_page": last_page,
-            "year": self._extract_year(record),
+            "year": self._extract_year(data),
             "published_print": format_date_parts(
                 published_print.get("date-parts") if isinstance(published_print, dict) else None
             ),
             "published_online": format_date_parts(
                 published_online.get("date-parts") if isinstance(published_online, dict) else None
             ),
-            "doc_type": CROSSREF_TYPE_MAP.get(record.get("type", ""), "PUBLICATION"),
-            "citation_count": record.get("is-referenced-by-count"),
-            "reference_count": record.get("references-count"),
-            "language": record.get("language"),
-            "license_url": self._extract_license_url(record),
-            "subjects": record.get("subject", []),
+            "doc_type": CROSSREF_TYPE_MAP.get(cast("str", data.get("type", "")), "PUBLICATION"),
+            "citation_count": data.get("is-referenced-by-count"),
+            "reference_count": data.get("references-count"),
+            "language": data.get("language"),
+            "license_url": self._extract_license_url(data),
+            "subjects": data.get("subject", []),
             "source": "crossref",
         }
 
