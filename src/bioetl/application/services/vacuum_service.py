@@ -7,6 +7,7 @@ operations without CLI-specific formatting concerns.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -15,6 +16,18 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import LoggerPort
+
+
+#: Type alias for table collector callable.
+#: This defines the interface for collecting tables from the pipeline registry.
+#: The implementation lives in the composition layer to maintain proper
+#: dependency direction (application -> domain <- composition).
+TableCollectorPort = Callable[[str], list[tuple[str, str]]]
+"""Protocol for collecting tables for vacuum operations.
+
+A callable that takes a layer name ("all", "silver", or "gold") and
+returns a list of (table_name, layer) tuples.
+"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,7 +87,7 @@ class VacuumService:
     """Service for batch vacuum operations on Delta tables.
 
     Responsibilities:
-    - Collect tables from pipeline registry for vacuum-all
+    - Collect tables from pipeline registry for vacuum-all (via injected collector)
     - Orchestrate vacuum operations across multiple tables
     - Track and report results
 
@@ -84,9 +97,17 @@ class VacuumService:
     Attributes:
         lifecycle: MedallionLifecycleService for individual vacuum ops.
         logger: Structured logger for observability.
+        table_collector: Injected function for collecting tables from registry.
 
     Example:
-        >>> service = VacuumService(lifecycle=lifecycle, logger=logger)
+        >>> def collect_tables(layer: str) -> list[tuple[str, str]]:
+        ...     # Implementation in composition layer
+        ...     return [("chembl_activity", "silver"), ("chembl_activity", "gold")]
+        >>> service = VacuumService(
+        ...     lifecycle=lifecycle,
+        ...     logger=logger,
+        ...     table_collector=collect_tables,
+        ... )
         >>> tables = service.collect_tables(layer="all")
         >>> result = await service.vacuum_all(tables, retention_days=7)
         >>> print(f"Removed {result.total_files_removed} files")
@@ -94,13 +115,13 @@ class VacuumService:
 
     lifecycle: MedallionLifecycleService
     logger: LoggerPort
-    _registry_factory: object = field(default=None, repr=False)
+    table_collector: TableCollectorPort = field(repr=False)
 
     def collect_tables(self, layer: str = "all") -> list[tuple[str, str]]:
         """Collect tables from all registered pipelines.
 
-        Queries the pipeline registry and extracts silver/gold table names
-        from each pipeline's configuration.
+        Delegates to the injected table_collector function which queries
+        the pipeline registry in the composition layer.
 
         Args:
             layer: Which layer to collect - "all", "silver", or "gold".
@@ -108,35 +129,7 @@ class VacuumService:
         Returns:
             List of (table_name, layer) tuples sorted alphabetically.
         """
-        from bioetl.composition.entrypoints import load_pipeline_config
-        from bioetl.composition.registry import get_default_registry
-
-        registry = get_default_registry()
-        pipelines = registry.list_pipelines()
-
-        silver_tables: set[str] = set()
-        gold_tables: set[str] = set()
-
-        for pipeline_name in pipelines:
-            try:
-                config = load_pipeline_config(pipeline_name)
-                if config.silver_table:
-                    silver_tables.add(config.silver_table)
-                if config.gold_table:
-                    gold_tables.add(config.gold_table)
-            except FileNotFoundError:
-                self.logger.warning(
-                    "Config not found for pipeline",
-                    pipeline_name=pipeline_name,
-                )
-
-        tables: list[tuple[str, str]] = []
-        if layer in ("all", "silver"):
-            tables.extend((t, "silver") for t in sorted(silver_tables))
-        if layer in ("all", "gold"):
-            tables.extend((t, "gold") for t in sorted(gold_tables))
-
-        return tables
+        return self.table_collector(layer)
 
     async def vacuum_table(
         self,
