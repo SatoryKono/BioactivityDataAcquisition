@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pyarrow as pa
 import pytest
@@ -15,14 +16,21 @@ import pytest
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
+@pytest.fixture
+def mock_logger() -> MagicMock:
+    """Create a mock logger for tests."""
+    return MagicMock()
+
+
 class TestDeterministicCsvExport:
     """Tests for deterministic CSV export."""
 
     @pytest.fixture
-    def csv_exporter(self, tmp_path: Path) -> CsvExporter:
+    def csv_exporter(self, tmp_path: Path, mock_logger: MagicMock) -> CsvExporter:
         """Create CSV exporter with sort_by configuration."""
         return CsvExporter(
             base_path=str(tmp_path),
+            logger=mock_logger,
             sort_by=["id", "name"],
             sort_ascending=True,
         )
@@ -59,7 +67,7 @@ class TestDeterministicCsvExport:
         assert ids == ["A", "B", "C"], "Records should be sorted by id column"
 
     async def test_csv_export_deterministic_across_runs(
-        self, tmp_path: Path, sample_records: list[dict]
+        self, tmp_path: Path, sample_records: list[dict], mock_logger: MagicMock
     ):
         """Test that multiple exports produce identical output."""
         import random
@@ -73,6 +81,7 @@ class TestDeterministicCsvExport:
 
             exporter = CsvExporter(
                 base_path=str(tmp_path / f"run_{i}"),
+                logger=mock_logger,
                 sort_by=["id"],
                 sort_ascending=True,
             )
@@ -107,7 +116,9 @@ class TestDeterministicCsvExport:
         lines = content.strip().split("\n")
         assert "A" in lines[1], "First record should be Alice (id=A)"
 
-    async def test_json_serialization_with_sort_keys(self, tmp_path: Path):
+    async def test_json_serialization_with_sort_keys(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ):
         """Test that JSON serialization uses sort_keys=True."""
         records = [
             {"id": "A", "data": {"z_key": 1, "a_key": 2, "m_key": 3}},
@@ -116,6 +127,7 @@ class TestDeterministicCsvExport:
 
         exporter = CsvExporter(
             base_path=str(tmp_path),
+            logger=mock_logger,
             sort_by=["id"],
         )
 

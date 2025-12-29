@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pyarrow as pa
 import pytest
@@ -11,23 +12,32 @@ import pytest
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
+@pytest.fixture
+def mock_logger() -> MagicMock:
+    """Create a mock logger for tests."""
+    return MagicMock()
+
+
 @pytest.mark.unit
 class TestCsvExporterInit:
     """Tests for CsvExporter initialization."""
 
-    def test_init_with_defaults(self, tmp_path: Path) -> None:
+    def test_init_with_defaults(self, tmp_path: Path, mock_logger: MagicMock) -> None:
         """Test initialization with default parameters."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         assert exporter.base_path == tmp_path
         assert exporter.delimiter == ","
         assert exporter.header is True
         assert exporter.encoding == "utf-8"
 
-    def test_init_with_custom_options(self, tmp_path: Path) -> None:
+    def test_init_with_custom_options(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test initialization with custom parameters."""
         exporter = CsvExporter(
             base_path=str(tmp_path),
+            logger=mock_logger,
             delimiter=";",
             header=False,
             encoding="latin-1",
@@ -108,9 +118,11 @@ class TestCsvExporterExport:
     """Tests for export method."""
 
     @pytest.mark.asyncio
-    async def test_export_creates_file(self, tmp_path: Path) -> None:
+    async def test_export_creates_file(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test that export creates the CSV file."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
         table = pa.Table.from_pydict(
             {
                 "id": [1, 2],
@@ -124,10 +136,12 @@ class TestCsvExporterExport:
         assert result_path == tmp_path / "test_table.csv"
 
     @pytest.mark.asyncio
-    async def test_export_creates_parent_directories(self, tmp_path: Path) -> None:
+    async def test_export_creates_parent_directories(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test that export creates parent directories if needed."""
         nested_path = tmp_path / "nested" / "path"
-        exporter = CsvExporter(base_path=str(nested_path))
+        exporter = CsvExporter(base_path=str(nested_path), logger=mock_logger)
         table = pa.Table.from_pydict({"id": [1]})
 
         result_path = await exporter.export("table", table)
@@ -136,9 +150,13 @@ class TestCsvExporterExport:
         assert nested_path.exists()
 
     @pytest.mark.asyncio
-    async def test_export_with_custom_delimiter(self, tmp_path: Path) -> None:
+    async def test_export_with_custom_delimiter(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test export with custom delimiter."""
-        exporter = CsvExporter(base_path=str(tmp_path), delimiter=";")
+        exporter = CsvExporter(
+            base_path=str(tmp_path), logger=mock_logger, delimiter=";"
+        )
         table = pa.Table.from_pydict(
             {
                 "id": [1, 2],
@@ -154,9 +172,13 @@ class TestCsvExporterExport:
         assert '"id";"name"' in content or "id;name" in content
 
     @pytest.mark.asyncio
-    async def test_export_without_header(self, tmp_path: Path) -> None:
+    async def test_export_without_header(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test export without header row."""
-        exporter = CsvExporter(base_path=str(tmp_path), header=False)
+        exporter = CsvExporter(
+            base_path=str(tmp_path), logger=mock_logger, header=False
+        )
         table = pa.Table.from_pydict(
             {
                 "id": [1],
@@ -173,9 +195,11 @@ class TestCsvExporterExport:
         assert "test" in content
 
     @pytest.mark.asyncio
-    async def test_export_complex_types(self, tmp_path: Path) -> None:
+    async def test_export_complex_types(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test that complex types are properly serialized to JSON."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
         table = pa.Table.from_pydict(
             {
                 "id": [1],
@@ -192,9 +216,11 @@ class TestCsvExporterExport:
         assert "key" in content and "value" in content
 
     @pytest.mark.asyncio
-    async def test_export_appends_to_existing_file(self, tmp_path: Path) -> None:
+    async def test_export_appends_to_existing_file(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test that export appends to existing file by default."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         # First export
         table1 = pa.Table.from_pydict({"id": [1], "value": ["first"]})
@@ -209,9 +235,11 @@ class TestCsvExporterExport:
         assert "second" in content
 
     @pytest.mark.asyncio
-    async def test_export_overwrites_when_append_false(self, tmp_path: Path) -> None:
+    async def test_export_overwrites_when_append_false(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test that export overwrites existing file when append=False."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         # First export
         table1 = pa.Table.from_pydict({"id": [1], "value": ["first"]})
@@ -230,9 +258,11 @@ class TestCsvExporterExport:
 class TestCsvExporterClear:
     """Tests for CsvExporter.clear() method."""
 
-    def test_clear_specific_table(self, tmp_path: Path) -> None:
+    def test_clear_specific_table(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test clearing a specific table's CSV file."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         # Create test files
         (tmp_path / "table1.csv").write_text("data1")
@@ -244,9 +274,11 @@ class TestCsvExporterClear:
         assert not (tmp_path / "table1.csv").exists()
         assert (tmp_path / "table2.csv").exists()
 
-    def test_clear_all_csv_files(self, tmp_path: Path) -> None:
+    def test_clear_all_csv_files(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test clearing all CSV files."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         # Create test files
         (tmp_path / "table1.csv").write_text("data1")
@@ -260,17 +292,23 @@ class TestCsvExporterClear:
         assert not (tmp_path / "table2.csv").exists()
         assert (tmp_path / "other.txt").exists()  # Non-CSV not deleted
 
-    def test_clear_nonexistent_directory(self, tmp_path: Path) -> None:
+    def test_clear_nonexistent_directory(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test clearing when base_path doesn't exist."""
-        exporter = CsvExporter(base_path=str(tmp_path / "nonexistent"))
+        exporter = CsvExporter(
+            base_path=str(tmp_path / "nonexistent"), logger=mock_logger
+        )
 
         deleted = exporter.clear()
 
         assert deleted == []
 
-    def test_clear_nonexistent_table(self, tmp_path: Path) -> None:
+    def test_clear_nonexistent_table(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test clearing a table that doesn't exist."""
-        exporter = CsvExporter(base_path=str(tmp_path))
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
         deleted = exporter.clear("nonexistent")
 

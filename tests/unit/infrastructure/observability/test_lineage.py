@@ -17,6 +17,12 @@ from bioetl.infrastructure.observability.lineage import (
 )
 
 
+@pytest.fixture
+def mock_logger() -> MagicMock:
+    """Create a mock logger for tests."""
+    return MagicMock()
+
+
 @pytest.mark.unit
 class TestLineageRecord:
     """Tests for LineageRecord dataclass."""
@@ -126,11 +132,12 @@ def temp_delta_path():
 
 
 @pytest.fixture
-def lineage_tracker(temp_delta_path):
+def lineage_tracker(temp_delta_path, mock_logger):
     """Create a LineageTracker instance."""
     return LineageTracker(
         delta_path=temp_delta_path,
         pipeline_name="test_pipeline",
+        logger=mock_logger,
     )
 
 
@@ -152,20 +159,22 @@ def mock_delta_table():
 class TestLineageTrackerInit:
     """Tests for LineageTracker initialization."""
 
-    def test_init_with_string_path(self, temp_delta_path):
+    def test_init_with_string_path(self, temp_delta_path, mock_logger):
         """Test initialization with string path."""
         tracker = LineageTracker(
             delta_path=str(temp_delta_path),
             pipeline_name="test",
+            logger=mock_logger,
         )
         assert tracker.delta_path == temp_delta_path
         assert tracker.pipeline_name == "test"
 
-    def test_init_with_path_object(self, temp_delta_path):
+    def test_init_with_path_object(self, temp_delta_path, mock_logger):
         """Test initialization with Path object."""
         tracker = LineageTracker(
             delta_path=temp_delta_path,
             pipeline_name="test",
+            logger=mock_logger,
         )
         assert tracker.delta_path == temp_delta_path
 
