@@ -35,6 +35,7 @@ sink:
         path: "data/output/bronze"
         format: jsonl
         save_json: true
+        deterministic: true
 
     silver:
         path: "data/output/silver"
@@ -45,6 +46,7 @@ sink:
         partition_by: [ "assay_type" ]
         classification: public
         forensic_retention: true
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/silver"
@@ -59,6 +61,7 @@ sink:
         path: "data/output/gold"
         format: delta
         mode: overwrite
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/gold"

@@ -25,6 +25,7 @@ sink:
         path: data/bronze/chembl/target_component
         format: jsonl
         save_json: true
+        deterministic: true
 
     silver:
         path: data/silver/chembl/target_component
@@ -33,6 +34,7 @@ sink:
         mode: merge
         on_schema_mismatch: evolve  # Allow schema evolution for _index field
         forensic_retention: true
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/silver"
@@ -46,6 +48,7 @@ sink:
         mode: overwrite
         validation:
             strict: true  # REQ-DATA-009: Gold validation must be strict
+        deterministic: true
         csv_export:
             enabled: true
             path: "data/output/csv/gold"

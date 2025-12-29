@@ -68,7 +68,7 @@ sink:
     gold:
         enabled: true
         validation:
-            strict: false
+            strict: true
         path: "data/output/gold"
         format: delta
         mode: overwrite
