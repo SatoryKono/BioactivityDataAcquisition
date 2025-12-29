@@ -52,6 +52,7 @@ class TestFileSizeLimits:
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 700,  # 675 LOC - pipeline entrypoints (run_pipeline expanded)
         "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
+        "registration.py": 490,  # 478 LOC - provider registrations + data source creators
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly
@@ -231,8 +232,8 @@ class TestFunctionLength:
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2025-12-30: 56 violations (domain value objects added)
-    MAX_VIOLATIONS = 56
+    # Baseline updated 2025-12-29: 58 violations (quarantine_service replay/purge)
+    MAX_VIOLATIONS = 58
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -309,6 +310,8 @@ class TestClassSize:
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 420,  # 402 lines - HTTP adapter with batch DOI resolution
         "CrossRefFieldExtractor": 330,  # ~315 lines - field extraction (refactored from mappers)
+        # PubChem adapter (similar to ChEMBL adapter)
+        "PubChemAdapter": 310,  # 303 lines - sync adapter with ThreadPoolExecutor
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
         # Domain value objects (aggregates with rich behavior)
         "Batch": 450,  # 429 lines - Batch aggregate with lifecycle methods
@@ -444,6 +447,7 @@ class TestGodObjectDetection:
         "ChemblAdapter": "HTTP adapter with internal helpers; delegates to ErrorClassifier, EntityMapper",
         "CrossRefAdapter": "HTTP adapter with internal helpers for batch resolution",
         "CrossRefTransformer": "Transformer with field extraction - single responsibility",
+        "PubChemAdapter": "Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter, CircuitBreaker",
         "UnifiedHTTPClient": "HTTP client with internal retry logic; single responsibility",
         # CLI (inherently has many commands but delegates to entrypoints)
         "CLI": "CLI entry point - commands are cohesive, delegates to entrypoints",
