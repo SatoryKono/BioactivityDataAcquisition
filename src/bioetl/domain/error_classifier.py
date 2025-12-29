@@ -2,12 +2,10 @@
 
 Pure domain logic - classifies exceptions into error categories.
 Primary classification uses the explicit error_type attribute on BioETLError subclasses.
-Falls back to keyword matching ONLY for non-domain exceptions with deprecation warning.
+Falls back to keyword matching for non-domain exceptions (tracked via fallback_usage_count).
 """
 
 from __future__ import annotations
-
-import warnings
 
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -65,7 +63,7 @@ class ErrorClassifier:
 
     This is a pure domain class that uses the centralized exception hierarchy.
     Primary classification uses the explicit error_type attribute on BioETLError subclasses.
-    Falls back to keyword matching ONLY for non-domain exceptions with deprecation warning.
+    Falls back to keyword matching for non-domain exceptions (tracked for observability).
 
     Attributes:
         strict_mode: If True, raise ValueError for unknown non-domain exceptions.
@@ -126,7 +124,7 @@ class ErrorClassifier:
         return error.get_error_type()
 
     def _classify_external_error(self, error: Exception) -> ErrorType:
-        """Classify non-domain exceptions using keyword matching (with warning).
+        """Classify non-domain exceptions using keyword matching.
 
         Args:
             error: Non-BioETLError exception
@@ -141,21 +139,11 @@ class ErrorClassifier:
         error_name = type(error).__name__
         result = _match_error_type(error_name)
 
-        # Emit deprecation warning for observability
-        if result == ErrorType.INVALID_DATA:
-            msg = (
+        # In strict mode, raise for unknown exception types
+        if self._strict_mode and result == ErrorType.INVALID_DATA:
+            raise ValueError(
                 f"Unknown exception type: {error_name}. "
                 f"Consider wrapping in BioETLError subclass with explicit error_type."
-            )
-            if self._strict_mode:
-                raise ValueError(msg)
-            warnings.warn(msg, DeprecationWarning, stacklevel=3)
-        else:
-            warnings.warn(
-                f"Using keyword fallback for {error_name} -> {result.value}. "
-                f"Consider wrapping in BioETLError subclass.",
-                DeprecationWarning,
-                stacklevel=3,
             )
 
         return result

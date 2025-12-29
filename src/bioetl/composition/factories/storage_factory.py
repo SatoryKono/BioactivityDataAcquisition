@@ -87,7 +87,9 @@ class StorageFactory:
             json_path = str(bronze_path.parent / "json")
 
         # Ensure tracing is always explicitly provided (DI pattern)
-        effective_tracing: TracingPort = tracing if tracing is not None else NoOpTracing()
+        effective_tracing: TracingPort = (
+            tracing if tracing is not None else NoOpTracing()
+        )
 
         return StorageAdapter(
             bronze_writer=BronzeWriter(

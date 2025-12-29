@@ -185,25 +185,16 @@ def test_pipeline_config_converts_strings_to_enums() -> None:
     assert config.gold_write_mode == GoldWriteMode.SCD2
 
 
-def test_deprecated_overwrite_for_silver_warns() -> None:
-    """silver_write_mode='overwrite' SHOULD warn and convert to DELETE."""
-    import warnings
+def test_overwrite_for_silver_raises_error() -> None:
+    """silver_write_mode='overwrite' MUST raise ValueError.
 
+    The deprecated 'overwrite' alias for Silver layer has been removed.
+    Use SilverWriteMode.DELETE explicitly for rebuild operations.
+    """
     from bioetl.domain.config import TableConfig
-    from bioetl.domain.medallion import SilverWriteMode
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        config = TableConfig(silver_write_mode="overwrite")
-
-        # Should have deprecation warning
-        assert len(w) == 1
-        assert issubclass(w[0].category, DeprecationWarning)
-        assert "overwrite" in str(w[0].message)
-        assert "DELETE" in str(w[0].message)
-
-        # Should be converted to DELETE
-        assert config.silver_write_mode == SilverWriteMode.DELETE
+    with pytest.raises(ValueError, match="Invalid Silver write mode.*overwrite"):
+        TableConfig(silver_write_mode="overwrite")
 
 
 def test_no_silent_degradation_in_batch_writer() -> None:
