@@ -313,6 +313,35 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Cell Line
+# See: https://www.ebi.ac.uk/chembl/api/data/cell_line
+CHEMBL_CELL_LINE_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("cell_chembl_id", pa.string()),
+        # Core metadata
+        pa.field("cell_name", pa.string()),
+        pa.field("cell_description", pa.string()),
+        # Source information
+        pa.field("cell_source_tissue", pa.string()),
+        pa.field("cell_source_organism", pa.string()),
+        pa.field("cell_source_tax_id", pa.int64()),
+        # External identifiers
+        pa.field("cellosaurus_id", pa.string()),
+        pa.field("cl_lincs_id", pa.string()),
+        pa.field("efo_id", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for ChEMBL Document
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 CHEMBL_DOCUMENT_SCHEMA = pa.schema(

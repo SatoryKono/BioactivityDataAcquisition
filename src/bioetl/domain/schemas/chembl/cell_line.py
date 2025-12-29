@@ -13,70 +13,64 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 
 class CellLineSchema(ETLRecordSchema):
-    """Cell line validation schema for Silver layer.
+    """Cell Line validation schema for Silver layer.
 
-    Represents cell lines used in bioassays (e.g., HeLa, HEK293).
+    Cell lines are biological objects used for in vitro experiments.
+    They have M:N relationship with Assay (via assay.cell_chembl_id FK).
     """
 
     # === Primary Key ===
-    cell_id: Series[int] = pa.Field(
+    cell_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        ge=1,
-        description="Unique cell line identifier (PK)",
+        str_matches=r"^CHEMBL\d+$",
+        unique=True,
+        description="ChEMBL ID for cell line (PK).",
     )
 
-    # === Core Fields ===
-    cell_name: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Cell line name (e.g., HeLa, MCF-7)",
+    # === Core Metadata ===
+    cell_name: Series[str] = pa.Field(
+        nullable=False,
+        description="Cell line name (e.g., HeLa, MCF7).",
     )
     cell_description: Series[str] | None = pa.Field(
         nullable=True,
-        description="Additional description of cell line",
+        description="Cell line description.",
     )
 
     # === Source Information ===
     cell_source_tissue: Series[str] | None = pa.Field(
         nullable=True,
-        description="Tissue of origin (e.g., Cervix, Breast)",
+        description="Source tissue (e.g., Cervix, Breast).",
     )
     cell_source_organism: Series[str] | None = pa.Field(
         nullable=True,
-        description="Organism of origin (e.g., Homo sapiens)",
+        description="Source organism (e.g., Homo sapiens).",
     )
     cell_source_tax_id: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
-        description="NCBI Taxonomy ID of source organism",
+        description="NCBI Taxonomy ID for source organism.",
     )
 
-    # === Ontology Cross-references ===
-    clo_id: Series[str] | None = pa.Field(
+    # === External Identifiers ===
+    cellosaurus_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CLO:\d+$",
-        description="Cell Line Ontology identifier",
+        str_matches=r"^CVCL_[A-Z0-9]+$",
+        description="Cellosaurus ID (external reference).",
+    )
+    cl_lincs_id: Series[str] | None = pa.Field(
+        nullable=True,
+        description="LINCS ID (Library of Integrated Network-Based Cellular Signatures).",
     )
     efo_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^EFO:\d+$",
-        description="Experimental Factor Ontology identifier",
-    )
-    cellosaurus_id: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^CVCL_\w+$",
-        description="Cellosaurus database identifier",
-    )
-
-    # === Status Flags ===
-    downgraded: Series[int] | None = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="1 if cell line record is deprecated",
+        str_matches=r"^EFO_\d+$",
+        description="EFO ontology ID.",
     )
 
     class Config:
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
