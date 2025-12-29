@@ -62,9 +62,20 @@ test: ## Run unit and integration tests (serial, with coverage)
 	@echo "$(BLUE)Running tests...$(NC)"
 	$(RUN) pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85
 
-test-fast: ## Run tests in parallel (faster, no benchmarks)
+test-fast: ## Run tests in parallel (faster, no benchmarks) - may have sporadic failures
 	@echo "$(BLUE)Running tests (parallel mode)...$(NC)"
+	@echo "$(YELLOW)Note: May have sporadic failures in integration tests. Use test-ci for stable parallel execution.$(NC)"
 	$(RUN) pytest tests/ -v -n auto --dist loadscope --ignore=tests/benchmarks --cov=src/bioetl --cov-report=term-missing
+
+test-ci: ## Run optimized CI tests (unit/arch parallel, integration serial)
+	@echo "$(BLUE)Running optimized CI tests...$(NC)"
+	@echo "$(BLUE)Phase 1: Unit tests (parallel)...$(NC)"
+	$(RUN) pytest tests/unit/ -v -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing
+	@echo "$(BLUE)Phase 2: Architecture tests (parallel)...$(NC)"
+	$(RUN) pytest tests/architecture/ tests/security/ tests/test_*.py -v -n auto --dist loadscope --cov=src/bioetl --cov-append --cov-report=term-missing
+	@echo "$(BLUE)Phase 3: Integration tests (serial)...$(NC)"
+	$(RUN) pytest tests/integration/ -v --cov=src/bioetl --cov-append --cov-report=term-missing --cov-fail-under=85
+	@echo "$(GREEN)All CI tests passed!$(NC)"
 
 test-unit: ## Run only unit tests (fast, no I/O)
 	@echo "$(BLUE)Running unit tests...$(NC)"

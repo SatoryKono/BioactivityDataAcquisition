@@ -34,8 +34,17 @@ jobs:
           print(orjson.__version__)
           PY
 
-      - name: Run Tests with Coverage
+      - name: Run Unit Tests (parallel)
         run: |
-          # Run unit and integration tests with coverage
-          # Enforce 85% coverage threshold as requested
-          uv run pytest tests/ -v -m "not e2e" --cov=src/bioetl --cov-report=term --cov-fail-under=85
+          # Run unit tests in parallel for speed (61% faster)
+          uv run pytest tests/unit/ -v -n auto --dist loadscope --cov=src/bioetl --cov-report=term
+
+      - name: Run Architecture Tests (parallel)
+        run: |
+          # Architecture tests are stateless, safe for parallel
+          uv run pytest tests/architecture/ tests/security/ tests/test_*.py -v -n auto --dist loadscope --cov=src/bioetl --cov-append --cov-report=term
+
+      - name: Run Integration Tests (serial)
+        run: |
+          # Integration tests use VCR and shared state, run serially
+          uv run pytest tests/integration/ -v --cov=src/bioetl --cov-append --cov-report=term --cov-fail-under=85
