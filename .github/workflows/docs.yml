@@ -50,7 +50,16 @@ jobs:
         run: npm install -g @mermaid-js/mermaid-cli
 
       - name: Render Mermaid diagrams to SVG
-        run: mmdc -i 'docs/01-architecture/diagrams' -o 'rendered-diagrams' -e svg
+        run: |
+          mkdir -p rendered-diagrams
+          shopt -s nullglob
+          for dir in docs/02-architecture/diagrams docs/architecture/diagrams; do
+            if [ -d "$dir" ]; then
+              for file in "$dir"/*.mermaid; do
+                [ -f "$file" ] && mmdc -i "$file" -o "rendered-diagrams/$(basename "$file" .mermaid).svg"
+              done
+            fi
+          done
 
       - name: Upload rendered diagrams
         uses: actions/upload-artifact@v3
