@@ -59,10 +59,6 @@ The `bootstrap` module is used by multiple entry points:
 from bioetl.composition.bootstrap import bootstrap_pipeline
 runner = bootstrap_pipeline(...)
 
-# Prefect Flows (interfaces/orchestration/prefect/)
-from bioetl.composition.bootstrap import bootstrap_pipeline
-runner = bootstrap_pipeline(...)
-
 # Integration Tests
 from bioetl.composition.bootstrap import bootstrap_pipeline
 runner = bootstrap_pipeline(...)
