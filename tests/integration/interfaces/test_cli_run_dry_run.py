@@ -53,7 +53,7 @@ class TestCliRunDryRun:
         mock_runner.shutdown_signal = None
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -88,7 +88,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 15
 
         with patch(
-            "bioetl.interfaces.cli.preview_cleanup",
+            "bioetl.interfaces.cli.commands.run.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -127,7 +127,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 10
 
         with patch(
-            "bioetl.interfaces.cli.preview_cleanup",
+            "bioetl.interfaces.cli.commands.run.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -166,7 +166,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 0
 
         with patch(
-            "bioetl.interfaces.cli.preview_cleanup",
+            "bioetl.interfaces.cli.commands.run.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -205,7 +205,7 @@ class TestCliRunDryRun:
         mock_preview.total_files = 59
 
         with patch(
-            "bioetl.interfaces.cli.preview_cleanup",
+            "bioetl.interfaces.cli.commands.run.preview_cleanup",
             new=AsyncMock(return_value=mock_preview),
         ):
             result = cli_runner.invoke(
@@ -242,7 +242,7 @@ class TestCliDryRunErrorHandling:
     ):
         """Test that --dry-run handles preview errors gracefully."""
         with patch(
-            "bioetl.interfaces.cli.preview_cleanup",
+            "bioetl.interfaces.cli.commands.run.preview_cleanup",
             new=AsyncMock(side_effect=Exception("Preview failed")),
         ):
             result = cli_runner.invoke(

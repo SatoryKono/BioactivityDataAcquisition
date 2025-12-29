@@ -95,7 +95,7 @@ class TestCliGracefulShutdownExitCode:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -117,7 +117,7 @@ class TestCliGracefulShutdownExitCode:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -139,7 +139,7 @@ class TestCliGracefulShutdownExitCode:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -226,7 +226,7 @@ class TestRunnerShutdownIntegration:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             cli_runner.invoke(
@@ -253,10 +253,10 @@ class TestRunnerShutdownIntegration:
 
         with (
             patch(
-                "bioetl.interfaces.cli.create_pipeline_runner",
+                "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
                 return_value=mock_runner,
             ),
-            patch("bioetl.interfaces.cli.setup_shutdown_handlers") as mock_setup,
+            patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers") as mock_setup,
         ):
             cli_runner.invoke(
                 cli,
@@ -292,7 +292,7 @@ class TestLockReleaseOnShutdown:
         mock_runner.shutdown_signal = ShutdownSignal()
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(

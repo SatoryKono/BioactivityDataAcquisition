@@ -1,6 +1,6 @@
 """Unit tests for BioETL CLI.
 
-Tests for cli.py helper functions and Click commands.
+Tests for cli package helper functions and Click commands.
 Uses Click's CliRunner for command testing without real bootstrap.
 """
 
@@ -37,7 +37,9 @@ def mock_registry():
         "pubchem_compound",
         "uniprot_protein",
     ]
-    with patch("bioetl.interfaces.cli.get_default_registry", return_value=mock):
+    with patch(
+        "bioetl.interfaces.cli.commands.run.get_default_registry", return_value=mock
+    ):
         yield mock
 
 
@@ -91,7 +93,7 @@ class TestHandleDestructiveRunConfirmation:
         )
         assert result is True
 
-    @patch("bioetl.interfaces.cli._preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run._preview_cleanup")
     def test_rebuild_dry_run_shows_preview_returns_false(self, mock_preview):
         """Test that rebuild with dry-run shows preview and returns False."""
         result = _handle_destructive_run_confirmation(
@@ -104,7 +106,7 @@ class TestHandleDestructiveRunConfirmation:
         assert result is False
         mock_preview.assert_called_once_with("chembl_activity")
 
-    @patch("bioetl.interfaces.cli._preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run._preview_cleanup")
     def test_backfill_dry_run_shows_preview_returns_false(self, mock_preview):
         """Test that backfill with dry-run shows preview and returns False."""
         result = _handle_destructive_run_confirmation(
@@ -117,7 +119,7 @@ class TestHandleDestructiveRunConfirmation:
         assert result is False
         mock_preview.assert_called_once_with("pubchem_compound")
 
-    @patch("bioetl.interfaces.cli.click.confirm", return_value=True)
+    @patch("bioetl.interfaces.cli.commands.run.click.confirm", return_value=True)
     def test_rebuild_with_confirmation_returns_true(self, mock_confirm):
         """Test that rebuild with user confirmation returns True."""
         result = _handle_destructive_run_confirmation(
@@ -130,8 +132,8 @@ class TestHandleDestructiveRunConfirmation:
         assert result is True
         mock_confirm.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.click.confirm", return_value=False)
-    @patch("bioetl.interfaces.cli.sys.exit")
+    @patch("bioetl.interfaces.cli.commands.run.click.confirm", return_value=False)
+    @patch("bioetl.interfaces.cli.commands.run.sys.exit")
     def test_rebuild_cancelled_exits(self, mock_exit, mock_confirm):
         """Test that cancelled rebuild exits."""
         _handle_destructive_run_confirmation(
@@ -256,7 +258,13 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert "Manage checkpoints" in result.output
 
-    @patch("bioetl.interfaces.cli.register_all_pipelines")
+    def test_maintenance_help(self, cli_runner):
+        """Test that maintenance --help works."""
+        result = cli_runner.invoke(cli, ["maintenance", "--help"])
+        assert result.exit_code == 0
+        assert "Maintenance operations" in result.output
+
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     def test_run_invalid_pipeline_shows_error(
         self, mock_register, cli_runner, mock_registry
     ):
@@ -265,9 +273,9 @@ class TestCliCommands:
         assert result.exit_code != 0
         assert "Unknown pipeline" in result.output or "Error" in result.output
 
-    @patch("bioetl.interfaces.cli.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_valid_pipeline(
         self, mock_asyncio, mock_create_runner, mock_register, cli_runner, mock_registry
     ):
@@ -282,9 +290,9 @@ class TestCliCommands:
         # Should have called create_pipeline_runner
         mock_create_runner.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_limit(
         self, mock_asyncio, mock_create_runner, mock_register, cli_runner, mock_registry
     ):
@@ -305,9 +313,9 @@ class TestCliCommands:
         assert pipeline_name == "chembl_activity"
         assert options.limit == 100
 
-    @patch("bioetl.interfaces.cli.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_resume_flag(
         self, mock_asyncio, mock_create_runner, mock_register, cli_runner, mock_registry
     ):
@@ -336,8 +344,8 @@ class TestCliCommands:
 class TestMainEntryPoint:
     """Tests for main() entry point."""
 
-    @patch("bioetl.interfaces.cli.cli")
-    @patch("bioetl.interfaces.cli.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.main.cli")
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     def test_main_registers_pipelines(self, mock_register, mock_cli):
         """Test that main() registers all pipelines before CLI."""
         main()
@@ -345,8 +353,8 @@ class TestMainEntryPoint:
         mock_register.assert_called_once()
         mock_cli.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.cli")
-    @patch("bioetl.interfaces.cli.register_all_pipelines")
+    @patch("bioetl.interfaces.cli.main.cli")
+    @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     def test_main_calls_cli(self, mock_register, mock_cli):
         """Test that main() invokes CLI group."""
         main()
