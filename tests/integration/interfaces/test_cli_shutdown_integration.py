@@ -365,15 +365,20 @@ class TestShutdownWithCheckpointManager:
 
         from uuid import uuid4
 
-        manager = LockManager(
-            lock_port=mock_lock,
-            run_id=uuid4(),
+        from bioetl.application.core.config import LockConfig
+
+        lock_config = LockConfig(
             lock_key="test:lock",
             exclusive=False,
             lock_ttl=300,
             wait_for_lock=False,
             wait_timeout=10,
             heartbeat_interval=60,
+        )
+        manager = LockManager(
+            lock_port=mock_lock,
+            run_id=uuid4(),
+            config=lock_config,
             logger=mock_logger,
             shutdown_signal=shutdown_signal,
             checkpoint_manager=mock_checkpoint,
@@ -414,15 +419,20 @@ class TestShutdownWithCheckpointManager:
 
         from uuid import uuid4
 
-        manager = LockManager(
-            lock_port=mock_lock,
-            run_id=uuid4(),
+        from bioetl.application.core.config import LockConfig
+
+        lock_config = LockConfig(
             lock_key="test:lock",
             exclusive=False,
             lock_ttl=300,
             wait_for_lock=False,
             wait_timeout=10,
             heartbeat_interval=0,  # Immediate for testing
+        )
+        manager = LockManager(
+            lock_port=mock_lock,
+            run_id=uuid4(),
+            config=lock_config,
             logger=mock_logger,
             shutdown_signal=shutdown_signal,
             checkpoint_manager=None,
