@@ -151,6 +151,7 @@ markers = [
     "security: Security tests",
     "vcr: VCR.py recorded HTTP interactions",
     "performance: Performance regression tests (optional CI stage)",
+    "architecture: Architecture tests (layer boundaries, contracts)",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
