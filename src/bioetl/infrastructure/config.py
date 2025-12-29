@@ -34,6 +34,7 @@ from pydantic_settings import (
 from bioetl.domain.config import PipelineConfig
 from bioetl.domain.filter_config import GoldFilterConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 # =============================================================================
 # Configuration Defaults Support
@@ -142,6 +143,44 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
                 d[field_key] = field_value
 
         return d
+
+
+@lru_cache(maxsize=10)
+def load_source_config(provider: str) -> SourceYamlConfig:
+    """Load source configuration from YAML file.
+
+    Loads provider-specific source configuration from configs/sources/{provider}.yaml.
+    Results are cached for efficiency.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubmed', 'pubchem', 'uniprot')
+
+    Returns:
+        SourceYamlConfig: Validated source configuration with rate limits,
+            circuit breaker settings, and batch sizes.
+
+    Raises:
+        ValueError: If config file is missing or validation fails.
+
+    Example:
+        >>> config = load_source_config("chembl")
+        >>> config.rate_limit.requests_per_second
+        5.0
+        >>> config.circuit_breaker.failure_threshold
+        5
+    """
+    config_path = Path(f"configs/sources/{provider}.yaml")
+
+    if not config_path.exists():
+        raise ValueError(
+            f"Source configuration file not found: {config_path}. "
+            f"Create configs/sources/{provider}.yaml with rate_limit and circuit_breaker settings."
+        )
+
+    with open(config_path, encoding="utf-8") as f:
+        raw_config = yaml.safe_load(f) or {}
+
+    return SourceYamlConfig.model_validate(raw_config)
 
 
 @lru_cache(maxsize=10)
@@ -498,8 +537,10 @@ from bioetl.domain.config import RuntimeConfig  # noqa: E402
 __all__ = [
     "RuntimeConfig",
     "Settings",
+    "SourceYamlConfig",
     "get_pipeline_config",
     "get_settings",
     "load_pipeline_config",
+    "load_source_config",
     "yaml_config_to_domain",
 ]

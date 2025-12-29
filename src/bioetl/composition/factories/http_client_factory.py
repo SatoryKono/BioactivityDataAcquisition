@@ -1,7 +1,12 @@
 """Factory for creating HTTP clients with standard configurations.
 
 Ensures consistent rate limiting and circuit breaker settings across providers.
-Uses ProviderRegistry for unified configuration management.
+Uses source configuration from YAML files (configs/sources/*.yaml) for settings.
+
+Configuration Priority:
+1. Source YAML config (configs/sources/{provider}.yaml) - PRIMARY
+2. Settings API key overrides (for rate limit boost with API keys)
+3. ProviderRegistry defaults (fallback only)
 
 SRP Compliance:
 - Creates UnifiedHTTPClient with injected RateLimiterPort and CircuitBreakerPort
@@ -11,17 +16,21 @@ SRP Compliance:
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.config import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
+
+_logger = logging.getLogger(__name__)
 
 
 class HttpClientFactory:
@@ -88,7 +97,10 @@ class HttpClientFactory:
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
     ) -> UnifiedHTTPClient:
-        """Create HTTP client using ProviderRegistry configuration.
+        """Create HTTP client using source YAML configuration.
+
+        Configuration is loaded from configs/sources/{provider}.yaml.
+        Falls back to ProviderRegistry defaults if source config not found.
 
         Args:
             provider: Provider name
@@ -101,26 +113,41 @@ class HttpClientFactory:
         Returns:
             Configured UnifiedHTTPClient with observability
         """
-        http_config = ProviderRegistry.get_http_config(provider)
-
-        if http_config is None:
-            # Provider doesn't use shared HTTP client
-            # Return default client
-            return UnifiedHTTPClient(
-                rate_limiter=TokenBucket(rate=5.0, capacity=10),
-                circuit_breaker=CircuitBreaker(provider=provider, metrics=metrics),
-                provider=provider,
-                run_id=run_id,
-                tracer=tracer,
-                metrics=metrics,
-                logger=logger,
+        # Try to load source config from YAML (primary source)
+        source_config = None
+        try:
+            source_config = load_source_config(provider)
+        except ValueError:
+            _logger.debug(
+                "Source config not found for %s, using ProviderRegistry defaults",
+                provider,
             )
 
-        rate = http_config.rate
-        capacity = http_config.capacity
+        # Get rate limit and circuit breaker settings
+        if source_config is not None:
+            # Use source YAML config (primary)
+            rate = source_config.rate_limit.requests_per_second
+            capacity = source_config.rate_limit.burst
+            failure_threshold = source_config.circuit_breaker.failure_threshold
+            recovery_timeout = source_config.circuit_breaker.recovery_timeout
+        else:
+            # Fallback to ProviderRegistry
+            http_config = ProviderRegistry.get_http_config(provider)
+            if http_config is None:
+                # Provider doesn't use shared HTTP client - use safe defaults
+                rate = 5.0
+                capacity = 10
+                failure_threshold = 5
+                recovery_timeout = 300
+            else:
+                rate = http_config.rate
+                capacity = http_config.capacity
+                failure_threshold = 5  # Default
+                recovery_timeout = 300  # Default
 
-        # Apply rate overrides based on settings
-        if settings and http_config.rate_overrides:
+        # Apply rate overrides based on settings (API key boosts)
+        http_config = ProviderRegistry.get_http_config(provider)
+        if settings and http_config and http_config.rate_overrides:
             for setting_name, override_rate in http_config.rate_overrides.items():
                 if cls._check_setting(settings, setting_name):
                     rate = override_rate
@@ -128,8 +155,13 @@ class HttpClientFactory:
                     break
 
         return UnifiedHTTPClient(
-            rate_limiter=TokenBucket(rate=rate, capacity=capacity),
-            circuit_breaker=CircuitBreaker(provider=provider, metrics=metrics),
+            rate_limiter=TokenBucket(rate=rate, capacity=capacity, provider=provider),
+            circuit_breaker=CircuitBreaker(
+                provider=provider,
+                failure_threshold=failure_threshold,
+                recovery_timeout=recovery_timeout,
+                metrics=metrics,
+            ),
             provider=provider,
             run_id=run_id,
             tracer=tracer,
