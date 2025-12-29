@@ -34,6 +34,7 @@ from bioetl.application.services.shutdown_service import (
     ShutdownService,
 )
 from bioetl.application.services.vacuum_service import (
+    TableCollectorPort,
     TableVacuumResult,
     VacuumAllResult,
     VacuumService,
@@ -48,10 +49,14 @@ __all__ = [
     "LockInfo",
     "LockService",
     "MedallionLifecycleService",
+    "PipelineShutdownError",
     "PurgeResult",
     "QuarantineRecord",
     "QuarantineService",
     "ReplayResult",
+    "ShutdownReason",
+    "ShutdownService",
+    "TableCollectorPort",
     "TableVacuumResult",
     "VacuumAllResult",
     "VacuumService",
