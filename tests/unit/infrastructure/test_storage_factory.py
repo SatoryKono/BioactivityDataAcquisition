@@ -410,10 +410,9 @@ class TestStorageAdapterHealthCheck:
         self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
     ):
         """Test health check returns DEGRADED when some layers are not writable."""
-        from bioetl.domain.types import HealthStatus
+        from unittest.mock import patch
 
-        # Make gold path point to non-existent read-only path
-        mock_gold_writer.base_path = "/nonexistent/readonly/path"
+        from bioetl.domain.types import HealthStatus
 
         adapter = StorageAdapter(
             bronze_writer=mock_bronze_writer,
@@ -421,10 +420,19 @@ class TestStorageAdapterHealthCheck:
             gold_writer=mock_gold_writer,
         )
 
-        result = await adapter.health_check()
+        # Mock _check_directory_writable to return False for gold path
+        original_check = StorageAdapter._check_directory_writable
 
-        # Either DEGRADED (if bronze/silver work) or UNHEALTHY (if all fail)
-        assert result in (HealthStatus.DEGRADED, HealthStatus.UNHEALTHY)
+        def mock_check(path):
+            if "gold" in str(path):
+                return False
+            return original_check(path)
+
+        with patch.object(StorageAdapter, "_check_directory_writable", side_effect=mock_check):
+            result = await adapter.health_check()
+
+        # DEGRADED because gold layer is not writable but bronze/silver are
+        assert result == HealthStatus.DEGRADED
 
     def test_check_directory_writable_creates_probe_file(self, tmp_path):
         """Test _check_directory_writable creates and deletes probe file."""
