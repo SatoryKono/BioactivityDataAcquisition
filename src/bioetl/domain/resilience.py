@@ -25,7 +25,6 @@ class RetryPolicy:
         max_delay: Maximum delay in seconds (default: 60.0)
         multiplier: Delay multiplier per attempt (default: 2.0)
         jitter: Random jitter factor 0-1 (default: 0.1)
-        deterministic: Use hash-based jitter for reproducibility (default: True)
         jitter_seed: Seed for deterministic jitter (default: None)
 
     Example:
@@ -40,15 +39,14 @@ class RetryPolicy:
     max_delay: float = 60.0
     multiplier: float = 2.0
     jitter: float = 0.1
-    deterministic: bool = True
     jitter_seed: int | None = None
 
     def calculate_delay(self, attempt: int, url: str = "") -> float:
         """Calculate delay for given attempt number (0-indexed).
 
-        Uses exponential backoff with optional jitter.
-        When deterministic=True, jitter is calculated using MD5 hash
-        for cross-process reproducibility (ADR-014).
+        Uses exponential backoff with deterministic jitter.
+        Jitter is calculated using MD5 hash for cross-process
+        reproducibility (ADR-014).
 
         Args:
             attempt: Attempt number (0-indexed)
@@ -61,26 +59,13 @@ class RetryPolicy:
         delay = min(delay, self.max_delay)
 
         jitter_range = delay * self.jitter
-        if self.deterministic:
-            # MD5-based deterministic jitter for cross-process reproducibility (ADR-014)
-            # Note: hash() is not stable across Python processes due to PYTHONHASHSEED
-            hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
-            digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
-            jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
-            # Map 0.0-1.0 to -1.0 to +1.0
-            delay += jitter_range * (jitter_factor * 2 - 1)
-        else:
-            # Non-deterministic jitter (deprecated, use deterministic=True)
-            import random
-            import warnings
-
-            warnings.warn(
-                "Non-deterministic jitter is deprecated per ADR-014. "
-                "Use deterministic=True for reproducibility.",
-                DeprecationWarning,
-                stacklevel=3,
-            )
-            delay += random.uniform(-jitter_range, jitter_range)
+        # MD5-based deterministic jitter for cross-process reproducibility (ADR-014)
+        # Note: hash() is not stable across Python processes due to PYTHONHASHSEED
+        hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
+        digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+        jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
+        # Map 0.0-1.0 to -1.0 to +1.0
+        delay += jitter_range * (jitter_factor * 2 - 1)
 
         return max(0.0, delay)
 
