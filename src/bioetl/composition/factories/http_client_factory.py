@@ -1,33 +1,36 @@
 """Factory for creating HTTP clients with standard configurations.
 
 Ensures consistent rate limiting and circuit breaker settings across providers.
-Uses ProviderRegistry for unified configuration management.
+Uses source configuration from YAML files (configs/sources/*.yaml) for settings.
+
+Configuration Priority:
+1. Source YAML config (configs/sources/{provider}.yaml) - PRIMARY
+2. Settings API key overrides (for rate limit boost with API keys)
+3. ProviderRegistry defaults (fallback only)
 
 SRP Compliance:
 - Creates UnifiedHTTPClient with injected RateLimiterPort and CircuitBreakerPort
 - RetryPolicy is configured via domain value object
 - Observability components (tracer, metrics, logger) are injected for correlation
-
-Configuration Priority:
-1. Pipeline-specific config from YAML (source.rate_limit, source.circuit_breaker)
-2. Provider defaults from ProviderRegistry (HttpConfig)
-3. Fallback defaults (rate=5.0, capacity=10, failure_threshold=5, recovery_timeout=300)
 """
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.config import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+_logger = logging.getLogger(__name__)
 
 
 class HttpClientFactory:
@@ -43,7 +46,6 @@ class HttpClientFactory:
         provider: str,
         settings: Settings | None = None,
         *,
-        pipeline_config: PipelineYamlConfig | None = None,
         run_id: RunID | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
@@ -51,14 +53,11 @@ class HttpClientFactory:
     ) -> UnifiedHTTPClient:
         """Create a configured HTTP client for the given provider.
 
-        Uses pipeline_config for rate limits and circuit breaker settings,
-        falling back to ProviderRegistry defaults if not specified.
+        Uses ProviderRegistry for configuration lookup.
 
         Args:
             provider: Provider name (e.g., 'chembl', 'pubmed')
             settings: Optional settings to override defaults (e.g., API keys)
-            pipeline_config: Optional pipeline config with source-specific settings.
-                If provided, uses source.rate_limit and source.circuit_breaker.
             run_id: Optional run ID for correlation headers
             tracer: Optional TracingPort for distributed tracing
             metrics: Optional MetricsPort for metrics collection
@@ -81,7 +80,6 @@ class HttpClientFactory:
         return cls._create_from_registry(
             provider,
             settings,
-            pipeline_config=pipeline_config,
             run_id=run_id,
             tracer=tracer,
             metrics=metrics,
@@ -94,23 +92,19 @@ class HttpClientFactory:
         provider: str,
         settings: Settings | None,
         *,
-        pipeline_config: PipelineYamlConfig | None = None,
         run_id: RunID | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
     ) -> UnifiedHTTPClient:
-        """Create HTTP client using configuration from pipeline config and registry.
+        """Create HTTP client using source YAML configuration.
 
-        Configuration priority:
-        1. Pipeline-specific config (source.rate_limit, source.circuit_breaker)
-        2. Provider defaults from ProviderRegistry (HttpConfig)
-        3. Fallback defaults
+        Configuration is loaded from configs/sources/{provider}.yaml.
+        Falls back to ProviderRegistry defaults if source config not found.
 
         Args:
             provider: Provider name
             settings: Application settings
-            pipeline_config: Optional pipeline config with source-specific settings
             run_id: Optional run ID for correlation headers
             tracer: Optional TracingPort for distributed tracing
             metrics: Optional MetricsPort for metrics collection
@@ -119,30 +113,41 @@ class HttpClientFactory:
         Returns:
             Configured UnifiedHTTPClient with observability
         """
-        # Get circuit breaker settings from pipeline config or use defaults
-        failure_threshold = 5
-        recovery_timeout = 300
+        # Try to load source config from YAML (primary source)
+        source_config = None
+        try:
+            source_config = load_source_config(provider)
+        except ValueError:
+            _logger.debug(
+                "Source config not found for %s, using ProviderRegistry defaults",
+                provider,
+            )
 
-        if pipeline_config:
-            # Use source.circuit_breaker from configs/sources/*.yaml
-            source_cb = pipeline_config.source.circuit_breaker
-            failure_threshold = source_cb.failure_threshold
-            recovery_timeout = source_cb.recovery_timeout
+        # Get rate limit and circuit breaker settings
+        if source_config is not None:
+            # Use source YAML config (primary)
+            rate = source_config.rate_limit.requests_per_second
+            capacity = source_config.rate_limit.burst
+            failure_threshold = source_config.circuit_breaker.failure_threshold
+            recovery_timeout = source_config.circuit_breaker.recovery_timeout
+        else:
+            # Fallback to ProviderRegistry
+            http_config = ProviderRegistry.get_http_config(provider)
+            if http_config is None:
+                # Provider doesn't use shared HTTP client - use safe defaults
+                rate = 5.0
+                capacity = 10
+                failure_threshold = 5
+                recovery_timeout = 300
+            else:
+                rate = http_config.rate
+                capacity = http_config.capacity
+                failure_threshold = 5  # Default
+                recovery_timeout = 300  # Default
 
-        # Get rate limit settings
-        rate: float = 5.0
-        capacity: int = 10
-
-        if pipeline_config:
-            # Use source.rate_limit from configs/sources/*.yaml
-            source_rl = pipeline_config.source.rate_limit
-            rate = source_rl.requests_per_second
-            capacity = source_rl.burst
-
-        # Check ProviderRegistry for rate overrides based on settings (e.g., API key)
+        # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
-
-        if http_config is not None and settings and http_config.rate_overrides:
+        if settings and http_config and http_config.rate_overrides:
             for setting_name, override_rate in http_config.rate_overrides.items():
                 if cls._check_setting(settings, setting_name):
                     rate = override_rate
