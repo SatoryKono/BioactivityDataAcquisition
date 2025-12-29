@@ -300,6 +300,15 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             )
             raise  # Base class catches and returns _fallback_health_status()
 
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for UniProt.
+
+        Returns:
+            UniProt search endpoint used for health probe.
+
+        """
+        return "/uniprotkb/search"
+
     def __repr__(self) -> str:
         """Return string representation."""
         has_key = "with API key" if self.api_key else "without API key"

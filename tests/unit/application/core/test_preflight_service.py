@@ -70,6 +70,8 @@ def mock_services():
     services.storage = MagicMock()
     services.storage.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
     services.data_source = MagicMock()
+    # Remove check_health attribute to trigger legacy fallback in HealthAggregator
+    del services.data_source.check_health
     services.data_source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
     services.logger = MagicMock()
     services.logger.info = MagicMock()
@@ -219,6 +221,8 @@ class TestPreflightServiceValidation:
             return_value=HealthStatus.DEGRADED
         )
         degraded_services.data_source = MagicMock()
+        # Remove check_health to trigger legacy fallback
+        del degraded_services.data_source.check_health
         degraded_services.data_source.health_check = AsyncMock(
             return_value=HealthStatus.HEALTHY
         )

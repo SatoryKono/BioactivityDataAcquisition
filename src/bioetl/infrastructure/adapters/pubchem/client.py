@@ -322,6 +322,15 @@ class PubChemAdapter(BaseSyncAdapter):
             )
             raise  # Let base class handle via _fallback_health_status()
 
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for PubChem.
+
+        Returns:
+            PubChem compound query endpoint used for health probe.
+
+        """
+        return "/rest/pug/compound/cid/962/property/MolecularFormula/JSON"
+
     def __repr__(self) -> str:
         """Return string representation."""
         return f"PubChemAdapter(rate={self.rate_limiter.rate})"
