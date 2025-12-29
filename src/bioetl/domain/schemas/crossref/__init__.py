@@ -1,19 +1,8 @@
-"""CrossRef Pandera schemas for Silver layer validation.
+"""CrossRef Pandera schemas.
 
-Entity-Relationship:
-    CrossRefWork (1) ─┬── (N) CrossRefAuthor
-                      ├── (N) CrossRefReference
-                      └── (N) CrossRefFunder
+Contains validation schemas for CrossRef data entities.
 """
 
-from bioetl.domain.schemas.crossref.author import AuthorSchema
-from bioetl.domain.schemas.crossref.funder import FunderSchema
-from bioetl.domain.schemas.crossref.reference import ReferenceSchema
-from bioetl.domain.schemas.crossref.work import WorkSchema
+from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 
-__all__ = [
-    "AuthorSchema",
-    "FunderSchema",
-    "ReferenceSchema",
-    "WorkSchema",
-]
+__all__ = ["PublicationEnrichedSchema"]
