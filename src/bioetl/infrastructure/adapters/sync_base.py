@@ -137,20 +137,7 @@ class BaseSyncAdapter(DataSourcePort):
             return self._fallback_health_status()
 
     async def check_health(self) -> HealthCheckResult:
-        """Perform health check and return detailed result.
-
-        This method provides enhanced health check with latency tracking
-        and error details. It wraps the Template Method pattern used by
-        health_check() with additional metrics.
-
-        Returns:
-            HealthCheckResult with status, latency, and error details.
-
-        Note:
-            This method never raises exceptions. All errors are caught
-            and returned as UNHEALTHY status with error details.
-
-        """
+        """Perform health check with latency tracking. Never raises; returns UNHEALTHY on errors."""
         start_time = time.monotonic()
         last_error: str | None = None
         consecutive_failures = 0
