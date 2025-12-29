@@ -107,11 +107,24 @@ def _create_chembl_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create ChEMBL data source with optional CSV filtering."""
+    """Create ChEMBL data source with optional CSV filtering.
+
+    Uses rate_limit and circuit_breaker settings from pipeline_config.source
+    (loaded from configs/sources/chembl.yaml).
+    """
     DataSourceFactory, HttpClientFactory = _get_factories()
-    http_client = HttpClientFactory.create_for_provider("chembl", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "chembl",
+        settings,
+        pipeline_config=pipeline_config,
+    )
+    # Pass batch_size from config to adapter
+    batch_size = pipeline_config.source.batch_size
     base_adapter = DataSourceFactory.create(
-        "chembl", http_client=http_client, logger=logger
+        "chembl",
+        http_client=http_client,
+        logger=logger,
+        batch_size=batch_size,
     )
     return _wrap_with_filter(
         base_adapter, filter_config, logger, metrics, pipeline_name
@@ -184,14 +197,26 @@ def _create_pubchem_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create PubChem data source with optional CSV filtering."""
-    # Create adapter via custom creator with all dependencies injected
+    """Create PubChem data source with optional CSV filtering.
+
+    Uses rate_limit, circuit_breaker, and batch_size settings from
+    pipeline_config.source (loaded from configs/sources/pubchem.yaml).
+    """
+    # Get config values from source config
+    source_rl = pipeline_config.source.rate_limit
+    source_cb = pipeline_config.source.circuit_breaker
+
+    # Create adapter via custom creator with config-driven dependencies
     data_source = _create_pubchem_adapter(
         http_client=None,
         logger=logger,
         settings=settings,
-        rate=5.0,
+        rate=source_rl.requests_per_second,
+        capacity=source_rl.burst,
+        circuit_breaker_threshold=source_cb.failure_threshold,
+        circuit_breaker_timeout=source_cb.recovery_timeout,
         strict_error_handling=settings.strict_error_handling,
+        metrics=metrics,
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
@@ -204,9 +229,20 @@ def _create_uniprot_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create UniProt data source with optional CSV filtering."""
+    """Create UniProt data source with optional CSV filtering.
+
+    Uses rate_limit and circuit_breaker settings from pipeline_config.source
+    (loaded from configs/sources/uniprot.yaml).
+
+    Note: UniProtAdapter doesn't accept batch_size in constructor, it's handled
+    differently via page_size in API calls.
+    """
     DataSourceFactory, HttpClientFactory = _get_factories()
-    http_client = HttpClientFactory.create_for_provider("uniprot", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "uniprot",
+        settings,
+        pipeline_config=pipeline_config,
+    )
     data_source = DataSourceFactory.create(
         "uniprot",
         http_client=http_client,
@@ -225,9 +261,17 @@ def _create_pubmed_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create PubMed data source with optional CSV filtering."""
+    """Create PubMed data source with optional CSV filtering.
+
+    Uses rate_limit and circuit_breaker settings from pipeline_config.source
+    (loaded from configs/sources/pubmed.yaml).
+    """
     _, HttpClientFactory = _get_factories()
-    http_client = HttpClientFactory.create_for_provider("pubmed", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "pubmed",
+        settings,
+        pipeline_config=pipeline_config,
+    )
 
     # Determine API key: config takes precedence over settings
     configured_api_key = pipeline_config.source.api_key
@@ -238,11 +282,15 @@ def _create_pubmed_data_source(
 
     email = pipeline_config.source.email or settings.default_email
 
+    # Get batch_size from config
+    batch_size = pipeline_config.source.batch_size
+
     data_source = PubMedAdapter(
         http_client=http_client,
         logger=logger,
         email=email,
         api_key=api_key,
+        batch_size=batch_size,
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 

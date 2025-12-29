@@ -670,17 +670,37 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 ## 6.1. Детерминизм и Воспроизводимость
 
+> См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
+
 **Детерминизм** — это гарантия того, что при одинаковых входных данных (source data, config) пайплайн всегда произведет идентичные выходные данные и побочные эффекты.
 
 #### MUST (Обязательно)
 1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
 2. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion_ts`, `processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
-3. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL).
+3. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryPolicy.calculate_delay()` использует MD5-based jitter.
 4. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
+5. **Content Hash**: Исключать из расчёта хэша технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`. Реализация: `domain/transformations.py:META_FIELDS`.
 
-**Проверка**:
-- `tests/architecture/test_no_random_in_writers.py`
-- `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+#### Архитектурные Тесты Детерминизма
+
+| Тест | REQ | Проверка | Файл |
+|------|-----|----------|------|
+| `test_no_random_import_in_storage_writers` | REQ-ARCH-030 | Запрет `import random` | `test_no_random_in_writers.py` |
+| `test_no_random_uniform_calls_in_storage` | REQ-ARCH-030 | Запрет `random.uniform()` | `test_no_random_in_writers.py` |
+| `test_no_random_choice_calls_in_storage` | REQ-ARCH-030 | Запрет `random.choice()` | `test_no_random_in_writers.py` |
+| `test_no_datetime_now_in_infrastructure` | REQ-ARCH-031 | Запрет `datetime.now()` | `test_no_datetime_now_in_infrastructure.py` |
+| `test_allowed_files_still_exist` | REQ-ARCH-031 | Валидация исключений | `test_no_datetime_now_in_infrastructure.py` |
+
+#### Детерминистичный Retry Jitter
+
+```python
+# domain/resilience.py — MD5-based jitter для кросс-процессной стабильности
+hash_input = f"{attempt}:{url}:{seed}"
+digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
+```
+
+При `RetryPolicy(deterministic=False)` выдаётся `DeprecationWarning` — рекомендуется переход на детерминистичный режим.
  
 ## 7. Протокол Архитектурных Обзоров
 
