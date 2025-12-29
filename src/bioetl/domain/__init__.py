@@ -30,9 +30,11 @@ from bioetl.domain.context import (
 
 # Entities (Domain objects)
 from bioetl.domain.entities import (
+    VALID_TARGET_RELATIONSHIPS,
     Activity,
     Assay,
     BaseEntity,
+    CellLine,
     Compound,
     Document,
     Molecule,
@@ -41,6 +43,7 @@ from bioetl.domain.entities import (
     RequiredEntityFields,
     Target,
     TargetComponent,
+    TargetRelation,
     Work,
 )
 
@@ -186,6 +189,7 @@ __all__ = [
     "Activity",
     "Assay",
     "BaseEntity",
+    "CellLine",
     "Compound",
     "Document",
     "Molecule",
@@ -194,6 +198,8 @@ __all__ = [
     "RequiredEntityFields",
     "Target",
     "TargetComponent",
+    "TargetRelation",
+    "VALID_TARGET_RELATIONSHIPS",
     "Work",
     # Error classifier
     "ErrorClassifier",

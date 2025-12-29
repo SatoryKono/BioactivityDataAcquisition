@@ -34,6 +34,12 @@ from bioetl.application.pipelines.chembl.target_component import (
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
+from bioetl.application.pipelines.chembl.target_relation import (
+    ChEMBLTargetRelationPipeline,
+)
+from bioetl.application.pipelines.chembl.target_relation_transformer import (
+    TargetRelationTransformer,
+)
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 
 __all__ = [
@@ -48,8 +54,10 @@ __all__ = [
     "ChEMBLMoleculePipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "ChEMBLTargetRelationPipeline",
     "DocumentTransformer",
     "MoleculeTransformer",
     "TargetComponentTransformer",
+    "TargetRelationTransformer",
     "TargetTransformer",
 ]

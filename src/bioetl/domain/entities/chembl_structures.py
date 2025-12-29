@@ -1,6 +1,6 @@
 """ChEMBL structural domain entities.
 
-Contains Document, Target, TargetComponent, CellLine, and Molecule entities.
+Contains Document, Target, TargetComponent, TargetRelation, CellLine, and Molecule entities.
 """
 
 from __future__ import annotations
@@ -139,6 +139,65 @@ class TargetComponent(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.component_id:
             raise ValueError("Component ID is required")
+
+
+# Valid relationship types for TargetRelation
+VALID_TARGET_RELATIONSHIPS = frozenset({
+    "SUPERSET OF",
+    "SUBSET OF",
+    "OVERLAPS WITH",
+    "EQUIVALENT TO",
+})
+
+
+@dataclass(frozen=True, kw_only=True)
+class TargetRelation(BaseEntity):
+    """Represents a relationship between targets (ChEMBL Target Relation).
+
+    Target relations form a directed graph describing relationships between
+    biological targets (subtypes, variants, complexes).
+
+    Contains all fields from ChEMBL target_relation API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/target_relation
+
+    Entity ID Strategy: Composite Key (target_chembl_id, related_target_chembl_id, relationship)
+    """
+
+    # Primary identifiers (composite key)
+    target_chembl_id: str  # FK to target (child)
+    related_target_chembl_id: str  # FK to target (related)
+    relationship: str  # Relationship type
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        # Validate required fields
+        self._validate_required_fields()
+        # Validate relationship constraints
+        self._validate_relationship_constraints()
+
+    def _validate_required_fields(self) -> None:
+        """Validate required composite key fields."""
+        if not self.target_chembl_id:
+            raise ValueError("Target ChEMBL ID is required")
+        if not self.related_target_chembl_id:
+            raise ValueError("Related Target ChEMBL ID is required")
+        if not self.relationship:
+            raise ValueError("Relationship is required")
+
+    def _validate_relationship_constraints(self) -> None:
+        """Validate relationship-specific constraints."""
+        if self.target_chembl_id == self.related_target_chembl_id:
+            raise ValueError(
+                f"Target cannot have a relationship with itself: {self.target_chembl_id}"
+            )
+        if self.relationship not in VALID_TARGET_RELATIONSHIPS:
+            raise ValueError(
+                f"Invalid relationship type '{self.relationship}'. "
+                f"Valid types: {sorted(VALID_TARGET_RELATIONSHIPS)}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)

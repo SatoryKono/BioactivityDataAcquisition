@@ -342,6 +342,27 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Target Relation
+# See: https://www.ebi.ac.uk/chembl/api/data/target_relation
+# Entity ID Strategy: Composite Key (target_chembl_id, related_target_chembl_id, relationship)
+CHEMBL_TARGET_RELATION_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Composite key fields (all required)
+        pa.field("target_chembl_id", pa.string()),  # FK to target (child)
+        pa.field("related_target_chembl_id", pa.string()),  # FK to target (related)
+        pa.field("relationship", pa.string()),  # Relationship type
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for ChEMBL Document
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 CHEMBL_DOCUMENT_SCHEMA = pa.schema(

@@ -44,6 +44,12 @@ from bioetl.application.pipelines.chembl.target_component import (
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
+from bioetl.application.pipelines.chembl.target_relation import (
+    ChEMBLTargetRelationPipeline,
+)
+from bioetl.application.pipelines.chembl.target_relation_transformer import (
+    TargetRelationTransformer,
+)
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
@@ -60,6 +66,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTargetRelationGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     UniProtProteinGoldSchema,
@@ -70,6 +77,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_DOCUMENT_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
+    CHEMBL_TARGET_RELATION_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
@@ -131,6 +139,16 @@ chembl_target_component_factory = GenericPipelineFactory(
     silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
     gold_schema=ChEMBLTargetComponentGoldSchema,
     transformer_class=TargetComponentTransformer,
+)
+
+# ChEMBL Target Relation Pipeline
+chembl_target_relation_factory = GenericPipelineFactory(
+    pipeline_name="chembl_target_relation",
+    pipeline_class=ChEMBLTargetRelationPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_TARGET_RELATION_SCHEMA,
+    gold_schema=ChEMBLTargetRelationGoldSchema,
+    transformer_class=TargetRelationTransformer,
 )
 
 # ChEMBL Molecule Pipeline
@@ -229,6 +247,7 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     registry.register_factory(chembl_document_factory)
     registry.register_factory(chembl_target_factory)
     registry.register_factory(chembl_target_component_factory)
+    registry.register_factory(chembl_target_relation_factory)
     registry.register_factory(chembl_molecule_factory)
     registry.register_factory(pubchem_compound_factory)
     registry.register_factory(uniprot_protein_factory)
@@ -269,6 +288,7 @@ __all__ = [
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
+    "chembl_target_relation_factory",
     "is_registered",
     "pubchem_compound_factory",
     "pubmed_publications_factory",

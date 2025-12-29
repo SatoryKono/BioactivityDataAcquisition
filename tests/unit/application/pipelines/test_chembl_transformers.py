@@ -1,4 +1,4 @@
-"""Unit tests for ChEMBL transformers (Assay, Document, Molecule, Target)."""
+"""Unit tests for ChEMBL transformers (Assay, Document, Molecule, Target, TargetRelation)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,9 @@ from bioetl.application.pipelines.chembl.document_transformer import DocumentTra
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
+)
+from bioetl.application.pipelines.chembl.target_relation_transformer import (
+    TargetRelationTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.domain.context import PipelineContext
@@ -802,3 +805,203 @@ class TestTargetComponentTransformer:
         result_empty = await transformer.transform(mock_context, record_empty, index=0)
         assert result_empty is not None
         assert result_empty.get("protein_classification_ids") is None
+
+
+@pytest.mark.unit
+class TestTargetRelationTransformer:
+    """Tests for TargetRelationTransformer."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create TargetRelationTransformer instance."""
+        return TargetRelationTransformer(provider="chembl")
+
+    @pytest.mark.asyncio
+    async def test_transform_valid_record(self, transformer, mock_context):
+        """Test transformation of valid target relation record."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "SUPERSET OF",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_chembl_id"] == "CHEMBL1862"
+        assert result["related_target_chembl_id"] == "CHEMBL240"
+        assert result["relationship"] == "SUPERSET OF"
+        assert "entity_id" in result
+        assert "content_hash" in result
+        assert "_run_id" in result
+        # Verify entity_id format with composite key
+        assert result["entity_id"].startswith("chembl:")
+        assert "CHEMBL1862" in result["entity_id"]
+        assert "CHEMBL240" in result["entity_id"]
+
+    @pytest.mark.asyncio
+    async def test_transform_missing_target_chembl_id(self, transformer, mock_context):
+        """Test transformation returns None when target_chembl_id is missing."""
+        record = {
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "SUPERSET OF",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_missing_related_target_chembl_id(
+        self, transformer, mock_context
+    ):
+        """Test transformation returns None when related_target_chembl_id is missing."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "relationship": "SUPERSET OF",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_missing_relationship(self, transformer, mock_context):
+        """Test transformation returns None when relationship is missing."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_normalizes_relationship(self, transformer, mock_context):
+        """Test that relationship is normalized (stripped, uppercased)."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "  subset of  ",  # lowercase with whitespace
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["relationship"] == "SUBSET OF"
+
+    @pytest.mark.asyncio
+    async def test_transform_all_relationship_types(self, transformer, mock_context):
+        """Test transformation works for all valid relationship types."""
+        valid_relationships = [
+            "SUPERSET OF",
+            "SUBSET OF",
+            "OVERLAPS WITH",
+            "EQUIVALENT TO",
+        ]
+
+        for relationship in valid_relationships:
+            record = {
+                "target_chembl_id": "CHEMBL1862",
+                "related_target_chembl_id": "CHEMBL240",
+                "relationship": relationship,
+            }
+
+            result = await transformer.transform(mock_context, record, index=0)
+
+            assert result is not None, f"Failed for relationship: {relationship}"
+            assert result["relationship"] == relationship
+
+    @pytest.mark.asyncio
+    async def test_transform_invalid_relationship(self, transformer, mock_context):
+        """Test transformation returns None for invalid relationship type."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "INVALID RELATIONSHIP",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_self_reference_rejected(self, transformer, mock_context):
+        """Test transformation returns None when target references itself."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL1862",  # Same as target
+            "relationship": "EQUIVALENT TO",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_composite_entity_id_format(
+        self, transformer, mock_context
+    ):
+        """Test entity_id uses composite key format."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "SUPERSET OF",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        # Entity ID should be: chembl:CHEMBL1862_CHEMBL240_SUPERSET_OF
+        expected_entity_id = "chembl:CHEMBL1862_CHEMBL240_SUPERSET_OF"
+        assert result["entity_id"] == expected_entity_id
+
+    @pytest.mark.asyncio
+    async def test_transform_custom_provider(self, mock_context):
+        """Test transformation with custom provider."""
+        transformer = TargetRelationTransformer(provider="custom_provider")
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "SUBSET OF",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["entity_id"].startswith("custom_provider:")
+
+    @pytest.mark.asyncio
+    async def test_transform_strips_chembl_ids(self, transformer, mock_context):
+        """Test that ChEMBL IDs are stripped of whitespace."""
+        record = {
+            "target_chembl_id": "  CHEMBL1862  ",
+            "related_target_chembl_id": "  CHEMBL240  ",
+            "relationship": "SUPERSET OF",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["target_chembl_id"] == "CHEMBL1862"
+        assert result["related_target_chembl_id"] == "CHEMBL240"
+
+    @pytest.mark.asyncio
+    async def test_transform_content_hash_consistent(self, transformer, mock_context):
+        """Test that content hash is consistent for same data."""
+        record = {
+            "target_chembl_id": "CHEMBL1862",
+            "related_target_chembl_id": "CHEMBL240",
+            "relationship": "SUPERSET OF",
+        }
+
+        result1 = await transformer.transform(mock_context, record, index=0)
+        result2 = await transformer.transform(mock_context, record, index=1)
+
+        assert result1 is not None
+        assert result2 is not None
+        # Content hash should be the same for same data
+        assert result1["content_hash"] == result2["content_hash"]
+        # Entity ID should also be the same
+        assert result1["entity_id"] == result2["entity_id"]
