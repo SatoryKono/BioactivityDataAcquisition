@@ -176,7 +176,9 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort:
     return metrics
 
 
-def bootstrap_dq_monitor(settings: Settings) -> DQMonitorPort | None:
+def bootstrap_dq_monitor(
+    settings: Settings, logger: LoggerPort | None = None
+) -> DQMonitorPort | None:
     """Bootstrap data quality monitor for anomaly detection.
 
     Creates a DataQualityMonitor configured with settings from ObservabilitySettings.
@@ -184,6 +186,7 @@ def bootstrap_dq_monitor(settings: Settings) -> DQMonitorPort | None:
 
     Args:
         settings: Application settings.
+        logger: Optional logger for DQ monitor. If None, uses NoOpLogger.
 
     Returns:
         Configured DQMonitorPort or None if disabled.
@@ -194,8 +197,12 @@ def bootstrap_dq_monitor(settings: Settings) -> DQMonitorPort | None:
         return None
 
     from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    effective_logger = logger if logger is not None else NoOpLogger()
 
     monitor = DataQualityMonitor(
+        logger=effective_logger,
         baseline_window=obs_settings.dq_baseline_window,
         z_score_threshold=obs_settings.dq_z_score_threshold,
     )
@@ -248,7 +255,7 @@ def bootstrap_observability(
     logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
     tracer = bootstrap_tracer(settings)
     metrics = bootstrap_metrics(settings)
-    dq_monitor = bootstrap_dq_monitor(settings)
+    dq_monitor = bootstrap_dq_monitor(settings, logger)
 
     bundle = ObservabilityBundle(
         logger=logger,

@@ -34,7 +34,6 @@ Usage:
 
 from __future__ import annotations
 
-import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, cast
@@ -46,7 +45,7 @@ from deltalake import DeltaTable, write_deltalake
 if TYPE_CHECKING:
     from pathlib import Path
 
-logger = logging.getLogger(__name__)
+    from bioetl.domain.ports import LoggerPort
 
 
 @dataclass(frozen=True)
@@ -146,18 +145,21 @@ class LineageTracker:
         self,
         delta_path: str | Path,
         pipeline_name: str,
+        logger: LoggerPort,
     ) -> None:
         """Initialize lineage tracker.
 
         Args:
             delta_path: Base path for lineage Delta tables
             pipeline_name: Pipeline identifier
+            logger: Structured logger for observability (MUST be injected)
 
         """
         from pathlib import Path
 
         self.delta_path = Path(delta_path)
         self.pipeline_name = pipeline_name
+        self._logger = logger
 
         # Table paths
         self.batch_table_path = self.delta_path / "batch_lineage"
@@ -269,9 +271,9 @@ class LineageTracker:
                 mode="append",
                 schema_mode="merge",
             )
-            logger.debug(f"Recorded batch lineage: {batch.batch_id}")
+            self._logger.debug("Recorded batch lineage", batch_id=batch.batch_id)
         except Exception as e:
-            logger.error(f"Failed to write batch lineage: {e}")
+            self._logger.error("Failed to write batch lineage", error=str(e))
             raise
 
     def _write_transformation_lineage(self, lineage: LineageRecord) -> None:
@@ -294,9 +296,11 @@ class LineageTracker:
                 mode="append",
                 schema_mode="merge",
             )
-            logger.debug(f"Recorded transformation lineage: {lineage.lineage_id}")
+            self._logger.debug(
+                "Recorded transformation lineage", lineage_id=lineage.lineage_id
+            )
         except Exception as e:
-            logger.error(f"Failed to write transformation lineage: {e}")
+            self._logger.error("Failed to write transformation lineage", error=str(e))
             raise
 
     def query_batch_history(
@@ -335,7 +339,7 @@ class LineageTracker:
             return df.head(limit)
 
         except Exception as e:
-            logger.error(f"Failed to query batch history: {e}")
+            self._logger.error("Failed to query batch history", error=str(e))
             return pl.DataFrame()
 
     def query_transformation_history(
@@ -378,7 +382,7 @@ class LineageTracker:
             return df.head(limit)
 
         except Exception as e:
-            logger.error(f"Failed to query transformation history: {e}")
+            self._logger.error("Failed to query transformation history", error=str(e))
             return pl.DataFrame()
 
     def get_entity_lineage(
@@ -410,7 +414,7 @@ class LineageTracker:
             return df
 
         except Exception as e:
-            logger.error(f"Failed to get entity lineage: {e}")
+            self._logger.error("Failed to get entity lineage", error=str(e))
             return pl.DataFrame()
 
     def get_batch_statistics(
@@ -469,7 +473,7 @@ class LineageTracker:
             }
 
         except Exception as e:
-            logger.error(f"Failed to get batch statistics: {e}")
+            self._logger.error("Failed to get batch statistics", error=str(e))
             return {
                 "total_batches": 0,
                 "total_records": 0,

@@ -47,11 +47,14 @@ class StorageFactory:
     """Factory for creating configured StorageAdapters for local deployment."""
 
     @staticmethod
-    def _create_csv_exporter_from_config(csv_cfg: Any) -> CsvExporter | None:
+    def _create_csv_exporter_from_config(
+        csv_cfg: Any, logger: LoggerPort
+    ) -> CsvExporter | None:
         """Create a CsvExporter from configuration if enabled."""
         if csv_cfg and csv_cfg.enabled:
             return CsvExporter(
                 base_path=csv_cfg.path,
+                logger=logger,
                 delimiter=csv_cfg.delimiter,
                 header=csv_cfg.header,
                 encoding=csv_cfg.encoding,
@@ -165,10 +168,10 @@ class StorageFactory:
         )
 
         silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            silver_config.csv_export if silver_config else None
+            silver_config.csv_export if silver_config else None, logger
         )
         gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            gold_config.csv_export if gold_config else None
+            gold_config.csv_export if gold_config else None, logger
         )
 
         json_path = None
