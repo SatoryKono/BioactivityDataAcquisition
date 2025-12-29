@@ -428,7 +428,9 @@ class TestStorageAdapterHealthCheck:
                 return False
             return original_check(path)
 
-        with patch.object(StorageAdapter, "_check_directory_writable", side_effect=mock_check):
+        with patch.object(
+            StorageAdapter, "_check_directory_writable", side_effect=mock_check
+        ):
             result = await adapter.health_check()
 
         # DEGRADED because gold layer is not writable but bronze/silver are
@@ -536,9 +538,9 @@ class TestStorageAdapterPreviewCleanup:
     @pytest.fixture
     def adapter_with_temp_storage(self, temp_storage):
         """Create adapter with temp storage."""
+        from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
         from bioetl.infrastructure.storage.gold_writer import GoldWriter
-        from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
         bronze = MagicMock(spec=BronzeWriter)
         bronze.base_path = str(temp_storage / "bronze")
