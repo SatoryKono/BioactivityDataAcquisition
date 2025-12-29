@@ -1,6 +1,6 @@
 """ChEMBL structural domain entities.
 
-Contains Document, Target, TargetComponent, and Molecule entities.
+Contains Document, Target, TargetComponent, CellLine, and Molecule entities.
 """
 
 from __future__ import annotations
@@ -139,6 +139,51 @@ class TargetComponent(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.component_id:
             raise ValueError("Component ID is required")
+
+
+@dataclass(frozen=True, kw_only=True)
+class CellLine(BaseEntity):
+    """Represents a cell line (ChEMBL Cell Line).
+
+    Cell lines are biological objects used for in vitro experiments.
+    They have M:N relationship with Assay (via assay.cell_chembl_id FK).
+
+    Contains all fields from ChEMBL cell_line API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/cell_line
+    """
+
+    # Primary identifier (REQUIRED)
+    cell_chembl_id: str
+
+    # Core metadata (cell_name is REQUIRED per task spec)
+    cell_name: str
+
+    # Optional metadata (API-OPTIONAL)
+    cell_description: str | None = None
+
+    # Source information (API-OPTIONAL)
+    cell_source_tissue: str | None = None
+    cell_source_organism: str | None = None
+    cell_source_tax_id: int | None = None
+
+    # External identifiers (API-OPTIONAL)
+    cellosaurus_id: str | None = None
+    cl_lincs_id: str | None = None
+    efo_id: str | None = None
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.cell_chembl_id:
+            raise ValueError("Cell ChEMBL ID is required")
+        if not self.cell_name:
+            raise ValueError("Cell name is required")
+        if self.cell_source_tax_id is not None and self.cell_source_tax_id < 1:
+            raise ValueError(
+                f"cell_source_tax_id must be >= 1, got {self.cell_source_tax_id}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)
