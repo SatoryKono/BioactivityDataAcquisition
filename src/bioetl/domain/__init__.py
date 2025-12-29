@@ -129,7 +129,7 @@ from bioetl.domain.ports import (
 )
 
 # Resilience (domain value objects)
-from bioetl.domain.resilience import RetryPolicy
+from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
 
 # Pure domain transformations
 from bioetl.domain.transformations import (
@@ -269,6 +269,8 @@ __all__ = [
     "StoragePort",
     "TracingPort",
     # Resilience
+    "CircuitBreakerConfig",
+    "RetryConfig",
     "RetryPolicy",
     # Transformations (pure functions)
     "META_FIELDS",
