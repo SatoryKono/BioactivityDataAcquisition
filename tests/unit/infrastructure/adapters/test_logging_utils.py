@@ -15,7 +15,7 @@ class TestLogAdapterError:
     """Tests for log_adapter_error function."""
 
     def test_logs_with_standard_logger(self) -> None:
-        """log_adapter_error works with standard logging.Logger."""
+        """log_adapter_error works with standard logging.Logger (structlog-style kwargs)."""
         logger = logging.getLogger("test_logger")
         logger.error = MagicMock()
 
@@ -31,7 +31,8 @@ class TestLogAdapterError:
         call_args = logger.error.call_args
         assert call_args[0][0] == "chembl fetch failed"
         assert call_args[1]["exc_info"] is True
-        assert call_args[1]["extra"]["batch_id"] == "batch_001"
+        # Context passed as kwargs (structlog-style), not extra
+        assert call_args[1]["batch_id"] == "batch_001"
 
     def test_logs_with_structlog_logger(self) -> None:
         """log_adapter_error works with structlog-compatible logger."""
@@ -130,8 +131,8 @@ class TestLogAdapterError:
         call_args = mock_logger.error.call_args
         assert call_args[1]["optional_field"] is None
 
-    def test_standard_logger_uses_extra(self) -> None:
-        """Standard logging.Logger receives context via 'extra' kwarg."""
+    def test_standard_logger_receives_kwargs(self) -> None:
+        """Standard logging.Logger receives context as kwargs (structlog-style)."""
         logger = logging.getLogger("test_standard")
         logger.error = MagicMock()
 
@@ -143,8 +144,9 @@ class TestLogAdapterError:
         )
 
         call_args = logger.error.call_args
-        assert "extra" in call_args[1]
-        assert call_args[1]["extra"]["custom_field"] == "value"
+        # All context passed as kwargs (structlog-style), not wrapped in extra
+        assert call_args[1]["custom_field"] == "value"
+        assert call_args[1]["provider"] == "chembl"
 
     def test_structlog_logger_receives_context_as_kwargs(self) -> None:
         """Structlog-compatible logger receives context as **kwargs."""
