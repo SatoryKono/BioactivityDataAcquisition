@@ -319,3 +319,265 @@ class TestProviderHealthMonitorGetAllStates:
         assert "uniprot" in states
         assert "pubchem" in states
         assert len(states) == 3
+
+
+class TestAdjustedClientConfig:
+    """Tests for AdjustedClientConfig dataclass."""
+
+    def test_apply_timeout_multiplies(self) -> None:
+        """Test apply_timeout multiplies base timeout."""
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            AdjustedClientConfig,
+        )
+
+        config = AdjustedClientConfig(
+            timeout_multiplier=2.0,
+            batch_size_divisor=2,
+            status=HealthStatus.DEGRADED,
+        )
+
+        assert config.apply_timeout(30.0) == 60.0
+
+    def test_apply_batch_size_divides(self) -> None:
+        """Test apply_batch_size divides base batch size."""
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            AdjustedClientConfig,
+        )
+
+        config = AdjustedClientConfig(
+            timeout_multiplier=2.0,
+            batch_size_divisor=2,
+            status=HealthStatus.DEGRADED,
+        )
+
+        assert config.apply_batch_size(1000) == 500
+
+    def test_apply_batch_size_respects_minimum(self) -> None:
+        """Test apply_batch_size respects minimum value."""
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            AdjustedClientConfig,
+        )
+
+        config = AdjustedClientConfig(
+            timeout_multiplier=4.0,
+            batch_size_divisor=4,
+            status=HealthStatus.UNHEALTHY,
+        )
+
+        # 50 / 4 = 12, but minimum is 100
+        assert config.apply_batch_size(50, minimum=100) == 100
+
+
+class TestProviderHealthTracker:
+    """Tests for ProviderHealthTracker wrapper class."""
+
+    @pytest.fixture
+    def mock_logger(self) -> MagicMock:
+        """Create mock logger."""
+        return MagicMock()
+
+    @pytest.fixture
+    def tracker(
+        self, monitor: ProviderHealthMonitor, mock_logger: MagicMock
+    ) -> "ProviderHealthTracker":
+        """Create ProviderHealthTracker."""
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            ProviderHealthTracker,
+        )
+
+        return ProviderHealthTracker(
+            provider="chembl",
+            monitor=monitor,
+            logger=mock_logger,
+        )
+
+    def test_status_property(
+        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test status property returns current health status."""
+        assert tracker.status == HealthStatus.HEALTHY
+
+        monitor.record_error("chembl")
+        assert tracker.status == HealthStatus.DEGRADED
+
+    def test_consecutive_failures_property(
+        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test consecutive_failures property returns error count."""
+        assert tracker.consecutive_failures == 0
+
+        monitor.record_error("chembl")
+        assert tracker.consecutive_failures == 1
+
+        monitor.record_error("chembl")
+        assert tracker.consecutive_failures == 2
+
+    def test_is_healthy_method(self, tracker: "ProviderHealthTracker") -> None:
+        """Test is_healthy returns True when HEALTHY."""
+        assert tracker.is_healthy() is True
+
+    def test_is_unhealthy_method(
+        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test is_unhealthy returns True when UNHEALTHY."""
+        assert tracker.is_unhealthy() is False
+
+        # Trigger UNHEALTHY
+        monitor.record_error("chembl")
+        monitor.record_error("chembl")
+        monitor.record_error("chembl")
+
+        assert tracker.is_unhealthy() is True
+
+    def test_should_pause_pipeline(
+        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test should_pause_pipeline returns True when UNHEALTHY."""
+        assert tracker.should_pause_pipeline() is False
+
+        # Trigger UNHEALTHY
+        for _ in range(3):
+            monitor.record_error("chembl")
+
+        assert tracker.should_pause_pipeline() is True
+
+    def test_record_success_delegates(
+        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test record_success delegates to monitor."""
+        monitor.record_error("chembl")  # DEGRADED
+
+        status = tracker.record_success()
+
+        # Should recover from DEGRADED if clear window passed
+        assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)
+
+    def test_record_error_delegates(
+        self, tracker: "ProviderHealthTracker"
+    ) -> None:
+        """Test record_error delegates to monitor."""
+        status = tracker.record_error()
+
+        assert status == HealthStatus.DEGRADED
+
+    def test_get_adjusted_config(
+        self, tracker: "ProviderHealthTracker", monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test get_adjusted_config returns proper config."""
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            AdjustedClientConfig,
+        )
+
+        config = tracker.get_adjusted_config()
+
+        assert isinstance(config, AdjustedClientConfig)
+        assert config.timeout_multiplier == 1.0
+        assert config.batch_size_divisor == 1
+        assert config.status == HealthStatus.HEALTHY
+
+
+class TestProviderHealthMonitorUpdateFromResult:
+    """Tests for update_from_health_check_result method."""
+
+    def test_updates_state_from_result(
+        self, monitor: ProviderHealthMonitor, mock_metrics: MagicMock
+    ) -> None:
+        """Test update_from_health_check_result updates state."""
+        from bioetl.domain.ports.health_check import HealthCheckResult
+
+        result = HealthCheckResult(
+            status=HealthStatus.UNHEALTHY,
+            latency_ms=100.0,
+            provider="chembl",
+            endpoint="/status.json",
+            last_error="Connection timeout",
+            consecutive_failures=3,
+        )
+
+        status = monitor.update_from_health_check_result(result)
+
+        assert status == HealthStatus.UNHEALTHY
+
+    def test_emits_latency_metric(
+        self, monitor: ProviderHealthMonitor, mock_metrics: MagicMock
+    ) -> None:
+        """Test update_from_health_check_result emits latency metric."""
+        from bioetl.domain.ports.health_check import HealthCheckResult
+
+        result = HealthCheckResult(
+            status=HealthStatus.HEALTHY,
+            latency_ms=45.5,
+            provider="chembl",
+            endpoint="/status.json",
+        )
+
+        monitor.update_from_health_check_result(result)
+
+        # Should have called observe_histogram for latency
+        mock_metrics.observe_histogram.assert_called_with(
+            "health_check_latency_ms",
+            45.5,
+            labels={"provider": "chembl"},
+        )
+
+    def test_logs_p2_alert_on_unhealthy(
+        self, monitor: ProviderHealthMonitor
+    ) -> None:
+        """Test P2 alert is logged when status becomes UNHEALTHY."""
+        from bioetl.domain.ports.health_check import HealthCheckResult
+
+        mock_logger = MagicMock()
+        result = HealthCheckResult(
+            status=HealthStatus.UNHEALTHY,
+            latency_ms=100.0,
+            provider="chembl",
+            endpoint="/status.json",
+            last_error="API unavailable",
+            consecutive_failures=5,
+        )
+
+        monitor.update_from_health_check_result(result, logger=mock_logger)
+
+        mock_logger.error.assert_called_once()
+        call_args = mock_logger.error.call_args
+        assert call_args[0][0] == "provider_unhealthy_alert"
+        assert call_args[1]["alert_priority"] == "P2"
+        assert call_args[1]["provider"] == "chembl"
+
+
+class TestGetAdjustedConfig:
+    """Tests for get_adjusted_config method."""
+
+    def test_healthy_config(self, monitor: ProviderHealthMonitor) -> None:
+        """Test get_adjusted_config returns normal config when HEALTHY."""
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            AdjustedClientConfig,
+        )
+
+        config = monitor.get_adjusted_config("chembl")
+
+        assert isinstance(config, AdjustedClientConfig)
+        assert config.timeout_multiplier == 1.0
+        assert config.batch_size_divisor == 1
+        assert config.status == HealthStatus.HEALTHY
+
+    def test_degraded_config(self, monitor: ProviderHealthMonitor) -> None:
+        """Test get_adjusted_config returns degraded config."""
+        monitor.record_error("chembl")
+
+        config = monitor.get_adjusted_config("chembl")
+
+        assert config.timeout_multiplier == 2.0
+        assert config.batch_size_divisor == 2
+        assert config.status == HealthStatus.DEGRADED
+
+    def test_unhealthy_config(self, monitor: ProviderHealthMonitor) -> None:
+        """Test get_adjusted_config returns aggressive config when UNHEALTHY."""
+        for _ in range(3):
+            monitor.record_error("chembl")
+
+        config = monitor.get_adjusted_config("chembl")
+
+        assert config.timeout_multiplier == 4.0
+        assert config.batch_size_divisor == 4
+        assert config.status == HealthStatus.UNHEALTHY
