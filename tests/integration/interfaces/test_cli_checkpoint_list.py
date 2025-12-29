@@ -54,7 +54,7 @@ class TestCliCheckpointList:
         mock_manager.list_all = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.get_checkpoint_manager",
+            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -81,7 +81,7 @@ class TestCliCheckpointList:
         mock_manager.list_all = AsyncMock(return_value=sample_checkpoints)
 
         with patch(
-            "bioetl.interfaces.cli.get_checkpoint_manager",
+            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -107,7 +107,7 @@ class TestCliCheckpointList:
         mock_manager.list_all = AsyncMock(return_value=sample_checkpoints)
 
         with patch(
-            "bioetl.interfaces.cli.get_checkpoint_manager",
+            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -236,7 +236,7 @@ class TestCliCheckpointIntegration:
         mock_manager.list_all = AsyncMock(return_value=["test_pipeline"])
 
         with patch(
-            "bioetl.interfaces.cli.get_checkpoint_manager",
+            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager",
             return_value=mock_manager,
         ) as mock_bootstrap:
             result = cli_runner.invoke(

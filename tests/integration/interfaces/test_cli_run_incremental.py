@@ -80,7 +80,7 @@ class TestCliRunIncremental:
         mock_runner.shutdown_signal = None
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -103,7 +103,7 @@ class TestCliRunIncremental:
         mock_runner.shutdown_signal = None
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(
@@ -192,7 +192,7 @@ class TestCliRunTypes:
         mock_runner.shutdown_signal = None
 
         with patch(
-            "bioetl.interfaces.cli.create_pipeline_runner",
+            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = cli_runner.invoke(

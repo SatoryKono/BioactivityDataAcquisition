@@ -34,23 +34,26 @@ from bioetl.application.services.quarantine_service import (
     QuarantineService,
     ReplayResult,
 )
+from bioetl.application.services.vacuum_service import (
+    TableVacuumResult,
+    VacuumAllResult,
+    VacuumService,
+)
 
 __all__ = [
-    # Medallion lifecycle
-    "ClearResult",
-    "MedallionLifecycleService",
-    # Checkpoint service
+    "BronzeCleanupService",
     "CheckpointInfo",
     "CheckpointService",
-    # Quarantine service
+    "CleanupResult",
+    "ClearResult",
+    "LockInfo",
+    "LockService",
+    "MedallionLifecycleService",
     "PurgeResult",
     "QuarantineRecord",
     "QuarantineService",
     "ReplayResult",
-    # Lock service
-    "LockInfo",
-    "LockService",
-    # Bronze cleanup service
-    "BronzeCleanupService",
-    "CleanupResult",
+    "TableVacuumResult",
+    "VacuumAllResult",
+    "VacuumService",
 ]
