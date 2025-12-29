@@ -187,6 +187,7 @@ __all__ = [
     "Activity",
     "Assay",
     "BaseEntity",
+    "CellLine",
     "Compound",
     "Document",
     "Molecule",
