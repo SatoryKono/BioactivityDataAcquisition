@@ -19,6 +19,7 @@ from bioetl.composition._bootstrap.checkpoint import (
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
 )
+from bioetl.composition._bootstrap.lock import bootstrap_lock_service
 from bioetl.composition._bootstrap.observability import (
     bootstrap_dq_monitor,
     bootstrap_logger,
@@ -43,6 +44,7 @@ __all__ = [
     "bootstrap_cleanup",
     "bootstrap_dq_monitor",
     "bootstrap_lifecycle_service",
+    "bootstrap_lock_service",
     "bootstrap_logger",
     "bootstrap_metrics",
     "bootstrap_observability",
