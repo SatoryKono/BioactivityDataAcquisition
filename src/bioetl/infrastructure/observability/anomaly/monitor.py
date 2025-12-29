@@ -35,7 +35,12 @@ class DataQualityMonitor:
             "error_rate": 0.15,
         })
         for issue in issues:
-            print(issue)
+            logger.warning(
+                "Data quality issue detected",
+                stage="validate",
+                anomaly_metric=issue.metric_name,
+                severity=issue.severity.value,
+            )
     """
 
     def __init__(
