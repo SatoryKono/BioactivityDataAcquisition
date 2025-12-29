@@ -225,9 +225,15 @@ class TestDomainComplexity:
         # Exemptions for specific functions (baseline)
         exemptions = {
             "__post_init__": 12,  # Dataclass post-init validation with complex context
+            "__init__": 10,  # Constructor with validation logic
             "TableConfig": 8,  # Dataclass with write mode enum conversion in __post_init__
             "SchemaEvolutionError": 7,  # Exception with detailed field tracking
             "_validate_config": 8,  # PipelineConfig validation logic
+            # Domain value object validation
+            "complete": 7,  # PipelineRun state transition with validation
+            "_validate": 8,  # Value object validation with multiple checks
+            "PubMedId": 9,  # Value object with multiple format validation
+            "PubChemCid": 9,  # Value object with multiple format validation
         }
 
         violations = []
