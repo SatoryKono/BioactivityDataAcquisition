@@ -33,12 +33,26 @@ from bioetl.application.services.shutdown_service import (
     ShutdownReason,
     ShutdownService,
 )
+from bioetl.application.services.vacuum_service import (
+    TableVacuumResult,
+    VacuumAllResult,
+    VacuumService,
+)
 
 __all__ = [
-    # Medallion lifecycle
+    "BronzeCleanupService",
+    "CheckpointInfo",
+    "CheckpointService",
+    "CleanupResult",
     "ClearResult",
+    "LockInfo",
+    "LockService",
     "MedallionLifecycleService",
-    "PipelineShutdownError",
-    "ShutdownReason",
-    "ShutdownService",
+    "PurgeResult",
+    "QuarantineRecord",
+    "QuarantineService",
+    "ReplayResult",
+    "TableVacuumResult",
+    "VacuumAllResult",
+    "VacuumService",
 ]

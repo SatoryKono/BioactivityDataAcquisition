@@ -27,7 +27,7 @@ def runner():
 class TestCheckpointCommands:
     """Tests for checkpoint CLI commands."""
 
-    @patch("bioetl.interfaces.cli.get_checkpoint_manager")
+    @patch("bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager")
     def test_checkpoint_list_command(self, mock_get_checkpoint_manager, runner):
         """Test that checkpoint list command works."""
         mock_checkpoint_manager = AsyncMock()
@@ -44,7 +44,7 @@ class TestCheckpointCommands:
 class TestQuarantineCommands:
     """Tests for quarantine CLI commands."""
 
-    @patch("bioetl.interfaces.cli.get_quarantine_manager")
+    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager")
     def test_quarantine_inspect_command(self, mock_get_quarantine_manager, runner):
         """Test that quarantine inspect command works."""
         mock_quarantine_manager = AsyncMock()
@@ -62,7 +62,7 @@ class TestQuarantineCommands:
         assert "Inspecting quarantine for test_pipeline" in result.output
         assert "ERR01" in result.output
 
-    @patch("bioetl.interfaces.cli.get_quarantine_manager")
+    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager")
     def test_quarantine_inspect_empty_command(
         self, mock_get_quarantine_manager, runner
     ):
@@ -83,9 +83,9 @@ class TestQuarantineCommands:
 class TestRunCommand:
     """Tests for the run CLI command."""
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_success(
         self,
         mock_asyncio_run,
@@ -108,9 +108,9 @@ class TestRunCommand:
         mock_create_runner.assert_called_once()
         mock_asyncio_run.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_with_options(
         self,
         mock_asyncio_run,
@@ -151,9 +151,9 @@ class TestRunCommand:
         assert options.resume is True
         assert options.limit == 1000
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_shutdown_error(
         self,
         mock_asyncio_run,
@@ -177,9 +177,9 @@ class TestRunCommand:
 
         assert result.exit_code == 130  # Shutdown exit code
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_exception(
         self,
         mock_asyncio_run,
@@ -205,7 +205,7 @@ class TestRunCommand:
 class TestMainFunction:
     """Tests for main entry point."""
 
-    @patch("bioetl.interfaces.cli.cli")
+    @patch("bioetl.interfaces.cli.main.cli")
     def test_main_calls_cli(self, mock_cli):
         """Test main function calls cli()."""
         main()
@@ -264,7 +264,7 @@ class TestPipelineValidation:
 class TestRunCommandAdvanced:
     """Advanced tests for run command edge cases."""
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_value_error(self, mock_create_runner, runner):
         """Test run command handles ValueError during bootstrap."""
         mock_create_runner.side_effect = ValueError("Invalid config")
@@ -274,7 +274,7 @@ class TestRunCommandAdvanced:
         assert result.exit_code == 1
         assert "Configuration error" in result.output
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_file_not_found(self, mock_create_runner, runner):
         """Test run command handles FileNotFoundError during bootstrap."""
         mock_create_runner.side_effect = FileNotFoundError("Config not found")
@@ -284,7 +284,7 @@ class TestRunCommandAdvanced:
         assert result.exit_code == 1
         assert "Configuration error" in result.output
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_generic_error(self, mock_create_runner, runner):
         """Test run command handles generic Exception during bootstrap."""
         mock_create_runner.side_effect = RuntimeError("Unexpected error")
@@ -294,9 +294,9 @@ class TestRunCommandAdvanced:
         assert result.exit_code == 1
         assert "Initialization failed" in result.output
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_with_filter_options(
         self,
         mock_asyncio_run,
@@ -341,7 +341,7 @@ class TestRunCommandAdvanced:
         assert options.filter_column == "id"
         assert options.filter_field == "molecule_chembl_id"
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_missing_logger(self, mock_create_runner, runner):
         """Test run command handles missing logger gracefully."""
         mock_runner_instance = MagicMock(spec=[])  # Empty spec, no logger attribute
@@ -356,7 +356,7 @@ class TestRunCommandAdvanced:
 class TestDryRunMode:
     """Tests for dry-run mode and _preview_cleanup function."""
 
-    @patch("bioetl.interfaces.cli.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
     def test_dry_run_shows_preview(
         self,
         mock_preview_cleanup,
@@ -389,7 +389,7 @@ class TestDryRunMode:
         assert "Total items that would be cleared: ~5" in result.output
         assert "No changes were made" in result.output
 
-    @patch("bioetl.interfaces.cli.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
     def test_dry_run_counts_existing_files(
         self,
         mock_preview_cleanup,
@@ -417,7 +417,7 @@ class TestDryRunMode:
         assert result.exit_code == 0
         assert "2 files" in result.output
 
-    @patch("bioetl.interfaces.cli.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
     def test_dry_run_preview_exception(
         self,
         mock_preview_cleanup,
@@ -441,7 +441,7 @@ class TestDryRunMode:
         assert result.exit_code == 0  # Should catch exception and print error
         assert "Error previewing cleanup" in result.output
 
-    @patch("bioetl.interfaces.cli.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
     def test_dry_run_preview_variations(
         self,
         mock_preview_cleanup,
@@ -482,9 +482,9 @@ class TestDryRunMode:
         assert result.exit_code == 0
         assert "cancelled" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
+    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_rebuild_with_yes_skips_confirmation(
         self,
         mock_asyncio_run,
