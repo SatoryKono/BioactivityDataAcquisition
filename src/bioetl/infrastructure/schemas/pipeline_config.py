@@ -2,11 +2,16 @@
 
 Implements strict validation for pipeline YAML configurations using Pydantic.
 Enforces Medallion Architecture constraints and operational limits.
+
+Consolidation Pattern:
+Each Pydantic model has a `to_domain()` method that converts to the corresponding
+domain dataclass. This eliminates duplicate conversion logic and provides a clean
+boundary between infrastructure (YAML parsing) and domain (business logic).
 """
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import (
     AliasChoices,
@@ -18,10 +23,19 @@ from pydantic import (
 )
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
+from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
+from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+
+if TYPE_CHECKING:
+    from bioetl.domain.filtering.input_config import (
+        InputFilterConfig as DomainInputFilterConfig,
+    )
 
 
 class DQConfig(BaseModel):
     """Data Quality configuration.
+
+    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
 
     Attributes:
         soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
@@ -47,12 +61,38 @@ class DQConfig(BaseModel):
         )
         return self
 
+    def to_domain(self) -> DomainDQConfig:
+        """Convert to domain DQConfig dataclass.
+
+        Returns:
+            DomainDQConfig: Immutable domain configuration.
+        """
+        return DomainDQConfig(
+            soft_fail_threshold=self.soft_fail_threshold,
+            hard_fail_threshold=self.hard_fail_threshold,
+            strict_validation=self.strict_validation,
+        )
+
 
 class CircuitBreakerConfig(BaseModel):
-    """Circuit Breaker configuration."""
+    """Circuit Breaker configuration.
+
+    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    """
 
     failure_threshold: int = Field(default=5, ge=1)
     recovery_timeout: int = Field(default=300, ge=60)
+
+    def to_domain(self) -> DomainCircuitBreakerConfig:
+        """Convert to domain CircuitBreakerConfig dataclass.
+
+        Returns:
+            DomainCircuitBreakerConfig: Immutable domain configuration.
+        """
+        return DomainCircuitBreakerConfig(
+            failure_threshold=self.failure_threshold,
+            recovery_timeout=self.recovery_timeout,
+        )
 
 
 class CsvExportConfig(BaseModel):
@@ -66,7 +106,10 @@ class CsvExportConfig(BaseModel):
 
 
 class InputFilterConfig(BaseModel):
-    """Configuration for input ID filtering from CSV."""
+    """Configuration for input ID filtering from CSV.
+
+    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    """
 
     enabled: bool = False
     source_path: str | None = Field(
@@ -87,6 +130,24 @@ class InputFilterConfig(BaseModel):
         le=1000,
         description="Number of IDs per API request",
     )
+
+    def to_domain(self) -> DomainInputFilterConfig:
+        """Convert to domain InputFilterConfig dataclass.
+
+        Returns:
+            DomainInputFilterConfig: Immutable domain configuration.
+        """
+        from bioetl.domain.filtering.input_config import (
+            InputFilterConfig as DomainInputFilterConfigImpl,
+        )
+
+        return DomainInputFilterConfigImpl(
+            enabled=self.enabled,
+            source_path=self.source_path,
+            column_name=self.column_name if self.enabled else None,
+            filter_field=self.filter_field if self.enabled else None,
+            batch_size=self.batch_size,
+        )
 
 
 class MaintenanceConfig(BaseModel):
@@ -112,11 +173,28 @@ class MaintenanceConfig(BaseModel):
 
 
 class ApiConfig(BaseModel):
-    """Configuration for API connection details."""
+    """Configuration for API connection details.
+
+    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    """
 
     base_url: str | None = None
     rate_limit: float | None = None
     timeout: int | None = None
+
+    def to_domain(self) -> BaseClientConfig:
+        """Convert to domain BaseClientConfig dataclass.
+
+        Returns:
+            BaseClientConfig: Immutable domain configuration.
+        """
+        return BaseClientConfig(
+            base_url=self.base_url,
+            timeout=self.timeout or 30,
+            rate_limit=RateLimitConfig(
+                requests_per_second=self.rate_limit or 5.0,
+            ),
+        )
 
 
 class SourceConfig(BaseModel):

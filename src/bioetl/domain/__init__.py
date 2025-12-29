@@ -22,6 +22,13 @@ from bioetl.domain.config import (
     TableConfig,
 )
 
+# Base configuration classes (consolidated DTOs per RULES.md §12.1.6)
+from bioetl.domain.configs import (
+    BaseClientConfig,
+    BaseProviderConfig,
+    RateLimitConfig,
+)
+
 # Context objects
 from bioetl.domain.context import (
     PipelineContext,
@@ -213,6 +220,10 @@ __all__ = [
     "PipelineConfig",
     "RuntimeConfig",
     "TableConfig",
+    # Base configuration classes (consolidated DTOs)
+    "BaseClientConfig",
+    "BaseProviderConfig",
+    "RateLimitConfig",
     # Context
     "PipelineContext",
     "PipelineRunContext",
