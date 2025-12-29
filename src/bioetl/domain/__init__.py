@@ -193,6 +193,20 @@ from bioetl.domain.types import (
     ValidationResult,
 )
 
+# Value Objects
+from bioetl.domain.value_objects import (
+    DOI,
+    ActivityType,
+    ChemblId,
+    Concentration,
+    ConcentrationUnit,
+    PChemblValue,
+    PubChemCid,
+    PubMedId,
+    UniProtId,
+    ValueObject,
+)
+
 __all__ = [
     # Configuration
     "DQConfig",
@@ -346,4 +360,15 @@ __all__ = [
     "RunType",
     "SilverRecord",
     "ValidationResult",
+    # Value Objects
+    "ActivityType",
+    "ChemblId",
+    "Concentration",
+    "ConcentrationUnit",
+    "DOI",
+    "PChemblValue",
+    "PubChemCid",
+    "PubMedId",
+    "UniProtId",
+    "ValueObject",
 ]
