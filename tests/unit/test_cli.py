@@ -356,7 +356,7 @@ class TestRunCommandAdvanced:
 class TestDryRunMode:
     """Tests for dry-run mode and _preview_cleanup function."""
 
-    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run_helpers.preview_cleanup")
     def test_dry_run_shows_preview(
         self,
         mock_preview_cleanup,
@@ -389,7 +389,7 @@ class TestDryRunMode:
         assert "Total items that would be cleared: ~5" in result.output
         assert "No changes were made" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run_helpers.preview_cleanup")
     def test_dry_run_counts_existing_files(
         self,
         mock_preview_cleanup,
@@ -417,7 +417,7 @@ class TestDryRunMode:
         assert result.exit_code == 0
         assert "2 files" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run_helpers.preview_cleanup")
     def test_dry_run_preview_exception(
         self,
         mock_preview_cleanup,
@@ -441,7 +441,7 @@ class TestDryRunMode:
         assert result.exit_code == 0  # Should catch exception and print error
         assert "Error previewing cleanup" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run.preview_cleanup")
+    @patch("bioetl.interfaces.cli.commands.run_helpers.preview_cleanup")
     def test_dry_run_preview_variations(
         self,
         mock_preview_cleanup,

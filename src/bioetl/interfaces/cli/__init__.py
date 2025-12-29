@@ -22,8 +22,8 @@ from __future__ import annotations
 from bioetl.interfaces.cli.commands.run import (
     _get_runner_logger,
     _handle_destructive_run_confirmation,
-    validate_pipeline_name,
 )
+from bioetl.interfaces.cli.commands.run_helpers import validate_pipeline_name
 from bioetl.interfaces.cli.main import cli, main
 
 __all__ = [

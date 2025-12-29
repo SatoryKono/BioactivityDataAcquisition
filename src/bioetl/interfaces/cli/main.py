@@ -11,6 +11,8 @@ import click
 from bioetl import __version__
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
+from bioetl.interfaces.cli.commands.config import config
+from bioetl.interfaces.cli.commands.lock import lock
 from bioetl.interfaces.cli.commands.maintenance import maintenance
 from bioetl.interfaces.cli.commands.quarantine import quarantine
 from bioetl.interfaces.cli.commands.run import run
@@ -27,6 +29,8 @@ def cli() -> None:
 cli.add_command(run)
 cli.add_command(quarantine)
 cli.add_command(checkpoint)
+cli.add_command(config)
+cli.add_command(lock)
 cli.add_command(maintenance)
 
 
