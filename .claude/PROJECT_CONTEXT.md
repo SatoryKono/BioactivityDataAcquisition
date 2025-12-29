@@ -1,7 +1,7 @@
 # BioETL: Контекст Проекта для Claude
 
-*Синхронизировано с CLAUDE.md и RULES.md v5.4*
-*Последнее обновление: 2025-12-26*
+*Синхронизировано с CLAUDE.md и RULES.md v5.8*
+*Последнее обновление: 2025-12-29*
 
 ---
 
@@ -29,11 +29,28 @@ make run-local        # Запуск на фикстурах
 
 ```
 src/bioetl/
-├── domain/          # Чистая логика, Protocols (Ports). БЕЗ I/O.
-├── application/     # Пайплайны, Use Cases, оркестрация
-├── composition/     # Composition Root (DI-контейнер, factories, bootstrap)
-├── infrastructure/  # Адаптеры (HTTP, локальное хранилище), реализация портов
-└── interfaces/      # CLI, PipelineRunner
+├── domain/           # Чистая логика (DDD), Protocols (Ports). БЕЗ I/O.
+│   ├── ports/        # Protocol интерфейсы
+│   ├── aggregates/   # DDD агрегаты с инвариантами
+│   ├── value_objects/ # Неизменяемые доменные примитивы
+│   ├── entities/     # Доменные сущности по провайдерам
+│   ├── schemas/      # Pydantic/Pandera схемы валидации
+│   └── exceptions/   # Классифицированные исключения
+├── application/      # Пайплайны, Use Cases, оркестрация
+│   ├── core/         # PipelineRunner, Executor, BaseTransformer
+│   ├── pipelines/    # Конкретные пайплайны (ChEMBL, PubChem, UniProt, PubMed)
+│   └── services/     # Application services
+├── composition/      # Composition Root (DI-контейнер, factories, bootstrap)
+│   ├── factories/    # Фабрики пайплайнов, storage, data source
+│   └── providers/    # Provider registry
+├── infrastructure/   # Адаптеры (HTTP, локальное хранилище), реализация портов
+│   ├── adapters/     # HTTP клиенты с unified resilience
+│   ├── storage/      # Bronze/Silver/Gold writers
+│   ├── locking/      # In-memory locks (MemoryLock)
+│   └── observability/ # Метрики, трейсинг, логирование
+└── interfaces/       # CLI
+    ├── cli/          # Click CLI команды
+    └── orchestration/ # Signal handlers
 ```
 
 ### 1.1. Матрица Импортов (ОБЯЗАТЕЛЬНО)
@@ -63,7 +80,7 @@ src/bioetl/
 |-----------|----------------------|---------------|
 | **PipelineRunner** | "God object, слишком много ответственностей" | 173 строки, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
 | **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
-| **ChEMBL Adapter** | "Размытые границы, много ответственностей" | Когезивная ответственность: health-aware HTTP fetching (~350 строк) |
+| **ChEMBL Adapter** | "Размытые границы, много ответственностей" | Когезивная ответственность: health-aware HTTP fetching (~350 строк), делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
 | **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — законная ответственность interfaces слоя |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
 | **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
@@ -369,17 +386,20 @@ await loop.run_in_executor(thread_pool, fetch_func)
 
 | Артефакт | Путь |
 |----------|------|
-| Domain Ports | `src/bioetl/domain/ports.py` |
+| Domain Ports | `src/bioetl/domain/ports/` (пакет с фасадом `__init__.py`) |
+| DDD Aggregates | `src/bioetl/domain/aggregates/` |
+| Value Objects | `src/bioetl/domain/value_objects/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
 | Pipeline Core | `src/bioetl/application/core/` |
 | BaseTransformer | `src/bioetl/application/core/base_transformer.py` |
 | Factories | `src/bioetl/composition/factories/` |
 | Bootstrap | `src/bioetl/composition/bootstrap.py` |
-| CLI | `src/bioetl/interfaces/cli.py` |
+| CLI | `src/bioetl/interfaces/cli/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | Tests | `tests/` |
 | VCR Cassettes | `tests/fixtures/vcr/` |
+| Ubiquitous Language | `docs/glossary.md` |
 
 ---
 
@@ -435,12 +455,13 @@ await loop.run_in_executor(thread_pool, fetch_func)
 
 | Документ | Описание |
 |----------|----------|
-| `CLAUDE.md` | Справочник для Claude Code |
+| `CLAUDE.md` | Справочник для Claude Code (синхронизирован с RULES.md v5.8) |
 | `AGENT.md` | Детальные инструкции для агента v2.2 |
-| `docs/RULES.md` | Конституция проекта v5.2 |
+| `docs/RULES.md` | Конституция проекта v5.8 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
+| `docs/glossary.md` | Ubiquitous Language (каноническая терминология) |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-011) |
+| `docs/02-architecture/decisions/` | ADR (001-020, все Accepted) |
 
 ---
 

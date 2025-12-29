@@ -67,7 +67,7 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # Architecture Decision Records (ADR-001..020)
+│   ├── decisions/               # Architecture Decision Records (ADR-001..021)
 │   └── diagrams/                # Diagram source files
 │
 ├── 03-guides/                   # How-to guides
