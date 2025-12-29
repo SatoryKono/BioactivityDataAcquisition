@@ -369,19 +369,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             yield work
 
     async def _probe_health(self) -> HealthStatus:
-        """Perform CrossRef-specific health probe.
-
-        Overrides BaseHttpAdapter._probe_health() to use CrossRef works endpoint.
-
-        Returns:
-            HealthStatus.HEALTHY - API accessible
-            HealthStatus.DEGRADED - slow response (>5 sec)
-            HealthStatus.UNHEALTHY - non-200 response
-
-        Raises:
-            Exception: On request failure (logged before raising).
-
-        """
+        """Probe CrossRef API health. Returns DEGRADED if response >5 sec."""
         try:
             url = f"{CROSSREF_API_BASE}/works"
             params = {
