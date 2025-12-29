@@ -454,3 +454,30 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
     ]
 )
+
+# Schema for ChEMBL Compound Record
+# See: https://www.ebi.ac.uk/chembl/api/data/compound_record
+CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("record_id", pa.int64()),
+        # Foreign keys
+        pa.field("molecule_chembl_id", pa.string()),
+        pa.field("document_chembl_id", pa.string()),
+        # Original compound names from document
+        pa.field("compound_key", pa.string()),
+        pa.field("compound_name", pa.string()),
+        # Source information
+        pa.field("src_id", pa.int64()),
+        pa.field("src_compound_id", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)

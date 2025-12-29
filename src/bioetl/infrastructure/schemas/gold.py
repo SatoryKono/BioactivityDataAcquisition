@@ -426,3 +426,36 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = True
+
+
+class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Compound Record in Gold layer."""
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    record_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+
+    # Foreign keys
+    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+    document_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Original compound names from document
+    compound_key: Series[str] = pa.Field(nullable=True)
+    compound_name: Series[str] = pa.Field(nullable=True)
+
+    # Source information
+    src_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+    src_compound_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
