@@ -243,8 +243,7 @@ src/bioetl/
 └── interfaces/                  # External interfaces
     ├── cli.py                   # Click CLI (bioetl run/quarantine/checkpoint)
     └── orchestration/           # Pipeline orchestration adapters
-        ├── signals.py           # OS signal handlers
-        └── prefect/             # Prefect integration
+        └── signals.py           # OS signal handlers
 
 tests/
 ├── unit/                        # Isolated unit tests (mock I/O)

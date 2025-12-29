@@ -286,7 +286,7 @@ class TestClassSize:
         "BatchWriter": 330,  # 301 lines - batch writing with lock context provider
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 420,  # 402 lines - HTTP adapter with batch DOI resolution
-        "WorkToPublicationMapper": 360,  # 344 lines - field extraction and transformation
+        "CrossRefFieldExtractor": 330,  # ~315 lines - field extraction (refactored from mappers)
         # Test classes exemptions
         "TestCliCommands": 350,  # Test class with many test cases
         "TestFileSizeLimits": 350,  # Test class with many exemptions

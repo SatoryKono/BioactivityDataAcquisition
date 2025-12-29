@@ -492,6 +492,28 @@ class StorageAdapter:
 
         return total_archived
 
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Implements StoragePort.cleanup_bronze().
+        Delegates to BronzeWriter.cleanup_old_files().
+
+        Args:
+            cutoff_date: Files older than this date will be removed.
+            dry_run: If True, only count what would be removed.
+
+        Returns:
+            Dictionary with cleanup statistics.
+        """
+        return await self.bronze.cleanup_old_files(
+            cutoff_date=cutoff_date,
+            dry_run=dry_run,
+        )
+
     @staticmethod
     def _check_directory_writable(dir_path: Path | str) -> bool:
         """Check if a directory is writable.

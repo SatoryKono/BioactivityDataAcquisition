@@ -1,20 +1,23 @@
-"""Unit tests for CrossRef mappers."""
+"""Unit tests for CrossRef field extractors.
+
+Tests for CrossRefFieldExtractor (infrastructure-level field extraction).
+Domain entity creation tests are in tests/unit/application/pipelines/crossref/.
+"""
 
 from __future__ import annotations
 
-from datetime import datetime
-from uuid import uuid4
-
 import pytest
 
-from bioetl.domain.types import ContentHash, RunID, RunType
-from bioetl.infrastructure.adapters.crossref.mappers import WorkToPublicationMapper
+from bioetl.infrastructure.adapters.crossref.mappers import (
+    CrossRefFieldExtractor,
+    WorkToPublicationMapper,  # Backward compat alias
+)
 
 
 @pytest.fixture
 def mapper():
-    """Create a WorkToPublicationMapper instance."""
-    return WorkToPublicationMapper()
+    """Create a CrossRefFieldExtractor instance."""
+    return CrossRefFieldExtractor()
 
 
 @pytest.fixture
@@ -323,57 +326,13 @@ def test_extract_subjects_empty(mapper):
 
 
 # =============================================================================
-# map_to_work tests
+# Backward compatibility alias test
 # =============================================================================
 
 
-def test_map_to_work_full(mapper, sample_work):
-    """Test mapping full work response to Work entity."""
-    run_id = RunID(uuid4())
-    run_type = RunType.INCREMENTAL
-    ingestion_ts = datetime.now()
-    content_hash = ContentHash("a" * 64)
-
-    work = mapper.map_to_work(
-        sample_work,
-        run_id=run_id,
-        run_type=run_type,
-        ingestion_ts=ingestion_ts,
-        content_hash=content_hash,
-        index=0,
-    )
-
-    assert work.doi == "10.1234/test.article"
-    assert work.title == "Test Article Title"
-    assert work.abstract == "This is the abstract text."
-    assert work.authors == ["John Doe", "Jane Smith", "Anonymous"]
-    assert work.journal == "Journal of Testing"
-    assert work.year == 2023
-    assert work.doc_type == "PUBLICATION"
-    assert work.citation_count == 100
-    assert work.source == "crossref"
-
-
-def test_map_to_work_minimal(mapper, minimal_work):
-    """Test mapping minimal work response to Work entity."""
-    run_id = RunID(uuid4())
-    run_type = RunType.BACKFILL
-    ingestion_ts = datetime.now()
-    content_hash = ContentHash("b" * 64)
-
-    work = mapper.map_to_work(
-        minimal_work,
-        run_id=run_id,
-        run_type=run_type,
-        ingestion_ts=ingestion_ts,
-        content_hash=content_hash,
-        index=1,
-    )
-
-    assert work.doi == "10.5678/minimal"
-    assert work.title is None
-    assert work.doc_type == "PREPRINT"
-    assert work.source == "crossref"
+def test_backward_compat_alias():
+    """Test WorkToPublicationMapper is alias for CrossRefFieldExtractor."""
+    assert WorkToPublicationMapper is CrossRefFieldExtractor
 
 
 # =============================================================================

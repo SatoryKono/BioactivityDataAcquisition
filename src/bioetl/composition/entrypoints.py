@@ -1,7 +1,7 @@
 """Entrypoints for BioETL pipeline operations.
 
 Provides high-level functions for running pipelines and managing resources.
-These entrypoints are designed to be used by CLI, Prefect, REST APIs, or any
+These entrypoints are designed to be used by CLI, REST APIs, or any
 other orchestration layer without direct dependency on bootstrap functions.
 
 The CLI should only import from this module, not from bootstrap.
@@ -38,14 +38,19 @@ __all__ = [
     "build_pipeline_context",
     "create_pipeline_runner",
     "run_pipeline",
-    # Resource management
+    # Resource management (managers - legacy)
     "get_quarantine_manager",
     "get_checkpoint_manager",
     "get_lifecycle_service",
+    # Resource management (services - new)
+    "get_checkpoint_service",
+    "get_quarantine_service",
+    "get_bronze_cleanup_service",
     # Maintenance operations
     "vacuum_table",
     "archive_table",
     "preview_cleanup",
+    "cleanup_bronze",
     # Inspection
     "inspect_quarantine",
     "list_checkpoints",
@@ -59,6 +64,11 @@ from bioetl.composition.bootstrap import (
     bootstrap_quarantine_manager,
     load_pipeline_config,
 )
+from bioetl.composition._bootstrap import (
+    bootstrap_bronze_cleanup_service,
+    bootstrap_checkpoint_service,
+    bootstrap_quarantine_service,
+)
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.domain.context import InputFilterContext, PipelineRunContext, VacuumConfig
@@ -69,6 +79,12 @@ if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupPreview
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services import (
+        BronzeCleanupService,
+        CheckpointService,
+        CleanupResult,
+        QuarantineService,
+    )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
@@ -78,7 +94,7 @@ if TYPE_CHECKING:
 class RunOptions:
     """Options for running a pipeline.
 
-    These are the user-facing options that can be set via CLI, Prefect, or REST.
+    These are the user-facing options that can be set via CLI or REST API.
     The entrypoint converts these to internal domain types.
 
     Attributes:
@@ -522,3 +538,92 @@ async def list_checkpoints(pipeline: str) -> list[str]:
     manager = get_checkpoint_manager(pipeline)
     checkpoints: list[str] = await manager.list_all()
     return checkpoints
+
+
+# =============================================================================
+# New Application Services (replacing direct infrastructure access)
+# =============================================================================
+
+
+def get_checkpoint_service() -> CheckpointService:
+    """Get a checkpoint service for administrative operations.
+
+    Used for listing, deleting, and inspecting checkpoints across all pipelines.
+    This is the recommended way to manage checkpoints from CLI or other interfaces.
+
+    Returns:
+        CheckpointService instance.
+
+    Example:
+        >>> service = get_checkpoint_service()
+        >>> checkpoints = await service.list_checkpoints()
+        >>> for cp in checkpoints:
+        ...     print(f"{cp.pipeline_name}: {cp.metadata}")
+    """
+    _ensure_registrations()
+    return bootstrap_checkpoint_service()
+
+
+def get_quarantine_service() -> QuarantineService:
+    """Get a quarantine service for administrative operations.
+
+    Used for inspecting, replaying, and purging quarantine records.
+    This is the recommended way to manage quarantine from CLI or other interfaces.
+
+    Returns:
+        QuarantineService instance.
+
+    Example:
+        >>> service = get_quarantine_service()
+        >>> records = await service.inspect("chembl_activity", limit=10)
+        >>> for rec in records:
+        ...     print(f"{rec.error_code}: {rec.payload}")
+    """
+    _ensure_registrations()
+    return bootstrap_quarantine_service()
+
+
+def get_bronze_cleanup_service() -> BronzeCleanupService:
+    """Get a bronze cleanup service for maintenance operations.
+
+    Used for Bronze layer retention cleanup per RULES.md §2.1.
+    This is the recommended way to manage Bronze cleanup from CLI.
+
+    Returns:
+        BronzeCleanupService instance.
+
+    Example:
+        >>> service = get_bronze_cleanup_service()
+        >>> result = await service.cleanup(retention_days=90, dry_run=True)
+        >>> print(f"Would remove {result.files_removed} files")
+    """
+    _ensure_registrations()
+    return bootstrap_bronze_cleanup_service()
+
+
+async def cleanup_bronze(
+    retention_days: int = 90,
+    dry_run: bool = False,
+) -> CleanupResult:
+    """Clean up old Bronze files based on retention policy.
+
+    Convenience function for Bronze cleanup operations.
+    Removes files older than the specified retention period.
+
+    Args:
+        retention_days: Files older than this will be removed (default: 90).
+        dry_run: If True, only show what would be removed.
+
+    Returns:
+        CleanupResult with cleanup statistics.
+
+    Example:
+        >>> result = await cleanup_bronze(retention_days=90, dry_run=True)
+        >>> print(f"Would remove {result.files_removed} files")
+    """
+    service = get_bronze_cleanup_service()
+    result: CleanupResult = await service.cleanup(
+        retention_days=retention_days,
+        dry_run=dry_run,
+    )
+    return result
