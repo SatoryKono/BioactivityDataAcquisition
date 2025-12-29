@@ -236,7 +236,7 @@
         "title"
       ]
     },
-    "gold_table": "pubmed_publications",
+    "gold_table": "pubmed_publication",
     "gold_write_mode": "overwrite",
     "on_schema_mismatch": "error",
     "partition_cols": [],
@@ -245,7 +245,7 @@
       "pmid"
     ],
     "provider": "pubmed",
-    "silver_table": "pubmed_publications",
+    "silver_table": "pubmed_publication",
     "write_mode": "merge"
   },
   "uniprot_protein": {

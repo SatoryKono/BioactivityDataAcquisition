@@ -33,6 +33,7 @@ from bioetl.domain.entities import (
     Activity,
     Assay,
     BaseEntity,
+    CellLine,
     Compound,
     Document,
     Molecule,
