@@ -1,6 +1,8 @@
 """ChEMBL Cell Line Transformer.
 
 Transforms Bronze records to Silver format (CellLine entity inflation).
+
+Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 """
 
 from __future__ import annotations
@@ -11,7 +13,8 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import CellLine
-from bioetl.domain.transformations import safe_int
+from bioetl.domain.normalization import normalize_to_string
+from bioetl.domain.validation import validate_positive_int
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -27,42 +30,14 @@ class CellLineTransformer(BaseChemblTransformer):
     entity_class = CellLine
     primary_id_field = "cell_chembl_id"
 
-    def _normalize_external_id(self, value: Any) -> str | None:
-        """Normalize external ID by stripping whitespace, NULL if empty.
-
-        Args:
-            value: Raw external ID value from API.
-
-        Returns:
-            Stripped string or None if empty/None.
-
-        """
-        if value is None:
-            return None
-        str_value = str(value).strip()
-        return str_value if str_value else None
-
-    def _validate_tax_id(self, value: Any) -> int | None:
-        """Validate taxonomy ID (must be > 0 or NULL).
-
-        Args:
-            value: Raw tax_id value from API.
-
-        Returns:
-            Valid tax_id (>= 1) or None.
-
-        """
-        tax_id = safe_int(value)
-        if tax_id is not None and tax_id < 1:
-            return None
-        return tax_id
-
     def _extract_business_data(
         self,
         record: BronzeRecord,
         primary_id: Any,
     ) -> dict[str, Any]:
         """Extract CellLine business data from bronze record.
+
+        Delegates normalization/validation to domain layer per REFACTOR-004.
 
         Args:
             record: Raw Bronze record from ChEMBL API.
@@ -72,10 +47,8 @@ class CellLineTransformer(BaseChemblTransformer):
             Dictionary of CellLine business fields.
 
         """
-        # Get cell_name with strip and lowercase normalization for comparison
-        cell_name = record.get("cell_name")
-        if cell_name is not None:
-            cell_name = str(cell_name).strip()
+        # Get cell_name with strip normalization using domain function
+        cell_name = normalize_to_string(record.get("cell_name"))
 
         return {
             # Primary identifier
@@ -86,13 +59,12 @@ class CellLineTransformer(BaseChemblTransformer):
             # Source information
             "cell_source_tissue": record.get("cell_source_tissue"),
             "cell_source_organism": record.get("cell_source_organism"),
-            "cell_source_tax_id": self._validate_tax_id(
+            # Use domain validation for tax_id (must be positive)
+            "cell_source_tax_id": validate_positive_int(
                 record.get("cell_source_tax_id")
             ),
-            # External identifiers (strip, NULL if empty)
-            "cellosaurus_id": self._normalize_external_id(
-                record.get("cellosaurus_id")
-            ),
-            "cl_lincs_id": self._normalize_external_id(record.get("cl_lincs_id")),
-            "efo_id": self._normalize_external_id(record.get("efo_id")),
+            # External identifiers (strip, NULL if empty) using domain normalization
+            "cellosaurus_id": normalize_to_string(record.get("cellosaurus_id")),
+            "cl_lincs_id": normalize_to_string(record.get("cl_lincs_id")),
+            "efo_id": normalize_to_string(record.get("efo_id")),
         }

@@ -142,6 +142,8 @@ class TestStoragePortProtocol:
                 schema: Any,
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
+                on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+                lock_context: Any = None,
             ) -> None:
                 pass
 
@@ -197,6 +199,13 @@ class TestStoragePortProtocol:
                 gold_table: str | None = None,
             ) -> dict[str, Any]:
                 return {}
+
+            async def cleanup_bronze(
+                self,
+                cutoff_date: Any,
+                dry_run: bool = False,
+            ) -> dict[str, int]:
+                return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
 
         assert isinstance(ValidStorage(), StoragePort)
 

@@ -122,3 +122,28 @@ class PolicyViolationError(CriticalError):
 
     def __init__(self, message: str) -> None:
         super().__init__(message)
+
+
+class InvalidStateError(CriticalError):
+    """Raised when an aggregate operation is attempted in an invalid state.
+
+    This is a CRITICAL error indicating an invariant violation attempt.
+    Aggregates use this to enforce state machine transitions and business rules.
+
+    Example:
+        - Attempting to complete a PipelineRun that has failed stages
+        - Attempting to record stages on an already completed run
+        - Mutating a Batch after it has been sealed
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        message: str,
+        current_state: str | None = None,
+        attempted_operation: str | None = None,
+    ) -> None:
+        self.current_state = current_state
+        self.attempted_operation = attempted_operation
+        super().__init__(message)
