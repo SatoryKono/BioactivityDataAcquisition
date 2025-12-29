@@ -11,6 +11,7 @@ Error Handling (RULES.md §3.1):
 - Data quality errors: Log and skip record
 
 Health-Aware Fetching:
+- Uses circuit breaker state for health-aware batch sizing
 - HEALTHY: Normal batch_size
 - DEGRADED: batch_size ÷ 2 (per RULES.md §3.5)
 - UNHEALTHY: Fail fast with clear error
@@ -24,12 +25,15 @@ from typing import TYPE_CHECKING, Any, NoReturn
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.domain.types import ErrorType, HealthStatus
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
+)
+from bioetl.infrastructure.adapters.http.health import (
+    assess_health_from_circuit_breaker,
 )
 
 if TYPE_CHECKING:
@@ -55,7 +59,7 @@ class ChemblAdapter(BaseHttpAdapter):
         batch_size: Number of records per API request (default: 1000)
         thread_pool: ThreadPoolExecutor for sync operations
 
-    Health-Aware Behavior:
+    Health-Aware Behavior (uses circuit breaker state):
         - HEALTHY: Uses configured batch_size
         - DEGRADED: Uses batch_size ÷ 2 to reduce load
         - UNHEALTHY: Raises CriticalError to prevent futile requests
@@ -71,13 +75,10 @@ class ChemblAdapter(BaseHttpAdapter):
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
 
-    _consecutive_errors: int = field(init=False, default=0)
-    _cached_health: HealthStatus = field(init=False, default=HealthStatus.HEALTHY)
+    # Error classifier for logging purposes (no state tracking)
     _error_classifier: ErrorClassifier = field(
         init=False, default_factory=ErrorClassifier
     )
-    _total_errors: int = field(init=False, default=0)
-    _error_counts: dict[ErrorType, int] = field(init=False, default_factory=dict)
 
     # Entity mapper for URL and key resolution
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
@@ -87,8 +88,21 @@ class ChemblAdapter(BaseHttpAdapter):
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
+    def _get_health_status(self) -> HealthStatus:
+        """Get health status from circuit breaker state.
+
+        Uses circuit breaker failure count for health assessment,
+        avoiding duplicate state tracking.
+
+        Returns:
+            HealthStatus based on circuit breaker state.
+        """
+        return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
+
     def _get_effective_batch_size(self) -> int:
         """Get batch size adjusted for current health status.
+
+        Uses circuit breaker state for health-aware batching.
 
         Returns:
             - Normal batch_size when HEALTHY
@@ -98,19 +112,22 @@ class ChemblAdapter(BaseHttpAdapter):
             CriticalError: When UNHEALTHY to prevent futile requests
 
         """
-        if self._cached_health == HealthStatus.UNHEALTHY:
+        health_status = self._get_health_status()
+        failure_count = self.http_client.circuit_breaker.get_failure_count()
+
+        if health_status == HealthStatus.UNHEALTHY:
             raise CriticalError(
-                f"ChEMBL adapter is UNHEALTHY after {self._consecutive_errors} "
-                f"consecutive errors. Total errors: {self._total_errors}"
+                f"ChEMBL adapter is UNHEALTHY after {failure_count} "
+                f"consecutive errors (circuit breaker)"
             )
-        if self._cached_health == HealthStatus.DEGRADED:
+        if health_status == HealthStatus.DEGRADED:
             reduced = max(100, self.batch_size // 2)  # Minimum 100
             self.logger.warning(
                 "chembl_degraded_mode",
                 provider="chembl",
                 original_batch_size=self.batch_size,
                 effective_batch_size=reduced,
-                consecutive_errors=self._consecutive_errors,
+                consecutive_errors=failure_count,
             )
             return reduced
         return self.batch_size
@@ -142,12 +159,15 @@ class ChemblAdapter(BaseHttpAdapter):
     async def _fetch_page(
         self, url: str, params: dict[str, Any], entity_type: str
     ) -> tuple[list[dict[str, Any]], bool]:
-        """Fetch a single page and handle errors."""
+        """Fetch a single page and handle errors.
+
+        Note: Success/failure tracking is handled by the circuit breaker
+        in UnifiedHTTPClient, no duplicate tracking needed here.
+        """
         try:
             with self._adapter_metrics.measure_request(f"/{entity_type}"):
                 response = await self.http_client.get(url, params=params)
             records, has_next = self._process_response(response, entity_type)
-            self._consecutive_errors = 0
             return records, has_next
         except Exception as e:
             self._handle_error(e)
@@ -227,7 +247,10 @@ class ChemblAdapter(BaseHttpAdapter):
                 break
 
     def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
-        """Handle fetch errors with classification and metrics.
+        """Handle fetch errors with classification and logging.
+
+        Error tracking is handled by the circuit breaker in UnifiedHTTPClient,
+        so this method focuses on classification and logging only.
 
         Args:
             e: The exception that occurred
@@ -238,16 +261,10 @@ class ChemblAdapter(BaseHttpAdapter):
             ChemblApiError: For recoverable and other errors
 
         """
-        # Classify the error
+        # Classify the error for logging
         error_type = self._error_classifier.classify(e)
-
-        # Update error counters
-        self._consecutive_errors += 1
-        self._total_errors += 1
-        self._error_counts[error_type] = self._error_counts.get(error_type, 0) + 1
-
-        # Update health status
-        self._update_health()
+        failure_count = self.http_client.circuit_breaker.get_failure_count()
+        health_status = self._get_health_status()
 
         # Log with full context
         self.logger.error(
@@ -258,9 +275,8 @@ class ChemblAdapter(BaseHttpAdapter):
             error_type=error_type.value,
             is_critical=error_type.is_critical(),
             is_recoverable=error_type.is_recoverable(),
-            consecutive_errors=self._consecutive_errors,
-            total_errors=self._total_errors,
-            health_status=self._cached_health.value,
+            circuit_breaker_failures=failure_count,
+            health_status=health_status.value,
         )
 
         # Critical errors should fail immediately
@@ -391,11 +407,11 @@ class ChemblAdapter(BaseHttpAdapter):
     async def _probe_health(self) -> HealthStatus:
         """Perform ChEMBL-specific health probe.
 
-        Overrides BaseHttpAdapter._probe_health() to use ChEMBL status endpoint
-        and internal health state tracking.
+        Overrides BaseHttpAdapter._probe_health() to use ChEMBL status endpoint.
+        Uses circuit breaker state for health tracking.
 
         Returns:
-            HealthStatus based on status endpoint response.
+            HealthStatus based on status endpoint response and circuit breaker state.
 
         Raises:
             Exception: On request failure (base class handles via _fallback_health_status).
@@ -404,11 +420,8 @@ class ChemblAdapter(BaseHttpAdapter):
         try:
             with self._adapter_metrics.measure_request("/status"):
                 response = await self.http_client.get(CHEMBL_STATUS_URL)
-            self._handle_health_response(response)
-            return self._cached_health
+            return self._handle_health_response(response)
         except Exception as e:
-            self._consecutive_errors += 1
-            self._update_health()
             error_type = self._error_classifier.classify(e)
             self.logger.warning(
                 "health_check_failed",
@@ -419,85 +432,62 @@ class ChemblAdapter(BaseHttpAdapter):
             raise  # Let base class handle via _fallback_health_status()
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Return cached health status.
-
-        Overrides BaseHttpAdapter._fallback_health_status() to use
-        ChEMBL's internal health state rather than circuit breaker.
+        """Return health status based on circuit breaker state.
 
         Returns:
-            Cached HealthStatus based on consecutive error count.
+            HealthStatus based on circuit breaker failure count.
 
         """
-        return self._cached_health
+        return self._get_health_status()
 
-    def _handle_health_response(self, response: Response) -> None:
-        """Process health check response."""
+    def _handle_health_response(self, response: Response) -> HealthStatus:
+        """Process health check response.
+
+        Args:
+            response: HTTP response from status endpoint
+
+        Returns:
+            HealthStatus based on response and API status.
+        """
         if response.status_code == 200:
-            # Reset error counter on any successful HTTP response
-            self._consecutive_errors = 0
             data = response.json()
             if data.get("status") == "UP":
-                self._cached_health = HealthStatus.HEALTHY
+                return HealthStatus.HEALTHY
             else:
-                self._cached_health = HealthStatus.DEGRADED
                 self.logger.warning(
                     "health_check_degraded",
                     provider=self.provider_name,
                     reason="status_not_up",
                     api_status=data.get("status"),
                 )
+                return HealthStatus.DEGRADED
         else:
-            self._consecutive_errors += 1
-            self._update_health()
             self.logger.warning(
                 "health_check_degraded",
                 provider=self.provider_name,
                 reason="non_200_response",
                 status_code=response.status_code,
             )
-
-    def _update_health(self) -> None:
-        """Update health status based on error count."""
-        previous_health = self._cached_health
-        if self._consecutive_errors >= 3:
-            self._cached_health = HealthStatus.UNHEALTHY
-        elif self._consecutive_errors >= 1:
-            self._cached_health = HealthStatus.DEGRADED
-        else:
-            self._cached_health = HealthStatus.HEALTHY
-
-        # Log health transitions
-        if previous_health != self._cached_health:
-            self.logger.info(
-                "chembl_health_transition",
-                provider="chembl",
-                previous_status=previous_health.value,
-                current_status=self._cached_health.value,
-                consecutive_errors=self._consecutive_errors,
-            )
+            return HealthStatus.DEGRADED
 
     def get_error_stats(self) -> dict[str, Any]:
-        """Get error statistics for monitoring.
+        """Get error statistics from circuit breaker for monitoring.
 
         Returns:
-            Dictionary with error counts and health status.
+            Dictionary with circuit breaker stats and health status.
 
         """
         return {
-            "consecutive_errors": self._consecutive_errors,
-            "total_errors": self._total_errors,
-            "health_status": self._cached_health.value,
-            "error_counts_by_type": {k.value: v for k, v in self._error_counts.items()},
+            "circuit_breaker_failures": self.http_client.circuit_breaker.get_failure_count(),
+            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
+            "health_status": self._get_health_status().value,
         }
 
-    def reset_error_counters(self) -> None:
-        """Reset error counters (e.g., after successful recovery)."""
-        self._consecutive_errors = 0
-        self._total_errors = 0
-        self._error_counts.clear()
-        self._cached_health = HealthStatus.HEALTHY
+    def reset_circuit_breaker(self) -> None:
+        """Reset circuit breaker (e.g., after successful recovery)."""
+        self.http_client.circuit_breaker.reset()
         self.logger.info(
-            "chembl_error_counters_reset",
+            "chembl_circuit_breaker_reset",
             provider="chembl",
         )
 
