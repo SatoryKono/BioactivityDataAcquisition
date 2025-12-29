@@ -31,6 +31,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         # Special imports (from __future__ import annotations)
         "annotations",
         # Submodules (imported but not re-exported individually)
+        "aggregates",  # Aggregate submodule
         "config",
         "configs",  # Submodule for value object configs
         "config_types",  # TypedDict definitions for YAML config (not public API)
@@ -158,6 +159,7 @@ def test_domain_no_infrastructure_types_in_all() -> None:
     # but are actually domain-level configuration DTOs
     allowed_exceptions = {
         "BaseClientConfig",  # Domain config DTO for client settings
+        "BaseProviderConfig",  # Domain config for providers
     }
 
     for symbol in domain.__all__:

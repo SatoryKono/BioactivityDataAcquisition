@@ -279,6 +279,7 @@ __all__ = [
     # Exceptions - Data Quality
     "DataQualityThresholdError",
     "InvalidDataFormatError",
+    "InvalidStateError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
     # Filters

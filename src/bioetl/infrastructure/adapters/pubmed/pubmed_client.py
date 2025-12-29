@@ -270,6 +270,15 @@ class PubMedAdapter(BaseHttpAdapter):
         """
         return HealthStatus.UNHEALTHY
 
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for PubMed.
+
+        Returns:
+            PubMed esearch endpoint used for health probe.
+
+        """
+        return "/entrez/eutils/esearch.fcgi"
+
     async def aclose(self) -> None:
         """Close adapter resources.
 
