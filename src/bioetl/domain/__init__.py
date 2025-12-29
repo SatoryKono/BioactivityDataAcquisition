@@ -130,7 +130,7 @@ from bioetl.domain.ports import (
 )
 
 # Resilience (domain value objects)
-from bioetl.domain.resilience import RetryPolicy
+from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
 
 # Pure domain normalization (REFACTOR-004)
 from bioetl.domain.normalization import (
@@ -294,6 +294,8 @@ __all__ = [
     "StoragePort",
     "TracingPort",
     # Resilience
+    "CircuitBreakerConfig",
+    "RetryConfig",
     "RetryPolicy",
     # Normalization (pure functions, REFACTOR-004)
     "extract_first_item",

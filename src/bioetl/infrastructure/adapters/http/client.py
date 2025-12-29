@@ -25,7 +25,7 @@ import httpx
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
 from bioetl.domain.ports import NoOpMetrics, NoOpTracing
-from bioetl.domain.resilience import RetryPolicy
+from bioetl.domain.resilience import RetryConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -38,22 +38,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
 
-# Backward compatibility alias (deprecated)
-RetryConfig = RetryPolicy
-
-
-def _is_retryable_status(status_code: int) -> bool:
-    """Check if HTTP status code is retryable."""
-    return status_code in {429, 500, 502, 503, 504}
-
-
-def _is_retryable_error(exc: Exception) -> bool:
-    """Check if exception is retryable."""
-    if isinstance(exc, httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout):
-        return True
-    if isinstance(exc, httpx.HTTPStatusError):
-        return _is_retryable_status(exc.response.status_code)
-    return False
+# Backward compatibility aliases
+RetryPolicy = RetryConfig
 
 
 @dataclass
@@ -72,7 +58,7 @@ class UnifiedHTTPClient:
     Args:
         rate_limiter: RateLimiterPort implementation for rate limiting
         circuit_breaker: CircuitBreakerPort implementation for fault tolerance
-        retry_policy: RetryPolicy for exponential backoff configuration
+        retry_config: RetryConfig for exponential backoff configuration
         timeout: Request timeout in seconds (default: 30.0)
         run_id: Current run ID for correlation header
         user_agent: User-Agent string (default: "BioETL/5.0.0")
@@ -94,7 +80,7 @@ class UnifiedHTTPClient:
 
     rate_limiter: RateLimiterPort
     circuit_breaker: CircuitBreakerPort
-    retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
+    retry_config: RetryConfig = field(default_factory=RetryConfig)
     timeout: float = 30.0
     run_id: RunID | None = None
     user_agent: str = "BioETL/5.0.0"
@@ -152,15 +138,20 @@ class UnifiedHTTPClient:
         attempt: int,
         url: str = "",
         response: httpx.Response | None = None,
-    ) -> None:
-        """Calculate and sleep for the appropriate retry delay."""
-        delay = self.retry_policy.calculate_delay(attempt, url)
+    ) -> float:
+        """Calculate and sleep for the appropriate retry delay.
+
+        Returns:
+            The actual wait time in seconds (for logging).
+        """
+        delay = self.retry_config.calculate_delay(attempt, url)
         if response:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
                 with suppress(ValueError):
                     delay = float(retry_after)
         await asyncio.sleep(delay)
+        return delay
 
     def _record_request_metrics(
         self,
@@ -206,24 +197,34 @@ class UnifiedHTTPClient:
         url: str,
         method: str,
         attempt: int,
+        wait_seconds: float,
         *,
         status_code: int | None = None,
-        error: str | None = None,
+        reason: str | None = None,
     ) -> None:
-        """Log retry attempt if logger is configured."""
+        """Log retry attempt with structured fields per RULES.md §3.1.3.
+
+        Args:
+            url: Request URL
+            method: HTTP method
+            attempt: Current attempt number (0-indexed)
+            wait_seconds: Time to wait before next attempt
+            status_code: HTTP status code if available
+            reason: Error reason string
+        """
         if not self.logger:
             return
-        kwargs: dict[str, Any] = {
-            "url": url,
-            "method": method,
-            "attempt": attempt + 1,
-            "provider": self.provider,
-        }
-        if status_code is not None:
-            kwargs["status_code"] = status_code
-        if error is not None:
-            kwargs["error"] = error
-        self.logger.debug("http_retry", **kwargs)
+        self.logger.warning(
+            "Retrying request",
+            stage="extract",
+            attempt=attempt + 1,
+            max_attempts=self.retry_config.max_attempts,
+            wait_seconds=round(wait_seconds, 3),
+            reason=reason or f"HTTP {status_code}" if status_code else "unknown",
+            url=url,
+            method=method,
+            provider=self.provider,
+        )
 
     async def _execute_single_attempt(
         self,
@@ -267,7 +268,7 @@ class UnifiedHTTPClient:
         span.__enter__()
 
         try:
-            for attempt in range(self.retry_policy.max_attempts):
+            for attempt in range(self.retry_config.max_attempts):
                 result = await self._attempt_request(
                     client, method, url, attempt, span, kwargs
                 )
@@ -285,7 +286,7 @@ class UnifiedHTTPClient:
             span.set_attribute("error.type", "retry_exhausted")
             if last_error:
                 span.record_exception(last_error)
-            raise RetryExhaustedError(url, self.retry_policy.max_attempts, last_error)
+            raise RetryExhaustedError(url, self.retry_config.max_attempts, last_error)
 
         finally:
             duration = time.perf_counter() - start_time
@@ -295,6 +296,21 @@ class UnifiedHTTPClient:
             self._record_request_metrics(
                 method, duration, status_code, retries, last_error
             )
+
+    def _is_retryable_error(self, exc: Exception) -> bool:
+        """Check if exception should trigger a retry.
+
+        Uses RetryConfig for httpx-specific exception types plus
+        configured retryable_exceptions.
+        """
+        # Check httpx-specific exceptions (connection/timeout errors)
+        if isinstance(exc, httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout):
+            return True
+        # Check httpx status errors using configured retryable statuses
+        if isinstance(exc, httpx.HTTPStatusError):
+            return self.retry_config.is_retryable_status(exc.response.status_code)
+        # Check other configured retryable exceptions
+        return self.retry_config.is_retryable_exception(exc)
 
     async def _attempt_request(
         self,
@@ -315,11 +331,13 @@ class UnifiedHTTPClient:
             response = await self._execute_single_attempt(client, method, url, **kwargs)
             status_code = response.status_code
 
-            if _is_retryable_status(
+            if self.retry_config.is_retryable_status(
                 status_code
-            ) and not self.retry_policy.is_last_attempt(attempt):
-                self._log_retry(url, method, attempt, status_code=status_code)
-                await self._handle_retry_delay(attempt, url, response)
+            ) and not self.retry_config.is_last_attempt(attempt):
+                wait_seconds = await self._handle_retry_delay(attempt, url, response)
+                self._log_retry(
+                    url, method, attempt, wait_seconds, status_code=status_code
+                )
                 return (True, status_code, 1, None)
 
             response.raise_for_status()
@@ -336,19 +354,20 @@ class UnifiedHTTPClient:
                     url=url,
                     method=method,
                     provider=self.provider,
+                    retry_after=exc.retry_after,
                 )
             raise
 
         except Exception as exc:
-            if not _is_retryable_error(exc):
+            if not self._is_retryable_error(exc):
                 span.set_attribute("error", True)
                 span.set_attribute("error.type", type(exc).__name__)
                 span.record_exception(exc)
                 raise
 
-            if not self.retry_policy.is_last_attempt(attempt):
-                self._log_retry(url, method, attempt, error=str(exc))
-                await self._handle_retry_delay(attempt, url)
+            if not self.retry_config.is_last_attempt(attempt):
+                wait_seconds = await self._handle_retry_delay(attempt, url)
+                self._log_retry(url, method, attempt, wait_seconds, reason=str(exc))
             return (True, 0, 1, exc)
 
     async def get(

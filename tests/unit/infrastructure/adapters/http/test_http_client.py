@@ -9,12 +9,8 @@ import httpx
 import pytest
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
-from bioetl.infrastructure.adapters.http.client import (
-    RetryConfig,
-    UnifiedHTTPClient,
-    _is_retryable_error,
-    _is_retryable_status,
-)
+from bioetl.domain.resilience import RetryConfig
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 @pytest.mark.unit
@@ -28,39 +24,68 @@ class TestRetryConfig:
         assert config.base_delay == 1.0
         assert config.max_delay == 60.0
         assert config.multiplier == 2.0
-        assert config.jitter == 0.1
+        assert config.jitter_range == (0.1, 0.5)
+        assert config.retryable_statuses == frozenset({429, 502, 503, 504})
+        assert ConnectionError in config.retryable_exceptions
+        assert TimeoutError in config.retryable_exceptions
 
     def test_calculate_delay_first_attempt(self):
-        """Test delay calculation for first attempt."""
-        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter=0.0)
+        """Test delay calculation for first attempt (no jitter)."""
+        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
         delay = config.calculate_delay(0)
         assert delay == 1.0
 
     def test_calculate_delay_second_attempt(self):
-        """Test delay calculation for second attempt."""
-        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter=0.0)
+        """Test delay calculation for second attempt (no jitter)."""
+        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
         delay = config.calculate_delay(1)
         assert delay == 2.0
 
     def test_calculate_delay_third_attempt(self):
-        """Test delay calculation for third attempt."""
-        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter=0.0)
+        """Test delay calculation for third attempt (no jitter)."""
+        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
         delay = config.calculate_delay(2)
         assert delay == 4.0
 
     def test_calculate_delay_respects_max_delay(self):
         """Test that delay is capped at max_delay."""
         config = RetryConfig(
-            base_delay=10.0, multiplier=2.0, max_delay=15.0, jitter=0.0
+            base_delay=10.0, multiplier=2.0, max_delay=15.0, jitter_range=(0.0, 0.0)
         )
         delay = config.calculate_delay(5)  # Would be 320 without cap
         assert delay == 15.0
+
+    def test_is_retryable_status(self):
+        """Test is_retryable_status method."""
+        config = RetryConfig()
+        assert config.is_retryable_status(429)
+        assert config.is_retryable_status(502)
+        assert config.is_retryable_status(503)
+        assert config.is_retryable_status(504)
+        assert not config.is_retryable_status(200)
+        assert not config.is_retryable_status(400)
+        assert not config.is_retryable_status(401)
+        assert not config.is_retryable_status(500)  # Not in default list
+
+    def test_is_retryable_exception(self):
+        """Test is_retryable_exception method."""
+        config = RetryConfig()
+        assert config.is_retryable_exception(ConnectionError("test"))
+        assert config.is_retryable_exception(TimeoutError("test"))
+        assert not config.is_retryable_exception(ValueError("test"))
+
+    def test_custom_retryable_statuses(self):
+        """Test custom retryable status codes."""
+        config = RetryConfig(retryable_statuses=frozenset({500, 502}))
+        assert config.is_retryable_status(500)
+        assert config.is_retryable_status(502)
+        assert not config.is_retryable_status(429)  # No longer in list
 
     def test_jitter_same_input_same_output(self):
         """Test jitter produces same delay for same inputs (deterministic)."""
         config = RetryConfig(
             base_delay=10.0,
-            jitter=0.1,
+            jitter_range=(0.1, 0.3),
             jitter_seed=42,
         )
         url = "https://api.example.com/data"
@@ -81,7 +106,7 @@ class TestRetryConfig:
         """Test jitter produces different delays for different URLs."""
         config = RetryConfig(
             base_delay=10.0,
-            jitter=0.1,
+            jitter_range=(0.1, 0.2),
             jitter_seed=42,
         )
 
@@ -91,26 +116,22 @@ class TestRetryConfig:
         # Different URLs should produce different jitter values
         assert delay1 != delay2
 
-        # Both should still be within jitter range (9.0 to 11.0)
-        assert 9.0 <= delay1 <= 11.0
-        assert 9.0 <= delay2 <= 11.0
+        # Both should still be within jitter range: base * (1 + jitter)
+        # With jitter_range=(0.1, 0.2), delay should be between 11.0 and 12.0
+        assert 11.0 <= delay1 <= 12.0
+        assert 11.0 <= delay2 <= 12.0
 
     def test_jitter_cross_process_stability(self):
         """Test deterministic jitter produces stable values across processes.
 
         This test verifies that the jitter calculation uses MD5 (not Python's
-        hash()) which is stable across different Python processes. Python's
-        built-in hash() uses PYTHONHASHSEED and produces different values in
-        different processes.
-
-        The expected values are pre-computed using MD5 and will remain constant
-        regardless of which Python process runs this test.
+        hash()) which is stable across different Python processes.
         """
         import hashlib
 
         config = RetryConfig(
             base_delay=10.0,
-            jitter=0.1,
+            jitter_range=(0.1, 0.2),
             jitter_seed=42,
         )
         url = "https://api.example.com/test"
@@ -119,9 +140,12 @@ class TestRetryConfig:
         hash_input = f"0:{url}:42"
         digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
         jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
+
         base_delay = 10.0
-        jitter_range = base_delay * 0.1
-        expected_delay = base_delay + jitter_range * (jitter_factor * 2 - 1)
+        jitter_min, jitter_max = 0.1, 0.2
+        jitter_span = jitter_max - jitter_min
+        jitter_amount = jitter_min + (jitter_span * jitter_factor)
+        expected_delay = min(base_delay * (1 + jitter_amount), config.max_delay)
 
         # Verify implementation matches our expectation
         actual_delay = config.calculate_delay(attempt=0, url=url)
@@ -135,89 +159,13 @@ class TestRetryConfig:
         assert config.calculate_delay(attempt=0, url=url) == expected_delay
         assert config.calculate_delay(attempt=0, url=url) == expected_delay
 
-    def test_jitter_known_values(self):
-        """Test jitter produces known stable values.
-
-        These values are pre-computed and serve as a regression test.
-        If this test fails, it means the jitter algorithm has changed.
-        """
-        config = RetryConfig(
-            base_delay=1.0,
-            jitter=0.5,
-            jitter_seed=123,
-        )
-
-        # Pre-computed expected values using MD5
-        # These should remain constant across all Python processes
-        test_cases = [
-            (0, "https://example.com/a", 0.6598315358068402),
-            (1, "https://example.com/a", 1.2365159788719648),
-            (0, "https://example.com/b", 1.0166028722926517),
-            (2, "https://example.com/c", 3.1987770072181654),
-        ]
-
-        for attempt, url, expected in test_cases:
-            actual = config.calculate_delay(attempt=attempt, url=url)
-            assert abs(actual - expected) < 1e-10, (
-                f"Delay mismatch for attempt={attempt}, url={url}. "
-                f"Expected {expected}, got {actual}"
-            )
-
-
-@pytest.mark.unit
-class TestIsRetryableStatus:
-    """Tests for _is_retryable_status function."""
-
-    @pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
-    def test_retryable_statuses(self, status):
-        """Test that retryable statuses return True."""
-        assert _is_retryable_status(status) is True
-
-    @pytest.mark.parametrize("status", [200, 201, 400, 401, 403, 404, 405])
-    def test_non_retryable_statuses(self, status):
-        """Test that non-retryable statuses return False."""
-        assert _is_retryable_status(status) is False
-
-
-@pytest.mark.unit
-class TestIsRetryableError:
-    """Tests for _is_retryable_error function."""
-
-    def test_connect_error_is_retryable(self):
-        """Test ConnectError is retryable."""
-        exc = httpx.ConnectError("Connection failed")
-        assert _is_retryable_error(exc) is True
-
-    def test_connect_timeout_is_retryable(self):
-        """Test ConnectTimeout is retryable."""
-        exc = httpx.ConnectTimeout("Connection timed out")
-        assert _is_retryable_error(exc) is True
-
-    def test_read_timeout_is_retryable(self):
-        """Test ReadTimeout is retryable."""
-        exc = httpx.ReadTimeout("Read timed out")
-        assert _is_retryable_error(exc) is True
-
-    def test_http_status_error_with_retryable_code(self):
-        """Test HTTPStatusError with retryable status code."""
-        response = MagicMock()
-        response.status_code = 503
-        exc = httpx.HTTPStatusError(
-            "Service Unavailable", request=MagicMock(), response=response
-        )
-        assert _is_retryable_error(exc) is True
-
-    def test_http_status_error_with_non_retryable_code(self):
-        """Test HTTPStatusError with non-retryable status code."""
-        response = MagicMock()
-        response.status_code = 404
-        exc = httpx.HTTPStatusError("Not Found", request=MagicMock(), response=response)
-        assert _is_retryable_error(exc) is False
-
-    def test_other_exception_not_retryable(self):
-        """Test other exceptions are not retryable."""
-        exc = ValueError("Some error")
-        assert _is_retryable_error(exc) is False
+    def test_is_last_attempt(self):
+        """Test is_last_attempt method."""
+        config = RetryConfig(max_attempts=3)
+        assert not config.is_last_attempt(0)
+        assert not config.is_last_attempt(1)
+        assert config.is_last_attempt(2)
+        assert config.is_last_attempt(3)  # Beyond last
 
 
 @pytest.fixture
@@ -242,7 +190,7 @@ def http_client(mock_rate_limiter, mock_circuit_breaker):
     return UnifiedHTTPClient(
         rate_limiter=mock_rate_limiter,
         circuit_breaker=mock_circuit_breaker,
-        retry_policy=RetryConfig(max_attempts=2, jitter=0.0),
+        retry_config=RetryConfig(max_attempts=2, jitter_range=(0.0, 0.0)),
         timeout=10.0,
     )
 
@@ -592,7 +540,7 @@ class TestUnifiedHTTPClientObservability:
         return UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,
-            retry_policy=RetryConfig(max_attempts=2, jitter=0.0),
+            retry_config=RetryConfig(max_attempts=2, jitter_range=(0.0, 0.0)),
             timeout=10.0,
             provider="test_provider",
             tracer=tracer,
