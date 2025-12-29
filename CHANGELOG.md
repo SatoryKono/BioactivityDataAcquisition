@@ -35,6 +35,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added glossary to Quick Links
   - Added glossary to Documentation Structure
   - Added glossary to Key Files
+### Removed
+
+- **Dead Code Cleanup**: Удалены избыточные абстракции согласно принципу "прагматичной инженерии" (RULES.md §1):
+  - `composition/base_registry.py` (88 LOC): `RegistryProtocol` не использовался ни одним registry в production
+  - `tests/unit/composition/test_base_registry.py` (321 LOC): Тесты для мёртвого кода
+  - `application/core/medallion_policy.py` (19 LOC): Чистый re-export из `domain.medallion`
+
+### Changed
+
+- **Direct Imports**: Обновлены импорты для устранённых re-export модулей:
+  - `application/core/__init__.py`: импортирует `Layer`, `WriteMode`, `WriteModePolicy` напрямую из `domain.medallion`
+  - `tests/unit/application/core/test_medallion_policy.py`: аналогичное обновление
 
 ## [5.0.4] - 2025-12-29
 
