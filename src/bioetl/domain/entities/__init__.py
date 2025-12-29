@@ -22,6 +22,7 @@ See base.py for RequiredEntityFields Protocol for type-safe required field check
 
 from bioetl.domain.entities.base import BaseEntity, RequiredEntityFields
 from bioetl.domain.entities.chembl_activity import Activity, Assay
+from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
     Document,
@@ -40,6 +41,7 @@ __all__ = [
     "BaseEntity",
     "CellLine",
     "Compound",
+    "CompoundRecord",
     "Document",
     "Molecule",
     "Protein",
