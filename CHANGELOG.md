@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] - 2025-12-29
+
+### Fixed
+
+- **Mypy Strict Compliance**: Исправлены все 4 ошибки mypy `--strict`:
+  - `domain/schemas/base.py:15`: Добавлен `# type: ignore[misc]` для Pandera `DataFrameModel` subclass
+  - `application/core/base_transformer.py:323,331,335`: Явная типизация результатов `orjson.dumps().decode()`
+
+### Added
+
+- **Consolidated Refactoring Plan v2**: Объединённый и верифицированный план рефакторинга
+  (`docs/consolidated-refactoring-plan-v2.md`):
+  - Выявлено 7 ложных утверждений в предыдущих аудитах
+  - Скорректирована общая оценка с 7.64-7.66 до 8.23
+  - Актуальный план: 4 задачи вместо ~10 (P1-1 mypy, P2-1 NoOp DI, P2-2 Gold validation, P3-1 psutil port)
+
+### Changed
+
+- **[P2-1] Writer DI Improvement**: Добавлен deprecation warning для `tracing=None` в writers:
+  - `BronzeWriter`, `DeltaWriter`, `GoldWriter` теперь выводят `DeprecationWarning`
+  - Рекомендуется явно передавать `NoOpTracing()` из composition layer
+  - `StorageFactory` обновлён для явной инъекции `NoOpTracing`
+  - Backward-compatible: существующий код продолжает работать
+
+- **Architecture Audit Quality**: Применён протокол двойной верификации (REQ-ARCH-040):
+  - Все утверждения проверены через grep/read кода
+  - Задокументированы команды верификации
+
 ## [5.0.1] - 2025-12-28
 
 ### Fixed
