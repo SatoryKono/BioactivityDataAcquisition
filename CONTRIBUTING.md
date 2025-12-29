@@ -113,6 +113,11 @@ Before contributing, read these documents:
 - Run `uv sync --extra dev --extra tracing`.
 - Check `pyproject.toml` for new groups.
 
+**4. "ERROR: Missing required plugins: pytest-asyncio>=0.23, pytest-cov>=4.0"**
+- Установите тестовые зависимости перед запуском: `make install` или `pip install -e .[tests]`.
+- При использовании uv запустите `uv sync --extra tests --extra dev`.
+- Убедитесь, что активировано корректное окружение (`uv run` или `source .venv/bin/activate`).
+
 ### Observability & Metrics
 
 - Metrics are available at `http://localhost:8000/metrics`.
