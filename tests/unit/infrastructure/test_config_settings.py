@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
@@ -55,10 +56,10 @@ class TestPipelineSettings:
         assert settings.batch_size == 10000
 
         # Invalid
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             PipelineSettings(batch_size=0)
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             PipelineSettings(batch_size=10001)
 
     def test_heartbeat_interval_validation(self) -> None:
@@ -71,10 +72,10 @@ class TestPipelineSettings:
         assert settings.heartbeat_interval == 60
 
         # Invalid
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             PipelineSettings(heartbeat_interval=4)
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             PipelineSettings(heartbeat_interval=61)
 
 

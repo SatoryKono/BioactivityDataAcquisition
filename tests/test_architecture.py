@@ -371,7 +371,7 @@ def test_io_ports_are_async():
                         origin = get_origin(return_type)
                         if origin in (AsyncIterator, AsyncGenerator):
                             is_async = True
-                except Exception:
+                except (NameError, TypeError, AttributeError):
                     pass  # Type hints may not be resolvable in all cases
 
             if not is_async:
