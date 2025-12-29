@@ -174,7 +174,6 @@ ALLOWED_NO_SUFFIX = {
     "BaseFieldExtractor",
     "BaseChemblTransformer",
     "BaseServicesFactory",
-    "RequiredEntityFields",
     # Private helpers
     "_NoOpSpan",
     "_NoOpOtelTracer",
