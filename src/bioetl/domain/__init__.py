@@ -123,13 +123,27 @@ from bioetl.domain.ports import (
     NoOpTracing,
     QuarantinePort,
     RateLimiterPort,
+    ShutdownPort,
     SilverValidatorPort,
     StoragePort,
     TracingPort,
 )
 
 # Resilience (domain value objects)
-from bioetl.domain.resilience import RetryPolicy
+from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
+
+# Pure domain normalization (REFACTOR-004)
+from bioetl.domain.normalization import (
+    extract_first_item,
+    extract_first_string,
+    format_date_parts,
+    normalize_doi,
+    normalize_string,
+    normalize_to_string,
+    parse_date_field,
+    parse_page_range,
+    strip_html_tags,
+)
 
 # Pure domain transformations
 from bioetl.domain.transformations import (
@@ -145,6 +159,16 @@ from bioetl.domain.transformations import (
     safe_float,
     safe_int,
     safe_str,
+)
+
+# Pure domain validation (REFACTOR-004)
+from bioetl.domain.validation import (
+    validate_doi,
+    validate_non_empty_string,
+    validate_non_negative,
+    validate_positive_int,
+    validate_smiles,
+    validate_year_range,
 )
 
 # Types
@@ -167,6 +191,20 @@ from bioetl.domain.types import (
     RunType,
     SilverRecord,
     ValidationResult,
+)
+
+# Value Objects
+from bioetl.domain.value_objects import (
+    DOI,
+    ActivityType,
+    ChemblId,
+    Concentration,
+    ConcentrationUnit,
+    PChemblValue,
+    PubChemCid,
+    PubMedId,
+    UniProtId,
+    ValueObject,
 )
 
 __all__ = [
@@ -265,11 +303,24 @@ __all__ = [
     "NoOpTracing",
     "QuarantinePort",
     "RateLimiterPort",
+    "ShutdownPort",
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
     # Resilience
+    "CircuitBreakerConfig",
+    "RetryConfig",
     "RetryPolicy",
+    # Normalization (pure functions, REFACTOR-004)
+    "extract_first_item",
+    "extract_first_string",
+    "format_date_parts",
+    "normalize_doi",
+    "normalize_string",
+    "normalize_to_string",
+    "parse_date_field",
+    "parse_page_range",
+    "strip_html_tags",
     # Transformations (pure functions)
     "META_FIELDS",
     "calculate_dq_score",
@@ -283,6 +334,13 @@ __all__ = [
     "safe_float",
     "safe_int",
     "safe_str",
+    # Validation (pure functions, REFACTOR-004)
+    "validate_doi",
+    "validate_non_empty_string",
+    "validate_non_negative",
+    "validate_positive_int",
+    "validate_smiles",
+    "validate_year_range",
     # Types
     "ArrowSchema",
     "BatchID",
@@ -302,4 +360,15 @@ __all__ = [
     "RunType",
     "SilverRecord",
     "ValidationResult",
+    # Value Objects
+    "ActivityType",
+    "ChemblId",
+    "Concentration",
+    "ConcentrationUnit",
+    "DOI",
+    "PChemblValue",
+    "PubChemCid",
+    "PubMedId",
+    "UniProtId",
+    "ValueObject",
 ]

@@ -28,11 +28,10 @@ from bioetl.application.services.medallion_lifecycle import (
     ClearResult,
     MedallionLifecycleService,
 )
-from bioetl.application.services.quarantine_service import (
-    PurgeResult,
-    QuarantineRecord,
-    QuarantineService,
-    ReplayResult,
+from bioetl.application.services.shutdown_service import (
+    PipelineShutdownError,
+    ShutdownReason,
+    ShutdownService,
 )
 from bioetl.application.services.vacuum_service import (
     TableVacuumResult,

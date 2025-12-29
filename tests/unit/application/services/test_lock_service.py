@@ -161,9 +161,10 @@ class TestLockServiceForceReleaseAll:
     async def test_force_release_all_some_held(self, lock_service, mock_lock_port):
         """Test force releasing when some locks are held."""
         owner_id = RunID(uuid4())
-        # First call (regular) succeeds, second (exclusive) fails for pipeline1
-        # Third call (regular) fails, fourth (exclusive) succeeds for pipeline2
-        mock_lock_port.release.side_effect = [True, False, False, True]
+        # First call (regular) succeeds for pipeline1 → exclusive not called
+        # Second call (regular) fails for pipeline2 → try exclusive
+        # Third call (exclusive) succeeds for pipeline2
+        mock_lock_port.release.side_effect = [True, False, True]
 
         result = await lock_service.force_release_all(
             owner_id, ["pipeline1", "pipeline2"]
