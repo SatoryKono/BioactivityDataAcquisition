@@ -7,19 +7,27 @@
 - flatten_nested_dict: Разворачивание вложенных словарей с префиксом
 - extract_list_field: Извлечение поля из списка словарей
 - aggregate_nested_lists: Агрегация вложенных списков
-- normalize_string: Нормализация строковых полей
-- parse_date_field: Парсинг даты с обработкой ошибок
-- validate_smiles: Валидация SMILES строки
+- normalize_string: Нормализация строковых полей (delegated to domain)
+- parse_date_field: Парсинг даты с обработкой ошибок (delegated to domain)
+- validate_smiles: Валидация SMILES строки (delegated to domain)
+
+Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 """
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 from datetime import date
 from typing import Any, TypeVar
 
+from bioetl.domain.normalization import (
+    normalize_string as _domain_normalize_string,
+)
+from bioetl.domain.normalization import (
+    parse_date_field as _domain_parse_date_field,
+)
 from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
 
 T = TypeVar("T")
 
@@ -180,6 +188,8 @@ def normalize_string(value: str | None) -> str | None:
 
     Удаляет пробельные символы по краям и возвращает None для пустых строк.
 
+    Note: Delegated to domain.normalization.normalize_string per REFACTOR-004.
+
     Args:
         value: Строка для нормализации.
 
@@ -195,10 +205,7 @@ def normalize_string(value: str | None) -> str | None:
         None
 
     """
-    if value is None:
-        return None
-    stripped = value.strip()
-    return stripped if stripped else None
+    return _domain_normalize_string(value)
 
 
 def parse_date_field(
@@ -208,6 +215,8 @@ def parse_date_field(
     """Парсит строку даты в объект date.
 
     Безопасный парсинг с обработкой ошибок и невалидных форматов.
+
+    Note: Delegated to domain.normalization.parse_date_field per REFACTOR-004.
 
     Args:
         value: Строка с датой или None.
@@ -225,20 +234,7 @@ def parse_date_field(
         datetime.date(2024, 1, 15)
 
     """
-    if value is None:
-        return None
-
-    from datetime import datetime
-
-    try:
-        return datetime.strptime(value.strip(), fmt).date()
-    except (ValueError, AttributeError):
-        return None
-
-
-# SMILES validation regex (базовая проверка синтаксиса)
-# Допускает: буквы, цифры, скобки, точки, знаки, решётки, проценты, @, +, -, =, #
-_SMILES_PATTERN = re.compile(r"^[A-Za-z0-9@+\-=#$()\[\]\\/%.*]+$")
+    return _domain_parse_date_field(value, fmt)
 
 
 def validate_smiles(smiles: str | None) -> bool:
@@ -246,6 +242,8 @@ def validate_smiles(smiles: str | None) -> bool:
 
     Выполняет базовую синтаксическую проверку без полного парсинга молекулы.
     Для полной валидации используйте RDKit или другую химическую библиотеку.
+
+    Note: Delegated to domain.validation.validate_smiles per REFACTOR-004.
 
     Args:
         smiles: SMILES строка для проверки.
@@ -266,14 +264,7 @@ def validate_smiles(smiles: str | None) -> bool:
         False
 
     """
-    if not smiles or not isinstance(smiles, str):
-        return False
-
-    stripped = smiles.strip()
-    if not stripped:
-        return False
-
-    return bool(_SMILES_PATTERN.match(stripped))
+    return _domain_validate_smiles(smiles)
 
 
 def safe_extract(

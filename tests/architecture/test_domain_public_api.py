@@ -42,11 +42,13 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "filtering",
         "locking",
         "medallion",
+        "normalization",  # REFACTOR-004: functions are re-exported, not module
         "ports",
         "resilience",
         "serialization",
         "transformations",
         "types",
+        "validation",  # REFACTOR-004: functions are re-exported, not module
     }
 
     # Get all attributes from the module
