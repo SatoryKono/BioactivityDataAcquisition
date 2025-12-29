@@ -193,18 +193,7 @@ class PubChemAdapter(BaseSyncAdapter):
     def _compound_to_dict(self, compound: pcp.Compound) -> dict[str, Any]:
         """Convert pubchempy Compound to dictionary.
 
-        Args:
-            compound: PubChemPy Compound object
-
-        Returns:
-            Dictionary with compound data
-
-        Note:
-            Uses connectivity_smiles and smiles properties instead of deprecated
-            canonical_smiles and isomeric_smiles (deprecated in pubchempy 1.0.5).
-            Output keys remain canonical_smiles/isomeric_smiles for backward
-            compatibility with domain entities and schemas.
-
+        Uses connectivity_smiles/smiles (replaces deprecated canonical/isomeric_smiles).
         """
         return {
             "cid": compound.cid,
@@ -226,15 +215,7 @@ class PubChemAdapter(BaseSyncAdapter):
         }
 
     def _substance_to_dict(self, substance: pcp.Substance) -> dict[str, Any]:
-        """Convert pubchempy Substance to dictionary.
-
-        Args:
-            substance: PubChemPy Substance object
-
-        Returns:
-            Dictionary with substance data
-
-        """
+        """Convert pubchempy Substance to dictionary."""
         return {
             "sid": substance.sid,
             "source_name": substance.source_name,
@@ -244,15 +225,7 @@ class PubChemAdapter(BaseSyncAdapter):
         }
 
     def _assay_to_dict(self, assay: dict[str, Any]) -> dict[str, Any]:
-        """Convert assay data to standardized dictionary.
-
-        Args:
-            assay: Raw assay data
-
-        Returns:
-            Dictionary with assay data
-
-        """
+        """Convert assay data to standardized dictionary."""
         return {
             "aid": assay.get("aid"),
             "name": assay.get("name"),
@@ -262,26 +235,7 @@ class PubChemAdapter(BaseSyncAdapter):
         }
 
     async def _probe_health(self) -> HealthStatus:
-        """Perform PubChem-specific health probe.
-
-        Overrides BaseSyncAdapter._probe_health() to use lightweight
-        compound query (water, CID 962) for health assessment.
-
-        Returns:
-            HealthStatus based on probe response:
-            - HEALTHY/DEGRADED: Based on circuit breaker state if compound found
-            - DEGRADED: Empty response
-            - UNHEALTHY: Circuit breaker is open
-
-        Raises:
-            Exception: On request failure (base class handles via _fallback_health_status).
-
-        Example:
-            >>> status = await adapter.health_check()
-            >>> status.value
-            'healthy'
-
-        """
+        """Perform PubChem health probe using lightweight water query (CID 962)."""
         try:
             # Lightweight query: fetch water (CID 962)
             await self.rate_limiter.acquire()
@@ -323,12 +277,7 @@ class PubChemAdapter(BaseSyncAdapter):
             raise  # Let base class handle via _fallback_health_status()
 
     def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for PubChem.
-
-        Returns:
-            PubChem compound query endpoint used for health probe.
-
-        """
+        """Get the PubChem health check endpoint."""
         return "/rest/pug/compound/cid/962/property/MolecularFormula/JSON"
 
     def __repr__(self) -> str:
