@@ -33,7 +33,7 @@ from bioetl.application.core.lifecycle_orchestrator import (
     LifecycleOrchestrator,
 )
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.medallion_policy import (
+from bioetl.domain.medallion import (
     Layer,
     WriteMode,
     WriteModePolicy,
