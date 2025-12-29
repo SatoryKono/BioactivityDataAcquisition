@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
@@ -72,12 +72,6 @@ __all__ = [
     "ServicesBuilder",
     "build_runner_services",
 ]
-
-
-class DataSourceFactoryProtocol(Protocol):
-    """Protocol for data source creation."""
-
-    def create(self, settings: Settings, logger: LoggerPort) -> DataSourcePort: ...
 
 
 # =============================================================================
