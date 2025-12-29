@@ -25,10 +25,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --extra dev --extra tracing
+          uv sync --extra dev --extra tracing --extra performance
+
+      - name: Validate orjson installation
+        run: |
+          uv run python - <<'PY'
+          import orjson
+          print(orjson.__version__)
+          PY
 
       - name: Run Tests with Coverage
         run: |
           # Run unit and integration tests with coverage
           # Enforce 85% coverage threshold as requested
-          uv run pytest tests/ -v -m "not e2e" --cov=src/bioetl --cov-fail-under=85
+          uv run pytest tests/ -v -m "not e2e" --cov=src/bioetl --cov-report=term --cov-fail-under=85
