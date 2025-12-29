@@ -1,9 +1,10 @@
 # configs/pipelines/chembl/compound_record.yaml
-# Конфигурация пайплайна для сущности Compound Record из ChEMBL.
+# Pipeline configuration for ChEMBL Compound Record entity.
 #
 # Compound records link molecules to documents. Contains the original
 # compound name as it appears in the publication.
-# Load strategy: incremental (>2M records, uses record_id as watermark).
+#
+# Inherits defaults from ../_defaults.yaml
 
 pipeline_name: chembl_compound_record
 provider: chembl
@@ -14,79 +15,39 @@ description: "Extract compound records from ChEMBL API"
 primary_keys: ["record_id"]
 silver_table: "chembl_compound_record"
 
-# Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/chembl.yaml
 
-# Gold filters: compound records with molecule and document references
+# Entity-specific gold filters
 gold_filters:
-    required_fields:
-        - molecule_chembl_id
-        - document_chembl_id
+  required_fields:
+    - molecule_chembl_id
+    - document_chembl_id
 
-transform:
-    version: "1.0.0"
-    steps:
-        - normalize_values
-        - add_metadata
-        - calculate_content_hash
-
+# Entity-specific sink overrides
 sink:
-    bronze:
-        path: "data/output/bronze"
-        format: jsonl
-        save_json: true
-        deterministic: true
+  bronze:
+    path: "data/output/bronze"
+  silver:
+    path: "data/output/silver"
+    primary_key: ["record_id"]
+    partition_by: []
+    sort_by:
+      columns: ["record_id"]
+      ascending: true
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/output/gold"
+    sort_by:
+      columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
+      ascending: true
+    csv_export:
+      path: "data/output/csv/gold"
 
-    silver:
-        path: "data/output/silver"
-        format: delta
-        mode: merge
-        on_schema_mismatch: evolve
-        primary_key: ["record_id"]
-        partition_by: []
-        classification: public
-        forensic_retention: true
-        deterministic: true
-        sort_by:
-            columns: ["record_id"]
-            ascending: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/silver"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-    gold:
-        enabled: true
-        validation:
-            strict: true
-        path: "data/output/gold"
-        format: delta
-        mode: overwrite
-        deterministic: true
-        sort_by:
-            columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
-            ascending: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/gold"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-dq_rules:
-    soft_fail_threshold: 0.05
-    hard_fail_threshold: 0.20
-
-circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-
-# Input filter configuration (for CSV-based ID filtering)
+# Entity-specific input filter
 input_filter:
-    enabled: true
-    source_path: "data/input/compound_record.csv"
-    column_name: "record_id"
-    filter_field: "record_id"
-    batch_size: 20
+  enabled: true
+  source_path: "data/input/compound_record.csv"
+  column_name: "record_id"
+  filter_field: "record_id"
+  batch_size: 20
