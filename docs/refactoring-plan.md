@@ -1147,4 +1147,28 @@ ls tests/architecture/test_di_*.py
 
 ---
 
+## Фаза 6: Mypy Strict Compliance ✅ ЗАВЕРШЕНА (2025-12-29)
+
+### P1-1: Исправление mypy ошибок ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано 2025-12-29
+> **Верификация:** `mypy src/bioetl --strict` → 0 ошибок
+
+#### Исправленные ошибки
+
+| Файл | Строка | Ошибка | Решение |
+|------|--------|--------|---------|
+| `domain/schemas/base.py` | 15 | `Class cannot subclass "DataFrameModel"` | `# type: ignore[misc]` (Pandera не имеет полных type stubs) |
+| `application/core/base_transformer.py` | 323 | `Returning Any from function declared to return "str \| None"` | Явная типизация: `result: str = orjson.dumps(...).decode("utf-8")` |
+| `application/core/base_transformer.py` | 331 | `Returning Any from function declared to return "str \| None"` | Явная типизация: `result_item: str = ...` |
+| `application/core/base_transformer.py` | 335 | `Returning Any from function declared to return "str \| None"` | Явная типизация: `result_list: str = ...` |
+
+#### Критерии приёмки
+
+- [x] `mypy src/bioetl --strict` → 0 ошибок
+- [x] Все тесты проходят
+- [x] CHANGELOG.md обновлён
+
+---
+
 *Строй надёжно. Верифицируй перед предложением. Документируй с доказательствами.*
