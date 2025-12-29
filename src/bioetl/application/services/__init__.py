@@ -10,8 +10,16 @@ from bioetl.application.services.medallion_lifecycle import (
     ClearResult,
     MedallionLifecycleService,
 )
+from bioetl.application.services.shutdown_service import (
+    PipelineShutdownError,
+    ShutdownReason,
+    ShutdownService,
+)
 
 __all__ = [
     "ClearResult",
     "MedallionLifecycleService",
+    "PipelineShutdownError",
+    "ShutdownReason",
+    "ShutdownService",
 ]
