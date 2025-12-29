@@ -224,12 +224,12 @@ async def test_circuit_breaker(pubchem_adapter):
     # Set low threshold
     pubchem_adapter.circuit_breaker.failure_threshold = 1
 
-    with patch("pubchempy.get_compounds", side_effect=Exception("API Error")):
+    with patch("pubchempy.get_compounds", side_effect=RuntimeError("API Error")):
         # First call fails and increments failure count
         try:
             async for _ in pubchem_adapter.fetch("compound", query="fail"):
                 pass
-        except Exception:
+        except RuntimeError:
             pass
 
         # Second call should raise CircuitBreakerOpenError
