@@ -59,11 +59,11 @@ class BronzeWriter:
         base_path: str | Path,
         logger: LoggerPort,
         metrics: MetricsPort,
+        tracing: TracingPort | None = None,
         save_json: bool = False,
         json_path: str | None = None,
         validate_json: bool = True,
         audit: AuditPort | None = None,
-        tracing: TracingPort | None = None,
         require_lock: bool = True,
     ) -> None:
         """Initialize Bronze writer.
@@ -73,6 +73,9 @@ class BronzeWriter:
             logger: Structured logger for observability (MUST be injected)
             metrics: Metrics port for observability (MUST be injected).
                      Use NoOpMetrics from composition layer if metrics disabled.
+            tracing: TracingPort for distributed tracing (SHOULD be injected).
+                    Use NoOpTracing from composition layer if tracing disabled.
+                    Passing None is deprecated and will raise error in future.
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to base_path/json/)
             validate_json: If True, validate each record is valid JSON bytes
@@ -80,13 +83,25 @@ class BronzeWriter:
                           Default is True for data integrity.
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
-            tracing: Optional TracingPort for distributed tracing.
-                    Use NoOpTracing from composition layer if tracing disabled.
             require_lock: If True, write operations require valid LockContext.
                          Default is True per RULES.md §3.3.
                          Set to False only for testing or non-concurrent scenarios.
 
         """
+        # Backward compatibility: create NoOp if not provided (deprecated)
+        if tracing is None:
+            import warnings
+
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+            warnings.warn(
+                "Passing tracing=None is deprecated. "
+                "Explicitly pass NoOpTracing() from composition layer.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            tracing = NoOpTracing()
+
         self.base_path = Path(base_path)
         self.logger = logger
         self._metrics = metrics
@@ -95,12 +110,6 @@ class BronzeWriter:
         self.validate_json = validate_json
         self._audit = audit
         self._require_lock = require_lock
-
-        # Use NoOpTracing if not provided
-        if tracing is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-
-            tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:

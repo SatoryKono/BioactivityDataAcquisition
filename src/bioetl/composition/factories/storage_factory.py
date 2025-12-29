@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -85,28 +86,31 @@ class StorageFactory:
         if bronze_config and bronze_config.save_json:
             json_path = str(bronze_path.parent / "json")
 
+        # Ensure tracing is always explicitly provided (DI pattern)
+        effective_tracing: TracingPort = tracing if tracing is not None else NoOpTracing()
+
         return StorageAdapter(
             bronze_writer=BronzeWriter(
                 base_path=bronze_path,
                 logger=logger,
+                metrics=metrics,
+                tracing=effective_tracing,
                 save_json=save_json,
                 json_path=json_path,
-                metrics=metrics,
-                tracing=tracing,
                 require_lock=require_lock,
             ),
             silver_writer=DeltaWriter(
                 base_path=silver_path,
                 logger=logger,
+                tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
-                tracing=tracing,
                 require_lock=require_lock,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
                 logger=logger,
+                tracing=effective_tracing,
                 csv_exporter=gold_csv_exporter,
-                tracing=tracing,
                 require_lock=require_lock,
             ),
         )
