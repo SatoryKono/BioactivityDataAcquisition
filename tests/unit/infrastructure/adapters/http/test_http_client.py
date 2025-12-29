@@ -56,19 +56,11 @@ class TestRetryConfig:
         delay = config.calculate_delay(5)  # Would be 320 without cap
         assert delay == 15.0
 
-    def test_calculate_delay_with_jitter(self):
-        """Test that jitter adds randomness."""
-        config = RetryConfig(base_delay=10.0, jitter=0.1, deterministic=False)
-        delays = [config.calculate_delay(0) for _ in range(10)]
-        # With 10% jitter, delays should vary between 9 and 11
-        assert not all(d == delays[0] for d in delays)  # Some variation expected
-
-    def test_deterministic_jitter_same_input_same_output(self):
-        """Test deterministic mode produces same delay for same inputs."""
+    def test_jitter_same_input_same_output(self):
+        """Test jitter produces same delay for same inputs (deterministic)."""
         config = RetryConfig(
             base_delay=10.0,
             jitter=0.1,
-            deterministic=True,
             jitter_seed=42,
         )
         url = "https://api.example.com/data"
@@ -85,12 +77,11 @@ class TestRetryConfig:
         delay_a1_again = config.calculate_delay(attempt=1, url=url)
         assert delay_a1 == delay_a1_again
 
-    def test_deterministic_jitter_different_urls_different_output(self):
-        """Test deterministic mode produces different delays for different URLs."""
+    def test_jitter_different_urls_different_output(self):
+        """Test jitter produces different delays for different URLs."""
         config = RetryConfig(
             base_delay=10.0,
             jitter=0.1,
-            deterministic=True,
             jitter_seed=42,
         )
 
@@ -104,28 +95,7 @@ class TestRetryConfig:
         assert 9.0 <= delay1 <= 11.0
         assert 9.0 <= delay2 <= 11.0
 
-    def test_non_deterministic_mode_uses_random(self):
-        """Test non-deterministic mode produces varying delays."""
-        config = RetryConfig(
-            base_delay=10.0,
-            jitter=0.1,
-            deterministic=False,  # Explicit non-deterministic
-        )
-        url = "https://api.example.com/data"
-
-        # Collect multiple delay values
-        delays = [config.calculate_delay(attempt=0, url=url) for _ in range(20)]
-
-        # With random jitter, not all delays should be identical
-        # (extremely unlikely for 20 random values to be the same)
-        unique_delays = set(delays)
-        assert len(unique_delays) > 1, "Random jitter should produce varying delays"
-
-        # All delays should still be within jitter range
-        for delay in delays:
-            assert 9.0 <= delay <= 11.0
-
-    def test_deterministic_jitter_cross_process_stability(self):
+    def test_jitter_cross_process_stability(self):
         """Test deterministic jitter produces stable values across processes.
 
         This test verifies that the jitter calculation uses MD5 (not Python's
@@ -141,7 +111,6 @@ class TestRetryConfig:
         config = RetryConfig(
             base_delay=10.0,
             jitter=0.1,
-            deterministic=True,
             jitter_seed=42,
         )
         url = "https://api.example.com/test"
@@ -166,8 +135,8 @@ class TestRetryConfig:
         assert config.calculate_delay(attempt=0, url=url) == expected_delay
         assert config.calculate_delay(attempt=0, url=url) == expected_delay
 
-    def test_deterministic_jitter_known_values(self):
-        """Test deterministic jitter produces known stable values.
+    def test_jitter_known_values(self):
+        """Test jitter produces known stable values.
 
         These values are pre-computed and serve as a regression test.
         If this test fails, it means the jitter algorithm has changed.
@@ -175,7 +144,6 @@ class TestRetryConfig:
         config = RetryConfig(
             base_delay=1.0,
             jitter=0.5,
-            deterministic=True,
             jitter_seed=123,
         )
 

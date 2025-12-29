@@ -699,26 +699,21 @@ class TestValidateWriteModes:
     def test_silver_overwrite_mode_is_invalid(
         self, mock_context, mock_logger, mock_metrics
     ):
-        """Test that Silver 'overwrite' mode is invalid."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            write_mode="overwrite",
-            gold_write_mode="scd2",
-        )
-        service = PreflightService(
-            config=config,
-            context=mock_context,
-            logger=mock_logger,
-            metrics=mock_metrics,
-        )
-        errors = service.validate_write_modes()
-        silver_errors = [e for e in errors if e.field == "write_mode"]
-        assert len(silver_errors) == 1
-        assert "RULES §2.1" in silver_errors[0].rule
+        """Test that Silver 'overwrite' mode is invalid.
+
+        The 'overwrite' mode is not a valid SilverWriteMode.
+        PipelineConfig raises ValueError during construction.
+        """
+        with pytest.raises(ValueError, match="Invalid Silver write mode.*overwrite"):
+            PipelineConfig(
+                pipeline_name="test",
+                provider="chembl",
+                entity_type="activity",
+                primary_keys=["id"],
+                silver_table="silver",
+                write_mode="overwrite",
+                gold_write_mode="scd2",
+            )
 
     def test_gold_merge_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
         """Test that Gold 'merge' mode is valid."""
@@ -818,14 +813,19 @@ class TestValidateWriteModes:
     def test_logs_warning_on_invalid_modes(
         self, mock_context, mock_logger, mock_metrics
     ):
-        """Test that invalid write modes are logged as warnings."""
+        """Test that invalid write modes are logged as warnings.
+
+        SilverWriteMode.DELETE is valid enum but not allowed by policy.
+        """
+        from bioetl.domain.medallion import SilverWriteMode
+
         config = PipelineConfig(
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
             primary_keys=["id"],
             silver_table="silver",
-            write_mode="overwrite",  # Invalid
+            write_mode=SilverWriteMode.DELETE,  # Valid enum, invalid for policy
             gold_write_mode="scd2",
         )
         service = PreflightService(
@@ -958,14 +958,19 @@ class TestValidatePreflight:
         mock_services,
         incremental_runtime,
     ):
-        """Test validate_preflight includes write mode validation errors."""
+        """Test validate_preflight includes write mode validation errors.
+
+        SilverWriteMode.DELETE is valid enum but not allowed by policy.
+        """
+        from bioetl.domain.medallion import SilverWriteMode
+
         config = PipelineConfig(
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
             primary_keys=["id"],
             silver_table="silver",
-            write_mode="overwrite",  # Invalid for Silver
+            write_mode=SilverWriteMode.DELETE,  # Valid enum, invalid for policy
             gold_write_mode="scd2",
         )
         service = PreflightService(

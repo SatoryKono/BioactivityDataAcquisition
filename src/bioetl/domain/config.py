@@ -13,7 +13,6 @@ Consolidated configuration classes (post-refactoring):
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
@@ -66,19 +65,10 @@ class DQConfig:
 
 
 def _convert_silver_write_mode(mode: SilverWriteMode | str) -> SilverWriteMode:
-    """Convert string to SilverWriteMode, handling deprecated values."""
+    """Convert string to SilverWriteMode."""
     if isinstance(mode, SilverWriteMode):
         return mode
-    mode_str = mode
-    if mode_str == "overwrite":
-        warnings.warn(
-            "silver_write_mode='overwrite' is deprecated. "
-            "Use SilverWriteMode.DELETE for rebuild operations.",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-        mode_str = "delete"
-    return SilverWriteMode.from_string(mode_str)
+    return SilverWriteMode.from_string(mode)
 
 
 def _convert_gold_write_mode(mode: GoldWriteMode | str) -> GoldWriteMode:
