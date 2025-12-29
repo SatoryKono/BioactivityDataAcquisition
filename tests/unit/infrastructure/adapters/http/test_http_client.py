@@ -676,10 +676,10 @@ class TestUnifiedHTTPClientObservability:
         assert call_args[1]["provider"] == "test_provider"
 
     @pytest.mark.asyncio
-    async def test_retry_logs_debug(
+    async def test_retry_logs_warning(
         self, http_client_with_observability, mock_circuit_breaker, mock_logger
     ):
-        """Test retry logs debug message."""
+        """Test retry logs warning message."""
         mock_response_503 = MagicMock(spec=httpx.Response)
         mock_response_503.status_code = 503
         mock_response_503.headers = {}
@@ -694,10 +694,22 @@ class TestUnifiedHTTPClientObservability:
             async with http_client_with_observability:
                 await http_client_with_observability.get("https://api.example.com/data")
 
-        # Verify debug was logged for retry
-        mock_logger.debug.assert_called()
-        call_args = mock_logger.debug.call_args
-        assert call_args[0][0] == "http_retry"
+        # Verify warning was logged for retry (not debug - retries are notable events)
+        # Check that logger.warning was called at least once for retry
+        mock_logger.warning.assert_called()
+        call_args_list = mock_logger.warning.call_args_list
+        retry_calls = [
+            c for c in call_args_list
+            if c.args and "Retry" in c.args[0]
+        ]
+        assert len(retry_calls) >= 1, (
+            f"Expected at least 1 retry warning call, got {len(retry_calls)}. "
+            f"All warning calls: {call_args_list}"
+        )
+        # Verify retry call contains expected fields
+        retry_call = retry_calls[0]
+        assert "attempt" in retry_call.kwargs
+        assert retry_call.kwargs["attempt"] == 1
 
     def test_default_observability_uses_noop(
         self, mock_rate_limiter, mock_circuit_breaker

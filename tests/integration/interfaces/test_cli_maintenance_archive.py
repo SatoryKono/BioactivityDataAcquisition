@@ -61,7 +61,7 @@ class TestCliMaintenanceArchiveExecution:
     ):
         """Test successful archive operation."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -86,7 +86,7 @@ class TestCliMaintenanceArchiveExecution:
     ):
         """Test archive with --remove-source flag."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -117,7 +117,7 @@ class TestCliMaintenanceArchiveExecution:
         mock_lifecycle_service.archive.return_value = 50
 
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -152,7 +152,7 @@ class TestCliMaintenanceArchivePathValidation:
     ):
         """Test archive with absolute target path."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -170,7 +170,7 @@ class TestCliMaintenanceArchivePathValidation:
     ):
         """Test archive with relative target path."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -192,7 +192,7 @@ class TestCliMaintenanceArchivePathValidation:
     ):
         """Test archive with path containing special characters."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -227,7 +227,7 @@ class TestCliMaintenanceArchiveErrors:
     ):
         """Test that archive propagates service errors."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service_error,
         ):
             result = cli_runner.invoke(
@@ -249,7 +249,7 @@ class TestCliMaintenanceArchiveErrors:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_service,
         ):
             result = cli_runner.invoke(
@@ -278,7 +278,7 @@ class TestCliMaintenanceArchiveRemoveSource:
     ):
         """Test that archive without --remove-source keeps the source."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -299,7 +299,7 @@ class TestCliMaintenanceArchiveRemoveSource:
     ):
         """Test that archive with --remove-source removes the source."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -337,7 +337,7 @@ class TestCliMaintenanceArchiveOutput:
     ):
         """Test that archive shows the number of archived files."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -356,7 +356,7 @@ class TestCliMaintenanceArchiveOutput:
     ):
         """Test that archive output includes target path."""
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_lifecycle_service,
         ):
             result = cli_runner.invoke(
@@ -376,7 +376,7 @@ class TestCliMaintenanceArchiveOutput:
         mock_service.archive = AsyncMock(return_value=0)
 
         with patch(
-            "bioetl.interfaces.cli.commands.maintenance.get_lifecycle_service",
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
             return_value=mock_service,
         ):
             result = cli_runner.invoke(
