@@ -5,11 +5,22 @@ These entrypoints are designed to be used by CLI, Prefect, REST APIs, or any
 other orchestration layer without direct dependency on bootstrap functions.
 
 The CLI should only import from this module, not from bootstrap.
+
+This module provides the unified pipeline execution interface (REQ-ARCH-041):
+- RunOptions: User-facing configuration options
+- RunResult: Execution result with metrics and status
+- run_pipeline(): Async convenience function for pipeline execution
+- create_pipeline_runner(): Factory for PipelineRunner instances
+
+Any orchestration layer (CLI, REST API, schedulers) should use these
+entrypoints instead of directly accessing bootstrap or runner internals.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from enum import Enum
 from typing import TYPE_CHECKING, Any, cast
 from uuid import uuid4
 
@@ -20,6 +31,9 @@ __all__ = [
     "RunOptions",
     "VacuumOptions",
     "ArchiveOptions",
+    # Result classes
+    "RunResult",
+    "RunStatus",
     # Pipeline operations
     "build_pipeline_context",
     "create_pipeline_runner",
@@ -116,6 +130,76 @@ class ArchiveOptions:
     remove_source: bool = False
 
 
+class RunStatus(str, Enum):
+    """Pipeline run completion status.
+
+    Attributes:
+        SUCCESS: Pipeline completed successfully.
+        SHUTDOWN: Pipeline was gracefully shut down (SIGTERM/SIGINT).
+        FAILED: Pipeline failed with an error.
+    """
+
+    SUCCESS = "success"
+    SHUTDOWN = "shutdown"
+    FAILED = "failed"
+
+
+@dataclass(frozen=True)
+class RunResult:
+    """Result of pipeline execution.
+
+    Provides execution metrics and status for orchestration layers.
+    This is the unified return type for run_pipeline() and enables
+    programmatic access to execution results without parsing logs.
+
+    Attributes:
+        status: Completion status (success, shutdown, failed).
+        pipeline_name: Name of the executed pipeline.
+        run_id: Unique identifier for this run.
+        run_type: Type of run (incremental, backfill, rebuild).
+        records_fetched: Total records retrieved from source.
+        records_bronze: Records written to Bronze layer.
+        records_silver: Records written to Silver layer.
+        records_gold: Records written to Gold layer.
+        records_quarantined: Records sent to quarantine.
+        started_at: Timestamp when execution started.
+        completed_at: Timestamp when execution completed.
+        error_message: Error message if status is FAILED.
+
+    Example:
+        >>> result = await run_pipeline("chembl_activity", options)
+        >>> if result.status == RunStatus.SUCCESS:
+        ...     print(f"Processed {result.records_silver} records")
+        >>> else:
+        ...     print(f"Failed: {result.error_message}")
+    """
+
+    status: RunStatus
+    pipeline_name: str
+    run_id: str
+    run_type: str
+    records_fetched: int = 0
+    records_bronze: int = 0
+    records_silver: int = 0
+    records_gold: int = 0
+    records_quarantined: int = 0
+    started_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    completed_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    error_message: str | None = None
+
+    @property
+    def duration_seconds(self) -> float:
+        """Calculate execution duration in seconds."""
+        return (self.completed_at - self.started_at).total_seconds()
+
+    @property
+    def success_rate(self) -> float:
+        """Calculate success rate (non-quarantined / fetched)."""
+        if self.records_fetched == 0:
+            return 1.0
+        return (self.records_fetched - self.records_quarantined) / self.records_fetched
+
+
 def _ensure_registrations() -> None:
     """Ensure all providers and pipelines are registered.
 
@@ -201,27 +285,75 @@ def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
     return bootstrap_pipeline(ctx)
 
 
-async def run_pipeline(name: str, options: RunOptions) -> None:
+async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     """Run a pipeline with the given options.
 
-    Convenience function that creates and executes a pipeline runner.
-    For more control over execution, use create_pipeline_runner() directly.
+    Unified pipeline execution interface that creates a runner, executes the
+    pipeline, and returns structured results. This is the recommended way to
+    run pipelines programmatically from any orchestration layer.
+
+    For lower-level control over execution (e.g., signal handling, custom
+    logging), use create_pipeline_runner() directly.
 
     Args:
         name: Pipeline name (e.g., 'chembl_activity').
         options: User-facing run options.
 
+    Returns:
+        RunResult with execution metrics and status.
+
     Raises:
         ValueError: If pipeline name is unknown or options are invalid.
         FileNotFoundError: If pipeline config file is missing.
-        PipelineShutdownError: If pipeline was gracefully shut down.
 
     Example:
         >>> options = RunOptions(run_type="incremental", limit=100)
-        >>> await run_pipeline("chembl_activity", options)
+        >>> result = await run_pipeline("chembl_activity", options)
+        >>> if result.status == RunStatus.SUCCESS:
+        ...     print(f"Processed {result.records_silver} records")
+        >>> elif result.status == RunStatus.SHUTDOWN:
+        ...     print("Pipeline was gracefully shut down")
+        >>> else:
+        ...     print(f"Pipeline failed: {result.error_message}")
     """
+    from bioetl.application.core.shutdown import PipelineShutdownError
+
+    started_at = datetime.now(tz=UTC)
     runner = create_pipeline_runner(name, options)
-    await runner.run()
+
+    # Extract run context for result
+    run_id = str(runner._context.run_id)
+    run_type = options.run_type
+
+    status = RunStatus.SUCCESS
+    error_message: str | None = None
+
+    try:
+        await runner.run()
+    except PipelineShutdownError:
+        status = RunStatus.SHUTDOWN
+    except Exception as e:
+        status = RunStatus.FAILED
+        error_message = str(e)
+
+    completed_at = datetime.now(tz=UTC)
+
+    # Extract metrics from executor (composition layer has access to internals)
+    executor = runner._executor
+    return RunResult(
+        status=status,
+        pipeline_name=name,
+        run_id=run_id,
+        run_type=run_type,
+        records_fetched=executor.records_fetched,
+        records_bronze=executor.records_bronze,
+        records_silver=executor.records_silver,
+        records_gold=executor.records_gold,
+        records_quarantined=executor.records_quarantined,
+        started_at=started_at,
+        completed_at=completed_at,
+        error_message=error_message,
+    )
 
 
 def get_quarantine_manager(pipeline: str) -> QuarantineManager:
