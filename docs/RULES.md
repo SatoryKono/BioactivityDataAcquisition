@@ -390,7 +390,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 ### 4.1. Стек и Матрица Решений 
 | Задача | Инструмент | Альтернатива | Критерий выбора | 
 |--------|------------|--------------|-----------------| 
-| **Оркестрация** | **Prefect** | Simple Runner | <5 DAG-ов — свой Runner (скрипт). Иначе Prefect. | 
+| **Оркестрация** | **PipelineRunner** | Prefect/Airflow | Используем собственный легковесный Runner. Внешние фреймворки при >5 DAG-ов. | 
 | **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. | 
 | **HTTP Клиент** | **httpx** via `UnifiedHTTPClient` | requests | Поддержка `async`. Все адаптеры **MUST** использовать `UnifiedHTTPClient` (см. §4.1.1). **Legacy Wrappers**: Для библиотек без async поддержки (pubchempy) — `BaseSyncAdapter` с `ThreadPoolExecutor`. | 
 | **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |

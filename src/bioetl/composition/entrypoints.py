@@ -1,7 +1,7 @@
 """Entrypoints for BioETL pipeline operations.
 
 Provides high-level functions for running pipelines and managing resources.
-These entrypoints are designed to be used by CLI, Prefect, REST APIs, or any
+These entrypoints are designed to be used by CLI, REST APIs, or any
 other orchestration layer without direct dependency on bootstrap functions.
 
 The CLI should only import from this module, not from bootstrap.
@@ -78,7 +78,7 @@ if TYPE_CHECKING:
 class RunOptions:
     """Options for running a pipeline.
 
-    These are the user-facing options that can be set via CLI, Prefect, or REST.
+    These are the user-facing options that can be set via CLI or REST API.
     The entrypoint converts these to internal domain types.
 
     Attributes:
