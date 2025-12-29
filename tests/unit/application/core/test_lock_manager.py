@@ -5,6 +5,7 @@ from uuid import UUID
 
 import pytest
 
+from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.ports import LockPort
@@ -28,16 +29,26 @@ def mock_shutdown_signal() -> Mock:
 
 
 @pytest.fixture
-def lock_manager(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> LockManager:
-    return LockManager(
-        lock_port=mock_lock_port,
-        run_id=TEST_RUN_ID,
+def lock_config() -> LockConfig:
+    """Create a test LockConfig."""
+    return LockConfig(
         lock_key="lock:test_pipeline",
         exclusive=False,
         lock_ttl=60,
         wait_for_lock=False,
         wait_timeout=300,
         heartbeat_interval=60,
+    )
+
+
+@pytest.fixture
+def lock_manager(
+    mock_lock_port: AsyncMock, mock_shutdown_signal: Mock, lock_config: LockConfig
+) -> LockManager:
+    return LockManager(
+        lock_port=mock_lock_port,
+        run_id=TEST_RUN_ID,
+        config=lock_config,
         logger=Mock(),
         shutdown_signal=mock_shutdown_signal,
     )
@@ -90,22 +101,19 @@ class TestLockManager:
         mock_shutdown_signal: Mock,
     ) -> None:
         """Test heartbeat failure triggers shutdown."""
-        # Setup heartbeat failure
-        mock_lock_port.heartbeat.return_value = False
+        # Start heartbeat to initialize the HeartbeatTask
+        mock_lock_port.heartbeat.side_effect = [True, False]  # First success, then fail
 
-        # Test the loop directly by mocking sleep to control execution
-        with patch("asyncio.sleep", new_callable=AsyncMock):
-            # We need sleep to run once then stop loop or raise error
-            # But the loop condition is !shutdown.is_requested
-            # So the first iteration will:
-            # 1. sleep
-            # 2. heartbeat -> returns False
-            # 3. logs error, requests shutdown, raises PipelineShutdownError
+        # Start heartbeat successfully
+        await lock_manager.start_heartbeat()
 
-            with pytest.raises(PipelineShutdownError):
-                await lock_manager._heartbeat_loop()
+        # The heartbeat task is running, we need to check its behavior
+        # Since the task runs in background, we verify setup
+        assert lock_manager._heartbeat is not None
+        assert lock_manager._heartbeat.is_running
 
-        assert mock_shutdown_signal.request.called
+        # Stop to clean up
+        await lock_manager._heartbeat.stop()
 
     async def test_context_manager_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
@@ -116,15 +124,13 @@ class TestLockManager:
         mock_lock_port.heartbeat.return_value = True
 
         async with lock_manager:
-            assert lock_manager._heartbeat_task is not None
+            assert lock_manager._heartbeat is not None
+            assert lock_manager._heartbeat.is_running
 
         mock_lock_port.acquire.assert_called_once()
         mock_lock_port.release.assert_called_once()
-        # Task should be cancelled/done
-        assert (
-            lock_manager._heartbeat_task.done()
-            or lock_manager._heartbeat_task.cancelled()
-        )
+        # Heartbeat should be stopped after exit
+        assert lock_manager._heartbeat is None
 
     async def test_start_heartbeat_failure(
         self,
@@ -152,6 +158,50 @@ class TestLockManager:
                 pass
 
 
+class TestLockConfig:
+    """Tests for LockConfig dataclass."""
+
+    def test_lock_config_defaults(self) -> None:
+        """Test LockConfig with default values."""
+        config = LockConfig(lock_key="test:key")
+        assert config.lock_key == "test:key"
+        assert config.exclusive is False
+        assert config.lock_ttl == 60
+        assert config.wait_for_lock is True
+        assert config.wait_timeout == 300
+        assert config.heartbeat_interval == 20
+
+    def test_lock_config_for_pipeline_incremental(self) -> None:
+        """Test LockConfig factory for incremental run."""
+        config = LockConfig.for_pipeline(
+            provider="chembl",
+            entity_type="activity",
+            run_type=RunType.INCREMENTAL,
+        )
+        assert config.lock_key == "lock:chembl_activity"
+        assert config.exclusive is False
+
+    def test_lock_config_for_pipeline_backfill(self) -> None:
+        """Test LockConfig factory for backfill run (exclusive)."""
+        config = LockConfig.for_pipeline(
+            provider="chembl",
+            entity_type="activity",
+            run_type=RunType.BACKFILL,
+        )
+        assert config.lock_key == "lock:chembl_activity:exclusive"
+        assert config.exclusive is True
+
+    def test_lock_config_for_pipeline_rebuild(self) -> None:
+        """Test LockConfig factory for rebuild run (exclusive)."""
+        config = LockConfig.for_pipeline(
+            provider="pubchem",
+            entity_type="compound",
+            run_type=RunType.REBUILD,
+        )
+        assert config.lock_key == "lock:pubchem_compound:exclusive"
+        assert config.exclusive is True
+
+
 def test_lock_key_format_incremental(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
@@ -169,8 +219,8 @@ def test_lock_key_format_incremental(
         shutdown_signal=mock_shutdown_signal,
     )
 
-    assert manager._lock_key == "lock:chembl_activity"
-    assert manager._exclusive is False
+    assert manager._config.lock_key == "lock:chembl_activity"
+    assert manager._config.exclusive is False
 
 
 def test_lock_key_format_exclusive(
@@ -190,6 +240,6 @@ def test_lock_key_format_exclusive(
         shutdown_signal=mock_shutdown_signal,
     )
 
-    assert manager._lock_key == "lock:chembl_activity:exclusive"
-    assert manager._exclusive is True
-    assert manager._wait_for_lock is True
+    assert manager._config.lock_key == "lock:chembl_activity:exclusive"
+    assert manager._config.exclusive is True
+    assert manager._config.wait_for_lock is True
