@@ -51,6 +51,9 @@ class BronzeWriter:
     COMPRESSION_LEVEL = 3
     COMPRESSION_THREADS = -1
 
+    # Bronze format version for path partitioning (REQ-DATA-002)
+    BRONZE_FORMAT_VERSION = "v1"
+
     def __init__(
         self,
         base_path: str | Path,
@@ -360,7 +363,8 @@ class BronzeWriter:
             # FIX: Removed redundant 'bronze/' prefix.
             # base_path already points to 'data/output/bronze'
             relative_path = (
-                f"v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+                f"{self.BRONZE_FORMAT_VERSION}/{provider}/{entity}/"
+                f"{date_str}/batch_{batch_id}.jsonl.zst"
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
@@ -559,7 +563,7 @@ class BronzeWriter:
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
         # FIX: Removed redundant 'bronze/' prefix here too
-        prefix = f"v1/{provider}/{entity}/"
+        prefix = f"{self.BRONZE_FORMAT_VERSION}/{provider}/{entity}/"
         if date:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
