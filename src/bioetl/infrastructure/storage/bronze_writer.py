@@ -99,6 +99,7 @@ class BronzeWriter:
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
             tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
 
@@ -396,7 +397,9 @@ class BronzeWriter:
                 atomic_write_bytes(meta_path, meta_bytes)
                 return count, size
 
-            record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
+            record_count, uncompressed_size = await loop.run_in_executor(
+                None, _write_task
+            )
             compressed_size = full_path.stat().st_size
 
             # Record metrics

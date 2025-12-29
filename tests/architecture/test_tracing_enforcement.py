@@ -378,7 +378,10 @@ class TestMandatorySpans:
                     if path.exists():
                         source = path.read_text()
                         for method in methods:
-                            if f"def {method}" in source or f"async def {method}" in source:
+                            if (
+                                f"def {method}" in source
+                                or f"async def {method}" in source
+                            ):
                                 found = True
                                 break
 

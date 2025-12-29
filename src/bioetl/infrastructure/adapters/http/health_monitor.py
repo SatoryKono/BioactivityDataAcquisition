@@ -90,8 +90,7 @@ class ProviderHealthMonitor:
         # Check if 5 min window passed BEFORE updating last_success
         # This allows DEGRADED → HEALTHY transition if enough time has passed
         should_recover_to_healthy = (
-            state.status == HealthStatus.DEGRADED
-            and self._check_clear_window(state)
+            state.status == HealthStatus.DEGRADED and self._check_clear_window(state)
         )
 
         state.last_success = time.monotonic()

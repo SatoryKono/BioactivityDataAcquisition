@@ -144,7 +144,9 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
 
 def _extract_write_modes(
     yaml_config: PipelineYamlConfig,
-) -> tuple[Literal["merge", "append", "overwrite"], Literal["append", "overwrite", "scd2"]]:
+) -> tuple[
+    Literal["merge", "append", "overwrite"], Literal["append", "overwrite", "scd2"]
+]:
     """Extract write modes from sink config."""
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")

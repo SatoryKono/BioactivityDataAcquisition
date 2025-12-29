@@ -399,10 +399,7 @@ class TestGoldMethods:
         # GoldFilterConfig usually contains column filters
         from bioetl.domain.filtering import GoldColumnFilter
 
-        col_filter = GoldColumnFilter(
-            column="type",
-            values=frozenset(["Ki"])
-        )
+        col_filter = GoldColumnFilter(column="type", values=frozenset(["Ki"]))
         filters = GoldFilterConfig(column_filters=(col_filter,))
         transformer = ConcreteTransformer(provider="test", gold_filters=filters)
 
@@ -430,7 +427,7 @@ class TestGoldMethods:
             "valid_field": "keep_me",
             "content_hash": "remove_me",
             "_run_id": "keep_me_too",
-            "molecule_properties": "remove_me_too"
+            "molecule_properties": "remove_me_too",
         }
 
         gold_record = transformer.transform_for_gold(mock_context, silver_record)

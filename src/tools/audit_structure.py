@@ -354,7 +354,9 @@ def print_text_report(result: AuditResult) -> None:
         print()
 
     if result.should_violations:
-        print(f"## SHOULD Violations ({len(result.should_violations)}) - RECOMMENDATIONS")
+        print(
+            f"## SHOULD Violations ({len(result.should_violations)}) - RECOMMENDATIONS"
+        )
         print()
         for v in result.should_violations:
             print(f"  [{v.category}] {v.path}")

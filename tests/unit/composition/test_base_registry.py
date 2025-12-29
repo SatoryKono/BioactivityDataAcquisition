@@ -18,6 +18,7 @@ class TestRegistryProtocol:
 
     def test_protocol_is_runtime_checkable(self) -> None:
         """RegistryProtocol is @runtime_checkable."""
+
         # Create a class that implements the protocol
         class TestRegistry:
             _registry: ClassVar[dict[str, str]] = {}

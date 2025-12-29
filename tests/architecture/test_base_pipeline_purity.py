@@ -10,8 +10,6 @@ import ast
 from pathlib import Path
 
 
-
-
 def test_base_pipeline_does_not_have_gold_methods(src_dir: Path) -> None:
     """BasePipeline MUST NOT implement Gold transformation logic.
 
@@ -24,15 +22,15 @@ def test_base_pipeline_does_not_have_gold_methods(src_dir: Path) -> None:
         tree = ast.parse(f.read())
 
     methods = {
-        node.name
-        for node in ast.walk(tree)
-        if isinstance(node, ast.FunctionDef)
+        node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)
     }
 
     forbidden = {"should_write_gold", "transform_for_gold"}
     found = methods.intersection(forbidden)
 
-    assert not found, f"BasePipeline contains forbidden methods: {found}. Logic belongs in BaseTransformer."
+    assert (
+        not found
+    ), f"BasePipeline contains forbidden methods: {found}. Logic belongs in BaseTransformer."
 
 
 def test_base_pipeline_does_not_have_gold_constants(src_dir: Path) -> None:
@@ -59,4 +57,6 @@ def test_base_pipeline_does_not_have_gold_constants(src_dir: Path) -> None:
 
     all_vars = assigns.union(ann_assigns)
 
-    assert "GOLD_EXCLUDE_FIELDS" not in all_vars, "BasePipeline must not define GOLD_EXCLUDE_FIELDS"
+    assert (
+        "GOLD_EXCLUDE_FIELDS" not in all_vars
+    ), "BasePipeline must not define GOLD_EXCLUDE_FIELDS"
