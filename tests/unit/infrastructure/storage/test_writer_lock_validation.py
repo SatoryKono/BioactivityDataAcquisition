@@ -187,10 +187,12 @@ class TestDeltaWriterLockValidation:
     @pytest.fixture
     def sample_schema(self) -> pa.Schema:
         """Create sample PyArrow schema."""
-        return pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("name", pa.string()),
-        ])
+        return pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("name", pa.string()),
+            ]
+        )
 
     def test_validate_lock_held_no_context(
         self, delta_writer: DeltaWriter, mock_logger: MagicMock
@@ -210,7 +212,9 @@ class TestDeltaWriterLockValidation:
     ) -> None:
         """Test validation fails when lock is for wrong table."""
         with pytest.raises(LockNotHeldError) as exc_info:
-            delta_writer._validate_lock_held("chembl_activity", wrong_table_lock_context)
+            delta_writer._validate_lock_held(
+                "chembl_activity", wrong_table_lock_context
+            )
 
         assert "lock:chembl_activity" in str(exc_info.value)
         assert "pubchem_compound" in str(exc_info.value)
@@ -302,9 +306,7 @@ class TestGoldWriterLockValidation:
         )
 
     @pytest.fixture
-    def gold_writer_no_lock(
-        self, tmp_path: Path, mock_logger: MagicMock
-    ) -> GoldWriter:
+    def gold_writer_no_lock(self, tmp_path: Path, mock_logger: MagicMock) -> GoldWriter:
         """Create GoldWriter with require_lock=False."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriter
 

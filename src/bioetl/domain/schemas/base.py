@@ -2,6 +2,7 @@
 
 Contains common metadata fields required by RULES.md §2.4.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -25,7 +26,9 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     # === Lineage & DQ Fields (from RULES.md §2.4) ===
-    _run_id: Series[UUID] = pa.Field(nullable=False, description="Correlation ID for the pipeline run.")
+    _run_id: Series[UUID] = pa.Field(
+        nullable=False, description="Correlation ID for the pipeline run."
+    )
     _run_type: Series[str] = pa.Field(
         nullable=False,
         isin=["incremental", "backfill", "rebuild"],
@@ -41,7 +44,9 @@ class ETLRecordSchema(pa.DataFrameModel):
         nullable=False, default=False, description="Flag for data quality warnings."
     )
     _index: Series[int] = pa.Field(
-        nullable=False, ge=0, description="Sequential index of the record in the pipeline run."
+        nullable=False,
+        ge=0,
+        description="Sequential index of the record in the pipeline run.",
     )
 
     class Config:

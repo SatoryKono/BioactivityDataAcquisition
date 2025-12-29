@@ -6,7 +6,6 @@ and can be instantiated with valid configuration data.
 
 from __future__ import annotations
 
-
 from bioetl.domain.config_types import (
     BronzeSinkDict,
     CircuitBreakerDict,

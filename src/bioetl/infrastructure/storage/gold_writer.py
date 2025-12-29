@@ -92,6 +92,7 @@ class GoldWriter:
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
             tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
 
@@ -341,7 +342,9 @@ class GoldWriter:
             },
         )
         # Safety assertion: this method is only called when self._audit is not None
-        assert self._audit is not None, "_log_gold_audit called without audit configured"
+        assert (
+            self._audit is not None
+        ), "_log_gold_audit called without audit configured"
         await self._audit.log_write(audit_entry)
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
@@ -444,11 +447,7 @@ class GoldWriter:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path,
-                    data=arrow_data,
-                    mode=mode,
-                    partition_by=partition_cols,
-                    schema_mode=schema_mode: write_deltalake(
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, schema_mode=schema_mode: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
@@ -475,10 +474,7 @@ class GoldWriter:
             # Pass primary_keys to CSV exporter for deduplication if mode is merge/append
             csv_primary_keys = primary_keys if mode != "overwrite" else None
             await self.csv_exporter.export(
-                table_name,
-                arrow_data,
-                append=csv_append,
-                primary_keys=csv_primary_keys
+                table_name, arrow_data, append=csv_append, primary_keys=csv_primary_keys
             )
 
     async def _write_scd2(
@@ -531,10 +527,7 @@ class GoldWriter:
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path,
-                        data=arrow_data,
-                        mode="append",
-                        partition_by=partition_cols: write_deltalake(
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()

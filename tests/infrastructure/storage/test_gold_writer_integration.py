@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pandera.pandas as pa
@@ -23,7 +23,9 @@ def noop_logger():
 
 @pytest.fixture
 def gold_writer(noop_logger):
-    return GoldWriter(base_path="s3://test-bucket/gold", logger=noop_logger, require_lock=False)
+    return GoldWriter(
+        base_path="s3://test-bucket/gold", logger=noop_logger, require_lock=False
+    )
 
 
 @pytest.fixture

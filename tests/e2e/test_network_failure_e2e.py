@@ -107,7 +107,9 @@ class TestRateLimitHandling:
             if call_count < 3:
                 request = httpx.Request("GET", "https://api.example.com")
                 response = httpx.Response(429, request=request)
-                raise httpx.HTTPStatusError("Rate limited", request=request, response=response)
+                raise httpx.HTTPStatusError(
+                    "Rate limited", request=request, response=response
+                )
             return {"data": "success"}
 
         result = None
@@ -117,7 +119,7 @@ class TestRateLimitHandling:
                 break
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
-                    delay = 0.01 * (2 ** attempt)  # Exponential backoff
+                    delay = 0.01 * (2**attempt)  # Exponential backoff
                     backoff_delays.append(delay)
                     await asyncio.sleep(delay)
                 else:
@@ -143,7 +145,9 @@ class TestRateLimitHandling:
                     request=request,
                     headers={"Retry-After": str(int(retry_after_value * 1000))},
                 )
-                raise httpx.HTTPStatusError("Rate limited", request=request, response=response)
+                raise httpx.HTTPStatusError(
+                    "Rate limited", request=request, response=response
+                )
             return {"data": "success"}
 
         for _attempt in range(3):
@@ -179,7 +183,9 @@ class TestServerErrorHandling:
                 code = error_codes[call_count - 1]
                 request = httpx.Request("GET", "https://api.example.com")
                 response = httpx.Response(code, request=request)
-                raise httpx.HTTPStatusError(f"Server error {code}", request=request, response=response)
+                raise httpx.HTTPStatusError(
+                    f"Server error {code}", request=request, response=response
+                )
             return {"data": "success"}
 
         result = None
@@ -208,7 +214,9 @@ class TestServerErrorHandling:
             if call_count == 1:
                 request = httpx.Request("GET", "https://api.example.com")
                 response = httpx.Response(500, request=request)
-                raise httpx.HTTPStatusError("Internal Server Error", request=request, response=response)
+                raise httpx.HTTPStatusError(
+                    "Internal Server Error", request=request, response=response
+                )
             return {"status": "recovered"}
 
         result = None
@@ -240,7 +248,9 @@ class TestRetryExhaustion:
             call_count += 1
             request = httpx.Request("GET", "https://api.example.com")
             response = httpx.Response(503, request=request)
-            raise httpx.HTTPStatusError("Service unavailable", request=request, response=response)
+            raise httpx.HTTPStatusError(
+                "Service unavailable", request=request, response=response
+            )
 
         with pytest.raises(httpx.HTTPStatusError) as exc_info:
             for attempt in range(max_retries):
@@ -294,7 +304,7 @@ class TestExponentialBackoff:
         delays: list[float] = []
 
         for attempt in range(5):
-            delay = min(base_delay * (multiplier ** attempt), max_delay)
+            delay = min(base_delay * (multiplier**attempt), max_delay)
             delays.append(delay)
 
         # Verify exponential growth
@@ -313,7 +323,7 @@ class TestExponentialBackoff:
         delays: list[float] = []
 
         for attempt in range(10):
-            delay = min(base_delay * (multiplier ** attempt), max_delay)
+            delay = min(base_delay * (multiplier**attempt), max_delay)
             delays.append(delay)
 
         # All delays after a point should be capped

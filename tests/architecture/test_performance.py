@@ -37,7 +37,9 @@ def test_no_json_import_in_storage_layer():
                         violations.append(f"{py_file.name}:{node.lineno}: import json")
             elif isinstance(node, ast.ImportFrom):
                 if node.module == "json":
-                    violations.append(f"{py_file.name}:{node.lineno}: from json import ...")
+                    violations.append(
+                        f"{py_file.name}:{node.lineno}: from json import ..."
+                    )
 
     # Check BatchWriter specifically as it's a hot path in application layer
     if BATCH_WRITER.exists():
@@ -47,10 +49,14 @@ def test_no_json_import_in_storage_layer():
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name == "json":
-                        violations.append(f"{BATCH_WRITER.name}:{node.lineno}: import json")
+                        violations.append(
+                            f"{BATCH_WRITER.name}:{node.lineno}: import json"
+                        )
             elif isinstance(node, ast.ImportFrom):
                 if node.module == "json":
-                    violations.append(f"{BATCH_WRITER.name}:{node.lineno}: from json import ...")
+                    violations.append(
+                        f"{BATCH_WRITER.name}:{node.lineno}: from json import ..."
+                    )
 
     assert not violations, (
         "Standard 'json' library found in performance-critical modules:\n"

@@ -18,10 +18,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.preflight_service import PreflightService
-from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
+from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.runner_services import RunnerServices
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -52,9 +52,9 @@ class CallRecorder:
             # Ensure this call comes after all previous expected calls
             for prev in expected[:i]:
                 prev_idx = actual.index(prev)
-                assert prev_idx < idx, (
-                    f"'{prev}' (idx {prev_idx}) should come before '{method}' (idx {idx})"
-                )
+                assert (
+                    prev_idx < idx
+                ), f"'{prev}' (idx {prev_idx}) should come before '{method}' (idx {idx})"
 
 
 @pytest.fixture
@@ -742,9 +742,9 @@ class TestPipelineRunnerLifecycle:
             await executor.execute(limit=None)
 
         # Verify checkpoint was saved before shutdown
-        assert checkpoint_save_called, (
-            "Checkpoint must be saved during graceful shutdown"
-        )
+        assert (
+            checkpoint_save_called
+        ), "Checkpoint must be saved during graceful shutdown"
         assert "checkpoint.save" in list(call_recorder.calls)
 
     @pytest.mark.asyncio

@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -52,9 +53,18 @@ class MoleculeSchema(ETLRecordSchema):
     molecule_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
-            "Small molecule", "Inorganic small molecule", "Polymeric small molecule",
-            "Antibody", "Antibody drug conjugate", "Protein", "Oligonucleotide",
-            "Oligosaccharide", "Cell", "Enzyme", "Unknown", "Unclassified",
+            "Small molecule",
+            "Inorganic small molecule",
+            "Polymeric small molecule",
+            "Antibody",
+            "Antibody drug conjugate",
+            "Protein",
+            "Oligonucleotide",
+            "Oligosaccharide",
+            "Cell",
+            "Enzyme",
+            "Unknown",
+            "Unclassified",
         ],
         description="Molecule type.",
     )
@@ -174,6 +184,7 @@ class MoleculeSchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = False
         coerce = True

@@ -42,7 +42,11 @@ def _check_lock_matches_table(
 ) -> None:
     """Validate lock matches the target table."""
     if not lock_context.matches_table(table_name):
-        logger.error("Write attempted with wrong lock", actual_key=lock_context.key, **log_context)
+        logger.error(
+            "Write attempted with wrong lock",
+            actual_key=lock_context.key,
+            **log_context,
+        )
         raise LockNotHeldError(f"{operation} (got {lock_context.key})", expected_key)
 
 
@@ -56,7 +60,9 @@ def _check_lock_valid(
     """Validate lock is not expired."""
     if not lock_context.is_valid():
         ctx = {k: v for k, v in log_context.items() if k != "expected_key"}
-        logger.error("Write attempted with expired lock", lock_key=lock_context.key, **ctx)
+        logger.error(
+            "Write attempted with expired lock", lock_key=lock_context.key, **ctx
+        )
         raise LockNotHeldError(f"{operation} (lock expired)", expected_key)
 
 
@@ -132,6 +138,20 @@ def validate_lock_for_write(
     assert lock_context is not None  # for type checker
 
     # Use normalized table name for matching
-    _check_lock_matches_table(lock_context, normalized_table_name, operation, expected_key, logger, base_log_context)
+    _check_lock_matches_table(
+        lock_context,
+        normalized_table_name,
+        operation,
+        expected_key,
+        logger,
+        base_log_context,
+    )
     _check_lock_valid(lock_context, operation, expected_key, logger, base_log_context)
-    _check_owner_id(lock_context, expected_owner_id, operation, expected_key, logger, base_log_context)
+    _check_owner_id(
+        lock_context,
+        expected_owner_id,
+        operation,
+        expected_key,
+        logger,
+        base_log_context,
+    )

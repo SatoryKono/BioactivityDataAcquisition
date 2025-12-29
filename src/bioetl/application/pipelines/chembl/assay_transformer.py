@@ -108,7 +108,9 @@ class AssayTransformer(BaseChemblTransformer):
             "relationship_description": record.get("relationship_description"),
             "assay_pref_name": record.get("assay_pref_name"),
             "score": safe_float(record.get("score")),
-            **_extract_variant(cast("dict[str, Any] | None", record.get("variant_sequence"))),
+            **_extract_variant(
+                cast("dict[str, Any] | None", record.get("variant_sequence"))
+            ),
             "variant_sequence_json": self.serialize_json(
                 record.get("variant_sequence")
             ),
