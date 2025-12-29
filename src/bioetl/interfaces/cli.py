@@ -35,13 +35,7 @@ if TYPE_CHECKING:
 
 
 async def _preview_cleanup_async(pipeline: str) -> None:
-    """Preview what data would be cleared in dry-run mode.
-
-    Delegates to entrypoints.preview_cleanup() for clean architecture.
-
-    Args:
-        pipeline: Pipeline name
-    """
+    """Preview what data would be cleared in dry-run mode."""
     preview_result = await preview_cleanup(pipeline)
 
     click.echo("\nFiles/directories that would be cleared:")
@@ -70,13 +64,7 @@ async def _preview_cleanup_async(pipeline: str) -> None:
 
 
 def _preview_cleanup(pipeline: str) -> None:
-    """Preview what data would be cleared in dry-run mode.
-
-    Sync wrapper for CLI that calls async CleanupService.preview().
-
-    Args:
-        pipeline: Pipeline name
-    """
+    """Sync wrapper for preview_cleanup_async."""
     try:
         asyncio.run(_preview_cleanup_async(pipeline))
     except Exception as e:
@@ -366,22 +354,11 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
     asyncio.run(_run())
 
 
-def _collect_vacuum_tables(
-    layer: str,
-) -> list[tuple[str, str]]:
-    """Collect tables to vacuum from all pipeline configs.
-
-    Args:
-        layer: Which layer to collect ("all", "silver", or "gold").
-
-    Returns:
-        List of (table_name, layer_name) tuples.
-    """
+def _collect_vacuum_tables(layer: str) -> list[tuple[str, str]]:
+    """Collect tables to vacuum from all pipeline configs."""
     from bioetl.composition.entrypoints import load_pipeline_config
-    from bioetl.composition.registry import get_default_registry
 
-    registry = get_default_registry()
-    pipelines = registry.list_pipelines()
+    pipelines = get_default_registry().list_pipelines()
 
     silver_tables: set[str] = set()
     gold_tables: set[str] = set()
@@ -412,11 +389,7 @@ async def _vacuum_table(
     retention_days: int,
     dry_run: bool,
 ) -> tuple[int, str | None]:
-    """Vacuum a single table.
-
-    Returns:
-        Tuple of (files_removed, error_message or None).
-    """
+    """Vacuum a single table. Returns (files_removed, error_message or None)."""
     try:
         action = "Would vacuum" if dry_run else "Vacuuming"
         click.echo(f"{'[DRY-RUN] ' if dry_run else ''}{action} {table_layer}/{table_name}...")
