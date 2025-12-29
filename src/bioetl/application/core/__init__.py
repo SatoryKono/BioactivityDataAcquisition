@@ -52,7 +52,13 @@ from bioetl.application.core.postrun_service import (
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.shutdown import (
+    PipelineShutdownError,
+    ShutdownReason,
+    ShutdownService,
+    ShutdownSignal,
+    create_shutdown_service,
+)
 from bioetl.application.core.transform_utils import (
     aggregate_nested_lists,
     extract_list_field,
@@ -91,6 +97,8 @@ __all__ = [
     "PreflightService",
     "QuarantineManager",
     "RuntimeConfig",
+    "ShutdownReason",
+    "ShutdownService",
     "ShutdownSignal",
     "StreamingBatchProcessor",
     "TransformResult",
@@ -99,6 +107,7 @@ __all__ = [
     "WriteMode",
     "WriteModePolicy",
     "aggregate_nested_lists",
+    "create_shutdown_service",
     "extract_list_field",
     "flatten_nested_dict",
     "normalize_string",

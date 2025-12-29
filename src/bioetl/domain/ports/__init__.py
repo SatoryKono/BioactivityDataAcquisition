@@ -14,6 +14,7 @@ This package contains all port definitions organized by domain:
 - resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
 - serialization: JsonEncoderPort for JSON encoding
 - audit: AuditPort for write operation traceability
+- shutdown: ShutdownPort for graceful termination coordination
 """
 
 from bioetl.domain.ports.audit import (
@@ -39,6 +40,7 @@ from bioetl.domain.ports.observability import (
 from bioetl.domain.ports.quarantine import QuarantinePort
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.serialization import JsonEncoderPort
+from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
@@ -63,6 +65,7 @@ __all__ = [
     "NoOpTracing",
     "QuarantinePort",
     "RateLimiterPort",
+    "ShutdownPort",
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
