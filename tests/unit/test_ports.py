@@ -200,6 +200,13 @@ class TestStoragePortProtocol:
             ) -> dict[str, Any]:
                 return {}
 
+            async def cleanup_bronze(
+                self,
+                cutoff_date: Any,
+                dry_run: bool = False,
+            ) -> dict[str, int]:
+                return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
+
         assert isinstance(ValidStorage(), StoragePort)
 
         # Note: @runtime_checkable protocols only check for method presence,
