@@ -1,6 +1,8 @@
 """Unit tests for CrossRef Transformer.
 
 Tests for CrossRefTransformer (domain entity creation from Bronze records).
+
+Note: Field extraction tests now use domain functions directly per REFACTOR-004.
 """
 
 from __future__ import annotations
@@ -12,6 +14,8 @@ import pytest
 
 from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP
+from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
 
 
@@ -71,39 +75,39 @@ def minimal_work():
 
 
 # =============================================================================
-# Field extraction tests (delegated to static methods)
+# Field extraction tests (delegated to domain functions per REFACTOR-004)
 # =============================================================================
 
 
-def test_normalize_doi(transformer):
-    """Test DOI normalization."""
-    assert transformer.normalize_doi("10.1234/ABC.DEF") == "10.1234/abc.def"
-    assert transformer.normalize_doi("  10.1234/test  ") == "10.1234/test"
+def test_normalize_doi():
+    """Test DOI normalization using domain function."""
+    assert normalize_doi("10.1234/ABC.DEF") == "10.1234/abc.def"
+    assert normalize_doi("  10.1234/test  ") == "10.1234/test"
 
 
-def test_extract_title(transformer, sample_work):
-    """Test title extraction."""
-    assert transformer.extract_title(sample_work) == "Test Article Title"
-    assert transformer.extract_title({}) is None
+def test_extract_title(sample_work):
+    """Test title extraction using domain function."""
+    assert extract_first_string(sample_work.get("title", [])) == "Test Article Title"
+    assert extract_first_string([]) is None
 
 
 def test_extract_authors(transformer, sample_work):
-    """Test author extraction."""
-    authors = transformer.extract_authors(sample_work)
+    """Test author extraction (CrossRef-specific logic)."""
+    authors = transformer._extract_authors(sample_work)
     assert authors == ["John Doe", "Jane Smith", "Anonymous"]
 
 
 def test_extract_year(transformer, sample_work):
-    """Test year extraction."""
-    assert transformer.extract_year(sample_work) == 2023
-    assert transformer.extract_year({}) is None
+    """Test year extraction (CrossRef-specific logic)."""
+    assert transformer._extract_year(sample_work) == 2023
+    assert transformer._extract_year({}) is None
 
 
-def test_map_doc_type(transformer):
-    """Test document type mapping."""
-    assert transformer.map_doc_type("journal-article") == "PUBLICATION"
-    assert transformer.map_doc_type("posted-content") == "PREPRINT"
-    assert transformer.map_doc_type("unknown") == "PUBLICATION"
+def test_map_doc_type():
+    """Test document type mapping using domain constant."""
+    assert CROSSREF_TYPE_MAP.get("journal-article", "PUBLICATION") == "PUBLICATION"
+    assert CROSSREF_TYPE_MAP.get("posted-content", "PUBLICATION") == "PREPRINT"
+    assert CROSSREF_TYPE_MAP.get("unknown", "PUBLICATION") == "PUBLICATION"
 
 
 # =============================================================================
