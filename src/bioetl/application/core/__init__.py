@@ -33,11 +33,6 @@ from bioetl.application.core.lifecycle_orchestrator import (
     LifecycleOrchestrator,
 )
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.domain.medallion import (
-    Layer,
-    WriteMode,
-    WriteModePolicy,
-)
 from bioetl.application.core.memory_monitor import (
     MemoryConfig,
     MemoryMonitor,
@@ -69,6 +64,11 @@ from bioetl.application.core.transform_utils import (
     validate_smiles,
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.medallion import (
+    Layer,
+    WriteMode,
+    WriteModePolicy,
+)
 
 __all__ = [
     "BasePipeline",
