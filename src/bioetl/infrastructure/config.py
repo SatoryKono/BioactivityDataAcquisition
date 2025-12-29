@@ -31,15 +31,8 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import PipelineConfig
-from bioetl.domain.filter_config import (
-    GoldColumnFilter,
-    GoldFilterConfig,
-    GoldListContainsFilter,
-    GoldListLengthFilter,
-    GoldRangeFilter,
-)
+from bioetl.domain.filter_config import GoldFilterConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 # =============================================================================
@@ -241,34 +234,11 @@ def _extract_write_modes(
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
-    """Build GoldFilterConfig from YAML config."""
-    gf = yaml_config.gold_filters
-    return GoldFilterConfig(
-        column_filters=tuple(
-            GoldColumnFilter(column=col, values=frozenset(vals))
-            for col, vals in gf.columns.items()
-        ),
-        range_filters=tuple(
-            GoldRangeFilter(
-                column=col,
-                min_value=r.min,
-                max_value=r.max,
-                include_min=r.include_min,
-                include_max=r.include_max,
-            )
-            for col, r in gf.ranges.items()
-        ),
-        list_length_filters=tuple(
-            GoldListLengthFilter(column=col, min_length=r.min, max_length=r.max)
-            for col, r in gf.list_lengths.items()
-        ),
-        list_contains_filters=tuple(
-            GoldListContainsFilter(column=col, values=frozenset(r.values), mode=r.mode)
-            for col, r in gf.list_contains.items()
-        ),
-        required_fields=tuple(gf.required_fields),
-        exclude_if_present=tuple(gf.exclude_if_present),
-    )
+    """Build GoldFilterConfig from YAML config.
+
+    Delegates to GoldFiltersConfig.to_domain() for consolidation pattern.
+    """
+    return yaml_config.gold_filters.to_domain()
 
 
 def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
