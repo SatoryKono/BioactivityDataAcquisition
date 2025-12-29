@@ -1,0 +1,98 @@
+%% Domain Layer DDD Components
+%% See ADR-021: DDD Aggregates Adoption
+
+flowchart TB
+    subgraph domain["Domain Layer (DDD)"]
+        subgraph ports["ports/"]
+            DataSourcePort
+            StoragePort
+            LockPort
+            CheckpointPort
+            QuarantinePort
+            MetricsPort
+            TracingPort
+        end
+
+        subgraph aggregates["aggregates/"]
+            Batch["Batch Aggregate
+            ───────────────
+            • add_record()
+            • quarantine_record()
+            • seal()
+            • mark_committed()"]
+
+            PipelineRun["PipelineRun Aggregate
+            ───────────────
+            • start()
+            • record_stage_success()
+            • complete()
+            • fail()"]
+
+            QuarantineEntry["QuarantineEntry Aggregate
+            ───────────────
+            • mark_retrying()
+            • mark_recovered()
+            • mark_dead_letter()"]
+        end
+
+        subgraph events["Domain Events"]
+            BatchCreated
+            BatchSealed
+            BatchWritten
+            RunStarted
+            RunCompleted
+            RecordQuarantined
+        end
+
+        subgraph value_objects["value_objects/"]
+            RunID["RunID (UUID)"]
+            BatchID["BatchID (UUID)"]
+            EntityID["EntityID (str)"]
+            ContentHash["ContentHash (str)"]
+            Measurement["Measurement
+            (value, unit, relation)"]
+        end
+
+        subgraph types["types.py"]
+            RunType["RunType Enum
+            (INCREMENTAL, BACKFILL, REBUILD)"]
+            HealthStatus["HealthStatus Enum
+            (HEALTHY, DEGRADED, UNHEALTHY)"]
+        end
+
+        subgraph exceptions["exceptions/"]
+            CriticalError
+            RecoverableError
+            DataQualityError
+            InvalidStateError
+        end
+    end
+
+    %% Relationships
+    Batch --> BatchCreated
+    Batch --> BatchSealed
+    Batch --> BatchWritten
+    Batch --> RecordQuarantined
+    PipelineRun --> RunStarted
+    PipelineRun --> RunCompleted
+
+    Batch --> RunID
+    Batch --> BatchID
+    PipelineRun --> RunID
+    QuarantineEntry --> EntityID
+    QuarantineEntry --> ContentHash
+
+    %% State machines
+    subgraph batch_states["Batch State Machine"]
+        B_OPEN["OPEN"] --> B_SEALED["SEALED"]
+        B_SEALED --> B_WRITING["WRITING"]
+        B_WRITING --> B_COMMITTED["COMMITTED"]
+        B_WRITING --> B_FAILED["FAILED"]
+    end
+
+    subgraph run_states["PipelineRun State Machine"]
+        R_PENDING["PENDING"] --> R_RUNNING["RUNNING"]
+        R_RUNNING --> R_COMPLETED["COMPLETED"]
+        R_RUNNING --> R_FAILED["FAILED"]
+        R_RUNNING --> R_SHUTDOWN["SHUTDOWN"]
+    end
