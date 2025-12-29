@@ -5,7 +5,9 @@ Handles the exposure of metrics and other observability signals to external syst
 
 from __future__ import annotations
 
-from bioetl.infrastructure.observability.server import MetricsServerError
+from bioetl.infrastructure.observability.server import (
+    MetricsServerError,
+)
 from bioetl.infrastructure.observability.server import (
     start_metrics_server as _start_server,
 )

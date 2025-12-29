@@ -26,7 +26,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     assay_chembl_id: Series[str] = pa.Field(nullable=True)
     document_chembl_id: Series[str] = pa.Field(nullable=True)
     record_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
-    src_id: Series[float] = pa.Field(nullable=True, coerce=True)     # int64 in Silver
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
 
     # Molecule data
     canonical_smiles: Series[str] = pa.Field(nullable=True)
@@ -64,7 +64,9 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     standard_relation: Series[str] = pa.Field(nullable=True)
     standard_upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_text_value: Series[str] = pa.Field(nullable=True)
-    standard_flag: Series[float] = pa.Field(nullable=True, coerce=True) # int64 in Silver
+    standard_flag: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 in Silver
 
     # Derived metrics
     pchembl_value: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -81,13 +83,17 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
     # Document/Publication data
     document_journal: Series[str] = pa.Field(nullable=True)
-    document_year: Series[float] = pa.Field(nullable=True, coerce=True) # int64 in Silver
+    document_year: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 in Silver
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)
     data_validity_comment: Series[str] = pa.Field(nullable=True)
     data_validity_description: Series[str] = pa.Field(nullable=True)
-    potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True) # int64 in Silver
+    potential_duplicate: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 in Silver
 
     # Action type
     action_type_action_type: Series[str] = pa.Field(nullable=True)
@@ -96,7 +102,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
     # Activity properties
     activity_properties: Series[str] = pa.Field(nullable=True)
-    toid: Series[float] = pa.Field(nullable=True, coerce=True) # int64 in Silver
+    toid: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -141,9 +147,9 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
     protein_name: Series[str] = pa.Field(nullable=True)
-    gene_names: Series[object] = pa.Field(nullable=True) # list[str]
-    organism_id: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    gene_names: Series[object] = pa.Field(nullable=True)  # list[str]
+    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Metadata
@@ -173,7 +179,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     pages: Series[str] = pa.Field(nullable=True)
-    authors: Series[object] = pa.Field(nullable=True) # list[str]
+    authors: Series[object] = pa.Field(nullable=True)  # list[str]
     pub_date: Series[str] = pa.Field(nullable=True)
     pub_year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -181,9 +187,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     received_date: Series[str] = pa.Field(nullable=True)
     revised_date: Series[str] = pa.Field(nullable=True)
     epub_date: Series[str] = pa.Field(nullable=True)
-    publication_types: Series[object] = pa.Field(nullable=True) # list[str]
-    keywords: Series[object] = pa.Field(nullable=True) # list[str]
-    mesh_terms: Series[object] = pa.Field(nullable=True) # list[str]
+    publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
+    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
 
@@ -265,19 +271,19 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     species_group_flag: Series[bool] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
     downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
-    dap_id: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    dap_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     pipeline_stages: Series[str] = pa.Field(nullable=True)
     target_constraints: Series[str] = pa.Field(nullable=True)
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
-    component_accessions: Series[object] = pa.Field(nullable=True) # list[str]
-    component_ids: Series[object] = pa.Field(nullable=True) # list[int]
-    component_types: Series[object] = pa.Field(nullable=True) # list[str]
-    component_relationships: Series[object] = pa.Field(nullable=True) # list[str]
-    component_descriptions: Series[object] = pa.Field(nullable=True) # list[str]
-    component_organisms: Series[object] = pa.Field(nullable=True) # list[str]
-    component_tax_ids: Series[object] = pa.Field(nullable=True) # list[int]
+    component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+    component_types: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_descriptions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_organisms: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_tax_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -295,7 +301,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    component_id: Series[float] = pa.Field(nullable=False, coerce=True) # int64
+    component_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
     accession: Series[str] = pa.Field(nullable=True)
     component_type: Series[str] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
@@ -304,7 +310,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     target_component_xrefs: Series[str] = pa.Field(nullable=True)
     protein_classifications: Series[str] = pa.Field(nullable=True)
-    protein_classification_ids: Series[object] = pa.Field(nullable=True) # list[int]
+    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -361,13 +367,13 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     structure_type: Series[str] = pa.Field(nullable=True)
     max_phase: Series[float] = pa.Field(nullable=True, coerce=True)
     first_approval: Series[float] = pa.Field(nullable=True, coerce=True)
-    chirality: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    dosed_ingredient: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    availability_type: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    chirality: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    dosed_ingredient: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    availability_type: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     usan_stem: Series[str] = pa.Field(nullable=True)
     usan_stem_definition: Series[str] = pa.Field(nullable=True)
     usan_substem: Series[str] = pa.Field(nullable=True)
-    usan_year: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    usan_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     helm_notation: Series[str] = pa.Field(nullable=True)
     molecule_species: Series[str] = pa.Field(nullable=True)
     oral: Series[bool] = pa.Field(nullable=True)
@@ -393,13 +399,17 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
     property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
     property_full_mwt: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_hba: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_hba: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     property_psa: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    property_ro5_violations: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    property_heavy_atoms: Series[float] = pa.Field(nullable=True, coerce=True) # int64
-    property_aromatic_rings: Series[float] = pa.Field(nullable=True, coerce=True) # int64
+    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_ro5_violations: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64
+    property_heavy_atoms: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_aromatic_rings: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64
     property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
     property_full_molformula: Series[str] = pa.Field(nullable=True)
     property_ro3_pass: Series[str] = pa.Field(nullable=True)

@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -14,14 +15,10 @@ class TargetRelationSchema(ETLRecordSchema):
     """Target Relation validation schema for Silver layer."""
 
     # === Primary Key ===
-    targrel_id: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    targrel_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
-    tid: Series[int] = pa.Field(
-        nullable=False, description="FK to target."
-    )
+    tid: Series[int] = pa.Field(nullable=False, description="FK to target.")
     related_tid: Series[int] = pa.Field(
         nullable=False, description="FK to related target."
     )
@@ -35,6 +32,7 @@ class TargetRelationSchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = True
         coerce = True

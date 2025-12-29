@@ -171,7 +171,9 @@ class RecordProcessor:
         """Execute transformation with extended span attributes."""
         span = self._start_span("transform", batch_id, len(records), input_count=True)
         try:
-            result = await self._transformer.transform_batch(records, batch_id, start_index=start_index)
+            result = await self._transformer.transform_batch(
+                records, batch_id, start_index=start_index
+            )
             if span:
                 span.set_attribute("bioetl.silver_count", len(result.silver_records))
                 span.set_attribute("bioetl.gold_count", len(result.gold_records))

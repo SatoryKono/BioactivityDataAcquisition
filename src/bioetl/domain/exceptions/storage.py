@@ -80,7 +80,9 @@ class SchemaEvolutionError(StorageError):
         self.table = table
         self.new_fields = new_fields or set()
         self.removed_fields = removed_fields or set()
-        super().__init__(_build_schema_error_message(table, self.new_fields, self.removed_fields))
+        super().__init__(
+            _build_schema_error_message(table, self.new_fields, self.removed_fields)
+        )
 
 
 class BronzeValidationError(StorageError):

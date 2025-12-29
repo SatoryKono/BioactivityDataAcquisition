@@ -37,6 +37,7 @@ class TestChEMBLPipelineE2E:
     def storage_adapter(self, storage_paths):
         """Create storage adapter with real writers pointing to temp paths."""
         import structlog
+
         logger = structlog.get_logger()
 
         bronze_writer = BronzeWriter(

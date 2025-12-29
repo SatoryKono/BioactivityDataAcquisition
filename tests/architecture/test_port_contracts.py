@@ -16,7 +16,6 @@ import pytest
 
 from bioetl.domain import ports
 
-
 # ============================================================================
 # Port Lifecycle Contract Tests
 # ============================================================================
@@ -56,30 +55,30 @@ class TestAsyncPortLifecycle:
         )
 
         # The method should return None (async def aclose(self) -> None)
-        assert hints.get("return") is type(None) or "return" not in hints, (
-            f"{port_name}.aclose() should return None"
-        )
+        assert (
+            hints.get("return") is type(None) or "return" not in hints
+        ), f"{port_name}.aclose() should return None"
 
     def test_datasource_port_has_context_manager(self) -> None:
         """DataSourcePort MUST support async context manager protocol."""
-        assert hasattr(ports.DataSourcePort, "__aenter__"), (
-            "DataSourcePort MUST define __aenter__ for async context manager"
-        )
-        assert hasattr(ports.DataSourcePort, "__aexit__"), (
-            "DataSourcePort MUST define __aexit__ for async context manager"
-        )
+        assert hasattr(
+            ports.DataSourcePort, "__aenter__"
+        ), "DataSourcePort MUST define __aenter__ for async context manager"
+        assert hasattr(
+            ports.DataSourcePort, "__aexit__"
+        ), "DataSourcePort MUST define __aexit__ for async context manager"
 
     def test_datasource_port_has_health_check(self) -> None:
         """DataSourcePort MUST have health_check for pre-flight validation."""
-        assert hasattr(ports.DataSourcePort, "health_check"), (
-            "DataSourcePort MUST define health_check() for HealthAggregator"
-        )
+        assert hasattr(
+            ports.DataSourcePort, "health_check"
+        ), "DataSourcePort MUST define health_check() for HealthAggregator"
 
     def test_storage_port_has_health_check(self) -> None:
         """StoragePort MUST have health_check for pre-flight validation."""
-        assert hasattr(ports.StoragePort, "health_check"), (
-            "StoragePort MUST define health_check() for HealthAggregator"
-        )
+        assert hasattr(
+            ports.StoragePort, "health_check"
+        ), "StoragePort MUST define health_check() for HealthAggregator"
 
 
 class TestObservabilityPortLifecycle:
@@ -113,15 +112,15 @@ class TestLoggerPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_LOG_METHODS)
     def test_logger_port_has_log_methods(self, method_name: str) -> None:
         """LoggerPort MUST have standard log level methods."""
-        assert hasattr(ports.LoggerPort, method_name), (
-            f"LoggerPort MUST define {method_name}() method"
-        )
+        assert hasattr(
+            ports.LoggerPort, method_name
+        ), f"LoggerPort MUST define {method_name}() method"
 
     def test_logger_port_has_bind_method(self) -> None:
         """LoggerPort MUST have bind() for context propagation."""
-        assert hasattr(ports.LoggerPort, "bind"), (
-            "LoggerPort MUST define bind() for structured context"
-        )
+        assert hasattr(
+            ports.LoggerPort, "bind"
+        ), "LoggerPort MUST define bind() for structured context"
 
 
 # ============================================================================
@@ -223,23 +222,23 @@ class TestStoragePortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_WRITE_METHODS)
     def test_storage_port_has_write_methods(self, method_name: str) -> None:
         """StoragePort MUST have all layer write methods."""
-        assert hasattr(ports.StoragePort, method_name), (
-            f"StoragePort MUST define {method_name}() for Medallion architecture"
-        )
+        assert hasattr(
+            ports.StoragePort, method_name
+        ), f"StoragePort MUST define {method_name}() for Medallion architecture"
 
     @pytest.mark.parametrize("method_name", REQUIRED_CLEAR_METHODS)
     def test_storage_port_has_clear_methods(self, method_name: str) -> None:
         """StoragePort MUST have clear methods for rebuild/backfill."""
-        assert hasattr(ports.StoragePort, method_name), (
-            f"StoragePort MUST define {method_name}() for data cleanup"
-        )
+        assert hasattr(
+            ports.StoragePort, method_name
+        ), f"StoragePort MUST define {method_name}() for data cleanup"
 
     @pytest.mark.parametrize("method_name", REQUIRED_MAINTENANCE_METHODS)
     def test_storage_port_has_maintenance_methods(self, method_name: str) -> None:
         """StoragePort MUST have vacuum and archive methods for Delta Lake maintenance."""
-        assert hasattr(ports.StoragePort, method_name), (
-            f"StoragePort MUST define {method_name}() for Delta Lake maintenance"
-        )
+        assert hasattr(
+            ports.StoragePort, method_name
+        ), f"StoragePort MUST define {method_name}() for Delta Lake maintenance"
 
     def test_storage_port_has_preview_cleanup(self) -> None:
         """StoragePort MUST have preview_cleanup for CLI dry-run mode."""
@@ -256,9 +255,9 @@ class TestStoragePortContract:
         params = sig.parameters
 
         assert "table_name" in params, "vacuum() MUST have table_name parameter"
-        assert "retention_hours" in params, (
-            "vacuum() MUST have retention_hours parameter"
-        )
+        assert (
+            "retention_hours" in params
+        ), "vacuum() MUST have retention_hours parameter"
         assert "dry_run" in params, "vacuum() MUST have dry_run parameter"
 
     def test_storage_port_archive_has_correct_signature(self) -> None:
@@ -314,9 +313,9 @@ class TestMetricsPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_METRIC_METHODS)
     def test_metrics_port_has_metric_methods(self, method_name: str) -> None:
         """MetricsPort MUST have all standard metric methods."""
-        assert hasattr(ports.MetricsPort, method_name), (
-            f"MetricsPort MUST define {method_name}() for observability"
-        )
+        assert hasattr(
+            ports.MetricsPort, method_name
+        ), f"MetricsPort MUST define {method_name}() for observability"
 
 
 # ============================================================================
@@ -332,9 +331,9 @@ class TestLockPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_LOCK_METHODS)
     def test_lock_port_has_lock_methods(self, method_name: str) -> None:
         """LockPort MUST have acquire, release, and heartbeat methods."""
-        assert hasattr(ports.LockPort, method_name), (
-            f"LockPort MUST define {method_name}() for distributed locking"
-        )
+        assert hasattr(
+            ports.LockPort, method_name
+        ), f"LockPort MUST define {method_name}() for distributed locking"
 
 
 # ============================================================================
@@ -350,9 +349,9 @@ class TestCheckpointPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_CHECKPOINT_METHODS)
     def test_checkpoint_port_has_methods(self, method_name: str) -> None:
         """CheckpointPort MUST have CRUD-like methods."""
-        assert hasattr(ports.CheckpointPort, method_name), (
-            f"CheckpointPort MUST define {method_name}() for state persistence"
-        )
+        assert hasattr(
+            ports.CheckpointPort, method_name
+        ), f"CheckpointPort MUST define {method_name}() for state persistence"
 
 
 # ============================================================================
@@ -368,9 +367,9 @@ class TestQuarantinePortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_QUARANTINE_METHODS)
     def test_quarantine_port_has_methods(self, method_name: str) -> None:
         """QuarantinePort MUST have write, inspect, and stats methods."""
-        assert hasattr(ports.QuarantinePort, method_name), (
-            f"QuarantinePort MUST define {method_name}() for failed record isolation"
-        )
+        assert hasattr(
+            ports.QuarantinePort, method_name
+        ), f"QuarantinePort MUST define {method_name}() for failed record isolation"
 
 
 # ============================================================================
@@ -481,9 +480,10 @@ class TestPortDefinitionQuality:
                             # If we get here, there's actual implementation
                             implementations_found.append(f"{node.name}.{item.name}")
 
-        assert not implementations_found, (
-            "Ports should not contain implementations (use ... only):\n"
-            + "\n".join(f"  - {m}" for m in implementations_found)
+        assert (
+            not implementations_found
+        ), "Ports should not contain implementations (use ... only):\n" + "\n".join(
+            f"  - {m}" for m in implementations_found
         )
 
 
@@ -505,9 +505,9 @@ class TestDQMonitorPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_DQ_METHODS)
     def test_dq_monitor_port_has_required_methods(self, method_name: str) -> None:
         """DQMonitorPort MUST have all required methods for anomaly detection."""
-        assert hasattr(ports.DQMonitorPort, method_name), (
-            f"DQMonitorPort MUST define {method_name}() for data quality monitoring"
-        )
+        assert hasattr(
+            ports.DQMonitorPort, method_name
+        ), f"DQMonitorPort MUST define {method_name}() for data quality monitoring"
 
     def test_dq_monitor_port_check_quality_returns_list(self) -> None:
         """DQMonitorPort.check_quality() MUST return list of anomalies."""
@@ -532,9 +532,9 @@ class TestDQMonitorPortContract:
         except TypeError:
             is_runtime_checkable = False
 
-        assert is_runtime_checkable, (
-            "DQMonitorPort MUST be decorated with @runtime_checkable"
-        )
+        assert (
+            is_runtime_checkable
+        ), "DQMonitorPort MUST be decorated with @runtime_checkable"
 
 
 # ============================================================================
@@ -645,9 +645,9 @@ class TestRateLimiterPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
     def test_rate_limiter_port_has_required_methods(self, method_name: str) -> None:
         """RateLimiterPort MUST have all required rate limiting methods."""
-        assert hasattr(ports.RateLimiterPort, method_name), (
-            f"RateLimiterPort MUST define {method_name}() for rate limiting"
-        )
+        assert hasattr(
+            ports.RateLimiterPort, method_name
+        ), f"RateLimiterPort MUST define {method_name}() for rate limiting"
 
     def test_rate_limiter_port_acquire_is_async(self) -> None:
         """RateLimiterPort.acquire() MUST be async for non-blocking operation."""
@@ -661,9 +661,9 @@ class TestRateLimiterPortContract:
         )
 
         # The return type should be None (async def acquire() -> None)
-        assert hints.get("return") is type(None) or "return" not in hints, (
-            "RateLimiterPort.acquire() should return None"
-        )
+        assert (
+            hints.get("return") is type(None) or "return" not in hints
+        ), "RateLimiterPort.acquire() should return None"
 
     def test_rate_limiter_port_is_runtime_checkable(self) -> None:
         """RateLimiterPort MUST be @runtime_checkable for isinstance() checks."""
@@ -679,9 +679,9 @@ class TestRateLimiterPortContract:
         except TypeError:
             is_runtime_checkable = False
 
-        assert is_runtime_checkable, (
-            "RateLimiterPort MUST be decorated with @runtime_checkable"
-        )
+        assert (
+            is_runtime_checkable
+        ), "RateLimiterPort MUST be decorated with @runtime_checkable"
 
 
 # ============================================================================
@@ -701,9 +701,9 @@ class TestCircuitBreakerPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
     def test_circuit_breaker_port_has_required_methods(self, method_name: str) -> None:
         """CircuitBreakerPort MUST have all required circuit breaker methods."""
-        assert hasattr(ports.CircuitBreakerPort, method_name), (
-            f"CircuitBreakerPort MUST define {method_name}() for fault tolerance"
-        )
+        assert hasattr(
+            ports.CircuitBreakerPort, method_name
+        ), f"CircuitBreakerPort MUST define {method_name}() for fault tolerance"
 
     def test_circuit_breaker_port_call_is_async(self) -> None:
         """CircuitBreakerPort.call() MUST be async for non-blocking operation."""
@@ -714,9 +714,9 @@ class TestCircuitBreakerPortContract:
         params = sig.parameters
 
         # Should have func parameter for the callable to wrap
-        assert "func" in params, (
-            "CircuitBreakerPort.call() MUST have func parameter for wrapped callable"
-        )
+        assert (
+            "func" in params
+        ), "CircuitBreakerPort.call() MUST have func parameter for wrapped callable"
 
     def test_circuit_breaker_port_get_state_returns_enum(self) -> None:
         """CircuitBreakerPort.get_state() MUST return CircuitBreakerState."""
@@ -724,9 +724,9 @@ class TestCircuitBreakerPortContract:
 
         hints = get_type_hints(ports.CircuitBreakerPort.get_state)
 
-        assert hints.get("return") is CircuitBreakerState, (
-            "CircuitBreakerPort.get_state() MUST return CircuitBreakerState enum"
-        )
+        assert (
+            hints.get("return") is CircuitBreakerState
+        ), "CircuitBreakerPort.get_state() MUST return CircuitBreakerState enum"
 
     def test_circuit_breaker_port_is_runtime_checkable(self) -> None:
         """CircuitBreakerPort MUST be @runtime_checkable for isinstance() checks."""
@@ -742,9 +742,9 @@ class TestCircuitBreakerPortContract:
         except TypeError:
             is_runtime_checkable = False
 
-        assert is_runtime_checkable, (
-            "CircuitBreakerPort MUST be decorated with @runtime_checkable"
-        )
+        assert (
+            is_runtime_checkable
+        ), "CircuitBreakerPort MUST be decorated with @runtime_checkable"
 
 
 # ============================================================================
@@ -800,9 +800,9 @@ class TestJsonEncoderPortContract:
     @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
     def test_json_encoder_port_has_required_methods(self, method_name: str) -> None:
         """JsonEncoderPort MUST have all required serialization methods."""
-        assert hasattr(ports.JsonEncoderPort, method_name), (
-            f"JsonEncoderPort MUST define {method_name}() for JSON serialization"
-        )
+        assert hasattr(
+            ports.JsonEncoderPort, method_name
+        ), f"JsonEncoderPort MUST define {method_name}() for JSON serialization"
 
     def test_json_encoder_port_dumps_has_sort_keys_param(self) -> None:
         """JsonEncoderPort.dumps() MUST have sort_keys parameter for determinism."""
@@ -811,9 +811,9 @@ class TestJsonEncoderPortContract:
         sig = inspect.signature(ports.JsonEncoderPort.dumps)
         params = sig.parameters
 
-        assert "sort_keys" in params, (
-            "JsonEncoderPort.dumps() MUST have sort_keys parameter for deterministic output"
-        )
+        assert (
+            "sort_keys" in params
+        ), "JsonEncoderPort.dumps() MUST have sort_keys parameter for deterministic output"
 
     def test_json_encoder_port_is_runtime_checkable(self) -> None:
         """JsonEncoderPort MUST be @runtime_checkable for isinstance() checks."""
@@ -829,9 +829,9 @@ class TestJsonEncoderPortContract:
         except TypeError:
             is_runtime_checkable = False
 
-        assert is_runtime_checkable, (
-            "JsonEncoderPort MUST be decorated with @runtime_checkable"
-        )
+        assert (
+            is_runtime_checkable
+        ), "JsonEncoderPort MUST be decorated with @runtime_checkable"
 
 
 class TestJsonEncoderImplementationContract:

@@ -49,7 +49,9 @@ class TestRegisterTransformer:
         register_transformer("test_provider", "test_entity", MockTransformer)
 
         assert ("test_provider", "test_entity") in _TRANSFORMER_REGISTRY
-        assert _TRANSFORMER_REGISTRY[("test_provider", "test_entity")] is MockTransformer
+        assert (
+            _TRANSFORMER_REGISTRY[("test_provider", "test_entity")] is MockTransformer
+        )
 
     def test_register_multiple_transformers(self) -> None:
         """Multiple transformers can be registered."""

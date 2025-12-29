@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -14,25 +15,15 @@ class DocumentSimilaritySchema(ETLRecordSchema):
     """Document Similarity validation schema for Silver layer."""
 
     # === Primary Key ===
-    sim_id: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    sim_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
-    doc_1: Series[int] = pa.Field(
-        nullable=False, description="FK to document 1."
-    )
-    doc_2: Series[int] = pa.Field(
-        nullable=False, description="FK to document 2."
-    )
+    doc_1: Series[int] = pa.Field(nullable=False, description="FK to document 1.")
+    doc_2: Series[int] = pa.Field(nullable=False, description="FK to document 2.")
 
     # === Identifiers ===
-    pubmed_id1: Series[int] | None = pa.Field(
-        nullable=True, description="PubMed ID 1."
-    )
-    pubmed_id2: Series[int] | None = pa.Field(
-        nullable=True, description="PubMed ID 2."
-    )
+    pubmed_id1: Series[int] | None = pa.Field(nullable=True, description="PubMed ID 1.")
+    pubmed_id2: Series[int] | None = pa.Field(nullable=True, description="PubMed ID 2.")
 
     # === Metrics ===
     tid_tani: Series[float] | None = pa.Field(
@@ -62,6 +53,7 @@ class DocumentSimilaritySchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = True
         coerce = True

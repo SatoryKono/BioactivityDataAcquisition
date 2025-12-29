@@ -10,7 +10,6 @@ not import-time side effects.
 import ast
 from pathlib import Path
 
-
 COMPOSITION_DIR = Path("src/bioetl/composition")
 
 

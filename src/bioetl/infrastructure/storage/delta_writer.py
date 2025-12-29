@@ -121,6 +121,7 @@ class DeltaWriter:
         # Use NoOpTracing if not provided
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
             tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
 
@@ -129,6 +130,7 @@ class DeltaWriter:
             from bioetl.infrastructure.validation.pandera_validator import (
                 NoOpSilverValidator,
             )
+
             silver_validator = NoOpSilverValidator()
         self._silver_validator: SilverValidatorPort = silver_validator
 
@@ -559,12 +561,14 @@ class DeltaWriter:
             if self.csv_exporter:
                 csv_append = mode != "delete"
                 # Pass primary_keys to CSV exporter for deduplication if mode is merge
-                csv_primary_keys = primary_keys if validated_mode == SilverWriteMode.MERGE else None
+                csv_primary_keys = (
+                    primary_keys if validated_mode == SilverWriteMode.MERGE else None
+                )
                 await self.csv_exporter.export(
                     table_name,
                     arrow_data,
                     append=csv_append,
-                    primary_keys=csv_primary_keys
+                    primary_keys=csv_primary_keys,
                 )
 
             # Log audit entry for write operation

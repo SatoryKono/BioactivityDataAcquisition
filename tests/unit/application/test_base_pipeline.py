@@ -171,12 +171,12 @@ async def test_run_id_propagation_is_consistent():
     pipeline = ConcretePipeline(config, runtime, services, expected_run_id)
 
     # Verify run_id consistency across all access points
-    assert pipeline.run_id == expected_run_id, (
-        "run_id property should return the injected run_id"
-    )
-    assert pipeline.context.run_id == expected_run_id, (
-        "PipelineContext should have the same run_id"
-    )
+    assert (
+        pipeline.run_id == expected_run_id
+    ), "run_id property should return the injected run_id"
+    assert (
+        pipeline.context.run_id == expected_run_id
+    ), "PipelineContext should have the same run_id"
     assert pipeline._run_id == expected_run_id, "Internal _run_id should match"
 
     # Verify logger was bound with correct run_id

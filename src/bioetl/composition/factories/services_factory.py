@@ -337,10 +337,16 @@ class ServicesBuilder:
             # Use getattr to avoid MyPy errors if we assume they exist, but runtime will fail if missing.
             # We provide a dummy lambda for safety if methods are strictly missing but user logic
             # handles it elsewhere? No, strict fail is better.
-            gold_filter_cb = getattr(pipeline, "should_write_gold", lambda _context, record: True)
+            gold_filter_cb = getattr(
+                pipeline, "should_write_gold", lambda _context, record: True
+            )
 
             # Default identity transform if missing
-            gold_transform_cb = getattr(pipeline, "transform_for_gold", lambda _context, silver_record: silver_record)
+            gold_transform_cb = getattr(
+                pipeline,
+                "transform_for_gold",
+                lambda _context, silver_record: silver_record,
+            )
 
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,

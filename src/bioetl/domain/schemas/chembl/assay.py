@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -56,12 +57,8 @@ class AssaySchema(ETLRecordSchema):
     assay_tax_id: Series[int] | None = pa.Field(
         nullable=True, description="NCBI Taxonomy ID."
     )
-    assay_strain: Series[str] | None = pa.Field(
-        nullable=True, description="Strain."
-    )
-    assay_tissue: Series[str] | None = pa.Field(
-        nullable=True, description="Tissue."
-    )
+    assay_strain: Series[str] | None = pa.Field(nullable=True, description="Strain.")
+    assay_tissue: Series[str] | None = pa.Field(nullable=True, description="Tissue.")
     assay_cell_type: Series[str] | None = pa.Field(
         nullable=True, description="Cell type."
     )
@@ -102,9 +99,7 @@ class AssaySchema(ETLRecordSchema):
     #     ge=0,
     #     description="Activity count.",
     # )
-    src_id: Series[int] | None = pa.Field(
-        nullable=True, description="Source ID."
-    )
+    src_id: Series[int] | None = pa.Field(nullable=True, description="Source ID.")
     src_assay_id: Series[str] | None = pa.Field(
         nullable=True, description="Source Assay ID."
     )
@@ -116,9 +111,7 @@ class AssaySchema(ETLRecordSchema):
     assay_pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    score: Series[float] | None = pa.Field(
-        nullable=True, description="Score."
-    )
+    score: Series[float] | None = pa.Field(nullable=True, description="Score.")
 
     # === Foreign Keys ===
     cell_chembl_id: Series[str] | None = pa.Field(
@@ -137,9 +130,7 @@ class AssaySchema(ETLRecordSchema):
         str_matches=r"^BAO:\d+$",
         description="BAO format.",
     )
-    bao_label: Series[str] | None = pa.Field(
-        nullable=True, description="BAO label."
-    )
+    bao_label: Series[str] | None = pa.Field(nullable=True, description="BAO label.")
     # a2t_complex: Optional[Series[int]] = pa.Field(
     #     nullable=True,
     #     isin=[0, 1],
@@ -165,9 +156,7 @@ class AssaySchema(ETLRecordSchema):
     # mc_target_accession: Optional[Series[str]] = pa.Field(
     #     nullable=True, description="MC Target Accession."
     # )
-    aidx: Series[str] | None = pa.Field(
-        nullable=True, description="Assay index."
-    )
+    aidx: Series[str] | None = pa.Field(nullable=True, description="Assay index.")
     # ridx: Optional[Series[str]] = pa.Field(
     #     nullable=True, description="Record index."
     # )
@@ -196,6 +185,7 @@ class AssaySchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = False
         coerce = True
