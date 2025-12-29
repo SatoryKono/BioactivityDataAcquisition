@@ -275,3 +275,27 @@ class StoragePort(Protocol):
             }
         """
         ...
+
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Implements Bronze layer retention policy by removing files
+        older than the specified cutoff date.
+
+        Args:
+            cutoff_date: Files older than this date will be removed.
+            dry_run: If True, only count what would be removed.
+
+        Returns:
+            Dictionary with cleanup statistics:
+            {
+                "files_removed": int,
+                "bytes_freed": int,
+                "directories_removed": int
+            }
+        """
+        ...

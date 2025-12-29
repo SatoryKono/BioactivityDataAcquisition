@@ -17,6 +17,7 @@ from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.composition.entrypoints import (
     RunOptions,
     create_pipeline_runner,
+    get_bronze_cleanup_service,
     get_checkpoint_manager,
     get_lifecycle_service,
     get_quarantine_manager,
@@ -513,20 +514,16 @@ def _format_bytes(b: int) -> str:
 @click.option("--dry-run", is_flag=True, help="Show what would be removed")
 def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
     """Clean up old Bronze files (RULES.md §2.1 retention, default 90 days)."""
-    from datetime import UTC, datetime, timedelta
-
-    from bioetl.composition._bootstrap.storage import bootstrap_storage
-
-    storage = bootstrap_storage()
-    cutoff = datetime.now(UTC) - timedelta(days=retention_days)
+    # Use BronzeCleanupService from Application layer (no direct infrastructure access)
+    service = get_bronze_cleanup_service()
 
     async def _run() -> None:
         if dry_run:
             click.echo(f"[DRY-RUN] Cleanup Bronze files older than {retention_days} days")
-        result = await storage.bronze.cleanup_old_files(cutoff_date=cutoff, dry_run=dry_run)
+        result = await service.cleanup(retention_days=retention_days, dry_run=dry_run)
         action = "Would remove" if dry_run else "Removed"
-        click.echo(f"{action} {result['files_removed']} files ({_format_bytes(result['bytes_freed'])})")
-        click.echo(f"{action} {result['directories_removed']} empty directories")
+        click.echo(f"{action} {result.files_removed} files ({_format_bytes(result.bytes_freed)})")
+        click.echo(f"{action} {result.directories_removed} empty directories")
 
     asyncio.run(_run())
 

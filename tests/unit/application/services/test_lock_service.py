@@ -1,0 +1,199 @@
+"""Unit tests for LockService.
+
+Tests the lock administrative service.
+"""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
+
+import pytest
+
+from bioetl.application.services.lock_service import (
+    LockInfo,
+    LockService,
+)
+from bioetl.domain.types import RunID
+
+
+@pytest.fixture
+def mock_logger():
+    """Create a mock logger."""
+    logger = MagicMock()
+    logger.bind = MagicMock(return_value=logger)
+    logger.info = MagicMock()
+    logger.debug = MagicMock()
+    logger.warning = MagicMock()
+    return logger
+
+
+@pytest.fixture
+def mock_lock_port():
+    """Create a mock lock port."""
+    port = MagicMock()
+    port.validate_owner = AsyncMock(return_value=False)
+    port.release = AsyncMock(return_value=False)
+    port.aclose = AsyncMock()
+    return port
+
+
+@pytest.fixture
+def lock_service(mock_lock_port, mock_logger):
+    """Create a LockService instance."""
+    return LockService(
+        lock_port=mock_lock_port,
+        logger=mock_logger,
+    )
+
+
+@pytest.mark.unit
+class TestLockInfo:
+    """Test LockInfo dataclass."""
+
+    def test_lock_info_creation(self):
+        """Test LockInfo can be created."""
+        info = LockInfo(
+            key="pipeline1",
+            owner_id="run-123",
+            exclusive=True,
+        )
+
+        assert info.key == "pipeline1"
+        assert info.owner_id == "run-123"
+        assert info.exclusive is True
+
+
+@pytest.mark.unit
+class TestLockServiceCheckLock:
+    """Test LockService.check_lock method."""
+
+    @pytest.mark.asyncio
+    async def test_check_lock_not_held(self, lock_service, mock_lock_port):
+        """Test checking a lock that is not held."""
+        owner_id = RunID(uuid4())
+        mock_lock_port.validate_owner.return_value = False
+
+        result = await lock_service.check_lock("pipeline1", owner_id)
+
+        assert result is False
+        mock_lock_port.validate_owner.assert_called_once_with(
+            key="pipeline1",
+            owner_id=owner_id,
+        )
+
+    @pytest.mark.asyncio
+    async def test_check_lock_held(self, lock_service, mock_lock_port):
+        """Test checking a lock that is held."""
+        owner_id = RunID(uuid4())
+        mock_lock_port.validate_owner.return_value = True
+
+        result = await lock_service.check_lock("pipeline1", owner_id)
+
+        assert result is True
+
+
+@pytest.mark.unit
+class TestLockServiceReleaseLock:
+    """Test LockService.release_lock method."""
+
+    @pytest.mark.asyncio
+    async def test_release_lock_not_held(self, lock_service, mock_lock_port):
+        """Test releasing a lock that is not held."""
+        owner_id = RunID(uuid4())
+        mock_lock_port.release.return_value = False
+
+        result = await lock_service.release_lock("pipeline1", owner_id)
+
+        assert result is False
+        mock_lock_port.release.assert_called_once_with(
+            key="pipeline1",
+            owner_id=owner_id,
+            exclusive=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_release_lock_success(self, lock_service, mock_lock_port):
+        """Test successfully releasing a lock."""
+        owner_id = RunID(uuid4())
+        mock_lock_port.release.return_value = True
+
+        result = await lock_service.release_lock("pipeline1", owner_id)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_release_exclusive_lock(self, lock_service, mock_lock_port):
+        """Test releasing an exclusive lock."""
+        owner_id = RunID(uuid4())
+        mock_lock_port.release.return_value = True
+
+        result = await lock_service.release_lock(
+            "pipeline1", owner_id, exclusive=True
+        )
+
+        assert result is True
+        mock_lock_port.release.assert_called_once_with(
+            key="pipeline1",
+            owner_id=owner_id,
+            exclusive=True,
+        )
+
+
+@pytest.mark.unit
+class TestLockServiceForceReleaseAll:
+    """Test LockService.force_release_all method."""
+
+    @pytest.mark.asyncio
+    async def test_force_release_all_none_held(self, lock_service, mock_lock_port):
+        """Test force releasing when no locks are held."""
+        owner_id = RunID(uuid4())
+        mock_lock_port.release.return_value = False
+
+        result = await lock_service.force_release_all(
+            owner_id, ["pipeline1", "pipeline2"]
+        )
+
+        assert result == []
+        assert mock_lock_port.release.call_count == 4  # 2 regular + 2 exclusive
+
+    @pytest.mark.asyncio
+    async def test_force_release_all_some_held(self, lock_service, mock_lock_port):
+        """Test force releasing when some locks are held."""
+        owner_id = RunID(uuid4())
+        # First call (regular) succeeds, second (exclusive) fails for pipeline1
+        # Third call (regular) fails, fourth (exclusive) succeeds for pipeline2
+        mock_lock_port.release.side_effect = [True, False, False, True]
+
+        result = await lock_service.force_release_all(
+            owner_id, ["pipeline1", "pipeline2"]
+        )
+
+        assert "pipeline1" in result
+        assert "pipeline2:exclusive" in result
+
+
+@pytest.mark.unit
+class TestLockServiceListLocks:
+    """Test LockService.list_locks method."""
+
+    @pytest.mark.asyncio
+    async def test_list_locks_not_supported(self, lock_service, mock_logger):
+        """Test listing locks returns empty (not supported by LockPort)."""
+        result = await lock_service.list_locks()
+
+        assert result == []
+        # Should log a warning
+        mock_logger.warning.assert_called()
+
+
+@pytest.mark.unit
+class TestLockServiceAclose:
+    """Test LockService.aclose method."""
+
+    @pytest.mark.asyncio
+    async def test_aclose(self, lock_service, mock_lock_port):
+        """Test closing the service."""
+        await lock_service.aclose()
+
+        mock_lock_port.aclose.assert_called_once()
