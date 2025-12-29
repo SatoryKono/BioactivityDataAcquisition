@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.core.medallion_policy import Layer, WriteMode, WriteModePolicy
+from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
 from bioetl.domain.exceptions import PolicyViolationError
 
 
