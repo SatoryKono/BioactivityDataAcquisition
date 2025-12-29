@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.4] - 2025-12-29
+
+### Removed
+
+- **Prefect Integration References**: Удалены все упоминания Prefect из документации и комментариев:
+  - Prefect-интеграция никогда не была реализована (директория `interfaces/orchestration/prefect/` не существовала)
+  - Документация ссылалась на неё как на будущую возможность
+  - Согласно RULES.md §4.1, используем собственный PipelineRunner для <5 DAG-ов
+  - Обновлены: `entrypoints.py`, `docs/00-map.md`, `docs/02-architecture/*`, `README.md`, `.claude/PROJECT_CONTEXT.md`
+
+### Changed
+
+- **Orchestration Stack Decision**: RULES.md §4.1 обновлён:
+  - Основной инструмент: **PipelineRunner** (собственный легковесный Runner)
+  - Альтернатива: Prefect/Airflow при >5 DAG-ов
+  - Отражает текущую Local-Only архитектуру (ADR-010)
+
 ## [5.0.3] - 2025-12-29
 
 ### Added

@@ -241,7 +241,7 @@ Access the docs at `http://localhost:8000`.
 │       │   └── locking/      # In-memory locks (MemoryLock)
 │       └── interfaces/       # External interfaces
 │           ├── cli.py        # Click CLI entry point
-│           └── orchestration/ # Runner, signals, Prefect
+│           └── orchestration/ # Signal handlers for graceful shutdown
 ├── tests/                    # Unit, Integration & Architecture tests
 ├── .env.example              # Environment variables template
 ├── dev_setup.sh              # Automated development environment setup

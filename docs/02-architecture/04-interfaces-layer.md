@@ -32,7 +32,7 @@ python -m bioetl run --pipeline chembl_activity --limit 100
 
 **Расположение:** `src/bioetl/interfaces/orchestration/`
 
-Содержит адаптеры для внешних систем управления запуском, таких как Prefect.
+Содержит адаптеры для оркестрации пайплайнов и обработки сигналов операционной системы (graceful shutdown).
 
 ---
 
