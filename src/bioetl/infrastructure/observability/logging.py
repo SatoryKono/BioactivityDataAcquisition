@@ -131,7 +131,7 @@ def create_logger(
         StructlogLogger implementing LoggerPort with bound context.
 
     """
-    processors = [
+    processors: list[Any] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
