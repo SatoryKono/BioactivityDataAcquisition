@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.7 | Дата: 2025-12-28 | Обновлено: Добавлены ложные утверждения о MemoryLock, MemoryMonitor, DQ метриках*
+*Версия: 5.8 | Дата: 2025-12-29 | Обновлено: Добавлены ложные утверждения из консолидированного анализа 4 аудитов*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -84,6 +84,11 @@
 | "protocols.py пустой файл с нулевым покрытием" | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort` | `application/core/protocols.py` |
 | "TTL по умолчанию 3600s не соответствует требованиям" | Фактический TTL = `heartbeat_interval * 3` = 90s по умолчанию. `LockContext.is_valid(ttl_seconds=3600)` — backward-compat check, не фактический TTL. | `domain/config.py:291-293` (`effective_lock_ttl`) |
 | "Email в config требует хэширования как PII" | `default_email` — технический идентификатор для NCBI API, **НЕ персональные данные**. NCBI требует email для идентификации инструмента. | `CLAUDE.md` §2.3, `pubmed_client.py:38-42` |
+| "Тестовый контур не работает, pytest падает" | **Тесты работают**: 2895 passed, 89% coverage. Проблема была в окружении, не в коде. | `make test` (верификация 2025-12-29) |
+| "Parquet разрешён для Silver/Gold" | **Parquet запрещён** валидатором: `ValueError("Silver layer MUST use 'delta' format")` | `pipeline_config.py:261-271` (верификация 2025-12-29) |
+| "VACUUM не автоматизирован, требуется планировщик" | **УЖЕ РЕАЛИЗОВАНО**: `PostrunService.run_vacuum_if_enabled()` вызывается автоматически после каждого успешного run | `runner.py:134-136`, `postrun_service.py:244-288` |
+| "DQ-пороги не реализованы, только логирование" | **УЖЕ РЕАЛИЗОВАНО**: `DQConfig` (soft=0.05, hard=0.20), `_check_hard_threshold()` выбрасывает `DataQualityThresholdError`, метрики Prometheus | `postrun_service.py:122-163`, `domain/config.py:28-40` |
+| "MemoryLock без TTL, требуется Redis" | **MemoryLock полон**: TTL через `_ttl_checker_loop()`, heartbeat через `heartbeat()`, safety guard через `validate_owner()`. Redis — только при масштабировании. | `memory_lock.py:1-256` (верификация 2025-12-29) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 

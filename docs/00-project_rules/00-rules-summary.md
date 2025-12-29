@@ -1,6 +1,6 @@
 # Rules Summary
 
-*Синхронизировано с RULES.md v5.6 (2025-12-27)*
+*Синхронизировано с RULES.md v5.7 (2025-12-29)*
 
 ## Уровни Требований (RFC 2119)
 
@@ -129,12 +129,12 @@
 
 > **Note**: Local-Only Deployment (ADR-010). Redis отложен для будущего распределённого развёртывания.
 
-| Параметр      | Значение (Local-Only)        | Значение (Distributed, future) |
-|---------------|------------------------------|--------------------------------|
-| Механизм      | `MemoryLock` (in-process)    | Redis `SETNX` + `EXPIRE`       |
-| TTL           | —                            | 60 секунд                      |
-| Heartbeat     | —                            | Каждые 20 сек                  |
-| Max Duration  | 4 часа                       | 4 часа                         |
+| Параметр      | Значение (Local-Only)                      | Значение (Distributed, future) |
+|---------------|--------------------------------------------|---------------------------------|
+| Механизм      | `MemoryLock` (in-process)                  | Redis `SETNX` + `EXPIRE`        |
+| TTL           | `heartbeat_interval * 3` = 90s             | `heartbeat_interval * 3` = 90s  |
+| Heartbeat     | 30s (настраивается в `RuntimeConfig`)      | 30s                             |
+| Max Duration  | 4 часа                                     | 4 часа                          |
 
 - **Invariant**: Потеря блокировки = Потеря права на запись.
 - **Safety Guard**: Валидация lock ownership перед записью.
@@ -275,7 +275,7 @@
 1. RFC 2119: MUST = блокер, SHOULD = обоснование в PR, MAY = опционально.
 2. Medallion: Bronze (JSONL) → Silver (Delta Lake, merge) → Gold (strict).
 3. Quarantine: `common.quarantine`, retention 30 дней, sentinel values запрещены.
-4. Locks: Redis SETNX, TTL 60s, Heartbeat 20s, Fencing Token, Max 4h.
+4. Locks: MemoryLock (local) / Redis SETNX (distributed), TTL 90s, Heartbeat 30s, Fencing Token, Max 4h.
 5. DR: RPO 24h, RTO 4h, Game Days ежегодно.
 6. Schema Evolution: 14-дневный deprecation period, dual-write.
 7. Coverage ≥80%, mypy --strict, zero-sum class count.
