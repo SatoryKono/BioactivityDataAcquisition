@@ -1,5 +1,8 @@
 # configs/pipelines/chembl/activity.yaml
-# Конфигурация пайплайна для сущности Activity из ChEMBL.
+# Pipeline configuration for ChEMBL Activity entity.
+#
+# Inherits defaults from ../_defaults.yaml:
+# - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
 
 pipeline_name: chembl_activity
 provider: chembl
@@ -10,86 +13,45 @@ description: "Extract biological activity records from ChEMBL API"
 primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 
-# Ссылка на файл с конфигурацией источника данных
+# Reference to source configuration file
 source_file: ../../sources/chembl.yaml
 
-# New configurable gold filters (replaces gold_filter_types)
+# Entity-specific gold filters
 gold_filters:
-    columns:
-        standard_type: [IC50, Ki]
-        standard_units: [nM]
-        standard_relation: ["="]
-        assay_type: [B, F]
-        potential_duplicate: ["0"]
-    ranges:
-        standard_value:
-            min: 0
-            include_min: false
-    required_fields:
-        - standard_type
-        - standard_value
-        - standard_units
-        - target_chembl_id
+  columns:
+    standard_type: [IC50, Ki]
+    standard_units: [nM]
+    standard_relation: ["="]
+    assay_type: [B, F]
+    potential_duplicate: ["0"]
+  ranges:
+    standard_value:
+      min: 0
+      include_min: false
+  required_fields:
+    - standard_type
+    - standard_value
+    - standard_units
+    - target_chembl_id
 
-transform:
-    version: "1.0.0"
-    steps:
-        - normalize_values
-        - add_metadata
-        - calculate_content_hash
-
+# Entity-specific sink overrides (paths and primary_key)
 sink:
-    bronze:
-        path: "data/output/bronze"
-        format: jsonl
-        save_json: true  # Also save uncompressed JSONL copy
-        deterministic: true
+  bronze:
+    path: "data/output/bronze"
+  silver:
+    path: "data/output/silver"
+    primary_key: ["activity_id"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/output/gold"
+    csv_export:
+      path: "data/output/csv/gold"
 
-    silver:
-        path: "data/output/silver"
-        format: delta
-        mode: merge
-        on_schema_mismatch: evolve  # Allow schema evolution for _index field
-        primary_key: [ "activity_id" ]
-        # partition_by removed: columns 'year' and 'month' do not exist in Activity entity
-        classification: public
-        forensic_retention: true
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/silver"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-    gold:
-        enabled: true
-        validation:
-            strict: true  # REQ-DATA-009: Gold validation must be strict
-        path: "data/output/gold"
-        format: delta
-        mode: overwrite
-        deterministic: true
-        csv_export:
-            enabled: true
-            path: "data/output/csv/gold"
-            delimiter: ","
-            header: true
-            encoding: "utf-8"
-
-dq_rules:
-    soft_fail_threshold: 0.05
-    hard_fail_threshold: 0.20
-
-circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-
-# Input filter configuration (for CSV-based ID filtering)
-# CLI options --input-csv, --filter-column, --filter-field override these
+# Entity-specific input filter
 input_filter:
-    enabled: true
-    source_path: "data/input/activity.csv"  # Default CSV path
-    column_name: "activity_id"         # Column in CSV with IDs
-    filter_field: "activity_id"        # API field to filter by
-    batch_size: 20                           # IDs per API request
+  enabled: true
+  source_path: "data/input/activity.csv"
+  column_name: "activity_id"
+  filter_field: "activity_id"
+  batch_size: 20
