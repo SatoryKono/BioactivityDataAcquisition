@@ -761,60 +761,46 @@ def test_no_datetime_now_in_infrastructure():
 
 ---
 
-### O2: TracingContext в PipelineExecutor
+### O2: TracingContext в PipelineExecutor ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `executor.py:167-189,421-457` (верификация 2025-12-29)
 
 **Файл:** `src/bioetl/application/core/executor.py`
 
-#### Требуемые изменения
-
-| № | Изменение | Описание |
-|---|-----------|----------|
-| 1 | Root span для batch | `with tracer.start_span(f"batch_{batch_id}"):` |
-| 2 | Nested spans | fetch → transform → write_bronze → write_silver → write_gold |
-| 3 | Span attributes | batch_id, record_count, run_type |
+| № | Изменение | Статус | Строки |
+|---|-----------|--------|--------|
+| 1 | Root span для batch | ✅ | `executor.py:421-433` |
+| 2 | Nested spans | ✅ | `executor.py:153-165,409-457` |
+| 3 | Span attributes | ✅ | `executor.py:270-276,445-449` |
 
 ---
 
-### O3: Graceful shutdown для tracer
+### O3: Graceful shutdown для tracer ✅ РЕАЛИЗОВАНО
 
-**Файл:** `src/bioetl/application/core/runner.py`
+> **Статус:** Реализовано в `observer.py:149-160` (верификация 2025-12-29)
 
-#### Требуемые изменения
+**Файл:** `src/bioetl/application/observability/observer.py`
 
-```python
-async def run(self) -> None:
-    try:
-        await self._execute_pipeline()
-    finally:
-        await self._cleanup()
-
-async def _cleanup(self) -> None:
-    """Cleanup all resources including observability."""
-    # Existing cleanup...
-
-    # Flush tracer spans
-    if hasattr(self._services, 'tracer') and self._services.tracer:
-        try:
-            self._services.tracer.close()
-        except Exception as e:
-            self._context.logger.warning(
-                "Failed to close tracer",
-                error=str(e),
-            )
-```
+Graceful shutdown реализован в `PipelineObserver.__exit__()`:
+- Try/except вокруг span cleanup (строки 150-160)
+- Ошибки tracer НЕ проваливают pipeline
+- Тест: `test_observer_handles_close_error`
 
 ---
 
-### O4: Тесты observer
+### O4: Тесты observer ✅ РЕАЛИЗОВАНО
+
+> **Статус:** Реализовано в `test_observer.py` — 30+ тестов (верификация 2025-12-29)
 
 **Файл:** `tests/unit/application/observability/test_observer.py`
 
-| Тест | Описание |
-|------|----------|
-| `test_observer_records_duration` | Histogram записывается с корректными labels |
-| `test_observer_tracks_errors` | Counter инкрементируется по error_type |
-| `test_observer_graceful_shutdown` | Spans flushed при close() |
-| `test_observer_handles_close_error` | Ошибка close() не падает pipeline |
+| Тест | Статус | Строки |
+|------|--------|--------|
+| `test_observer_records_duration` | ✅ | 138-168 |
+| `test_observer_tracks_errors` | ✅ | 170-195 |
+| `test_observer_graceful_shutdown` | ✅ | 198-222 |
+| `test_observer_handles_close_error` | ✅ | 224-246 |
+| Lifecycle event tests | ✅ | 249-634 |
 
 ---
 

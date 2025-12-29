@@ -359,3 +359,294 @@ class TestStorageFactoryEdgeCases:
             assert result.adapter.bronze is bronze_instance
             assert result.adapter.silver is silver_instance
             assert result.adapter.gold is gold_instance
+
+
+@pytest.mark.unit
+class TestStorageAdapterHealthCheck:
+    """Tests for StorageAdapter.health_check() method."""
+
+    @pytest.fixture
+    def mock_bronze_writer(self, tmp_path):
+        """Create mock bronze writer."""
+        writer = MagicMock()
+        writer.base_path = str(tmp_path / "bronze")
+        return writer
+
+    @pytest.fixture
+    def mock_silver_writer(self, tmp_path):
+        """Create mock silver writer."""
+        writer = MagicMock()
+        writer.base_path = str(tmp_path / "silver")
+        writer.csv_exporter = None
+        return writer
+
+    @pytest.fixture
+    def mock_gold_writer(self, tmp_path):
+        """Create mock gold writer."""
+        writer = MagicMock()
+        writer.base_path = str(tmp_path / "gold")
+        writer.csv_exporter = None
+        return writer
+
+    @pytest.mark.asyncio
+    async def test_health_check_healthy_all_layers_writable(
+        self, mock_bronze_writer, mock_silver_writer, mock_gold_writer, tmp_path
+    ):
+        """Test health check returns HEALTHY when all layers are writable."""
+        from bioetl.domain.types import HealthStatus
+
+        adapter = StorageAdapter(
+            bronze_writer=mock_bronze_writer,
+            silver_writer=mock_silver_writer,
+            gold_writer=mock_gold_writer,
+        )
+
+        result = await adapter.health_check()
+
+        assert result == HealthStatus.HEALTHY
+
+    @pytest.mark.asyncio
+    async def test_health_check_degraded_partial_access(
+        self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
+    ):
+        """Test health check returns DEGRADED when some layers are not writable."""
+        from bioetl.domain.types import HealthStatus
+
+        # Make gold path point to non-existent read-only path
+        mock_gold_writer.base_path = "/nonexistent/readonly/path"
+
+        adapter = StorageAdapter(
+            bronze_writer=mock_bronze_writer,
+            silver_writer=mock_silver_writer,
+            gold_writer=mock_gold_writer,
+        )
+
+        result = await adapter.health_check()
+
+        # Either DEGRADED (if bronze/silver work) or UNHEALTHY (if all fail)
+        assert result in (HealthStatus.DEGRADED, HealthStatus.UNHEALTHY)
+
+    def test_check_directory_writable_creates_probe_file(self, tmp_path):
+        """Test _check_directory_writable creates and deletes probe file."""
+        adapter = StorageAdapter(
+            bronze_writer=MagicMock(),
+            silver_writer=MagicMock(),
+            gold_writer=MagicMock(),
+        )
+
+        result = adapter._check_directory_writable(tmp_path)
+
+        assert result is True
+        # Probe file should be cleaned up
+        probe_file = tmp_path / ".health_check_probe"
+        assert not probe_file.exists()
+
+
+@pytest.mark.unit
+class TestStorageAdapterClearOperations:
+    """Tests for StorageAdapter clear operations."""
+
+    @pytest.fixture
+    def mock_bronze_writer(self, tmp_path):
+        """Create mock bronze writer."""
+        writer = MagicMock()
+        writer.base_path = str(tmp_path / "bronze")
+        return writer
+
+    @pytest.fixture
+    def mock_silver_writer(self, tmp_path):
+        """Create mock silver writer."""
+        writer = MagicMock()
+        writer.base_path = str(tmp_path / "silver")
+        writer.csv_exporter = None
+        writer.clear = MagicMock(return_value=1)
+        return writer
+
+    @pytest.fixture
+    def mock_gold_writer(self, tmp_path):
+        """Create mock gold writer."""
+        writer = MagicMock()
+        writer.base_path = str(tmp_path / "gold")
+        writer.csv_exporter = None
+        writer.clear = MagicMock(return_value=1)
+        return writer
+
+    @pytest.mark.asyncio
+    async def test_clear_silver_calls_writer(
+        self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
+    ):
+        """Test clear_silver delegates to silver writer."""
+        adapter = StorageAdapter(
+            bronze_writer=mock_bronze_writer,
+            silver_writer=mock_silver_writer,
+            gold_writer=mock_gold_writer,
+        )
+
+        result = await adapter.clear_silver("chembl_activity", dry_run=False)
+
+        assert result == 1
+        mock_silver_writer.clear.assert_called_once_with(
+            "chembl_activity", dry_run=False
+        )
+
+    @pytest.mark.asyncio
+    async def test_clear_gold_calls_writer(
+        self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
+    ):
+        """Test clear_gold delegates to gold writer."""
+        adapter = StorageAdapter(
+            bronze_writer=mock_bronze_writer,
+            silver_writer=mock_silver_writer,
+            gold_writer=mock_gold_writer,
+        )
+
+        result = await adapter.clear_gold("chembl_activity", dry_run=False)
+
+        assert result == 1
+        mock_gold_writer.clear.assert_called_once_with("chembl_activity", dry_run=False)
+
+
+@pytest.mark.unit
+class TestStorageAdapterPreviewCleanup:
+    """Tests for StorageAdapter.preview_cleanup() method."""
+
+    @pytest.fixture
+    def temp_storage(self, tmp_path):
+        """Create temporary storage structure."""
+        silver_path = tmp_path / "silver" / "chembl" / "activity"
+        gold_path = tmp_path / "gold" / "chembl" / "activity"
+        silver_path.mkdir(parents=True)
+        gold_path.mkdir(parents=True)
+
+        # Create some test files
+        (silver_path / "file1.parquet").touch()
+        (silver_path / "file2.parquet").touch()
+        (gold_path / "file1.parquet").touch()
+
+        return tmp_path
+
+    @pytest.fixture
+    def adapter_with_temp_storage(self, temp_storage):
+        """Create adapter with temp storage."""
+        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.gold_writer import GoldWriter
+        from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+        bronze = MagicMock(spec=BronzeWriter)
+        bronze.base_path = str(temp_storage / "bronze")
+
+        silver = MagicMock(spec=DeltaWriter)
+        silver.base_path = str(temp_storage / "silver")
+        silver.get_table_path = MagicMock(
+            return_value=temp_storage / "silver" / "chembl" / "activity"
+        )
+
+        gold = MagicMock(spec=GoldWriter)
+        gold.base_path = str(temp_storage / "gold")
+        gold.get_table_path = MagicMock(
+            return_value=temp_storage / "gold" / "chembl" / "activity"
+        )
+
+        return StorageAdapter(
+            bronze_writer=bronze,
+            silver_writer=silver,
+            gold_writer=gold,
+        )
+
+    def test_preview_cleanup_returns_file_counts(
+        self, adapter_with_temp_storage, temp_storage
+    ):
+        """Test preview_cleanup returns correct file counts."""
+        result = adapter_with_temp_storage.preview_cleanup(
+            silver_table="chembl.activity",
+            gold_table="chembl.activity",
+        )
+
+        assert result["silver"]["file_count"] == 2
+        assert result["silver"]["exists"] is True
+        assert result["gold"]["file_count"] == 1
+        assert result["gold"]["exists"] is True
+        assert result["total_files"] == 3
+
+    def test_preview_cleanup_without_gold(self, adapter_with_temp_storage):
+        """Test preview_cleanup when gold_table is not specified."""
+        result = adapter_with_temp_storage.preview_cleanup(
+            silver_table="chembl.activity",
+            gold_table=None,
+        )
+
+        assert result["silver"]["file_count"] == 2
+        assert result["gold"] is None
+        assert result["total_files"] == 2
+
+
+@pytest.mark.unit
+class TestStorageAdapterVacuum:
+    """Tests for StorageAdapter.vacuum() method."""
+
+    @pytest.fixture
+    def mock_writers(self, tmp_path):
+        """Create mock writers."""
+        bronze = MagicMock()
+        bronze.base_path = str(tmp_path / "bronze")
+
+        silver = MagicMock()
+        silver.base_path = str(tmp_path / "silver")
+        silver.vacuum = MagicMock(return_value=["file1", "file2"])
+
+        gold = MagicMock()
+        gold.base_path = str(tmp_path / "gold")
+
+        return bronze, silver, gold
+
+    @pytest.mark.asyncio
+    async def test_vacuum_calls_silver_vacuum(self, mock_writers):
+        """Test vacuum delegates to silver writer."""
+        bronze, silver, gold = mock_writers
+
+        adapter = StorageAdapter(
+            bronze_writer=bronze,
+            silver_writer=silver,
+            gold_writer=gold,
+        )
+
+        # Mock the silver.vacuum as async
+        async def mock_vacuum(**kwargs):
+            return ["file1", "file2"]
+
+        silver.vacuum = mock_vacuum
+
+        result = await adapter.vacuum("chembl_activity", retention_hours=168)
+
+        # Should have vacuumed at least silver (2 files)
+        assert result >= 2
+
+
+@pytest.mark.unit
+class TestStorageAdapterAclose:
+    """Tests for StorageAdapter.aclose() method."""
+
+    @pytest.mark.asyncio
+    async def test_aclose_completes_without_error(self):
+        """Test aclose completes without raising."""
+        adapter = StorageAdapter(
+            bronze_writer=MagicMock(),
+            silver_writer=MagicMock(),
+            gold_writer=MagicMock(),
+        )
+
+        # Should not raise
+        await adapter.aclose()
+
+    @pytest.mark.asyncio
+    async def test_aclose_is_idempotent(self):
+        """Test aclose can be called multiple times."""
+        adapter = StorageAdapter(
+            bronze_writer=MagicMock(),
+            silver_writer=MagicMock(),
+            gold_writer=MagicMock(),
+        )
+
+        # Should not raise on multiple calls
+        await adapter.aclose()
+        await adapter.aclose()
