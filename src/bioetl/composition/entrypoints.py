@@ -44,6 +44,7 @@ __all__ = [
     "get_lifecycle_service",
     # Resource management (services - new)
     "get_checkpoint_service",
+    "get_lock_service",
     "get_quarantine_service",
     "get_bronze_cleanup_service",
     "get_vacuum_service",
@@ -60,6 +61,7 @@ __all__ = [
 from bioetl.composition._bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
+    bootstrap_lock_service,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
 )
@@ -88,6 +90,7 @@ if TYPE_CHECKING:
         QuarantineService,
         VacuumService,
     )
+    from bioetl.application.services.lock_service import LockService
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
@@ -621,6 +624,27 @@ def get_vacuum_service() -> VacuumService:
     """
     _ensure_registrations()
     return bootstrap_vacuum_service()
+
+
+def get_lock_service() -> LockService:
+    """Get a lock service for administrative lock operations.
+
+    Used for releasing stale locks and checking lock status.
+    This is the recommended way to manage locks from CLI.
+
+    Note: Uses in-memory locking which only affects the current process.
+    Lock operations are local to this process instance.
+
+    Returns:
+        LockService instance.
+
+    Example:
+        >>> service = get_lock_service()
+        >>> released = await service.release_lock("chembl_activity", run_id)
+        >>> print(f"Lock released: {released}")
+    """
+    _ensure_registrations()
+    return bootstrap_lock_service()
 
 
 async def cleanup_bronze(
