@@ -1015,7 +1015,7 @@ ci: lint test arch-all
 
 **Критерии готовности**:
 - [x] CLI не импортирует `bootstrap_*`
-- [x] Entrypoints доступны для Prefect/REST
+- [x] Entrypoints доступны для REST API и других оркестраторов
 
 ### Приоритет 2: ВЫСОКИЙ
 

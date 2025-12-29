@@ -1,40 +1,67 @@
-"""CrossRef API response field extraction utilities.
+"""CrossRef Transformer.
 
-Technical utilities for extracting and normalizing fields from CrossRef API responses.
-Used by infrastructure layer for raw data processing (dict → dict transformation).
+Transforms Bronze records to Silver format (Work entity inflation).
+Contains business logic for CrossRef data transformation per Hexagonal Architecture.
 
-NOTE: Business logic for domain entity creation (Work) has been moved to
-application/pipelines/crossref/transformer.py per Hexagonal Architecture.
-This module only provides field extraction helpers for Bronze-level processing.
+This module was refactored from infrastructure/adapters/crossref/mappers.py
+to properly separate business logic from infrastructure concerns.
 """
 
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, Work
+from bioetl.domain.transformations import generate_entity_id
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.filtering import GoldFilterConfig
+    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.types import BronzeRecord, SilverRecord
+
 
 # HTML tag pattern for stripping from abstract
-HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
-
-# Document type mapping from CrossRef types to internal types
-# Used for dict-level transformation (Bronze). For domain entity mapping,
-# see domain/entities/crossref.py (canonical source).
-_CROSSREF_TYPE_MAP = {
-    "journal-article": "PUBLICATION",
-    "posted-content": "PREPRINT",
-    "proceedings-article": "PUBLICATION",
-    "book-chapter": "PUBLICATION",
-    "dissertation": "PUBLICATION",
-}
+_HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 
 
-class CrossRefFieldExtractor:
-    """Extracts and normalizes fields from CrossRef API responses.
+class CrossRefTransformer(BaseTransformer):
+    """Transforms CrossRef bronze records to silver.
 
-    Provides technical field extraction for dict-to-dict transformations.
-    Does NOT create domain entities - that responsibility belongs to
-    application/pipelines/crossref/transformer.py.
+    Implements field extraction, normalization, and type coercion
+    according to the CrossRef → Work entity mapping specification.
+
+    Subclasses BaseTransformer to provide:
+    - Unified error handling via Template Method
+    - Content hash computation
+    - Tracing and metrics observability (O1)
     """
+
+    def __init__(
+        self,
+        provider: str = "crossref",
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+    ) -> None:
+        """Initialize CrossRef transformer.
+
+        Args:
+            provider: Data provider identifier. Defaults to 'crossref'.
+            tracer: Optional tracing port for distributed tracing.
+            metrics: Optional metrics port for duration/error tracking.
+            gold_filters: Optional filter configuration for Gold layer.
+
+        """
+        super().__init__(
+            provider, entity_type="work", tracer=tracer, metrics=metrics, gold_filters=gold_filters
+        )
+
+    # ========================================================================
+    # Field Extraction Methods (Business Logic)
+    # ========================================================================
 
     @staticmethod
     def normalize_doi(doi: str) -> str:
@@ -182,7 +209,7 @@ class CrossRefFieldExtractor:
             Plain text with HTML tags removed.
 
         """
-        return HTML_TAG_PATTERN.sub("", text).strip()
+        return _HTML_TAG_PATTERN.sub("", text).strip()
 
     @staticmethod
     def extract_abstract(work: dict[str, Any]) -> str | None:
@@ -198,7 +225,7 @@ class CrossRefFieldExtractor:
         abstract = work.get("abstract", "")
         if not abstract:
             return None
-        return CrossRefFieldExtractor.strip_html_tags(abstract) or None
+        return CrossRefTransformer.strip_html_tags(abstract) or None
 
     @staticmethod
     def map_doc_type(crossref_type: str) -> str:
@@ -211,7 +238,7 @@ class CrossRefFieldExtractor:
             Internal document type (PUBLICATION or PREPRINT).
 
         """
-        return _CROSSREF_TYPE_MAP.get(crossref_type, "PUBLICATION")
+        return CROSSREF_TYPE_MAP.get(crossref_type, "PUBLICATION")
 
     @staticmethod
     def extract_issn(work: dict[str, Any]) -> list[str]:
@@ -258,71 +285,99 @@ class CrossRefFieldExtractor:
         subjects: list[str] = work.get("subject", [])
         return subjects
 
-    def extract_to_dict(self, work_data: dict[str, Any]) -> dict[str, Any]:
-        """Extract and normalize CrossRef fields to dictionary.
+    # ========================================================================
+    # Main Transformation
+    # ========================================================================
 
-        Performs field extraction and normalization for Bronze storage.
-        Does NOT create domain entities.
-
-        Args:
-            work_data: Raw CrossRef work record.
-
-        Returns:
-            Normalized dictionary for Bronze storage.
-
-        """
-        return self.map_to_dict(work_data)
-
-    def map_to_dict(self, work_data: dict[str, Any]) -> dict[str, Any]:
-        """Extract and normalize CrossRef fields to dictionary (alias).
-
-        Backward compatibility alias for extract_to_dict.
+    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+        """Extract Work business data from bronze record.
 
         Args:
-            work_data: Raw CrossRef work record.
+            record: Raw Bronze record from CrossRef API.
 
         Returns:
-            Normalized dictionary for Bronze storage.
+            Dictionary of Work business fields.
 
         """
-        doi = self.normalize_doi(work_data.get("DOI", ""))
-        first_page, last_page = self.extract_pages(work_data)
+        doi = self.normalize_doi(record.get("DOI", ""))
+        first_page, last_page = self.extract_pages(record)
 
         # Extract date fields
-        published_print = work_data.get("published-print", {})
-        published_online = work_data.get("published-online", {})
+        published_print = record.get("published-print", {})
+        published_online = record.get("published-online", {})
 
         return {
             "doi": doi,
-            "title": self.extract_title(work_data),
-            "abstract": self.extract_abstract(work_data),
-            "authors": self.extract_authors(work_data),
-            "journal": self.extract_journal(work_data),
-            "issn": self.extract_issn(work_data),
-            "publisher": work_data.get("publisher"),
-            "volume": work_data.get("volume"),
-            "issue": work_data.get("issue"),
+            "title": self.extract_title(record),
+            "abstract": self.extract_abstract(record),
+            "authors": self.extract_authors(record),
+            "journal": self.extract_journal(record),
+            "issn": self.extract_issn(record),
+            "publisher": record.get("publisher"),
+            "volume": record.get("volume"),
+            "issue": record.get("issue"),
             "first_page": first_page,
             "last_page": last_page,
-            "year": self.extract_year(work_data),
+            "year": self.extract_year(record),
             "published_print": self.format_date_parts(
                 published_print.get("date-parts") if isinstance(published_print, dict) else None
             ),
             "published_online": self.format_date_parts(
                 published_online.get("date-parts") if isinstance(published_online, dict) else None
             ),
-            "doc_type": self.map_doc_type(work_data.get("type", "")),
-            "citation_count": work_data.get("is-referenced-by-count"),
-            "reference_count": work_data.get("references-count"),
-            "language": work_data.get("language"),
-            "license_url": self.extract_license_url(work_data),
-            "subjects": self.extract_subjects(work_data),
+            "doc_type": self.map_doc_type(record.get("type", "")),
+            "citation_count": record.get("is-referenced-by-count"),
+            "reference_count": record.get("references-count"),
+            "language": record.get("language"),
+            "license_url": self.extract_license_url(record),
+            "subjects": self.extract_subjects(record),
             "source": "crossref",
-            # Preserve raw type for debugging
-            "_raw_type": work_data.get("type"),
         }
 
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Transform CrossRef bronze record to silver format.
 
-# Backward compatibility alias (deprecated)
-# TODO: Remove after migrating all usages to CrossRefFieldExtractor
-WorkToPublicationMapper = CrossRefFieldExtractor
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record from CrossRef API.
+            index: Sequential index of the record in the pipeline run.
+
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
+
+        """
+        # 1. Validate required field
+        doi = record.get("DOI")
+        if not doi:
+            raise ValueError("DOI is required for CrossRef Work")
+
+        # 2. Extract business data
+        business_data = self._extract_business_data(record)
+
+        # 3. Generate entity ID (normalized DOI)
+        entity_id = generate_entity_id(
+            record={"doi": business_data["doi"]},
+            provider=self.provider,
+            id_field="doi",
+        )
+
+        # 4. Compute content hash
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+
+        # 5. Create domain entity
+        entity = self._create_entity(
+            Work,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 6. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
