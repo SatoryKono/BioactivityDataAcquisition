@@ -80,7 +80,7 @@ circuit_breaker:
 # CLI options --input-csv, --filter-column, --filter-field override these
 input_filter:
     enabled: false
-    source_path: "data/input/proteins.csv"
+    source_path: "data/input/protein.csv"
     column_name: "accession"
     filter_field: "accession"
     batch_size: 100
