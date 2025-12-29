@@ -76,7 +76,7 @@ def _mask_secrets(value: Any) -> Any:
 
 def _secret_filter_processor(
     logger: Any,
-    method_name: str,
+    _method_name: str,
     event_dict: dict[str, Any],
 ) -> dict[str, Any]:
     """Structlog processor that filters secrets from log entries.
