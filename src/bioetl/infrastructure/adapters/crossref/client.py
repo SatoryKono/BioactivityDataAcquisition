@@ -431,6 +431,15 @@ class CrossRefAdapter(BaseHttpAdapter):
         """
         return HealthStatus.UNHEALTHY
 
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for CrossRef.
+
+        Returns:
+            CrossRef works endpoint used for health probe.
+
+        """
+        return "/works"
+
     async def aclose(self) -> None:
         """Close adapter resources.
 
