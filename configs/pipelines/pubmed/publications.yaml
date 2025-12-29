@@ -8,8 +8,8 @@ version: "1.0.0"
 description: "Extract publication metadata from PubMed via Entrez API"
 
 primary_keys: ["pmid"]
-silver_table: "pubmed_publications"
-gold_table: "pubmed_publications"
+silver_table: "pubmed_publication"
+gold_table: "pubmed_publication"
 
 # Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/pubmed.yaml

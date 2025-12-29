@@ -51,12 +51,12 @@ async def test_pubmed_publications_full_cycle(e2e_data_dir: Path):
 
     # Assert - Silver layer
     silver_count = assert_silver_table_has_records(
-        e2e_data_dir, "pubmed_publications", expected_min=1
+        e2e_data_dir, "pubmed_publication", expected_min=1
     )
     assert silver_count <= 5
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "pubmed_publications")
+    records = get_silver_records(e2e_data_dir, "pubmed_publication")
     required_fields = ["pmid", "title"]
     for record in records:
         for field in required_fields:
@@ -84,7 +84,7 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check date fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publications")
+    records = get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
         # PMID must always be present
@@ -118,7 +118,7 @@ async def test_pubmed_publications_journal_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check journal fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publications")
+    records = get_silver_records(e2e_data_dir, "pubmed_publication")
 
     # Verify records were extracted
     assert len(records) >= 1, "Should have at least one publication record"
@@ -143,7 +143,7 @@ async def test_pubmed_publications_classification_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check classification fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publications")
+    records = get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
         # Keywords and mesh_terms should be lists (possibly empty)
@@ -186,7 +186,7 @@ async def test_pubmed_publications_identifier_fields(e2e_data_dir: Path):
     await runner.run()
 
     # Assert - Check identifier fields
-    records = get_silver_records(e2e_data_dir, "pubmed_publications")
+    records = get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
         # PMID is always required
