@@ -456,7 +456,7 @@ class TestMemoryMonitorRecovery:
 
             # Simulate 5+ consecutive pressure events
             current_size = 1000
-            for i in range(6):
+            for _ in range(6):
                 current_size = monitor.get_recommended_batch_size(current_size)
 
             # After 5+ pressure events, reduction should be 0.25
