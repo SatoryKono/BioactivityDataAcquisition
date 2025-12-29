@@ -5,13 +5,31 @@ Tests the infrastructure health validation before pipeline execution.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
 import pytest
 
 from bioetl.application.core.health_aggregator import HealthAggregator
 from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
+
+
+def _create_health_check_result(
+    status: HealthStatus = HealthStatus.HEALTHY,
+    provider: str = "test_provider",
+    latency_ms: float = 50.0,
+    last_error: str | None = None,
+) -> HealthCheckResult:
+    """Helper to create HealthCheckResult for tests."""
+    return HealthCheckResult(
+        status=status,
+        latency_ms=latency_ms,
+        provider=provider,
+        endpoint="/health",
+        last_error=last_error,
+        consecutive_failures=0 if status == HealthStatus.HEALTHY else 1,
+    )
 
 
 @pytest.fixture
@@ -45,8 +63,26 @@ def mock_storage():
 
 @pytest.fixture
 def mock_data_source():
-    """Create a mock data source port."""
+    """Create a mock data source port with check_health method.
+
+    Uses spec to ensure only specified methods are available,
+    preventing MagicMock auto-attribute creation from triggering
+    the hasattr check for check_health.
+    """
     data_source = MagicMock()
+    # Remove check_health attribute to trigger legacy fallback
+    del data_source.check_health
+    data_source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+    return data_source
+
+
+@pytest.fixture
+def mock_data_source_with_check_health():
+    """Create a mock data source port with new check_health method."""
+    data_source = MagicMock()
+    data_source.check_health = AsyncMock(
+        return_value=_create_health_check_result(HealthStatus.HEALTHY)
+    )
     data_source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
     return data_source
 

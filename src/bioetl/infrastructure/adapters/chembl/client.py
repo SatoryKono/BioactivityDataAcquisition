@@ -440,6 +440,15 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         return self._get_health_status()
 
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for ChEMBL.
+
+        Returns:
+            ChEMBL status endpoint path.
+
+        """
+        return "/chembl/api/data/status.json"
+
     def _handle_health_response(self, response: Response) -> HealthStatus:
         """Process health check response.
 
