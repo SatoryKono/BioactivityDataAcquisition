@@ -152,6 +152,12 @@ bioetl checkpoint list
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.
 
+* **Quick Check (with dependencies auto-synced and coverage):**
+  ```bash
+  ./scripts/run_pytest.sh
+  ```
+  The helper bootstraps the virtual environment (installs `pytest-cov`, `orjson`, `syrupy`, and other test-only dependencies) and reproduces the default CI command with coverage output.
+
 * **Run All Tests**:
   ```bash
   make test
