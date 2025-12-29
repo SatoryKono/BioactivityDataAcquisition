@@ -142,10 +142,10 @@ docs/
 | Topic            | Document                                                                                            | RULES.md |
 |------------------|-----------------------------------------------------------------------------------------------------|----------|
 | Medallion Layers | [data-flow.md](02-architecture/data-flow.md)                                                        | §2.1     |
-| Schema Drift     | [01-project-rules.md](00-project_rules/01-project-rules.md)   | §2.2     |
+| Schema Drift     | [RULES.md §2.2](RULES.md#22-политика-дрейфа-схемы-schema-drift) | §2.2     |
 | Data Lineage     | [system-context.md](02-architecture/system-context.md)                                              | §2.3     |
-| Backfill/Replay  | [01-project-rules.md](00-project_rules/01-project-rules.md)            | §2.4     |
-| Quarantine       | [01-project-rules.md](00-project_rules/01-project-rules.md) | §2.6     |
+| Backfill/Replay  | [RULES.md §2.4](RULES.md#24-политика-backfill--replay) | §2.4     |
+| Quarantine       | [RULES.md §2.6](RULES.md#26-политика-null-и-пропущенных-значений) | §2.6     |
 | Content Hash     | [system-context.md](02-architecture/system-context.md)                                              | §2.8     |
 
 ### Schema Documentation
@@ -164,7 +164,7 @@ docs/
 | Error Handling    | [data-flow.md](02-architecture/data-flow.md)                                    | §3.1     |
 | Circuit Breaker   | [data-flow.md](02-architecture/data-flow.md)                                  | §3.1.4   |
 | Locking           | [data-flow.md](02-architecture/data-flow.md)                                | §3.3     |
-| DQ Metrics        | [01-project-rules.md](00-project_rules/01-project-rules.md) | §3.4     |
+| DQ Metrics        | [RULES.md §3.4](RULES.md#34-метрики-качества-данных-dq-metrics) | §3.4     |
 | Graceful Shutdown | [data-flow.md](02-architecture/data-flow.md)                                 | §5.3     |
 | DR Procedures     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                                                      | §5.5     |
 | Cleanup           | [05-cleanup-policy.md](00-project_rules/05-cleanup-policy.md)                                     | §2.1.1   |
@@ -176,9 +176,9 @@ docs/
 | Adding Providers | [add-new-source.md](03-guides/add-new-source.md)                                                | App D    |
 | Adding Pipelines | [add-pipeline-existing-source.md](03-guides/add-pipeline-existing-source.md)                    | App D    |
 | Pipeline Review  | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                | §4.2     |
-| Testing          | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4.2     |
+| Testing          | [testing.md](03-guides/testing.md) / [RULES.md §4.2](RULES.md#42-политика-тестирования) | §4.2     |
 | E2E Testing      | [tests/e2e/](../tests/e2e/) + [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md) | §4.2.3 |
-| Code Style       | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4       |
+| Code Style       | [RULES.md §4](RULES.md#4-стандарты-кода-и-тестирование) | §4       |
 
 ---
 
