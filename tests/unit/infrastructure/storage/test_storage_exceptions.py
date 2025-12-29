@@ -66,7 +66,9 @@ class TestDeltaWriterExceptions:
             TableNotFoundError("Not found"),  # Schema check
             SchemaMismatchError("Invalid schema"),  # Write attempt
         ]
-        writer = DeltaWriter(base_path="/fake/path", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/fake/path", logger=noop_logger, require_lock=False
+        )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
@@ -106,7 +108,9 @@ class TestDeltaWriterExceptions:
             mock_table_instance,  # Write attempt
         ]
 
-        writer = DeltaWriter(base_path="/fake/path", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/fake/path", logger=noop_logger, require_lock=False
+        )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
@@ -138,7 +142,9 @@ class TestDeltaWriterExceptions:
     ):
         """Test SchemaViolationError on table creation."""
         mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
-        writer = DeltaWriter(base_path="/fake/path", logger=noop_logger, require_lock=False)
+        writer = DeltaWriter(
+            base_path="/fake/path", logger=noop_logger, require_lock=False
+        )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
@@ -166,7 +172,9 @@ class TestDeltaWriterExceptions:
             "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=TableNotFoundError,
         ):
-            writer = DeltaWriter(base_path="/fake/path", logger=noop_logger, require_lock=False)
+            writer = DeltaWriter(
+                base_path="/fake/path", logger=noop_logger, require_lock=False
+            )
             # Make run_in_executor execute synchronously for testing
             writer.loop = asyncio.get_event_loop()
             writer.loop.run_in_executor = make_sync_executor(writer.loop)

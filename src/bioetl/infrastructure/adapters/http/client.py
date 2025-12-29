@@ -194,11 +194,21 @@ class UnifiedHTTPClient:
             self._metrics.increment_counter(
                 "http_request_errors_total",
                 1,
-                {"provider": self.provider, "method": method.upper(), "error_type": error_type},
+                {
+                    "provider": self.provider,
+                    "method": method.upper(),
+                    "error_type": error_type,
+                },
             )
 
     def _log_retry(
-        self, url: str, method: str, attempt: int, *, status_code: int | None = None, error: str | None = None
+        self,
+        url: str,
+        method: str,
+        attempt: int,
+        *,
+        status_code: int | None = None,
+        error: str | None = None,
     ) -> None:
         """Log retry attempt if logger is configured."""
         if not self.logger:
@@ -282,7 +292,9 @@ class UnifiedHTTPClient:
             span.set_attribute("http.retries", retries)
             span.set_attribute("bioetl.duration_ms", duration * 1000)
             span.__exit__(None, None, None)
-            self._record_request_metrics(method, duration, status_code, retries, last_error)
+            self._record_request_metrics(
+                method, duration, status_code, retries, last_error
+            )
 
     async def _attempt_request(
         self,
@@ -303,7 +315,9 @@ class UnifiedHTTPClient:
             response = await self._execute_single_attempt(client, method, url, **kwargs)
             status_code = response.status_code
 
-            if _is_retryable_status(status_code) and not self.retry_policy.is_last_attempt(attempt):
+            if _is_retryable_status(
+                status_code
+            ) and not self.retry_policy.is_last_attempt(attempt):
                 self._log_retry(url, method, attempt, status_code=status_code)
                 await self._handle_retry_delay(attempt, url, response)
                 return (True, status_code, 1, None)
@@ -318,7 +332,10 @@ class UnifiedHTTPClient:
             span.record_exception(exc)
             if self.logger:
                 self.logger.warning(
-                    "http_circuit_breaker_open", url=url, method=method, provider=self.provider
+                    "http_circuit_breaker_open",
+                    url=url,
+                    method=method,
+                    provider=self.provider,
                 )
             raise
 

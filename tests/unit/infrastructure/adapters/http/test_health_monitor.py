@@ -62,9 +62,7 @@ class TestProviderHealthMonitorStateTransitions:
         state = monitor.get_state("chembl")
         assert state.consecutive_errors == 1
 
-    def test_degraded_after_two_errors(
-        self, monitor: ProviderHealthMonitor
-    ) -> None:
+    def test_degraded_after_two_errors(self, monitor: ProviderHealthMonitor) -> None:
         """Test status remains DEGRADED with 2 consecutive errors."""
         monitor.record_error("chembl")  # 1st error -> DEGRADED
         status = monitor.record_error("chembl")  # 2nd error
@@ -117,7 +115,9 @@ class TestProviderHealthMonitorStateTransitions:
         monitor.record_success("chembl")
         state = monitor.get_state("chembl")
         assert state.consecutive_errors == 0
-        assert state.status == HealthStatus.DEGRADED  # Still degraded (window not passed)
+        assert (
+            state.status == HealthStatus.DEGRADED
+        )  # Still degraded (window not passed)
 
         # Simulate 5 minutes passing by setting last_success in the past
         # This simulates that the previous success happened 5+ minutes ago
@@ -130,9 +130,7 @@ class TestProviderHealthMonitorStateTransitions:
         # Now should be HEALTHY since 5 min window passed
         assert status == HealthStatus.HEALTHY
 
-    def test_success_resets_error_count(
-        self, monitor: ProviderHealthMonitor
-    ) -> None:
+    def test_success_resets_error_count(self, monitor: ProviderHealthMonitor) -> None:
         """Test that success resets consecutive error count."""
         monitor.record_error("chembl")
         monitor.record_error("chembl")
@@ -141,9 +139,7 @@ class TestProviderHealthMonitorStateTransitions:
         monitor.record_success("chembl")
         assert monitor.get_state("chembl").consecutive_errors == 0
 
-    def test_independent_provider_states(
-        self, monitor: ProviderHealthMonitor
-    ) -> None:
+    def test_independent_provider_states(self, monitor: ProviderHealthMonitor) -> None:
         """Test that each provider has independent state."""
         monitor.record_error("chembl")
         monitor.record_error("chembl")
@@ -153,7 +149,9 @@ class TestProviderHealthMonitorStateTransitions:
 
         assert monitor.get_state("chembl").status == HealthStatus.UNHEALTHY
         assert monitor.get_state("uniprot").status == HealthStatus.DEGRADED
-        assert monitor.get_state("pubchem").status == HealthStatus.HEALTHY  # Never errored
+        assert (
+            monitor.get_state("pubchem").status == HealthStatus.HEALTHY
+        )  # Never errored
 
 
 class TestProviderHealthMonitorHealthCheck:
@@ -302,9 +300,7 @@ class TestProviderHealthMonitorAdaptiveParams:
 class TestProviderHealthMonitorGetAllStates:
     """Tests for get_all_states() method."""
 
-    def test_get_all_states_empty(
-        self, monitor: ProviderHealthMonitor
-    ) -> None:
+    def test_get_all_states_empty(self, monitor: ProviderHealthMonitor) -> None:
         """Test get_all_states returns empty dict initially."""
         states = monitor.get_all_states()
         assert states == {}

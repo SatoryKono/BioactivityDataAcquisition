@@ -2,6 +2,7 @@
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 """
+
 from __future__ import annotations
 
 import pandera as pa
@@ -14,9 +15,7 @@ class ProteinClassificationSchema(ETLRecordSchema):
     """Protein Classification validation schema for Silver layer."""
 
     # === Primary Key ===
-    protein_class_id: Series[int] = pa.Field(
-        nullable=False, description="Primary key."
-    )
+    protein_class_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
     parent_id: Series[int] | None = pa.Field(
@@ -30,23 +29,17 @@ class ProteinClassificationSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    short_name: Series[str] | None = pa.Field(
-        nullable=True, description="Short name."
-    )
+    short_name: Series[str] | None = pa.Field(nullable=True, description="Short name.")
     protein_class_desc: Series[str] | None = pa.Field(
         nullable=True, description="Description."
     )
-    definition: Series[str] | None = pa.Field(
-        nullable=True, description="Definition."
-    )
+    definition: Series[str] | None = pa.Field(nullable=True, description="Definition.")
     class_level: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Class level.",
     )
-    sort_order: Series[int] | None = pa.Field(
-        nullable=True, description="Sort order."
-    )
+    sort_order: Series[int] | None = pa.Field(nullable=True, description="Sort order.")
 
     # === Flags ===
     downgraded: Series[int] | None = pa.Field(
@@ -57,6 +50,7 @@ class ProteinClassificationSchema(ETLRecordSchema):
 
     class Config:
         """Pandera configuration."""
+
         strict = True
         ordered = True
         coerce = True

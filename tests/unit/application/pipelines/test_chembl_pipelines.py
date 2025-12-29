@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
 
 import pytest
 
@@ -15,8 +16,6 @@ from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from uuid import uuid4
-
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics

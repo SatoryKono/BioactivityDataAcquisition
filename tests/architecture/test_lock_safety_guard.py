@@ -42,9 +42,9 @@ class TestLockSafetyGuard:
         """MemoryLock MUST implement validate_owner method."""
         lock = MemoryLock()
 
-        assert hasattr(lock, "validate_owner"), (
-            "MemoryLock MUST implement validate_owner() method from LockPort"
-        )
+        assert hasattr(
+            lock, "validate_owner"
+        ), "MemoryLock MUST implement validate_owner() method from LockPort"
         assert callable(lock.validate_owner)
 
     @pytest.mark.asyncio

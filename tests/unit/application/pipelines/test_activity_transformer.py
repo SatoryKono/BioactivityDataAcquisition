@@ -12,9 +12,9 @@ import pytest
 
 from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.activity_transformer import (
-    ActivityTransformer,
     _ACTION_TYPE_FIELDS,
     _LIGAND_EFFICIENCY_FIELDS,
+    ActivityTransformer,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType

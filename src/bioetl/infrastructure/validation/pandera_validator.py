@@ -169,39 +169,39 @@ class PanderaGoldValidator:
 
             # We need to tell Pandera to be non-strict if our validator is configured as non-strict.
             if not self._strict and hasattr(self._schema, "columns"):
-                 # We can't easily modify the schema instance if it's frozen or shared.
-                 # But we can try to validate with a non-strict copy or just catch the error?
-                 # Catching the error is risky as it might hide other schema issues.
+                # We can't easily modify the schema instance if it's frozen or shared.
+                # But we can try to validate with a non-strict copy or just catch the error?
+                # Catching the error is risky as it might hide other schema issues.
 
-                 # Let's try to use the add_missing_columns=True? No, that adds missing, doesn't allow extra.
+                # Let's try to use the add_missing_columns=True? No, that adds missing, doesn't allow extra.
 
-                 # Actually, if we want to allow extra columns, the schema itself must not be strict.
-                 # Since we cannot change the schema definition easily (it's in code), we must ensure
-                 # validation doesn't fail on extra columns.
+                # Actually, if we want to allow extra columns, the schema itself must not be strict.
+                # Since we cannot change the schema definition easily (it's in code), we must ensure
+                # validation doesn't fail on extra columns.
 
-                 # If we can't change the schema object, we can try to validate only the columns present in schema.
-                 # But wait, if we do that, we are validating a subset, and then writing the full set.
-                 # That is actually what we want! We want to validate that the columns KNOWN to the schema are correct,
-                 # and ignore the extra ones (pass them through).
+                # If we can't change the schema object, we can try to validate only the columns present in schema.
+                # But wait, if we do that, we are validating a subset, and then writing the full set.
+                # That is actually what we want! We want to validate that the columns KNOWN to the schema are correct,
+                # and ignore the extra ones (pass them through).
 
-                 # So, if self._strict is False, we should filter the DF to schema columns for validation only?
-                 # Yes, that would solve the validation error.
-                 # And since we write the original 'records' (not the DF used for validation), the extra columns will be written.
+                # So, if self._strict is False, we should filter the DF to schema columns for validation only?
+                # Yes, that would solve the validation error.
+                # And since we write the original 'records' (not the DF used for validation), the extra columns will be written.
 
-                 # Let's implement this strategy.
+                # Let's implement this strategy.
 
-                 schema_columns = set(self._schema.columns.keys())
-                 # Also include index columns if any
-                 if self._schema.index:
-                     schema_columns.update(self._schema.index.names)
+                schema_columns = set(self._schema.columns.keys())
+                # Also include index columns if any
+                if self._schema.index:
+                    schema_columns.update(self._schema.index.names)
 
-                 # Filter DF to only schema columns
-                 # We need to handle case where schema column is NOT in df (missing column) - Pandera handles that.
-                 # We only want to remove columns from DF that are NOT in schema.
-                 cols_to_keep = list(schema_columns.intersection(df.columns))
-                 df_to_validate = df[cols_to_keep]
+                # Filter DF to only schema columns
+                # We need to handle case where schema column is NOT in df (missing column) - Pandera handles that.
+                # We only want to remove columns from DF that are NOT in schema.
+                cols_to_keep = list(schema_columns.intersection(df.columns))
+                df_to_validate = df[cols_to_keep]
 
-                 self._schema.validate(df_to_validate, lazy=True)
+                self._schema.validate(df_to_validate, lazy=True)
             else:
                 self._schema.validate(df, lazy=True)
 

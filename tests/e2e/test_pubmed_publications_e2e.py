@@ -93,9 +93,9 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
         # Most publications should have at least pub_year
         pub_year = record.get("pub_year") or record.get("publication_year")
         if pub_year is not None:
-            assert 1800 <= pub_year <= 2100, (
-                f"Invalid pub_year {pub_year} for PMID {record.get('pmid')}"
-            )
+            assert (
+                1800 <= pub_year <= 2100
+            ), f"Invalid pub_year {pub_year} for PMID {record.get('pmid')}"
 
 
 @pytest.mark.e2e
@@ -152,19 +152,19 @@ async def test_pubmed_publications_classification_fields(e2e_data_dir: Path):
         pub_types = record.get("publication_types")
 
         if keywords is not None:
-            assert isinstance(keywords, list), (
-                f"keywords should be list, got {type(keywords)}"
-            )
+            assert isinstance(
+                keywords, list
+            ), f"keywords should be list, got {type(keywords)}"
 
         if mesh_terms is not None:
-            assert isinstance(mesh_terms, list), (
-                f"mesh_terms should be list, got {type(mesh_terms)}"
-            )
+            assert isinstance(
+                mesh_terms, list
+            ), f"mesh_terms should be list, got {type(mesh_terms)}"
 
         if pub_types is not None:
-            assert isinstance(pub_types, list), (
-                f"publication_types should be list, got {type(pub_types)}"
-            )
+            assert isinstance(
+                pub_types, list
+            ), f"publication_types should be list, got {type(pub_types)}"
 
 
 @pytest.mark.e2e

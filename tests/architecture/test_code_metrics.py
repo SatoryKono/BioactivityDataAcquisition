@@ -57,8 +57,8 @@ class TestFileSizeLimits:
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
-        "storage_factory.py": 400, # Extracted from storage.py
-        "observability.py": 450, # Bootstrap observability
+        "storage_factory.py": 400,  # Extracted from storage.py
+        "observability.py": 450,  # Bootstrap observability
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -179,9 +179,10 @@ class TestFunctionComplexity:
             except SyntaxError:
                 continue
 
-        assert not violations, (
-            f"Functions with CC > {max_cc} in {layer}:\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert (
+            not violations
+        ), f"Functions with CC > {max_cc} in {layer}:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
 

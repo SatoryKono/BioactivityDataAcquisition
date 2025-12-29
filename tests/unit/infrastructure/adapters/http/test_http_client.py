@@ -612,7 +612,12 @@ class TestUnifiedHTTPClientObservability:
 
     @pytest.fixture
     def http_client_with_observability(
-        self, mock_rate_limiter, mock_circuit_breaker, mock_tracer, mock_metrics, mock_logger
+        self,
+        mock_rate_limiter,
+        mock_circuit_breaker,
+        mock_tracer,
+        mock_metrics,
+        mock_logger,
     ):
         """Create client with all observability components."""
         tracer, _ = mock_tracer
@@ -703,7 +708,8 @@ class TestUnifiedHTTPClientObservability:
 
         # Verify retry counter was incremented
         counter_calls = [
-            c for c in mock_metrics.increment_counter.call_args_list
+            c
+            for c in mock_metrics.increment_counter.call_args_list
             if c[0][0] == "http_retries_total"
         ]
         assert len(counter_calls) == 1
@@ -719,11 +725,14 @@ class TestUnifiedHTTPClientObservability:
         with patch("asyncio.sleep", new_callable=AsyncMock):
             async with http_client_with_observability:
                 with pytest.raises(RetryExhaustedError):
-                    await http_client_with_observability.get("https://api.example.com/data")
+                    await http_client_with_observability.get(
+                        "https://api.example.com/data"
+                    )
 
         # Verify error counter was incremented
         error_calls = [
-            c for c in mock_metrics.increment_counter.call_args_list
+            c
+            for c in mock_metrics.increment_counter.call_args_list
             if c[0][0] == "http_request_errors_total"
         ]
         assert len(error_calls) == 1
@@ -774,7 +783,9 @@ class TestUnifiedHTTPClientObservability:
         call_args = mock_logger.debug.call_args
         assert call_args[0][0] == "http_retry"
 
-    def test_default_observability_uses_noop(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_default_observability_uses_noop(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
         """Test client uses NoOp implementations when observability not provided."""
         from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 
