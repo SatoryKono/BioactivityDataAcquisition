@@ -500,6 +500,37 @@ def archive_command(table: str, target_path: str, remove_source: bool) -> None:
     asyncio.run(_run())
 
 
+def _format_bytes(b: int) -> str:
+    """Format bytes as human-readable string."""
+    for unit, div in [("GB", 1024**3), ("MB", 1024**2), ("KB", 1024)]:
+        if b >= div:
+            return f"{b / div:.2f} {unit}"
+    return f"{b} bytes"
+
+
+@maintenance.command("bronze-cleanup")
+@click.option("-r", "--retention-days", default=90, help="Remove files older than N days")
+@click.option("--dry-run", is_flag=True, help="Show what would be removed")
+def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
+    """Clean up old Bronze files (RULES.md §2.1 retention, default 90 days)."""
+    from datetime import UTC, datetime, timedelta
+
+    from bioetl.composition._bootstrap.storage import bootstrap_storage
+
+    storage = bootstrap_storage()
+    cutoff = datetime.now(UTC) - timedelta(days=retention_days)
+
+    async def _run() -> None:
+        if dry_run:
+            click.echo(f"[DRY-RUN] Cleanup Bronze files older than {retention_days} days")
+        result = await storage.bronze.cleanup_old_files(cutoff_date=cutoff, dry_run=dry_run)
+        action = "Would remove" if dry_run else "Removed"
+        click.echo(f"{action} {result['files_removed']} files ({_format_bytes(result['bytes_freed'])})")
+        click.echo(f"{action} {result['directories_removed']} empty directories")
+
+    asyncio.run(_run())
+
+
 def main() -> None:
     """Main entry point."""
     # Explicit registration of all pipeline factories

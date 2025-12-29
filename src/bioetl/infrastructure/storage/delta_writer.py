@@ -93,9 +93,9 @@ class DeltaWriter:
         Args:
             base_path: Base path for Delta tables (local filesystem)
             logger: Structured logger for observability (MUST be injected)
-            tracing: TracingPort for distributed tracing (SHOULD be injected).
-                    Use NoOpTracing from composition layer if tracing disabled.
-                    Passing None is deprecated and will raise error in future.
+            tracing: TracingPort for distributed tracing. Use NoOpTracing from
+                    composition layer if tracing is disabled. If None, NoOpTracing
+                    is used automatically (for test convenience).
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
             write_policy: Optional WriteModePolicy for medallion layer validation.
                 If None, a default WriteModePolicy is created.
@@ -109,20 +109,12 @@ class DeltaWriter:
                             Use NoOpSilverValidator if validation is not required.
 
         Note: LoggerPort is required per RULES.md DI requirements.
-        TracingPort should be explicitly injected (None is deprecated).
+        Production code SHOULD always inject tracing explicitly via composition.
         """
-        # Backward compatibility: create NoOp if not provided (deprecated)
+        # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
-            import warnings
-
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
-            warnings.warn(
-                "Passing tracing=None is deprecated. "
-                "Explicitly pass NoOpTracing() from composition layer.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
             tracing = NoOpTracing()
 
         self.base_path = str(base_path).rstrip("/")
