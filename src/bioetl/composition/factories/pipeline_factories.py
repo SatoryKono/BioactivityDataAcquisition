@@ -33,6 +33,12 @@ from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+from bioetl.application.pipelines.chembl.compound_record import (
+    ChEMBLCompoundRecordPipeline,
+)
+from bioetl.application.pipelines.chembl.compound_record_transformer import (
+    CompoundRecordTransformer,
+)
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
@@ -56,6 +62,7 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
+    ChEMBLCompoundRecordGoldSchema,
     ChEMBLDocumentGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetComponentGoldSchema,
@@ -67,6 +74,7 @@ from bioetl.infrastructure.schemas.gold import (
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
+    CHEMBL_COMPOUND_RECORD_SCHEMA,
     CHEMBL_DOCUMENT_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
@@ -141,6 +149,16 @@ chembl_molecule_factory = GenericPipelineFactory(
     silver_schema=CHEMBL_MOLECULE_SCHEMA,
     gold_schema=ChEMBLMoleculeGoldSchema,
     transformer_class=MoleculeTransformer,
+)
+
+# ChEMBL Compound Record Pipeline
+chembl_compound_record_factory = GenericPipelineFactory(
+    pipeline_name="chembl_compound_record",
+    pipeline_class=ChEMBLCompoundRecordPipeline,
+    provider="chembl",
+    silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
+    gold_schema=ChEMBLCompoundRecordGoldSchema,
+    transformer_class=CompoundRecordTransformer,
 )
 
 # PubChem Compound Pipeline
@@ -226,6 +244,7 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     """
     registry.register_factory(chembl_activity_factory)
     registry.register_factory(chembl_assay_factory)
+    registry.register_factory(chembl_compound_record_factory)
     registry.register_factory(chembl_document_factory)
     registry.register_factory(chembl_target_factory)
     registry.register_factory(chembl_target_component_factory)
@@ -265,6 +284,7 @@ def reset_registration() -> None:
 __all__ = [
     "chembl_activity_factory",
     "chembl_assay_factory",
+    "chembl_compound_record_factory",
     "chembl_document_factory",
     "chembl_molecule_factory",
     "chembl_target_component_factory",
