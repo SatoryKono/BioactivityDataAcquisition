@@ -61,9 +61,9 @@ class GoldWriter:
         self,
         base_path: str | Path,
         logger: LoggerPort,
+        tracing: TracingPort | None = None,
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
-        tracing: TracingPort | None = None,
         require_lock: bool = True,
     ) -> None:
         """Initialize Gold writer.
@@ -71,29 +71,38 @@ class GoldWriter:
         Args:
             base_path: Base path for Gold tables (local filesystem)
             logger: Structured logger for observability (MUST be injected)
+            tracing: TracingPort for distributed tracing (SHOULD be injected).
+                    Use NoOpTracing from composition layer if tracing disabled.
+                    Passing None is deprecated and will raise error in future.
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
-            tracing: Optional TracingPort for distributed tracing.
-                    Use NoOpTracing from composition layer if tracing disabled.
             require_lock: If True, write operations require valid LockContext.
                          Default is True per RULES.md §3.3.
                          Set to False only for testing or non-concurrent scenarios.
 
-        Note: LoggerPort is required per RULES.md DI requirements. All dependencies
-        MUST be injected through constructor without fallback defaults.
+        Note: LoggerPort is required per RULES.md DI requirements.
+        TracingPort should be explicitly injected (None is deprecated).
         """
+        # Backward compatibility: create NoOp if not provided (deprecated)
+        if tracing is None:
+            import warnings
+
+            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+            warnings.warn(
+                "Passing tracing=None is deprecated. "
+                "Explicitly pass NoOpTracing() from composition layer.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            tracing = NoOpTracing()
+
         self.base_path = str(base_path).rstrip("/")
         self.logger = logger
         self.csv_exporter = csv_exporter
         self._audit = audit
         self._require_lock = require_lock
-
-        # Use NoOpTracing if not provided
-        if tracing is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-
-            tracing = NoOpTracing()
         self._tracing: TracingPort = tracing
 
     def _validate_lock_held(
