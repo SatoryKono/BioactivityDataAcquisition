@@ -428,7 +428,9 @@ class TestStorageAdapterHealthCheck:
                 return False
             return original_check(path)
 
-        with patch.object(StorageAdapter, "_check_directory_writable", side_effect=mock_check):
+        with patch.object(
+            StorageAdapter, "_check_directory_writable", side_effect=mock_check
+        ):
             result = await adapter.health_check()
 
         # DEGRADED because gold layer is not writable but bronze/silver are
