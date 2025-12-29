@@ -18,12 +18,16 @@ try:
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
             OTLPSpanExporter,
         )
+
+        OTLP_AVAILABLE = True
     except ImportError:
-        OTLPSpanExporter = None
+        OTLPSpanExporter = None  # type: ignore[misc,assignment,unused-ignore]
+        OTLP_AVAILABLE = False
 
     OTEL_AVAILABLE = True
 except ImportError:
     OTEL_AVAILABLE = False
+    OTLP_AVAILABLE = False
 
 
 class OpenTelemetryTracer:
@@ -47,7 +51,7 @@ class OpenTelemetryTracer:
         self._provider = TracerProvider()
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
-        exporter = OTLPSpanExporter() if OTLPSpanExporter else ConsoleSpanExporter()
+        exporter = OTLPSpanExporter() if OTLP_AVAILABLE else ConsoleSpanExporter()
 
         processor = BatchSpanProcessor(exporter)
         self._provider.add_span_processor(processor)
