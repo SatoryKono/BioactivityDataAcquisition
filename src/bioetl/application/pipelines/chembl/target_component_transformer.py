@@ -1,12 +1,19 @@
 """ChEMBL Target Component Transformer.
 
 Transforms Bronze records to Silver format (Target Component entity inflation).
+Uses declarative field_specs DSL for mapping where applicable.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.field_specs import (
+    FieldGroup,
+    int_fields,
+    map_field_groups,
+    simple_fields,
+)
 from bioetl.application.core.transform_utils import extract_list_field
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -16,6 +23,25 @@ from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
+
+
+# JSON fields to serialize
+_JSON_FIELDS: tuple[str, ...] = (
+    "target_component_synonyms",
+    "target_component_xrefs",
+    "protein_classifications",
+)
+
+# Declarative field group for core metadata
+_CORE_METADATA = FieldGroup(
+    name="core_metadata",
+    fields=(
+        *simple_fields("accession", "component_type", "description", "organism"),
+        *int_fields("tax_id"),
+    ),
+)
+
+_TARGET_COMPONENT_GROUPS: tuple[FieldGroup, ...] = (_CORE_METADATA,)
 
 
 class TargetComponentTransformer(BaseChemblTransformer):
@@ -40,24 +66,12 @@ class TargetComponentTransformer(BaseChemblTransformer):
 
         """
         return {
-            # Primary identifier
+            # Primary identifier (int)
             "component_id": safe_int(primary_id),
-            # Core metadata
-            "accession": record.get("accession"),
-            "component_type": record.get("component_type"),
-            "description": record.get("description"),
-            "organism": record.get("organism"),
-            "tax_id": safe_int(record.get("tax_id")),
-            # Complex fields (JSON serialized for forensic purposes)
-            "target_component_synonyms": self.serialize_json(
-                record.get("target_component_synonyms")
-            ),
-            "target_component_xrefs": self.serialize_json(
-                record.get("target_component_xrefs")
-            ),
-            "protein_classifications": self.serialize_json(
-                record.get("protein_classifications")
-            ),
+            # Declarative field groups
+            **map_field_groups(record, _TARGET_COMPONENT_GROUPS),
+            # JSON serialization using helper method
+            **self.serialize_json_fields(record, _JSON_FIELDS),
             # Flattened fields (extracted from protein_classifications)
             "protein_classification_ids": extract_list_field(
                 cast(
