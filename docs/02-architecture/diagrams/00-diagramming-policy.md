@@ -1,6 +1,6 @@
 # Diagramming Policy
 
-*Synced with RULES.md v5.6 (2025-12-27)*
+*Synced with RULES.md v5.8 (2025-12-29)*
 
 ## Overview
 
@@ -39,22 +39,23 @@ docs/02-architecture/diagrams/
 ├── 00-diagramming-policy.md     # This file
 ├── 01-high-level.mermaid        # System overview
 ├── 02-medallion.mermaid         # Data flow layers
-├── 03-pipeline-sequence.puml    # Pipeline execution
+├── 03-pipeline-sequence.mermaid # Pipeline execution
 ├── 04-error-flow.mermaid        # Error handling
-├── 05-locking.puml              # Concurrency
-├── 06-classes.mermaid           # Class relationships
-└── 07-deployment.mermaid        # Infrastructure
+├── 05-layers-interaction.mermaid # Layer interaction
+├── 05-locking.mermaid           # Concurrency
+├── 06-pipeline-execution.mermaid # Detailed execution
+└── 07-medallion-flow.mermaid    # Data flow through layers
 ```
 
 ### 2.2 Naming Convention (MUST)
 
-- Format: `NN-<topic>.<format>`
+- Format: `NN-<topic>.mermaid`
 - Examples:
   - `01-high-level.mermaid`
-  - `03-pipeline-sequence.puml`
+  - `03-pipeline-sequence.mermaid`
 - Prefix `NN-` for ordering
 - Topic in kebab-case
-- Extension matches format (`.mermaid`, `.puml`)
+- Extension: `.mermaid` (standardized)
 
 ---
 
