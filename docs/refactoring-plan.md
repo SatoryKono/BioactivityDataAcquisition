@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 5.9 | Дата: 2025-12-29 | Обновлено: Интегрирован консолидированный анализ 4 аудитов*
+*Версия: 6.0 | Дата: 2025-12-30 | Обновлено: Версионирование контрактов, property-based тесты, документация стратегий*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -44,6 +44,10 @@
 | **T3: BronzeWriter ingestion_ts** | `bronze_writer.py:211` | `ingestion_ts: datetime` (обязательный параметр) |
 | **T4: Quarantine ingestion_ts** | `unified.py:66` | `ingestion_ts: datetime` (keyword-only, required) |
 | **M3: Bronze JSON validation** | `bronze_writer.py:151-178` | `_validate_json_records()` с lazy generator и `BronzeValidationError` |
+| **Версионирование контрактов** | `docs/contracts/gold/*.json` | Добавлено `$version: "1.0.0"` во все 3 JSON-схемы (activity, assay, molecule) |
+| **Property-based тесты Pandera** | `test_pandera_validator.py:292-395` | 5 hypothesis-тестов для валидаторов с arbitrary input |
+| **Документация Hypothesis стратегий** | `tests/strategies.py:1-118` | Добавлены docstrings с примерами использования |
+| **Порог покрытия 85%** | `pyproject.toml:182` | `fail_under = 85` уже установлен |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -95,6 +99,9 @@
 | "Content hash не исключает _ingestion_ts, _run_id" | **Уже исключает**: `META_FIELDS` set в `transformations.py:29-36` содержит `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`, `_source_batch_id` | `transformations.py:29-36,83-87` (верификация 2025-12-29) |
 | "psutil в MemoryMonitor нарушает DI" | psutil — data source для системных метрик, аналогично `os.environ`. Graceful degradation реализована в `_get_stats_estimate()`. Port добавит accidental complexity. | `memory_monitor.py:86-180` (верификация 2025-12-29) |
 | "CLI click.echo нарушает logging" | `click.echo` для human-readable вывода — **корректно** для CLI (interfaces слой). JSON-логи для machine processing, не для CLI interaction. | CLAUDE.md §2.3 (верификация 2025-12-29) |
+| "Требуется хеширование PII (email)" | `default_email` — технический идентификатор NCBI API, **НЕ PII**. Нет персональных данных. | `config.py:454-460` (верификация 2025-12-30) |
+| "Порог покрытия не синхронизирован" | `fail_under = 85` **уже установлен** в pyproject.toml | `pyproject.toml:182` (верификация 2025-12-30) |
+| "architecture-audit.md устарел" | Документ **актуален** — версия 1.0 от 2025-12-29, Score 8.9/10 | `docs/architecture-audit.md:1-4` (верификация 2025-12-30) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 

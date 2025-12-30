@@ -1,5 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
     "title": "ChEMBL Molecule Data Contract",
     "description": "Defines the schema for the gold 'Molecule' entity. Contains flattened fields only - JSON fields (molecule_hierarchy, molecule_properties, etc.) are retained in Silver for forensic purposes.",
     "type": "object",
