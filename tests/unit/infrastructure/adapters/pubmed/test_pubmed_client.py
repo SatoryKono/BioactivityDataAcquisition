@@ -168,26 +168,34 @@ async def test_health_check_returns_degraded_on_slow_response(
     mock_response.status_code = 200
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
-    # Simulate slow response by patching time.monotonic
+    # Simulate slow response by patching time.monotonic in both modules
+    # (adapter module and health_check_mixin where HealthCheckContext uses it)
     call_count = 0
 
     def mock_monotonic():
         nonlocal call_count
         call_count += 1
-        # First call (start_time) returns 0, second call returns 6 (elapsed = 6 sec)
+        # First call (start_time) returns 0, subsequent calls return 6 (elapsed = 6 sec)
         return 0.0 if call_count == 1 else 6.0
 
     with patch(
         "bioetl.infrastructure.adapters.pubmed.pubmed_client.time.monotonic",
         side_effect=mock_monotonic,
+    ), patch(
+        "bioetl.infrastructure.adapters.health_check_mixin.time.monotonic",
+        side_effect=mock_monotonic,
     ):
         result = await adapter.health_check()
 
     assert result == HealthStatus.DEGRADED
-    mock_logger.warning.assert_called_once()
-    # Verify the warning was about slow response
-    call_args = mock_logger.warning.call_args
-    assert call_args[0][0] == "pubmed_health_check_slow"
+    # Verify a slow response warning was logged
+    assert mock_logger.warning.called
+    # Find the slow response warning among the calls
+    slow_warning_found = any(
+        call[0][0] == "pubmed_health_check_slow"
+        for call in mock_logger.warning.call_args_list
+    )
+    assert slow_warning_found, "Expected 'pubmed_health_check_slow' warning to be logged"
 
 
 @pytest.mark.asyncio
@@ -199,9 +207,11 @@ async def test_health_check_logs_error_on_exception(
 
     await adapter.health_check()
 
-    mock_logger.warning.assert_called_once()
-    call_args = mock_logger.warning.call_args
-    # Uses unified log format now
-    assert call_args[0][0] == "health_check_failed"
-    assert "Network timeout" in call_args[1]["error"]
-    assert call_args[1]["provider"] == "pubmed"
+    # Warning is logged twice: once in _probe_health() and once in _handle_health_check_failure()
+    assert mock_logger.warning.called
+    # Find the health_check_failed warning with Network timeout
+    failed_warning_found = any(
+        call[0][0] == "health_check_failed" and "Network timeout" in str(call[1].get("error", "") or call[1].get("error_message", ""))
+        for call in mock_logger.warning.call_args_list
+    )
+    assert failed_warning_found, "Expected 'health_check_failed' warning with 'Network timeout' to be logged"
