@@ -9,13 +9,10 @@ import pytest
 from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
-from bioetl.domain.exceptions import (
-    MergeConflictError,
-    SchemaViolationError,
-)
+from bioetl.domain.exceptions import MergeConflictError, SchemaViolationError
 from bioetl.domain.exceptions import TableNotFoundError as CustomTableNotFoundError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
@@ -34,9 +31,9 @@ def noop_logger():
 
 
 @pytest.fixture
-def delta_writer(noop_logger):
-    """Fixture for a DeltaWriter."""
-    return DeltaWriter(base_path="/fake/path", logger=noop_logger)
+def silver_writer(noop_logger):
+    """Fixture for a SilverWriter."""
+    return SilverWriter(base_path="/fake/path", logger=noop_logger)
 
 
 @pytest.fixture
@@ -51,8 +48,8 @@ def valid_record():
     }
 
 
-class TestDeltaWriterExceptions:
-    """Tests for exception handling in DeltaWriter."""
+class TestSilverWriterExceptions:
+    """Tests for exception handling in SilverWriter."""
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
@@ -66,7 +63,7 @@ class TestDeltaWriterExceptions:
             TableNotFoundError("Not found"),  # Schema check
             SchemaMismatchError("Invalid schema"),  # Write attempt
         ]
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/fake/path", logger=noop_logger
         )
         # Make run_in_executor execute synchronously for testing
@@ -108,7 +105,7 @@ class TestDeltaWriterExceptions:
             mock_table_instance,  # Write attempt
         ]
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/fake/path", logger=noop_logger
         )
         # Make run_in_executor execute synchronously for testing
@@ -142,7 +139,7 @@ class TestDeltaWriterExceptions:
     ):
         """Test SchemaViolationError on table creation."""
         mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/fake/path", logger=noop_logger
         )
         # Make run_in_executor execute synchronously for testing
@@ -172,7 +169,7 @@ class TestDeltaWriterExceptions:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             side_effect=TableNotFoundError,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/fake/path", logger=noop_logger
             )
             # Make run_in_executor execute synchronously for testing

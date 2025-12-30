@@ -22,7 +22,6 @@ Architecture:
 Note:
     This class was renamed from DeltaWriter to SilverWriter to follow
     the Medallion layer naming convention (BronzeWriter, SilverWriter, GoldWriter).
-    DeltaWriter is preserved as a deprecated alias for backward compatibility.
 """
 
 from __future__ import annotations
@@ -43,12 +42,7 @@ from bioetl.domain.exceptions import (
     SchemaEvolutionError,
     SchemaViolationError,
 )
-from bioetl.domain.medallion import (
-    Layer,
-    SilverWriteMode,
-    WriteMode,
-    WriteModePolicy,
-)
+from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.infrastructure.storage.retention_manager import RetentionManager
 
 if TYPE_CHECKING:
@@ -76,10 +70,6 @@ class SilverWriter:
 
     Implements merge/upsert strategy to handle updates and deduplication.
     CSV export is delegated to an optional CsvExporter (composition pattern).
-
-    Note:
-        This class was renamed from DeltaWriter to follow the Medallion
-        layer naming convention: BronzeWriter, SilverWriter, GoldWriter.
     """
 
     def __init__(

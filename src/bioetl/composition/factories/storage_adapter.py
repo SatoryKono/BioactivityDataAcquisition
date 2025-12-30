@@ -360,7 +360,7 @@ class StorageAdapter:
 
         Checks if each layer's base directory is writable.
         """
-        # Convert to Path objects since DeltaWriter and GoldWriter store as strings
+        # Convert to Path objects since SilverWriter and GoldWriter store as strings
         layers = [
             ("bronze", Path(self.bronze.base_path)),
             ("silver", Path(self.silver.base_path)),
@@ -412,7 +412,7 @@ class StorageAdapter:
             # Log but continue to Gold (table may not exist)
             pass
 
-        # Vacuum Gold (GoldWriter uses DeltaWriter internally, need to add vacuum)
+        # Vacuum Gold (GoldWriter uses SilverWriter internally, need to add vacuum)
         # Gold layer uses same Delta format, so we can vacuum via path
         try:
             gold_table_path = f"{self.gold.base_path}/{table_name.replace('.', '/')}"

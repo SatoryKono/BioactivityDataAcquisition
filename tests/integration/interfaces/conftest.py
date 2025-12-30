@@ -18,8 +18,8 @@ from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.fakes.checkpoint_fake import InMemoryCheckpoint
 from tests.fakes.quarantine_fake import InMemoryQuarantine
 
@@ -120,7 +120,7 @@ def create_local_storage_context(
             json_path=str(storage_paths["json"]) if save_json else None,
             # Lock validation at Application layer
         ),
-        silver_writer=DeltaWriter(
+        silver_writer=SilverWriter(
             base_path=str(storage_paths["silver"]),
             logger=logger,
             csv_exporter=None,
