@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class AdjustedClientConfig:
+class HealthAdjustedConfig:
     """Configuration adjusted based on provider health status.
 
     Per RULES.md §3.5:
@@ -315,7 +315,7 @@ class ProviderHealthMonitor:
 
         return new_status
 
-    def get_adjusted_config(self, provider: str) -> AdjustedClientConfig:
+    def get_adjusted_config(self, provider: str) -> HealthAdjustedConfig:
         """Get adjusted client configuration based on health status.
 
         Per RULES.md §3.5:
@@ -327,7 +327,7 @@ class ProviderHealthMonitor:
             provider: Provider name.
 
         Returns:
-            AdjustedClientConfig with multipliers for timeout and batch_size.
+            HealthAdjustedConfig with multipliers for timeout and batch_size.
 
         Example:
             >>> config = monitor.get_adjusted_config("chembl")
@@ -337,7 +337,7 @@ class ProviderHealthMonitor:
         """
         timeout_mult, batch_div = self.get_adaptive_params(provider)
         state = self.get_state(provider)
-        return AdjustedClientConfig(
+        return HealthAdjustedConfig(
             timeout_multiplier=timeout_mult,
             batch_size_divisor=batch_div,
             status=state.status,
@@ -408,11 +408,11 @@ class ProviderHealthTracker:
         """
         return self.monitor.record_error(self.provider)
 
-    def get_adjusted_config(self) -> AdjustedClientConfig:
+    def get_adjusted_config(self) -> HealthAdjustedConfig:
         """Get adjusted client configuration.
 
         Returns:
-            AdjustedClientConfig with timeout/batch_size adjustments.
+            HealthAdjustedConfig with timeout/batch_size adjustments.
 
         """
         return self.monitor.get_adjusted_config(self.provider)
