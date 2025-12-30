@@ -21,9 +21,8 @@ FORBIDDEN_PREFIXES = [
 ]
 
 # Allowed exceptions (factory classes that wire up dependencies)
-ALLOWED_FILES = [
-    "chembl_activity.py",  # Factory needs to import infrastructure
-]
+# NOTE: Empty list - all application layer files must follow architecture rules
+ALLOWED_FILES: list[str] = []
 
 
 def get_imports(filepath: Path) -> list[str]:
