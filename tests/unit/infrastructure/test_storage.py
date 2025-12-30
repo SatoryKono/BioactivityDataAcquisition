@@ -36,10 +36,10 @@ def mock_silver_writer():
     """Fixture for mocking silver_writer module."""
     with (
         patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable"
+            "bioetl.infrastructure.storage.silver_writer.DeltaTable"
         ) as mock_delta_table,
         patch(
-            "bioetl.infrastructure.storage.delta_writer.write_deltalake"
+            "bioetl.infrastructure.storage.silver_writer.write_deltalake"
         ) as mock_write_deltalake,
     ):
         yield mock_delta_table, mock_write_deltalake
