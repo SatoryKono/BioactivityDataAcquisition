@@ -2,19 +2,20 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from bioetl.application.core.postrun_service import (
-    DQResult,
+    PostrunResult,
     PostrunService,
     VacuumResult,
 )
-from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.types import RunType
+from bioetl.domain.value_objects.dq_result import DQResult, DQStatus
 
 
 @pytest.fixture
@@ -61,15 +62,6 @@ def runtime_config():
 
 
 @pytest.fixture
-def mock_services(mock_metrics):
-    """Create mock pipeline services."""
-    services = MagicMock()
-    services.metrics = mock_metrics
-    services.dq_monitor = None
-    return services
-
-
-@pytest.fixture
 def mock_executor():
     """Create a mock executor."""
     executor = MagicMock()
@@ -95,16 +87,33 @@ def mock_lifecycle_service():
 
 
 @pytest.fixture
+def mock_dq_service():
+    """Create a mock DataQualityService."""
+    service = MagicMock(spec=DataQualityService)
+    service.evaluate = AsyncMock(
+        return_value=DQResult(
+            error_rate=0.05,
+            status=DQStatus.PASSED,
+            anomalies=(),
+            has_critical=False,
+            check_duration_ms=10.0,
+        )
+    )
+    return service
+
+
+@pytest.fixture
 def postrun_service(
-    pipeline_config, runtime_config, mock_services, mock_logger, mock_lifecycle_service
+    pipeline_config, runtime_config, mock_dq_service, mock_lifecycle_service, mock_metrics, mock_logger
 ):
     """Create a PostrunService instance."""
     return PostrunService(
         config=pipeline_config,
         runtime=runtime_config,
-        services=mock_services,
-        logger=mock_logger,
+        dq_service=mock_dq_service,
         lifecycle_service=mock_lifecycle_service,
+        metrics=mock_metrics,
+        logger=mock_logger,
     )
 
 
@@ -116,24 +125,58 @@ class TestPostrunServiceInit:
         self,
         pipeline_config,
         runtime_config,
-        mock_services,
-        mock_logger,
+        mock_dq_service,
         mock_lifecycle_service,
+        mock_metrics,
+        mock_logger,
     ):
         """Test postrun service initializes correctly."""
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime_config,
-            services=mock_services,
-            logger=mock_logger,
+            dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            metrics=mock_metrics,
+            logger=mock_logger,
         )
 
         assert service._config == pipeline_config
         assert service._runtime == runtime_config
-        assert service._services == mock_services
-        assert service._logger == mock_logger
+        assert service._dq_service == mock_dq_service
         assert service._lifecycle_service == mock_lifecycle_service
+        assert service._metrics == mock_metrics
+        assert service._logger == mock_logger
+
+
+@pytest.mark.unit
+class TestPostrunServiceRun:
+    """Tests for PostrunService.run method."""
+
+    @pytest.mark.asyncio
+    async def test_run_returns_postrun_result(
+        self, postrun_service, mock_executor, mock_dq_service, mock_lifecycle_service
+    ):
+        """Test run method returns PostrunResult with DQ and VACUUM results."""
+        result = await postrun_service.run(mock_executor)
+
+        assert isinstance(result, PostrunResult)
+        assert isinstance(result.dq, DQResult)
+        assert isinstance(result.vacuum, VacuumResult)
+
+        mock_dq_service.evaluate.assert_called_once()
+        mock_lifecycle_service.finalize_run.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_run_propagates_dq_error(
+        self, postrun_service, mock_executor, mock_dq_service
+    ):
+        """Test run method propagates DataQualityThresholdError from DQ service."""
+        mock_dq_service.evaluate = AsyncMock(
+            side_effect=DataQualityThresholdError(error_rate=0.25, threshold=0.20)
+        )
+
+        with pytest.raises(DataQualityThresholdError):
+            await postrun_service.run(mock_executor)
 
 
 @pytest.mark.unit
@@ -141,151 +184,39 @@ class TestPostrunServiceDQChecks:
     """Tests for PostrunService.run_dq_checks method."""
 
     @pytest.mark.asyncio
-    async def test_dq_checks_skips_without_monitor(
-        self, postrun_service, mock_executor
+    async def test_dq_checks_delegates_to_dq_service(
+        self, postrun_service, mock_executor, mock_dq_service
     ):
-        """Test run_dq_checks returns early when dq_monitor is None."""
+        """Test run_dq_checks delegates to DataQualityService."""
         result = await postrun_service.run_dq_checks(mock_executor)
 
-        assert result.anomalies_count == 0
-        assert result.has_critical is False
-        assert result.check_duration_ms == 0
+        assert isinstance(result, DQResult)
+        mock_dq_service.evaluate.assert_called_once()
+
+        # Verify metrics dict was passed
+        call_args = mock_dq_service.evaluate.call_args
+        metrics_dict = call_args[0][0]
+        assert "error_rate" in metrics_dict
+        assert "record_count" in metrics_dict
 
     @pytest.mark.asyncio
-    async def test_dq_checks_with_no_anomalies(
-        self,
-        pipeline_config,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-        mock_executor,
-        mock_metrics,
+    async def test_dq_checks_collects_batch_metrics(
+        self, postrun_service, mock_executor, mock_dq_service
     ):
-        """Test run_dq_checks with no anomalies detected."""
-        mock_dq_monitor = MagicMock()
-        mock_dq_monitor.check_quality = MagicMock(return_value=[])
-        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
+        """Test run_dq_checks collects correct batch metrics."""
+        await postrun_service.run_dq_checks(mock_executor)
 
-        services = MagicMock()
-        services.dq_monitor = mock_dq_monitor
-        services.metrics = mock_metrics
+        call_args = mock_dq_service.evaluate.call_args
+        metrics_dict = call_args[0][0]
 
-        service = PostrunService(
-            config=pipeline_config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        result = await service.run_dq_checks(mock_executor)
-
-        assert result.anomalies_count == 0
-        assert result.has_critical is False
-        mock_dq_monitor.check_quality.assert_called_once()
-        mock_dq_monitor.update_baseline_from_metrics.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_dq_checks_with_anomalies(
-        self,
-        pipeline_config,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-        mock_executor,
-        mock_metrics,
-    ):
-        """Test run_dq_checks with anomalies detected."""
-        from bioetl.infrastructure.observability.anomaly.types import (
-            Anomaly,
-            AnomalySeverity,
-            AnomalyType,
-        )
-
-        anomaly = Anomaly(
-            metric_name="error_rate",
-            current_value=0.25,
-            baseline_mean=0.05,
-            baseline_stddev=0.02,
-            anomaly_type=AnomalyType.SPIKE,
-            severity=AnomalySeverity.HIGH,
-            z_score=10.0,
-            timestamp=datetime.now(UTC),
-            message="Error rate spike detected",
-        )
-
-        mock_dq_monitor = MagicMock()
-        mock_dq_monitor.check_quality = MagicMock(return_value=[anomaly])
-        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
-
-        services = MagicMock()
-        services.dq_monitor = mock_dq_monitor
-        services.metrics = mock_metrics
-
-        service = PostrunService(
-            config=pipeline_config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        result = await service.run_dq_checks(mock_executor)
-
-        assert result.anomalies_count == 1
-        assert result.has_critical is False
-        mock_logger.warning.assert_called()
-
-    @pytest.mark.asyncio
-    async def test_dq_checks_with_critical_anomaly(
-        self,
-        pipeline_config,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-        mock_executor,
-        mock_metrics,
-    ):
-        """Test run_dq_checks with critical anomaly."""
-        from bioetl.infrastructure.observability.anomaly.types import (
-            Anomaly,
-            AnomalySeverity,
-            AnomalyType,
-        )
-
-        critical_anomaly = Anomaly(
-            metric_name="error_rate",
-            current_value=0.50,
-            baseline_mean=0.05,
-            baseline_stddev=0.02,
-            anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
-            severity=AnomalySeverity.CRITICAL,
-            z_score=22.5,
-            timestamp=datetime.now(UTC),
-            message="Error rate critical",
-        )
-
-        mock_dq_monitor = MagicMock()
-        mock_dq_monitor.check_quality = MagicMock(return_value=[critical_anomaly])
-        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
-
-        services = MagicMock()
-        services.dq_monitor = mock_dq_monitor
-        services.metrics = mock_metrics
-
-        service = PostrunService(
-            config=pipeline_config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        result = await service.run_dq_checks(mock_executor)
-
-        assert result.anomalies_count == 1
-        assert result.has_critical is True
-        mock_logger.error.assert_called()
+        assert metrics_dict["record_count"] == 100.0
+        assert metrics_dict["bronze_count"] == 100.0
+        assert metrics_dict["silver_count"] == 95.0
+        assert metrics_dict["gold_count"] == 90.0
+        assert metrics_dict["quarantined_count"] == 5.0
+        assert metrics_dict["error_rate"] == 0.05
+        assert metrics_dict["silver_yield"] == 0.95
+        assert metrics_dict["gold_yield"] == 0.90
 
 
 @pytest.mark.unit
@@ -300,9 +231,10 @@ class TestPostrunServiceVacuum:
     async def test_vacuum_delegates_to_finalize_run(
         self,
         pipeline_config,
-        mock_services,
+        mock_dq_service,
         mock_logger,
         mock_lifecycle_service,
+        mock_metrics,
     ):
         """Test run_vacuum_if_enabled delegates to lifecycle service."""
         from bioetl.application.services.medallion_lifecycle import VacuumResult
@@ -320,9 +252,10 @@ class TestPostrunServiceVacuum:
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime,
-            services=mock_services,
-            logger=mock_logger,
+            dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            metrics=mock_metrics,
+            logger=mock_logger,
         )
 
         result = await service.run_vacuum_if_enabled()
@@ -331,7 +264,7 @@ class TestPostrunServiceVacuum:
         mock_lifecycle_service.finalize_run.assert_called_once_with(
             config=pipeline_config,
             runtime=runtime,
-            metrics=mock_services.metrics,
+            metrics=mock_metrics,
         )
         assert result.skipped is True
 
@@ -339,9 +272,10 @@ class TestPostrunServiceVacuum:
     async def test_vacuum_returns_finalize_run_result(
         self,
         pipeline_config,
-        mock_services,
+        mock_dq_service,
         mock_logger,
         mock_lifecycle_service,
+        mock_metrics,
     ):
         """Test run_vacuum_if_enabled returns finalize_run result."""
         from bioetl.application.services.medallion_lifecycle import VacuumResult
@@ -360,9 +294,10 @@ class TestPostrunServiceVacuum:
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime,
-            services=mock_services,
-            logger=mock_logger,
+            dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            metrics=mock_metrics,
+            logger=mock_logger,
         )
 
         result = await service.run_vacuum_if_enabled()
@@ -439,20 +374,25 @@ class TestPostrunServiceBatchMetrics:
 
 
 @pytest.mark.unit
-class TestDQResult:
-    """Tests for DQResult dataclass."""
+class TestPostrunResult:
+    """Tests for PostrunResult dataclass."""
 
-    def test_dq_result_creation(self):
-        """Test DQResult creation."""
-        result = DQResult(
-            anomalies_count=2,
-            has_critical=True,
-            check_duration_ms=123.45,
+    def test_postrun_result_creation(self):
+        """Test PostrunResult creation."""
+        dq_result = DQResult(
+            error_rate=0.05,
+            status=DQStatus.PASSED,
+        )
+        vacuum_result = VacuumResult(
+            silver_files_removed=10,
+            gold_files_removed=5,
+            skipped=False,
         )
 
-        assert result.anomalies_count == 2
-        assert result.has_critical is True
-        assert result.check_duration_ms == 123.45
+        result = PostrunResult(dq=dq_result, vacuum=vacuum_result)
+
+        assert result.dq == dq_result
+        assert result.vacuum == vacuum_result
 
 
 @pytest.mark.unit
@@ -473,29 +413,57 @@ class TestVacuumResult:
 
 
 @pytest.mark.unit
-class TestPostrunServiceDQThresholds:
-    """Tests for DQ threshold checking in PostrunService."""
+class TestPostrunServiceIntegrationWithDataQualityService:
+    """Integration tests for PostrunService with real DataQualityService."""
 
     @pytest.mark.asyncio
-    async def test_hard_threshold_exceeded_raises_error(
+    async def test_full_flow_with_real_dq_service(
         self,
+        pipeline_config,
         runtime_config,
-        mock_services,
-        mock_logger,
         mock_lifecycle_service,
+        mock_metrics,
+        mock_logger,
+        mock_executor,
     ):
-        """Test that error rate exceeding hard threshold raises DataQualityThresholdError."""
-        # Config with hard_fail_threshold=0.20 (default)
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
+        """Test full flow using real DataQualityService (no dq_monitor)."""
+        # Create real DataQualityService
+        dq_service = DataQualityService(
+            dq_monitor=None,
+            config=pipeline_config.dq,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name=pipeline_config.pipeline_name,
         )
 
-        # Executor with 25% error rate (25/100 quarantined)
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime_config,
+            dq_service=dq_service,
+            lifecycle_service=mock_lifecycle_service,
+            metrics=mock_metrics,
+            logger=mock_logger,
+        )
+
+        result = await service.run(mock_executor)
+
+        assert isinstance(result, PostrunResult)
+        # 5% error rate exactly equals soft threshold (5%), so status is WARNING
+        assert result.dq.status == DQStatus.WARNING
+        assert result.dq.error_rate == 0.05
+        assert result.vacuum.skipped is False
+
+    @pytest.mark.asyncio
+    async def test_hard_threshold_raised_with_real_dq_service(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_lifecycle_service,
+        mock_metrics,
+        mock_logger,
+    ):
+        """Test hard threshold error with real DataQualityService."""
+        # Create executor with 25% error rate
         executor = MagicMock()
         executor.records_fetched = 100
         executor.records_bronze = 100
@@ -503,280 +471,26 @@ class TestPostrunServiceDQThresholds:
         executor.records_gold = 70
         executor.records_quarantined = 25
 
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=mock_services,
+        # Create real DataQualityService
+        dq_service = DataQualityService(
+            dq_monitor=None,
+            config=pipeline_config.dq,
             logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name=pipeline_config.pipeline_name,
+        )
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime_config,
+            dq_service=dq_service,
             lifecycle_service=mock_lifecycle_service,
+            metrics=mock_metrics,
+            logger=mock_logger,
         )
 
         with pytest.raises(DataQualityThresholdError) as exc_info:
-            await service.run_dq_checks(executor)
+            await service.run(executor)
 
         assert exc_info.value.error_rate == 0.25
         assert exc_info.value.threshold == 0.20
-        mock_logger.error.assert_called_once()
-        # Verify error log includes expected details
-        error_call = mock_logger.error.call_args
-        assert error_call[0][0] == "DQ hard threshold exceeded"
-
-    @pytest.mark.asyncio
-    async def test_hard_threshold_exactly_at_limit_raises_error(
-        self,
-        runtime_config,
-        mock_services,
-        mock_logger,
-        mock_lifecycle_service,
-    ):
-        """Test that error rate exactly at hard threshold raises DataQualityThresholdError."""
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
-        )
-
-        # Executor with exactly 20% error rate (20/100 quarantined)
-        executor = MagicMock()
-        executor.records_fetched = 100
-        executor.records_bronze = 100
-        executor.records_silver = 80
-        executor.records_gold = 75
-        executor.records_quarantined = 20
-
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=mock_services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        with pytest.raises(DataQualityThresholdError):
-            await service.run_dq_checks(executor)
-
-    @pytest.mark.asyncio
-    async def test_soft_threshold_exceeded_logs_warning_and_emits_metric(
-        self,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-        mock_metrics,
-    ):
-        """Test that error rate exceeding soft threshold logs warning and emits metric."""
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
-        )
-
-        # Executor with 10% error rate (10/100 quarantined) - above soft, below hard
-        executor = MagicMock()
-        executor.records_fetched = 100
-        executor.records_bronze = 100
-        executor.records_silver = 90
-        executor.records_gold = 85
-        executor.records_quarantined = 10
-
-        services = MagicMock()
-        services.dq_monitor = None
-        services.metrics = mock_metrics
-
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        # Should not raise, but should log warning
-        result = await service.run_dq_checks(executor)
-
-        assert result.anomalies_count == 0
-        mock_logger.warning.assert_called_once()
-        warning_call = mock_logger.warning.call_args
-        assert warning_call[0][0] == "DQ soft threshold exceeded"
-
-        # Verify metric was emitted
-        mock_metrics.increment_counter.assert_called_once_with(
-            "dq_soft_threshold_exceeded",
-            1,
-            {"pipeline": "test_pipeline"},
-        )
-
-    @pytest.mark.asyncio
-    async def test_soft_threshold_exactly_at_limit_logs_warning(
-        self,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-        mock_metrics,
-    ):
-        """Test that error rate exactly at soft threshold logs warning."""
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
-        )
-
-        # Executor with exactly 5% error rate (5/100 quarantined)
-        executor = MagicMock()
-        executor.records_fetched = 100
-        executor.records_bronze = 100
-        executor.records_silver = 95
-        executor.records_gold = 90
-        executor.records_quarantined = 5
-
-        services = MagicMock()
-        services.dq_monitor = None
-        services.metrics = mock_metrics
-
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        await service.run_dq_checks(executor)
-
-        mock_logger.warning.assert_called_once()
-        mock_metrics.increment_counter.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_below_soft_threshold_no_warning(
-        self,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-        mock_metrics,
-    ):
-        """Test that error rate below soft threshold does not log warning."""
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
-        )
-
-        # Executor with 3% error rate (3/100 quarantined) - below soft threshold
-        executor = MagicMock()
-        executor.records_fetched = 100
-        executor.records_bronze = 100
-        executor.records_silver = 97
-        executor.records_gold = 95
-        executor.records_quarantined = 3
-
-        services = MagicMock()
-        services.dq_monitor = None
-        services.metrics = mock_metrics
-
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        await service.run_dq_checks(executor)
-
-        mock_logger.warning.assert_not_called()
-        mock_logger.error.assert_not_called()
-        mock_metrics.increment_counter.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_soft_threshold_without_metrics_still_logs_warning(
-        self,
-        runtime_config,
-        mock_logger,
-        mock_lifecycle_service,
-    ):
-        """Test that soft threshold logs warning even when metrics port is None."""
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            dq=DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20),
-        )
-
-        # Executor with 10% error rate
-        executor = MagicMock()
-        executor.records_fetched = 100
-        executor.records_bronze = 100
-        executor.records_silver = 90
-        executor.records_gold = 85
-        executor.records_quarantined = 10
-
-        services = MagicMock()
-        services.dq_monitor = None
-        services.metrics = None  # No metrics port
-
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        # Should not raise
-        result = await service.run_dq_checks(executor)
-
-        assert result.anomalies_count == 0
-        mock_logger.warning.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_zero_records_does_not_fail(
-        self,
-        runtime_config,
-        mock_services,
-        mock_logger,
-        mock_lifecycle_service,
-    ):
-        """Test that zero records processed does not trigger threshold errors."""
-        config = PipelineConfig(
-            pipeline_name="test_pipeline",
-            provider="chembl",
-            entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-        )
-
-        # Executor with zero records
-        executor = MagicMock()
-        executor.records_fetched = 0
-        executor.records_bronze = 0
-        executor.records_silver = 0
-        executor.records_gold = 0
-        executor.records_quarantined = 0
-
-        service = PostrunService(
-            config=config,
-            runtime=runtime_config,
-            services=mock_services,
-            logger=mock_logger,
-            lifecycle_service=mock_lifecycle_service,
-        )
-
-        # Should not raise - error_rate is 0/1=0 which is below thresholds
-        result = await service.run_dq_checks(executor)
-
-        assert result.anomalies_count == 0
-        mock_logger.warning.assert_not_called()
-        mock_logger.error.assert_not_called()
