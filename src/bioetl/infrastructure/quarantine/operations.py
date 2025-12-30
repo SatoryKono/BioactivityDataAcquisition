@@ -13,7 +13,7 @@ import pyarrow.compute as pc
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.types import DQStatus
+from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.helpers import quote_literal
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ def inspect_records(
     pipeline: str,
     limit: int = 100,
     error_code: str | None = None,
-    dq_status: DQStatus | None = None,
+    dq_status: QuarantineRecordStatus | None = None,
 ) -> list[dict[str, Any]]:
     """Inspect quarantine records for a pipeline."""
     try:
@@ -35,7 +35,7 @@ def inspect_records(
         return []
 
     arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
-    status_filter = dq_status or DQStatus.NEW
+    status_filter = dq_status or QuarantineRecordStatus.NEW
 
     mask = pc.equal(arrow_table["pipeline"], pipeline)
     if error_code:
@@ -86,7 +86,7 @@ def replay_records(
         partitions=[("pipeline", "=", pipeline)],
         filters=[
             ("ingestion_ts", ">=", cutoff_date),
-            ("dq_status", "=", DQStatus.NEW.value),
+            ("dq_status", "=", QuarantineRecordStatus.NEW.value),
         ],
     )
 
