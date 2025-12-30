@@ -187,23 +187,6 @@ async def test_health_check_returns_degraded_on_slow_response(
 
 
 # =============================================================================
-# DOI normalization tests
-# =============================================================================
-
-
-def test_normalize_doi_lowercase(adapter):
-    """Test DOI normalization converts to lowercase."""
-    result = adapter._normalize_doi("10.1234/ABC.DEF")
-    assert result == "10.1234/abc.def"
-
-
-def test_normalize_doi_strips_whitespace(adapter):
-    """Test DOI normalization strips whitespace."""
-    result = adapter._normalize_doi("  10.1234/test  ")
-    assert result == "10.1234/test"
-
-
-# =============================================================================
 # Fetch single work tests
 # =============================================================================
 

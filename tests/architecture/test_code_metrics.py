@@ -329,7 +329,6 @@ class TestClassSize:
         "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
-        "CrossRefFieldExtractor": 330,  # ~315 lines - field extraction (refactored from mappers)
         # PubChem adapter (similar to ChEMBL adapter)
         "PubChemAdapter": 310,  # 303 lines - sync adapter with ThreadPoolExecutor
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
