@@ -20,6 +20,7 @@ from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
+from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.lock_service import (
     LockInfo,
     LockService,
@@ -52,6 +53,7 @@ __all__ = [
     "CheckpointService",
     "CleanupResult",
     "ClearResult",
+    "DataQualityService",
     "LockInfo",
     "LockService",
     "MedallionLifecycleService",
