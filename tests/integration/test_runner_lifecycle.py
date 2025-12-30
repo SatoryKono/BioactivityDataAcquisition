@@ -22,7 +22,6 @@ from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.runner_services import RunnerServices
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
@@ -333,14 +332,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = lm_aenter
         lock_manager.__aexit__ = lm_aexit
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -350,7 +341,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         await runner.run()
@@ -410,14 +405,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=orchestrator_no_clear,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -427,7 +414,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=orchestrator_no_clear,
+            observer=mock_observer,
         )
 
         await runner.run()
@@ -487,14 +478,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = lm_aenter
         lock_manager.__aexit__ = lm_aexit
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -504,7 +487,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         with pytest.raises(RuntimeError, match="Test error"):
@@ -559,14 +546,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -576,7 +555,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         await runner.run()
@@ -638,14 +621,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = lm_aenter
         lock_manager.__aexit__ = lm_aexit
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -655,7 +630,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         with pytest.raises(InfrastructureError) as exc_info:
@@ -803,14 +782,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -820,7 +791,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         await runner.run()
@@ -926,14 +901,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -943,7 +910,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         await runner.run()
@@ -1003,14 +974,6 @@ class TestPipelineRunnerLifecycle:
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock()
 
-        runner_services = RunnerServices(
-            lock_manager=lock_manager,
-            preflight=mock_preflight_service,
-            postrun=mock_postrun_service,
-            lifecycle_orch=mock_orchestrator,
-            observer=mock_observer,
-        )
-
         runner = PipelineRunner(
             config=config,
             runtime=runtime,
@@ -1020,7 +983,11 @@ class TestPipelineRunnerLifecycle:
             checkpoint_manager=mock_checkpoint_manager_with_recorder,
             shutdown_signal=MagicMock(),
             logger=mock_logger,
-            runner_services=runner_services,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_orch=mock_orchestrator,
+            observer=mock_observer,
         )
 
         await runner.run()
