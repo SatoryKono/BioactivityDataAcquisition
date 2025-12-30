@@ -32,6 +32,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **Deprecated Pipeline Aliases (`compat.py`)**: Removed deprecated pipeline alias module:
+  - Deleted `application/pipelines/compat.py` which provided deprecated wrapper aliases
+  - These aliases (e.g., `ChEMBLActivityPipeline` from compat) wrapped `GenericPipeline` with deprecation warnings
+  - Real pipeline classes remain available from their canonical locations:
+    - `from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline`
+    - `from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline`
+    - `from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline`
+    - `from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline`
+  - Package-level imports now re-export real classes instead of deprecated aliases
+
+- **Deprecated `__getattr__` Aliases**: Removed lazy-loading deprecated aliases from `application/core/__init__.py`:
+  - `PipelineExecutor` and `RecordProcessor` no longer exported via `__getattr__`
+  - Use `BatchExecutor` for combined extraction and processing functionality
+  - Direct imports still work: `from bioetl.application.core.executor import PipelineExecutor`
+
+### Changed
+
+- **Package Re-exports Simplified**: Updated package `__init__.py` files to import from canonical modules:
+  - `chembl/__init__.py`: Imports from `activity.py`, `assay.py`, etc. instead of `compat.py`
+  - `pubchem/__init__.py`: Imports from `compound.py` instead of `compat.py`
+  - `uniprot/__init__.py`: Imports from `protein.py` instead of `compat.py`
+  - `pubmed/__init__.py`: Imports from `publications.py` instead of `compat.py`
+
 - **Deprecated Domain Classes Cleanup**: Removed 3 deprecated classes from domain layer:
   - `Activity` class (deprecated alias for `Bioactivity`) - use `Bioactivity` instead
   - `ChemblApiError` in `domain.exceptions` - use `infrastructure.adapters.chembl.exceptions.ChemblApiError` instead

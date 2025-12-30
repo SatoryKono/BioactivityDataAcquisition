@@ -5,8 +5,8 @@ various bioinformatics data sources.
 
 Main Components:
 - GenericPipeline: Universal pipeline class for all provider/entity combinations
+- Provider-specific pipelines: ChEMBL, PubChem, UniProt, PubMed
 - Provider-specific transformers: Implement Bronze→Silver transformation logic
-- Deprecated aliases: ChEMBLActivityPipeline, PubChemCompoundPipeline, etc.
 
 Usage:
     # Recommended approach - use GenericPipeline via factory
@@ -18,7 +18,7 @@ Usage:
     from bioetl.application.pipelines.generic import GenericPipeline
     pipeline = GenericPipeline.create(...)
 
-    # Deprecated aliases (emit DeprecationWarning)
+    # Provider-specific pipelines
     from bioetl.application.pipelines.chembl import ChEMBLActivityPipeline
 """
 
