@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bioetl.application.services import RunResult, RunStatus
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli import cli
 
@@ -46,15 +47,17 @@ class TestCliRunDryRun:
         Dry-run only affects rebuild/backfill cleanup preview.
         For incremental, the pipeline executes normally.
         """
-        # Mock the pipeline runner to avoid actual execution
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = None
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(return_value=RunResult(
+            status=RunStatus.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run",
+            run_type="incremental"
+        ))
 
         with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+            return_value=mock_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -64,7 +67,10 @@ class TestCliRunDryRun:
         # Incremental with dry-run proceeds normally (dry-run doesn't affect incremental)
         assert result.exit_code == 0
         # Verify pipeline was actually executed
-        mock_runner.run.assert_called_once()
+        mock_service.run.assert_called_once()
+        # Verify dry_run flag was passed
+        call_args = mock_service.run.call_args
+        assert call_args.kwargs['options'].dry_run is True
 
     def test_dry_run_with_rebuild_shows_preview(
         self,

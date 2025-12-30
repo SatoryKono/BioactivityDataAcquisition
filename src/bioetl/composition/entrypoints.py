@@ -453,12 +453,11 @@ async def vacuum_table(table: str, options: VacuumOptions) -> int:
         >>> files_removed = await vacuum_table("chembl.activity", options)
     """
     service = get_lifecycle_service()
-    result: int = await service.vacuum(
+    return await service.vacuum(
         table=table,
         retention_days=options.retention_days,
         dry_run=options.dry_run,
     )
-    return result
 
 
 async def archive_table(table: str, options: ArchiveOptions) -> int:
@@ -476,12 +475,11 @@ async def archive_table(table: str, options: ArchiveOptions) -> int:
         >>> files_archived = await archive_table("chembl.activity", options)
     """
     service = get_lifecycle_service()
-    result: int = await service.archive(
+    return await service.archive(
         table=table,
         target_path=options.target_path,
         remove_source=options.remove_source,
     )
-    return result
 
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:
@@ -527,8 +525,7 @@ async def inspect_quarantine(pipeline: str, limit: int = 100) -> list[dict[str, 
         ['DQ_MISSING_FIELD', 'DQ_INVALID_SMILES']
     """
     manager = get_quarantine_manager(pipeline)
-    records: list[dict[str, Any]] = await manager.inspect(limit=limit)
-    return records
+    return await manager.inspect(limit=limit)
 
 
 async def list_checkpoints(pipeline: str) -> list[str]:
@@ -548,8 +545,7 @@ async def list_checkpoints(pipeline: str) -> list[str]:
         ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
     """
     manager = get_checkpoint_manager(pipeline)
-    checkpoints: list[str] = await manager.list_all()
-    return checkpoints
+    return await manager.list_all()
 
 
 # =============================================================================
@@ -674,11 +670,10 @@ async def cleanup_bronze(
         >>> print(f"Would remove {result.files_removed} files")
     """
     service = get_bronze_cleanup_service()
-    result: CleanupResult = await service.cleanup(
+    return await service.cleanup(
         retention_days=retention_days,
         dry_run=dry_run,
     )
-    return result
 
 
 def get_pipeline_runner_service() -> PipelineRunnerService:

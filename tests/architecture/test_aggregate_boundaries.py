@@ -123,8 +123,11 @@ class TestAggregateBoundaryIsolation:
                                 if arg.annotation:
                                     ann_str = ast.unparse(arg.annotation)
                                     for forbidden in forbidden_types:
+                                        # Use regex to check for whole word match to avoid matching ID types
+                                        # e.g., "Batch" shouldn't match "BatchID"
+                                        import re
                                         if (
-                                            forbidden in ann_str
+                                            re.search(rf"\b{forbidden}\b", ann_str)
                                             and forbidden != current_file_class
                                         ):
                                             violations.append(
@@ -138,8 +141,10 @@ class TestAggregateBoundaryIsolation:
                             ann_str = ast.unparse(item.annotation)
                             target_name = getattr(item.target, "id", "unknown")
                             for forbidden in forbidden_types:
+                                # Use regex to check for whole word match
+                                import re
                                 if (
-                                    forbidden in ann_str
+                                    re.search(rf"\b{forbidden}\b", ann_str)
                                     and forbidden != current_file_class
                                 ):
                                     violations.append(
