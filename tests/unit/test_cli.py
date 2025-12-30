@@ -270,7 +270,6 @@ class TestRunCommandAdvanced:
         """Test run command handles ValueError during bootstrap."""
         mock_create_runner.side_effect = ValueError("Invalid config")
 
-        from bioetl.interfaces.cli.exit_codes import ExitCode
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
@@ -280,7 +279,6 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_file_not_found(self, mock_create_runner, runner):
         """Test run command handles FileNotFoundError during bootstrap."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode
 
         mock_create_runner.side_effect = FileNotFoundError("Config not found")
 
@@ -292,7 +290,6 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_generic_error(self, mock_create_runner, runner):
         """Test run command handles generic Exception during bootstrap."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode
 
         mock_create_runner.side_effect = RuntimeError("Unexpected error")
 
@@ -351,7 +348,6 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_missing_logger(self, mock_create_runner, runner):
         """Test run command handles missing logger gracefully."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode
 
         mock_runner_instance = MagicMock(spec=[])  # Empty spec, no logger attribute
         mock_create_runner.return_value = mock_runner_instance
