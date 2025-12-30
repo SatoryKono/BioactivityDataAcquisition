@@ -11,12 +11,16 @@ Error Handling (RULES.md §4.1):
 - Critical errors: Fail immediately (401, 403)
 - Recoverable errors: Handled by circuit breaker
 - Data quality errors: Log and skip record
+
+Health Check Observability (RULES.md §4.8):
+- SUCCESS: DEBUG log "health_check_passed", increment success counter
+- FAILURE: WARNING log "health_check_failed" with details, increment failure counter
+- LATENCY: Record duration histogram for all health checks
 """
 
 from __future__ import annotations
 
 import asyncio
-import time
 import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Self
@@ -25,6 +29,7 @@ from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMet
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.error_handling import ErrorHandler
+from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckMixin
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -34,16 +39,20 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
-class BaseSyncAdapter(DataSourcePort):
+class BaseSyncAdapter(HealthCheckMixin, DataSourcePort):
     """Base class for adapters using synchronous libraries.
 
     Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreaker.
     All dependencies are injected via constructor (Composition Root pattern).
 
     Uses Template Method pattern for health checks:
-    - health_check(): Template method that handles try/except
+    - health_check(): Template method that handles try/except with observability
     - _probe_health(): Override for provider-specific health probe
     - _fallback_health_status(): Fallback using circuit breaker state
+
+    Health Check Observability (via HealthCheckMixin):
+    - SUCCESS: DEBUG log, success counter, latency histogram
+    - FAILURE: WARNING log with details, failure counter, latency histogram
 
     Error Handling:
     - _error_handler: Provides unified error classification, logging, and wrapping
@@ -61,7 +70,7 @@ class BaseSyncAdapter(DataSourcePort):
 
     provider_name: str
     logger: LoggerPort
-    metrics: MetricsPort
+    metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
@@ -125,58 +134,61 @@ class BaseSyncAdapter(DataSourcePort):
         """Check API health status using Template Method pattern.
 
         Calls _probe_health() for provider-specific probe, falling back
-        to _fallback_health_status() on any exception. Logs warning and
-        increments failure metric on exception.
+        to _fallback_health_status() on any exception.
+
+        Observability (via HealthCheckMixin):
+        - SUCCESS: DEBUG log, success counter, latency histogram
+        - FAILURE: WARNING log with details, failure counter, latency histogram
 
         Returns:
             HealthStatus from probe or fallback.
 
         """
+        ctx = self._start_health_check()
         try:
-            return await self._probe_health()
+            status = await self._probe_health()
+            self._handle_health_check_success(ctx, status)
+            return status
         except Exception as e:
-            self.logger.warning(
-                "health_check_failed",
-                provider=self.provider_name,
-                error=str(e),
-                error_type=type(e).__name__,
-            )
-            self.metrics.increment_counter(
-                "health_check_failures_total",
-                1,
-                {"provider": self.provider_name},
-            )
-            return self._fallback_health_status()
+            fallback_status = self._fallback_health_status()
+            # Log and record metrics for the failure
+            self._handle_health_check_failure(ctx, e)
+            return fallback_status
 
     async def check_health(self) -> HealthCheckResult:
-        """Perform health check with latency tracking. Never raises; returns UNHEALTHY on errors."""
-        start_time = time.monotonic()
+        """Perform health check with latency tracking.
+
+        Observability (via HealthCheckMixin):
+        - SUCCESS: DEBUG log, success counter, latency histogram
+        - FAILURE: WARNING log with details, failure counter, latency histogram
+
+        Returns:
+            HealthCheckResult with status, latency, and error details.
+
+        Note:
+            This method never raises exceptions. All errors are caught
+            and returned as UNHEALTHY status with error details.
+
+        """
+        ctx = self._start_health_check()
         last_error: str | None = None
         consecutive_failures = 0
 
         try:
             status = await self._probe_health()
+            self._handle_health_check_success(ctx, status)
         except Exception as e:
             last_error = str(e)
             status = self._fallback_health_status()
-            self.logger.warning(
-                "health_check_failed",
-                provider=self.provider_name,
-                error=str(e),
-                error_type=type(e).__name__,
-            )
-            self.metrics.increment_counter(
-                "health_check_failures_total",
-                1,
-                {"provider": self.provider_name},
-            )
+            # Log and record metrics for the failure
+            self._handle_health_check_failure(ctx, e)
             # Get failure count from circuit breaker
             try:
                 consecutive_failures = self.circuit_breaker.get_failure_count()
             except Exception:
                 consecutive_failures = 1
 
-        latency_ms = (time.monotonic() - start_time) * 1000
+        latency_ms = ctx.elapsed_seconds * 1000
 
         return HealthCheckResult(
             status=status,
@@ -186,18 +198,6 @@ class BaseSyncAdapter(DataSourcePort):
             last_error=last_error,
             consecutive_failures=consecutive_failures,
         )
-
-    def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for this adapter.
-
-        Subclasses SHOULD override this to return the specific endpoint
-        used for health probes. Default returns empty string.
-
-        Returns:
-            Health check endpoint path.
-
-        """
-        return ""
 
     async def _probe_health(self) -> HealthStatus:
         """Perform provider-specific health probe.

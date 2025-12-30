@@ -1,4 +1,4 @@
-"""Tests for BaseSyncAdapter health_check logging.
+"""Tests for BaseHttpAdapter health_check logging.
 
 Tests verify that health_check uses HealthCheckMixin for unified
 observability across BaseHttpAdapter and BaseSyncAdapter.
@@ -6,39 +6,32 @@ observability across BaseHttpAdapter and BaseSyncAdapter.
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
 
-class StubSyncAdapter(BaseSyncAdapter):
-    """Concrete adapter for testing BaseSyncAdapter."""
+class StubHttpAdapter(BaseHttpAdapter):
+    """Concrete adapter for testing BaseHttpAdapter."""
 
     provider_name: str = "test_provider"
 
     def __init__(
         self,
+        http_client: Any,
         logger: Any,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
         metrics: Any = None,
         fail_probe: bool = False,
         probe_error: Exception | None = None,
         health_endpoint: str = "/health",
     ) -> None:
         super().__init__(
+            http_client=http_client,
             logger=logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             metrics=metrics,
         )
         self._fail_probe = fail_probe
@@ -79,23 +72,16 @@ def mock_metrics():
 
 
 @pytest.fixture
-def rate_limiter():
-    """Create a rate limiter for testing."""
-    return TokenBucket(rate=100.0, capacity=200, provider="test")
-
-
-@pytest.fixture
-def circuit_breaker():
-    """Create a circuit breaker for testing."""
-    return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=300)
-
-
-@pytest.fixture
-def thread_pool():
-    """Create a thread pool for testing."""
-    pool = ThreadPoolExecutor(max_workers=2)
-    yield pool
-    pool.shutdown(wait=False)
+def mock_http_client():
+    """Create a mock HTTP client for testing."""
+    client = MagicMock()
+    client.__aenter__ = AsyncMock(return_value=client)
+    client.__aexit__ = AsyncMock(return_value=None)
+    # Mock circuit breaker for fallback health status
+    client.circuit_breaker = MagicMock()
+    client.circuit_breaker.get_state.return_value = MagicMock(value="closed")
+    client.circuit_breaker.get_failure_count.return_value = 0
+    return client
 
 
 class TestHealthCheckLogging:
@@ -103,18 +89,14 @@ class TestHealthCheckLogging:
 
     async def test_health_check_logs_warning_on_exception(
         self,
+        mock_http_client: MagicMock,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check logs warning when _probe_health raises."""
-        adapter = StubSyncAdapter(
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
             logger=mock_logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             metrics=mock_metrics,
             fail_probe=True,
             probe_error=ConnectionError("Connection refused"),
@@ -140,18 +122,14 @@ class TestHealthCheckLogging:
 
     async def test_health_check_increments_failure_metric_on_exception(
         self,
+        mock_http_client: MagicMock,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check increments failure metric when _probe_health raises."""
-        adapter = StubSyncAdapter(
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
             logger=mock_logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             metrics=mock_metrics,
             fail_probe=True,
         )
@@ -169,18 +147,14 @@ class TestHealthCheckLogging:
 
     async def test_health_check_logs_debug_and_increments_success_on_success(
         self,
+        mock_http_client: MagicMock,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check logs debug and increments success metric on success."""
-        adapter = StubSyncAdapter(
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
             logger=mock_logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             metrics=mock_metrics,
             fail_probe=False,
         )
@@ -209,19 +183,15 @@ class TestHealthCheckLogging:
 
     async def test_health_check_records_latency_histogram(
         self,
+        mock_http_client: MagicMock,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check records latency histogram for both success and failure."""
         # Test success case
-        adapter = StubSyncAdapter(
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
             logger=mock_logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             metrics=mock_metrics,
             fail_probe=False,
         )
@@ -237,17 +207,13 @@ class TestHealthCheckLogging:
 
     async def test_health_check_uses_noop_metrics_by_default(
         self,
+        mock_http_client: MagicMock,
         mock_logger: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check works without explicit metrics (uses NoOpMetrics)."""
-        adapter = StubSyncAdapter(
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
             logger=mock_logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             fail_probe=True,
         )
 
@@ -264,18 +230,14 @@ class TestHealthCheckLogging:
 
     async def test_health_check_logs_correct_error_type(
         self,
+        mock_http_client: MagicMock,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
-        thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check logs the correct error type name."""
-        adapter = StubSyncAdapter(
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
             logger=mock_logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            thread_pool=thread_pool,
             metrics=mock_metrics,
             fail_probe=True,
             probe_error=TimeoutError("Request timed out"),
@@ -288,3 +250,58 @@ class TestHealthCheckLogging:
         call_kwargs = mock_logger.warning.call_args[1]
         assert call_kwargs["error_type"] == "TimeoutError"
         assert call_kwargs["error_message"] == "Request timed out"
+
+    async def test_check_health_also_uses_mixin_for_observability(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        """Test that check_health() also uses HealthCheckMixin for observability."""
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            fail_probe=False,
+        )
+
+        result = await adapter.check_health()
+
+        # Debug log should be emitted (via HealthCheckMixin)
+        mock_logger.debug.assert_called_once()
+        call_kwargs = mock_logger.debug.call_args[1]
+        assert call_kwargs["provider"] == "test_provider"
+        assert call_kwargs["status"] == HealthStatus.HEALTHY.value
+
+        # Result should contain expected fields
+        assert result.status == HealthStatus.HEALTHY
+        assert result.provider == "test_provider"
+        assert result.endpoint == "/health"
+        assert result.latency_ms > 0
+
+    async def test_check_health_failure_also_uses_mixin_for_observability(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        """Test that check_health() uses HealthCheckMixin on failure."""
+        adapter = StubHttpAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            fail_probe=True,
+            probe_error=ConnectionError("Connection refused"),
+        )
+
+        result = await adapter.check_health()
+
+        # Warning log should be emitted (via HealthCheckMixin)
+        mock_logger.warning.assert_called_once()
+        call_kwargs = mock_logger.warning.call_args[1]
+        assert call_kwargs["error_type"] == "ConnectionError"
+        assert call_kwargs["error_message"] == "Connection refused"
+
+        # Result should contain error details
+        assert result.last_error == "Connection refused"
+        assert result.provider == "test_provider"
