@@ -287,6 +287,7 @@ class TestPIIHandling:
             "pubmed_client.py",  # NCBI API tool identification
             "pipeline_config.py",  # NCBI API source config
             "client.py",  # User-Agent header identification
+            "source_config.py",  # NCBI API default_email for PubMed
         }
     )
 

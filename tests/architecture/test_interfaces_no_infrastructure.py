@@ -52,11 +52,11 @@ class TestInterfacesNoDIrectInfrastructure:
 
     def test_cli_no_infrastructure_imports(self):
         """Test that CLI doesn't import from infrastructure directly."""
-        # CLI is now a package, check main.py
+        # CLI is now in a package structure: interfaces/cli/main.py
         cli_path = SRC_PATH / "interfaces" / "cli" / "main.py"
 
         if not cli_path.exists():
-            pytest.skip("CLI main.py file not found")
+            pytest.skip("CLI main.py not found")
 
         imports = get_imports_from_file(cli_path)
 
@@ -76,11 +76,11 @@ class TestInterfacesNoDIrectInfrastructure:
 
         CLI should use composition.entrypoints, not _bootstrap directly.
         """
-        # CLI is now a package, check main.py
+        # CLI is now in a package structure: interfaces/cli/main.py
         cli_path = SRC_PATH / "interfaces" / "cli" / "main.py"
 
         if not cli_path.exists():
-            pytest.skip("CLI main.py file not found")
+            pytest.skip("CLI main.py not found")
 
         imports = get_imports_from_file(cli_path)
 
