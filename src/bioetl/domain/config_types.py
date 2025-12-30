@@ -68,10 +68,14 @@ class BronzeSinkDict(TypedDict, total=False):
 
 
 class SilverSinkDict(TypedDict, total=False):
-    """YAML structure for Silver layer sink configuration."""
+    """YAML structure for Silver layer sink configuration.
+
+    Note: Silver format MUST be "delta" per RULES.md §2.1 and medallion_validator.py.
+    Parquet is not allowed for Silver layer to ensure ACID compliance.
+    """
 
     path: str
-    format: Literal["delta", "parquet"]
+    format: Literal["delta"]  # RULES.md §2.1: Silver MUST use Delta Lake
     mode: Literal["merge", "append", "overwrite"]
     primary_key: list[str]
     partition_by: list[str]
