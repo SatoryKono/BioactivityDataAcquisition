@@ -55,9 +55,6 @@ ALLOWED_FILES: set[str] = {
     # infrastructure/storage/gold_writer.py
     # Uses datetime.now(UTC) for audit logging timestamps.
     "gold_writer.py",
-    # infrastructure/storage/silver_writer.py
-    # Uses datetime.now(UTC) for audit logging timestamps.
-    "silver_writer.py",
 }
 
 

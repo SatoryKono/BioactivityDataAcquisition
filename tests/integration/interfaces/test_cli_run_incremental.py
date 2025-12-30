@@ -6,7 +6,7 @@ to verify end-to-end CLI behavior without external dependencies.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
