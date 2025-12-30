@@ -13,16 +13,11 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 
 from bioetl.domain.types import RunID, RunType
-
-if TYPE_CHECKING:
-    pass
 
 
 # ============================================================================
@@ -386,14 +381,14 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
     - Bronze writes should be atomic (temp file + rename)
     - Partial writes should not corrupt data
     """
-    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    import time
+    from datetime import UTC, datetime
+
+    from bioetl.domain.locking import LockContext
     from bioetl.domain.ports.noop import NoOpMetrics
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
-    from bioetl.domain.locking import LockContext
-    from datetime import datetime, timezone
-
-    import time
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     # Setup lock - the key format must match what BronzeWriter expects
     lock = MemoryLock()
@@ -430,11 +425,11 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         records=iter(records),
         provider=provider,
         entity=entity,
-        date=datetime.now(timezone.utc),
+        date=datetime.now(UTC),
         batch_id=uuid4(),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
-        ingestion_ts=datetime.now(timezone.utc),
+        ingestion_ts=datetime.now(UTC),
         lock_context=lock_context,
     )
 
