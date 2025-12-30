@@ -13,7 +13,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Activity** | ChEMBL: Activity | Bioactivity measurement |
 | **Molecule** | ChEMBL: Molecule, PubChem: Compound | Chemical compound |
 | **Target** | ChEMBL: Target, UniProt: Protein | Biological target |
-| **Publication** | PubMed: Publication, ChEMBL: Document, Crossref: Work | Scientific document |
+| **Publication** | PubMed: Publication, ChEMBL: Document, CrossRef: Publication | Scientific document |
 
 ---
 
@@ -51,9 +51,10 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 | Canonical Term | Definition | Provider-Specific Names | Avoid |
 |----------------|------------|------------------------|-------|
-| **Publication** | A scientific document (article, patent, etc.) | PubMed: `Publication` | `paper`, `article` (as class names) |
+| **Publication** | A scientific document (article, patent, etc.) | PubMed: `Publication`, CrossRef: `PublicationEntity` | `paper`, `article` (as class names), `Work` (deprecated CrossRef API term) |
 | **Document** | ChEMBL's representation of a source document | ChEMBL: `Document` | `reference`, `source` |
-| **Work** | Crossref's representation of a scholarly work | Crossref: `Work` | `record` |
+
+**Note**: CrossRef's API uses the term "Work" but our codebase uses "Publication" as the canonical term for Ubiquitous Language. The deprecated alias `Work` is kept for backward compatibility.
 
 ---
 
@@ -174,11 +175,11 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 |------|-----|-------------|
 | `Publication` | E-utilities | Article metadata |
 
-### Crossref
+### CrossRef
 
 | Term | API Endpoint | Description |
 |------|-------------|-------------|
-| `Work` | `/works` | Scholarly work metadata |
+| `Publication` | `/works` | Scholarly publication metadata (API uses "works", codebase uses "publication") |
 
 ---
 
@@ -195,6 +196,9 @@ These terms should NOT be used in new code:
 | `data_point` | `record` | Generic term |
 | `Loader` | `Adapter` (for input), `Writer` (for output) | Vague technical term |
 | `Handler` | Specific name (e.g., `Manager`, `Service`) | Vague technical term |
+| `Work` | `Publication` | CrossRef API term → Ubiquitous Language |
+| `WorkSchema` | `PublicationSchema` | CrossRef schema naming |
+| `CrossRefWorkRecord` | `CrossRefPublicationRecord` | CrossRef model naming |
 
 ---
 

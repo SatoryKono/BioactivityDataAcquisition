@@ -154,13 +154,17 @@ class CrossRefDateParts(BaseModel):
     )
 
 
-# === Work Record Model ===
+# === Publication Record Model ===
 
 
-class CrossRefWorkRecord(BaseModel):
-    """Individual work record from CrossRef API.
+class CrossRefPublicationRecord(BaseModel):
+    """Individual publication record from CrossRef API.
 
-    Represents a publication (article, book, dataset, etc.) with DOI.
+    Represents a scholarly publication (article, book, dataset, etc.) with DOI.
+
+    Terminology:
+    - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
+    - Business analysts can understand the model without knowing CrossRef API specifics
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -168,12 +172,16 @@ class CrossRefWorkRecord(BaseModel):
     # Primary Identifier
     doi: str = Field(alias="DOI", description="Digital Object Identifier")
 
-    # Type
-    type: str = Field(description="Work type (journal-article, book-chapter, etc.)")
-    subtype: str | None = Field(default=None, description="Work subtype")
+    # Type (CrossRef API type field - kept as-is for API compatibility)
+    type: str = Field(
+        description="Publication type (journal-article, book-chapter, etc.)"
+    )
+    subtype: str | None = Field(default=None, description="Publication subtype")
 
     # Titles
-    title: list[str] | None = Field(default_factory=list, description="Work titles")
+    title: list[str] | None = Field(
+        default_factory=list, description="Publication titles"
+    )
     subtitle: list[str] | None = Field(default_factory=list, description="Subtitles")
     short_title: list[str] | None = Field(
         default_factory=list, alias="short-title", description="Short titles"
@@ -343,13 +351,13 @@ class CrossRefMessage(BaseModel):
     )
 
     # Items (for list responses)
-    items: list[CrossRefWorkRecord] | None = Field(
-        default_factory=list, description="Work records"
+    items: list[CrossRefPublicationRecord] | None = Field(
+        default_factory=list, description="Publication records"
     )
 
 
-class CrossRefWorksResponse(BaseModel):
-    """Complete CrossRef works API response (list endpoint)."""
+class CrossRefPublicationsResponse(BaseModel):
+    """Complete CrossRef publications API response (list endpoint)."""
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
@@ -361,8 +369,8 @@ class CrossRefWorksResponse(BaseModel):
     message: CrossRefMessage = Field(description="Response message")
 
 
-class CrossRefWorkResponse(BaseModel):
-    """Complete CrossRef work API response (single work endpoint)."""
+class CrossRefPublicationResponse(BaseModel):
+    """Complete CrossRef publication API response (single publication endpoint)."""
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
@@ -371,12 +379,24 @@ class CrossRefWorkResponse(BaseModel):
     message_version: str | None = Field(
         default=None, alias="message-version", description="API version"
     )
-    message: CrossRefWorkRecord = Field(description="Work record")
+    message: CrossRefPublicationRecord = Field(description="Publication record")
+
+
+# === Deprecated Aliases (backward compatibility) ===
+
+CrossRefWorkRecord = CrossRefPublicationRecord
+"""Deprecated: Use CrossRefPublicationRecord instead."""
+
+CrossRefWorksResponse = CrossRefPublicationsResponse
+"""Deprecated: Use CrossRefPublicationsResponse instead."""
+
+CrossRefWorkResponse = CrossRefPublicationResponse
+"""Deprecated: Use CrossRefPublicationResponse instead."""
 
 
 # === Record Type Mapping ===
 
 CROSSREF_RECORD_MODELS: dict[str, type[BaseModel]] = {
-    "work": CrossRefWorkRecord,
-    "publication": CrossRefWorkRecord,
+    "work": CrossRefPublicationRecord,
+    "publication": CrossRefPublicationRecord,
 }

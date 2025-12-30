@@ -80,14 +80,14 @@ class CrossRefAdapter(BaseHttpAdapter):
             "Accept": "application/json",
         }
 
-    async def _fetch_single_work(self, doi: str) -> dict[str, Any] | None:
-        """Fetch a single work by DOI.
+    async def _fetch_single_publication(self, doi: str) -> dict[str, Any] | None:
+        """Fetch a single publication by DOI.
 
         Args:
             doi: The DOI to fetch (will be normalized).
 
         Returns:
-            Work record or None if not found.
+            Publication record or None if not found.
 
         Raises:
             CrossRefApiError: On API errors (non-404).
@@ -116,8 +116,8 @@ class CrossRefAdapter(BaseHttpAdapter):
                 )
 
             data = response.json()
-            work: dict[str, Any] = data.get("message", {})
-            return work
+            publication: dict[str, Any] = data.get("message", {})
+            return publication
 
         except CrossRefApiError:
             raise
@@ -140,14 +140,14 @@ class CrossRefAdapter(BaseHttpAdapter):
             dois: List of DOIs to fetch individually.
 
         Yields:
-            Work records for successfully fetched DOIs.
+            Publication records for successfully fetched DOIs.
 
         """
         for doi in dois:
             try:
-                work = await self._fetch_single_work(doi)
-                if work:
-                    yield work
+                publication = await self._fetch_single_publication(doi)
+                if publication:
+                    yield publication
             except Exception as e:
                 self.logger.debug(
                     "crossref_individual_fetch_failed",
@@ -155,10 +155,10 @@ class CrossRefAdapter(BaseHttpAdapter):
                     error=str(e),
                 )
 
-    async def _fetch_batch_works(
+    async def _fetch_batch_publications(
         self, dois: list[str]
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch multiple works by DOI batch.
+        """Fetch multiple publications by DOI batch.
 
         Uses CrossRef filter endpoint for batch resolution.
 
@@ -166,7 +166,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             dois: List of DOIs to fetch (max 100).
 
         Yields:
-            Work records for found DOIs.
+            Publication records for found DOIs.
 
         """
         if not dois:
@@ -194,8 +194,8 @@ class CrossRefAdapter(BaseHttpAdapter):
                     status_code=response.status_code,
                     doi_count=len(dois),
                 )
-                async for work in self._fallback_individual_fetch(dois):
-                    yield work
+                async for publication in self._fallback_individual_fetch(dois):
+                    yield publication
                 return
 
             data = response.json()
@@ -209,8 +209,8 @@ class CrossRefAdapter(BaseHttpAdapter):
                 error=str(e),
                 doi_count=len(dois),
             )
-            async for work in self._fallback_individual_fetch(dois):
-                yield work
+            async for publication in self._fallback_individual_fetch(dois):
+                yield publication
 
     async def _fetch_search_page(
         self,
@@ -276,13 +276,13 @@ class CrossRefAdapter(BaseHttpAdapter):
             return False
         return bool(next_cursor and next_cursor != current_cursor)
 
-    async def _search_works(
+    async def _search_publications(
         self,
         query: str,
         limit: int | None = None,
         cursor: str = "*",
     ) -> AsyncIterator[dict[str, Any]]:
-        """Search for works using cursor-based pagination.
+        """Search for publications using cursor-based pagination.
 
         Args:
             query: Search query string.
@@ -290,7 +290,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             cursor: Pagination cursor (* for first page).
 
         Yields:
-            Work records matching the query.
+            Publication records matching the query.
 
         """
         rows = min(limit, 100) if limit else 100
@@ -323,7 +323,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch CrossRef works by DOI list (batch resolution).
+        """Fetch CrossRef publications by DOI list (batch resolution).
 
         Implements FilterableDataSourcePort.fetch_filtered().
 
@@ -334,7 +334,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             limit: Maximum number of records to fetch.
 
         Yields:
-            Dictionary records for each resolved work.
+            Dictionary records for each resolved publication.
 
         Raises:
             ValueError: If entity_type is not 'work' or 'publication'.
@@ -358,8 +358,8 @@ class CrossRefAdapter(BaseHttpAdapter):
         # Process DOIs in batches (max 100 per request)
         for i in range(0, len(dois), self.batch_size):
             batch = dois[i : i + self.batch_size]
-            async for work in self._fetch_batch_works(batch):
-                yield work
+            async for publication in self._fetch_batch_publications(batch):
+                yield publication
                 fetched += 1
                 if limit and fetched >= limit:
                     return
@@ -372,7 +372,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch CrossRef works.
+        """Fetch CrossRef publications.
 
         Implements DataSourcePort.fetch().
 
@@ -393,10 +393,10 @@ class CrossRefAdapter(BaseHttpAdapter):
         """
         if filter_ids:
             effective_filter_field = filter_field or "doi"
-            async for work in self.fetch_filtered(
+            async for publication in self.fetch_filtered(
                 entity_type, filter_ids, effective_filter_field, limit
             ):
-                yield work
+                yield publication
             return
 
         if entity_type not in ("work", "publication"):
@@ -409,8 +409,8 @@ class CrossRefAdapter(BaseHttpAdapter):
                 "CrossRef requires either filter_ids (DOIs) or query parameter"
             )
 
-        async for work in self._search_works(query, limit):
-            yield work
+        async for publication in self._search_publications(query, limit):
+            yield publication
 
     async def _probe_health(self) -> HealthStatus:
         """Probe CrossRef API health. Returns DEGRADED if response >5 sec."""
