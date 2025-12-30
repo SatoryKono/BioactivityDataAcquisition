@@ -272,9 +272,9 @@ from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
 ### Высокий приоритет
 
-| # | Задача | Файлы | Сложность |
-|---|--------|-------|-----------|
-| H1 | Устранить дублирование `RunOptions`/`RunResult`/`RunStatus` | `composition/entrypoints.py` | Низкая |
+| # | Задача | Файлы | Сложность | Статус |
+|---|--------|-------|-----------|--------|
+| H1 | Устранить дублирование `RunOptions`/`RunResult`/`RunStatus` | `composition/entrypoints.py` | Низкая | ✅ Выполнено |
 
 **Детали H1:**
 ```python
@@ -286,11 +286,11 @@ from bioetl.application.services import RunOptions, RunResult, RunStatus
 
 ### Средний приоритет
 
-| # | Задача | Файлы | Сложность |
-|---|--------|-------|-----------|
-| M1 | Удалить deprecated `run_chembl_all` | `run_all.py`, `main.py` | Низкая |
-| M2 | Удалить deprecated `setup_shutdown_handlers` | `signals.py` | Низкая |
-| M3 | Использовать `ShutdownPort` вместо локального Protocol | `signals.py` | Низкая |
+| # | Задача | Файлы | Сложность | Статус |
+|---|--------|-------|-----------|--------|
+| M1 | Удалить deprecated `run_chembl_all` | `run_all.py`, `main.py` | Низкая | ✅ Выполнено |
+| M2 | Удалить deprecated `setup_shutdown_handlers` | `signals.py` | Низкая | ✅ Выполнено |
+| M3 | Использовать `ShutdownPort` вместо локального Protocol | `signals.py` | Низкая | ✅ Выполнено |
 
 **Детали M3:**
 ```python
@@ -302,11 +302,11 @@ from bioetl.domain.ports import ShutdownPort
 
 ### Низкий приоритет / Косметические
 
-| # | Задача | Файлы | Сложность |
-|---|--------|-------|-----------|
-| L1 | Рефакторить тесты для использования публичного API | `tests/unit/interfaces/` | Средняя |
-| L2 | Удалить re-export `_private` функций | `cli/__init__.py` | Низкая |
-| L3 | Перенести `BatchRunResult` в application (опционально) | `run_all.py` | Средняя |
+| # | Задача | Файлы | Сложность | Статус |
+|---|--------|-------|-----------|--------|
+| L1 | Рефакторить тесты для использования публичного API | `tests/unit/interfaces/` | Средняя | ✅ Выполнено |
+| L2 | Удалить re-export `_private` функций | `cli/__init__.py` | Низкая | ✅ Выполнено |
+| L3 | Перенести `BatchRunResult` в application (опционально) | `run_all.py` | Средняя | ⏳ Отложено |
 
 ---
 
