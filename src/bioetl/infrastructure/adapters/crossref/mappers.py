@@ -321,8 +321,3 @@ class CrossRefFieldExtractor:
             # Preserve raw type for debugging
             "_raw_type": work_data.get("type"),
         }
-
-
-# Backward compatibility alias (deprecated)
-# TODO: Remove after migrating all usages to CrossRefFieldExtractor
-WorkToPublicationMapper = CrossRefFieldExtractor

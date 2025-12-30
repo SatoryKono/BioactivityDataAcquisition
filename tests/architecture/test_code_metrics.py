@@ -435,8 +435,6 @@ class TestGodObjectDetection:
         "BaseTransformer": "Template Method pattern - provides hooks for subclasses",
         # Protocol implementations (must implement all methods themselves)
         "StorageAdapter": "Facade implementing StoragePort - delegates to bronze/silver/gold writers",
-        # Mappers (pure transformation functions, no dependencies to delegate to)
-        "WorkToPublicationMapper": "Data mapper with static methods, no dependencies",
         # Writers with cohesive responsibilities (all methods about writing)
         "DeltaWriter": "Cohesive writer - all methods relate to Delta Lake operations",
         "GoldWriter": "Cohesive writer - delegates to _audit, _tracing; modes are cohesive",
