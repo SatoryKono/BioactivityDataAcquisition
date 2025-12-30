@@ -419,7 +419,6 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         b'{"id": 2, "value": "test2"}',
     ]
 
-    from pathlib import Path as PathLib
 
     path_str = await writer.write_bronze(
         records=iter(records),
