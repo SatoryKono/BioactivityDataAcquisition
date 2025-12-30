@@ -9,18 +9,12 @@ from httpx import RequestError
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
-from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
 
 @pytest.fixture
 def mock_http_client():
     """Fixture for mock HTTP client."""
-    client = AsyncMock()
-    client.__aenter__.return_value = client
-    client.__aexit__.return_value = None
-    client._client = AsyncMock()
-    client._client.aclose = AsyncMock()
-    return client
+    return AsyncMock()
 
 
 @pytest.fixture
@@ -40,58 +34,85 @@ def adapter(mock_http_client, mock_logger):
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_success(adapter, mock_http_client):
-    """Test successful fetch_single_work."""
+async def test_fetch_by_doi_success(adapter, mock_http_client):
+    """Test successful fetch by DOI."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {"message": {"title": ["Test Title"]}}
+    mock_response.json.return_value = {"message": {"items": [{"title": ["Test Title"]}]}}
     mock_http_client.get.return_value = mock_response
 
-    result = await adapter._fetch_single_work("10.1234/test")
+    results = [
+        res
+        async for res in adapter.fetch(
+            entity_type="work", filter_ids=["10.1234/test"], filter_field="doi"
+        )
+    ]
 
-    assert result == {"title": ["Test Title"]}
-    mock_http_client.get.assert_called_once_with(
-        "https://api.crossref.org/works/10.1234/test",
-        headers={"User-Agent": "BioETL/1.0 (mailto:test@example.com)", "Accept": "application/json"},
-    )
+    assert len(results) == 1
+    assert results[0] == {"title": ["Test Title"]}
+    mock_http_client.get.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_not_found(adapter, mock_http_client, mock_logger):
-    """Test fetch_single_work when DOI is not found (404)."""
+async def test_fetch_by_doi_not_found(adapter, mock_http_client, mock_logger):
+    """Test fetch by DOI when DOI is not found (404)."""
     mock_response = MagicMock()
-    mock_response.status_code = 404
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"message": {"items": []}}
     mock_http_client.get.return_value = mock_response
 
-    result = await adapter._fetch_single_work("10.1234/notfound")
+    results = [
+        res
+        async for res in adapter.fetch(
+            entity_type="work", filter_ids=["10.1234/notfound"], filter_field="doi"
+        )
+    ]
 
-    assert result is None
-    mock_logger.debug.assert_called_with(
-        "crossref_doi_not_found",
-        doi="10.1234/notfound",
-    )
+    assert len(results) == 0
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_http_error(adapter, mock_http_client):
-    """Test fetch_single_work with HTTP error (e.g., 500)."""
+async def test_fetch_by_doi_http_error(adapter, mock_http_client, mock_logger):
+    """Test fetch by DOI with HTTP error (e.g., 500)."""
     mock_response = MagicMock()
     mock_response.status_code = 500
     mock_http_client.get.return_value = mock_response
 
-    with pytest.raises(CrossRefApiError):
-        await adapter._fetch_single_work("10.1234/error")
+    results = [
+        res
+        async for res in adapter.fetch(
+            entity_type="work", filter_ids=["10.1234/error"], filter_field="doi"
+        )
+    ]
+
+    assert len(results) == 0
+    mock_logger.warning.assert_called_with(
+        "crossref_batch_fetch_failed",
+        status_code=500,
+        doi_count=1,
+    )
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_request_error(adapter, mock_http_client, mock_logger):
-    """Test fetch_single_work with a request error (e.g., network issue)."""
+async def test_fetch_by_doi_request_error(adapter, mock_http_client, mock_logger):
+    """Test fetch by DOI with a request error (e.g., network issue)."""
     mock_http_client.get.side_effect = RequestError("Network error")
 
-    with pytest.raises(CrossRefApiError):
-        await adapter._fetch_single_work("10.1234/network-error")
+    results = [
+        res
+        async for res in adapter.fetch(
+            entity_type="work",
+            filter_ids=["10.1234/network-error"],
+            filter_field="doi",
+        )
+    ]
 
-    mock_logger.error.assert_called()
+    assert len(results) == 0
+    mock_logger.warning.assert_called_with(
+        "crossref_batch_fetch_error",
+        error="Network error",
+        doi_count=1,
+    )
 
 
 @pytest.mark.asyncio
