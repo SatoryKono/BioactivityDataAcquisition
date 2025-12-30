@@ -1,5 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
     "title": "Activity Data Contract",
     "description": "Defines the schema for the gold 'Activity' entity, aligned with RULES.md §7.1. This contract is for data consumers.",
     "type": "object",
