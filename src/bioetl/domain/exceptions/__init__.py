@@ -8,6 +8,21 @@ error classification (see ErrorClassifier).
 
 This module re-exports all exceptions for backward compatibility with:
     from bioetl.domain.exceptions import SomeError
+
+External Service Exceptions (RULES.md §7.2):
+    Domain layer provides abstract exceptions for external service errors.
+    Application layer should catch these abstract exceptions, not provider-specific ones.
+
+    - ExternalServiceError: Base for all external service errors
+    - ServiceUnavailableError: Service is down (5xx, timeout)
+    - RateLimitExceededError: Rate limit exceeded (429)
+    - ServiceAuthenticationError: Auth failed (401/403)
+    - DataValidationError: Invalid data from external source
+
+Deprecated Exceptions:
+    ChemblApiError and CrossRefApiError are deprecated in domain layer.
+    Use infrastructure.adapters.{provider}.exceptions instead, and catch
+    ExternalServiceError in application layer.
 """
 
 from bioetl.domain.exceptions.base import (
@@ -31,6 +46,13 @@ from bioetl.domain.exceptions.data_quality import (
     InvalidDataFormatError,
     MissingRequiredFieldError,
     SchemaViolationError,
+)
+from bioetl.domain.exceptions.external_service import (
+    DataValidationError,
+    ExternalServiceError,
+    RateLimitExceededError,
+    ServiceAuthenticationError,
+    ServiceUnavailableError,
 )
 from bioetl.domain.exceptions.recoverable import (
     ApiError,
@@ -64,6 +86,8 @@ __all__ = [
     "CrossRefApiError",
     "DataQualityError",
     "DataQualityThresholdError",
+    "DataValidationError",
+    "ExternalServiceError",
     "InfrastructureError",
     "InvalidDataFormatError",
     "InvalidStateError",
@@ -74,10 +98,13 @@ __all__ = [
     "NetworkError",
     "PolicyViolationError",
     "RateLimitError",
+    "RateLimitExceededError",
     "RecoverableError",
     "RetryExhaustedError",
     "SchemaEvolutionError",
     "SchemaViolationError",
+    "ServiceAuthenticationError",
+    "ServiceUnavailableError",
     "StorageError",
     "TableNotFoundError",
     "TimeoutError",
