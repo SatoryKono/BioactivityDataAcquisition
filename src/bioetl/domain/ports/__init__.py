@@ -39,18 +39,18 @@ from bioetl.domain.ports.health_check import (
 )
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
+from bioetl.domain.ports.noop import (
+    NoOpAudit,
+    NoOpMemoryMonitor,
+    NoOpMetrics,
+    NoOpTracing,
+)
 from bioetl.domain.ports.normalization import (
     ActivityAggregatorPort,
     NormalizationServicePort,
     OutlierFilterPort,
     UnitConverterPort,
     ValueValidatorPort,
-)
-from bioetl.domain.ports.noop import (
-    NoOpAudit,
-    NoOpMemoryMonitor,
-    NoOpMetrics,
-    NoOpTracing,
 )
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
