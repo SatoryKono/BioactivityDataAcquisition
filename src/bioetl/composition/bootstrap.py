@@ -11,7 +11,7 @@ Bootstrap functions are organized into submodules:
 All bootstrap functions are re-exported here for convenience.
 
 Note:
-    Infrastructure types (BronzeWriter, DeltaWriter, etc.) are NOT exported
+    Infrastructure types (BronzeWriter, SilverWriter, etc.) are NOT exported
     from this module. Import them directly from infrastructure modules or
     use composition/types.py for type annotations.
 """

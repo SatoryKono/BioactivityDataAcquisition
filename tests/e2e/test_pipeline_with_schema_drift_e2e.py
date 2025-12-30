@@ -127,13 +127,13 @@ class TestSchemaEvolutionErrorMode:
         When on_schema_mismatch='error' and incoming data has new fields,
         the write operation should fail with SchemaEvolutionError.
         """
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         logger = NoOpLogger()
         table_name = "test_schema_error"
         table_path = e2e_data_dir / "silver" / table_name
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
 
@@ -169,12 +169,12 @@ class TestSchemaEvolutionErrorMode:
         self, e2e_data_dir: Path, base_schema: pa.Schema, base_records, reduced_records
     ):
         """E2E: Schema drift with 'error' mode raises on removed field."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         logger = NoOpLogger()
         table_name = "test_schema_removed"
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
 
@@ -224,13 +224,13 @@ class TestSchemaEvolutionEvolveMode:
         """
         from deltalake import DeltaTable
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         logger = NoOpLogger()
         table_name = "test_schema_evolve"
         table_path = e2e_data_dir / "silver" / table_name
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
 
@@ -273,14 +273,14 @@ class TestSchemaEvolutionEvolveMode:
         evolved_records,
     ):
         """E2E: Schema evolution logs warning about drift."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_logger = MagicMock()
         mock_logger.warning = MagicMock()
         mock_logger.debug = MagicMock()
         table_name = "test_schema_evolve_log"
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
 
@@ -330,13 +330,13 @@ class TestSchemaEvolutionIgnoreMode:
         """
         from deltalake import DeltaTable
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         logger = NoOpLogger()
         table_name = "test_schema_ignore"
         table_path = e2e_data_dir / "silver" / table_name
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
 
@@ -382,13 +382,13 @@ class TestSchemaEvolutionEdgeCases:
         """E2E: First write creates table without schema drift check."""
         from deltalake import DeltaTable
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         logger = NoOpLogger()
         table_name = "test_new_table"
         table_path = e2e_data_dir / "silver" / table_name
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
 
@@ -416,14 +416,14 @@ class TestSchemaEvolutionEdgeCases:
         self, e2e_data_dir: Path, base_schema: pa.Schema, base_records
     ):
         """E2E: Same schema in subsequent writes does not trigger drift."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_logger = MagicMock()
         mock_logger.warning = MagicMock()
         mock_logger.debug = MagicMock()
         table_name = "test_no_drift"
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
 
@@ -476,13 +476,13 @@ class TestSchemaEvolutionEdgeCases:
         """E2E: Multiple schema evolutions are handled correctly."""
         from deltalake import DeltaTable
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         logger = NoOpLogger()
         table_name = "test_multi_evolve"
         table_path = e2e_data_dir / "silver" / table_name
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
 

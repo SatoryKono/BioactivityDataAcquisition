@@ -23,8 +23,8 @@ from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 logger = structlog.get_logger()
 
@@ -91,7 +91,7 @@ class IntegrationPipelineTestCase:
                 json_path=self.json_path if save_json else None,
                 # Lock validation at Application layer
             ),
-            silver_writer=DeltaWriter(
+            silver_writer=SilverWriter(
                 base_path=self.silver_path,
                 logger=logger,
                 csv_exporter=None,
