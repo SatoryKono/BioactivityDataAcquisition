@@ -10,9 +10,9 @@ Safety Guard (RULES.md §4.6):
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.batch_executor import BatchResult
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.batch_writer import BatchWriter
@@ -30,16 +30,6 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
     from bioetl.domain.types import BatchID
-
-
-@dataclass(frozen=True, slots=True)
-class BatchResult:
-    """Result of processing a batch of records."""
-
-    bronze_count: int
-    silver_count: int
-    gold_count: int
-    quarantined_count: int
 
 
 class RecordProcessor:

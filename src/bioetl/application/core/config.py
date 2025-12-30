@@ -27,30 +27,6 @@ class RecordProcessorConfig:
 
 
 @dataclass(frozen=True, slots=True)
-class ExecutorConfig:
-    """Configuration for PipelineExecutor.
-
-    Bundles execution-related configuration to reduce __init__ parameters.
-
-    Attributes:
-        entity_type: Type of entity to process.
-        batch_size: Number of records per batch.
-        checkpoint_interval: Number of records between checkpoints.
-        run_type: Type of pipeline run (for tracing attributes).
-        pipeline_name: Name of the pipeline (for tracing attributes).
-        run_id: Unique run identifier (for tracing attributes).
-
-    """
-
-    entity_type: str
-    batch_size: int = 100
-    checkpoint_interval: int = 1000
-    run_type: RunType | None = None
-    pipeline_name: str | None = None
-    run_id: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
 class LockConfig:
     """Configuration for LockManager.
 

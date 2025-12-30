@@ -50,13 +50,12 @@ class TestFileSizeLimits:
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
         "identifiers.py": 350,  # 332 LOC - Value objects with validation
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
-        "activity.py": 330,  # 327 LOC - Activity-related value objects
         # Domain ports NoOp implementations
         "noop.py": 350,  # 322 LOC - NoOp implementations for Null Object Pattern
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "base_transformer.py": 600,  # 594 LOC - Template Method with helpers (tracing spans added)
-        "batch_executor.py": 650,  # 610 LOC - unified executor combining PipelineExecutor + RecordProcessor
+        "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 720,  # 703 LOC - pipeline entrypoints (run_pipeline expanded + services)
@@ -69,7 +68,6 @@ class TestFileSizeLimits:
         # Infrastructure layer exemptions
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
-        "silver_writer.py": 780,  # 777 LOC - Silver layer write with merge/validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
@@ -336,7 +334,6 @@ class TestClassSize:
         "BaseTransformer": 560,  # 559 lines - Template Method with helpers (tracing added)
         "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
-        "SilverWriter": 710,  # 704 lines - Silver layer writer with merge/validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "LineageTracker": 400,
         "ChemblAdapter": 520,  # 513 lines - complex API adapter with Template Method health check
@@ -344,8 +341,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
-        "PipelineExecutor": 460,  # 458 lines - executor with tracing and metrics (deprecated)
-        "BatchExecutor": 550,  # 547 lines - unified executor combining PipelineExecutor + RecordProcessor
+        "BatchExecutor": 550,  # 547 lines - unified executor for batch processing
         "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
@@ -487,7 +483,6 @@ class TestGodObjectDetection:
         # Services with clear single responsibility
         "PreflightService": "Single responsibility: infrastructure validation, delegates to _health_aggregator",
         "PostrunService": "Single responsibility: post-run operations (DQ, vacuum, cleanup)",
-        "PipelineExecutor": "Single responsibility: execution orchestration, delegates to _record_processor",
         # Adapters (HTTP adapters need internal helpers for retry/error handling)
         "ChemblAdapter": "HTTP adapter with internal helpers; delegates to ErrorClassifier, EntityMapper",
         "CrossRefAdapter": "HTTP adapter with internal helpers for batch resolution",
@@ -511,8 +506,6 @@ class TestGodObjectDetection:
         "NormalizationService": "Cohesive service - all methods relate to value normalization",
         # Lifecycle orchestration service
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
-        # Silver layer writer
-        "SilverWriter": "Cohesive writer - all methods relate to Silver layer operations",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
