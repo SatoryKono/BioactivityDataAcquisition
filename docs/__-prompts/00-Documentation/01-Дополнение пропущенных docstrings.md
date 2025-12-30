@@ -84,17 +84,15 @@ class HashService:
 
 **Pipeline (application/pipelines/):**
 ```python
-class ChemblActivityPipeline(ChemblCommonPipeline):
+class ChEMBLActivityPipeline(BasePipeline):
     """Pipeline for ChEMBL activity data extraction and loading.
-    
+
     Follows Medallion Architecture (§2.1):
         Bronze: JSONL + zstd (append-only)
         Silver: Delta Lake (merge/upsert)
         Gold: Delta Lake (strict validation)
-    
-    Attributes:
-        entity: Target entity name ('activity').
-        schema: Pandera schema for validation.
+
+    Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
     """
 ```
 
