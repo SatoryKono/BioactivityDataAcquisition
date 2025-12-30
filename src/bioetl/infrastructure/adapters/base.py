@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Self
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.error_handling import ErrorHandler
+from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckMixin
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -66,7 +66,7 @@ class BaseHttpAdapter(HealthCheckMixin, DataSourcePort):
     provider_name: str
     logger: LoggerPort
     metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
-    _error_handler: ErrorHandler
+    _error_handler: ErrorService
 
     def __init__(
         self,
@@ -86,7 +86,7 @@ class BaseHttpAdapter(HealthCheckMixin, DataSourcePort):
         self.http_client = http_client
         self.logger = logger
         self.metrics = metrics if metrics is not None else NoOpMetrics()
-        self._error_handler = ErrorHandler(logger)
+        self._error_handler = ErrorService(logger)
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.
