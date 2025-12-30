@@ -247,25 +247,17 @@ class TestRunCommandAdvanced:
         assert result.exit_code == ExitCode.CONFIG_ERROR
         assert "Pipeline not found" in result.output or "not found" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
-    def test_run_command_bootstrap_file_not_found(self, mock_asyncio_run, mock_get_service, runner):
+    def test_run_command_bootstrap_file_not_found(self, mock_asyncio_run, runner):
         """Test run command handles FileNotFoundError during service call."""
-        from bioetl.application.services import RunResult, RunStatus
+        from bioetl.application.services import RunStatus
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.FAILED,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-                error_message="Config not found",
-                error_type="FileNotFoundError",
-            )
+        # _run_pipeline_async returns (status, error_message, error_type) tuple
+        mock_asyncio_run.return_value = (
+            RunStatus.FAILED,
+            "Config not found",
+            "FileNotFoundError",
         )
-        mock_get_service.return_value = mock_service
-        mock_asyncio_run.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
@@ -283,33 +275,22 @@ class TestRunCommandAdvanced:
         assert result.exit_code == ExitCode.FAIL
         assert "Unexpected error" in result.output or "error" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run._run_pipeline_async")
     def test_run_command_with_filter_options(
         self,
-        mock_asyncio_run,
-        mock_get_service,
+        mock_run_async,
         runner,
         tmp_path,
     ):
         """Test run command with CSV filter options."""
-        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.application.services import RunOptions, RunStatus
 
         # Create a temporary CSV file
         csv_file = tmp_path / "filter.csv"
         csv_file.write_text("id\nCHEMBL123\nCHEMBL456")
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-        )
-        mock_get_service.return_value = mock_service
-        mock_asyncio_run.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
+        # Mock the async function to return success tuple
+        mock_run_async.return_value = (RunStatus.SUCCESS, None, None)
 
         result = runner.invoke(
             cli,
@@ -327,34 +308,28 @@ class TestRunCommandAdvanced:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        call_args = mock_service.run.call_args
-        pipeline_name = call_args[0][0]
-        options = call_args[1]["options"]
+        # Verify _run_pipeline_async was called with correct arguments
+        mock_run_async.assert_called_once()
+        call_args = mock_run_async.call_args
+        pipeline_name = call_args[0][0]  # First positional arg
+        options = call_args[0][1]  # Second positional arg
         assert pipeline_name == "chembl_activity"
         assert isinstance(options, RunOptions)
         assert options.input_csv == str(csv_file)
         assert options.filter_column == "id"
         assert options.filter_field == "molecule_chembl_id"
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
-    def test_run_command_missing_logger(self, mock_asyncio_run, mock_get_service, runner):
+    def test_run_command_missing_logger(self, mock_asyncio_run, runner):
         """Test run command handles service errors gracefully."""
-        from bioetl.application.services import RunResult, RunStatus
+        from bioetl.application.services import RunStatus
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.FAILED,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-                error_message="Internal error",
-                error_type="RuntimeError",
-            )
+        # _run_pipeline_async returns (status, error_message, error_type) tuple
+        mock_asyncio_run.return_value = (
+            RunStatus.FAILED,
+            "Internal error",
+            "RuntimeError",
         )
-        mock_get_service.return_value = mock_service
-        mock_asyncio_run.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
@@ -491,28 +466,17 @@ class TestDryRunMode:
         assert result.exit_code == 0
         assert "cancelled" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_rebuild_with_yes_skips_confirmation(
         self,
         mock_asyncio_run,
-        mock_get_service,
         runner,
     ):
         """Test that rebuild with -y skips confirmation."""
-        from bioetl.application.services import RunResult, RunStatus
+        from bioetl.application.services import RunStatus
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="rebuild",
-            )
-        )
-        mock_get_service.return_value = mock_service
-        mock_asyncio_run.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
+        # _run_pipeline_async returns (status, error_message, error_type) tuple
+        mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
 
         result = runner.invoke(
             cli,
@@ -520,7 +484,7 @@ class TestDryRunMode:
         )
 
         assert result.exit_code == 0
-        mock_get_service.assert_called_once()
+        mock_asyncio_run.assert_called_once()
 
 
 class TestValidatePipelineName:

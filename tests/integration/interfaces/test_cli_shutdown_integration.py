@@ -108,7 +108,7 @@ class TestCliGracefulShutdownExitCode:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
             ),
         ):
             result = cli_runner.invoke(
@@ -145,7 +145,7 @@ class TestCliGracefulShutdownExitCode:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
             ),
         ):
             result = cli_runner.invoke(
@@ -271,7 +271,7 @@ class TestRunnerShutdownIntegration:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
             ),
         ):
             result = cli_runner.invoke(
@@ -310,7 +310,7 @@ class TestRunnerShutdownIntegration:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
             ),
         ):
             result = cli_runner.invoke(
@@ -358,7 +358,7 @@ class TestLockReleaseOnShutdown:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
             ),
         ):
             result = cli_runner.invoke(
