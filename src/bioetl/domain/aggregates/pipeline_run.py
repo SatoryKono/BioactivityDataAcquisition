@@ -220,10 +220,6 @@ class PipelineRun:
         self._events: list[Any] = []
         self._metadata = metadata or {}
 
-    # ──────────────────────────────────────────────────────────────────────────
-    # Read-only properties (encapsulation)
-    # ──────────────────────────────────────────────────────────────────────────
-
     @property
     def run_id(self) -> RunID:
         """Immutable run identifier."""
@@ -286,10 +282,6 @@ class PipelineRun:
     def successful_stages(self) -> tuple[StageResult, ...]:
         """Stages that completed successfully."""
         return tuple(s for s in self._stages if s.status == StageStatus.SUCCESS)
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # State transition methods (enforce invariants)
-    # ──────────────────────────────────────────────────────────────────────────
 
     def start(self, started_at: datetime | None = None) -> None:
         """Start the pipeline run.
@@ -538,10 +530,6 @@ class PipelineRun:
             )
         )
 
-    # ──────────────────────────────────────────────────────────────────────────
-    # Domain events
-    # ──────────────────────────────────────────────────────────────────────────
-
     def collect_events(self) -> list[Any]:
         """Collect and clear accumulated domain events.
 
@@ -551,10 +539,6 @@ class PipelineRun:
         events = self._events.copy()
         self._events.clear()
         return events
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # Private helpers
-    # ──────────────────────────────────────────────────────────────────────────
 
     def _assert_running(self, operation: str) -> None:
         """Assert that the run is in RUNNING status.
