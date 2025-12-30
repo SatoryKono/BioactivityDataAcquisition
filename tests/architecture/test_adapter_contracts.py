@@ -44,6 +44,7 @@ class TestAdapterHealthCheck:
             "pagination.py",  # Pagination mixin, not a DataSourcePort adapter
             "rate_limiter.py",  # Rate limiting utility
             "circuit_breaker.py",  # Circuit breaker utility
+            "health_monitor.py",  # Health state utility, not a DataSourcePort adapter
         }
         adapter_files = []
         for py_file in adapters_path.rglob("*.py"):
