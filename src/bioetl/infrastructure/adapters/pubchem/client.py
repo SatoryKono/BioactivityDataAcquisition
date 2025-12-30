@@ -8,6 +8,10 @@ Requirements:
 - Health: lightweight query
 - Entities: compounds, substances, assays, bioassays
 
+DTO Support:
+- fetch_as_models(): Returns typed DTO models (PubChemCompoundRecord)
+- fetch(): Returns raw dicts (backward compatible)
+
 Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 """
 
@@ -17,7 +21,9 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
+from pydantic import BaseModel
 
+from bioetl.domain.entities.pubchem import PubChemCompoundRecord
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
@@ -28,6 +34,12 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+
+# Mapping from entity_type to DTO model class
+PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
+    "compound": PubChemCompoundRecord,
+}
 
 
 class PubChemAdapter(BaseSyncAdapter):
@@ -232,6 +244,64 @@ class PubChemAdapter(BaseSyncAdapter):
             "protocol": assay.get("protocol"),
             "target": assay.get("target"),
         }
+
+    async def fetch_as_models(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+        *,
+        validate: bool = True,
+    ) -> AsyncIterator[BaseModel]:
+        """Fetch records from PubChem as typed DTO models.
+
+        Returns Pydantic DTO models instead of raw dicts for type safety.
+        Uses domain DTOs with extra='forbid' to detect API changes.
+
+        Args:
+            entity_type: Type of entity (compound, substance, assay)
+            limit: Maximum number of records to fetch
+            query: Search query string
+            filter_ids: Unused for PubChem
+            filter_field: Unused for PubChem
+            validate: If True, validate with model_validate (strict).
+                     If False, use model_construct (skip validation, faster).
+
+        Yields:
+            Typed DTO models (PubChemCompoundRecord for compound)
+
+        Raises:
+            ValueError: If entity_type is not supported for DTO conversion
+
+        Example:
+            >>> async for compound in adapter.fetch_as_models("compound", query="aspirin"):
+            ...     print(compound.cid, compound.canonical_smiles)
+
+        """
+        model_class = PUBCHEM_DTO_MODELS.get(entity_type)
+        if model_class is None:
+            raise ValueError(
+                f"No DTO model for entity_type '{entity_type}'. "
+                f"Supported: {', '.join(PUBCHEM_DTO_MODELS.keys())}"
+            )
+
+        async for record in self.fetch(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        ):
+            # Convert CID to string for DTO (domain DTOs use str for IDs)
+            if "cid" in record and record["cid"] is not None:
+                record["cid"] = str(record["cid"])
+
+            if validate:
+                yield model_class.model_validate(record)
+            else:
+                yield model_class.model_construct(**record)
 
     async def _probe_health(self) -> HealthStatus:
         """Perform PubChem health probe using lightweight water query (CID 962)."""

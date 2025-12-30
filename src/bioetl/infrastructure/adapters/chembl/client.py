@@ -15,6 +15,11 @@ Health-Aware Fetching:
 - HEALTHY: Normal batch_size
 - DEGRADED: batch_size ÷ 2 (per RULES.md §3.5)
 - UNHEALTHY: Fail fast with clear error
+
+DTO Support:
+- fetch_as_models(): Returns typed DTO models (ActivityRecord, AssayRecord, etc.)
+- fetch(): Returns raw dicts (backward compatible)
+- Use model_construct() for trusted data (skip validation)
 """
 
 from __future__ import annotations
@@ -22,6 +27,17 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
+from pydantic import BaseModel
+
+from bioetl.domain.entities.chembl import (
+    ActivityRecord,
+    AssayRecord,
+    CellLineRecord,
+    DocumentRecord,
+    MoleculeRecord,
+    TargetComponentRecord,
+    TargetRecord,
+)
 from bioetl.domain.exceptions import CriticalError
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
@@ -45,6 +61,19 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+
+# Mapping from entity_type to DTO model class
+CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
+    "activity": ActivityRecord,
+    "assay": AssayRecord,
+    "molecule": MoleculeRecord,
+    "compound": MoleculeRecord,  # Alias for molecule
+    "target": TargetRecord,
+    "target_component": TargetComponentRecord,
+    "document": DocumentRecord,
+    "cell_line": CellLineRecord,
+}
 
 
 @dataclass
@@ -397,6 +426,63 @@ class ChemblAdapter(BaseHttpAdapter):
             entity_type, limit, filter_ids, filter_field
         ):
             yield record
+
+    async def fetch_as_models(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+        *,
+        validate: bool = True,
+    ) -> AsyncIterator[BaseModel]:
+        """Fetch records from ChEMBL as typed DTO models.
+
+        Returns Pydantic DTO models instead of raw dicts for type safety.
+        Uses domain DTOs with extra='forbid' to detect API changes.
+
+        Args:
+            entity_type: Type of entity (activity, assay, molecule, target, etc.)
+            limit: Maximum number of records to fetch
+            query: Unused for ChEMBL
+            filter_ids: List of IDs to filter by
+            filter_field: Field name to filter on
+            validate: If True, validate with model_validate (strict).
+                     If False, use model_construct (skip validation, faster).
+
+        Yields:
+            Typed DTO models (ActivityRecord, AssayRecord, etc.)
+
+        Raises:
+            ValueError: If entity_type is not supported for DTO conversion
+            ValidationError: If validate=True and API response has unexpected fields
+
+        Example:
+            >>> async for activity in adapter.fetch_as_models("activity", limit=100):
+            ...     print(activity.activity_id, activity.pchembl_value)
+
+        """
+        model_class = CHEMBL_DTO_MODELS.get(entity_type)
+        if model_class is None:
+            raise ValueError(
+                f"No DTO model for entity_type '{entity_type}'. "
+                f"Supported: {', '.join(CHEMBL_DTO_MODELS.keys())}"
+            )
+
+        async for record in self.fetch(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        ):
+            if validate:
+                # Strict validation - will raise on unknown fields
+                yield model_class.model_validate(record)
+            else:
+                # Fast path - skip validation for trusted data
+                yield model_class.model_construct(**record)
 
     async def _probe_health(self) -> HealthStatus:
         """Perform ChEMBL-specific health probe.
