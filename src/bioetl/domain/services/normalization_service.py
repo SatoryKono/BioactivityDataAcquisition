@@ -15,12 +15,12 @@ from bioetl.domain.services.activity_aggregator import ActivityAggregator
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.unit_converter import UnitConverter
 from bioetl.domain.services.value_validator import ValueValidator
-from bioetl.domain.value_objects.measurements import PChemblValue
+from bioetl.domain.value_objects.activity_values import PChemblValue
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from bioetl.domain.value_objects.measurements import Concentration
+    from bioetl.domain.value_objects.activity_values import Concentration
 
 
 @dataclass(slots=True)
@@ -286,7 +286,7 @@ class NormalizationService:
             Aggregated NormalizationResult.
 
         Example:
-            >>> from bioetl.domain.value_objects.measurements import Concentration, ConcentrationUnit
+            >>> from bioetl.domain.value_objects import Concentration, ConcentrationUnit
             >>> service = NormalizationService()
             >>> concs = [
             ...     Concentration(100.0, ConcentrationUnit.NANOMOLAR),

@@ -5,7 +5,7 @@ and business rules. They provide type safety and self-validation.
 
 Categories:
 - Identifiers: ChemblId, UniProtId, DOI, PubMedId, PubChemCid, CompoundId, AssayId
-- Measurements: Concentration, ActivityType, PChemblValue, ActivityValue
+- Activity Values: Concentration, ActivityType, PChemblValue, ActivityValue
 - Activity: ConfidenceScore, RelationOperator
 
 Usage:
@@ -35,6 +35,12 @@ from bioetl.domain.value_objects.activity import (
     ConfidenceScore,
     RelationOperator,
 )
+from bioetl.domain.value_objects.activity_values import (
+    ActivityType,
+    Concentration,
+    ConcentrationUnit,
+    PChemblValue,
+)
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
@@ -49,12 +55,6 @@ from bioetl.domain.value_objects.identifiers import (
     PubChemCid,
     PubMedId,
     UniProtId,
-)
-from bioetl.domain.value_objects.measurements import (
-    ActivityType,
-    Concentration,
-    ConcentrationUnit,
-    PChemblValue,
 )
 
 __all__ = [

@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.value_objects.measurements import ActivityType
+from bioetl.domain.value_objects.activity_values import ActivityType
 
 if TYPE_CHECKING:
     from bioetl.domain.services.normalization_config import NormalizationConfig

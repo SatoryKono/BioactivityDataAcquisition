@@ -212,9 +212,33 @@ class PublicationEntity(BaseEntity):
             raise ValueError("Publication DOI is required")
 
 
-# Deprecated alias for backward compatibility
-Work = PublicationEntity
-"""Deprecated: Use PublicationEntity instead. Kept for backward compatibility."""
+# Deprecated alias for backward compatibility with deprecation warning
+class _WorkMeta(type):
+    """Metaclass to emit deprecation warning on Work usage."""
+
+    def __instancecheck__(cls, instance: object) -> bool:
+        return isinstance(instance, PublicationEntity)
+
+
+class Work(PublicationEntity, metaclass=_WorkMeta):
+    """Deprecated alias for PublicationEntity.
+
+    .. deprecated:: 1.0.0
+        Use :class:`PublicationEntity` instead.
+        The term "Work" is CrossRef API-specific; use "Publication"
+        for Ubiquitous Language per glossary.md.
+    """
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        import warnings
+
+        warnings.warn(
+            "Work is deprecated. Use PublicationEntity instead. "
+            "See glossary.md for Ubiquitous Language terminology.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
 
 
 __all__ = ["CROSSREF_TYPE_MAP", "PublicationEntity", "PublicationRecord", "Work"]

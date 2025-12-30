@@ -15,7 +15,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.value_objects.measurements import Concentration
+    from bioetl.domain.value_objects.activity_values import Concentration
 
 
 class RelationOperator(str, Enum):
@@ -282,7 +282,7 @@ class ActivityValue:
         Raises:
             ValueError: If unit is not a recognized concentration unit.
         """
-        from bioetl.domain.value_objects.measurements import (
+        from bioetl.domain.value_objects.activity_values import (
             Concentration,
             ConcentrationUnit,
         )

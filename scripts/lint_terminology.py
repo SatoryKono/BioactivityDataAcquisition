@@ -35,6 +35,7 @@ class TermViolation:
 
 # Deprecated terms and their canonical replacements
 # Format: {pattern: (canonical_term, description)}
+# Based on docs/glossary.md "Deprecated Terms" section
 DEPRECATED_TERMS: dict[str, tuple[str, str]] = {
     # Generic technical names (class definitions)
     r"class\s+\w*Loader\b": ("Adapter/Writer", "Use Adapter for input, Writer for output"),
@@ -42,17 +43,20 @@ DEPRECATED_TERMS: dict[str, tuple[str, str]] = {
     # ETL process terms
     r"\bworkflow\b": ("pipeline", "Use 'pipeline' for data processing sequences"),
     r"\bjob\b": ("run", "Use 'run' for pipeline execution instances"),
+    r"\bchunk\b": ("batch", "Use 'batch' for collections of records processed together"),
     # Data terms (when used as class/variable names, not in strings/comments)
     r"\bdata_point\b": ("record", "Use 'record' for data items"),
+    # Domain terms (per glossary.md)
+    r"class\s+\w*Workflow\b": ("Pipeline", "Use Pipeline for data processing sequences"),
 }
 
 # Context-sensitive deprecated terms (only in certain files/contexts)
 CONTEXT_SENSITIVE_TERMS: dict[str, tuple[str, str, list[str]]] = {
-    # measurement is OK in measurements.py but not elsewhere for Activity
+    # measurement is OK in activity_values.py and backward-compat measurements.py
     r"\bmeasurement\b": (
         "activity",
         "Use 'activity' for bioactivity data (ChEMBL terminology)",
-        ["measurements.py"],  # Allowed files
+        ["activity_values.py", "measurements.py"],  # Allowed files
     ),
 }
 
