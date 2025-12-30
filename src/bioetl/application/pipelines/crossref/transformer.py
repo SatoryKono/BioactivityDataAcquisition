@@ -22,7 +22,7 @@ from bioetl.domain.normalization import (
     parse_page_range,
     strip_html_tags,
 )
-from bioetl.domain.transformations import generate_entity_id
+from bioetl.domain.services import IdentityService
 from bioetl.domain.validation import validate_year_range
 
 if TYPE_CHECKING:
@@ -50,6 +50,7 @@ class CrossRefTransformer(BaseTransformer):
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
     ) -> None:
         """Initialize CrossRef transformer.
 
@@ -58,6 +59,7 @@ class CrossRefTransformer(BaseTransformer):
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
             gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
 
         """
         super().__init__(
@@ -66,6 +68,7 @@ class CrossRefTransformer(BaseTransformer):
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
+            identity_service=identity_service,
         )
 
     # ========================================================================
@@ -225,11 +228,10 @@ class CrossRefTransformer(BaseTransformer):
         # 2. Extract business data
         business_data = self._extract_business_data(record)
 
-        # 3. Generate entity ID (normalized DOI)
-        entity_id = generate_entity_id(
+        # 3. Generate entity ID using IdentityService (normalized DOI)
+        entity_id = self.compute_entity_id(
+            source_id=business_data["doi"],
             record={"doi": business_data["doi"]},
-            provider=self.provider,
-            id_field="doi",
         )
 
         # 4. Compute content hash
