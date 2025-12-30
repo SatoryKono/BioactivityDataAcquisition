@@ -1,7 +1,10 @@
 """Pandera schema for CrossRef Reference entity.
 
 Aligned with RULES.md v5.0 and CrossRef REST API.
-Represents bibliographic references from the "reference" field in Works API response.
+Represents bibliographic references from the "reference" field in Publications API response.
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
 """
 
 from __future__ import annotations
@@ -15,7 +18,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 class ReferenceSchema(ETLRecordSchema):
     """CrossRef Reference validation schema for Silver layer.
 
-    Represents a bibliographic reference in a CrossRef Work (1:N relationship).
+    Represents a bibliographic reference in a CrossRef Publication (1:N relationship).
     Composite PK: (source_doi, reference_key)
     """
 
@@ -23,21 +26,21 @@ class ReferenceSchema(ETLRecordSchema):
     source_doi: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^10\.\d{4,}/.*$",
-        description="DOI of citing work (FK to Work.doi)",
+        description="DOI of citing publication (FK to Publication.doi)",
     )
 
     # === Composite Primary Key Component ===
     reference_key: Series[str] = pa.Field(
         nullable=False,
         str_length={"min_value": 1},
-        description="Unique reference key within source work",
+        description="Unique reference key within source publication",
     )
 
     # === Target Reference ===
     target_doi: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^10\.\d{4,}/.*$",
-        description="DOI of cited work (if resolved)",
+        description="DOI of cited publication (if resolved)",
     )
     unstructured: Series[str] | None = pa.Field(
         nullable=True, description="Unstructured citation string"

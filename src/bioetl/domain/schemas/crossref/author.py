@@ -1,7 +1,10 @@
 """Pandera schema for CrossRef Author entity.
 
 Aligned with RULES.md v5.0 and CrossRef REST API.
-Represents authors from the "author" field in Works API response.
+Represents authors from the "author" field in Publications API response.
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
 """
 
 from __future__ import annotations
@@ -18,7 +21,7 @@ AUTHOR_SEQUENCES = ["first", "additional"]
 class AuthorSchema(ETLRecordSchema):
     """CrossRef Author validation schema for Silver layer.
 
-    Represents an author of a CrossRef Work (1:N relationship).
+    Represents an author of a CrossRef Publication (1:N relationship).
     Composite PK: (doi, author_sequence)
     """
 
@@ -26,7 +29,7 @@ class AuthorSchema(ETLRecordSchema):
     doi: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^10\.\d{4,}/.*$",
-        description="FK to Work.doi",
+        description="FK to Publication.doi",
     )
 
     # === Composite Primary Key Component ===
