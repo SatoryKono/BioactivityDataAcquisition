@@ -2,12 +2,17 @@
 
 Contains:
 - PublicationRecord: DTO (Pydantic) for type-safe data transfer at boundaries
-- Work: Domain entity (dataclass) with lineage fields - deprecated, use PublicationRecord
+- PublicationEntity: Domain entity (dataclass) with lineage fields
+- Work: Deprecated alias for PublicationEntity (backward compatibility)
 
 DTO Design:
 - Uses extra='forbid' to detect API changes early
 - frozen=True ensures immutability
 - Adapters return DTOs, transformers convert to Domain Entities
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
+- All layers use "publication" to refer to scholarly works (articles, preprints, etc.)
 
 Used for enriching publication records with DOI resolution and citation metadata.
 """
@@ -117,18 +122,42 @@ class PublicationRecord(BaseModel):
     source: str = PydanticField(default="crossref", description="Data source")
 
 
-# === Dataclass Domain Entity (backward compatibility) ===
+# === Dataclass Domain Entity ===
 
 
 @dataclass(frozen=True, kw_only=True)
-class Work(BaseEntity):
-    """Represents a scholarly work from CrossRef.
+class PublicationEntity(BaseEntity):
+    """Represents a scholarly publication from CrossRef or other bibliographic sources.
 
     Domain entity with lineage fields (run_id, content_hash, etc.).
     For DTO without lineage, use PublicationRecord.
 
-    Note: This class is kept for backward compatibility.
-    New code should use PublicationRecord DTO.
+    Terminology:
+    - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
+    - Business analysts can understand the model without knowing CrossRef API specifics
+
+    Attributes:
+        doi: Digital Object Identifier (normalized: lowercase, stripped).
+        title: Publication title.
+        abstract: Publication abstract (HTML tags stripped).
+        authors: List of author names in "given family" format.
+        journal: Journal name (container-title from CrossRef).
+        issn: List of ISSNs.
+        publisher: Publisher name.
+        volume: Volume number.
+        issue: Issue number.
+        first_page: First page number.
+        last_page: Last page number.
+        year: Publication year.
+        published_print: Print publication date (ISO format).
+        published_online: Online publication date (ISO format).
+        doc_type: Document type (PUBLICATION or PREPRINT).
+        citation_count: Number of citations (is-referenced-by-count from CrossRef).
+        reference_count: Number of references in the publication.
+        language: Publication language code.
+        license_url: License URL.
+        subjects: Subject areas.
+        source: Data source identifier (default: "crossref").
 
     See: https://api.crossref.org/swagger-ui/index.html
     """
@@ -178,7 +207,12 @@ class Work(BaseEntity):
         """Post-initialization validation."""
         super().__post_init__()
         if not self.doi:
-            raise ValueError("CrossRef Work DOI is required")
+            raise ValueError("Publication DOI is required")
 
 
-__all__ = ["CROSSREF_TYPE_MAP", "PublicationRecord", "Work"]
+# Deprecated alias for backward compatibility
+Work = PublicationEntity
+"""Deprecated: Use PublicationEntity instead. Kept for backward compatibility."""
+
+
+__all__ = ["CROSSREF_TYPE_MAP", "PublicationEntity", "PublicationRecord", "Work"]

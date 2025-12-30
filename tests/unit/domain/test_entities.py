@@ -12,7 +12,7 @@ from bioetl.domain.entities import (
     BioactivityState,
     Compound,
     Protein,
-    Work,
+    PublicationEntity,
 )
 from bioetl.domain.types import ContentHash, EntityID, RunType
 
@@ -460,22 +460,26 @@ class TestProtein:
 
 
 @pytest.mark.unit
-class TestWork:
-    """Tests for CrossRef Work entity."""
+class TestPublicationEntity:
+    """Tests for CrossRef PublicationEntity (formerly Work).
 
-    def test_work_creation_success(self, base_entity_kwargs):
-        """Test successful Work creation."""
-        work = Work(
+    Tests the PublicationEntity domain entity which represents scholarly
+    publications from CrossRef or other bibliographic sources.
+    """
+
+    def test_publication_creation_success(self, base_entity_kwargs):
+        """Test successful PublicationEntity creation."""
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test.article",
         )
-        assert work.doi == "10.1234/test.article"
-        assert work.source == "crossref"
-        assert work.doc_type == "PUBLICATION"
+        assert publication.doi == "10.1234/test.article"
+        assert publication.source == "crossref"
+        assert publication.doc_type == "PUBLICATION"
 
-    def test_work_with_all_optional_fields(self, base_entity_kwargs):
-        """Test Work with all optional fields."""
-        work = Work(
+    def test_publication_with_all_optional_fields(self, base_entity_kwargs):
+        """Test PublicationEntity with all optional fields."""
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1038/nature12373",
             title="The complete genome sequence",
@@ -498,59 +502,59 @@ class TestWork:
             license_url="https://creativecommons.org/licenses/by/4.0/",
             subjects=["Genetics", "Genomics"],
         )
-        assert work.title == "The complete genome sequence"
-        assert work.journal == "Nature"
-        assert work.year == 2023
-        assert work.citation_count == 2847
-        assert len(work.authors) == 2
-        assert len(work.issn) == 2
+        assert publication.title == "The complete genome sequence"
+        assert publication.journal == "Nature"
+        assert publication.year == 2023
+        assert publication.citation_count == 2847
+        assert len(publication.authors) == 2
+        assert len(publication.issn) == 2
 
-    def test_work_requires_doi(self, base_entity_kwargs):
+    def test_publication_requires_doi(self, base_entity_kwargs):
         """Test that empty doi raises ValueError."""
-        with pytest.raises(ValueError, match="CrossRef Work DOI is required"):
-            Work(
+        with pytest.raises(ValueError, match="Publication DOI is required"):
+            PublicationEntity(
                 **base_entity_kwargs,
                 doi="",
             )
 
-    def test_work_preprint_doc_type(self, base_entity_kwargs):
-        """Test Work with PREPRINT doc_type."""
-        work = Work(
+    def test_publication_preprint_doc_type(self, base_entity_kwargs):
+        """Test PublicationEntity with PREPRINT doc_type."""
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1101/2023.01.01.123456",
             doc_type="PREPRINT",
         )
-        assert work.doc_type == "PREPRINT"
+        assert publication.doc_type == "PREPRINT"
 
-    def test_work_default_authors_empty_list(self, base_entity_kwargs):
+    def test_publication_default_authors_empty_list(self, base_entity_kwargs):
         """Test that authors defaults to empty list."""
-        work = Work(
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
-        assert work.authors == []
+        assert publication.authors == []
 
-    def test_work_default_issn_empty_list(self, base_entity_kwargs):
+    def test_publication_default_issn_empty_list(self, base_entity_kwargs):
         """Test that issn defaults to empty list."""
-        work = Work(
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
-        assert work.issn == []
+        assert publication.issn == []
 
-    def test_work_default_subjects_empty_list(self, base_entity_kwargs):
+    def test_publication_default_subjects_empty_list(self, base_entity_kwargs):
         """Test that subjects defaults to empty list."""
-        work = Work(
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
-        assert work.subjects == []
+        assert publication.subjects == []
 
-    def test_work_is_frozen(self, base_entity_kwargs):
-        """Test that Work is immutable."""
-        work = Work(
+    def test_publication_is_frozen(self, base_entity_kwargs):
+        """Test that PublicationEntity is immutable."""
+        publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
         with pytest.raises(AttributeError):
-            work.doi = "10.9999/changed"
+            publication.doi = "10.9999/changed"

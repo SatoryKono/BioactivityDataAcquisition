@@ -1,10 +1,14 @@
 """CrossRef Transformer.
 
-Transforms Bronze records to Silver format (Work entity inflation).
+Transforms Bronze records to Silver format (Publication entity inflation).
 Contains orchestration logic for CrossRef data transformation per Hexagonal Architecture.
 
 This module was refactored from infrastructure/adapters/crossref/mappers.py
 to properly separate business logic from infrastructure concerns.
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
+- All layers use "publication" to refer to scholarly works (articles, preprints, etc.)
 
 Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 """
@@ -14,7 +18,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, Work
+from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, PublicationEntity
 from bioetl.domain.normalization import (
     extract_first_string,
     format_date_parts,
@@ -36,7 +40,7 @@ class CrossRefTransformer(BaseTransformer):
     """Transforms CrossRef bronze records to silver.
 
     Implements field extraction, normalization, and type coercion
-    according to the CrossRef → Work entity mapping specification.
+    according to the CrossRef → Publication entity mapping specification.
 
     Subclasses BaseTransformer to provide:
     - Unified error handling via Template Method
@@ -64,7 +68,7 @@ class CrossRefTransformer(BaseTransformer):
         """
         super().__init__(
             provider,
-            entity_type="work",
+            entity_type="publication",
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
@@ -76,20 +80,20 @@ class CrossRefTransformer(BaseTransformer):
     # ========================================================================
 
     @staticmethod
-    def _extract_authors(work: dict[str, Any]) -> list[str]:
+    def _extract_authors(publication: dict[str, Any]) -> list[str]:
         """Extract author names in 'given family' format.
 
         This is CrossRef-specific extraction logic (not generic normalization).
 
         Args:
-            work: CrossRef work record.
+            publication: CrossRef publication record.
 
         Returns:
             List of author names.
 
         """
         authors = []
-        for author in work.get("author", []):
+        for author in publication.get("author", []):
             given = author.get("given", "").strip()
             family = author.get("family", "").strip()
             if given and family:
@@ -101,21 +105,21 @@ class CrossRefTransformer(BaseTransformer):
         return authors
 
     @staticmethod
-    def _extract_year(work: dict[str, Any]) -> int | None:
+    def _extract_year(publication: dict[str, Any]) -> int | None:
         """Extract publication year from date-parts.
 
         Tries published-print, then published-online, then issued.
         Delegates validation to domain.validation.validate_year_range.
 
         Args:
-            work: CrossRef work record.
+            publication: CrossRef publication record.
 
         Returns:
             Publication year or None.
 
         """
         for date_field in ["published-print", "published-online", "issued"]:
-            date_info = work.get(date_field, {})
+            date_info = publication.get(date_field, {})
             date_parts = date_info.get("date-parts", [[]])
             if date_parts and date_parts[0] and len(date_parts[0]) > 0:
                 year = date_parts[0][0]
@@ -124,17 +128,17 @@ class CrossRefTransformer(BaseTransformer):
         return None
 
     @staticmethod
-    def _extract_license_url(work: dict[str, Any]) -> str | None:
-        """Extract license URL from work.
+    def _extract_license_url(publication: dict[str, Any]) -> str | None:
+        """Extract license URL from publication.
 
         Args:
-            work: CrossRef work record.
+            publication: CrossRef publication record.
 
         Returns:
             First license URL or None.
 
         """
-        licenses = work.get("license", [])
+        licenses = publication.get("license", [])
         if licenses and len(licenses) > 0:
             url: str | None = licenses[0].get("URL")
             return url
@@ -145,7 +149,7 @@ class CrossRefTransformer(BaseTransformer):
     # ========================================================================
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
-        """Extract Work business data from bronze record.
+        """Extract Publication business data from bronze record.
 
         Delegates normalization to domain layer per REFACTOR-004.
 
@@ -153,7 +157,7 @@ class CrossRefTransformer(BaseTransformer):
             record: Raw Bronze record from CrossRef API.
 
         Returns:
-            Dictionary of Work business fields.
+            Dictionary of Publication business fields.
 
         """
         # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
@@ -223,7 +227,7 @@ class CrossRefTransformer(BaseTransformer):
         # 1. Validate required field
         doi = record.get("DOI")
         if not doi:
-            raise ValueError("DOI is required for CrossRef Work")
+            raise ValueError("DOI is required for CrossRef Publication")
 
         # 2. Extract business data
         business_data = self._extract_business_data(record)
@@ -239,7 +243,7 @@ class CrossRefTransformer(BaseTransformer):
 
         # 5. Create domain entity
         entity = self._create_entity(
-            Work,
+            PublicationEntity,
             context,
             entity_id=entity_id,
             content_hash=content_hash,
