@@ -8,6 +8,7 @@ Administrative services for CLI operations:
 - QuarantineService: Quarantine inspection, replay, purge
 - LockService: Lock management
 - BronzeCleanupService: Bronze retention cleanup
+- PipelineRunnerService: Universal pipeline execution
 """
 
 from __future__ import annotations
@@ -39,6 +40,13 @@ from bioetl.application.services.shutdown_service import (
     ShutdownReason,
     ShutdownService,
 )
+from bioetl.application.services.pipeline_runner_service import (
+    PipelineNotFoundError,
+    PipelineRunnerService,
+    RunOptions,
+    RunResult,
+    RunStatus,
+)
 from bioetl.application.services.vacuum_service import (
     TableCollectorPort,
     TableVacuumResult,
@@ -55,11 +63,16 @@ __all__ = [
     "LockInfo",
     "LockService",
     "MedallionLifecycleService",
+    "PipelineNotFoundError",
+    "PipelineRunnerService",
     "PipelineShutdownError",
     "PurgeResult",
     "QuarantineRecord",
     "QuarantineService",
     "ReplayResult",
+    "RunOptions",
+    "RunResult",
+    "RunStatus",
     "ShutdownReason",
     "ShutdownService",
     "TableCollectorPort",
