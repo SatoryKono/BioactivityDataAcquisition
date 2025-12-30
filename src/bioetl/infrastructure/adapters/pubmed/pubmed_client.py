@@ -1,10 +1,21 @@
 # src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
+"""PubMed adapter for Entrez E-utilities API.
+
+Implements DataSourcePort for PubMed article metadata extraction.
+
+DTO Support:
+- fetch_as_models(): Returns typed DTO models (ArticleRecord)
+- fetch(): Returns raw dicts (backward compatible)
+"""
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from pydantic import BaseModel
+
+from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -20,6 +31,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+
+# Mapping from entity_type to DTO model class
+PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
+    "publication": ArticleRecord,
+}
 
 
 @dataclass
@@ -219,6 +235,67 @@ class PubMedAdapter(BaseHttpAdapter):
 
         async for record in self._yield_articles_from_pmids(pmids, limit):
             yield record
+
+    async def fetch_as_models(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+        *,
+        validate: bool = True,
+    ) -> AsyncIterator[BaseModel]:
+        """Fetch PubMed records as typed DTO models.
+
+        Returns Pydantic DTO models instead of raw dicts for type safety.
+        Uses domain DTOs with extra='forbid' to detect API changes.
+
+        Args:
+            entity_type: Type of entity (publication)
+            limit: Maximum number of records to fetch
+            query: Search query string
+            filter_ids: List of PMIDs to filter by
+            filter_field: Field name to filter on
+            validate: If True, validate with model_validate (strict).
+                     If False, use model_construct (skip validation, faster).
+
+        Yields:
+            Typed DTO models (ArticleRecord for publication)
+
+        Raises:
+            ValueError: If entity_type is not supported for DTO conversion
+
+        Example:
+            >>> async for article in adapter.fetch_as_models("publication", limit=10):
+            ...     print(article.pmid, article.title)
+
+        """
+        model_class = PUBMED_DTO_MODELS.get(entity_type)
+        if model_class is None:
+            raise ValueError(
+                f"No DTO model for entity_type '{entity_type}'. "
+                f"Supported: {', '.join(PUBMED_DTO_MODELS.keys())}"
+            )
+
+        async for record in self.fetch(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        ):
+            # Map field names from XML processor output to ArticleRecord DTO
+            dto_data = {
+                "pmid": record.get("pmid"),
+                "title": record.get("article_title"),
+                "raw_xml": record.get("_raw_xml"),
+            }
+
+            if validate:
+                yield model_class.model_validate(dto_data)
+            else:
+                yield model_class.model_construct(**dto_data)
 
     async def _probe_health(self) -> HealthStatus:
         """Perform PubMed-specific health probe.
