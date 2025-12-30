@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 from .storage_adapter import StorageAdapter
 
@@ -107,7 +107,7 @@ class StorageFactory:
                 save_json=save_json,
                 json_path=json_path,
             ),
-            silver_writer=DeltaWriter(
+            silver_writer=SilverWriter(
                 base_path=silver_path,
                 logger=logger,
                 tracing=effective_tracing,
