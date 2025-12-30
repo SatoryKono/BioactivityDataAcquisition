@@ -936,3 +936,87 @@ class TestJsonEncoderImplementationContract:
             "OrjsonEncoder MUST implement JsonEncoderPort protocol. "
             "Check that all required methods are present."
         )
+
+
+# ============================================================================
+# Memory Monitor Port Contract Tests
+# ============================================================================
+
+
+class TestMemoryMonitorPortContract:
+    """Tests for MemoryMonitorPort specific contracts.
+
+    MemoryMonitorPort defines the contract for memory monitoring and
+    adaptive batch sizing. Implements RULES.md memory management requirements.
+    """
+
+    REQUIRED_METHODS = [
+        "get_memory_stats",
+        "is_under_pressure",
+        "get_recommended_batch_size",
+        "estimate_batch_memory_mb",
+        "calculate_max_batch_size",
+    ]
+
+    @pytest.mark.parametrize("method_name", REQUIRED_METHODS)
+    def test_memory_monitor_port_has_required_methods(self, method_name: str) -> None:
+        """MemoryMonitorPort MUST have all required memory monitoring methods."""
+        assert hasattr(
+            ports.MemoryMonitorPort, method_name
+        ), f"MemoryMonitorPort MUST define {method_name}() for memory management"
+
+    def test_memory_monitor_port_is_runtime_checkable(self) -> None:
+        """MemoryMonitorPort MUST be @runtime_checkable for isinstance() checks."""
+
+        class DummyMonitor:
+            """Dummy class for testing isinstance()."""
+
+            pass
+
+        try:
+            isinstance(DummyMonitor(), ports.MemoryMonitorPort)
+            is_runtime_checkable = True
+        except TypeError:
+            is_runtime_checkable = False
+
+        assert (
+            is_runtime_checkable
+        ), "MemoryMonitorPort MUST be decorated with @runtime_checkable"
+
+    def test_memory_monitor_port_get_recommended_batch_size_signature(self) -> None:
+        """MemoryMonitorPort.get_recommended_batch_size() MUST have current_batch_size param."""
+        import inspect
+
+        sig = inspect.signature(ports.MemoryMonitorPort.get_recommended_batch_size)
+        params = sig.parameters
+
+        assert "current_batch_size" in params, (
+            "MemoryMonitorPort.get_recommended_batch_size() MUST have "
+            "current_batch_size parameter for adaptive batch sizing"
+        )
+
+
+class TestMemoryMonitorImplementationContract:
+    """Tests that memory monitor implementations satisfy port contracts."""
+
+    def test_memory_monitor_implements_memory_monitor_port(self) -> None:
+        """MemoryMonitor MUST satisfy MemoryMonitorPort contract."""
+        from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+
+        monitor = MemoryMonitor(config=MemoryConfig())
+
+        assert isinstance(monitor, ports.MemoryMonitorPort), (
+            "MemoryMonitor MUST implement MemoryMonitorPort protocol. "
+            "Check that all required methods are present."
+        )
+
+    def test_noop_memory_monitor_implements_memory_monitor_port(self) -> None:
+        """NoOpMemoryMonitor MUST satisfy MemoryMonitorPort contract."""
+        from bioetl.domain.ports.noop import NoOpMemoryMonitor
+
+        monitor = NoOpMemoryMonitor()
+
+        assert isinstance(monitor, ports.MemoryMonitorPort), (
+            "NoOpMemoryMonitor MUST implement MemoryMonitorPort protocol. "
+            "Check that all required methods are present."
+        )
