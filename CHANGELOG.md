@@ -30,6 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improves test reliability by testing real integration
 ## [Unreleased]
 
+### Removed
+
+- **Deprecated Domain Classes Cleanup**: Removed 3 deprecated classes from domain layer:
+  - `Activity` class (deprecated alias for `Bioactivity`) - use `Bioactivity` instead
+  - `ChemblApiError` in `domain.exceptions` - use `infrastructure.adapters.chembl.exceptions.ChemblApiError` instead
+  - `CrossRefApiError` in `domain.exceptions` - use `infrastructure.adapters.crossref.exceptions.CrossRefApiError` instead
+  - Updated tools (`verify_schema_parity.py`, `naming_audit.py`) to use `Bioactivity`
+  - Removed corresponding test classes (`TestActivityDeprecatedAlias`, deprecated exception tests)
+  - Net reduction: 3 classes removed from domain layer
+
 ### Verified (No Action Required)
 
 - **ThinPipeline Classes**: Verified absence of `ThinPipeline`, `ChemblPipelineProtocol`, and `bioetl.pipelines.chembl.base` module:

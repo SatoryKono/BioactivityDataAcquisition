@@ -37,7 +37,6 @@ from bioetl.domain.context import (
 
 # Entities (Domain objects)
 from bioetl.domain.entities import (
-    Activity,
     Assay,
     BaseEntity,
     Bioactivity,
@@ -68,10 +67,8 @@ from bioetl.domain.exceptions import (
     BronzeValidationError,
     BucketNotFoundError,
     CheckpointConflictError,
-    ChemblApiError,
     CircuitBreakerOpenError,
     CriticalError,
-    CrossRefApiError,
     DataQualityError,
     DataQualityThresholdError,
     DataValidationError,
@@ -243,7 +240,6 @@ __all__ = [
     "PipelineContext",
     "PipelineRunContext",
     # Entities
-    "Activity",
     "Assay",
     "BaseEntity",
     "Bioactivity",
@@ -295,9 +291,6 @@ __all__ = [
     "TableNotFoundError",
     "TimeoutError",
     "UploadError",
-    # Exceptions - Deprecated provider-specific (backward compatibility)
-    "ChemblApiError",
-    "CrossRefApiError",
     # Exceptions - Data Quality
     "DataQualityThresholdError",
     "InvalidDataFormatError",
