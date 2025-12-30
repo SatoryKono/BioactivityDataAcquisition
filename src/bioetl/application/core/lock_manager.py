@@ -66,7 +66,9 @@ class LockManager:
         self._config = config
         self._logger = logger
         self._shutdown_signal = shutdown_signal
-        self._checkpoint_manager = checkpoint_manager  # Kept for interface compatibility
+        self._checkpoint_manager = (
+            checkpoint_manager  # Kept for interface compatibility
+        )
         self._context_holder = context_holder
         self._heartbeat: HeartbeatTask | None = None
         self._acquired_at: float | None = None  # monotonic timestamp when lock acquired

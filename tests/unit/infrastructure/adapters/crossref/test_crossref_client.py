@@ -265,9 +265,7 @@ async def test_fetch_filtered_valid_entity_types(adapter, mock_http_client):
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
     results = []
-    async for work in adapter.fetch_filtered(
-        "work", ["10.1234/test"], "doi", limit=10
-    ):
+    async for work in adapter.fetch_filtered("work", ["10.1234/test"], "doi", limit=10):
         results.append(work)
 
     assert results == []
@@ -277,9 +275,7 @@ async def test_fetch_filtered_valid_entity_types(adapter, mock_http_client):
 async def test_fetch_filtered_invalid_entity_type(adapter):
     """Test fetch_filtered raises ValueError for invalid entity type."""
     with pytest.raises(ValueError, match="supports 'work' or 'publication'"):
-        async for _ in adapter.fetch_filtered(
-            "invalid", ["10.1234/test"], "doi"
-        ):
+        async for _ in adapter.fetch_filtered("invalid", ["10.1234/test"], "doi"):
             pass
 
 

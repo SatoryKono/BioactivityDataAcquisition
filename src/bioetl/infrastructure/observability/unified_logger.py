@@ -41,11 +41,34 @@ StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup
 
 # Patterns for secret detection in log values
 _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"(?i)(api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE), "[REDACTED_API_KEY]"),
-    (re.compile(r"(?i)(auth|authorization)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE), "[REDACTED_AUTH]"),
-    (re.compile(r"(?i)(token|bearer)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE), "[REDACTED_TOKEN]"),
-    (re.compile(r"(?i)(password|passwd|pwd)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE), "[REDACTED_PASSWORD]"),
-    (re.compile(r"(?i)(secret|private[_-]?key)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE), "[REDACTED_SECRET]"),
+    (
+        re.compile(
+            r"(?i)(api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
+        ),
+        "[REDACTED_API_KEY]",
+    ),
+    (
+        re.compile(
+            r"(?i)(auth|authorization)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
+        ),
+        "[REDACTED_AUTH]",
+    ),
+    (
+        re.compile(r"(?i)(token|bearer)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE),
+        "[REDACTED_TOKEN]",
+    ),
+    (
+        re.compile(
+            r"(?i)(password|passwd|pwd)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
+        ),
+        "[REDACTED_PASSWORD]",
+    ),
+    (
+        re.compile(
+            r"(?i)(secret|private[_-]?key)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
+        ),
+        "[REDACTED_SECRET]",
+    ),
     # Bearer tokens in headers
     (re.compile(r"Bearer\s+[\w.-]+", re.IGNORECASE), "Bearer [REDACTED]"),
     # AWS-style keys

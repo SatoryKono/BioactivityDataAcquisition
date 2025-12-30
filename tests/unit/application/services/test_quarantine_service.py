@@ -125,9 +125,7 @@ class TestQuarantineServiceInspect:
         )
 
     @pytest.mark.asyncio
-    async def test_inspect_with_records(
-        self, quarantine_service, mock_quarantine_port
-    ):
+    async def test_inspect_with_records(self, quarantine_service, mock_quarantine_port):
         """Test inspecting quarantine with records."""
         now = datetime.now(UTC)
         mock_quarantine_port.inspect.return_value = [
@@ -199,9 +197,7 @@ class TestQuarantineServiceReplay:
     """Test QuarantineService.replay method."""
 
     @pytest.mark.asyncio
-    async def test_replay_returns_stats(
-        self, quarantine_service, mock_quarantine_port
-    ):
+    async def test_replay_returns_stats(self, quarantine_service, mock_quarantine_port):
         """Test replay returns statistics (not yet implemented)."""
         batch_id = uuid4()
         mock_quarantine_port.inspect.return_value = [
@@ -223,9 +219,7 @@ class TestQuarantineServicePurge:
     """Test QuarantineService.purge method."""
 
     @pytest.mark.asyncio
-    async def test_purge_returns_stats(
-        self, quarantine_service, mock_quarantine_port
-    ):
+    async def test_purge_returns_stats(self, quarantine_service, mock_quarantine_port):
         """Test purge returns statistics (not yet implemented)."""
         mock_quarantine_port.inspect.return_value = []
 

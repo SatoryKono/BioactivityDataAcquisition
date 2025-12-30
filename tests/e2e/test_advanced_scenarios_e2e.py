@@ -12,6 +12,7 @@ Part of architecture review refactoring plan (R2).
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC
 from pathlib import Path
 from uuid import uuid4
 
@@ -26,8 +27,6 @@ from .conftest import (
     create_test_context,
     get_silver_records,
 )
-from datetime import UTC
-
 
 # ============================================================================
 # VACUUM After Run Tests
@@ -90,7 +89,9 @@ async def test_vacuum_respects_retention_days(e2e_data_dir: Path):
         await asyncio.sleep(0.1)  # Small delay between runs
 
     # Verify table has records
-    count = assert_silver_table_has_records(e2e_data_dir, "chembl_activity", expected_min=1)
+    count = assert_silver_table_has_records(
+        e2e_data_dir, "chembl_activity", expected_min=1
+    )
     assert count >= 1
 
     # VACUUM with 7 day retention shouldn't delete anything recent
@@ -118,10 +119,11 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     - Data quality errors should quarantine records
     - Quarantine location: data_dir/quarantine/{pipeline}/
     """
-    from bioetl.application.core.quarantine_manager import QuarantineManager
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-    from bioetl.domain.types import ErrorType
     from datetime import datetime
+
+    from bioetl.application.core.quarantine_manager import QuarantineManager
+    from bioetl.domain.types import ErrorType
+    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
@@ -131,7 +133,9 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         base_path=str(quarantine_path),
     )
 
-    manager = QuarantineManager(quarantine_port=quarantine, pipeline_name="test_pipeline")
+    manager = QuarantineManager(
+        quarantine_port=quarantine, pipeline_name="test_pipeline"
+    )
 
     # Write a quarantine record
     test_record = {
@@ -150,7 +154,9 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     # Verify quarantine Delta table exists (base_path IS the table path)
     # Delta Lake creates _delta_log directory in the table path
     delta_log = quarantine_path / "_delta_log"
-    assert delta_log.exists(), f"Quarantine Delta table should exist at {quarantine_path}"
+    assert (
+        delta_log.exists()
+    ), f"Quarantine Delta table should exist at {quarantine_path}"
 
 
 @pytest.mark.e2e
@@ -342,17 +348,11 @@ async def test_rebuild_clears_existing_data(e2e_data_dir: Path):
     - Bronze is append-only (never cleared)
     """
     # First run - create initial data
-    ctx1 = create_test_context(
-        "chembl_activity",
-        limit=3,
-        run_type=RunType.INCREMENTAL
-    )
+    ctx1 = create_test_context("chembl_activity", limit=3, run_type=RunType.INCREMENTAL)
     runner1 = bootstrap_pipeline(ctx1)
     await runner1.run()
 
-    assert_silver_table_has_records(
-        e2e_data_dir, "chembl_activity", expected_min=1
-    )
+    assert_silver_table_has_records(e2e_data_dir, "chembl_activity", expected_min=1)
 
     # Rebuild run - should clear and recreate
     ctx2 = create_test_context(

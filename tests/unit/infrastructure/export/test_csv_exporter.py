@@ -258,9 +258,7 @@ class TestCsvExporterExport:
 class TestCsvExporterClear:
     """Tests for CsvExporter.clear() method."""
 
-    def test_clear_specific_table(
-        self, tmp_path: Path, mock_logger: MagicMock
-    ) -> None:
+    def test_clear_specific_table(self, tmp_path: Path, mock_logger: MagicMock) -> None:
         """Test clearing a specific table's CSV file."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
@@ -274,9 +272,7 @@ class TestCsvExporterClear:
         assert not (tmp_path / "table1.csv").exists()
         assert (tmp_path / "table2.csv").exists()
 
-    def test_clear_all_csv_files(
-        self, tmp_path: Path, mock_logger: MagicMock
-    ) -> None:
+    def test_clear_all_csv_files(self, tmp_path: Path, mock_logger: MagicMock) -> None:
         """Test clearing all CSV files."""
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
 
