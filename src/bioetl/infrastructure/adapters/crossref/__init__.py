@@ -7,7 +7,6 @@ from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefAdapter,
     _create_crossref_adapter,
 )
-from bioetl.infrastructure.adapters.crossref.mappers import WorkToPublicationMapper
 from bioetl.infrastructure.adapters.crossref.models import (
     CROSSREF_RECORD_MODELS,
     CrossRefWorkRecord,
@@ -25,6 +24,5 @@ __all__ = [
     # Response Models
     "CrossRefWorkResponse",
     "CrossRefWorksResponse",
-    "WorkToPublicationMapper",
     "_create_crossref_adapter",
 ]

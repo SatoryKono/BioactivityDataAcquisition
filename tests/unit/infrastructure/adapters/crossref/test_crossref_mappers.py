@@ -8,10 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.infrastructure.adapters.crossref.mappers import (
-    CrossRefFieldExtractor,
-    WorkToPublicationMapper,  # Backward compat alias
-)
+from bioetl.infrastructure.adapters.crossref.mappers import CrossRefFieldExtractor
 
 
 @pytest.fixture
@@ -323,16 +320,6 @@ def test_extract_subjects(mapper, sample_work):
 def test_extract_subjects_empty(mapper):
     """Test subjects extraction with no subjects."""
     assert mapper.extract_subjects({}) == []
-
-
-# =============================================================================
-# Backward compatibility alias test
-# =============================================================================
-
-
-def test_backward_compat_alias():
-    """Test WorkToPublicationMapper is alias for CrossRefFieldExtractor."""
-    assert WorkToPublicationMapper is CrossRefFieldExtractor
 
 
 # =============================================================================
