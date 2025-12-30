@@ -108,30 +108,14 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that normal completion returns exit code 0."""
-        import asyncio
+        from bioetl.application.services import RunStatus
 
-        from bioetl.application.services import RunResult, RunStatus
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run"
+        ) as mock_asyncio_run:
+            # _run_pipeline_async returns (status, error_message, error_type) tuple
+            mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-        )
-
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
-                return_value=mock_service,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
-            ),
-        ):
             result = cli_runner.invoke(
                 cli,
                 ["run", "--pipeline", "chembl_activity"],
