@@ -8,18 +8,31 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 
 if TYPE_CHECKING:
-    from bioetl.application.core.executor import PipelineExecutor
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import LoggerPort, TracingPort
+
+
+@runtime_checkable
+class ExecutorMetricsProtocol(Protocol):
+    """Protocol for executors providing batch metrics.
+
+    Both PipelineExecutor and BatchExecutor implement this protocol.
+    """
+
+    records_fetched: int
+    records_bronze: int
+    records_silver: int
+    records_gold: int
+    records_quarantined: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,7 +104,7 @@ class PostrunService:
         self._logger = logger
         self._lifecycle_service = lifecycle_service
 
-    async def run_dq_checks(self, executor: PipelineExecutor) -> DQResult:
+    async def run_dq_checks(self, executor: ExecutorMetricsProtocol) -> DQResult:
         """Check data quality metrics and report anomalies.
 
         Performs threshold checks before anomaly detection:
@@ -306,7 +319,7 @@ class PostrunService:
                     error=str(e),
                 )
 
-    def _collect_batch_metrics(self, executor: PipelineExecutor) -> dict[str, float]:
+    def _collect_batch_metrics(self, executor: ExecutorMetricsProtocol) -> dict[str, float]:
         """Collect batch metrics from executor.
 
         Args:

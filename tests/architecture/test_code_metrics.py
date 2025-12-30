@@ -50,6 +50,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "preflight_service.py": 580,  # 572 LOC - preflight validation
         "base_transformer.py": 565,  # 559 LOC - Template Method with helpers (tracing spans added)
+        "batch_executor.py": 650,  # 610 LOC - unified executor combining PipelineExecutor + RecordProcessor
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 700,  # 675 LOC - pipeline entrypoints (run_pipeline expanded)
@@ -58,7 +59,7 @@ class TestFileSizeLimits:
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly
-        "services_factory.py": 470,  # 460 LOC - merged base_services + services_builder + runner_services + LockContextHolder
+        "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
         "delta_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
@@ -307,7 +308,8 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
-        "PipelineExecutor": 460,  # 458 lines - executor with tracing and metrics
+        "PipelineExecutor": 460,  # 458 lines - executor with tracing and metrics (deprecated)
+        "BatchExecutor": 550,  # 547 lines - unified executor combining PipelineExecutor + RecordProcessor
         "BatchWriter": 330,  # 301 lines - batch writing with lock context provider
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods

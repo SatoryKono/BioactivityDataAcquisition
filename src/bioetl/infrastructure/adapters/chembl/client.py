@@ -80,13 +80,7 @@ class ChemblAdapter(BaseHttpAdapter):
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
 
     def __post_init__(self) -> None:
-        """Initialize adapter with config values and metrics.
-
-        Configuration priority (RULES.md §12.1.2 - YAML as single source of truth):
-        1. adapter_config (from YAML via to_adapter_config())
-        2. Explicit batch_size/filter_batch_size parameters (deprecated, for backward compat)
-        3. Default fallback values (only if nothing else provided)
-        """
+        """Initialize adapter with config values and metrics."""
         # Resolve configuration with clear priority
         if self.adapter_config is not None:
             # Primary: use AdapterConfig from YAML
@@ -109,40 +103,15 @@ class ChemblAdapter(BaseHttpAdapter):
 
     @property
     def effective_batch_size(self) -> int:
-        """Get the configured page size (batch size for API requests).
-
-        Returns the resolved page_size from configuration, which determines
-        how many records are fetched per API request.
-
-        Returns:
-            Configured page size (default 1000).
-        """
+        """Get configured page size for API requests."""
         return self._page_size
 
     def _get_health_status(self) -> HealthStatus:
-        """Get health status from circuit breaker state.
-
-        Uses circuit breaker failure count for health assessment,
-        avoiding duplicate state tracking.
-
-        Returns:
-            HealthStatus based on circuit breaker state.
-        """
+        """Get health status from circuit breaker state."""
         return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
-        """Get batch size adjusted for current health status.
-
-        Uses circuit breaker state for health-aware batching.
-
-        Returns:
-            - Normal page_size when HEALTHY
-            - Half page_size when DEGRADED (per RULES.md §3.5)
-
-        Raises:
-            CriticalError: When UNHEALTHY to prevent futile requests
-
-        """
+        """Get batch size adjusted for health: full if HEALTHY, half if DEGRADED."""
         health_status = self._get_health_status()
         failure_count = self.http_client.circuit_breaker.get_failure_count()
 

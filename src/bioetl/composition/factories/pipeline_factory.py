@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
-from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.factories.data_source_factory import (
@@ -397,7 +396,7 @@ def assemble_runner(
     """Assemble a PipelineRunner from a pipeline instance.
 
     This function handles the construction of the entire pipeline execution graph,
-    including record processor, executor, lifecycle service, and runner services.
+    using the unified BatchExecutor that combines extraction and processing.
 
     Args:
         pipeline: Configured pipeline instance
@@ -439,24 +438,16 @@ def assemble_runner(
         tracer=observability.tracer,
     )
 
-    # Create RecordProcessor with lock context holder from runner services
-    record_processor = ServicesBuilder.create_record_processor_from_pipeline(
+    # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
+    batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
         pipeline=pipeline,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
-        lock_context_holder=runner_services.context_holder,
-    )
-
-    # Create Executor
-    executor = PipelineExecutor(
-        services=pipeline.services,
-        record_processor=record_processor,
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
-        entity_type=pipeline.config.entity_type,
-        batch_size=pipeline.config.batch_size,
-        checkpoint_interval=pipeline.config.checkpoint_interval,
+        strict_gold_validation=strict_gold_validation,
+        lock_context_holder=runner_services.context_holder,
+        tracer=observability.tracer,
     )
 
     # Assemble Runner with injected RunnerServices bundle
@@ -465,7 +456,7 @@ def assemble_runner(
         runtime=pipeline.runtime,
         services=pipeline.services,
         context=pipeline.context,
-        executor=executor,
+        executor=batch_executor,
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         logger=logger_port,
