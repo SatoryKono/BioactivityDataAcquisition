@@ -1,25 +1,39 @@
 """Domain entities for BioETL.
 
-Defines rich domain objects with invariants and business logic.
-Implements part of the Domain Layer (RULES.md §1).
+Contains two categories of domain objects:
 
-These entities are distinct from:
-- DTOs/TypedDicts (used for serialization/transport)
-- Infrastructure Schemas (PyArrow/Pandera used for validation)
+1. **Domain Entities** (dataclass): Rich domain objects with lineage fields
+   - Validated on construction (__post_init__)
+   - Include run_id, content_hash for data lineage
 
-Design Principles:
-- Immutable (frozen dataclasses with slots=True for memory efficiency)
-- Validated on construction (__post_init__)
-- Pure Python (no external dependencies)
+2. **DTO Models** (Pydantic): Type-safe data transfer objects
+   - Use extra='forbid' to detect API changes early
+   - frozen=True ensures immutability
+   - Adapters return DTOs, transformers convert to Domain Entities
+
+Implements part of the Domain Layer (RULES.md §1, §8.2).
 
 Field Classification:
-- REQUIRED: Fields validated in __post_init__ (must be non-None)
+- REQUIRED: Fields validated on construction
 - API-OPTIONAL: Fields from external APIs (may be None)
 - COMPUTED: Derived fields (calculated from other fields)
 """
 
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.bioactivity import Bioactivity, BioactivityState
+
+# ChEMBL DTOs (Pydantic)
+from bioetl.domain.entities.chembl import (
+    ActivityRecord,
+    AssayRecord,
+    CellLineRecord,
+    DocumentRecord,
+    MoleculeRecord,
+    TargetComponentRecord,
+    TargetRecord,
+)
+
+# ChEMBL Domain Entities (dataclass)
 from bioetl.domain.entities.chembl_activity import Assay
 from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
@@ -29,24 +43,42 @@ from bioetl.domain.entities.chembl_structures import (
     Target,
     TargetComponent,
 )
-from bioetl.domain.entities.crossref import Work
-from bioetl.domain.entities.pubchem import Compound
-from bioetl.domain.entities.pubmed import Publication
+
+# CrossRef DTO + Entity
+from bioetl.domain.entities.crossref import PublicationRecord, Work
+
+# PubChem DTO + Entity
+from bioetl.domain.entities.pubchem import Compound, PubChemCompoundRecord
+
+# PubMed DTO + Entity
+from bioetl.domain.entities.pubmed import ArticleRecord, Publication
+
+# UniProt Entity
 from bioetl.domain.entities.uniprot import Protein
 
 __all__ = [
+    "ActivityRecord",
+    "ArticleRecord",
     "Assay",
+    "AssayRecord",
     "BaseEntity",
     "Bioactivity",
     "BioactivityState",
     "CellLine",
+    "CellLineRecord",
     "Compound",
     "CompoundRecord",
     "Document",
+    "DocumentRecord",
     "Molecule",
+    "MoleculeRecord",
     "Protein",
+    "PubChemCompoundRecord",
     "Publication",
+    "PublicationRecord",
     "Target",
     "TargetComponent",
+    "TargetComponentRecord",
+    "TargetRecord",
     "Work",
 ]
