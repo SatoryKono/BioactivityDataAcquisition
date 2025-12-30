@@ -191,6 +191,6 @@ def test_provider_is_crossref(transformer):
     assert transformer.provider == "crossref"
 
 
-def test_entity_type_is_work(transformer):
-    """Test entity type is set to work."""
-    assert transformer.entity_type == "work"
+def test_entity_type_is_publication(transformer):
+    """Test entity type is set to publication (Ubiquitous Language, not CrossRef 'work')."""
+    assert transformer.entity_type == "publication"

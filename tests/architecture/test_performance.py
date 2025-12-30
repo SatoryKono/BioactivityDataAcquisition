@@ -10,7 +10,7 @@ BATCH_WRITER = Path("src/bioetl/application/core/batch_writer.py")
 # Currently none as we want strict orjson usage in storage layer
 ALLOWED_FILES: set[str] = {
     "bronze_writer.py",  # Uses json for metadata and validation
-    "delta_writer.py",  # Uses json for Delta Lake serialization
+    "silver_writer.py",  # Uses json for Delta Lake serialization
 }
 
 

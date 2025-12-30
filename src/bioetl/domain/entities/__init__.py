@@ -45,7 +45,7 @@ from bioetl.domain.entities.chembl_structures import (
 )
 
 # CrossRef DTO + Entity
-from bioetl.domain.entities.crossref import PublicationRecord, Work
+from bioetl.domain.entities.crossref import PublicationEntity, PublicationRecord, Work
 
 # PubChem DTO + Entity
 from bioetl.domain.entities.pubchem import Compound, PubChemCompoundRecord
@@ -75,10 +75,11 @@ __all__ = [
     "Protein",
     "PubChemCompoundRecord",
     "Publication",
+    "PublicationEntity",
     "PublicationRecord",
     "Target",
     "TargetComponent",
     "TargetComponentRecord",
     "TargetRecord",
-    "Work",
+    "Work",  # Deprecated: use PublicationEntity
 ]

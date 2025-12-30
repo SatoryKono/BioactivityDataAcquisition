@@ -22,6 +22,7 @@ from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
@@ -459,12 +460,22 @@ def assemble_runner(
         metrics=pipeline.services.metrics,
     )
 
+    # Create DataQualityService for DQ evaluation
+    dq_service = DataQualityService(
+        dq_monitor=pipeline.services.dq_monitor,
+        config=pipeline.config.dq,
+        logger=logger_port,
+        metrics=pipeline.services.metrics,
+        pipeline_name=pipeline.config.pipeline_name,
+    )
+
     postrun_service = PostrunService(
         config=pipeline.config,
         runtime=pipeline.runtime,
-        services=pipeline.services,
-        logger=logger_port,
+        dq_service=dq_service,
         lifecycle_service=lifecycle_service,
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
     )
 
     observer = PipelineObserver(
