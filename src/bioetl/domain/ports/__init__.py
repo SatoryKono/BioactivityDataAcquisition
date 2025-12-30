@@ -16,6 +16,7 @@ This package contains all port definitions organized by domain:
 - audit: AuditPort for write operation traceability
 - shutdown: ShutdownPort for graceful termination coordination
 - memory: MemoryMonitorPort for adaptive batch sizing
+- normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 """
 
 from bioetl.domain.ports.audit import (
@@ -38,6 +39,13 @@ from bioetl.domain.ports.health_check import (
 )
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
+from bioetl.domain.ports.normalization import (
+    ActivityAggregatorPort,
+    NormalizationServicePort,
+    OutlierFilterPort,
+    UnitConverterPort,
+    ValueValidatorPort,
+)
 from bioetl.domain.ports.noop import (
     NoOpAudit,
     NoOpMemoryMonitor,
@@ -58,6 +66,7 @@ from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
+    "ActivityAggregatorPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",
@@ -83,10 +92,14 @@ __all__ = [
     "NoOpMemoryMonitor",
     "NoOpMetrics",
     "NoOpTracing",
+    "NormalizationServicePort",
+    "OutlierFilterPort",
     "QuarantinePort",
     "RateLimiterPort",
     "ShutdownPort",
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
+    "UnitConverterPort",
+    "ValueValidatorPort",
 ]
