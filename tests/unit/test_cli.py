@@ -234,13 +234,13 @@ class TestPipelineValidation:
 class TestRunCommandAdvanced:
     """Advanced tests for run command edge cases."""
 
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
-    def test_run_command_bootstrap_value_error(self, mock_asyncio_run, mock_get_service, runner):
-        """Test run command handles ValueError during service call."""
+    def test_run_command_bootstrap_value_error(self, mock_asyncio_run, runner):
+        """Test run command handles PipelineNotFoundError during execution."""
         from bioetl.application.services import PipelineNotFoundError
 
-        mock_get_service.side_effect = PipelineNotFoundError("chembl_activity", "Invalid config")
+        # PipelineNotFoundError is caught at the CLI level when asyncio.run raises it
+        mock_asyncio_run.side_effect = PipelineNotFoundError("chembl_activity", "Invalid config")
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
