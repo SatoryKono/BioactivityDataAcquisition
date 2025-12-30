@@ -87,11 +87,16 @@ class TestAggregateBoundaryIsolation:
         REQ-ARCH-021: Cross-aggregate references must be by ID only,
         not by full aggregate objects.
         """
+        import re
+
         if not aggregates_dir.exists():
             pytest.skip("Aggregates directory not found")
 
         # These aggregate type names should NOT appear in type hints
         forbidden_types = {"Batch", "PipelineRun", "QuarantineEntry"}
+
+        # ID types that are allowed (they reference aggregates by ID)
+        allowed_id_types = {"BatchID", "RunID", "EntityID", "ContentHash"}
 
         violations = []
 
@@ -113,6 +118,22 @@ class TestAggregateBoundaryIsolation:
             elif py_file.name == "quarantine_entry.py":
                 current_file_class = "QuarantineEntry"
 
+            def is_forbidden_type(ann_str: str, forbidden: str) -> bool:
+                """Check if annotation contains forbidden type (not ID type)."""
+                # Check for exact match or as generic type parameter
+                # Use word boundary to avoid matching substrings like "BatchID"
+                pattern = rf"\b{forbidden}\b"
+                if not re.search(pattern, ann_str):
+                    return False
+                # Skip if it's actually an ID type (e.g., BatchID, RunID)
+                for allowed in allowed_id_types:
+                    if allowed in ann_str:
+                        # Check if the forbidden word is part of an ID type
+                        id_pattern = rf"{forbidden}ID\b"
+                        if re.search(id_pattern, ann_str):
+                            return False
+                return True
+
             # Check each class in the file
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
@@ -124,7 +145,7 @@ class TestAggregateBoundaryIsolation:
                                     ann_str = ast.unparse(arg.annotation)
                                     for forbidden in forbidden_types:
                                         if (
-                                            forbidden in ann_str
+                                            is_forbidden_type(ann_str, forbidden)
                                             and forbidden != current_file_class
                                         ):
                                             violations.append(
@@ -139,7 +160,7 @@ class TestAggregateBoundaryIsolation:
                             target_name = getattr(item.target, "id", "unknown")
                             for forbidden in forbidden_types:
                                 if (
-                                    forbidden in ann_str
+                                    is_forbidden_type(ann_str, forbidden)
                                     and forbidden != current_file_class
                                 ):
                                     violations.append(
