@@ -49,7 +49,8 @@ class TestFileSizeLimits:
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
         "identifiers.py": 350,  # 332 LOC - Value objects with validation
-        "measurements.py": 450,  # 425 LOC - Measurement value objects
+        "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
+        "activity.py": 330,  # 327 LOC - Activity-related value objects
         # Domain ports NoOp implementations
         "noop.py": 350,  # 322 LOC - NoOp implementations for Null Object Pattern
         # Application layer exemptions
@@ -355,8 +356,8 @@ class TestClassSize:
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 360,  # 351 lines - HTTP adapter with Entrez API
-        # Error handling utility
-        "ErrorHandler": 370,  # 363 lines - comprehensive error classification and logging
+        # Error handling utility (ErrorService + deprecated ErrorHandler alias)
+        "ErrorService": 420,  # ~400 lines - comprehensive error classification and logging
         # Domain services
         "NormalizationService": 350,  # 338 lines - Normalization service with validation
         # Domain value objects (aggregates with rich behavior)
@@ -505,7 +506,7 @@ class TestGodObjectDetection:
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": "Cohesive validator - all methods relate to medallion validation",
         # Error handling utility (not an adapter, unified error classification)
-        "ErrorHandler": "Cohesive utility - all methods relate to error classification and logging",
+        "ErrorService": "Cohesive utility - all methods relate to error classification and logging",
         # Domain services (cohesive services with single responsibility)
         "NormalizationService": "Cohesive service - all methods relate to value normalization",
         # Lifecycle orchestration service

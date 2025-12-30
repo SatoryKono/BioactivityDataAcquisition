@@ -9,7 +9,7 @@ from bioetl.domain.services.value_validator import (
     PCHEMBL_MIN,
     ValueValidator,
 )
-from bioetl.domain.value_objects.measurements import ActivityType
+from bioetl.domain.value_objects import ActivityType
 
 
 class TestValueValidatorConcentration:

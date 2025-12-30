@@ -9,7 +9,7 @@ from bioetl.domain.services.normalization_service import (
     NormalizationResult,
     NormalizationService,
 )
-from bioetl.domain.value_objects.measurements import Concentration, ConcentrationUnit
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
 
 class TestNormalizationServiceBasic:
@@ -294,7 +294,7 @@ class TestNormalizationResult:
 
     def test_result_with_all_fields(self) -> None:
         """Test result with all fields populated."""
-        from bioetl.domain.value_objects.measurements import PChemblValue
+        from bioetl.domain.value_objects import PChemblValue
 
         result = NormalizationResult(
             value=100.0,

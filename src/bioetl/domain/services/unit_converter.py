@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.value_objects.measurements import (
+from bioetl.domain.value_objects.activity_values import (
     Concentration,
     ConcentrationUnit,
     PChemblValue,

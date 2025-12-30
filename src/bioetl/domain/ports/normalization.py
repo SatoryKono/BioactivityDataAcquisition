@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from bioetl.domain.value_objects.measurements import (
+    from bioetl.domain.value_objects.activity_values import (
         ActivityType,
         Concentration,
         ConcentrationUnit,
