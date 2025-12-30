@@ -389,7 +389,23 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
     from bioetl.infrastructure.observability.noop_logger import NoOpLogger
     from bioetl.domain.ports.noop import NoOpMetrics
+    from bioetl.infrastructure.locking.memory_lock import MemoryLock
+    from bioetl.domain.locking import LockContext
     from datetime import datetime, timezone
+
+    # Setup lock
+    lock = MemoryLock()
+    lock_key = "lock:test_entity"
+    owner_id = str(uuid4())
+    await lock.acquire(key=lock_key, owner_id=owner_id, ttl=60, wait=False)
+
+    lock_context = LockContext(
+        key=lock_key,
+        owner_id=owner_id,
+        acquired_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc), # Dummy expiry
+        lock_port=lock
+    )
 
     writer = BronzeWriter(
         base_path=e2e_data_dir / "bronze",
@@ -412,9 +428,12 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         ingestion_ts=datetime.now(timezone.utc),
+        lock_context=lock_context,
     )
 
     assert path.exists(), "Bronze file should exist"
     assert path.suffix == ".zst", "Should be zstd compressed"
 
     await writer.aclose()
+    await lock.release(key=lock_key, owner_id=owner_id)
+    await lock.aclose()
