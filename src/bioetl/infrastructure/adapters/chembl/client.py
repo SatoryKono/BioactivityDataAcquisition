@@ -141,6 +141,18 @@ class ChemblAdapter(BaseHttpAdapter):
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
+    @property
+    def effective_batch_size(self) -> int:
+        """Get the configured page size (batch size for API requests).
+
+        Returns the resolved page_size from configuration, which determines
+        how many records are fetched per API request.
+
+        Returns:
+            Configured page size (default 1000).
+        """
+        return self._page_size
+
     def _get_health_status(self) -> HealthStatus:
         """Get health status from circuit breaker state.
 
