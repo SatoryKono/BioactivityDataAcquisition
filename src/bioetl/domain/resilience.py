@@ -179,11 +179,19 @@ class AdapterConfig:
 
     def __post_init__(self) -> None:
         """Validate configuration values on creation."""
-        if self.batch_size <= 0:
-            raise ValueError(f"batch_size must be positive, got {self.batch_size}")
-        if self.page_size <= 0:
-            raise ValueError(f"page_size must be positive, got {self.page_size}")
-        if self.timeout_sec <= 0:
-            raise ValueError(f"timeout_sec must be positive, got {self.timeout_sec}")
-        if self.max_retries < 0:
-            raise ValueError(f"max_retries must be non-negative, got {self.max_retries}")
+        _validate_positive("batch_size", self.batch_size)
+        _validate_positive("page_size", self.page_size)
+        _validate_positive("timeout_sec", self.timeout_sec)
+        _validate_non_negative("max_retries", self.max_retries)
+
+
+def _validate_positive(name: str, value: int | float) -> None:
+    """Validate that value is positive (> 0)."""
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
+def _validate_non_negative(name: str, value: int) -> None:
+    """Validate that value is non-negative (>= 0)."""
+    if value < 0:
+        raise ValueError(f"{name} must be non-negative, got {value}")
