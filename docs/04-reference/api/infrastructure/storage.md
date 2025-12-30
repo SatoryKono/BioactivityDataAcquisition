@@ -12,7 +12,7 @@ flowchart LR
     end
 
     subgraph Silver["Silver Layer"]
-        DW[DeltaWriter]
+        SW[SilverWriter]
         SF["Delta Lake<br/>Merge/Upsert"]
     end
 
@@ -22,9 +22,9 @@ flowchart LR
     end
 
     BW --> BF
-    DW --> SF
+    SW --> SF
     GW --> GF
-    BF --> DW
+    BF --> SW
     SF --> GW
 ```
 
@@ -57,21 +57,22 @@ Writer for Bronze layer (raw data in JSONL + zstd compression).
 
 ## Silver Layer
 
-### DeltaWriter
+### SilverWriter
 
 Writer for Silver layer (Delta Lake with merge/upsert).
 
-::: bioetl.infrastructure.storage.delta_writer.DeltaWriter
+> **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead. The class was renamed to follow the Medallion layer naming convention (BronzeWriter, SilverWriter, GoldWriter).
+
+::: bioetl.infrastructure.storage.silver_writer.SilverWriter
     options:
         show_root_heading: true
         show_source: false
         members:
             - __init__
-            - write
-            - merge
+            - write_silver
             - vacuum
             - optimize
-            - get_table_stats
+            - get_table_info
 
 **Features**:
 - ACID transactions via Delta Lake
@@ -129,16 +130,16 @@ elif mode == WriteMode.OVERWRITE:
 
 ## Schema Evolution
 
-DeltaWriter handles schema evolution:
+SilverWriter handles schema evolution:
 
 ```python
 try:
-    await writer.write(records)
+    await writer.write_silver(records, ...)
 except SchemaEvolutionError as e:
     # New columns detected
-    logger.warning(f"Schema drift: {e.new_columns}")
+    logger.warning(f"Schema drift: {e.new_fields}")
     # Auto-evolve schema if enabled
-    await writer.write(records, schema_mode="merge")
+    await writer.write_silver(records, ..., on_schema_mismatch="evolve")
 ```
 
 ## VACUUM Operations
@@ -147,16 +148,16 @@ Periodic cleanup of old data files:
 
 ```python
 # Silver layer: 7-day retention
-await delta_writer.vacuum(retention_hours=168)
+await silver_writer.vacuum(table_name="chembl_activity", retention_hours=168)
 
 # Gold layer: 30-day retention (forensic)
-await gold_writer.vacuum(retention_hours=720)
+await gold_writer.vacuum(table_name="chembl_activity", retention_hours=720)
 ```
 
 ## Usage Example
 
 ```python
-from bioetl.infrastructure.storage import BronzeWriter, DeltaWriter, GoldWriter
+from bioetl.infrastructure.storage import BronzeWriter, SilverWriter, GoldWriter
 from bioetl.domain.medallion import SilverWriteMode
 
 # Bronze: raw data storage
@@ -165,38 +166,40 @@ bronze = BronzeWriter(
     logger=logger,
     metrics=metrics,
 )
-await bronze.write(
+await bronze.write_bronze(
     records=raw_records,
     provider="chembl",
-    entity_type="activity",
+    entity="activity",
+    date=date,
     batch_id=batch_id,
     run_id=run_id,
+    run_type=run_type,
+    ingestion_ts=ingestion_ts,
 )
 
-# Silver: normalized data
-silver = DeltaWriter(
+# Silver: normalized data (using SilverWriter, formerly DeltaWriter)
+silver = SilverWriter(
     base_path="/data/silver",
-    table_name="chembl_activity",
-    primary_keys=["activity_id"],
     logger=logger,
 )
-await silver.write(
+await silver.write_silver(
+    table_name="chembl_activity",
     records=silver_records,
-    run_id=run_id,
-    mode=SilverWriteMode.MERGE,
+    primary_keys=["activity_id"],
+    schema=arrow_schema,
+    mode=SilverWriteMode.MERGE.value,
 )
 
 # Gold: validated data
 gold = GoldWriter(
     base_path="/data/gold",
-    table_name="chembl_activity",
-    primary_keys=["activity_id"],
-    schema=activity_schema,
     logger=logger,
 )
-await gold.write(
+await gold.write_gold(
+    table_name="chembl_activity",
     records=gold_records,
-    run_id=run_id,
+    schema=pandera_schema,
+    primary_keys=["activity_id"],
 )
 ```
 

@@ -15,8 +15,8 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupService
@@ -62,7 +62,7 @@ def bootstrap_storage() -> StorageAdapter:
             save_json=False,
             json_path=None,
         ),
-        silver_writer=DeltaWriter(
+        silver_writer=SilverWriter(
             base_path=settings.silver_path,
             logger=noop_logger,
             tracing=noop_tracing,
