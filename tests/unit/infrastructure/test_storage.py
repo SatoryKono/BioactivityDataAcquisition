@@ -15,8 +15,8 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 # Default test run metadata
 TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
@@ -32,8 +32,8 @@ def noop_logger() -> NoOpLogger:
 
 
 @pytest.fixture
-def mock_delta_writer():
-    """Fixture for mocking delta_writer module."""
+def mock_silver_writer():
+    """Fixture for mocking silver_writer module."""
     with (
         patch(
             "bioetl.infrastructure.storage.delta_writer.DeltaTable"
@@ -333,24 +333,24 @@ class TestBronzeWriter:
 
 
 @pytest.mark.unit
-class TestDeltaWriter:
-    """Test DeltaWriter functionality."""
+class TestSilverWriter:
+    """Test SilverWriter functionality."""
 
-    def test_delta_writer_initialization(self, noop_logger):
-        """Test DeltaWriter can be initialized."""
-        writer = DeltaWriter(
+    def test_silver_writer_initialization(self, noop_logger):
+        """Test SilverWriter can be initialized."""
+        writer = SilverWriter(
             base_path="/tmp/delta", logger=noop_logger
         )
         assert writer.base_path == "/tmp/delta"
 
-    async def test_write_silver_creates_new_table(self, mock_delta_writer, noop_logger):
+    async def test_write_silver_creates_new_table(self, mock_silver_writer, noop_logger):
         """Test write_silver creates table if not exists."""
         from deltalake.exceptions import TableNotFoundError
 
-        mock_delta_table, mock_write_deltalake = mock_delta_writer
+        mock_delta_table, mock_write_deltalake = mock_silver_writer
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/delta", logger=noop_logger
         )
 
@@ -384,12 +384,12 @@ class TestDeltaWriter:
         mock_write_deltalake.assert_called_once()
 
     async def test_write_silver_merge_existing_table(
-        self, mock_delta_writer, noop_logger
+        self, mock_silver_writer, noop_logger
     ):
         """Test write_silver merges into existing table."""
         import pyarrow as pa
 
-        mock_delta_table, _mock_write_deltalake = mock_delta_writer
+        mock_delta_table, _mock_write_deltalake = mock_silver_writer
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
@@ -414,7 +414,7 @@ class TestDeltaWriter:
         mock_merge.when_matched_update_all.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/delta", logger=noop_logger
         )
 
@@ -439,9 +439,9 @@ class TestDeltaWriter:
 
         mock_table_instance.merge.assert_called_once()
 
-    @pytest.mark.usefixtures("mock_delta_writer")
+    @pytest.mark.usefixtures("mock_silver_writer")
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/delta", logger=noop_logger
         )
 

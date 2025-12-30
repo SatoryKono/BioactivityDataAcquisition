@@ -111,7 +111,7 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
             # gold_table = f"{self._config.provider}.{self._config.entity_type}"
             # which is chembl.activity.
             # BUT filesystem shows chembl/activity.
-            # DeltaWriter replaces . with /.
+            # SilverWriter replaces . with /.
             gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
 
         gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"

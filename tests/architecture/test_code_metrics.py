@@ -66,7 +66,7 @@ class TestFileSizeLimits:
         "pipeline_factory.py": 520,  # 517 LOC - merged generic_factory + runner_assembly
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "delta_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
+        "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "silver_writer.py": 780,  # 777 LOC - Silver layer write with merge/validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
@@ -333,7 +333,7 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 520,  # 510 lines - storage adapter with writers
         "BaseTransformer": 560,  # 559 lines - Template Method with helpers (tracing added)
-        "DeltaWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
+        "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "SilverWriter": 710,  # 704 lines - Silver layer writer with merge/validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
@@ -480,7 +480,7 @@ class TestGodObjectDetection:
         # Protocol implementations (must implement all methods themselves)
         "StorageAdapter": "Facade implementing StoragePort - delegates to bronze/silver/gold writers",
         # Writers with cohesive responsibilities (all methods about writing)
-        "DeltaWriter": "Cohesive writer - all methods relate to Delta Lake operations",
+        "SilverWriter": "Cohesive writer - all methods relate to Delta Lake operations",
         "GoldWriter": "Cohesive writer - delegates to _audit, _tracing; modes are cohesive",
         "BronzeWriter": "Cohesive writer - all methods relate to Bronze layer operations",
         # Services with clear single responsibility

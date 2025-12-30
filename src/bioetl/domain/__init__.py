@@ -60,9 +60,10 @@ from bioetl.domain.entities import (
     Molecule,
     Protein,
     Publication,
+    PublicationEntity,
     Target,
     TargetComponent,
-    Work,
+    Work,  # Deprecated: use PublicationEntity
 )
 
 # Error classifier
@@ -282,9 +283,10 @@ __all__ = [
     "Molecule",
     "Protein",
     "Publication",
+    "PublicationEntity",
     "Target",
     "TargetComponent",
-    "Work",
+    "Work",  # Deprecated: use PublicationEntity
     # Error classifier
     "ErrorClassifier",
     # Events

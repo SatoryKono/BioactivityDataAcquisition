@@ -156,12 +156,16 @@ def mock_preflight_service():
 @pytest.fixture
 def mock_postrun_service():
     """Create a mock PostrunService (injected via DI)."""
-    from bioetl.application.core.postrun_service import DQResult, VacuumResult
+    from bioetl.application.core.postrun_service import DQResult, DQStatus, VacuumResult
 
     service = MagicMock(spec=PostrunService)
     service.run_dq_checks = AsyncMock(
         return_value=DQResult(
-            anomalies_count=0, has_critical=False, check_duration_ms=0
+            error_rate=0.0,
+            status=DQStatus.PASSED,
+            anomalies=(),
+            has_critical=False,
+            check_duration_ms=0.0,
         )
     )
     service.run_vacuum_if_enabled = AsyncMock(
@@ -178,7 +182,6 @@ def mock_lifecycle_service():
     """Create a mock MedallionLifecycleService (injected via DI)."""
     from bioetl.application.services.medallion_lifecycle import (
         ClearResult,
-        PrepareResult,
         VacuumResult,
     )
     from bioetl.domain.medallion import MedallionPolicy
@@ -585,7 +588,6 @@ class TestPipelineRunnerClearViaLifecycle:
         """Test _prepare_medallion_layers delegates to lifecycle service."""
         from bioetl.application.services.medallion_lifecycle import (
             ClearResult,
-            PrepareResult,
         )
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -640,7 +642,6 @@ class TestPipelineRunnerClearViaLifecycle:
         """Test _prepare_medallion_layers is called as part of run() execution."""
         from bioetl.application.services.medallion_lifecycle import (
             ClearResult,
-            PrepareResult,
             VacuumResult,
         )
         from bioetl.domain.medallion import MedallionPolicy
@@ -716,14 +717,18 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality delegates to PostrunService."""
-        from bioetl.application.core.postrun_service import DQResult, VacuumResult
+        from bioetl.application.core.postrun_service import DQResult, DQStatus, VacuumResult
 
         services = create_mock_services()
 
         postrun_service = MagicMock(spec=PostrunService)
         postrun_service.run_dq_checks = AsyncMock(
             return_value=DQResult(
-                anomalies_count=0, has_critical=False, check_duration_ms=5.0
+                error_rate=0.0,
+                status=DQStatus.PASSED,
+                anomalies=(),
+                has_critical=False,
+                check_duration_ms=5.0,
             )
         )
         postrun_service.run_vacuum_if_enabled = AsyncMock(
@@ -773,14 +778,18 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality is invoked during run()."""
-        from bioetl.application.core.postrun_service import DQResult, VacuumResult
+        from bioetl.application.core.postrun_service import DQResult, DQStatus, VacuumResult
 
         services = create_mock_services()
 
         postrun_service = MagicMock(spec=PostrunService)
         postrun_service.run_dq_checks = AsyncMock(
             return_value=DQResult(
-                anomalies_count=0, has_critical=False, check_duration_ms=0
+                error_rate=0.0,
+                status=DQStatus.PASSED,
+                anomalies=(),
+                has_critical=False,
+                check_duration_ms=0.0,
             )
         )
         postrun_service.run_vacuum_if_enabled = AsyncMock(

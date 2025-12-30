@@ -554,14 +554,14 @@ class TestDQMonitorPortContract:
 class TestStorageWriterLoggerContract:
     """Tests for storage writer LoggerPort requirements.
 
-    All storage writers (BronzeWriter, DeltaWriter, GoldWriter) MUST
+    All storage writers (BronzeWriter, SilverWriter, GoldWriter) MUST
     require a LoggerPort parameter in their constructor for observability.
     Per RULES.md: Dependencies MUST be injected through constructor.
     """
 
     STORAGE_WRITERS = [
         ("BronzeWriter", "bioetl.infrastructure.storage.bronze_writer"),
-        ("DeltaWriter", "bioetl.infrastructure.storage.delta_writer"),
+        ("SilverWriter", "bioetl.infrastructure.storage.silver_writer"),
         ("GoldWriter", "bioetl.infrastructure.storage.gold_writer"),
     ]
 

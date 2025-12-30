@@ -139,6 +139,21 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | `{Resource}Manager` | `LockManager`, `CheckpointManager` | Resource lifecycle |
 | `{Concern}Service` | `PreflightService`, `PostrunService` | Cross-cutting operations |
 
+### CLI Conventions
+
+**Pipeline Names**: CLI uses `{provider}_{entity}` format for pipeline identifiers:
+- `chembl_molecule`, `chembl_activity`, `chembl_assay`
+- `pubchem_compound`
+- `uniprot_protein`
+- `pubmed_publications`
+
+**Language Policy**: All CLI help texts, error messages, and user-facing output use **English** for consistency and international accessibility. Internal documentation (CLAUDE.md, RULES.md) may use Russian per project convention.
+
+**Entity Terms in CLI**: Use provider-specific terms as defined in this glossary:
+- ChEMBL pipelines use `molecule`, `activity`, `target`, etc.
+- PubChem pipelines use `compound`
+- Avoid generic terms like `testitem`, `drug`, `substance` in pipeline names
+
 ---
 
 ## Provider-Specific Terminology
