@@ -134,7 +134,9 @@ class CheckpointService:
         # Check if checkpoint exists first
         existing = await self.checkpoint_port.load(pipeline_name)
         if existing is None:
-            self.logger.debug("Checkpoint not found for deletion", pipeline=pipeline_name)
+            self.logger.debug(
+                "Checkpoint not found for deletion", pipeline=pipeline_name
+            )
             return False
 
         await self.checkpoint_port.delete(pipeline_name)

@@ -310,7 +310,9 @@ class UnifiedHTTPClient:
         configured retryable_exceptions.
         """
         # Check httpx-specific exceptions (connection/timeout errors)
-        if isinstance(exc, httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout):
+        if isinstance(
+            exc, httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout
+        ):
             return True
         # Check httpx status errors using configured retryable statuses
         if isinstance(exc, httpx.HTTPStatusError):

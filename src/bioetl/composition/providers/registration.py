@@ -72,7 +72,10 @@ def _get_rate_limit_from_config(provider: str) -> tuple[float, int]:
     """Get (rate, capacity) from source config or defaults (5.0, 10)."""
     source_config = _get_source_config(provider)
     if source_config:
-        return source_config.rate_limit.requests_per_second, source_config.rate_limit.burst
+        return (
+            source_config.rate_limit.requests_per_second,
+            source_config.rate_limit.burst,
+        )
     return 5.0, 10
 
 
@@ -80,7 +83,10 @@ def _get_circuit_breaker_from_config(provider: str) -> tuple[int, int]:
     """Get (failure_threshold, recovery_timeout) from config or defaults (5, 300)."""
     source_config = _get_source_config(provider)
     if source_config:
-        return source_config.circuit_breaker.failure_threshold, source_config.circuit_breaker.recovery_timeout
+        return (
+            source_config.circuit_breaker.failure_threshold,
+            source_config.circuit_breaker.recovery_timeout,
+        )
     return 5, 300
 
 
@@ -170,7 +176,9 @@ def _create_chembl_data_source(
         adapter_config=adapter_config,
         metrics=metrics,
     )
-    return _wrap_with_filter(base_adapter, filter_config, logger, metrics, pipeline_name)
+    return _wrap_with_filter(
+        base_adapter, filter_config, logger, metrics, pipeline_name
+    )
 
 
 def _create_pubchem_adapter(
@@ -198,8 +206,10 @@ def _create_pubchem_adapter(
         logger=logger,
         rate_limiter=TokenBucket(rate=rate, capacity=capacity, provider="pubchem"),
         circuit_breaker=CircuitBreaker(
-            provider="pubchem", failure_threshold=cb_threshold,
-            recovery_timeout=cb_timeout, metrics=metrics,
+            provider="pubchem",
+            failure_threshold=cb_threshold,
+            recovery_timeout=cb_timeout,
+            metrics=metrics,
         ),
         thread_pool=ThreadPoolExecutor(max_workers=max_workers),
         strict_error_handling=strict_error_handling,
@@ -216,8 +226,10 @@ def _create_pubchem_data_source(
 ) -> DataSourcePort:
     """Create PubChem data source with optional CSV filtering."""
     data_source = _create_pubchem_adapter(
-        logger=logger, settings=settings,
-        strict_error_handling=settings.strict_error_handling, metrics=metrics,
+        logger=logger,
+        settings=settings,
+        strict_error_handling=settings.strict_error_handling,
+        metrics=metrics,
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 

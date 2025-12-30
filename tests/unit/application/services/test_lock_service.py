@@ -128,9 +128,7 @@ class TestLockServiceReleaseLock:
         owner_id = RunID(uuid4())
         mock_lock_port.release.return_value = True
 
-        result = await lock_service.release_lock(
-            "pipeline1", owner_id, exclusive=True
-        )
+        result = await lock_service.release_lock("pipeline1", owner_id, exclusive=True)
 
         assert result is True
         mock_lock_port.release.assert_called_once_with(

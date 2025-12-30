@@ -6,6 +6,7 @@ Provides common fixtures for live API contract testing.
 from __future__ import annotations
 
 import os
+
 import pytest
 
 
@@ -15,7 +16,9 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "pubchem: PubChem API contract tests")
     config.addinivalue_line("markers", "uniprot: UniProt API contract tests")
     config.addinivalue_line("markers", "pubmed: PubMed API contract tests")
-    config.addinivalue_line("markers", "slow: Tests that may be slow due to rate limits")
+    config.addinivalue_line(
+        "markers", "slow: Tests that may be slow due to rate limits"
+    )
 
 
 def pytest_collection_modifyitems(
@@ -56,28 +59,38 @@ def uniprot_api_key() -> str | None:
 
 
 # Common expected schema fields for contract verification
-CHEMBL_ACTIVITY_REQUIRED_FIELDS = frozenset({
-    "activity_id",
-    "assay_chembl_id",
-    "molecule_chembl_id",
-})
+CHEMBL_ACTIVITY_REQUIRED_FIELDS = frozenset(
+    {
+        "activity_id",
+        "assay_chembl_id",
+        "molecule_chembl_id",
+    }
+)
 
-CHEMBL_MOLECULE_REQUIRED_FIELDS = frozenset({
-    "molecule_chembl_id",
-    "molecule_type",
-})
+CHEMBL_MOLECULE_REQUIRED_FIELDS = frozenset(
+    {
+        "molecule_chembl_id",
+        "molecule_type",
+    }
+)
 
-CHEMBL_TARGET_REQUIRED_FIELDS = frozenset({
-    "target_chembl_id",
-    "target_type",
-})
+CHEMBL_TARGET_REQUIRED_FIELDS = frozenset(
+    {
+        "target_chembl_id",
+        "target_type",
+    }
+)
 
-UNIPROT_PROTEIN_REQUIRED_FIELDS = frozenset({
-    "primaryAccession",
-    "uniProtkbId",
-    "entryType",
-})
+UNIPROT_PROTEIN_REQUIRED_FIELDS = frozenset(
+    {
+        "primaryAccession",
+        "uniProtkbId",
+        "entryType",
+    }
+)
 
-PUBCHEM_COMPOUND_REQUIRED_FIELDS = frozenset({
-    "cid",
-})
+PUBCHEM_COMPOUND_REQUIRED_FIELDS = frozenset(
+    {
+        "cid",
+    }
+)

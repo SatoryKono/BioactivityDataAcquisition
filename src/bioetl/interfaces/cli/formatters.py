@@ -48,9 +48,7 @@ def echo_cleanup_preview(preview: CleanupPreview) -> None:
 
     if preview.gold:
         if preview.gold.exists:
-            click.echo(
-                f"  Gold: {preview.gold.path} ({preview.gold.file_count} files)"
-            )
+            click.echo(f"  Gold: {preview.gold.path} ({preview.gold.file_count} files)")
         else:
             click.echo(f"  Gold: {preview.gold.path} (does not exist)")
 

@@ -5,7 +5,6 @@ Tests for Concentration, ConcentrationUnit, ActivityType, PChemblValue.
 
 from __future__ import annotations
 
-
 import pytest
 
 from bioetl.domain.value_objects import (
@@ -247,8 +246,12 @@ class TestActivityType:
 
     def test_from_string_percent_inhibition(self) -> None:
         """Test parsing % Inhibition from string."""
-        assert ActivityType.from_string("% Inhibition") == ActivityType.PERCENT_INHIBITION
-        assert ActivityType.from_string("% INHIBITION") == ActivityType.PERCENT_INHIBITION
+        assert (
+            ActivityType.from_string("% Inhibition") == ActivityType.PERCENT_INHIBITION
+        )
+        assert (
+            ActivityType.from_string("% INHIBITION") == ActivityType.PERCENT_INHIBITION
+        )
 
     def test_from_string_invalid_raises(self) -> None:
         """Test invalid type string raises ValueError."""

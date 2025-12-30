@@ -36,7 +36,8 @@ def get_all_pipeline_configs():
         return []
     # Exclude files in 'sources/' subdirectories and _defaults.yaml
     return [
-        p for p in PIPELINE_CONFIG_PATH.glob("**/*.yaml")
+        p
+        for p in PIPELINE_CONFIG_PATH.glob("**/*.yaml")
         if "sources" not in p.parts and p.name != "_defaults.yaml"
     ]
 
