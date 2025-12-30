@@ -146,21 +146,6 @@ class CircuitBreakerConfig:
 RetryPolicy = RetryConfig
 
 
-def _validate_adapter_config(
-    batch_size: int, page_size: int, timeout_sec: float, max_retries: int
-) -> None:
-    """Validate AdapterConfig parameters (extracted for lower CC)."""
-    checks = [
-        (batch_size <= 0, f"batch_size must be positive, got {batch_size}"),
-        (page_size <= 0, f"page_size must be positive, got {page_size}"),
-        (timeout_sec <= 0, f"timeout_sec must be positive, got {timeout_sec}"),
-        (max_retries < 0, f"max_retries must be non-negative, got {max_retries}"),
-    ]
-    errors = [msg for failed, msg in checks if failed]
-    if errors:
-        raise ValueError("; ".join(errors))
-
-
 @dataclass(frozen=True, slots=True)
 class AdapterConfig:
     """Configuration for data source adapters.
@@ -194,6 +179,19 @@ class AdapterConfig:
 
     def __post_init__(self) -> None:
         """Validate configuration values on creation."""
-        _validate_adapter_config(
-            self.batch_size, self.page_size, self.timeout_sec, self.max_retries
-        )
+        _validate_positive("batch_size", self.batch_size)
+        _validate_positive("page_size", self.page_size)
+        _validate_positive("timeout_sec", self.timeout_sec)
+        _validate_non_negative("max_retries", self.max_retries)
+
+
+def _validate_positive(name: str, value: int | float) -> None:
+    """Validate that value is positive (> 0)."""
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
+def _validate_non_negative(name: str, value: int) -> None:
+    """Validate that value is non-negative (>= 0)."""
+    if value < 0:
+        raise ValueError(f"{name} must be non-negative, got {value}")
