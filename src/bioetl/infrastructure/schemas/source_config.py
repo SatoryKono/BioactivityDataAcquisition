@@ -87,7 +87,7 @@ class ProviderConfigYaml(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    provider: str
+    provider: str = ""
     base_url: str | None = None
     client: ClientYamlConfig = Field(default_factory=ClientYamlConfig)
     batch_size: int | None = Field(default=None, ge=1, le=10000)
@@ -116,11 +116,15 @@ class SourceSectionConfig(BaseModel):
     type: Literal["api", "file"] = "api"
     load_strategy: Literal["full", "incremental"] = "full"
     batch_size: int = Field(default=100, ge=1, le=10000)
-    provider_config: ProviderConfigYaml = Field(default_factory=ProviderConfigYaml)
-    circuit_breaker: CircuitBreakerYamlConfig = Field(
-        default_factory=CircuitBreakerYamlConfig
+    provider_config: ProviderConfigYaml = Field(
+        default_factory=lambda: ProviderConfigYaml()
     )
-    rate_limit: RateLimitYamlConfig = Field(default_factory=RateLimitYamlConfig)
+    circuit_breaker: CircuitBreakerYamlConfig = Field(
+        default_factory=lambda: CircuitBreakerYamlConfig()
+    )
+    rate_limit: RateLimitYamlConfig = Field(
+        default_factory=lambda: RateLimitYamlConfig()
+    )
 
 
 class SourceYamlConfig(BaseModel):

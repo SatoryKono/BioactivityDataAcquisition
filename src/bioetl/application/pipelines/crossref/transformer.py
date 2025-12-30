@@ -149,43 +149,46 @@ class CrossRefTransformer(BaseTransformer):
             Dictionary of Work business fields.
 
         """
+        # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
+        rec = cast("dict[str, Any]", record)
+
         # Use domain functions for normalization
-        doi = normalize_doi(record.get("DOI", "")) or ""
-        first_page, last_page = parse_page_range(record.get("page"))
+        doi = normalize_doi(rec.get("DOI", "")) or ""
+        first_page, last_page = parse_page_range(rec.get("page"))
 
         # Extract date fields using domain functions
-        published_print = record.get("published-print", {})
-        published_online = record.get("published-online", {})
+        published_print = rec.get("published-print", {})
+        published_online = rec.get("published-online", {})
 
         # Extract abstract with HTML stripping via domain function
-        abstract_raw = record.get("abstract", "")
+        abstract_raw = rec.get("abstract", "")
         abstract = strip_html_tags(abstract_raw) if abstract_raw else None
 
         return {
             "doi": doi,
-            "title": extract_first_string(record.get("title", [])),
+            "title": extract_first_string(rec.get("title", [])),
             "abstract": abstract,
-            "authors": self._extract_authors(record),
-            "journal": extract_first_string(record.get("container-title", [])),
-            "issn": record.get("ISSN", []),
-            "publisher": record.get("publisher"),
-            "volume": record.get("volume"),
-            "issue": record.get("issue"),
+            "authors": self._extract_authors(rec),
+            "journal": extract_first_string(rec.get("container-title", [])),
+            "issn": rec.get("ISSN", []),
+            "publisher": rec.get("publisher"),
+            "volume": rec.get("volume"),
+            "issue": rec.get("issue"),
             "first_page": first_page,
             "last_page": last_page,
-            "year": self._extract_year(record),
+            "year": self._extract_year(rec),
             "published_print": format_date_parts(
                 published_print.get("date-parts") if isinstance(published_print, dict) else None
             ),
             "published_online": format_date_parts(
                 published_online.get("date-parts") if isinstance(published_online, dict) else None
             ),
-            "doc_type": CROSSREF_TYPE_MAP.get(record.get("type", ""), "PUBLICATION"),
-            "citation_count": record.get("is-referenced-by-count"),
-            "reference_count": record.get("references-count"),
-            "language": record.get("language"),
-            "license_url": self._extract_license_url(record),
-            "subjects": record.get("subject", []),
+            "doc_type": CROSSREF_TYPE_MAP.get(rec.get("type", ""), "PUBLICATION"),
+            "citation_count": rec.get("is-referenced-by-count"),
+            "reference_count": rec.get("references-count"),
+            "language": rec.get("language"),
+            "license_url": self._extract_license_url(rec),
+            "subjects": rec.get("subject", []),
             "source": "crossref",
         }
 
