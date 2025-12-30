@@ -270,7 +270,7 @@ class TestStorageFactoryLocal:
                 metrics=mock_metrics,
             )
 
-            # Verify DeltaWriter (Silver) was called with csv_exporter
+            # Verify SilverWriter (Silver) was called with csv_exporter
             mock_delta.assert_called_once()
             silver_call_kwargs = mock_delta.call_args[1]
             assert "csv_exporter" in silver_call_kwargs
@@ -539,13 +539,13 @@ class TestStorageAdapterPreviewCleanup:
     def adapter_with_temp_storage(self, temp_storage):
         """Create adapter with temp storage."""
         from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
         from bioetl.infrastructure.storage.gold_writer import GoldWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         bronze = MagicMock(spec=BronzeWriter)
         bronze.base_path = str(temp_storage / "bronze")
 
-        silver = MagicMock(spec=DeltaWriter)
+        silver = MagicMock(spec=SilverWriter)
         silver.base_path = str(temp_storage / "silver")
         silver.get_table_path = MagicMock(
             return_value=temp_storage / "silver" / "chembl" / "activity"

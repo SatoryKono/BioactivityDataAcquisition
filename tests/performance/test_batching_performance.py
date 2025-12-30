@@ -27,7 +27,7 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 
 def generate_test_record(idx: int) -> dict[str, Any]:
@@ -83,9 +83,9 @@ def bronze_writer(tmp_path: Path, logger: NoOpLogger) -> BronzeWriter:
 
 
 @pytest.fixture
-def delta_writer(tmp_path: Path, logger: NoOpLogger) -> DeltaWriter:
-    """Create DeltaWriter for performance tests."""
-    return DeltaWriter(base_path=tmp_path / "silver", logger=logger)
+def silver_writer(tmp_path: Path, logger: NoOpLogger) -> SilverWriter:
+    """Create SilverWriter for performance tests."""
+    return SilverWriter(base_path=tmp_path / "silver", logger=logger)
 
 
 @pytest.fixture
@@ -167,7 +167,7 @@ class TestBatchingPerformance:
         )
 
     def test_silver_transform_1000_records_under_2s(
-        self, delta_writer: DeltaWriter, activity_schema: pa.Schema
+        self, silver_writer: SilverWriter, activity_schema: pa.Schema
     ) -> None:
         """Silver transformation should not degrade beyond 2s for 1000 records.
 
@@ -192,7 +192,7 @@ class TestBatchingPerformance:
 
         start = time.perf_counter()
         asyncio.run(
-            delta_writer.write_silver(
+            silver_writer.write_silver(
                 table_name="chembl.activity",
                 records=records,
                 primary_keys=["entity_id"],
@@ -226,7 +226,7 @@ class TestBatchingPerformance:
         )
 
     def test_arrow_data_preparation_1000_records_under_500ms(
-        self, delta_writer: DeltaWriter, activity_schema: pa.Schema
+        self, silver_writer: SilverWriter, activity_schema: pa.Schema
     ) -> None:
         """Arrow table preparation should be fast (<0.5s for 1000 records).
 
@@ -250,7 +250,7 @@ class TestBatchingPerformance:
             records.append(record)
 
         start = time.perf_counter()
-        delta_writer._prepare_arrow_data(
+        silver_writer._prepare_arrow_data(
             records=records,
             schema=activity_schema,
             primary_keys=["entity_id"],

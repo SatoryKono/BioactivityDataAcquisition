@@ -18,9 +18,6 @@ from __future__ import annotations
 
 # Re-export writers for test patching compatibility
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-
-# DeltaWriter is deprecated, use SilverWriter instead
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -30,7 +27,6 @@ from .storage_factory import StorageContext, StorageFactory
 
 __all__ = [
     "BronzeWriter",
-    "DeltaWriter",  # Deprecated: use SilverWriter instead
     "GoldWriter",
     "SilverWriter",
     "StorageAdapter",

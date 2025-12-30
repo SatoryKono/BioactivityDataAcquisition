@@ -19,7 +19,7 @@ class SilverValidatorPort(Protocol):
 
     This interface abstracts the validation mechanism for Silver records,
     allowing different validation strategies (Pandera, Great Expectations, etc.)
-    to be injected without coupling DeltaWriter to a specific implementation.
+    to be injected without coupling SilverWriter to a specific implementation.
 
     Note: SilverValidatorPort uses synchronous methods as validation
     should be a CPU-bound operation without I/O.

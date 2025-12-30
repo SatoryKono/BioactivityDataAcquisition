@@ -3,7 +3,7 @@
 E2E тесты используют локальное файловое хранилище и in-memory инфраструктуру:
 - LocalCheckpoint (файловая система)
 - MemoryLock (in-process)
-- DeltaWriter (локальный Delta Lake)
+- SilverWriter (локальный Delta Lake)
 - VCR cassettes для HTTP-запросов
 
 Запуск:

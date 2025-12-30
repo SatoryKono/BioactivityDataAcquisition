@@ -173,7 +173,7 @@ class TestStorageTracingIntegration:
 
     STORAGE_FILES = [
         "src/bioetl/infrastructure/storage/bronze_writer.py",
-        "src/bioetl/infrastructure/storage/delta_writer.py",
+        "src/bioetl/infrastructure/storage/silver_writer.py",
         "src/bioetl/infrastructure/storage/gold_writer.py",
     ]
 
@@ -217,19 +217,19 @@ class TestStorageTracingIntegration:
 
         assert has_metrics, "BronzeWriter should have metrics integration"
 
-    def test_delta_writer_has_logging(self):
-        """DeltaWriter should have structured logging."""
-        path = Path("src/bioetl/infrastructure/storage/delta_writer.py")
+    def test_silver_writer_has_logging(self):
+        """SilverWriter should have structured logging."""
+        path = Path("src/bioetl/infrastructure/storage/silver_writer.py")
 
         if not path.exists():
-            pytest.skip("DeltaWriter not found")
+            pytest.skip("SilverWriter not found")
 
         source = path.read_text()
 
-        # DeltaWriter should have logging
+        # SilverWriter should have logging
         has_logging = "logger" in source.lower()
 
-        assert has_logging, "DeltaWriter should have logging"
+        assert has_logging, "SilverWriter should have logging"
 
 
 class TestPipelineRunnerTracing:
@@ -363,7 +363,7 @@ class TestMandatorySpans:
         ("executor.py", ["execute", "process"]),
         # Storage operations
         ("bronze_writer.py", ["write_bronze"]),
-        ("delta_writer.py", ["write_silver"]),
+        ("silver_writer.py", ["write_silver"]),
         ("gold_writer.py", ["write_gold"]),
     ]
 
