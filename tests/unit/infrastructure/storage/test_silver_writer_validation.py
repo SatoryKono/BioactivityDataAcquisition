@@ -148,6 +148,10 @@ class TestSilverWriterValidateSilverPandera:
         # Should not raise
         writer._validate_silver_pandera(records, "test.table")
 
+    @pytest.mark.skipif(
+        PYTHON_314,
+        reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
+    )
     def test_validate_silver_pandera_with_invalid_records_raises(self, noop_logger):
         """Test _validate_silver_pandera raises SchemaViolationError for invalid records."""
         import pandera as pa
