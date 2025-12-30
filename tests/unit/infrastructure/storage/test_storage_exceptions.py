@@ -42,7 +42,7 @@ class TestSilverWriterExceptions:
     """Tests for exception handling in SilverWriter."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
     async def test_write_silver_raises_schema_violation_error_on_merge(
         self, mock_delta_table, valid_record, noop_logger
     ):
@@ -74,7 +74,7 @@ class TestSilverWriterExceptions:
             )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
     async def test_write_silver_raises_merge_conflict_error(
         self, mock_delta_table, valid_record, noop_logger
     ):
@@ -113,9 +113,9 @@ class TestSilverWriterExceptions:
             )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.delta_writer.write_deltalake")
+    @patch("bioetl.infrastructure.storage.silver_writer.write_deltalake")
     @patch(
-        "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+        "bioetl.infrastructure.storage.silver_writer.DeltaTable",
         side_effect=TableNotFoundError,
     )
     async def test_write_silver_raises_schema_error_on_create(
