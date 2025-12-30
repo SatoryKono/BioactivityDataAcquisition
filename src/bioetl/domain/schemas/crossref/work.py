@@ -1,7 +1,11 @@
-"""Pandera schema for CrossRef Work entity.
+"""Pandera schema for CrossRef Publication entity.
 
-Aligned with RULES.md v5.0 and CrossRef REST API.
+Aligned with RULES.md v5.8 and CrossRef REST API.
 Source: https://api.crossref.org/swagger-ui/index.html
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
+- WorkSchema is kept as deprecated alias for backward compatibility
 """
 
 from __future__ import annotations
@@ -14,7 +18,8 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 # === Fixed Value Constants ===
-WORK_TYPES = [
+# CrossRef publication types (from CrossRef API "type" field)
+PUBLICATION_TYPES = [
     "journal-article",
     "book-chapter",
     "proceedings-article",
@@ -46,10 +51,13 @@ WORK_TYPES = [
 ]
 
 
-class WorkSchema(ETLRecordSchema):
-    """CrossRef Work validation schema for Silver layer.
+class PublicationSchema(ETLRecordSchema):
+    """CrossRef Publication validation schema for Silver layer.
 
-    Represents a publication (article, book, dataset, etc.) with DOI.
+    Represents a scholarly publication (article, book, dataset, etc.) with DOI.
+
+    Uses "Publication" terminology instead of CrossRef API term "Work"
+    for Ubiquitous Language compliance.
     """
 
     # === Primary Key ===
@@ -62,13 +70,13 @@ class WorkSchema(ETLRecordSchema):
     # === Core Fields ===
     type: Series[str] = pa.Field(
         nullable=False,
-        isin=WORK_TYPES,
-        description="Work type (journal-article, book-chapter, etc.)",
+        isin=PUBLICATION_TYPES,
+        description="Publication type (journal-article, book-chapter, etc.)",
     )
     title: Series[str] = pa.Field(
         nullable=False,
         str_length={"min_value": 1},
-        description="Work title (first element of title array)",
+        description="Publication title (first element of title array)",
     )
 
     # === Container (Journal/Book) ===
@@ -150,5 +158,13 @@ class WorkSchema(ETLRecordSchema):
         strict = True
         ordered = True
         coerce = True
-        name = "WorkSchema"
-        description = "CrossRef Work Silver layer validation"
+        name = "PublicationSchema"
+        description = "CrossRef Publication Silver layer validation"
+
+
+# Deprecated aliases for backward compatibility
+WorkSchema = PublicationSchema
+"""Deprecated: Use PublicationSchema instead. Kept for backward compatibility."""
+
+WORK_TYPES = PUBLICATION_TYPES
+"""Deprecated: Use PUBLICATION_TYPES instead. Kept for backward compatibility."""
