@@ -13,7 +13,7 @@ from bioetl.domain.ports import FilterableDataSourcePort
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.filter_config import FilterLoadResult, InputFilterConfig
+    from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, InputFilterPort, MetricsPort
     from bioetl.domain.types import HealthStatus
 
