@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.domain.filter_config import FilterLoadResult
+from bioetl.domain.filtering import FilterLoadResult
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 
 

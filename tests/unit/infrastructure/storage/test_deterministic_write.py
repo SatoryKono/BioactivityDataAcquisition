@@ -180,7 +180,7 @@ class TestDeterministicCsvFilterRead:
 
     async def test_csv_filter_reader_returns_sorted_tuple(self, tmp_path: Path):
         """Test that CsvFilterReader returns FilterLoadResult with sorted IDs."""
-        from bioetl.domain.filter_config import FilterLoadResult
+        from bioetl.domain.filtering import FilterLoadResult
         from bioetl.infrastructure.adapters.input.csv_filter_reader import (
             CsvFilterReader,
         )

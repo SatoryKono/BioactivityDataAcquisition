@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from bioetl.domain.filter_config import FilterLoadResult
+from bioetl.domain.filtering import FilterLoadResult
 
 
 @runtime_checkable

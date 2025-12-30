@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.filter_config import InputFilterConfig
+from bioetl.domain.filtering import InputFilterConfig
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import (

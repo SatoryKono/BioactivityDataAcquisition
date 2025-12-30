@@ -20,7 +20,7 @@ from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from bioetl.domain.filter_config import GoldFilterConfig
+    from bioetl.domain.filtering import GoldFilterConfig
 
 
 @dataclass(frozen=True, slots=True)
