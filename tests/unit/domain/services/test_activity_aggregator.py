@@ -8,7 +8,7 @@ from bioetl.domain.services.activity_aggregator import (
     ActivityAggregator,
     AggregationMethod,
 )
-from bioetl.domain.value_objects.measurements import Concentration, ConcentrationUnit
+from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
 
 class TestActivityAggregatorBasic:
