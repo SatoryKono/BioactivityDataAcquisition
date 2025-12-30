@@ -50,6 +50,8 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
     - VACUUM should run automatically after successful incremental runs
     - Retention period is 7 days by default
     """
+    from bioetl.domain.context import VacuumConfig
+
     # Create context with vacuum enabled
     ctx = PipelineRunContext(
         pipeline_name="chembl_activity",
@@ -57,8 +59,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=5,
-        vacuum_after_run=True,  # Enable VACUUM
-        vacuum_retention_days=7,
+        vacuum=VacuumConfig(enabled=True, retention_days=7),  # Enable VACUUM
     )
 
     runner = bootstrap_pipeline(ctx)
