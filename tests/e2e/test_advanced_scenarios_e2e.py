@@ -19,7 +19,6 @@ import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.types import RunID, RunType
 
 from .conftest import (
@@ -27,6 +26,7 @@ from .conftest import (
     create_test_context,
     get_silver_records,
 )
+from datetime import UTC
 
 
 # ============================================================================
@@ -121,7 +121,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
     from bioetl.domain.types import ErrorType
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
@@ -144,7 +144,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         error_type=ErrorType.DATA_QUALITY,
         batch_id=uuid4(),
         error_details="Test DQ error",
-        ingestion_ts=datetime.now(timezone.utc),
+        ingestion_ts=datetime.now(UTC),
     )
 
     # Verify quarantine Delta table exists (base_path IS the table path)
