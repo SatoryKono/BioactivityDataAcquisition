@@ -144,3 +144,46 @@ class CircuitBreakerConfig:
 
 # Backward compatibility alias
 RetryPolicy = RetryConfig
+
+
+@dataclass(frozen=True, slots=True)
+class AdapterConfig:
+    """Configuration for data source adapters.
+
+    Consolidates adapter-specific settings that were previously hardcoded.
+    Single source of truth for batch sizes, timeouts, and page sizes.
+
+    Implements RULES.md §12.1.2 - YAML MUST map to Pydantic and be validated.
+    All values are loaded from configs/sources/{provider}.yaml.
+
+    Args:
+        batch_size: Number of records per request batch for filtered queries.
+            Used when fetching with ID filters (e.g., ChEMBL filter_batch_size).
+            Default: 20 (matches ChEMBL config).
+        page_size: Number of records per paginated API request.
+            Used for standard pagination (e.g., ChEMBL batch_size parameter).
+            Default: 1000 (matches ChEMBL config).
+        timeout_sec: Request timeout in seconds. Default: 30.0.
+        max_retries: Maximum retry attempts for recoverable errors. Default: 3.
+
+    Example:
+        >>> config = AdapterConfig(batch_size=50, page_size=500)
+        >>> config.batch_size
+        50
+    """
+
+    batch_size: int = 20
+    page_size: int = 1000
+    timeout_sec: float = 30.0
+    max_retries: int = 3
+
+    def __post_init__(self) -> None:
+        """Validate configuration values on creation."""
+        if self.batch_size <= 0:
+            raise ValueError(f"batch_size must be positive, got {self.batch_size}")
+        if self.page_size <= 0:
+            raise ValueError(f"page_size must be positive, got {self.page_size}")
+        if self.timeout_sec <= 0:
+            raise ValueError(f"timeout_sec must be positive, got {self.timeout_sec}")
+        if self.max_retries < 0:
+            raise ValueError(f"max_retries must be non-negative, got {self.max_retries}")

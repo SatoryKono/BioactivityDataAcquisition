@@ -15,6 +15,7 @@ from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
     ProviderRegistry,
 )
+from bioetl.domain.resilience import AdapterConfig
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -80,11 +81,44 @@ def _get_circuit_breaker_from_config(provider: str) -> tuple[int, int]:
 
 
 def _get_page_size_from_config(provider: str, default: int = 1000) -> int:
-    """Get page size from config for paginated APIs (e.g., ChEMBL)."""
+    """Get page size from config for paginated APIs (e.g., ChEMBL).
+
+    DEPRECATED: Use _get_adapter_config() instead.
+    """
     source_config = _get_source_config(provider)
     if source_config and source_config.page_size is not None:
         return source_config.page_size
     return default
+
+
+def _get_adapter_config(provider: str, default_page_size: int = 1000) -> AdapterConfig:
+    """Get AdapterConfig from source YAML config.
+
+    This is the single source of truth for adapter parameters (RULES.md §12.1.2).
+    Loads from configs/sources/{provider}.yaml and converts to domain dataclass.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem')
+        default_page_size: Default page size if not specified in config
+
+    Returns:
+        AdapterConfig: Immutable adapter configuration
+
+    Raises:
+        ValueError: If source config is missing and fail_fast is True
+    """
+    source_config = _get_source_config(provider)
+    if source_config is not None:
+        return source_config.to_adapter_config(default_page_size=default_page_size)
+
+    # Fallback to domain defaults
+    _logger.warning(
+        "Source config not found for %s, using AdapterConfig defaults. "
+        "Create configs/sources/%s.yaml to configure adapter parameters.",
+        provider,
+        provider,
+    )
+    return AdapterConfig(page_size=default_page_size)
 
 
 def _wrap_with_filter(
@@ -114,17 +148,22 @@ def _create_chembl_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create ChEMBL data source with optional CSV filtering."""
+    """Create ChEMBL data source with optional CSV filtering.
+
+    Configuration is loaded from configs/sources/chembl.yaml via AdapterConfig.
+    This ensures YAML is the single source of truth (RULES.md §12.1.2).
+    """
     DataSourceFactory, HttpClientFactory = _get_factories()
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
-    page_size = _get_page_size_from_config("chembl", default=1000)
-    filter_batch_size = _get_batch_size_from_config("chembl", default=20)
+
+    # Load adapter configuration from YAML (single source of truth)
+    adapter_config = _get_adapter_config("chembl", default_page_size=1000)
+
     base_adapter = DataSourceFactory.create(
         "chembl",
         http_client=http_client,
         logger=logger,
-        batch_size=page_size,
-        filter_batch_size=filter_batch_size,
+        adapter_config=adapter_config,
         metrics=metrics,
     )
     return _wrap_with_filter(base_adapter, filter_config, logger, metrics, pipeline_name)

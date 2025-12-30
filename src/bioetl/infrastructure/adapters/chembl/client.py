@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, NoReturn
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import ChemblApiError, CriticalError
 from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
@@ -53,30 +54,55 @@ class ChemblAdapter(BaseHttpAdapter):
     Implements DataSourcePort and FilterableDataSourcePort for fetching
     data from ChEMBL database with optional server-side filtering.
 
+    Configuration is loaded from configs/sources/chembl.yaml and passed
+    via AdapterConfig. This ensures YAML is the single source of truth
+    (RULES.md §12.1.2).
+
     Args:
         http_client: UnifiedHTTPClient instance
         logger: LoggerPort instance for structured logging
-        batch_size: Number of records per API request (default: 1000)
-        filter_batch_size: Number of IDs per filtered API request (default: 20).
-            ChEMBL API returns 500 errors if URL is too long with many IDs.
+        adapter_config: Configuration from YAML (preferred). Contains batch_size,
+            page_size, timeout_sec, max_retries. If not provided, falls back to
+            batch_size/filter_batch_size parameters for backward compatibility.
+        batch_size: DEPRECATED. Use adapter_config.page_size instead.
+            Number of records per API request. Fallback if adapter_config not provided.
+        filter_batch_size: DEPRECATED. Use adapter_config.batch_size instead.
+            Number of IDs per filtered API request. Fallback if adapter_config not provided.
         thread_pool: ThreadPoolExecutor for sync operations
+        metrics: MetricsPort instance for observability
 
     Health-Aware Behavior (uses circuit breaker state):
         - HEALTHY: Uses configured batch_size
         - DEGRADED: Uses batch_size ÷ 2 to reduce load
         - UNHEALTHY: Raises CriticalError to prevent futile requests
 
+    Example:
+        >>> # Preferred: use AdapterConfig from YAML
+        >>> from bioetl.infrastructure.config import load_source_config
+        >>> source_config = load_source_config("chembl")
+        >>> adapter_config = source_config.to_adapter_config()
+        >>> adapter = ChemblAdapter(
+        ...     http_client=http_client,
+        ...     logger=logger,
+        ...     adapter_config=adapter_config,
+        ... )
+
     """
 
     http_client: UnifiedHTTPClient
     logger: LoggerPort
-    batch_size: int = 1000
-    filter_batch_size: int = 20
+    adapter_config: AdapterConfig | None = None
+    batch_size: int | None = None  # DEPRECATED: use adapter_config.page_size
+    filter_batch_size: int | None = None  # DEPRECATED: use adapter_config.batch_size
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
+
+    # Resolved configuration values (computed in __post_init__)
+    _page_size: int = field(init=False, default=1000)
+    _filter_batch_size: int = field(init=False, default=20)
 
     # Error classifier for logging purposes (no state tracking)
     _error_classifier: ErrorClassifier = field(
@@ -87,7 +113,30 @@ class ChemblAdapter(BaseHttpAdapter):
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics after dataclass init."""
+        """Initialize adapter with config values and metrics.
+
+        Configuration priority (RULES.md §12.1.2 - YAML as single source of truth):
+        1. adapter_config (from YAML via to_adapter_config())
+        2. Explicit batch_size/filter_batch_size parameters (deprecated, for backward compat)
+        3. Default fallback values (only if nothing else provided)
+        """
+        # Resolve configuration with clear priority
+        if self.adapter_config is not None:
+            # Primary: use AdapterConfig from YAML
+            self._page_size = self.adapter_config.page_size
+            self._filter_batch_size = self.adapter_config.batch_size
+        elif self.batch_size is not None or self.filter_batch_size is not None:
+            # Backward compatibility: use explicit parameters
+            self._page_size = self.batch_size if self.batch_size is not None else 1000
+            self._filter_batch_size = (
+                self.filter_batch_size if self.filter_batch_size is not None else 20
+            )
+        else:
+            # Fallback: use domain defaults from AdapterConfig
+            default_config = AdapterConfig()
+            self._page_size = default_config.page_size
+            self._filter_batch_size = default_config.batch_size
+
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
@@ -108,8 +157,8 @@ class ChemblAdapter(BaseHttpAdapter):
         Uses circuit breaker state for health-aware batching.
 
         Returns:
-            - Normal batch_size when HEALTHY
-            - Half batch_size when DEGRADED (per RULES.md §3.5)
+            - Normal page_size when HEALTHY
+            - Half page_size when DEGRADED (per RULES.md §3.5)
 
         Raises:
             CriticalError: When UNHEALTHY to prevent futile requests
@@ -124,16 +173,16 @@ class ChemblAdapter(BaseHttpAdapter):
                 f"consecutive errors (circuit breaker)"
             )
         if health_status == HealthStatus.DEGRADED:
-            reduced = max(100, self.batch_size // 2)  # Minimum 100
+            reduced = max(100, self._page_size // 2)  # Minimum 100
             self.logger.warning(
                 "chembl_degraded_mode",
                 provider="chembl",
-                original_batch_size=self.batch_size,
+                original_batch_size=self._page_size,
                 effective_batch_size=reduced,
                 consecutive_errors=failure_count,
             )
             return reduced
-        return self.batch_size
+        return self._page_size
 
     def _build_params(self, offset: int) -> dict[str, Any]:
         """Build API request parameters with health-aware batch size."""
@@ -303,7 +352,7 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
 
-        for id_batch in self._batch_ids(filter_ids, batch_size=self.filter_batch_size):
+        for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
             async for record in self._fetch_with_filter(
                 entity_type, id_batch, filter_field, limit
             ):
