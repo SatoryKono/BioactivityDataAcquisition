@@ -1249,7 +1249,7 @@ class TestDeltaWriterWriteModePolicy:
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
-                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
+                "bioetl.infrastructure.storage.delta_writer.write_deltalake"
             ) as mock_write,
         ):
             writer = DeltaWriter(
@@ -1295,7 +1295,7 @@ class TestDeltaWriterWriteModePolicy:
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
-                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
+                "bioetl.infrastructure.storage.delta_writer.write_deltalake"
             ) as mock_write,
         ):
             writer = DeltaWriter(
