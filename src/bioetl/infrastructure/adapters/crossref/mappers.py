@@ -306,10 +306,14 @@ class CrossRefFieldExtractor:
             "last_page": last_page,
             "year": self.extract_year(work_data),
             "published_print": self.format_date_parts(
-                published_print.get("date-parts") if isinstance(published_print, dict) else None
+                published_print.get("date-parts")
+                if isinstance(published_print, dict)
+                else None
             ),
             "published_online": self.format_date_parts(
-                published_online.get("date-parts") if isinstance(published_online, dict) else None
+                published_online.get("date-parts")
+                if isinstance(published_online, dict)
+                else None
             ),
             "doc_type": self.map_doc_type(work_data.get("type", "")),
             "citation_count": work_data.get("is-referenced-by-count"),

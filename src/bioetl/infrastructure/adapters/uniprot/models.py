@@ -22,9 +22,7 @@ class UniProtOrganism(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    scientific_name: str = Field(
-        alias="scientificName", description="Scientific name"
-    )
+    scientific_name: str = Field(alias="scientificName", description="Scientific name")
     common_name: str | None = Field(
         default=None, alias="commonName", description="Common name"
     )
@@ -210,8 +208,7 @@ class UniProtProteinRecord(BaseModel):
 
     # Entry Type
     entry_type: str = Field(
-        alias="entryType",
-        description="Entry type (UniProtKB reviewed/unreviewed)"
+        alias="entryType", description="Entry type (UniProtKB reviewed/unreviewed)"
     )
 
     # Primary Identifiers
@@ -251,7 +248,7 @@ class UniProtProteinRecord(BaseModel):
     uniprot_kb_cross_references: list[UniProtCrossReference] | None = Field(
         default_factory=list,
         alias="uniProtKBCrossReferences",
-        description="External database cross-references"
+        description="External database cross-references",
     )
 
     # Sequence
@@ -266,7 +263,9 @@ class UniProtProteinRecord(BaseModel):
 
     # Secondary Accessions
     secondary_accessions: list[str] | None = Field(
-        default_factory=list, alias="secondaryAccessions", description="Secondary accessions"
+        default_factory=list,
+        alias="secondaryAccessions",
+        description="Secondary accessions",
     )
 
 

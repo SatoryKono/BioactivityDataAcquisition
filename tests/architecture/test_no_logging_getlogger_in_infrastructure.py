@@ -80,7 +80,9 @@ def _check_logging_getlogger_imports(
     return violations
 
 
-def _check_getlogger_calls(directory: Path, allowed: set[str] | None = None) -> list[str]:
+def _check_getlogger_calls(
+    directory: Path, allowed: set[str] | None = None
+) -> list[str]:
     """Check for logging.getLogger() or getLogger() calls in source code.
 
     Args:
@@ -124,9 +126,7 @@ def _check_getlogger_calls(directory: Path, allowed: set[str] | None = None) -> 
                         )
                 # Check for direct getLogger() call
                 elif isinstance(node.func, ast.Name) and node.func.id == "getLogger":
-                    violations.append(
-                        f"{rel_path}:{node.lineno}: getLogger() call"
-                    )
+                    violations.append(f"{rel_path}:{node.lineno}: getLogger() call")
 
     return violations
 
@@ -140,9 +140,7 @@ class TestNoLoggingGetLoggerInInfrastructure:
         REQ-ARCH-033: Use LoggerPort injection instead of logging.getLogger()
         to ensure all logs include run_id and other context fields.
         """
-        violations = _check_logging_getlogger_imports(
-            INFRASTRUCTURE_DIR, ALLOWED_FILES
-        )
+        violations = _check_logging_getlogger_imports(INFRASTRUCTURE_DIR, ALLOWED_FILES)
 
         assert not violations, (
             "logging.getLogger usage found in infrastructure layer:\n"
@@ -174,9 +172,7 @@ class TestNoLoggingGetLoggerInInfrastructure:
         (_check_getlogger_calls, "getLogger calls"),
     ],
 )
-def test_no_logging_getlogger_parametrized(
-    check_fn: callable, check_name: str
-) -> None:
+def test_no_logging_getlogger_parametrized(check_fn: callable, check_name: str) -> None:
     """Parametrized test for logging.getLogger detection.
 
     Args:

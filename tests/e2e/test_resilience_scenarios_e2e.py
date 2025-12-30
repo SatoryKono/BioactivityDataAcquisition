@@ -19,7 +19,6 @@ import pytest
 
 from bioetl.domain.types import RunID, RunType
 
-
 # ============================================================================
 # Memory Pressure Tests
 # ============================================================================
@@ -255,8 +254,8 @@ async def test_circuit_breaker_opens_on_failures():
     - 5 consecutive failures should open the circuit
     - Open circuit should reject requests immediately
     """
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.domain.types import CircuitBreakerState
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
     breaker = CircuitBreaker(
         provider="test",
@@ -269,7 +268,9 @@ async def test_circuit_breaker_opens_on_failures():
     # Simulate failures via force_open (circuit breaker uses internal _on_failure)
     breaker.force_open()
 
-    assert breaker.get_state() == CircuitBreakerState.OPEN, "Should be OPEN after force_open()"
+    assert (
+        breaker.get_state() == CircuitBreakerState.OPEN
+    ), "Should be OPEN after force_open()"
 
 
 @pytest.mark.e2e
@@ -282,8 +283,8 @@ async def test_circuit_breaker_half_open_recovery():
     - Single success should close circuit
     - Single failure should re-open circuit
     """
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.domain.types import CircuitBreakerState
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
     breaker = CircuitBreaker(
         provider="test",
@@ -418,7 +419,6 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         b'{"id": 1, "value": "test1"}',
         b'{"id": 2, "value": "test2"}',
     ]
-
 
     path_str = await writer.write_bronze(
         records=iter(records),

@@ -344,9 +344,7 @@ class TestRunPipelineIntegration:
             "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=mock_runner,
         ):
-            result = await run_pipeline(
-                "test_pipeline", RunOptions(run_type="rebuild")
-            )
+            result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
 
         assert result.status == RunStatus.FAILED
         assert result.error_message == "Connection failed"

@@ -74,6 +74,40 @@ class RunStatus(str, Enum):
         return self in {RunStatus.COMPLETED, RunStatus.FAILED, RunStatus.SHUTDOWN}
 
 
+def _validate_stage_name(stage: str) -> None:
+    """Validate stage name is not empty."""
+    if not stage:
+        raise ValueError("Stage name cannot be empty")
+
+
+def _validate_stage_completion(
+    status: StageStatus, error: str | None, completed_at: datetime | None
+) -> None:
+    """Validate stage completion invariants."""
+    if status == StageStatus.FAILED and not error:
+        raise ValueError("Failed stage must have an error message")
+    needs_timestamp = status in {StageStatus.SUCCESS, StageStatus.FAILED}
+    if needs_timestamp and not completed_at:
+        raise ValueError(
+            f"Completed/Failed stage must have completed_at timestamp, "
+            f"got status={status.value}"
+        )
+
+
+def _validate_stage_result(
+    stage: str,
+    status: StageStatus,
+    error: str | None,
+    completed_at: datetime | None,
+    records_processed: int,
+) -> None:
+    """Validate stage result invariants (extracted for lower CC)."""
+    _validate_stage_name(stage)
+    _validate_stage_completion(status, error, completed_at)
+    if records_processed < 0:
+        raise ValueError(f"records_processed cannot be negative: {records_processed}")
+
+
 @dataclass(frozen=True, slots=True)
 class StageResult:
     """Immutable value object representing the result of a pipeline stage.
@@ -100,17 +134,13 @@ class StageResult:
 
     def __post_init__(self) -> None:
         """Validate stage result invariants."""
-        if not self.stage:
-            raise ValueError("Stage name cannot be empty")
-        if self.status == StageStatus.FAILED and not self.error:
-            raise ValueError("Failed stage must have an error message")
-        if self.status in {StageStatus.SUCCESS, StageStatus.FAILED} and not self.completed_at:
-            raise ValueError(
-                f"Completed/Failed stage must have completed_at timestamp, "
-                f"got status={self.status.value}"
-            )
-        if self.records_processed < 0:
-            raise ValueError(f"records_processed cannot be negative: {self.records_processed}")
+        _validate_stage_result(
+            self.stage,
+            self.status,
+            self.error,
+            self.completed_at,
+            self.records_processed,
+        )
 
     @property
     def duration_seconds(self) -> float | None:
@@ -322,7 +352,9 @@ class PipelineRun:
         self._status = RunStatus.RUNNING
         self._started_at = started_at or datetime.now(UTC)
 
-    def record_stage_start(self, stage: str, started_at: datetime | None = None) -> None:
+    def record_stage_start(
+        self, stage: str, started_at: datetime | None = None
+    ) -> None:
         """Record the start of a pipeline stage.
 
         Args:
@@ -429,6 +461,22 @@ class PipelineRun:
             )
         )
 
+    def _assert_can_complete(self) -> None:
+        """Check invariants required for successful completion."""
+        if self.failed_stages:
+            failed_names = [s.stage for s in self.failed_stages]
+            raise InvalidStateError(
+                f"Cannot complete run: {len(self.failed_stages)} stages failed: {failed_names}",
+                current_state=self._status.value,
+                attempted_operation="complete",
+            )
+        if not self._stages:
+            raise InvalidStateError(
+                "Cannot complete run: no stages recorded",
+                current_state=self._status.value,
+                attempted_operation="complete",
+            )
+
     def complete(self, completed_at: datetime | None = None) -> None:
         """Mark the run as completed successfully.
 
@@ -446,23 +494,7 @@ class PipelineRun:
                              or has no stages.
         """
         self._assert_running("complete")
-
-        # Invariant: Cannot complete with failed stages
-        if self.failed_stages:
-            failed_names = [s.stage for s in self.failed_stages]
-            raise InvalidStateError(
-                f"Cannot complete run: {len(self.failed_stages)} stages failed: {failed_names}",
-                current_state=self._status.value,
-                attempted_operation="complete",
-            )
-
-        # Invariant: Must have at least one stage
-        if not self._stages:
-            raise InvalidStateError(
-                "Cannot complete run: no stages recorded",
-                current_state=self._status.value,
-                attempted_operation="complete",
-            )
+        self._assert_can_complete()
 
         now = completed_at or datetime.now(UTC)
         self._status = RunStatus.COMPLETED
@@ -482,7 +514,12 @@ class PipelineRun:
             )
         )
 
-    def fail(self, error: str, error_type: str | None = None, failed_at: datetime | None = None) -> None:
+    def fail(
+        self,
+        error: str,
+        error_type: str | None = None,
+        failed_at: datetime | None = None,
+    ) -> None:
         """Mark the run as failed without recording a specific stage.
 
         Transitions: RUNNING -> FAILED

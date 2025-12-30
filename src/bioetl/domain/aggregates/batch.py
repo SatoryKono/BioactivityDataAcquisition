@@ -455,7 +455,9 @@ class Batch:
             )
         )
 
-    def mark_failed(self, layer: str, error: str, error_type: str | None = None) -> None:
+    def mark_failed(
+        self, layer: str, error: str, error_type: str | None = None
+    ) -> None:
         """Mark batch write as failed.
 
         Transitions: WRITING -> FAILED

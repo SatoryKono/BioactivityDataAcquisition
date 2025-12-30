@@ -156,7 +156,9 @@ def bootstrap_vacuum_service() -> VacuumService:
     )
 
 
-def _create_table_collector(logger: NoOpLogger) -> Callable[[str], list[tuple[str, str]]]:
+def _create_table_collector(
+    logger: NoOpLogger,
+) -> Callable[[str], list[tuple[str, str]]]:
     """Create a table collector function for VacuumService.
 
     This function queries the pipeline registry and config loader

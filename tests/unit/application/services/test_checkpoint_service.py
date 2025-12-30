@@ -79,7 +79,9 @@ class TestCheckpointServiceListCheckpoints:
     """Test CheckpointService.list_checkpoints method."""
 
     @pytest.mark.asyncio
-    async def test_list_checkpoints_empty(self, checkpoint_service, mock_checkpoint_port):
+    async def test_list_checkpoints_empty(
+        self, checkpoint_service, mock_checkpoint_port
+    ):
         """Test listing checkpoints when none exist."""
         mock_checkpoint_port.list_all.return_value = []
 
@@ -145,9 +147,7 @@ class TestCheckpointServiceGetCheckpoint:
         mock_checkpoint_port.load.assert_called_once_with("nonexistent")
 
     @pytest.mark.asyncio
-    async def test_get_checkpoint_found(
-        self, checkpoint_service, mock_checkpoint_port
-    ):
+    async def test_get_checkpoint_found(self, checkpoint_service, mock_checkpoint_port):
         """Test getting an existing checkpoint."""
         run_id = uuid4()
         mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})

@@ -458,9 +458,7 @@ class TestProviderHealthTracker:
         # Should recover from DEGRADED if clear window passed
         assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)
 
-    def test_record_error_delegates(
-        self, tracker: ProviderHealthTracker
-    ) -> None:
+    def test_record_error_delegates(self, tracker: ProviderHealthTracker) -> None:
         """Test record_error delegates to monitor."""
         status = tracker.record_error()
 
@@ -526,9 +524,7 @@ class TestProviderHealthMonitorUpdateFromResult:
             labels={"provider": "chembl"},
         )
 
-    def test_logs_p2_alert_on_unhealthy(
-        self, monitor: ProviderHealthMonitor
-    ) -> None:
+    def test_logs_p2_alert_on_unhealthy(self, monitor: ProviderHealthMonitor) -> None:
         """Test P2 alert is logged when status becomes UNHEALTHY."""
         from bioetl.domain.ports.health_check import HealthCheckResult
 

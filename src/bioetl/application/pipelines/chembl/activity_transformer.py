@@ -49,9 +49,7 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
-        *simple_fields(
-            "target_chembl_id", "assay_chembl_id", "document_chembl_id"
-        ),
+        *simple_fields("target_chembl_id", "assay_chembl_id", "document_chembl_id"),
         *int_fields("record_id", "src_id"),
     ),
 )
@@ -86,7 +84,12 @@ _RAW_VALUES = FieldGroup(
 _STANDARD_VALUES = FieldGroup(
     name="standard_values",
     fields=(
-        *simple_fields("standard_type", "standard_units", "standard_relation", "standard_text_value"),
+        *simple_fields(
+            "standard_type",
+            "standard_units",
+            "standard_relation",
+            "standard_text_value",
+        ),
         *float_fields("standard_value", "standard_upper_value", "pchembl_value"),
         *int_fields("standard_flag"),
     ),

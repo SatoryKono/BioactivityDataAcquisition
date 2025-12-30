@@ -152,9 +152,7 @@ class TestCellLineTransformer:
         assert result["cl_lincs_id"] == "LCL-1234"
 
     @pytest.mark.asyncio
-    async def test_transform_with_invalid_tax_id_zero(
-        self, transformer, mock_context
-    ):
+    async def test_transform_with_invalid_tax_id_zero(self, transformer, mock_context):
         """Test that tax_id of 0 becomes None (must be >= 1)."""
         record = {
             "cell_chembl_id": "CHEMBL3308376",

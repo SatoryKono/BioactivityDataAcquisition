@@ -29,9 +29,7 @@ class PubChemCompoundRecord(BaseModel):
     cid: int = Field(description="PubChem Compound ID")
 
     # Molecular Properties
-    molecular_formula: str | None = Field(
-        default=None, description="Molecular formula"
-    )
+    molecular_formula: str | None = Field(default=None, description="Molecular formula")
     molecular_weight: float | None = Field(
         default=None, description="Molecular weight in g/mol"
     )
@@ -43,22 +41,14 @@ class PubChemCompoundRecord(BaseModel):
     isomeric_smiles: str | None = Field(
         default=None, description="Isomeric SMILES (from smiles property)"
     )
-    inchi: str | None = Field(
-        default=None, description="InChI string"
-    )
-    inchikey: str | None = Field(
-        default=None, description="InChI Key"
-    )
+    inchi: str | None = Field(default=None, description="InChI string")
+    inchikey: str | None = Field(default=None, description="InChI Key")
 
     # Names
-    iupac_name: str | None = Field(
-        default=None, description="IUPAC systematic name"
-    )
+    iupac_name: str | None = Field(default=None, description="IUPAC systematic name")
 
     # Physical/Chemical Properties
-    charge: int | None = Field(
-        default=None, description="Formal charge"
-    )
+    charge: int | None = Field(default=None, description="Formal charge")
     complexity: float | None = Field(
         default=None, description="Molecular complexity score"
     )
@@ -73,9 +63,7 @@ class PubChemCompoundRecord(BaseModel):
     )
 
     # Fingerprints
-    fingerprint: str | None = Field(
-        default=None, description="PubChem fingerprint"
-    )
+    fingerprint: str | None = Field(default=None, description="PubChem fingerprint")
 
 
 class PubChemSubstanceRecord(BaseModel):
@@ -118,20 +106,12 @@ class PubChemAssayRecord(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Primary Key
-    aid: int | None = Field(
-        default=None, description="PubChem Assay ID"
-    )
+    aid: int | None = Field(default=None, description="PubChem Assay ID")
 
     # Core Fields
-    name: str | None = Field(
-        default=None, description="Assay name"
-    )
-    description: str | None = Field(
-        default=None, description="Assay description"
-    )
-    protocol: str | None = Field(
-        default=None, description="Assay protocol"
-    )
+    name: str | None = Field(default=None, description="Assay name")
+    description: str | None = Field(default=None, description="Assay description")
+    protocol: str | None = Field(default=None, description="Assay protocol")
     target: dict[str, Any] | None = Field(
         default=None, description="Target information"
     )
@@ -224,17 +204,11 @@ class PubChemBioactivityRecord(BaseModel):
     activity_outcome: str | None = Field(
         default=None, description="Activity outcome (Active, Inactive, etc.)"
     )
-    activity_score: float | None = Field(
-        default=None, description="Activity score"
-    )
+    activity_score: float | None = Field(default=None, description="Activity score")
 
     # Target Info
-    target_gi: int | None = Field(
-        default=None, description="Target GI number"
-    )
-    target_name: str | None = Field(
-        default=None, description="Target name"
-    )
+    target_gi: int | None = Field(default=None, description="Target GI number")
+    target_name: str | None = Field(default=None, description="Target name")
 
     # Activity Values
     activity_values: list[dict[str, Any]] | None = Field(
