@@ -179,6 +179,10 @@ class TestSilverWriterValidateSilverPandera:
         assert exc_info.value.table == "test.table"
         assert len(exc_info.value.errors) > 0
 
+    @pytest.mark.skipif(
+        PYTHON_314,
+        reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
+    )
     def test_validate_silver_pandera_logs_error_on_failure(self):
         """Test _validate_silver_pandera logs error when validation fails."""
         import pandera as pa
@@ -209,6 +213,10 @@ class TestSilverWriterValidateSilverPandera:
         assert call_args[0][0] == "Silver Pandera validation failed"
         assert call_args[1]["table"] == "test.table"
 
+    @pytest.mark.skipif(
+        PYTHON_314,
+        reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
+    )
     def test_validate_silver_pandera_increments_metric_on_failure(self):
         """Test _validate_silver_pandera increments metric when validation fails."""
         import pandera as pa
@@ -247,6 +255,10 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
     """Tests for write_silver with Pandera validation integration."""
 
     @pytest.mark.asyncio
+    @pytest.mark.skipif(
+        PYTHON_314,
+        reason="Pandera 0.26.1 has compatibility issues with Python 3.14",
+    )
     async def test_write_silver_pandera_validation_fails(
         self, valid_records, noop_logger
     ):
