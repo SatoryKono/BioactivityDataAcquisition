@@ -87,11 +87,27 @@ class TestAggregateBoundaryIsolation:
         REQ-ARCH-021: Cross-aggregate references must be by ID only,
         not by full aggregate objects.
         """
+        import re
+
         if not aggregates_dir.exists():
             pytest.skip("Aggregates directory not found")
 
         # These aggregate type names should NOT appear in type hints
+        # We use word boundary matching to avoid false positives (e.g., BatchID vs Batch)
         forbidden_types = {"Batch", "PipelineRun", "QuarantineEntry"}
+
+        def is_forbidden_type_match(ann_str: str, forbidden: str) -> bool:
+            """Check if annotation contains forbidden type as a standalone word.
+
+            Uses word boundary matching to avoid false positives like:
+            - BatchID should NOT match Batch
+            - list[Batch] should match Batch
+            - Batch should match Batch
+            """
+            # Pattern matches the forbidden type as a standalone word
+            # Not followed by ID (to allow BatchID, RunID etc.)
+            pattern = rf"\b{re.escape(forbidden)}\b(?!ID)"
+            return bool(re.search(pattern, ann_str))
 
         violations = []
 
@@ -124,7 +140,7 @@ class TestAggregateBoundaryIsolation:
                                     ann_str = ast.unparse(arg.annotation)
                                     for forbidden in forbidden_types:
                                         if (
-                                            forbidden in ann_str
+                                            is_forbidden_type_match(ann_str, forbidden)
                                             and forbidden != current_file_class
                                         ):
                                             violations.append(
@@ -139,7 +155,7 @@ class TestAggregateBoundaryIsolation:
                             target_name = getattr(item.target, "id", "unknown")
                             for forbidden in forbidden_types:
                                 if (
-                                    forbidden in ann_str
+                                    is_forbidden_type_match(ann_str, forbidden)
                                     and forbidden != current_file_class
                                 ):
                                     violations.append(

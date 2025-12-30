@@ -84,21 +84,25 @@ class TestQuarantineCommands:
 class TestRunCommand:
     """Tests for the run CLI command."""
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     def test_run_command_success(
         self,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_create_runner,
+        mock_get_service,
         runner,
     ):
         """Test that run command works with valid arguments."""
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock()
-        mock_runner_instance.logger = MagicMock()  # CLI needs logger
-        mock_create_runner.return_value = mock_runner_instance
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(
             cli,
@@ -106,26 +110,27 @@ class TestRunCommand:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        mock_create_runner.assert_called_once()
-        mock_asyncio_run.assert_called_once()
+        mock_service.run.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     def test_run_command_with_options(
         self,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_create_runner,
+        mock_get_service,
         runner,
     ):
         """Test run command with all options."""
-        from bioetl.composition.entrypoints import RunOptions
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
 
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock()
-        mock_runner_instance.logger = MagicMock()  # CLI needs logger
-        mock_create_runner.return_value = mock_runner_instance
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(
             cli,
@@ -143,33 +148,33 @@ class TestRunCommand:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        # create_pipeline_runner is called with (pipeline_name, RunOptions)
-        call_args = mock_create_runner.call_args
-        assert call_args[0][0] == "chembl_activity"  # pipeline name
-        options = call_args[0][1]  # RunOptions
+        # Check service.run was called with correct RunOptions
+        call_args = mock_service.run.call_args
+        options = call_args[1]["options"]  # RunOptions passed as keyword arg
         assert isinstance(options, RunOptions)
         assert options.run_type == "backfill"
         assert options.resume is True
         assert options.limit == 1000
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     def test_run_command_shutdown_error(
         self,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_create_runner,
+        mock_get_service,
         runner,
     ):
-        """Test run command handles shutdown error."""
-        from bioetl.application.core.shutdown import PipelineShutdownError
+        """Test run command handles shutdown result."""
+        from bioetl.application.services import RunResult, RunStatus
 
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock(side_effect=PipelineShutdownError())
-        mock_runner_instance.logger = MagicMock()  # CLI needs logger
-        mock_create_runner.return_value = mock_runner_instance
-        mock_asyncio_run.side_effect = PipelineShutdownError("Shutdown")
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(
             cli,
@@ -178,22 +183,16 @@ class TestRunCommand:
 
         assert result.exit_code == 130  # Shutdown exit code
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     def test_run_command_exception(
         self,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_create_runner,
+        mock_get_service,
         runner,
     ):
         """Test run command handles general exceptions."""
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock(side_effect=RuntimeError("Test error"))
-        mock_runner_instance.logger = MagicMock()  # CLI needs logger
-        mock_create_runner.return_value = mock_runner_instance
-        mock_asyncio_run.side_effect = RuntimeError("Test error")
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(side_effect=RuntimeError("Test error"))
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(
             cli,
@@ -265,60 +264,86 @@ class TestPipelineValidation:
 class TestRunCommandAdvanced:
     """Advanced tests for run command edge cases."""
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    def test_run_command_bootstrap_value_error(self, mock_create_runner, runner):
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    def test_run_command_bootstrap_value_error(self, mock_get_service, runner):
         """Test run command handles ValueError during bootstrap."""
-        mock_create_runner.side_effect = ValueError("Invalid config")
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.FAILED,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+                error_message="Invalid config",
+                error_type="ValueError",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
         assert result.exit_code == ExitCode.CONFIG_ERROR
-        assert "Configuration error" in result.output
+        assert "Pipeline failed" in result.output or "Invalid config" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    def test_run_command_bootstrap_file_not_found(self, mock_create_runner, runner):
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    def test_run_command_bootstrap_file_not_found(self, mock_get_service, runner):
         """Test run command handles FileNotFoundError during bootstrap."""
+        from bioetl.application.services import RunResult, RunStatus
 
-        mock_create_runner.side_effect = FileNotFoundError("Config not found")
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.FAILED,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+                error_message="Config not found",
+                error_type="FileNotFoundError",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == ExitCode.CONFIG_ERROR
-        assert "Configuration error" in result.output
+        assert result.exit_code == ExitCode.EX_NOINPUT
+        assert "Pipeline failed" in result.output or "Config not found" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    def test_run_command_bootstrap_generic_error(self, mock_create_runner, runner):
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    def test_run_command_bootstrap_generic_error(self, mock_get_service, runner):
         """Test run command handles generic Exception during bootstrap."""
-
-        mock_create_runner.side_effect = RuntimeError("Unexpected error")
+        mock_get_service.side_effect = RuntimeError("Unexpected error")
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == ExitCode.INIT_ERROR
-        assert "Initialization failed" in result.output
+        assert result.exit_code == ExitCode.FAIL
+        assert "Unexpected error" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     def test_run_command_with_filter_options(
         self,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_create_runner,
+        mock_get_service,
         runner,
         tmp_path,
     ):
         """Test run command with CSV filter options."""
-        from bioetl.composition.entrypoints import RunOptions
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
 
         # Create a temporary CSV file
         csv_file = tmp_path / "filter.csv"
         csv_file.write_text("id\nCHEMBL123\nCHEMBL456")
 
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock()
-        mock_runner_instance.logger = MagicMock()  # CLI needs logger
-        mock_create_runner.return_value = mock_runner_instance
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(
             cli,
@@ -336,25 +361,22 @@ class TestRunCommandAdvanced:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        call_args = mock_create_runner.call_args
-        assert call_args[0][0] == "chembl_activity"  # pipeline name
-        options = call_args[0][1]  # RunOptions
+        call_args = mock_service.run.call_args
+        options = call_args[1]["options"]  # RunOptions
         assert isinstance(options, RunOptions)
         assert options.input_csv == str(csv_file)
         assert options.filter_column == "id"
         assert options.filter_field == "molecule_chembl_id"
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    def test_run_command_missing_logger(self, mock_create_runner, runner):
-        """Test run command handles missing logger gracefully."""
-
-        mock_runner_instance = MagicMock(spec=[])  # Empty spec, no logger attribute
-        mock_create_runner.return_value = mock_runner_instance
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    def test_run_command_missing_logger(self, mock_get_service, runner):
+        """Test run command handles missing service gracefully."""
+        mock_get_service.side_effect = RuntimeError("Service not initialized")
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == ExitCode.INIT_ERROR
-        assert "Logger not initialized" in result.output
+        assert result.exit_code == ExitCode.FAIL
+        assert "Service not initialized" in result.output
 
 
 class TestDryRunMode:
@@ -486,21 +508,25 @@ class TestDryRunMode:
         assert result.exit_code == 0
         assert "cancelled" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
-    @patch("bioetl.interfaces.cli.commands.run.setup_shutdown_handlers")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     def test_rebuild_with_yes_skips_confirmation(
         self,
-        mock_asyncio_run,
-        mock_setup_handlers,
-        mock_create_runner,
+        mock_get_service,
         runner,
     ):
         """Test that rebuild with -y skips confirmation."""
-        mock_runner_instance = MagicMock()
-        mock_runner_instance.run = AsyncMock()
-        mock_runner_instance.logger = MagicMock()  # CLI needs logger
-        mock_create_runner.return_value = mock_runner_instance
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = runner.invoke(
             cli,
@@ -508,7 +534,7 @@ class TestDryRunMode:
         )
 
         assert result.exit_code == 0
-        mock_create_runner.assert_called_once()
+        mock_service.run.assert_called_once()
 
 
 class TestValidatePipelineName:

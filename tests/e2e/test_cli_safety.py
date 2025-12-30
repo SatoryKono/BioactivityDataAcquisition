@@ -28,8 +28,8 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
     """Test that rebuild requires confirmation without --yes."""
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner"
-        ) as mock_create_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
+        ) as mock_get_service,
         patch(
             "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
             return_value=mock_registry,
@@ -42,39 +42,47 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
         # Should prompt for confirmation (message format from merged CLI)
         assert "rebuild will clear existing data" in result.output.lower()
         assert result.exit_code != 0  # Click aborts when no input provided
-        mock_create_runner.assert_not_called()
+        mock_get_service.assert_not_called()
 
 
 def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
+    from bioetl.application.services import RunResult, RunStatus
+
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner"
-        ) as mock_create_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
+        ) as mock_get_service,
         patch(
             "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
             return_value=mock_registry,
         ),
     ):
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock()  # Make run awaitable
-        mock_runner.logger = MagicMock()  # Satisfy logger check
-        mock_create_runner.return_value = mock_runner
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="test_pipe",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
 
         result = cli_runner.invoke(
             cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild", "--yes"]
         )
 
         assert result.exit_code == 0
-        mock_create_runner.assert_called_once()
+        mock_service.run.assert_called_once()
 
 
 def test_cli_dry_run_flag(cli_runner, mock_registry):
     """Test that --dry-run flag shows preview and does NOT execute pipeline."""
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner"
-        ) as mock_create_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
+        ) as mock_get_service,
         patch(
             "bioetl.interfaces.cli.commands.run_helpers.show_cleanup_preview"
         ) as mock_preview,
@@ -91,7 +99,7 @@ def test_cli_dry_run_flag(cli_runner, mock_registry):
         assert result.exit_code == 0
         # Dry-run outputs preview info, not warning
         assert "[DRY-RUN]" in result.output
-        # Dry-run should NOT call create_pipeline_runner (returns early)
-        mock_create_runner.assert_not_called()
+        # Dry-run should NOT call get_pipeline_runner_service (returns early)
+        mock_get_service.assert_not_called()
         # But should call preview
         mock_preview.assert_called_once()

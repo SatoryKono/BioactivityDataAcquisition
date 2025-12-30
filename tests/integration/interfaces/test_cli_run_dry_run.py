@@ -41,30 +41,36 @@ class TestCliRunDryRun:
         cli_runner: CliRunner,
         temp_env: dict[str, str],
     ):
-        """Test that --dry-run with incremental mode runs the pipeline.
+        """Test that --dry-run with incremental mode returns dry-run result.
 
-        Dry-run only affects rebuild/backfill cleanup preview.
-        For incremental, the pipeline executes normally.
+        Dry-run with incremental run_type returns DRY_RUN status
+        from the service without executing the actual pipeline.
         """
-        # Mock the pipeline runner to avoid actual execution
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = None
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.DRY_RUN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+            return_value=mock_service,
         ):
             result = cli_runner.invoke(
                 cli,
                 ["run", "--pipeline", "chembl_activity", "--dry-run"],
             )
 
-        # Incremental with dry-run proceeds normally (dry-run doesn't affect incremental)
+        # Dry-run mode returns success
         assert result.exit_code == 0
-        # Verify pipeline was actually executed
-        mock_runner.run.assert_called_once()
+        # Verify service was called
+        mock_service.run.assert_called_once()
 
     def test_dry_run_with_rebuild_shows_preview(
         self,

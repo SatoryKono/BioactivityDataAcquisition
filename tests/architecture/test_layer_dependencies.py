@@ -393,6 +393,8 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         "main",
         # Prefect task decorators
         "execute",
+        # PipelineRunnerService placeholder parameters (not implemented yet)
+        "overrides",
     }
 
     # Get unused code with confidence threshold

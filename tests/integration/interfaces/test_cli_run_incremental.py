@@ -72,16 +72,23 @@ class TestCliRunIncremental:
     ):
         """Test successful incremental pipeline run.
 
-        Uses mocked runner to verify CLI bootstrapping and execution flow.
+        Uses mocked service to verify CLI bootstrapping and execution flow.
         """
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = None
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+            return_value=mock_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -89,7 +96,7 @@ class TestCliRunIncremental:
             )
 
         assert result.exit_code == 0, f"CLI failed: {result.output}"
-        mock_runner.run.assert_called_once()
+        mock_service.run.assert_called_once()
 
     def test_run_incremental_with_resume_flag(
         self,
@@ -97,14 +104,21 @@ class TestCliRunIncremental:
         temp_env: dict[str, str],
     ):
         """Test incremental run with --resume flag."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = None
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+            return_value=mock_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -119,7 +133,7 @@ class TestCliRunIncremental:
             )
 
         assert result.exit_code == 0, f"CLI failed: {result.output}"
-        mock_runner.run.assert_called_once()
+        mock_service.run.assert_called_once()
 
     def test_run_shows_version(self, cli_runner: CliRunner):
         """Test that --version displays version info."""
@@ -186,14 +200,21 @@ class TestCliRunTypes:
         temp_env: dict[str, str],
     ):
         """Test that -y skips confirmation for backfill."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = None
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
 
         with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+            return_value=mock_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -211,8 +232,8 @@ class TestCliRunTypes:
 
         # Check that it didn't ask for confirmation
         assert "cancelled" not in result.output.lower()
-        # Should have called bootstrap and run
-        mock_runner.run.assert_called_once()
+        # Should have called service.run
+        mock_service.run.assert_called_once()
 
 
 class TestCliMain:
