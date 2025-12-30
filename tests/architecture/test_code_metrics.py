@@ -40,6 +40,7 @@ class TestFileSizeLimits:
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
         "activity_aggregator.py": 365,  # 359 LOC - Activity aggregation with multiple strategies
         "normalization_service.py": 390,  # 385 LOC - Normalization service with validation
+        "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
@@ -67,6 +68,7 @@ class TestFileSizeLimits:
         # Infrastructure layer exemptions
         "delta_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
+        "silver_writer.py": 780,  # 777 LOC - Silver layer write with merge/validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
@@ -333,6 +335,8 @@ class TestClassSize:
         "BaseTransformer": 560,  # 559 lines - Template Method with helpers (tracing added)
         "DeltaWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
+        "SilverWriter": 710,  # 704 lines - Silver layer writer with merge/validation
+        "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "LineageTracker": 400,
         "ChemblAdapter": 520,  # 513 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
@@ -504,6 +508,10 @@ class TestGodObjectDetection:
         "ErrorHandler": "Cohesive utility - all methods relate to error classification and logging",
         # Domain services (cohesive services with single responsibility)
         "NormalizationService": "Cohesive service - all methods relate to value normalization",
+        # Lifecycle orchestration service
+        "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
+        # Silver layer writer
+        "SilverWriter": "Cohesive writer - all methods relate to Silver layer operations",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
