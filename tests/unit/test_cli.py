@@ -271,7 +271,8 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        # ExitCode.CONFIG_ERROR is 80
+        assert result.exit_code == 80
         assert "Configuration error" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -281,7 +282,8 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        # ExitCode.CONFIG_ERROR is 80
+        assert result.exit_code == 80
         assert "Configuration error" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -291,7 +293,8 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        # ExitCode.INIT_ERROR is 81
+        assert result.exit_code == 81
         assert "Initialization failed" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -349,7 +352,8 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        # ExitCode.INIT_ERROR is 81
+        assert result.exit_code == 81
         assert "Logger not initialized" in result.output
 
 
