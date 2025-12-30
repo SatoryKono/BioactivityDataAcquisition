@@ -5,11 +5,11 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions import ApiError
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.error_handling import ErrorHandler
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
@@ -57,7 +57,10 @@ class PubMedAdapter(BaseHttpAdapter):
     """Provider identifier (required by DataSourcePort)."""
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics after dataclass init."""
+        """Initialize adapter metrics and error handler after dataclass init."""
+        # Initialize error handler from base class
+        self._error_handler = ErrorHandler(self.logger)
+
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
@@ -83,8 +86,14 @@ class PubMedAdapter(BaseHttpAdapter):
             idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
             return idlist
         except Exception as e:
-            self.logger.error("Failed to fetch PMIDs", error=str(e))
-            raise ApiError(f"PubMed search failed: {e}") from e
+            # Use unified error handler
+            wrapped = self._error_handler.handle_error(
+                error=e,
+                provider=self.provider_name,
+                operation="search",
+                context={"search_term": search_term, "max_count": max_count},
+            )
+            raise wrapped from e
 
     def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
         """Build parameters for efetch API call."""
@@ -110,12 +119,25 @@ class PubMedAdapter(BaseHttpAdapter):
                 )
             root = PubMedXmlProcessor.parse_response(response.text)
             if root is None:
-                self.logger.error("XML parse error in batch fetch")
+                self.logger.error(
+                    "external_api_error",
+                    provider=self.provider_name,
+                    operation="batch_fetch",
+                    error_category="DATA_QUALITY",
+                    error="XML parse error",
+                    batch_size=len(id_batch),
+                )
                 return []
             return PubMedXmlProcessor.extract_all_records(root)
         except Exception as e:
-            self.logger.error("Batch fetch failed", error=str(e))
-            raise ApiError(f"PubMed fetch failed: {e}") from e
+            # Use unified error handler
+            wrapped = self._error_handler.handle_error(
+                error=e,
+                provider=self.provider_name,
+                operation="batch_fetch",
+                context={"batch_size": len(id_batch)},
+            )
+            raise wrapped from e
 
     async def _yield_articles_from_pmids(
         self, pmids: list[str], limit: int | None
@@ -252,8 +274,11 @@ class PubMedAdapter(BaseHttpAdapter):
             return HealthStatus.HEALTHY
 
         except Exception as e:
+            error_type = self._error_handler.get_error_type(e)
             self.logger.warning(
-                "pubmed_health_check_failed",
+                "health_check_failed",
+                provider=self.provider_name,
+                error_type=error_type.value,
                 error=str(e),
             )
             raise  # Let health_check() return _fallback_health_status()

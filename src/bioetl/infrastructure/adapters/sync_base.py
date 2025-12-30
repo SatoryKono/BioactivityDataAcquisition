@@ -6,6 +6,11 @@ Provides common functionality for adapters that must use synchronous libraries
 Uses Template Method pattern for health checks: subclasses implement
 _probe_health() for provider-specific probes, with automatic fallback
 to circuit breaker assessment on failure.
+
+Error Handling (RULES.md §4.1):
+- Critical errors: Fail immediately (401, 403)
+- Recoverable errors: Handled by circuit breaker
+- Data quality errors: Log and skip record
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ from typing import TYPE_CHECKING, Any, Self
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.error_handling import ErrorHandler
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -39,6 +45,10 @@ class BaseSyncAdapter(DataSourcePort):
     - _probe_health(): Override for provider-specific health probe
     - _fallback_health_status(): Fallback using circuit breaker state
 
+    Error Handling:
+    - _error_handler: Provides unified error classification, logging, and wrapping
+    - _handle_adapter_error(): Template method for consistent error handling
+
     Attributes:
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
@@ -55,6 +65,7 @@ class BaseSyncAdapter(DataSourcePort):
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
+    _error_handler: ErrorHandler
 
     def __init__(
         self,
@@ -84,6 +95,7 @@ class BaseSyncAdapter(DataSourcePort):
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
         self.strict_error_handling = strict_error_handling
+        self._error_handler = ErrorHandler(logger)
 
         # Safety: ensure shutdown if aclose/context manager is misused
         self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
@@ -212,3 +224,57 @@ class BaseSyncAdapter(DataSourcePort):
             return assess_health_from_circuit_breaker(self.circuit_breaker)
         except Exception:
             return HealthStatus.UNHEALTHY
+
+    def _get_error_context(self, operation: str) -> dict[str, Any]:
+        """Build error context with circuit breaker info.
+
+        Args:
+            operation: Operation name for context.
+
+        Returns:
+            Context dictionary for error handling.
+        """
+        try:
+            cb_state = self.circuit_breaker.get_state().value
+            cb_failures = self.circuit_breaker.get_failure_count()
+        except Exception:
+            cb_state = None
+            cb_failures = 0
+
+        return {
+            "circuit_breaker_state": cb_state,
+            "circuit_breaker_failures": cb_failures,
+        }
+
+    def _handle_adapter_error(
+        self,
+        error: Exception,
+        operation: str = "fetch",
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        """Handle adapter error with unified logging and wrapping.
+
+        Logs error with full context and raises appropriate exception.
+        Uses ErrorHandler for consistent behavior across all adapters.
+
+        Args:
+            error: The exception that occurred.
+            operation: Operation that failed (e.g., 'fetch', 'health_check').
+            context: Additional context (status_code, retry_count, etc.).
+
+        Raises:
+            CriticalError: For authentication failures (401, 403).
+            ExternalServiceError: For other errors.
+        """
+        ctx = self._get_error_context(operation)
+        if context:
+            ctx.update(context)
+
+        # Let ErrorHandler log and wrap the error
+        wrapped = self._error_handler.handle_error(
+            error=error,
+            provider=self.provider_name,
+            operation=operation,
+            context=ctx,
+        )
+        raise wrapped from error

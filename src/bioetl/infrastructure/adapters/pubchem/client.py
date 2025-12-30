@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
@@ -266,8 +265,7 @@ class PubChemAdapter(BaseSyncAdapter):
             return HealthStatus.UNHEALTHY
 
         except Exception as e:
-            error_classifier = ErrorClassifier()
-            error_type = error_classifier.classify(e)
+            error_type = self._error_handler.get_error_type(e)
             self.logger.warning(
                 "health_check_failed",
                 provider=self.provider_name,

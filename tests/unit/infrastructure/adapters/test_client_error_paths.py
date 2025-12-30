@@ -12,6 +12,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
+from bioetl.domain.exceptions import ExternalServiceError
+
 
 @pytest.fixture(autouse=True)
 def reset_settings_cache():
@@ -111,7 +113,10 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_proteins_raises_in_strict_mode(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_proteins raises exception in strict mode."""
+        """Test that _fetch_proteins raises exception in strict mode.
+
+        With unified error handling, exceptions are wrapped in ExternalServiceError.
+        """
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         # Make http_client.get raise an exception
@@ -120,7 +125,7 @@ class TestUniProtAdapterErrorPaths:
             http_client=mock_http_client, logger=mock_logger, strict_error_handling=True
         )
 
-        with pytest.raises(ConnectionError, match="Network error"):
+        with pytest.raises(ExternalServiceError):
             _ = [r async for r in adapter._fetch_proteins(query="test", limit=100)]
 
     async def test_fetch_features_logs_error_on_failure(
@@ -160,7 +165,10 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_features_raises_in_strict_mode(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_features raises exception in strict mode."""
+        """Test that _fetch_features raises exception in strict mode.
+
+        With unified error handling, exceptions are wrapped in ExternalServiceError.
+        """
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         # Make http_client.get raise an exception
@@ -169,7 +177,7 @@ class TestUniProtAdapterErrorPaths:
             http_client=mock_http_client, logger=mock_logger, strict_error_handling=True
         )
 
-        with pytest.raises(TimeoutError, match="Request timeout"):
+        with pytest.raises(ExternalServiceError):
             _ = [r async for r in adapter._fetch_features("P12345", limit=10)]
 
     async def test_fetch_sequences_logs_error_on_failure(
@@ -213,7 +221,10 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_sequences_raises_in_strict_mode(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_sequences raises exception in strict mode."""
+        """Test that _fetch_sequences raises exception in strict mode.
+
+        With unified error handling, exceptions are wrapped in ExternalServiceError.
+        """
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         # Make http_client.get raise an exception
@@ -227,7 +238,7 @@ class TestUniProtAdapterErrorPaths:
             http_client=mock_http_client, logger=mock_logger, strict_error_handling=True
         )
 
-        with pytest.raises(httpx.HTTPStatusError):
+        with pytest.raises(ExternalServiceError):
             _ = [r async for r in adapter._fetch_sequences("gene:TP53", limit=10)]
 
 
