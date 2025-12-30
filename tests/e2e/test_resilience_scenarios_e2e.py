@@ -382,10 +382,8 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
     - Bronze writes should be atomic (temp file + rename)
     - Partial writes should not corrupt data
     """
-    import time
     from datetime import UTC, datetime
 
-    from bioetl.domain.locking import LockContext
     from bioetl.domain.ports.noop import NoOpMetrics
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
     from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -400,13 +398,8 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
 
     await lock.acquire(key=lock_key, owner_id=str(run_id), ttl=60, wait=False)
 
-    # Create lock context with correct format
-    lock_context = LockContext(
-        key=lock_key,
-        owner_id=run_id,
-        exclusive=False,
-        acquired_at=time.monotonic(),
-    )
+    # Note: Lock validation is now at Application layer (BatchWriter)
+    # per RULES.md §4.6 Safety Guard. BronzeWriter is a pure I/O adapter.
 
     writer = BronzeWriter(
         base_path=e2e_data_dir / "bronze",
@@ -429,7 +422,6 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
         ingestion_ts=datetime.now(UTC),
-        lock_context=lock_context,
     )
 
     # write_bronze returns relative path from base_path, so join them

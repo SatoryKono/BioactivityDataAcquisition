@@ -310,7 +310,7 @@ class TestClassSize:
         "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
         "PipelineExecutor": 460,  # 458 lines - executor with tracing and metrics (deprecated)
         "BatchExecutor": 550,  # 547 lines - unified executor combining PipelineExecutor + RecordProcessor
-        "BatchWriter": 330,  # 301 lines - batch writing with lock context provider
+        "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
         "CrossRefFieldExtractor": 330,  # ~315 lines - field extraction (refactored from mappers)

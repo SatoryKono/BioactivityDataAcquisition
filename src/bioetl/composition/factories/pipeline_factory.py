@@ -439,6 +439,7 @@ def assemble_runner(
     )
 
     # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
+    # Safety Guard §4.6: lock validation via lock_validator callback
     batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
         pipeline=pipeline,
         silver_schema=silver_schema,
@@ -446,7 +447,7 @@ def assemble_runner(
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         strict_gold_validation=strict_gold_validation,
-        lock_context_holder=runner_services.context_holder,
+        lock_validator=runner_services.lock_manager.validate,
         tracer=observability.tracer,
     )
 

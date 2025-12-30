@@ -15,7 +15,7 @@ Observability:
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
@@ -42,7 +42,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.locking import LockContext
     from bioetl.domain.ports import (
         GoldValidatorPort,
         LoggerPort,
@@ -102,7 +101,7 @@ class BatchExecutor:
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         tracer: TracingPort | None = None,
-        lock_context_provider: Callable[[], LockContext | None] | None = None,
+        lock_validator: Callable[[], Awaitable[bool]] | None = None,
         memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
         logger: LoggerPort | None = None,
@@ -123,7 +122,7 @@ class BatchExecutor:
             batch_size: Number of records per batch.
             checkpoint_interval: Number of records between checkpoints.
             tracer: Optional tracing port for distributed tracing.
-            lock_context_provider: Callable returning current lock context.
+            lock_validator: Async callable that validates lock ownership (Safety Guard §4.6).
             memory_monitor: Optional memory monitor for adaptive batch sizing.
             memory_config: Memory configuration (used if memory_monitor not provided).
             logger: Logger for memory-related messages.
@@ -190,7 +189,7 @@ class BatchExecutor:
             error_classifier=error_classifier,
             batch_metrics=self._batch_metrics,
             tracer=tracer,
-            lock_context_provider=lock_context_provider,
+            lock_validator=lock_validator,
         )
 
     @property
