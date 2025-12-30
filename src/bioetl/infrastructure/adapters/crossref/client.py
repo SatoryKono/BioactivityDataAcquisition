@@ -21,6 +21,7 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -79,10 +80,6 @@ class CrossRefAdapter(BaseHttpAdapter):
             "Accept": "application/json",
         }
 
-    def _normalize_doi(self, doi: str) -> str:
-        """Normalize DOI to lowercase, stripped format."""
-        return doi.strip().lower()
-
     async def _fetch_single_work(self, doi: str) -> dict[str, Any] | None:
         """Fetch a single work by DOI.
 
@@ -96,7 +93,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             CrossRefApiError: On API errors (non-404).
 
         """
-        normalized_doi = self._normalize_doi(doi)
+        normalized_doi = normalize_doi(doi) or ""
         url = f"{CROSSREF_API_BASE}/works/{normalized_doi}"
 
         try:
@@ -176,7 +173,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             return
 
         # CrossRef allows filtering by multiple DOIs
-        normalized_dois = [self._normalize_doi(d) for d in dois]
+        normalized_dois = [normalize_doi(d) or "" for d in dois]
         filter_value = ",".join(normalized_dois)
         url = f"{CROSSREF_API_BASE}/works"
         params = {

@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
-from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
@@ -43,7 +42,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
         DQMonitorPort,
@@ -468,13 +467,6 @@ def assemble_runner(
         lifecycle_service=lifecycle_service,
     )
 
-    lifecycle_orchestrator = LifecycleOrchestrator(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        logger=logger_port,
-        lifecycle_service=lifecycle_service,
-    )
-
     observer = PipelineObserver(
         pipeline_name=pipeline.config.pipeline_name,
         run_id=pipeline.context.run_id,
@@ -510,7 +502,7 @@ def assemble_runner(
         lock_manager=lock_manager,
         preflight=preflight_service,
         postrun=postrun_service,
-        lifecycle_orch=lifecycle_orchestrator,
+        lifecycle_service=lifecycle_service,
         observer=observer,
         pipeline=pipeline,
         tracer=observability.tracer,

@@ -7,7 +7,7 @@ Delegates to specialized services (injected directly via DI):
 - LockManager: Distributed locking
 - PreflightService: Infrastructure health validation
 - PostrunService: DQ checks, VACUUM, cleanup
-- LifecycleOrchestrator: Medallion layer clearing
+- MedallionLifecycleService: Medallion layer clearing and vacuum
 - PipelineObserver: Observability wrapper for tracing, metrics, logging
 """
 
@@ -21,13 +21,15 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
     from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.postrun_service import PostrunService
     from bioetl.application.core.preflight_service import PreflightService
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.application.observability.observer import PipelineObserver
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
@@ -41,8 +43,8 @@ class PipelineRunner:
 
     Delegates specialized operations to:
     - PreflightService: Pre-flight infrastructure validation
-    - PostrunService: Post-run DQ checks, VACUUM, cleanup
-    - LifecycleOrchestrator: Medallion layer clear policies
+    - PostrunService: Post-run DQ checks, cleanup
+    - MedallionLifecycleService: Pre-run clearing and post-run VACUUM
     """
 
     def __init__(
@@ -58,7 +60,7 @@ class PipelineRunner:
         lock_manager: LockManager,
         preflight: PreflightService,
         postrun: PostrunService,
-        lifecycle_orch: LifecycleOrchestrator,
+        lifecycle_service: MedallionLifecycleService,
         observer: PipelineObserver,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
@@ -76,8 +78,8 @@ class PipelineRunner:
             logger: Structured logger.
             lock_manager: Distributed locking manager.
             preflight: Pre-flight infrastructure validation service.
-            postrun: Post-run DQ checks and VACUUM service.
-            lifecycle_orch: Lifecycle orchestrator for medallion layer clearing.
+            postrun: Post-run DQ checks service.
+            lifecycle_service: Medallion lifecycle service for clearing and vacuum.
             observer: Pipeline observability wrapper for tracing, metrics, logging.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
@@ -97,7 +99,7 @@ class PipelineRunner:
         self._lock_manager = lock_manager
         self._preflight_service = preflight
         self._postrun_service = postrun
-        self._lifecycle_orchestrator = lifecycle_orch
+        self._lifecycle_service = lifecycle_service
         self._observer = observer
 
     @property
@@ -133,8 +135,11 @@ class PipelineRunner:
                         self._services
                     )
 
-                    # Lifecycle: clear data exports
-                    await self._lifecycle_orchestrator.clear_for_run()
+                    # Lifecycle: prepare (clear based on run type policy)
+                    await self._lifecycle_service.prepare_for_run(
+                        config=self._config,
+                        runtime=self._runtime,
+                    )
 
                     # Execute pipeline
                     await self._checkpoint_manager.load_checkpoint()
@@ -161,9 +166,12 @@ class PipelineRunner:
         """Validate infrastructure health before pipeline execution."""
         await self._preflight_service.validate_infrastructure(self._services)
 
-    async def _clear_via_lifecycle(self) -> None:
-        """Clear exports using MedallionLifecycleService (policy-based)."""
-        await self._lifecycle_orchestrator.clear_for_run()
+    async def _prepare_medallion_layers(self) -> None:
+        """Prepare medallion layers (clear based on run type policy)."""
+        await self._lifecycle_service.prepare_for_run(
+            config=self._config,
+            runtime=self._runtime,
+        )
 
     async def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""

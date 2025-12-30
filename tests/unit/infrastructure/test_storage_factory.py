@@ -151,7 +151,7 @@ class TestStorageFactoryLocal:
         """Test that local runs use paths from settings."""
         with (
             patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
+            patch("bioetl.composition.factories.storage_factory.SilverWriter"),
             patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             result = StorageFactory.create(
@@ -189,7 +189,7 @@ class TestStorageFactoryLocal:
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
             ) as mock_bronze,
             patch(
-                "bioetl.composition.factories.storage_factory.DeltaWriter"
+                "bioetl.composition.factories.storage_factory.SilverWriter"
             ) as mock_delta,
             patch(
                 "bioetl.composition.factories.storage_factory.GoldWriter"
@@ -229,7 +229,7 @@ class TestStorageFactoryLocal:
             patch(
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
             ) as mock_bronze,
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
+            patch("bioetl.composition.factories.storage_factory.SilverWriter"),
             patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             StorageFactory.create(
@@ -257,7 +257,7 @@ class TestStorageFactoryLocal:
         with (
             patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
             patch(
-                "bioetl.composition.factories.storage_factory.DeltaWriter"
+                "bioetl.composition.factories.storage_factory.SilverWriter"
             ) as mock_delta,
             patch(
                 "bioetl.composition.factories.storage_factory.GoldWriter"
@@ -305,7 +305,7 @@ class TestStorageFactoryEdgeCases:
             patch(
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
             ) as mock_bronze,
-            patch("bioetl.composition.factories.storage_factory.DeltaWriter"),
+            patch("bioetl.composition.factories.storage_factory.SilverWriter"),
             patch("bioetl.composition.factories.storage_factory.GoldWriter"),
         ):
             result = StorageFactory.create(
@@ -339,7 +339,7 @@ class TestStorageFactoryEdgeCases:
                 "bioetl.composition.factories.storage_factory.BronzeWriter"
             ) as mock_bronze,
             patch(
-                "bioetl.composition.factories.storage_factory.DeltaWriter"
+                "bioetl.composition.factories.storage_factory.SilverWriter"
             ) as mock_delta,
             patch(
                 "bioetl.composition.factories.storage_factory.GoldWriter"

@@ -84,8 +84,13 @@ def mock_executor():
 @pytest.fixture
 def mock_lifecycle_service():
     """Create a mock lifecycle service."""
+    from bioetl.application.services.medallion_lifecycle import VacuumResult
+
     service = MagicMock()
     service.vacuum = AsyncMock(return_value=10)
+    service.finalize_run = AsyncMock(
+        return_value=VacuumResult(silver_files_removed=10, gold_files_removed=5, skipped=False)
+    )
     return service
 
 
@@ -285,30 +290,31 @@ class TestPostrunServiceDQChecks:
 
 @pytest.mark.unit
 class TestPostrunServiceVacuum:
-    """Tests for PostrunService.run_vacuum_if_enabled method."""
+    """Tests for PostrunService.run_vacuum_if_enabled method.
+
+    Note: run_vacuum_if_enabled now delegates to MedallionLifecycleService.finalize_run().
+    These tests verify the delegation behavior.
+    """
 
     @pytest.mark.asyncio
-    async def test_vacuum_skipped_when_disabled(self, postrun_service):
-        """Test vacuum is skipped when vacuum_after_run is False."""
-        result = await postrun_service.run_vacuum_if_enabled()
-
-        assert result.skipped is True
-        assert result.silver_files_removed == 0
-        assert result.gold_files_removed == 0
-
-    @pytest.mark.asyncio
-    async def test_vacuum_skipped_in_dry_run(
+    async def test_vacuum_delegates_to_finalize_run(
         self,
         pipeline_config,
         mock_services,
         mock_logger,
         mock_lifecycle_service,
     ):
-        """Test vacuum is skipped in dry-run mode."""
+        """Test run_vacuum_if_enabled delegates to lifecycle service."""
+        from bioetl.application.services.medallion_lifecycle import VacuumResult
+
+        mock_lifecycle_service.finalize_run = AsyncMock(
+            return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
+        )
+
         runtime = RuntimeConfig(
             run_type=RunType.INCREMENTAL,
-            vacuum_after_run=True,
-            dry_run=True,
+            vacuum_after_run=False,
+            dry_run=False,
         )
 
         service = PostrunService(
@@ -321,18 +327,30 @@ class TestPostrunServiceVacuum:
 
         result = await service.run_vacuum_if_enabled()
 
+        # Verify delegation
+        mock_lifecycle_service.finalize_run.assert_called_once_with(
+            config=pipeline_config,
+            runtime=runtime,
+            metrics=mock_services.metrics,
+        )
         assert result.skipped is True
-        mock_logger.info.assert_called()
 
     @pytest.mark.asyncio
-    async def test_vacuum_runs_when_enabled(
+    async def test_vacuum_returns_finalize_run_result(
         self,
         pipeline_config,
         mock_services,
         mock_logger,
         mock_lifecycle_service,
     ):
-        """Test vacuum runs when enabled and not dry-run."""
+        """Test run_vacuum_if_enabled returns finalize_run result."""
+        from bioetl.application.services.medallion_lifecycle import VacuumResult
+
+        expected_result = VacuumResult(
+            silver_files_removed=10, gold_files_removed=5, skipped=False
+        )
+        mock_lifecycle_service.finalize_run = AsyncMock(return_value=expected_result)
+
         runtime = RuntimeConfig(
             run_type=RunType.INCREMENTAL,
             vacuum_after_run=True,
@@ -349,42 +367,10 @@ class TestPostrunServiceVacuum:
 
         result = await service.run_vacuum_if_enabled()
 
-        assert result.skipped is False
+        assert result == expected_result
         assert result.silver_files_removed == 10
-        assert result.gold_files_removed == 10
-        assert mock_lifecycle_service.vacuum.call_count == 2
-
-    @pytest.mark.asyncio
-    async def test_vacuum_handles_error_gracefully(
-        self,
-        pipeline_config,
-        mock_services,
-        mock_logger,
-    ):
-        """Test vacuum handles errors gracefully."""
-        runtime = RuntimeConfig(
-            run_type=RunType.INCREMENTAL,
-            vacuum_after_run=True,
-            dry_run=False,
-        )
-
-        failing_lifecycle = MagicMock()
-        failing_lifecycle.vacuum = AsyncMock(side_effect=Exception("Vacuum failed"))
-
-        service = PostrunService(
-            config=pipeline_config,
-            runtime=runtime,
-            services=mock_services,
-            logger=mock_logger,
-            lifecycle_service=failing_lifecycle,
-        )
-
-        result = await service.run_vacuum_if_enabled()
-
+        assert result.gold_files_removed == 5
         assert result.skipped is False
-        assert result.silver_files_removed == 0
-        assert result.gold_files_removed == 0
-        mock_logger.warning.assert_called()
 
 
 @pytest.mark.unit

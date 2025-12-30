@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
-from bioetl.domain.filter_config import FilterLoadResult, InputFilterConfig
+from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
 from bioetl.domain.types import HealthStatus
 
 

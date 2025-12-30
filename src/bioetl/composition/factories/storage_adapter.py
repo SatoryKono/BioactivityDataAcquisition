@@ -18,8 +18,8 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -44,7 +44,7 @@ class StorageAdapter:
     def __init__(
         self,
         bronze_writer: BronzeWriter,
-        silver_writer: DeltaWriter,
+        silver_writer: SilverWriter,
         gold_writer: GoldWriter,
     ):
         self.bronze = bronze_writer
@@ -308,7 +308,7 @@ class StorageAdapter:
 
     def _preview_layer(
         self,
-        writer: DeltaWriter | GoldWriter,
+        writer: SilverWriter | GoldWriter,
         table_name: str,
     ) -> dict[str, Any]:
         """Count files in a layer without deletion.
