@@ -171,7 +171,8 @@ def parse_with_validation(
     result = validate_record(record, model_class, logger, context)
 
     if result.is_valid and result.validated is not None:
-        return result.validated.model_dump(by_alias=False)
+        validated_dict: dict[str, Any] = result.validated.model_dump(by_alias=False)
+        return validated_dict
 
     if strict:
         raise ValueError(result.error or "Validation failed")

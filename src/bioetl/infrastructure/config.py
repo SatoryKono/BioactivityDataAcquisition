@@ -180,7 +180,8 @@ def load_source_config(provider: str) -> SourceYamlConfig:
     with open(config_path, encoding="utf-8") as f:
         raw_config = yaml.safe_load(f) or {}
 
-    return SourceYamlConfig.model_validate(raw_config)
+    config: SourceYamlConfig = SourceYamlConfig.model_validate(raw_config)
+    return config
 
 
 @lru_cache(maxsize=10)
