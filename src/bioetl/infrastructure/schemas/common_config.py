@@ -24,7 +24,7 @@ class DQConfig(BaseModel):
     strict_validation: bool = Field(default=False)
 
     @model_validator(mode="after")
-    def validate_thresholds(self) -> "DQConfig":
+    def validate_thresholds(self) -> DQConfig:
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,

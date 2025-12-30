@@ -14,6 +14,7 @@ from bioetl.infrastructure.storage.retention_manager import RetentionManager
 
 if TYPE_CHECKING:
     from pathlib import Path
+
     from bioetl.domain.ports import LoggerPort
 
 
