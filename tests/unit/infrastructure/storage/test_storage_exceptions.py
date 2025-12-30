@@ -90,7 +90,7 @@ class TestDeltaWriterExceptions:
             )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
     async def test_write_silver_raises_merge_conflict_error(
         self, mock_delta_table, valid_record, noop_logger
     ):
@@ -132,9 +132,9 @@ class TestDeltaWriterExceptions:
             )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.silver_writer.write_deltalake")
+    @patch("bioetl.infrastructure.storage.delta_writer.write_deltalake")
     @patch(
-        "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+        "bioetl.infrastructure.storage.delta_writer.DeltaTable",
         side_effect=TableNotFoundError,
     )
     async def test_write_silver_raises_schema_error_on_create(
@@ -169,7 +169,7 @@ class TestDeltaWriterExceptions:
     async def test_vacuum_raises_table_not_found(self, noop_logger):
         """Test that vacuum raises CustomTableNotFoundError."""
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
             side_effect=TableNotFoundError,
         ):
             writer = DeltaWriter(
