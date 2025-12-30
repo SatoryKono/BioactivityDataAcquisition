@@ -48,7 +48,7 @@ from bioetl.domain.value_objects.compound_ids import (
     CompoundIdUnion,
     CompoundSource,
 )
-from bioetl.domain.value_objects.dq_result import DQResult, DQStatus
+from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult, DQStatus
 from bioetl.domain.value_objects.identifiers import (
     DOI,
     ChemblId,
@@ -69,8 +69,9 @@ __all__ = [
     "Concentration",
     "ConcentrationUnit",
     "ConfidenceScore",
+    "DQEvaluationStatus",
     "DQResult",
-    "DQStatus",
+    "DQStatus",  # Deprecated: use DQEvaluationStatus
     "PChemblValue",
     "PubChemCid",
     "PubMedId",

@@ -3,34 +3,8 @@
 Implements RULES.md §1 - Domain Layer with pure types and value objects.
 No I/O operations allowed (REQ-ARCH-003).
 
-Type Safety Guidelines:
-1. Use NewType for semantic disambiguation (RunID, EntityID, ContentHash, BatchID)
-2. Use TypedDict for structured dictionaries with known keys
-3. Use Literal for constrained string values
-4. Use frozen dataclasses with slots=True for value objects
-
-Justified Any Type Usage:
-The following patterns are the ONLY acceptable uses of Any in the domain layer:
-
-1. dict[str, Any] for External API Records:
-   - BronzeRecord, SilverRecord from external sources with dynamic schemas
-   - Filtering operations on records with unknown field types
-   - Justification: External APIs have varying schemas per record type
-
-2. **kwargs: Any for Logger Binding:
-   - LoggerPort.bind(**kwargs: Any)
-   - Justification: Structured logging accepts arbitrary context
-
-3. Protocol Method Parameters:
-   - Port interfaces that must work with multiple implementations
-   - Justification: Enables polymorphism while maintaining interface contracts
-
-4. Type-Agnostic Value Normalization:
-   - normalize_value(value: Any) in transformations.py
-   - safe_float/safe_int/safe_str conversion functions
-   - Justification: Must handle any JSON-serializable value type
-
-All other uses of Any require explicit justification in code comments.
+Type Safety: NewType for IDs, TypedDict for records, frozen dataclasses for VOs.
+See RULES.md §1.3 for Any usage justification (external APIs, logging, protocols).
 """
 
 from __future__ import annotations
@@ -269,8 +243,22 @@ class ErrorType(str, Enum):
         }
 
 
-class DQStatus(str, Enum):
-    """Quarantine record status (RULES.md §2.6)."""
+class QuarantineRecordStatus(str, Enum):
+    """Status of a quarantine record in Delta Lake storage (RULES.md §2.6).
+
+    This enum represents the persisted status of quarantine records.
+    Values are uppercase for backward compatibility with existing data.
+
+    Note:
+        This is distinct from:
+        - QuarantineStatus in aggregates/quarantine_entry.py (domain lifecycle)
+        - DQEvaluationStatus in value_objects/dq_result.py (DQ threshold checks)
+
+    Attributes:
+        NEW: Newly quarantined record, needs triage.
+        IGNORED: Reviewed and marked as non-actionable.
+        REPROCESSED: Successfully reprocessed and moved to Silver.
+    """
 
     NEW = "NEW"
     """Newly quarantined record, needs triage."""
@@ -280,6 +268,16 @@ class DQStatus(str, Enum):
 
     REPROCESSED = "REPROCESSED"
     """Successfully reprocessed and moved to Silver."""
+
+
+# Deprecated alias for backward compatibility
+DQStatus = QuarantineRecordStatus
+"""Deprecated alias for QuarantineRecordStatus.
+
+.. deprecated:: 1.1.0
+    Use :class:`QuarantineRecordStatus` instead.
+    DQStatus was renamed to avoid confusion with DQEvaluationStatus.
+"""
 
 
 @dataclass(frozen=True, slots=True)
