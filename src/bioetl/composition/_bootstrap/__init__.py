@@ -20,7 +20,6 @@ from bioetl.composition._bootstrap.checkpoint import (
     bootstrap_quarantine_service,
 )
 from bioetl.composition._bootstrap.lock import bootstrap_lock_service
-from bioetl.composition._bootstrap.runner import bootstrap_pipeline_runner_service
 from bioetl.composition._bootstrap.observability import (
     bootstrap_dq_monitor,
     bootstrap_logger,
@@ -29,6 +28,7 @@ from bioetl.composition._bootstrap.observability import (
     bootstrap_tracer,
     validate_observability_preflight,
 )
+from bioetl.composition._bootstrap.runner import bootstrap_pipeline_runner_service
 from bioetl.composition._bootstrap.storage import (
     bootstrap_bronze_cleanup_service,
     bootstrap_cleanup,

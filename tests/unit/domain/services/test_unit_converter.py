@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.services.unit_converter import UnitConverter
-from bioetl.domain.value_objects.measurements import (
+from bioetl.domain.value_objects import (
     Concentration,
     ConcentrationUnit,
     PChemblValue,
