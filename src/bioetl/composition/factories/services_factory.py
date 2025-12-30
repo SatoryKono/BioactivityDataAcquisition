@@ -28,7 +28,7 @@ from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
+from bioetl.infrastructure.quarantine import UnifiedQuarantine
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:

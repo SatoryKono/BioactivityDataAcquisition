@@ -35,7 +35,7 @@ from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 from bioetl.infrastructure.config import load_source_config
 
 if TYPE_CHECKING:
-    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings

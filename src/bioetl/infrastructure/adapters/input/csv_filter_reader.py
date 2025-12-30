@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.domain.filter_config import FilterLoadResult
+from bioetl.domain.filtering import FilterLoadResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

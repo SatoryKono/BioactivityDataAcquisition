@@ -10,10 +10,7 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.types import BatchID, DQStatus
-from bioetl.infrastructure.quarantine.unified_quarantine import (
-    UnifiedQuarantine,
-    _quote_literal,
-)
+from bioetl.infrastructure.quarantine import UnifiedQuarantine, quote_literal
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
@@ -34,33 +31,33 @@ def _extract_record_from_call(mock_call) -> dict:
 
 @pytest.mark.unit
 class TestQuoteLiteral:
-    """Tests for _quote_literal helper function."""
+    """Tests for quote_literal helper function."""
 
     def test_quote_string(self):
         """Test quoting a string value."""
-        assert _quote_literal("hello") == "'hello'"
+        assert quote_literal("hello") == "'hello'"
 
     def test_quote_string_with_single_quotes(self):
         """Test quoting a string containing single quotes."""
-        assert _quote_literal("it's") == "'it''s'"
+        assert quote_literal("it's") == "'it''s'"
 
     def test_quote_integer(self):
         """Test quoting an integer."""
-        assert _quote_literal(42) == "42"
+        assert quote_literal(42) == "42"
 
     def test_quote_float(self):
         """Test quoting a float."""
-        assert _quote_literal(3.14) == "3.14"
+        assert quote_literal(3.14) == "3.14"
 
     def test_quote_boolean_true(self):
         """Test quoting True.
 
-        Note: In Python, bool is a subclass of int. The _quote_literal function
+        Note: In Python, bool is a subclass of int. The quote_literal function
         checks bool before int/float, so True returns 'true' (Delta Lake boolean).
         However, if isinstance(value, (int, float)) was checked first, we'd get '1'.
         Current implementation correctly checks bool first.
         """
-        result = _quote_literal(True)
+        result = quote_literal(True)
         # Current code has: if isinstance(value, bool) BEFORE int/float check
         # So this should return the Delta Lake boolean string
         # If this fails with 'True' or '1', the order of checks may have changed
@@ -69,13 +66,13 @@ class TestQuoteLiteral:
 
     def test_quote_boolean_false(self):
         """Test quoting False."""
-        result = _quote_literal(False)
+        result = quote_literal(False)
         # Same as test_quote_boolean_true - accept actual behavior
         assert result in ("false", "False", "0")
 
     def test_quote_other_type(self):
         """Test quoting other types."""
-        result = _quote_literal(["a", "b"])
+        result = quote_literal(["a", "b"])
         assert result == "'['a', 'b']'"
 
 

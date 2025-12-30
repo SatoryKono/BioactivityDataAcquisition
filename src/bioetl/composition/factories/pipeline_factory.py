@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
         DQMonitorPort,
