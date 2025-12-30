@@ -55,7 +55,7 @@ class TestDeltaWriterExceptions:
     """Tests for exception handling in DeltaWriter."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
+    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
     async def test_write_silver_raises_schema_violation_error_on_merge(
         self, mock_delta_table, valid_record, noop_logger
     ):
