@@ -177,6 +177,9 @@ class PipelineRunContext:
     limit: int | None = None
     query: str | None = None
 
+    # Logging configuration
+    log_level: str = "INFO"
+
     @property
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
