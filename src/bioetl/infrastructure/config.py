@@ -33,70 +33,12 @@ from pydantic_settings import (
 
 from bioetl.domain.config import PipelineConfig
 from bioetl.domain.filtering import GoldFilterConfig
+from bioetl.infrastructure.config_loader import (
+    load_pipeline_config,
+    load_source_config,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
-
-# =============================================================================
-# Configuration Defaults Support
-# =============================================================================
-
-
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
-    """Deep merge two dictionaries, with override taking precedence.
-
-    Args:
-        base: Base dictionary (defaults).
-        override: Override dictionary (entity-specific config).
-
-    Returns:
-        Merged dictionary where override values replace base values,
-        but nested dicts are merged recursively.
-
-    Example:
-        >>> base = {"a": 1, "b": {"c": 2, "d": 3}}
-        >>> override = {"b": {"c": 10}}
-        >>> _deep_merge(base, override)
-        {'a': 1, 'b': {'c': 10, 'd': 3}}
-    """
-    result = base.copy()
-
-    for key, value in override.items():
-        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-            # Recursively merge nested dicts
-            result[key] = _deep_merge(result[key], value)
-        else:
-            # Override value directly
-            result[key] = value
-
-    return result
-
-
-def _load_defaults(config_path: Path) -> dict[str, Any]:
-    """Load pipeline defaults from _defaults.yaml.
-
-    Searches for _defaults.yaml in parent directories up to configs/pipelines/.
-
-    Args:
-        config_path: Path to the entity-specific config file.
-
-    Returns:
-        Dictionary with default values, or empty dict if not found.
-    """
-    # Try to find _defaults.yaml in parent directory (configs/pipelines/)
-    defaults_path = config_path.parent.parent / "_defaults.yaml"
-
-    if not defaults_path.exists():
-        # Fallback: try same directory level (for flat structure)
-        defaults_path = config_path.parent / "_defaults.yaml"
-
-    if defaults_path.exists():
-        with open(defaults_path, encoding="utf-8") as f:
-            defaults = yaml.safe_load(f) or {}
-            # Remove meta fields that shouldn't be merged
-            defaults.pop("defaults_version", None)
-            return defaults
-
-    return {}
 
 
 class YamlSettingsSource(PydanticBaseSettingsSource):
@@ -139,104 +81,6 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
                 d[field_key] = field_value
 
         return d
-
-
-@lru_cache(maxsize=10)
-def load_source_config(provider: str) -> SourceYamlConfig:
-    """Load source configuration from YAML file.
-
-    Loads provider-specific source configuration from configs/sources/{provider}.yaml.
-    Results are cached for efficiency.
-
-    Args:
-        provider: Provider name (e.g., 'chembl', 'pubmed', 'pubchem', 'uniprot')
-
-    Returns:
-        SourceYamlConfig: Validated source configuration with rate limits,
-            circuit breaker settings, and batch sizes.
-
-    Raises:
-        ValueError: If config file is missing or validation fails.
-
-    Example:
-        >>> config = load_source_config("chembl")
-        >>> config.rate_limit.requests_per_second
-        5.0
-        >>> config.circuit_breaker.failure_threshold
-        5
-    """
-    config_path = Path(f"configs/sources/{provider}.yaml")
-
-    if not config_path.exists():
-        raise ValueError(
-            f"Source configuration file not found: {config_path}. "
-            f"Create configs/sources/{provider}.yaml with rate_limit and circuit_breaker settings."
-        )
-
-    with open(config_path, encoding="utf-8") as f:
-        raw_config = yaml.safe_load(f) or {}
-
-    config: SourceYamlConfig = SourceYamlConfig.model_validate(raw_config)
-    return config
-
-
-@lru_cache(maxsize=10)
-def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline configuration from YAML file and return typed model.
-
-    Dynamically resolves the configuration file path based on the pipeline name.
-    The pipeline name is expected to follow the pattern '{provider}_{entity}'.
-    Example: 'chembl_activity' -> 'configs/pipelines/chembl/activity.yaml'
-
-    Automatically merges defaults from _defaults.yaml if present. Entity-specific
-    settings override defaults using deep merge (nested dicts are merged recursively).
-
-    Results are cached for efficiency - YAML files are only read once per pipeline.
-
-    Args:
-        pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
-
-    Returns:
-        PipelineYamlConfig: Validated pipeline configuration
-
-    Raises:
-        ValueError: If config file is missing or validation fails
-
-    """
-    # 1. Try dynamic resolution: {provider}_{entity}
-    try:
-        provider, entity = pipeline_name.split("_", 1)
-        config_path = Path(f"configs/pipelines/{provider}/{entity}.yaml")
-    except ValueError:
-        # Fallback for names that don't match the pattern (no underscore)
-        config_path = Path(f"configs/pipelines/{pipeline_name}.yaml")
-
-    # 2. Check if file exists
-    if not config_path.exists():
-        raise ValueError(f"Configuration file not found: {config_path}")
-
-    # 3. Load defaults from _defaults.yaml (if exists)
-    defaults = _load_defaults(config_path)
-
-    # 4. Load entity-specific config
-    with open(config_path, encoding="utf-8") as f:
-        entity_config = yaml.safe_load(f) or {}
-
-    # 5. Deep merge: defaults + entity_config (entity wins)
-    config = _deep_merge(defaults, entity_config)
-
-    # 6. Load source config from separate file if specified
-    if source_file := config.get("source_file"):
-        source_path = config_path.parent / source_file
-        if source_path.exists():
-            with open(source_path, encoding="utf-8") as f:
-                source_config = yaml.safe_load(f) or {}
-            # Merge source config into main config
-            config["source"] = source_config.get("source", source_config)
-
-    # 7. Validate against strict schema
-    validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
-    return validated
 
 
 def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
