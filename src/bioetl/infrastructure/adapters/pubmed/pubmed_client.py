@@ -20,7 +20,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.error_handling import ErrorHandler
+from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
@@ -75,7 +75,7 @@ class PubMedAdapter(BaseHttpAdapter):
     def __post_init__(self) -> None:
         """Initialize adapter metrics and error handler after dataclass init."""
         # Initialize error handler from base class
-        self._error_handler = ErrorHandler(self.logger)
+        self._error_handler = ErrorService(self.logger)
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
