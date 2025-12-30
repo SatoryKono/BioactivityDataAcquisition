@@ -201,5 +201,7 @@ async def test_health_check_logs_error_on_exception(
 
     mock_logger.warning.assert_called_once()
     call_args = mock_logger.warning.call_args
-    assert call_args[0][0] == "pubmed_health_check_failed"
+    # Uses unified log format now
+    assert call_args[0][0] == "health_check_failed"
     assert "Network timeout" in call_args[1]["error"]
+    assert call_args[1]["provider"] == "pubmed"

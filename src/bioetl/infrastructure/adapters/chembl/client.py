@@ -22,7 +22,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import CriticalError
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
@@ -33,7 +32,7 @@ from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
 )
-from bioetl.infrastructure.adapters.chembl.exceptions import ChemblApiError
+from bioetl.infrastructure.adapters.error_handling import ErrorHandler
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -71,16 +70,13 @@ class ChemblAdapter(BaseHttpAdapter):
     _page_size: int = field(init=False, default=1000)
     _filter_batch_size: int = field(init=False, default=20)
 
-    # Error classifier for logging purposes (no state tracking)
-    _error_classifier: ErrorClassifier = field(
-        init=False, default_factory=ErrorClassifier
-    )
-
     # Entity mapper for URL and key resolution
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
+        # Initialize error handler from base class
+        self._error_handler = ErrorHandler(self.logger)
         # Resolve configuration with clear priority
         if self.adapter_config is not None:
             # Primary: use AdapterConfig from YAML
@@ -247,10 +243,10 @@ class ChemblAdapter(BaseHttpAdapter):
                 break
 
     def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
-        """Handle fetch errors with classification and logging.
+        """Handle fetch errors with unified classification and logging.
 
-        Error tracking is handled by the circuit breaker in UnifiedHTTPClient,
-        so this method focuses on classification and logging only.
+        Uses ErrorHandler for consistent error handling across all adapters.
+        Error tracking is handled by the circuit breaker in UnifiedHTTPClient.
 
         On adapter boundary, provider-specific errors are translated to
         domain ExternalServiceError hierarchy for application layer consumption.
@@ -261,39 +257,30 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Raises:
             CriticalError: For auth failures and other critical errors
-            ChemblApiError: For recoverable and other errors (inherits ExternalServiceError)
+            ExternalServiceError: For recoverable and other errors
 
         Note:
-            Application layer should catch ExternalServiceError, not ChemblApiError.
-            ChemblApiError inherits from ExternalServiceError, so this works correctly.
+            Application layer should catch ExternalServiceError.
 
         """
-        # Classify the error for logging
-        error_type = self._error_classifier.classify(e)
+        # Build context with circuit breaker info
         failure_count = self.http_client.circuit_breaker.get_failure_count()
         health_status = self._get_health_status()
 
-        # Log with full context
-        self.logger.error(
-            "chembl_error",
-            provider="chembl",
+        error_context = {
+            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_failures": failure_count,
+            "health_status": health_status.value,
+        }
+
+        # Use unified error handler
+        wrapped = self._error_handler.handle_error(
+            error=e,
+            provider=self.provider_name,
             operation=context,
-            error=str(e),
-            error_type=error_type.value,
-            is_critical=error_type.is_critical(),
-            is_recoverable=error_type.is_recoverable(),
-            circuit_breaker_failures=failure_count,
-            health_status=health_status.value,
+            context=error_context,
         )
-
-        # Critical errors should fail immediately
-        if error_type.is_critical():
-            raise CriticalError(
-                f"Critical ChEMBL error ({error_type.value}): {e}"
-            ) from e
-
-        # Wrap in ChemblApiError (inherits ExternalServiceError) for consistent handling
-        raise ChemblApiError(str(e), operation=context) from e
+        raise wrapped from e
 
     async def _fetch_filtered(
         self,
@@ -429,7 +416,7 @@ class ChemblAdapter(BaseHttpAdapter):
                 response = await self.http_client.get(CHEMBL_STATUS_URL)
             return self._handle_health_response(response)
         except Exception as e:
-            error_type = self._error_classifier.classify(e)
+            error_type = self._error_handler.get_error_type(e)
             self.logger.warning(
                 "health_check_failed",
                 provider=self.provider_name,

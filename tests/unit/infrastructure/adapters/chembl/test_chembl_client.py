@@ -6,10 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.exceptions import CriticalError, RateLimitError
+from bioetl.domain.exceptions import CriticalError, ExternalServiceError, RateLimitError
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.infrastructure.adapters.chembl.exceptions import ChemblApiError
 
 
 @pytest.fixture
@@ -194,7 +193,7 @@ async def test_fetch_error(adapter, mock_http_client):
     """Test API error handling."""
     mock_http_client.get.side_effect = Exception("API Error")
 
-    with pytest.raises(ChemblApiError):
+    with pytest.raises(ExternalServiceError):
         async for _ in adapter.fetch("activity"):
             pass
 
@@ -276,7 +275,7 @@ class TestChemblAdapterErrorClassification:
         """Test that error type is classified and logged."""
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
-        with pytest.raises(ChemblApiError):
+        with pytest.raises(ExternalServiceError):
             async for _ in adapter.fetch("activity"):
                 pass
 
@@ -296,7 +295,7 @@ class TestChemblAdapterErrorClassification:
         """
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
-        with pytest.raises(ChemblApiError):
+        with pytest.raises(ExternalServiceError):
             async for _ in adapter.fetch("activity"):
                 pass
 
