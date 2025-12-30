@@ -125,7 +125,7 @@ ALLOWED_NO_SUFFIX = {
     "Anomaly",
     "LineageRecord",
     "BatchLineage",
-    "ClearDecision",
+    "PrepareResult",
     "ClearResult",
     "CleanupPreview",
     "CleanupResult",
