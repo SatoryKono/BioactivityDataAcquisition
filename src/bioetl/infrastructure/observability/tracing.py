@@ -1,4 +1,23 @@
-"""Tracing implementations (OpenTelemetry).
+"""Tracing infrastructure — Null Object Pattern implementation.
+
+Design Decision (ADR-010, ADR-022):
+    Local-Only Deployment does not require distributed tracing.
+    NoOpTracing (default) provides:
+    - Compliance with TracingPort interface
+    - Extension point for future distributed deployment
+    - Zero overhead in current configuration
+
+Correlation:
+    Instead of trace_id, run_id is used (RULES.md §4.5).
+    All structured logs include run_id for request correlation.
+
+Extension Point:
+    To enable tracing, use OpenTelemetryTracer (provided below),
+    register in composition/factories/observability.py.
+
+Available Implementations:
+    - NoOpTracing: Null Object Pattern, default for Local-Only
+    - OpenTelemetryTracer: Real OTel implementation (requires opentelemetry deps)
 
 Implements TracingPort.
 """
