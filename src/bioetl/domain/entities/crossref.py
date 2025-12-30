@@ -66,8 +66,10 @@ class PublicationRecord(BaseModel):
     doi: str = PydanticField(description="Digital Object Identifier (normalized)")
 
     # Core metadata
-    title: str | None = PydanticField(default=None, description="Work title")
-    abstract: str | None = PydanticField(default=None, description="Work abstract")
+    title: str | None = PydanticField(default=None, description="Publication title")
+    abstract: str | None = PydanticField(
+        default=None, description="Publication abstract"
+    )
 
     # Authors (list of "given family" formatted names)
     authors: list[str] = PydanticField(

@@ -199,13 +199,13 @@ async def test_health_check_returns_degraded_on_slow_response(
 
 
 # =============================================================================
-# Fetch single work tests
+# Fetch single publication tests
 # =============================================================================
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_success(adapter, mock_http_client):
-    """Test successful single work fetch."""
+async def test_fetch_single_publication_success(adapter, mock_http_client):
+    """Test successful single publication fetch."""
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
@@ -216,34 +216,34 @@ async def test_fetch_single_work_success(adapter, mock_http_client):
     }
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
-    result = await adapter._fetch_single_work("10.1234/test")
+    result = await adapter._fetch_single_publication("10.1234/test")
 
     assert result is not None
     assert result["DOI"] == "10.1234/test"
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_not_found(adapter, mock_http_client, mock_logger):
+async def test_fetch_single_publication_not_found(adapter, mock_http_client, mock_logger):
     """Test fetch returns None for 404."""
     mock_response = MagicMock()
     mock_response.status_code = 404
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
-    result = await adapter._fetch_single_work("10.1234/nonexistent")
+    result = await adapter._fetch_single_publication("10.1234/nonexistent")
 
     assert result is None
     mock_logger.debug.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_fetch_single_work_api_error(adapter, mock_http_client):
+async def test_fetch_single_publication_api_error(adapter, mock_http_client):
     """Test fetch raises CrossRefApiError on non-200/404."""
     mock_response = MagicMock()
     mock_response.status_code = 500
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
     with pytest.raises(CrossRefApiError):
-        await adapter._fetch_single_work("10.1234/test")
+        await adapter._fetch_single_publication("10.1234/test")
 
 
 # =============================================================================
