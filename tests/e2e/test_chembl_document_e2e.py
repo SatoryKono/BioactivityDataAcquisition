@@ -64,7 +64,6 @@ async def test_chembl_document_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="ChEMBL API returns 500 - external service issue")
 async def test_chembl_document_publication_fields(e2e_data_dir: Path):
     """E2E: Verify publication-related fields are extracted.
 

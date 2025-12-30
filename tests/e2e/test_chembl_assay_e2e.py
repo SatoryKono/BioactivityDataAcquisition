@@ -29,7 +29,6 @@ def vcr_cassette_dir() -> Path:
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="ChEMBL API returns 500 - external service issue")
 async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
     """E2E: ChEMBL Assay pipeline from fetch to Silver.
 
@@ -69,7 +68,6 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="ChEMBL API returns 500 - external service issue")
 async def test_chembl_assay_metadata_fields(e2e_data_dir: Path):
     """E2E: Verify assay metadata fields are extracted.
 
@@ -96,7 +94,6 @@ async def test_chembl_assay_metadata_fields(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="ChEMBL API returns 500 - external service issue")
 async def test_chembl_assay_confidence_score(e2e_data_dir: Path):
     """E2E: Verify confidence_score is within valid range.
 
