@@ -1,11 +1,6 @@
 """ChEMBL bioactivity domain entities.
 
-Contains Activity (deprecated alias for Bioactivity) and Assay entities.
-
-Migration Note:
-    The `Activity` class is deprecated in favor of `Bioactivity`.
-    Use `from bioetl.domain.entities import Bioactivity` for new code.
-    The `Activity` alias will be removed after 14 days.
+Contains Assay entity for bioassay definitions.
 
 Field Classification:
     - REQUIRED: Validated in __post_init__, will raise ValueError if empty
@@ -15,9 +10,7 @@ Field Classification:
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
-from typing import Any
 
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.bioactivity import (
@@ -26,40 +19,10 @@ from bioetl.domain.entities.bioactivity import (
 )
 
 __all__ = [
-    "Activity",
     "Assay",
     "Bioactivity",
     "BioactivityState",
 ]
-
-
-class Activity(Bioactivity):
-    """Deprecated alias for Bioactivity.
-
-    .. deprecated:: 1.0.0
-        Use :class:`Bioactivity` instead. This alias will be removed in 14 days.
-
-    This class exists for backward compatibility during migration.
-    All functionality is inherited from Bioactivity.
-
-    Example:
-        >>> # Old code (deprecated):
-        >>> from bioetl.domain.entities import Activity
-        >>> activity = Activity(...)  # Will emit DeprecationWarning
-
-        >>> # New code (recommended):
-        >>> from bioetl.domain.entities import Bioactivity
-        >>> bioactivity = Bioactivity(...)
-    """
-
-    def __init__(self, **kwargs: Any) -> None:
-        warnings.warn(
-            "Activity is deprecated, use Bioactivity instead. "
-            "This alias will be removed in 14 days.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**kwargs)
 
 
 @dataclass(frozen=True, kw_only=True)

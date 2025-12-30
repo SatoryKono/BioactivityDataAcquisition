@@ -19,10 +19,10 @@ External Service Exceptions (RULES.md §7.2):
     - ServiceAuthenticationError: Auth failed (401/403)
     - DataValidationError: Invalid data from external source
 
-Deprecated Exceptions:
-    ChemblApiError and CrossRefApiError are deprecated in domain layer.
-    Use infrastructure.adapters.{provider}.exceptions instead, and catch
-    ExternalServiceError in application layer.
+Provider-Specific Exceptions:
+    Provider-specific API errors (ChemblApiError, CrossRefApiError, etc.) are
+    defined in infrastructure.adapters.{provider}.exceptions. Application layer
+    should catch ExternalServiceError instead.
 """
 
 from bioetl.domain.exceptions.base import (
@@ -56,9 +56,7 @@ from bioetl.domain.exceptions.external_service import (
 )
 from bioetl.domain.exceptions.recoverable import (
     ApiError,
-    ChemblApiError,
     CircuitBreakerOpenError,
-    CrossRefApiError,
     NetworkError,
     RateLimitError,
     RetryExhaustedError,
@@ -80,10 +78,8 @@ __all__ = [
     "BronzeValidationError",
     "BucketNotFoundError",
     "CheckpointConflictError",
-    "ChemblApiError",
     "CircuitBreakerOpenError",
     "CriticalError",
-    "CrossRefApiError",
     "DataQualityError",
     "DataQualityThresholdError",
     "DataValidationError",

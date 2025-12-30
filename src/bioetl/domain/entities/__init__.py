@@ -20,7 +20,7 @@ Field Classification:
 
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.bioactivity import Bioactivity, BioactivityState
-from bioetl.domain.entities.chembl_activity import Activity, Assay
+from bioetl.domain.entities.chembl_activity import Assay
 from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
@@ -35,7 +35,6 @@ from bioetl.domain.entities.pubmed import Publication
 from bioetl.domain.entities.uniprot import Protein
 
 __all__ = [
-    "Activity",  # Deprecated: use Bioactivity instead
     "Assay",
     "BaseEntity",
     "Bioactivity",

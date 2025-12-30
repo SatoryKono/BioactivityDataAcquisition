@@ -7,10 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-import warnings
-
 from bioetl.domain.entities import (
-    Activity,
     Bioactivity,
     BioactivityState,
     Compound,
@@ -271,29 +268,6 @@ class TestBioactivityState:
         assert not BioactivityState.RAW.is_fully_validated()
         assert not BioactivityState.NORMALIZED.is_fully_validated()
         assert BioactivityState.VALIDATED.is_fully_validated()
-
-
-@pytest.mark.unit
-class TestActivityDeprecatedAlias:
-    """Tests for deprecated Activity alias."""
-
-    def test_activity_emits_deprecation_warning(self, base_entity_kwargs):
-        """Test that Activity emits DeprecationWarning."""
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            Activity(
-                **base_entity_kwargs,
-                activity_id="ACT1",
-                molecule_chembl_id="CHEMBL1",
-            )
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "Activity is deprecated" in str(w[0].message)
-            assert "Bioactivity" in str(w[0].message)
-
-    def test_activity_is_subclass_of_bioactivity(self):
-        """Test that Activity is subclass of Bioactivity."""
-        assert issubclass(Activity, Bioactivity)
 
 
 @pytest.mark.unit
