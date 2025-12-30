@@ -57,7 +57,55 @@ if TYPE_CHECKING:
 __all__ = [
     "BaseServicesFactory",
     "ServicesBuilder",
+    "extract_pipeline_callbacks",
 ]
+
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+
+def extract_pipeline_callbacks(
+    pipeline: BasePipeline,
+) -> tuple[Any, Any, Any]:
+    """Extract transformation callbacks from pipeline.
+
+    Extracts callbacks from the pipeline's transformer if available,
+    otherwise falls back to pipeline methods (legacy support).
+
+    Args:
+        pipeline: Pipeline instance with transformer or legacy methods.
+
+    Returns:
+        Tuple of (transform_callback, gold_filter_callback, gold_transform_callback).
+
+    Raises:
+        AttributeError: If pipeline has no transformer and doesn't implement
+            transform_bronze_to_silver (enforces REQ-ARCH-REF-001).
+    """
+    transformer = pipeline.transformer
+    if transformer is not None:
+        return (
+            transformer.transform,
+            transformer.should_write_gold,
+            transformer.transform_for_gold,
+        )
+
+    # Fallback for pipelines without explicit transformer (legacy)
+    # NOTE: BasePipeline no longer implements these methods.
+    # If a subclass does not implement them and has no transformer, this will raise AttributeError.
+    # This is intentional to enforce the new architecture (REQ-ARCH-REF-001).
+    transform_cb = pipeline.transform_bronze_to_silver
+    gold_filter_cb = getattr(
+        pipeline, "should_write_gold", lambda _context, record: True
+    )
+    gold_transform_cb = getattr(
+        pipeline,
+        "transform_for_gold",
+        lambda _context, silver_record: silver_record,
+    )
+    return (transform_cb, gold_filter_cb, gold_transform_cb)
 
 
 # =============================================================================
@@ -302,32 +350,9 @@ class ServicesBuilder:
         Returns:
             Configured RecordProcessor instance
         """
-        # Use injected transformer if available
-        transformer = pipeline.transformer
-        if transformer is not None:
-            transform_cb = transformer.transform
-            gold_filter_cb = transformer.should_write_gold
-            gold_transform_cb = transformer.transform_for_gold
-        else:
-            # Fallback for pipelines without explicit transformer (legacy)
-            # NOTE: BasePipeline no longer implements these methods.
-            # If a subclass does not implement them and has no transformer, this will raise AttributeError.
-            # This is intentional to enforce the new architecture (REQ-ARCH-REF-001).
-            transform_cb = pipeline.transform_bronze_to_silver
-
-            # Use getattr to avoid MyPy errors if we assume they exist, but runtime will fail if missing.
-            # We provide a dummy lambda for safety if methods are strictly missing but user logic
-            # handles it elsewhere? No, strict fail is better.
-            gold_filter_cb = getattr(
-                pipeline, "should_write_gold", lambda _context, record: True
-            )
-
-            # Default identity transform if missing
-            gold_transform_cb = getattr(
-                pipeline,
-                "transform_for_gold",
-                lambda _context, silver_record: silver_record,
-            )
+        transform_cb, gold_filter_cb, gold_transform_cb = extract_pipeline_callbacks(
+            pipeline
+        )
 
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,
@@ -385,22 +410,9 @@ class ServicesBuilder:
         Returns:
             Configured BatchExecutor instance.
         """
-        # Extract callbacks from transformer or pipeline
-        transformer = pipeline.transformer
-        if transformer is not None:
-            transform_cb = transformer.transform
-            gold_filter_cb = transformer.should_write_gold
-            gold_transform_cb = transformer.transform_for_gold
-        else:
-            transform_cb = pipeline.transform_bronze_to_silver
-            gold_filter_cb = getattr(
-                pipeline, "should_write_gold", lambda _context, record: True
-            )
-            gold_transform_cb = getattr(
-                pipeline,
-                "transform_for_gold",
-                lambda _context, silver_record: silver_record,
-            )
+        transform_cb, gold_filter_cb, gold_transform_cb = extract_pipeline_callbacks(
+            pipeline
+        )
 
         # Build configuration
         error_classifier = ErrorClassifier()
