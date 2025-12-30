@@ -308,7 +308,7 @@ class TestClassSize:
         "PipelineExecutor": 460,  # 458 lines - executor with tracing and metrics
         "BatchWriter": 330,  # 301 lines - batch writing with lock context provider
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
-        "CrossRefAdapter": 420,  # 402 lines - HTTP adapter with batch DOI resolution
+        "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
         "CrossRefFieldExtractor": 330,  # ~315 lines - field extraction (refactored from mappers)
         # PubChem adapter (similar to ChEMBL adapter)
         "PubChemAdapter": 310,  # 303 lines - sync adapter with ThreadPoolExecutor

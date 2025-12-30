@@ -41,6 +41,12 @@ if TYPE_CHECKING:
 # Backward compatibility aliases
 RetryPolicy = RetryConfig
 
+__all__ = [
+    "RetryConfig",
+    "RetryPolicy",
+    "UnifiedHTTPClient",
+]
+
 
 @dataclass
 class UnifiedHTTPClient:
