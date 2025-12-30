@@ -229,6 +229,7 @@ def bootstrap_observability(
     pipeline: str,
     run_id: UUID,
     settings: Settings,
+    log_level: str = "INFO",
 ) -> ObservabilityBundle:
     """Bootstrap all observability components.
 
@@ -244,6 +245,7 @@ def bootstrap_observability(
         pipeline: Pipeline name for logger context.
         run_id: Unique run identifier.
         settings: Application settings.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
 
     Returns:
         Configured ObservabilityBundle instance with valid implementations.
@@ -252,7 +254,7 @@ def bootstrap_observability(
     Raises:
         ObservabilityContractError: If bundle creation fails validation.
     """
-    logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
+    logger = bootstrap_logger(pipeline=pipeline, run_id=run_id, log_level=log_level)
     tracer = bootstrap_tracer(settings)
     metrics = bootstrap_metrics(settings)
     dq_monitor = bootstrap_dq_monitor(settings, logger)
