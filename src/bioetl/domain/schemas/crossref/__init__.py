@@ -1,8 +1,26 @@
 """CrossRef Pandera schemas.
 
 Contains validation schemas for CrossRef data entities.
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
+- WorkSchema and WORK_TYPES are kept as deprecated aliases for backward compatibility
 """
 
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
+from bioetl.domain.schemas.crossref.work import (
+    PUBLICATION_TYPES,
+    WORK_TYPES,  # Deprecated alias
+    PublicationSchema,
+    WorkSchema,  # Deprecated alias
+)
 
-__all__ = ["PublicationEnrichedSchema"]
+__all__ = [
+    # Main schemas
+    "PublicationEnrichedSchema",
+    "PublicationSchema",
+    "PUBLICATION_TYPES",
+    # Deprecated aliases (backward compatibility)
+    "WorkSchema",
+    "WORK_TYPES",
+]

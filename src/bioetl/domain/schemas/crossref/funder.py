@@ -1,8 +1,11 @@
 """Pandera schema for CrossRef Funder entity.
 
 Aligned with RULES.md v5.0 and CrossRef REST API.
-Represents funders from the "funder" field in Works API response.
+Represents funders from the "funder" field in Publications API response.
 Integrates with CrossRef Funder Registry (DOI prefix: 10.13039/).
+
+Terminology:
+- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
 """
 
 from __future__ import annotations
@@ -16,7 +19,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 class FunderSchema(ETLRecordSchema):
     """CrossRef Funder validation schema for Silver layer.
 
-    Represents a funder of a CrossRef Work (1:N relationship).
+    Represents a funder of a CrossRef Publication (1:N relationship).
     Composite PK: (doi, funder_sequence)
     """
 
@@ -24,7 +27,7 @@ class FunderSchema(ETLRecordSchema):
     doi: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^10\.\d{4,}/.*$",
-        description="FK to Work.doi",
+        description="FK to Publication.doi",
     )
 
     # === Composite Primary Key Component ===
