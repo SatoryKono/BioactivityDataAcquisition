@@ -3,11 +3,12 @@
 Application Service that orchestrates pipeline execution lifecycle.
 Coordinates locking, checkpointing, and execution.
 
-Delegates to specialized services (injected via RunnerServices):
+Delegates to specialized services (injected directly via DI):
 - LockManager: Distributed locking
 - PreflightService: Infrastructure health validation
 - PostrunService: DQ checks, VACUUM, cleanup
 - LifecycleOrchestrator: Medallion layer clearing
+- PipelineObserver: Observability wrapper for tracing, metrics, logging
 """
 
 from __future__ import annotations
@@ -20,9 +21,13 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
+    from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.application.core.runner_services import RunnerServices
+    from bioetl.application.core.postrun_service import PostrunService
+    from bioetl.application.core.preflight_service import PreflightService
     from bioetl.application.core.shutdown import ShutdownSignal
+    from bioetl.application.observability.observer import PipelineObserver
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
@@ -50,7 +55,11 @@ class PipelineRunner:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: LoggerPort,
-        runner_services: RunnerServices,
+        lock_manager: LockManager,
+        preflight: PreflightService,
+        postrun: PostrunService,
+        lifecycle_orch: LifecycleOrchestrator,
+        observer: PipelineObserver,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
     ) -> None:
@@ -65,8 +74,11 @@ class PipelineRunner:
             checkpoint_manager: Checkpoint manager.
             shutdown_signal: Shutdown signal for graceful termination.
             logger: Structured logger.
-            runner_services: Bundle of application services (lock, preflight,
-                postrun, lifecycle). Created via build_runner_services().
+            lock_manager: Distributed locking manager.
+            preflight: Pre-flight infrastructure validation service.
+            postrun: Post-run DQ checks and VACUUM service.
+            lifecycle_orch: Lifecycle orchestrator for medallion layer clearing.
+            observer: Pipeline observability wrapper for tracing, metrics, logging.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
         """
@@ -81,12 +93,12 @@ class PipelineRunner:
         self.pipeline = pipeline
         self._tracer = tracer
 
-        # Extract services from RunnerServices bundle (created in composition layer)
-        self._lock_manager = runner_services.lock_manager
-        self._preflight_service = runner_services.preflight
-        self._postrun_service = runner_services.postrun
-        self._lifecycle_orchestrator = runner_services.lifecycle_orch
-        self._observer = runner_services.observer
+        # Services injected directly via DI (created in composition layer)
+        self._lock_manager = lock_manager
+        self._preflight_service = preflight
+        self._postrun_service = postrun
+        self._lifecycle_orchestrator = lifecycle_orch
+        self._observer = observer
 
     @property
     def logger(self) -> LoggerPort:

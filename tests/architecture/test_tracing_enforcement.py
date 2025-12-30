@@ -144,10 +144,9 @@ class TestExecutorTracingIntegration:
             ), "Executor should reference tracing mechanism"
 
     def test_pipeline_services_includes_tracing(self):
-        """PipelineServices/RunnerServices should include tracing."""
+        """PipelineServices should include tracing."""
         services_paths = [
             Path("src/bioetl/application/core/pipeline_services.py"),
-            Path("src/bioetl/application/core/runner_services.py"),
             Path("src/bioetl/application/core/services.py"),
         ]
 

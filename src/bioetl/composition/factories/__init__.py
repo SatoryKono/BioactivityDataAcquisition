@@ -11,7 +11,7 @@ All pipeline factories are auto-registered when this module is imported.
 
 Consolidated modules (v5.2):
 - pipeline_factory: GenericPipelineFactory, runner assembly
-- services_factory: BaseServicesFactory, ServicesBuilder, RunnerServices
+- services_factory: BaseServicesFactory, ServicesBuilder
 - data_source_factory: DataSourceFactory, DataSourceRegistry
 - storage: StorageAdapter, StorageContext, StorageFactory
 """
@@ -42,9 +42,7 @@ from bioetl.composition.factories.pipeline_factory import (
 # Services factory (DI for PipelineRunner)
 from bioetl.composition.factories.services_factory import (
     BaseServicesFactory,
-    RunnerServices,
     ServicesBuilder,
-    build_runner_services,
 )
 
 # Storage factory
@@ -68,14 +66,12 @@ __all__ = [
     "DataSourceFactory",
     "DataSourceRegistry",
     "GenericPipelineFactory",
-    "RunnerServices",
     "ServicesBuilder",
     "StorageAdapter",
     "StorageContext",
     "StorageFactory",
     "assemble_runner",
     "build_pipeline_services",
-    "build_runner_services",
     "chembl_activity_factory",
     "create_pipeline_factory",
     "create_transformer",
