@@ -71,6 +71,7 @@ def show_command(pipeline: str, output_format: str) -> None:
         echo_info(json.dumps(config_dict, indent=2, default=str))
     else:
         import yaml
+
         echo_info(yaml.dump(config_dict, default_flow_style=False, sort_keys=False))
 
 
@@ -129,6 +130,7 @@ def show_settings_command(output_format: str) -> None:
         echo_info(json.dumps(settings_dict, indent=2, default=str))
     else:
         import yaml
+
         echo_info(yaml.dump(settings_dict, default_flow_style=False, sort_keys=False))
 
 

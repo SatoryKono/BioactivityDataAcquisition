@@ -24,7 +24,6 @@ from bioetl.domain.aggregates.pipeline_run import (
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import RunID, RunType
 
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────────────────────
@@ -175,7 +174,9 @@ class TestPipelineRunStageRecording:
         assert started_run.stages[0].stage == "preflight"
         assert started_run.stages[0].status == StageStatus.SUCCESS
 
-    def test_cannot_record_stage_on_pending_run(self, pipeline_run: PipelineRun) -> None:
+    def test_cannot_record_stage_on_pending_run(
+        self, pipeline_run: PipelineRun
+    ) -> None:
         """Invariant: Cannot record stages on PENDING run."""
         with pytest.raises(InvalidStateError, match="run is in status pending"):
             pipeline_run.record_stage_success("test")
@@ -220,7 +221,9 @@ class TestPipelineRunCompletionInvariants:
         with pytest.raises(InvalidStateError, match="no stages recorded"):
             started_run.complete()
 
-    def test_complete_with_all_successful_stages(self, started_run: PipelineRun) -> None:
+    def test_complete_with_all_successful_stages(
+        self, started_run: PipelineRun
+    ) -> None:
         """Should complete when all stages succeeded."""
         started_run.record_stage_success("preflight")
         started_run.record_stage_success("execution", records_processed=1000)
@@ -259,7 +262,9 @@ class TestPipelineRunEncapsulation:
         with pytest.raises((TypeError, AttributeError)):
             stages.append(None)  # type: ignore
 
-    def test_run_id_is_immutable(self, run_id: RunID, pipeline_run: PipelineRun) -> None:
+    def test_run_id_is_immutable(
+        self, run_id: RunID, pipeline_run: PipelineRun
+    ) -> None:
         """Invariant: run_id cannot be changed after creation."""
         assert pipeline_run.run_id == run_id
 

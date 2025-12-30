@@ -698,10 +698,7 @@ class TestUnifiedHTTPClientObservability:
         # Check that logger.warning was called at least once for retry
         mock_logger.warning.assert_called()
         call_args_list = mock_logger.warning.call_args_list
-        retry_calls = [
-            c for c in call_args_list
-            if c.args and "Retry" in c.args[0]
-        ]
+        retry_calls = [c for c in call_args_list if c.args and "Retry" in c.args[0]]
         assert len(retry_calls) >= 1, (
             f"Expected at least 1 retry warning call, got {len(retry_calls)}. "
             f"All warning calls: {call_args_list}"

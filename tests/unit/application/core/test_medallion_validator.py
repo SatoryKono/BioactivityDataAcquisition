@@ -220,9 +220,7 @@ class TestMedallionConfigValidator:
 class TestWriteModeValidation:
     """Tests for write mode validation."""
 
-    def test_valid_silver_merge(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_valid_silver_merge(self, mock_logger: Mock) -> None:
         """Test validation passes for merge mode in silver."""
         config = Mock()
         config.write_mode = "merge"
@@ -232,9 +230,7 @@ class TestWriteModeValidation:
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
-    def test_valid_silver_append(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_valid_silver_append(self, mock_logger: Mock) -> None:
         """Test validation passes for append mode in silver."""
         config = Mock()
         config.write_mode = "append"
@@ -244,9 +240,7 @@ class TestWriteModeValidation:
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
-    def test_invalid_silver_overwrite(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_invalid_silver_overwrite(self, mock_logger: Mock) -> None:
         """Test validation fails for overwrite mode in silver."""
         config = Mock()
         config.write_mode = "overwrite"  # Not allowed for silver
@@ -257,9 +251,7 @@ class TestWriteModeValidation:
         assert len(errors) == 1
         assert errors[0].field == "write_mode"
 
-    def test_valid_gold_merge(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_valid_gold_merge(self, mock_logger: Mock) -> None:
         """Test validation passes for merge mode in gold."""
         config = Mock()
         config.write_mode = "merge"
@@ -269,9 +261,7 @@ class TestWriteModeValidation:
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
-    def test_valid_gold_overwrite(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_valid_gold_overwrite(self, mock_logger: Mock) -> None:
         """Test validation passes for overwrite mode in gold."""
         config = Mock()
         config.write_mode = "merge"
@@ -281,9 +271,7 @@ class TestWriteModeValidation:
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
-    def test_valid_gold_scd2(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_valid_gold_scd2(self, mock_logger: Mock) -> None:
         """Test validation passes for scd2 mode in gold."""
         config = Mock()
         config.write_mode = "merge"
@@ -293,9 +281,7 @@ class TestWriteModeValidation:
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
-    def test_valid_gold_append(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_valid_gold_append(self, mock_logger: Mock) -> None:
         """Test validation passes for append mode in gold."""
         config = Mock()
         config.write_mode = "merge"
@@ -305,9 +291,7 @@ class TestWriteModeValidation:
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
-    def test_invalid_gold_mode(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_invalid_gold_mode(self, mock_logger: Mock) -> None:
         """Test validation fails for invalid gold mode."""
         config = Mock()
         config.write_mode = "merge"
@@ -318,9 +302,7 @@ class TestWriteModeValidation:
         assert len(errors) == 1
         assert errors[0].field == "gold_write_mode"
 
-    def test_invalid_both_modes(
-        self, mock_logger: Mock
-    ) -> None:
+    def test_invalid_both_modes(self, mock_logger: Mock) -> None:
         """Test validation fails for both invalid modes."""
         config = Mock()
         config.write_mode = "invalid_mode"

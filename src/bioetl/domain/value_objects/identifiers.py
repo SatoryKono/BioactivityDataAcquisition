@@ -97,9 +97,14 @@ class UniProtId(ValueObject[str]):
     _PRIMARY_PATTERN = re.compile(r"^[OPQ][0-9][A-Z0-9]{3}[0-9]$")
 
     # Secondary accession pattern for other letters (6 or 10 characters)
-    _SECONDARY_PATTERN = re.compile(
-        r"^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
-    )
+    _SECONDARY_PATTERN = re.compile(r"^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$")
+
+    def _validate_format(self, normalized: str) -> bool:
+        """Check if normalized string matches UniProt format."""
+        return bool(
+            self._PRIMARY_PATTERN.match(normalized)
+            or self._SECONDARY_PATTERN.match(normalized)
+        )
 
     def _validate(self, value: str) -> str:
         """Validate and normalize UniProt accession.
@@ -117,7 +122,6 @@ class UniProtId(ValueObject[str]):
             raise ValueError(f"UniProtId must be str, got {type(value).__name__}")
 
         normalized = value.strip().upper()
-
         if not normalized:
             raise ValueError("UniProtId cannot be empty")
 
@@ -127,13 +131,9 @@ class UniProtId(ValueObject[str]):
                 f"Expected 6 or 10 characters."
             )
 
-        if self._PRIMARY_PATTERN.match(normalized):
-            return normalized
-
-        if self._SECONDARY_PATTERN.match(normalized):
-            return normalized
-
-        raise ValueError(f"Invalid UniProt accession format: {value!r}")
+        if not self._validate_format(normalized):
+            raise ValueError(f"Invalid UniProt accession format: {value!r}")
+        return normalized
 
     @property
     def is_primary_format(self) -> bool:
@@ -173,6 +173,13 @@ class DOI(ValueObject[str]):
         "DOI:",
     )
 
+    def _strip_url_prefix(self, value: str) -> str:
+        """Strip URL prefix from DOI if present."""
+        for prefix in self._URL_PREFIXES:
+            if value.lower().startswith(prefix.lower()):
+                return value[len(prefix) :]
+        return value
+
     def _validate(self, value: str) -> str:
         """Validate and normalize DOI.
 
@@ -189,23 +196,14 @@ class DOI(ValueObject[str]):
             raise ValueError(f"DOI must be str, got {type(value).__name__}")
 
         normalized = value.strip()
-
         if not normalized:
             raise ValueError("DOI cannot be empty")
 
-        # Strip URL prefixes
-        for prefix in self._URL_PREFIXES:
-            if normalized.lower().startswith(prefix.lower()):
-                normalized = normalized[len(prefix):]
-                break
-
-        # DOIs are case-insensitive, normalize to lowercase
-        normalized = normalized.lower()
+        # Strip URL prefixes and normalize to lowercase
+        normalized = self._strip_url_prefix(normalized).lower()
 
         if not self._PATTERN.match(normalized):
-            raise ValueError(
-                f"Invalid DOI format: {value!r}. Expected: 10.XXXX/suffix"
-            )
+            raise ValueError(f"Invalid DOI format: {value!r}. Expected: 10.XXXX/suffix")
 
         return normalized
 
@@ -248,6 +246,19 @@ class PubMedId(ValueObject[int]):
 
     _MAX_PMID = 10_000_000_000  # Reasonable upper bound
 
+    def _coerce_to_int(self, value: int | str) -> int:
+        """Coerce value to int, raising ValueError on failure."""
+        if isinstance(value, bool):
+            raise ValueError(f"PubMedId must be int, got {type(value).__name__}")
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value.strip())
+            except ValueError:
+                raise ValueError(f"Invalid PubMed ID: {value!r}") from None
+        raise ValueError(f"PubMedId must be int, got {type(value).__name__}")
+
     def _validate(self, value: int) -> int:
         """Validate PubMed ID.
 
@@ -260,26 +271,12 @@ class PubMedId(ValueObject[int]):
         Raises:
             ValueError: If PMID is invalid.
         """
-        if isinstance(value, bool):
-            raise ValueError(f"PubMedId must be int, got {type(value).__name__}")
-
-        if not isinstance(value, int):
-            # Try to parse string
-            if isinstance(value, str):
-                try:
-                    value = int(value.strip())
-                except ValueError:
-                    raise ValueError(f"Invalid PubMed ID: {value!r}") from None
-            else:
-                raise ValueError(f"PubMedId must be int, got {type(value).__name__}")
-
-        if value <= 0:
-            raise ValueError(f"PubMed ID must be positive: {value}")
-
-        if value >= self._MAX_PMID:
-            raise ValueError(f"PubMed ID too large: {value}")
-
-        return value
+        int_value = self._coerce_to_int(value)
+        if int_value <= 0:
+            raise ValueError(f"PubMed ID must be positive: {int_value}")
+        if int_value >= self._MAX_PMID:
+            raise ValueError(f"PubMed ID too large: {int_value}")
+        return int_value
 
 
 class PubChemCid(ValueObject[int]):
@@ -298,6 +295,19 @@ class PubChemCid(ValueObject[int]):
 
     _MAX_CID = 100_000_000_000  # Reasonable upper bound
 
+    def _coerce_to_int(self, value: int | str) -> int:
+        """Coerce value to int, raising ValueError on failure."""
+        if isinstance(value, bool):
+            raise ValueError(f"PubChemCid must be int, got {type(value).__name__}")
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value.strip())
+            except ValueError:
+                raise ValueError(f"Invalid PubChem CID: {value!r}") from None
+        raise ValueError(f"PubChemCid must be int, got {type(value).__name__}")
+
     def _validate(self, value: int) -> int:
         """Validate PubChem CID.
 
@@ -310,23 +320,9 @@ class PubChemCid(ValueObject[int]):
         Raises:
             ValueError: If CID is invalid.
         """
-        if isinstance(value, bool):
-            raise ValueError(f"PubChemCid must be int, got {type(value).__name__}")
-
-        if not isinstance(value, int):
-            # Try to parse string
-            if isinstance(value, str):
-                try:
-                    value = int(value.strip())
-                except ValueError:
-                    raise ValueError(f"Invalid PubChem CID: {value!r}") from None
-            else:
-                raise ValueError(f"PubChemCid must be int, got {type(value).__name__}")
-
-        if value <= 0:
-            raise ValueError(f"PubChem CID must be positive: {value}")
-
-        if value >= self._MAX_CID:
-            raise ValueError(f"PubChem CID too large: {value}")
-
-        return value
+        int_value = self._coerce_to_int(value)
+        if int_value <= 0:
+            raise ValueError(f"PubChem CID must be positive: {int_value}")
+        if int_value >= self._MAX_CID:
+            raise ValueError(f"PubChem CID too large: {int_value}")
+        return int_value

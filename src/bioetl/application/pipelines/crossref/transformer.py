@@ -61,7 +61,11 @@ class CrossRefTransformer(BaseTransformer):
 
         """
         super().__init__(
-            provider, entity_type="work", tracer=tracer, metrics=metrics, gold_filters=gold_filters
+            provider,
+            entity_type="work",
+            tracer=tracer,
+            metrics=metrics,
+            gold_filters=gold_filters,
         )
 
     # ========================================================================
@@ -178,10 +182,14 @@ class CrossRefTransformer(BaseTransformer):
             "last_page": last_page,
             "year": self._extract_year(rec),
             "published_print": format_date_parts(
-                published_print.get("date-parts") if isinstance(published_print, dict) else None
+                published_print.get("date-parts")
+                if isinstance(published_print, dict)
+                else None
             ),
             "published_online": format_date_parts(
-                published_online.get("date-parts") if isinstance(published_online, dict) else None
+                published_online.get("date-parts")
+                if isinstance(published_online, dict)
+                else None
             ),
             "doc_type": CROSSREF_TYPE_MAP.get(rec.get("type", ""), "PUBLICATION"),
             "citation_count": rec.get("is-referenced-by-count"),

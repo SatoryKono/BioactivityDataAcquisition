@@ -97,9 +97,7 @@ class PublicationEnrichedSchema(ETLRecordSchema):
     language: Series[str] | None = pa.Field(
         nullable=True, description="Publication language code"
     )
-    license_url: Series[str] | None = pa.Field(
-        nullable=True, description="License URL"
-    )
+    license_url: Series[str] | None = pa.Field(nullable=True, description="License URL")
     subjects: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of subject areas"
     )

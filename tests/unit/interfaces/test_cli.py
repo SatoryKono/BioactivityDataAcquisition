@@ -120,7 +120,9 @@ class TestHandleDestructiveRunConfirmation:
         assert result is False
         mock_preview.assert_called_once_with("pubchem_compound")
 
-    @patch("bioetl.interfaces.cli.commands.run_helpers.click.confirm", return_value=True)
+    @patch(
+        "bioetl.interfaces.cli.commands.run_helpers.click.confirm", return_value=True
+    )
     def test_rebuild_with_confirmation_returns_true(self, mock_confirm):
         """Test that rebuild with user confirmation returns True."""
         result = _handle_destructive_run_confirmation(

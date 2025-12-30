@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.value_objects import (
-    ChemblId,
     DOI,
+    ChemblId,
     PubChemCid,
     PubMedId,
     UniProtId,

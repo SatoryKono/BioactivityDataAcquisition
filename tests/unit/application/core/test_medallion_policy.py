@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
 from bioetl.domain.exceptions import PolicyViolationError
+from bioetl.domain.medallion import Layer, WriteMode, WriteModePolicy
 
 
 @pytest.mark.unit

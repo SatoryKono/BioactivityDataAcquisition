@@ -624,7 +624,15 @@ class BronzeWriter:
                     date_dir.rmdir()
 
         self.logger.info(
-            "bronze_cleanup_complete", cutoff=cutoff_str, dry_run=dry_run,
-            files_removed=files, bytes_freed=bytes_total, dirs_removed=dirs,
+            "bronze_cleanup_complete",
+            cutoff=cutoff_str,
+            dry_run=dry_run,
+            files_removed=files,
+            bytes_freed=bytes_total,
+            dirs_removed=dirs,
         )
-        return {"files_removed": files, "bytes_freed": bytes_total, "directories_removed": dirs}
+        return {
+            "files_removed": files,
+            "bytes_freed": bytes_total,
+            "directories_removed": dirs,
+        }

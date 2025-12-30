@@ -30,7 +30,9 @@ class TestSourceConfigFilesExist:
         "provider",
         ["chembl", "pubchem", "uniprot", "pubmed"],
     )
-    def test_source_config_exists(self, source_configs_dir: Path, provider: str) -> None:
+    def test_source_config_exists(
+        self, source_configs_dir: Path, provider: str
+    ) -> None:
         """Each provider MUST have a source configuration file."""
         config_file = source_configs_dir / f"{provider}.yaml"
         assert config_file.exists(), (
@@ -58,21 +60,21 @@ class TestSourceConfigFilesExist:
 
         assert "rate_limit" in source, f"{provider}: Missing 'rate_limit' section"
         rate_limit = source["rate_limit"]
-        assert "requests_per_second" in rate_limit, (
-            f"{provider}: Missing 'rate_limit.requests_per_second'"
-        )
+        assert (
+            "requests_per_second" in rate_limit
+        ), f"{provider}: Missing 'rate_limit.requests_per_second'"
         assert "burst" in rate_limit, f"{provider}: Missing 'rate_limit.burst'"
 
-        assert "circuit_breaker" in source, (
-            f"{provider}: Missing 'circuit_breaker' section"
-        )
+        assert (
+            "circuit_breaker" in source
+        ), f"{provider}: Missing 'circuit_breaker' section"
         cb = source["circuit_breaker"]
-        assert "failure_threshold" in cb, (
-            f"{provider}: Missing 'circuit_breaker.failure_threshold'"
-        )
-        assert "recovery_timeout" in cb, (
-            f"{provider}: Missing 'circuit_breaker.recovery_timeout'"
-        )
+        assert (
+            "failure_threshold" in cb
+        ), f"{provider}: Missing 'circuit_breaker.failure_threshold'"
+        assert (
+            "recovery_timeout" in cb
+        ), f"{provider}: Missing 'circuit_breaker.recovery_timeout'"
 
 
 class TestSourceConfigLoading:
@@ -113,12 +115,12 @@ class TestSourceConfigLoading:
         yaml_rate = raw["source"]["rate_limit"]["requests_per_second"]
         yaml_burst = raw["source"]["rate_limit"]["burst"]
 
-        assert config.rate_limit.requests_per_second == yaml_rate, (
-            f"{provider}: rate_limit.requests_per_second mismatch"
-        )
-        assert config.rate_limit.burst == yaml_burst, (
-            f"{provider}: rate_limit.burst mismatch"
-        )
+        assert (
+            config.rate_limit.requests_per_second == yaml_rate
+        ), f"{provider}: rate_limit.requests_per_second mismatch"
+        assert (
+            config.rate_limit.burst == yaml_burst
+        ), f"{provider}: rate_limit.burst mismatch"
 
 
 class TestNoHardcodedRateLimits:
@@ -133,9 +135,9 @@ class TestNoHardcodedRateLimits:
         source = inspect.getsource(HttpClientFactory)
 
         # Should import and use load_source_config
-        assert "load_source_config" in source, (
-            "HttpClientFactory should use load_source_config"
-        )
+        assert (
+            "load_source_config" in source
+        ), "HttpClientFactory should use load_source_config"
 
     def test_registration_uses_source_config(self) -> None:
         """registration.py should use load_source_config for rate limits."""
@@ -146,9 +148,9 @@ class TestNoHardcodedRateLimits:
         source = inspect.getsource(registration)
 
         # Should import load_source_config
-        assert "load_source_config" in source, (
-            "registration.py should use load_source_config"
-        )
+        assert (
+            "load_source_config" in source
+        ), "registration.py should use load_source_config"
 
         # Should have helper functions for getting config
         assert "_get_rate_limit_from_config" in source
@@ -165,24 +167,26 @@ class TestSourceConfigSchema:
         config = load_source_config("chembl")
 
         # ChEMBL should have page_size configured
-        assert config.page_size is not None, (
-            "ChEMBL config should have page_size for API pagination"
-        )
+        assert (
+            config.page_size is not None
+        ), "ChEMBL config should have page_size for API pagination"
         assert config.page_size >= 100, "ChEMBL page_size should be at least 100"
 
     def test_source_config_batch_size_property(self) -> None:
         """batch_size property should return provider_config.batch_size if set."""
         from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-        config = SourceYamlConfig.model_validate({
-            "source": {
-                "batch_size": 100,
-                "provider_config": {
-                    "provider": "test",
-                    "batch_size": 50,
-                },
+        config = SourceYamlConfig.model_validate(
+            {
+                "source": {
+                    "batch_size": 100,
+                    "provider_config": {
+                        "provider": "test",
+                        "batch_size": 50,
+                    },
+                }
             }
-        })
+        )
 
         # provider_config.batch_size takes precedence
         assert config.batch_size == 50
@@ -191,14 +195,16 @@ class TestSourceConfigSchema:
         """batch_size should fall back to source.batch_size if not in provider_config."""
         from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-        config = SourceYamlConfig.model_validate({
-            "source": {
-                "batch_size": 100,
-                "provider_config": {
-                    "provider": "test",
-                },
+        config = SourceYamlConfig.model_validate(
+            {
+                "source": {
+                    "batch_size": 100,
+                    "provider_config": {
+                        "provider": "test",
+                    },
+                }
             }
-        })
+        )
 
         assert config.batch_size == 100
 
@@ -208,7 +214,9 @@ class TestConfigValuesNotHardcoded:
 
     def test_chembl_rate_limit_from_config(self) -> None:
         """ChEMBL rate limit should match configs/sources/chembl.yaml."""
-        from bioetl.composition.providers.registration import _get_rate_limit_from_config
+        from bioetl.composition.providers.registration import (
+            _get_rate_limit_from_config,
+        )
 
         rate, capacity = _get_rate_limit_from_config("chembl")
 
@@ -219,12 +227,12 @@ class TestConfigValuesNotHardcoded:
         expected_rate = raw["source"]["rate_limit"]["requests_per_second"]
         expected_capacity = raw["source"]["rate_limit"]["burst"]
 
-        assert rate == expected_rate, (
-            f"ChEMBL rate mismatch: got {rate}, expected {expected_rate}"
-        )
-        assert capacity == expected_capacity, (
-            f"ChEMBL capacity mismatch: got {capacity}, expected {expected_capacity}"
-        )
+        assert (
+            rate == expected_rate
+        ), f"ChEMBL rate mismatch: got {rate}, expected {expected_rate}"
+        assert (
+            capacity == expected_capacity
+        ), f"ChEMBL capacity mismatch: got {capacity}, expected {expected_capacity}"
 
     def test_chembl_circuit_breaker_from_config(self) -> None:
         """ChEMBL circuit breaker should match configs/sources/chembl.yaml."""
