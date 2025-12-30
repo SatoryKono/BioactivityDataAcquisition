@@ -55,7 +55,6 @@ class TestFileSizeLimits:
         "entrypoints.py": 700,  # 675 LOC - pipeline entrypoints (run_pipeline expanded)
         "registration.py": 500,  # 478 LOC - provider registration with data source creators
         "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
-        "registration.py": 490,  # 478 LOC - provider registrations + data source creators
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly

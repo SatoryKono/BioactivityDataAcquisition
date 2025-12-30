@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
+from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
 @pytest.fixture(autouse=True)
@@ -269,32 +270,35 @@ class TestRunCommandAdvanced:
         """Test run command handles ValueError during bootstrap."""
         mock_create_runner.side_effect = ValueError("Invalid config")
 
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        # ExitCode.CONFIG_ERROR is 80
-        assert result.exit_code == 80
+        assert result.exit_code == ExitCode.CONFIG_ERROR
         assert "Configuration error" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_file_not_found(self, mock_create_runner, runner):
         """Test run command handles FileNotFoundError during bootstrap."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
         mock_create_runner.side_effect = FileNotFoundError("Config not found")
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        # ExitCode.CONFIG_ERROR is 80
-        assert result.exit_code == 80
+        assert result.exit_code == ExitCode.CONFIG_ERROR
         assert "Configuration error" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_bootstrap_generic_error(self, mock_create_runner, runner):
         """Test run command handles generic Exception during bootstrap."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
         mock_create_runner.side_effect = RuntimeError("Unexpected error")
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        # ExitCode.INIT_ERROR is 81
-        assert result.exit_code == 81
+        assert result.exit_code == ExitCode.INIT_ERROR
         assert "Initialization failed" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -347,13 +351,14 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
     def test_run_command_missing_logger(self, mock_create_runner, runner):
         """Test run command handles missing logger gracefully."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
         mock_runner_instance = MagicMock(spec=[])  # Empty spec, no logger attribute
         mock_create_runner.return_value = mock_runner_instance
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        # ExitCode.INIT_ERROR is 81
-        assert result.exit_code == 81
+        assert result.exit_code == ExitCode.INIT_ERROR
         assert "Logger not initialized" in result.output
 
 
