@@ -209,9 +209,7 @@ def mock_lifecycle_service_with_recorder(call_recorder, mock_services_with_recor
 @pytest.fixture
 def mock_lifecycle_service(call_recorder, mock_lifecycle_service_with_recorder):
     """Create a mock lifecycle service for runner tests."""
-    from bioetl.application.services.medallion_lifecycle import ClearResult
     from bioetl.domain.medallion import MedallionPolicy
-    from bioetl.domain.types import RunType
 
     service = MagicMock(spec=MedallionLifecycleService)
 
