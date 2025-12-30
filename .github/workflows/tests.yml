@@ -37,5 +37,17 @@ jobs:
       - name: Run Tests with Coverage
         run: |
           # Run unit and integration tests with coverage
-          # Enforce 85% coverage threshold as requested
-          uv run pytest tests/ -v -m "not e2e" --cov=src/bioetl --cov-report=term --cov-fail-under=85
+          # Enforce 85% coverage threshold (RULES.md §4.2)
+          uv run pytest tests/ -v -m "not e2e" \
+            --cov=src/bioetl \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under=85
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 30
