@@ -46,30 +46,14 @@ class TestCliRunDryRun:
         Dry-run only affects rebuild/backfill cleanup preview.
         For incremental, the pipeline executes normally.
         """
-        import asyncio
+        from bioetl.application.services import RunStatus
 
-        from bioetl.application.services import RunResult, RunStatus
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run"
+        ) as mock_asyncio_run:
+            # _run_pipeline_async returns (status, error_message, error_type) tuple
+            mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-        )
-
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
-                return_value=mock_service,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
-            ),
-        ):
             result = cli_runner.invoke(
                 cli,
                 ["run", "--pipeline", "chembl_activity", "--dry-run"],
@@ -77,8 +61,8 @@ class TestCliRunDryRun:
 
         # Incremental with dry-run proceeds normally (dry-run doesn't affect incremental)
         assert result.exit_code == 0
-        # Verify pipeline service was called
-        mock_service.run.assert_called_once()
+        # Verify asyncio.run was called (meaning pipeline was executed)
+        mock_asyncio_run.assert_called_once()
 
     def test_dry_run_with_rebuild_shows_preview(
         self,

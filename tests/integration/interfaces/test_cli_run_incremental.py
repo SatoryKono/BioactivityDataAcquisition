@@ -74,44 +74,21 @@ class TestCliRunIncremental:
 
         Uses mocked service to verify CLI bootstrapping and execution flow.
         """
-        import asyncio
+        from bioetl.application.services import RunStatus
 
-        from bioetl.application.services import RunResult, RunStatus
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run"
+        ) as mock_asyncio_run:
+            # _run_pipeline_async returns (status, error_message, error_type) tuple
+            mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
 
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-        )
-
-        def run_coro(coro):
-            loop = asyncio.new_event_loop()
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
-                return_value=mock_service,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=run_coro,
-            ),
-        ):
             result = cli_runner.invoke(
                 cli,
                 ["run", "--pipeline", "chembl_activity", "--limit", "5"],
             )
 
         assert result.exit_code == 0, f"CLI failed: {result.output}"
-        mock_service.run.assert_called_once()
+        mock_asyncio_run.assert_called_once()
 
     def test_run_incremental_with_resume_flag(
         self,

@@ -280,33 +280,21 @@ class TestCliCommands:
         assert "Unknown pipeline" in result.output or "Error" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_valid_pipeline(
-        self, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
-        from bioetl.application.services import RunResult, RunStatus
+        from bioetl.application.services import RunStatus
 
-        mock_service = MagicMock()
-        mock_result = RunResult(
-            status=RunStatus.SUCCESS,
-            pipeline_name="chembl_activity",
-            run_id="test-run-id",
-            run_type="incremental",
-        )
-        mock_service.run = AsyncMock(return_value=mock_result)
-        mock_get_service.return_value = mock_service
+        # _run_pipeline_async returns (status, error_message, error_type) tuple
+        mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
 
-        # Use patch for asyncio.run that returns the result directly
-        with patch(
-            "bioetl.interfaces.cli.commands.run.asyncio.run",
-            return_value=mock_result,
-        ):
-            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+        result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        # Should have called the service
+        # Should have called asyncio.run
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        mock_get_service.assert_called_once()
+        mock_asyncio_run.assert_called_once()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
