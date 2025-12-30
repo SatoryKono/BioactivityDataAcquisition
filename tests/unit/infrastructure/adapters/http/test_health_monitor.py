@@ -327,16 +327,16 @@ class TestProviderHealthMonitorGetAllStates:
         assert len(states) == 3
 
 
-class TestAdjustedClientConfig:
-    """Tests for AdjustedClientConfig dataclass."""
+class TestHealthAdjustedConfig:
+    """Tests for HealthAdjustedConfig dataclass."""
 
     def test_apply_timeout_multiplies(self) -> None:
         """Test apply_timeout multiplies base timeout."""
         from bioetl.infrastructure.adapters.http.health_monitor import (
-            AdjustedClientConfig,
+            HealthAdjustedConfig,
         )
 
-        config = AdjustedClientConfig(
+        config = HealthAdjustedConfig(
             timeout_multiplier=2.0,
             batch_size_divisor=2,
             status=HealthStatus.DEGRADED,
@@ -347,10 +347,10 @@ class TestAdjustedClientConfig:
     def test_apply_batch_size_divides(self) -> None:
         """Test apply_batch_size divides base batch size."""
         from bioetl.infrastructure.adapters.http.health_monitor import (
-            AdjustedClientConfig,
+            HealthAdjustedConfig,
         )
 
-        config = AdjustedClientConfig(
+        config = HealthAdjustedConfig(
             timeout_multiplier=2.0,
             batch_size_divisor=2,
             status=HealthStatus.DEGRADED,
@@ -361,10 +361,10 @@ class TestAdjustedClientConfig:
     def test_apply_batch_size_respects_minimum(self) -> None:
         """Test apply_batch_size respects minimum value."""
         from bioetl.infrastructure.adapters.http.health_monitor import (
-            AdjustedClientConfig,
+            HealthAdjustedConfig,
         )
 
-        config = AdjustedClientConfig(
+        config = HealthAdjustedConfig(
             timeout_multiplier=4.0,
             batch_size_divisor=4,
             status=HealthStatus.UNHEALTHY,
@@ -471,12 +471,12 @@ class TestProviderHealthTracker:
     ) -> None:
         """Test get_adjusted_config returns proper config."""
         from bioetl.infrastructure.adapters.http.health_monitor import (
-            AdjustedClientConfig,
+            HealthAdjustedConfig,
         )
 
         config = tracker.get_adjusted_config()
 
-        assert isinstance(config, AdjustedClientConfig)
+        assert isinstance(config, HealthAdjustedConfig)
         assert config.timeout_multiplier == 1.0
         assert config.batch_size_divisor == 1
         assert config.status == HealthStatus.HEALTHY
@@ -557,12 +557,12 @@ class TestGetAdjustedConfig:
     def test_healthy_config(self, monitor: ProviderHealthMonitor) -> None:
         """Test get_adjusted_config returns normal config when HEALTHY."""
         from bioetl.infrastructure.adapters.http.health_monitor import (
-            AdjustedClientConfig,
+            HealthAdjustedConfig,
         )
 
         config = monitor.get_adjusted_config("chembl")
 
-        assert isinstance(config, AdjustedClientConfig)
+        assert isinstance(config, HealthAdjustedConfig)
         assert config.timeout_multiplier == 1.0
         assert config.batch_size_divisor == 1
         assert config.status == HealthStatus.HEALTHY
