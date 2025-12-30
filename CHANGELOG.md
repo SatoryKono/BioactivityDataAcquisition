@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improves test reliability by testing real integration
 ## [Unreleased]
 
+### Verified (No Action Required)
+
+- **ThinPipeline Classes**: Verified absence of `ThinPipeline`, `ChemblPipelineProtocol`, and `bioetl.pipelines.chembl.base` module:
+  - No `thin.py` file exists in `application/pipelines/chembl/`
+  - No `base.py` file with legacy pipeline protocols exists
+  - All ChEMBL pipelines (`ChEMBLActivityPipeline`, etc.) inherit from `BasePipeline` correctly
+  - Package import validation passed: `from bioetl.application.pipelines.chembl import *`
+  - These classes were either never implemented or removed in a previous refactoring
+
 ### Added
 
 - **Unified Bioactivity Entity**: Introduced `Bioactivity` class as the canonical domain entity for bioactivity data:
