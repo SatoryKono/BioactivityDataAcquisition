@@ -242,7 +242,7 @@ grep "from bioetl\.composition" src/bioetl/infrastructure/  # 0 matches
 
 | Компонент | Статус | Комментарий |
 |-----------|--------|-------------|
-| Storage Writers | ⚠️ | NoOpTracing создаётся внутри __init__ |
+| Storage Writers | ✅ | NoOpTracing импортируется из domain.ports.noop (R-002 выполнено) |
 | Adapters | ✅ | Все зависимости инжектируются |
 | Quarantine | ✅ | Только base_path в конструкторе |
 | Config | ✅ | Singleton через lru_cache |
@@ -271,67 +271,29 @@ grep "from bioetl\.composition" src/bioetl/infrastructure/  # 0 matches
 
 ### 5.2. Желательные улучшения
 
-#### R-001: Удалить deprecated ErrorHandler alias
+#### R-001: ~~Удалить deprecated ErrorHandler alias~~ ✅ ВЫПОЛНЕНО
 
-**Файл:** `adapters/error_handling.py:476-514`
-**Действие:** Удалить `ErrorHandler` класс и metaclass после migration period
-**Обоснование:** Упростит код, уберёт complexity от metaclass
+**Файл:** `adapters/error_handling.py`
+**Статус:** Выполнено в коммите `08dd0ca`
+**Что сделано:** Удалён deprecated `ErrorHandler` alias и metaclass. Все использования мигрированы на `ErrorService`.
 
-```python
-# Удалить:
-class _ErrorHandlerMeta(type): ...
-class ErrorHandler(ErrorService, metaclass=_ErrorHandlerMeta): ...
-```
+#### R-002: ~~Вынести NoOpTracing создание в composition~~ ✅ ВЫПОЛНЕНО
 
-#### R-002: Вынести NoOpTracing создание в composition
+**Файлы:** `storage/gold_writer.py`, `storage/bronze_writer.py`
+**Статус:** Выполнено в коммите `08dd0ca`
+**Что сделано:** Изменён импорт NoOpTracing с `infrastructure.observability.noop_tracing` на `domain.ports.noop`. Это более чистое решение — domain допускает импорт в infrastructure, и NoOpTracing как Null Object не имеет I/O зависимостей.
 
-**Файлы:** `storage/gold_writer.py:83-87`, `storage/bronze_writer.py:88-92`
-**Действие:** Убрать fallback создание NoOpTracing внутри __init__
-**Обоснование:** Строгое соблюдение DI — все зависимости из composition root
+#### R-003: ~~Централизовать structlog configuration~~ ✅ ВЫПОЛНЕНО
 
-```python
-# Было:
-if tracing is None:
-    from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-    tracing = NoOpTracing()
+**Файл:** `observability/logging_config.py` (новый)
+**Статус:** Выполнено в коммите `08dd0ca`
+**Что сделано:** Создан `logging_config.py` с thread-safe глобальной конфигурацией structlog. Функция `configure_logging()` вызывается один раз и игнорирует повторные вызовы.
 
-# Должно быть:
-# В composition/bootstrap.py:
-tracing = NoOpTracing() if not config.tracing_enabled else OpenTelemetryTracing()
-writer = GoldWriter(base_path, logger, tracing=tracing, ...)
-```
+#### R-004: ~~Убрать re-export RuntimeConfig из config.py~~ ✅ ВЫПОЛНЕНО
 
-#### R-003: Централизовать structlog configuration
-
-**Файл:** `observability/unified_logger.py:185-189`
-**Действие:** Вынести `structlog.configure()` в отдельную функцию инициализации
-**Обоснование:** Избежать перезаписи конфигурации при создании множественных логгеров
-
-```python
-# Новый файл: observability/logging_config.py
-_configured = False
-
-def configure_structlog(json_format: bool = True) -> None:
-    global _configured
-    if _configured:
-        return
-    # ... configuration ...
-    _configured = True
-```
-
-#### R-004: Убрать re-export RuntimeConfig из config.py
-
-**Файл:** `config.py:376`
-**Действие:** Удалить re-export, импортировать из domain напрямую
-**Обоснование:** Чистота разделения слоёв
-
-```python
-# Удалить из config.py:
-from bioetl.domain.config import RuntimeConfig
-
-# В interfaces/cli.py импортировать напрямую:
-from bioetl.domain.config import RuntimeConfig
-```
+**Файл:** `config.py`
+**Статус:** Выполнено в коммите `08dd0ca`
+**Что сделано:** Удалён re-export `RuntimeConfig` из infrastructure.config. Импортировать напрямую из `bioetl.domain.config`.
 
 #### R-005: Консолидировать AdapterMetrics и MetricsCollector
 
