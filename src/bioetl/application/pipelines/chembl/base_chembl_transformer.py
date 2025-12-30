@@ -16,7 +16,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.domain.transformations import generate_entity_id
+from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -59,6 +59,7 @@ class BaseChemblTransformer(BaseTransformer):
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
     ) -> None:
         """Initialize ChEMBL transformer.
 
@@ -67,10 +68,15 @@ class BaseChemblTransformer(BaseTransformer):
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
 
         """
         super().__init__(
-            provider, tracer=tracer, metrics=metrics, gold_filters=gold_filters
+            provider,
+            tracer=tracer,
+            metrics=metrics,
+            gold_filters=gold_filters,
+            identity_service=identity_service,
         )
 
     async def _transform_impl(
@@ -101,11 +107,10 @@ class BaseChemblTransformer(BaseTransformer):
         # 1. Validate primary ID
         primary_id = self._get_required_field(record, self.primary_id_field)
 
-        # 2. Generate entity ID
-        entity_id = generate_entity_id(
+        # 2. Generate entity ID using IdentityService
+        entity_id = self.compute_entity_id(
+            source_id=str(primary_id),
             record={self.primary_id_field: str(primary_id)},
-            provider=self.provider,
-            id_field=self.primary_id_field,
         )
 
         # 3. Extract business data (delegated to subclass)
