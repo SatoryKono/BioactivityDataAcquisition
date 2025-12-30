@@ -32,7 +32,7 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.config import PipelineConfig
-from bioetl.domain.filter_config import GoldFilterConfig
+from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 

@@ -2,6 +2,8 @@
 
 Application Service that handles DQ checks, VACUUM, and cleanup after pipeline execution.
 Extracted from PipelineRunner to follow Single Responsibility Principle.
+
+VACUUM operations are delegated to MedallionLifecycleService.finalize_run().
 """
 
 from __future__ import annotations
@@ -10,6 +12,7 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
+from bioetl.application.services.medallion_lifecycle import VacuumResult
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 
 if TYPE_CHECKING:
@@ -48,21 +51,6 @@ class DQResult:
     anomalies_count: int
     has_critical: bool
     check_duration_ms: float
-
-
-@dataclass(frozen=True, slots=True)
-class VacuumResult:
-    """Result of VACUUM operation.
-
-    Attributes:
-        silver_files_removed: Number of files removed from Silver table.
-        gold_files_removed: Number of files removed from Gold table.
-        skipped: Whether VACUUM was skipped.
-    """
-
-    silver_files_removed: int
-    gold_files_removed: int
-    skipped: bool
 
 
 class PostrunService:
@@ -257,47 +245,19 @@ class PostrunService:
     async def run_vacuum_if_enabled(self) -> VacuumResult:
         """Run VACUUM on Silver and Gold tables if enabled.
 
-        Executes VACUUM using MedallionLifecycleService when:
-        - runtime.vacuum_after_run is True
-        - runtime.dry_run is False (no vacuum in dry-run mode)
+        Delegates to MedallionLifecycleService.finalize_run() which handles:
+        - Checking if vacuum is enabled
+        - Skipping in dry-run mode
+        - Vacuuming both Silver and Gold tables
+        - Metrics emission
 
         Returns:
             VacuumResult with operation details.
         """
-        if not self._runtime.vacuum_after_run:
-            return VacuumResult(
-                silver_files_removed=0, gold_files_removed=0, skipped=True
-            )
-
-        if self._runtime.dry_run:
-            self._logger.info(
-                "VACUUM skipped in dry-run mode",
-                extra={"stage": "vacuum"},
-            )
-            return VacuumResult(
-                silver_files_removed=0, gold_files_removed=0, skipped=True
-            )
-
-        self._logger.info(
-            "Starting VACUUM operation",
-            extra={
-                "stage": "vacuum",
-                "retention_days": self._runtime.vacuum_retention_days,
-            },
-        )
-
-        gold_table = (
-            self._config.gold_table
-            or f"{self._config.provider}.{self._config.entity_type}"
-        )
-
-        silver_files = await self._vacuum_table(self._config.silver_table, "silver")
-        gold_files = await self._vacuum_table(gold_table, "gold")
-
-        return VacuumResult(
-            silver_files_removed=silver_files,
-            gold_files_removed=gold_files,
-            skipped=False,
+        return await self._lifecycle_service.finalize_run(
+            config=self._config,
+            runtime=self._runtime,
+            metrics=self._services.metrics,
         )
 
     async def cleanup(self, tracer: TracingPort | None) -> None:
@@ -377,43 +337,5 @@ class PostrunService:
                 message=anomaly.message,
             )
 
-    async def _vacuum_table(self, table: str, layer: str) -> int:
-        """Vacuum a single table with error handling.
 
-        Args:
-            table: Table name to vacuum.
-            layer: Layer name for metrics (silver/gold).
-
-        Returns:
-            Number of files removed.
-        """
-        try:
-            files_removed = await self._lifecycle_service.vacuum(
-                table=table,
-                retention_days=self._runtime.vacuum_retention_days,
-                dry_run=False,
-            )
-            self._logger.info(
-                f"VACUUM completed for {layer.capitalize()} table",
-                extra={
-                    "table": table,
-                    "files_removed": files_removed,
-                },
-            )
-
-            if self._services.metrics:
-                self._services.metrics.increment_counter(
-                    "vacuum_files_removed",
-                    files_removed,
-                    {"pipeline": self._config.pipeline_name, "layer": layer},
-                )
-            return files_removed
-        except Exception as e:
-            self._logger.warning(
-                f"VACUUM failed for {layer.capitalize()} table",
-                extra={"table": table, "error": str(e)},
-            )
-            return 0
-
-
-__all__ = ["DQResult", "PostrunService", "VacuumResult"]
+__all__ = ["DQResult", "ExecutorMetricsProtocol", "PostrunService", "VacuumResult"]

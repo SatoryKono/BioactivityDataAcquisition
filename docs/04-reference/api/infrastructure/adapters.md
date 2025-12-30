@@ -58,19 +58,21 @@ Mixin for handling paginated API responses.
 
 ## Storage Adapters
 
-### DeltaWriter
+### SilverWriter
 
-Storage adapter for Delta Lake (Silver/Gold layers).
+Storage adapter for Delta Lake (Silver layer).
 
-::: bioetl.infrastructure.storage.delta_writer.DeltaWriter
+> **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead.
+
+::: bioetl.infrastructure.storage.silver_writer.SilverWriter
     options:
         show_root_heading: true
         show_source: false
         members:
             - write_silver
-            - write_gold
-            - read_table
-            - table_exists
+            - vacuum
+            - optimize
+            - get_table_info
 
 ### BronzeWriter
 
