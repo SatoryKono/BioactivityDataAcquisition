@@ -241,7 +241,7 @@ class TestFunctionLength:
         "_clear_exports_legacy": 70,
         "create_logger": 55,  # Logger setup with many handlers
         "vacuum_all_command": 90,  # CLI command with multiple suboperations
-        "_fetch_batch_works": 75,  # CrossRef batch DOI resolution with fallback
+        "_fetch_batch_publications": 75,  # CrossRef batch DOI resolution with fallback
         # Extracted validators (REFACTOR-003)
         "validate_medallion_config": 55,  # MedallionConfigValidator method
         "validate_write_modes": 75,  # MedallionConfigValidator method with multiple checks

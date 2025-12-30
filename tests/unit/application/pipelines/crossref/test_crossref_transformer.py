@@ -37,8 +37,8 @@ def pipeline_context(noop_logger):
 
 
 @pytest.fixture
-def sample_work():
-    """Create a sample CrossRef work response."""
+def sample_publication():
+    """Create a sample CrossRef publication response."""
     return {
         "DOI": "10.1234/test.article",
         "title": ["Test Article Title"],
@@ -66,8 +66,8 @@ def sample_work():
 
 
 @pytest.fixture
-def minimal_work():
-    """Create a minimal CrossRef work response."""
+def minimal_publication():
+    """Create a minimal CrossRef publication response."""
     return {
         "DOI": "10.5678/minimal",
         "type": "posted-content",
@@ -85,21 +85,21 @@ def test_normalize_doi():
     assert normalize_doi("  10.1234/test  ") == "10.1234/test"
 
 
-def test_extract_title(sample_work):
+def test_extract_title(sample_publication):
     """Test title extraction using domain function."""
-    assert extract_first_string(sample_work.get("title", [])) == "Test Article Title"
+    assert extract_first_string(sample_publication.get("title", [])) == "Test Article Title"
     assert extract_first_string([]) is None
 
 
-def test_extract_authors(transformer, sample_work):
+def test_extract_authors(transformer, sample_publication):
     """Test author extraction (CrossRef-specific logic)."""
-    authors = transformer._extract_authors(sample_work)
+    authors = transformer._extract_authors(sample_publication)
     assert authors == ["John Doe", "Jane Smith", "Anonymous"]
 
 
-def test_extract_year(transformer, sample_work):
+def test_extract_year(transformer, sample_publication):
     """Test year extraction (CrossRef-specific logic)."""
-    assert transformer._extract_year(sample_work) == 2023
+    assert transformer._extract_year(sample_publication) == 2023
     assert transformer._extract_year({}) is None
 
 
@@ -115,9 +115,9 @@ def test_map_doc_type():
 # =============================================================================
 
 
-def test_extract_business_data_full(transformer, sample_work):
+def test_extract_business_data_full(transformer, sample_publication):
     """Test extracting business data from full work record."""
-    data = transformer._extract_business_data(sample_work)
+    data = transformer._extract_business_data(sample_publication)
 
     assert data["doi"] == "10.1234/test.article"
     assert data["title"] == "Test Article Title"
@@ -130,9 +130,9 @@ def test_extract_business_data_full(transformer, sample_work):
     assert data["source"] == "crossref"
 
 
-def test_extract_business_data_minimal(transformer, minimal_work):
+def test_extract_business_data_minimal(transformer, minimal_publication):
     """Test extracting business data from minimal work record."""
-    data = transformer._extract_business_data(minimal_work)
+    data = transformer._extract_business_data(minimal_publication)
 
     assert data["doi"] == "10.5678/minimal"
     assert data["title"] is None
@@ -146,9 +146,9 @@ def test_extract_business_data_minimal(transformer, minimal_work):
 
 
 @pytest.mark.asyncio
-async def test_transform_full_record(transformer, pipeline_context, sample_work):
+async def test_transform_full_record(transformer, pipeline_context, sample_publication):
     """Test transforming full work record to SilverRecord."""
-    result = await transformer.transform(pipeline_context, sample_work, index=0)
+    result = await transformer.transform(pipeline_context, sample_publication, index=0)
 
     assert result is not None
     assert result["doi"] == "10.1234/test.article"
@@ -163,9 +163,9 @@ async def test_transform_full_record(transformer, pipeline_context, sample_work)
 
 
 @pytest.mark.asyncio
-async def test_transform_minimal_record(transformer, pipeline_context, minimal_work):
+async def test_transform_minimal_record(transformer, pipeline_context, minimal_publication):
     """Test transforming minimal work record to SilverRecord."""
-    result = await transformer.transform(pipeline_context, minimal_work, index=1)
+    result = await transformer.transform(pipeline_context, minimal_publication, index=1)
 
     assert result is not None
     assert result["doi"] == "10.5678/minimal"
