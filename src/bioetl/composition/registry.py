@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings

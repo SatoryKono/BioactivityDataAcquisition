@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
+from bioetl.infrastructure.quarantine import UnifiedQuarantine
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager

@@ -666,9 +666,7 @@ def test_adapters_implement_protocols(src_dir: Path):
         from bioetl.infrastructure.observability.prometheus_metrics import (
             PrometheusMetrics,
         )
-        from bioetl.infrastructure.quarantine.unified_quarantine import (
-            UnifiedQuarantine,
-        )
+        from bioetl.infrastructure.quarantine import UnifiedQuarantine
     except ImportError as e:
         pytest.fail(f"Could not import adapters for protocol check: {e}")
 
