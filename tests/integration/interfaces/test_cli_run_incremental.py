@@ -88,6 +88,13 @@ class TestCliRunIncremental:
             )
         )
 
+        def run_coro(coro):
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
+
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
@@ -95,7 +102,7 @@ class TestCliRunIncremental:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=run_coro,
             ),
         ):
             result = cli_runner.invoke(
@@ -126,6 +133,13 @@ class TestCliRunIncremental:
             )
         )
 
+        def run_coro(coro):
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
+
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
@@ -133,7 +147,7 @@ class TestCliRunIncremental:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=run_coro,
             ),
         ):
             result = cli_runner.invoke(
@@ -230,6 +244,13 @@ class TestCliRunTypes:
             )
         )
 
+        def run_coro(coro):
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
+
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
@@ -237,7 +258,7 @@ class TestCliRunTypes:
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run.asyncio.run",
-                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+                side_effect=run_coro,
             ),
         ):
             result = cli_runner.invoke(
