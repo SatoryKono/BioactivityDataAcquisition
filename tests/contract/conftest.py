@@ -29,8 +29,11 @@ def pytest_collection_modifyitems(
             reason="Live API tests disabled. Set BIOETL_LIVE_API_TESTS=true to enable."
         )
         for item in items:
-            # All tests in contract/ directory require live API access
-            if "contract" in str(item.fspath):
+            # Only skip tests in tests/contract/ directory (not files with "contract" in name)
+            # Check for /contract/ or \contract\ path separator to avoid matching
+            # files like test_port_contracts.py in other directories
+            fspath_str = str(item.fspath)
+            if "/contract/" in fspath_str or "\\contract\\" in fspath_str:
                 item.add_marker(skip_marker)
 
 
