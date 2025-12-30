@@ -164,6 +164,9 @@ from bioetl.domain.ports import (
 # Resilience (domain value objects)
 from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
 
+# Domain services
+from bioetl.domain.services import IdentityService
+
 # Pure domain transformations
 from bioetl.domain.transformations import (
     META_FIELDS,
@@ -346,6 +349,8 @@ __all__ = [
     "CircuitBreakerConfig",
     "RetryConfig",
     "RetryPolicy",
+    # Services
+    "IdentityService",
     # Normalization (pure functions, REFACTOR-004)
     "extract_first_item",
     "extract_first_string",

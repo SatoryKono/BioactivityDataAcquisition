@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 import orjson
 
 from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
-from bioetl.domain.transformations import generate_content_hash
+from bioetl.domain.services import IdentityService
 from bioetl.domain.types import ContentHash, EntityID
 
 if TYPE_CHECKING:
@@ -89,6 +89,7 @@ class BaseTransformer(ABC):
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -98,6 +99,8 @@ class BaseTransformer(ABC):
             tracer: Tracing port for distributed tracing. Defaults to NoOpTracing.
             metrics: Metrics port for duration/error tracking. Defaults to NoOpMetrics.
             gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
+                Defaults to a new IdentityService instance.
 
         """
         self.provider = provider
@@ -105,6 +108,9 @@ class BaseTransformer(ABC):
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
         self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
         self._gold_filters = gold_filters
+        self._identity: IdentityService = (
+            identity_service if identity_service is not None else IdentityService()
+        )
 
     async def transform(
         self,
@@ -280,6 +286,8 @@ class BaseTransformer(ABC):
     ) -> ContentHash:
         """Generate canonical content hash for record versioning.
 
+        Delegates to IdentityService for computation.
+
         Implements RULES.md §2.8.1:
         - sha256(provider + canonical_json(record))
         - Normalizes NaN/Inf → null, floats → round(val, 10), dates → ISO
@@ -292,10 +300,37 @@ class BaseTransformer(ABC):
             ContentHash: SHA256 hash of normalized record.
 
         """
-        return generate_content_hash(
-            business_data,
+        return self._identity.compute_content_hash(
             self.provider,
+            business_data,
             exclude_none=exclude_none,
+        )
+
+    def compute_entity_id(
+        self,
+        source_id: str | None,
+        record: dict[str, Any],
+    ) -> EntityID:
+        """Generate stable entity identifier.
+
+        Delegates to IdentityService for computation.
+
+        If source_id is provided, uses it for stable identification.
+        Otherwise, generates identifier from content hash prefix.
+
+        Args:
+            source_id: Source system identifier (e.g., activity_id from API).
+            record: Record for fallback hash-based identification.
+
+        Returns:
+            EntityID in format "{provider}:{id}" or "{provider}:{hash_prefix}".
+
+        """
+        return self._identity.compute_entity_id(
+            provider=self.provider,
+            entity_type=self.entity_type,
+            source_id=source_id,
+            record=record,
         )
 
     @staticmethod

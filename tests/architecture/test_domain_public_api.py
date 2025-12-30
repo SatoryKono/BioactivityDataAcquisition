@@ -48,6 +48,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "ports",
         "resilience",
         "serialization",
+        "services",  # Submodule for domain services (IdentityService)
         "transformations",
         "types",
         "validation",  # REFACTOR-004: functions are re-exported, not module
