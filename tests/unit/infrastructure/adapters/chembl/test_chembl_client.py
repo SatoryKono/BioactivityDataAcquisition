@@ -6,9 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.exceptions import ChemblApiError, CriticalError, RateLimitError
+from bioetl.domain.exceptions import CriticalError, RateLimitError
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.chembl.exceptions import ChemblApiError
 
 
 @pytest.fixture

@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.domain.exceptions import CrossRefApiError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefAdapter,
     _create_crossref_adapter,
 )
+from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
 
 @pytest.fixture
