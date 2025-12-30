@@ -27,11 +27,9 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.locking import LockContext
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.storage.lock_validator import validate_lock_for_write
 
 T = TypeVar("T")
 
@@ -64,7 +62,6 @@ class GoldWriter:
         tracing: TracingPort | None = None,
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
-        require_lock: bool = True,
     ) -> None:
         """Initialize Gold writer.
 
@@ -77,12 +74,11 @@ class GoldWriter:
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
-            require_lock: If True, write operations require valid LockContext.
-                         Default is True per RULES.md §3.3.
-                         Set to False only for testing or non-concurrent scenarios.
 
-        Note: LoggerPort is required per RULES.md DI requirements.
-        Production code SHOULD always inject tracing explicitly via composition.
+        Note:
+            LoggerPort is required per RULES.md DI requirements.
+            Lock validation is now performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
@@ -94,28 +90,7 @@ class GoldWriter:
         self.logger = logger
         self.csv_exporter = csv_exporter
         self._audit = audit
-        self._require_lock = require_lock
         self._tracing: TracingPort = tracing
-
-    def _validate_lock_held(
-        self,
-        table_name: str,
-        lock_context: LockContext | None,
-        expected_owner_id: RunID | None = None,
-    ) -> None:
-        """Validate that lock is held before write operation.
-
-        Delegates to centralized lock_validator module.
-        Implements RULES.md §3.3 - Writers MUST verify lock held.
-        """
-        validate_lock_for_write(
-            table_name=table_name,
-            lock_context=lock_context,
-            logger=self.logger,
-            operation="write_gold",
-            require_lock=self._require_lock,
-            expected_owner_id=expected_owner_id,
-        )
 
     async def write_gold(
         self,
@@ -129,7 +104,6 @@ class GoldWriter:
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        lock_context: LockContext | None = None,
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -145,23 +119,20 @@ class GoldWriter:
                          (single source of time per ADR-014). Required for SCD2 mode
                          and audit logging.
             run_id: Run identifier for audit correlation across layers.
-            lock_context: Lock context from LockManager. Required unless
-                         require_lock=False was passed to constructor (RULES.md §3.3).
 
         Raises:
             ValueError: If mode is invalid, records empty, schema not strict,
                        or SCD2 mode without ingestion_ts
-            LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
+
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard.
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_gold") as span:
             span.set_attribute("table_name", table_name)
             span.set_attribute("mode", mode)
             span.set_attribute("record_count", len(records))
-
-            # Validate lock is held before any write operation (RULES.md §3.3)
-            # Pass run_id as expected_owner_id for fencing token validation
-            self._validate_lock_held(table_name, lock_context, run_id)
 
             validated_mode = self._validate_write_mode(mode)
             self._validate_records(records)

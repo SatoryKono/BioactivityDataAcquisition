@@ -4,6 +4,10 @@ Implements StoragePort protocol from domain/ports.py.
 
 This module was extracted from storage.py as part of the storage factory split
 to improve maintainability and reduce file size.
+
+Note:
+    Lock validation is performed at Application layer (BatchWriter)
+    per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O adapters.
 """
 
 from __future__ import annotations
@@ -12,7 +16,6 @@ import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-from bioetl.domain.locking import LockContext
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -58,7 +61,6 @@ class StorageAdapter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-        lock_context: LockContext | None = None,
     ) -> str:
         """Write raw records to Bronze layer.
 
@@ -72,10 +74,13 @@ class StorageAdapter:
             run_type: Type of run.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
-            lock_context: Lock context for validation (RULES.md §3.3).
 
         Returns:
             str: Relative path to the written file.
+
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard.
         """
         return await self.bronze.write_bronze(
             records=records,
@@ -86,7 +91,6 @@ class StorageAdapter:
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
-            lock_context=lock_context,
         )
 
     async def write_silver(
@@ -98,9 +102,13 @@ class StorageAdapter:
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        lock_context: LockContext | None = None,
     ) -> None:
-        """Write transformed records to Silver layer."""
+        """Write transformed records to Silver layer.
+
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard.
+        """
         await self.silver.write_silver(
             table_name=table_name,
             records=records,
@@ -109,7 +117,6 @@ class StorageAdapter:
             mode=mode,
             partition_cols=partition_cols,
             on_schema_mismatch=on_schema_mismatch,
-            lock_context=lock_context,
         )
 
     async def write_gold(
@@ -122,7 +129,6 @@ class StorageAdapter:
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        lock_context: LockContext | None = None,
     ) -> None:
         """Write aggregated records to Gold layer.
 
@@ -134,7 +140,10 @@ class StorageAdapter:
             mode: Write mode
             ingestion_ts: Ingestion timestamp for audit (ADR-014)
             run_id: Run identifier for audit correlation
-            lock_context: Lock context for validation (RULES.md §3.3).
+
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard.
         """
         await self.gold.write_gold(
             table_name=table_name,
@@ -144,7 +153,6 @@ class StorageAdapter:
             mode=mode,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
-            lock_context=lock_context,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:

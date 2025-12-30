@@ -36,7 +36,7 @@ def noop_logger():
 @pytest.fixture
 def delta_writer(noop_logger):
     """Fixture for a DeltaWriter."""
-    return DeltaWriter(base_path="/fake/path", logger=noop_logger, require_lock=False)
+    return DeltaWriter(base_path="/fake/path", logger=noop_logger)
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ class TestDeltaWriterExceptions:
             SchemaMismatchError("Invalid schema"),  # Write attempt
         ]
         writer = DeltaWriter(
-            base_path="/fake/path", logger=noop_logger, require_lock=False
+            base_path="/fake/path", logger=noop_logger
         )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
@@ -109,7 +109,7 @@ class TestDeltaWriterExceptions:
         ]
 
         writer = DeltaWriter(
-            base_path="/fake/path", logger=noop_logger, require_lock=False
+            base_path="/fake/path", logger=noop_logger
         )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
@@ -143,7 +143,7 @@ class TestDeltaWriterExceptions:
         """Test SchemaViolationError on table creation."""
         mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
         writer = DeltaWriter(
-            base_path="/fake/path", logger=noop_logger, require_lock=False
+            base_path="/fake/path", logger=noop_logger
         )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
@@ -173,7 +173,7 @@ class TestDeltaWriterExceptions:
             side_effect=TableNotFoundError,
         ):
             writer = DeltaWriter(
-                base_path="/fake/path", logger=noop_logger, require_lock=False
+                base_path="/fake/path", logger=noop_logger
             )
             # Make run_in_executor execute synchronously for testing
             writer.loop = asyncio.get_event_loop()

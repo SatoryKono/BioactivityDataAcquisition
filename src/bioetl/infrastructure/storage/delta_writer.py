@@ -38,15 +38,12 @@ from bioetl.domain.exceptions import (
     SchemaEvolutionError,
     SchemaViolationError,
 )
-from bioetl.domain.locking import LockContext
 from bioetl.domain.medallion import (
     Layer,
     SilverWriteMode,
     WriteMode,
     WriteModePolicy,
 )
-from bioetl.domain.types import RunID
-from bioetl.infrastructure.storage.lock_validator import validate_lock_for_write
 from bioetl.infrastructure.storage.retention_manager import RetentionManager
 
 if TYPE_CHECKING:
@@ -85,7 +82,6 @@ class DeltaWriter:
         write_policy: WriteModePolicy | None = None,
         metrics: MetricsPort | None = None,
         audit: AuditPort | None = None,
-        require_lock: bool = True,
         silver_validator: SilverValidatorPort | None = None,
     ) -> None:
         """Initialize Delta writer.
@@ -102,14 +98,13 @@ class DeltaWriter:
             metrics: Optional MetricsPort for recording policy violation metrics.
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
-            require_lock: If True, write operations require valid LockContext.
-                         Default is True per RULES.md §3.3.
-                         Set to False only for testing or non-concurrent scenarios.
             silver_validator: Optional SilverValidatorPort for Pandera validation.
                             Use NoOpSilverValidator if validation is not required.
 
-        Note: LoggerPort is required per RULES.md DI requirements.
-        Production code SHOULD always inject tracing explicitly via composition.
+        Note:
+            LoggerPort is required per RULES.md DI requirements.
+            Lock validation is now performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
@@ -123,7 +118,6 @@ class DeltaWriter:
         self._write_policy = write_policy or WriteModePolicy()
         self._metrics = metrics
         self._audit = audit
-        self._require_lock = require_lock
         self._tracing: TracingPort = tracing
 
         # Use NoOpSilverValidator if not provided (validation is optional)
@@ -244,27 +238,6 @@ class DeltaWriter:
                 f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
             ) from None
 
-    def _extract_owner_id_from_records(
-        self, records: list[dict[str, Any]], table_name: str
-    ) -> RunID | None:
-        """Extract owner_id from records for fencing token validation."""
-        if not records:
-            return None
-        run_id_str = records[0].get("_run_id")
-        if not run_id_str:
-            return None
-        from uuid import UUID
-
-        try:
-            return RunID(UUID(run_id_str))
-        except (ValueError, TypeError):
-            self.logger.warning(
-                "Could not parse _run_id for owner validation",
-                table=table_name,
-                run_id=run_id_str,
-            )
-            return None
-
     def _deduplicate_by_primary_keys(
         self, records: list[dict[str, Any]], primary_keys: list[str]
     ) -> list[dict[str, Any]]:
@@ -276,26 +249,6 @@ class DeltaWriter:
             key = tuple(record.get(pk) for pk in primary_keys)
             unique_records[key] = record
         return list(unique_records.values())
-
-    def _validate_lock_held(
-        self,
-        table_name: str,
-        lock_context: LockContext | None,
-        expected_owner_id: RunID | None = None,
-    ) -> None:
-        """Validate that lock is held before write operation.
-
-        Delegates to centralized lock_validator module.
-        Implements RULES.md §3.3 - Writers MUST verify lock held.
-        """
-        validate_lock_for_write(
-            table_name=table_name,
-            lock_context=lock_context,
-            logger=self.logger,
-            operation="write_silver",
-            require_lock=self._require_lock,
-            expected_owner_id=expected_owner_id,
-        )
 
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
         """Map SilverWriteMode to WriteMode for policy validation.
@@ -494,7 +447,6 @@ class DeltaWriter:
         mode: str = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        lock_context: LockContext | None = None,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -509,25 +461,22 @@ class DeltaWriter:
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
-            lock_context: Lock context from LockManager. Required unless
-                         require_lock=False was passed to constructor (RULES.md §3.3).
-            **kwargs: Additional arguments for compatibility (ignored).
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
             PolicyViolationError: If mode is not allowed for Silver layer
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
             SchemaViolationError: If Pandera validation fails
-            LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
+
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard.
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
             span.set_attribute("mode", mode)
             span.set_attribute("record_count", len(records))
-
-            expected_owner_id = self._extract_owner_id_from_records(records, table_name)
-            self._validate_lock_held(table_name, lock_context, expected_owner_id)
 
             records = self._deduplicate_by_primary_keys(records, primary_keys)
             span.set_attribute("record_count", len(records))
