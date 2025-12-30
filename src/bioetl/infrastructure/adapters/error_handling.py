@@ -104,20 +104,24 @@ class AdapterErrorContext:
     extra: dict[str, Any] = field(default_factory=dict)
 
 
-class ErrorHandler:
-    """Unified error handler for all adapters.
+class ErrorService:
+    """Unified error service for all adapters.
 
     Provides consistent error classification, logging, and exception wrapping
     across all DataSourcePort implementations.
 
+    Note:
+        Renamed from ErrorHandler to ErrorService to align with glossary.md
+        Ubiquitous Language (avoid "Handler", use "Service").
+
     Usage:
-        >>> handler = ErrorHandler(logger)
+        >>> service = ErrorService(logger)
         >>> try:
         ...     response = await client.get(url)
         ... except httpx.HTTPStatusError as e:
-        ...     category = handler.classify_http_error(e.response.status_code)
-        ...     handler.log_error("chembl", "fetch", e, {"status_code": e.response.status_code})
-        ...     raise handler.wrap_error(e, "chembl")
+        ...     category = service.classify_http_error(e.response.status_code)
+        ...     service.log_error("chembl", "fetch", e, {"status_code": e.response.status_code})
+        ...     raise service.wrap_error(e, "chembl")
 
     Attributes:
         logger: LoggerPort instance for structured logging.
@@ -129,7 +133,7 @@ class ErrorHandler:
         logger: LoggerPort,
         classifier: ErrorClassifier | None = None,
     ) -> None:
-        """Initialize ErrorHandler.
+        """Initialize ErrorService.
 
         Args:
             logger: LoggerPort instance for structured logging.
@@ -469,8 +473,50 @@ class ErrorHandler:
         )
 
 
+# Backward-compatibility alias (deprecated)
+def _deprecated_error_handler_alias() -> type[ErrorService]:
+    """Return ErrorService with deprecation warning."""
+    import warnings
+
+    warnings.warn(
+        "ErrorHandler is deprecated. Use ErrorService instead. "
+        "See glossary.md for Ubiquitous Language terminology.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+    return ErrorService
+
+
+# Create deprecated alias - accessing this triggers warning
+class _ErrorHandlerMeta(type):
+    """Metaclass to emit deprecation warning on ErrorHandler usage."""
+
+    def __instancecheck__(cls, instance: object) -> bool:
+        return isinstance(instance, ErrorService)
+
+
+class ErrorHandler(ErrorService, metaclass=_ErrorHandlerMeta):
+    """Deprecated alias for ErrorService.
+
+    .. deprecated:: 1.0.0
+        Use :class:`ErrorService` instead.
+    """
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        import warnings
+
+        warnings.warn(
+            "ErrorHandler is deprecated. Use ErrorService instead. "
+            "See glossary.md for Ubiquitous Language terminology.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
+
+
 __all__ = [
     "AdapterErrorContext",
     "ErrorCategory",
-    "ErrorHandler",
+    "ErrorHandler",  # Deprecated: kept for backward compatibility
+    "ErrorService",
 ]

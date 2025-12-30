@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from bioetl.domain.value_objects.measurements import (
+from bioetl.domain.value_objects.activity_values import (
     Concentration,
     ConcentrationUnit,
 )
@@ -232,7 +232,7 @@ class ActivityAggregator:
             ValueError: If concentrations is empty.
 
         Example:
-            >>> from bioetl.domain.value_objects.measurements import Concentration, ConcentrationUnit
+            >>> from bioetl.domain.value_objects import Concentration, ConcentrationUnit
             >>> aggregator = ActivityAggregator()
             >>> concs = [
             ...     Concentration(100.0, ConcentrationUnit.NANOMOLAR),
