@@ -8,6 +8,12 @@ Requirements:
 - Health: lightweight query
 - Entities: compounds, substances, assays, bioassays
 
+Error Handling (RULES.md §4.1):
+Uses unified AdapterErrorHandler for consistent error classification:
+- CRITICAL errors (401, 403): Fail immediately with AuthFailureError
+- RECOVERABLE errors (429, 5xx): Retry with exponential backoff
+- DATA_QUALITY errors: Log and skip record
+
 Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 """
 
@@ -18,7 +24,6 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
@@ -266,14 +271,8 @@ class PubChemAdapter(BaseSyncAdapter):
             return HealthStatus.UNHEALTHY
 
         except Exception as e:
-            error_classifier = ErrorClassifier()
-            error_type = error_classifier.classify(e)
-            self.logger.warning(
-                "health_check_failed",
-                provider=self.provider_name,
-                error_type=error_type.value,
-                error=str(e),
-            )
+            # Use unified error handler for consistent logging
+            self._error_handler.log_error("health_check", e)
             raise  # Let base class handle via _fallback_health_status()
 
     def _get_health_endpoint(self) -> str:

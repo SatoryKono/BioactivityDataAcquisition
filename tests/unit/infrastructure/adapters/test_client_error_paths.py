@@ -79,7 +79,11 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_proteins_logs_error_on_failure(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_proteins logs error when fetch fails."""
+        """Test that _fetch_proteins logs error when fetch fails.
+
+        Uses unified error handler which logs at warning level for
+        recoverable errors (RULES.md §4.1).
+        """
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         with patch.dict(
@@ -99,12 +103,12 @@ class TestUniProtAdapterErrorPaths:
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the error via injected logger
-            mock_logger.error.assert_called()
+            # Should have logged the error via unified error handler (warning level)
+            mock_logger.warning.assert_called()
             # Verify the error message contains expected context
-            call_args = mock_logger.error.call_args
+            call_args = mock_logger.warning.call_args
             assert (
-                "protein fetch" in str(call_args).lower()
+                "protein_fetch" in str(call_args).lower()
                 or "network error" in str(call_args).lower()
             )
 
@@ -126,7 +130,11 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_features_logs_error_on_failure(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_features logs error when fetch fails."""
+        """Test that _fetch_features logs error when fetch fails.
+
+        Uses unified error handler which logs at warning level for
+        recoverable errors (RULES.md §4.1).
+        """
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         with patch.dict(
@@ -148,12 +156,12 @@ class TestUniProtAdapterErrorPaths:
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the error via injected logger
-            mock_logger.error.assert_called()
+            # Should have logged the error via unified error handler (warning level)
+            mock_logger.warning.assert_called()
             # Verify the error message contains expected context
-            call_args = mock_logger.error.call_args
+            call_args = mock_logger.warning.call_args
             assert (
-                "feature fetch" in str(call_args).lower()
+                "feature_fetch" in str(call_args).lower()
                 or "timeout" in str(call_args).lower()
             )
 
@@ -175,7 +183,11 @@ class TestUniProtAdapterErrorPaths:
     async def test_fetch_sequences_logs_error_on_failure(
         self, mock_http_client, mock_logger
     ):
-        """Test that _fetch_sequences logs error when fetch fails."""
+        """Test that _fetch_sequences logs error when fetch fails.
+
+        Uses unified error handler which logs at warning level for
+        recoverable errors (RULES.md §4.1).
+        """
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 
         with patch.dict(
@@ -201,12 +213,12 @@ class TestUniProtAdapterErrorPaths:
             # Should return empty results on failure
             assert results == []
 
-            # Should have logged the error via injected logger
-            mock_logger.error.assert_called()
+            # Should have logged the error via unified error handler (warning level)
+            mock_logger.warning.assert_called()
             # Verify the error message contains expected context
-            call_args = mock_logger.error.call_args
+            call_args = mock_logger.warning.call_args
             assert (
-                "sequence fetch" in str(call_args).lower()
+                "sequence_fetch" in str(call_args).lower()
                 or "server error" in str(call_args).lower()
             )
 

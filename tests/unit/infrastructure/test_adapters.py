@@ -35,7 +35,8 @@ class TestChemblAdapter:
         adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
 
         assert adapter.provider_name == "chembl"
-        assert adapter.batch_size == 1000
+        # Use internal _page_size (batch_size is deprecated, defaults to None)
+        assert adapter._page_size == 1000
 
     def test_adapter_with_custom_batch_size(self, mock_logger):
         """Test ChEMBL adapter with custom batch size."""
@@ -46,7 +47,8 @@ class TestChemblAdapter:
             http_client=http_client, logger=mock_logger, batch_size=500
         )
 
-        assert adapter.batch_size == 500
+        # Use internal _page_size (batch_size is deprecated constructor param)
+        assert adapter._page_size == 500
 
     def test_entity_mapping(self, mock_logger):
         """Test entity type to resource URL mapping."""

@@ -1,11 +1,19 @@
 """Base HTTP adapter for BioETL infrastructure.
 
 Provides common functionality for adapters interacting with HTTP APIs,
-including lifecycle management (context manager) and health checks.
+including lifecycle management (context manager), health checks, and
+unified error handling.
 
 Uses Template Method pattern for health checks: subclasses implement
 _probe_health() for provider-specific probes, with automatic fallback
 to circuit breaker assessment on failure.
+
+Error Handling (RULES.md §4.1):
+All adapters use AdapterErrorHandler for unified error classification,
+logging, and exception wrapping. This ensures consistent behavior:
+- CRITICAL errors (401, 403): Fail immediately
+- RECOVERABLE errors (429, 5xx): Retry with exponential backoff
+- DATA_QUALITY errors: Log and skip record
 """
 
 from __future__ import annotations
@@ -17,6 +25,7 @@ from typing import TYPE_CHECKING, Self
 from bioetl.domain.ports import DataSourcePort, LoggerPort
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.error_handling import AdapterErrorHandler
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -35,6 +44,10 @@ class BaseHttpAdapter(DataSourcePort):
     - _probe_health(): Override for provider-specific health probe
     - _fallback_health_status(): Fallback using circuit breaker state
 
+    Provides unified error handling via AdapterErrorHandler:
+    - _error_handler: Lazily initialized error handler
+    - Use _error_handler.handle_error() in catch blocks
+
     Attributes:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
         provider_name: Unique identifier for the data provider.
@@ -46,6 +59,9 @@ class BaseHttpAdapter(DataSourcePort):
     provider_name: str
     logger: LoggerPort
 
+    # Lazily initialized error handler
+    _error_handler_instance: AdapterErrorHandler | None = None
+
     def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort) -> None:
         """Initialize BaseAdapter.
 
@@ -56,6 +72,22 @@ class BaseHttpAdapter(DataSourcePort):
         """
         self.http_client = http_client
         self.logger = logger
+        self._error_handler_instance = None
+
+    @property
+    def _error_handler(self) -> AdapterErrorHandler:
+        """Get or create error handler (lazy initialization).
+
+        Returns:
+            AdapterErrorHandler configured for this adapter.
+        """
+        if self._error_handler_instance is None:
+            self._error_handler_instance = AdapterErrorHandler(
+                logger=self.logger,
+                provider=self.provider_name,
+                circuit_breaker=getattr(self.http_client, "circuit_breaker", None),
+            )
+        return self._error_handler_instance
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.

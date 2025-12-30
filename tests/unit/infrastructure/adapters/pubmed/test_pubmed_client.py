@@ -194,12 +194,16 @@ async def test_health_check_returns_degraded_on_slow_response(
 async def test_health_check_logs_error_on_exception(
     adapter, mock_http_client, mock_logger
 ):
-    """Test health_check logs error details on exception."""
+    """Test health_check logs error details on exception.
+
+    Uses unified error handler for consistent log format (RULES.md §4.1).
+    """
     mock_http_client.get = AsyncMock(side_effect=Exception("Network timeout"))
 
     await adapter.health_check()
 
     mock_logger.warning.assert_called_once()
     call_args = mock_logger.warning.call_args
-    assert call_args[0][0] == "pubmed_health_check_failed"
-    assert "Network timeout" in call_args[1]["error"]
+    # Unified error handler logs as "external_api_error"
+    assert call_args[0][0] == "external_api_error"
+    assert "Network timeout" in call_args[1]["error_message"]

@@ -6,6 +6,13 @@ Provides common functionality for adapters that must use synchronous libraries
 Uses Template Method pattern for health checks: subclasses implement
 _probe_health() for provider-specific probes, with automatic fallback
 to circuit breaker assessment on failure.
+
+Error Handling (RULES.md §4.1):
+All adapters use AdapterErrorHandler for unified error classification,
+logging, and exception wrapping. This ensures consistent behavior:
+- CRITICAL errors (401, 403): Fail immediately
+- RECOVERABLE errors (429, 5xx): Retry with exponential backoff
+- DATA_QUALITY errors: Log and skip record
 """
 
 from __future__ import annotations
@@ -19,6 +26,7 @@ from typing import TYPE_CHECKING, Any, Self
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.error_handling import AdapterErrorHandler
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -39,6 +47,10 @@ class BaseSyncAdapter(DataSourcePort):
     - _probe_health(): Override for provider-specific health probe
     - _fallback_health_status(): Fallback using circuit breaker state
 
+    Provides unified error handling via AdapterErrorHandler:
+    - _error_handler: Lazily initialized error handler
+    - Use _error_handler.handle_error() in catch blocks
+
     Attributes:
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
@@ -55,6 +67,9 @@ class BaseSyncAdapter(DataSourcePort):
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
+
+    # Lazily initialized error handler
+    _error_handler_instance: AdapterErrorHandler | None = None
 
     def __init__(
         self,
@@ -84,9 +99,25 @@ class BaseSyncAdapter(DataSourcePort):
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
         self.strict_error_handling = strict_error_handling
+        self._error_handler_instance = None
 
         # Safety: ensure shutdown if aclose/context manager is misused
         self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
+
+    @property
+    def _error_handler(self) -> AdapterErrorHandler:
+        """Get or create error handler (lazy initialization).
+
+        Returns:
+            AdapterErrorHandler configured for this adapter.
+        """
+        if self._error_handler_instance is None:
+            self._error_handler_instance = AdapterErrorHandler(
+                logger=self.logger,
+                provider=self.provider_name,
+                circuit_breaker=self.circuit_breaker,
+            )
+        return self._error_handler_instance
 
     async def __aenter__(self) -> Self:
         """Enter async context manager."""

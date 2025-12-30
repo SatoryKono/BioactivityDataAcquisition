@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.exceptions import ChemblApiError, CriticalError, RateLimitError
+from bioetl.domain.exceptions import (
+    CriticalError,
+    NetworkError,
+    RateLimitError,
+)
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
@@ -190,10 +194,13 @@ async def test_fetch_with_filter_deduplicates_across_pages(adapter, mock_http_cl
 
 @pytest.mark.asyncio
 async def test_fetch_error(adapter, mock_http_client):
-    """Test API error handling."""
+    """Test API error handling.
+
+    Uses unified error handler which wraps generic exceptions in NetworkError.
+    """
     mock_http_client.get.side_effect = Exception("API Error")
 
-    with pytest.raises(ChemblApiError):
+    with pytest.raises(NetworkError):
         async for _ in adapter.fetch("activity"):
             pass
 
@@ -272,18 +279,22 @@ class TestChemblAdapterErrorClassification:
     async def test_error_classification_logged(
         self, adapter, mock_http_client, mock_logger
     ):
-        """Test that error type is classified and logged."""
+        """Test that error type is classified and logged.
+
+        Uses unified error handler which logs at warning level for
+        recoverable errors (RULES.md §4.1).
+        """
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
-        with pytest.raises(ChemblApiError):
+        with pytest.raises(RateLimitError):
             async for _ in adapter.fetch("activity"):
                 pass
 
-        # Verify error was logged with classification
-        mock_logger.error.assert_called()
-        call_kwargs = mock_logger.error.call_args.kwargs
+        # Verify error was logged with unified format
+        mock_logger.warning.assert_called()
+        call_kwargs = mock_logger.warning.call_args.kwargs
         assert call_kwargs["error_type"] == ErrorType.RATE_LIMIT.value
-        assert call_kwargs["is_recoverable"] is True
+        assert call_kwargs["error_category"] == "RECOVERABLE"
 
     @pytest.mark.asyncio
     async def test_circuit_breaker_failure_count_accessed(
@@ -295,7 +306,7 @@ class TestChemblAdapterErrorClassification:
         """
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
-        with pytest.raises(ChemblApiError):
+        with pytest.raises(RateLimitError):
             async for _ in adapter.fetch("activity"):
                 pass
 

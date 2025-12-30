@@ -8,6 +8,12 @@ Requirements:
 - Health check: Search probe (Ubiquitin)
 - Entities: proteins, features, sequences
 
+Error Handling (RULES.md §4.1):
+Uses unified AdapterErrorHandler for consistent error classification:
+- CRITICAL errors (401, 403): Fail immediately with AuthFailureError
+- RECOVERABLE errors (429, 5xx): Retry with exponential backoff
+- DATA_QUALITY errors: Log and skip record
+
 Documentation: https://www.uniprot.org/help/api
 """
 
@@ -18,7 +24,6 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -160,26 +165,47 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                         f"{self.base_url}/uniprotkb/search", params=params
                     )
                 return self._parse_response(response)
-            except Exception:
-                self._handle_fetch_error("protein", query, cursor)
+            except Exception as e:
+                self._handle_fetch_error("protein", query, cursor, error=e)
                 return [], None
 
         async for item in self.paginated_fetch(_pagination_callback, limit=limit):
             yield item
 
     def _handle_fetch_error(
-        self, entity_type: str, query: str | None, cursor: str | None = None
+        self,
+        entity_type: str,
+        query: str | None,
+        cursor: str | None = None,
+        error: Exception | None = None,
     ) -> None:
-        """Handle fetch errors centrally."""
-        self.logger.error(
-            f"uniprot {entity_type} fetch failed",
-            provider="uniprot",
-            operation=f"{entity_type} fetch",
+        """Handle fetch errors with unified error handling.
+
+        Uses AdapterErrorHandler for consistent error classification, logging,
+        and exception wrapping across all adapters.
+
+        Args:
+            entity_type: Type of entity being fetched (protein, feature, sequence)
+            query: Query string used for fetch
+            cursor: Pagination cursor if applicable
+            error: The exception that occurred (optional for backward compat)
+
+        Raises:
+            Exception: In strict mode, re-raises the original exception
+        """
+        # Create a synthetic error if none provided
+        if error is None:
+            error = RuntimeError(f"UniProt {entity_type} fetch failed")
+
+        # Use unified error handler for consistent logging
+        self._error_handler.log_error(
+            f"{entity_type}_fetch",
+            error,
             query=query,
             cursor=cursor,
         )
         if self.strict_error_handling:
-            raise
+            raise error
 
     async def _get_features_json(self, query: str) -> list[dict[str, Any]]:
         """Retrieve features JSON."""
@@ -192,8 +218,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 features: list[dict[str, Any]] = response.json().get("features", [])
                 return features
             return []
-        except Exception:
-            self._handle_fetch_error("feature", query)
+        except Exception as e:
+            self._handle_fetch_error("feature", query, error=e)
             return []
 
     async def _fetch_features(
@@ -232,8 +258,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 text: str = response.text
                 return text
             return None
-        except Exception:
-            self._handle_fetch_error("sequence", query)
+        except Exception as e:
+            self._handle_fetch_error("sequence", query, error=e)
             return None
 
     async def _get_parsed_sequences(self, query: str) -> AsyncIterator[dict[str, Any]]:
@@ -290,14 +316,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             # On success, return circuit breaker assessment (original behavior)
             return self._fallback_health_status()
         except Exception as e:
-            error_classifier = ErrorClassifier()
-            error_type = error_classifier.classify(e)
-            self.logger.warning(
-                "health_check_failed",
-                provider=self.provider_name,
-                error_type=error_type.value,
-                error=str(e),
-            )
+            # Use unified error handler for consistent logging
+            self._error_handler.log_error("health_check", e)
             raise  # Base class catches and returns _fallback_health_status()
 
     def _get_health_endpoint(self) -> str:
