@@ -76,7 +76,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Should not raise for valid names (alphanumeric + underscore only)
@@ -93,7 +93,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         with pytest.raises(ValueError, match="Invalid provider name"):
@@ -118,7 +118,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         with pytest.raises(ValueError, match="Invalid entity name"):
@@ -153,7 +153,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -185,7 +185,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -207,7 +207,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Should not raise for valid iterators
@@ -221,7 +221,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         with pytest.raises(TypeError, match="records cannot be None"):
@@ -235,7 +235,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # List is an iterable (valid now)
@@ -265,7 +265,7 @@ class TestBronzeWriterNameValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -293,7 +293,7 @@ class TestBronzeWriterUTCValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Should not raise for UTC datetime
@@ -306,7 +306,7 @@ class TestBronzeWriterUTCValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         naive_dt = datetime(2024, 1, 15, 12, 0, 0)  # No tzinfo
@@ -321,7 +321,7 @@ class TestBronzeWriterUTCValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Create datetime with non-UTC timezone (e.g., UTC+3)
@@ -347,7 +347,7 @@ class TestBronzeWriterUTCValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         naive_date = datetime(2024, 1, 15)  # No tzinfo
 
@@ -378,7 +378,7 @@ class TestBronzeWriterUTCValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         utc_date = datetime(2024, 1, 15, tzinfo=UTC)
         naive_ingestion = datetime(2024, 1, 15, 12, 0, 0)  # No tzinfo
@@ -413,7 +413,7 @@ class TestBronzeWriterUTCValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         non_utc_tz = timezone(timedelta(hours=5))
         non_utc_date = datetime(2024, 1, 15, tzinfo=non_utc_tz)
@@ -441,7 +441,7 @@ class TestBronzeWriterInit:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         assert writer.base_path == tmp_path
@@ -455,7 +455,7 @@ class TestBronzeWriterInit:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             save_json=True,
-            require_lock=False,
+
         )
 
         assert writer.save_json is True
@@ -470,7 +470,7 @@ class TestBronzeWriterInit:
             metrics=NoOpMetrics(),
             save_json=True,
             json_path=custom_path,
-            require_lock=False,
+
         )
 
         assert writer.json_path == custom_path
@@ -493,7 +493,7 @@ class TestBronzeWriterCompress:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         compressed, record_count, uncompressed_size = writer._compress_records(
@@ -518,7 +518,7 @@ class TestBronzeWriterCompress:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         with pytest.raises(ValueError, match="No records provided"):
@@ -530,7 +530,7 @@ class TestBronzeWriterCompress:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Create large records
@@ -569,7 +569,7 @@ class TestBronzeWriterWriteLocal:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -633,7 +633,7 @@ class TestBronzeWriterWriteLocal:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
@@ -679,7 +679,7 @@ class TestBronzeWriterWriteLocal:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             save_json=True,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -720,7 +720,7 @@ class TestBronzeWriterWriteLocal:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -757,7 +757,7 @@ class TestBronzeWriterReadLocal:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -803,7 +803,7 @@ class TestBronzeWriterListBatches:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Write multiple batches
@@ -850,7 +850,7 @@ class TestBronzeWriterListBatches:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         date1 = datetime(2024, 1, 15, tzinfo=UTC)
@@ -889,7 +889,7 @@ class TestBronzeWriterListBatches:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         batches = await writer.list_batches("nonexistent", "entity")
@@ -920,7 +920,7 @@ class TestBronzeWriterAtomicWrite:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -972,7 +972,7 @@ class TestBronzeWriterAtomicWrite:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1011,7 +1011,7 @@ class TestBronzeWriterAtomicWrite:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1046,7 +1046,7 @@ class TestBronzeWriterAtomicWrite:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1090,7 +1090,7 @@ class TestBronzeWriterAtomicWrite:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             save_json=True,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1135,7 +1135,7 @@ class TestBronzeWriterLoggerInjection:
             base_path=tmp_path,
             logger=mock_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1166,7 +1166,7 @@ class TestBronzeWriterLoggerInjection:
             base_path=tmp_path,
             logger=mock_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         assert writer.logger is mock_logger
@@ -1195,7 +1195,7 @@ class TestBronzeWriterMetadataDeterminism:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1268,7 +1268,7 @@ class TestBronzeWriterMetadataDeterminism:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         metadata = writer._build_bronze_metadata(
@@ -1307,7 +1307,7 @@ class TestBronzeWriterMetadataDeterminism:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         metadata = writer._build_bronze_metadata(
@@ -1340,7 +1340,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=mock_metrics,
-            require_lock=False,
+
         )
 
         assert writer._metrics is mock_metrics
@@ -1353,7 +1353,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         assert isinstance(writer._metrics, NoOpMetrics)
@@ -1375,7 +1375,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=mock_metrics,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1421,7 +1421,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=mock_metrics,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1466,7 +1466,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=mock_metrics,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1511,7 +1511,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=mock_metrics,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1560,7 +1560,7 @@ class TestBronzeWriterMetrics:
             base_path=tmp_path,
             logger=mock_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1597,7 +1597,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         assert writer.validate_json is True
 
@@ -1608,7 +1608,7 @@ class TestBronzeWriterJsonValidation:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             validate_json=False,
-            require_lock=False,
+
         )
         assert writer.validate_json is False
 
@@ -1618,7 +1618,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         valid_records = [
@@ -1641,7 +1641,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         invalid_records = [
@@ -1665,7 +1665,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         with pytest.raises(BronzeValidationError) as exc_info:
@@ -1681,7 +1681,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         truncated_records = [
@@ -1699,7 +1699,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         valid_records = [
@@ -1732,7 +1732,7 @@ class TestBronzeWriterJsonValidation:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1772,7 +1772,7 @@ class TestBronzeWriterJsonValidation:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             validate_json=False,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
@@ -1816,7 +1816,7 @@ class TestBronzeWriterJsonValidation:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             validate_json=True,
-            require_lock=False,
+
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 

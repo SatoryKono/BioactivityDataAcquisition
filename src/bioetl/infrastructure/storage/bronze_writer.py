@@ -31,11 +31,9 @@ import zstandard as zstd
 if TYPE_CHECKING:
     from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
-from bioetl.domain.locking import LockContext
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
-from bioetl.infrastructure.storage.lock_validator import validate_lock_for_write
 
 
 class BronzeWriter:
@@ -64,7 +62,6 @@ class BronzeWriter:
         json_path: str | None = None,
         validate_json: bool = True,
         audit: AuditPort | None = None,
-        require_lock: bool = True,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -83,11 +80,10 @@ class BronzeWriter:
                           Default is True for data integrity.
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
-            require_lock: If True, write operations require valid LockContext.
-                         Default is True per RULES.md §3.3.
-                         Set to False only for testing or non-concurrent scenarios.
 
-        Note: Production code SHOULD always inject tracing explicitly via composition.
+        Note:
+            Lock validation is now performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
@@ -102,7 +98,6 @@ class BronzeWriter:
         self.json_path = json_path or str(self.base_path / "json")
         self.validate_json = validate_json
         self._audit = audit
-        self._require_lock = require_lock
         self._tracing: TracingPort = tracing
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
@@ -160,29 +155,6 @@ class BronzeWriter:
                 f"{param_name} must be UTC, got timezone with offset {offset}. "
                 "Convert to UTC before passing to BronzeWriter."
             )
-
-    def _validate_lock_held(
-        self,
-        provider: str,
-        entity: str,
-        lock_context: LockContext | None,
-        expected_owner_id: RunID | None = None,
-    ) -> None:
-        """Validate that lock is held before write operation.
-
-        Delegates to centralized lock_validator module.
-        Implements RULES.md §3.3 - Writers MUST verify lock held.
-        """
-        table_name = f"{provider}_{entity}"
-        validate_lock_for_write(
-            table_name=table_name,
-            lock_context=lock_context,
-            logger=self.logger,
-            operation="write_bronze",
-            require_lock=self._require_lock,
-            expected_owner_id=expected_owner_id,
-            log_context={"provider": provider, "entity": entity},
-        )
 
     def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
         """Validate that each record is valid JSON bytes (lazy generator).
@@ -310,7 +282,6 @@ class BronzeWriter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-        lock_context: LockContext | None = None,
     ) -> str:
         """Write raw records to Bronze layer (JSONL + zstd).
 
@@ -326,16 +297,13 @@ class BronzeWriter:
             run_type: Type of run (incremental, backfill, etc.).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014).
-            lock_context: Lock context from LockManager. Required unless
-                         require_lock=False was passed to constructor (RULES.md §3.3).
-            **kwargs: Additional arguments for compatibility (ignored).
 
         Returns:
             Relative path to the written file.
 
-        Raises:
-            LockNotHeldError: If lock_context is None or invalid (when require_lock=True)
-
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard.
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_bronze") as span:
@@ -345,10 +313,6 @@ class BronzeWriter:
             span.set_attribute("run_id", str(run_id))
 
             start_time = time.perf_counter()
-
-            # Validate lock is held before any write operation (RULES.md §3.3)
-            # Pass run_id as expected_owner_id for fencing token validation
-            self._validate_lock_held(provider, entity, lock_context, run_id)
 
             self._validate_bronze_names(provider, entity)
             self._validate_records_iterator(records)

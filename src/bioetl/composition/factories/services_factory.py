@@ -13,7 +13,7 @@ composition layer and injected into pipeline components.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -222,7 +222,7 @@ class ServicesBuilder:
         gold_transform_callback: Any,
         *,
         strict_gold_validation: bool = False,
-        lock_context_holder: LockContextHolder | None = None,
+        lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
         """Create configured RecordProcessor.
 
@@ -246,7 +246,10 @@ class ServicesBuilder:
             gold_transform_callback: Silver to Gold transformation callback
             strict_gold_validation: If True, validation fails when gold_schema is None.
                 Default False for backward compatibility.
-            lock_context_holder: Optional holder for lock context.
+            lock_validator: Async callable that validates lock ownership.
+                Returns True if lock is still held, False otherwise.
+                Typically LockManager.validate(). If None, lock validation
+                is skipped (Safety Guard §4.6).
 
         Returns:
             Configured RecordProcessor instance
@@ -277,11 +280,6 @@ class ServicesBuilder:
             gold_schema, strict=strict_gold_validation
         )
 
-        # Create lock context provider if holder is available
-        lock_context_provider = None
-        if lock_context_holder:
-            lock_context_provider = lock_context_holder.get
-
         return RecordProcessor(
             services=services,
             error_classifier=error_classifier,
@@ -291,7 +289,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=gold_validator,
-            lock_context_provider=lock_context_provider,
+            lock_validator=lock_validator,
         )
 
     @staticmethod
@@ -301,7 +299,7 @@ class ServicesBuilder:
         gold_schema: Any,
         *,
         strict_gold_validation: bool = False,
-        lock_context_holder: LockContextHolder | None = None,
+        lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
         """Create RecordProcessor from pipeline instance.
 
@@ -313,7 +311,10 @@ class ServicesBuilder:
             gold_schema: Pandera schema for Gold layer
             strict_gold_validation: If True, validation fails when gold_schema is None.
                 Default False for backward compatibility.
-            lock_context_holder: Optional holder for lock context.
+            lock_validator: Async callable that validates lock ownership.
+                Returns True if lock is still held, False otherwise.
+                Typically LockManager.validate(). If None, lock validation
+                is skipped (Safety Guard §4.6).
 
         Returns:
             Configured RecordProcessor instance
@@ -364,7 +365,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_cb,
             gold_transform_callback=gold_transform_cb,
             strict_gold_validation=strict_gold_validation,
-            lock_context_holder=lock_context_holder,
+            lock_validator=lock_validator,
         )
 
     @staticmethod
@@ -376,7 +377,7 @@ class ServicesBuilder:
         shutdown_signal: ShutdownSignal,
         *,
         strict_gold_validation: bool = False,
-        lock_context_holder: LockContextHolder | None = None,
+        lock_validator: Callable[[], Awaitable[bool]] | None = None,
         tracer: TracingPort | None = None,
         memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
@@ -393,7 +394,7 @@ class ServicesBuilder:
             checkpoint_manager: Checkpoint manager instance.
             shutdown_signal: Shutdown signal for graceful termination.
             strict_gold_validation: If True, validation fails when gold_schema is None.
-            lock_context_holder: Optional holder for lock context.
+            lock_validator: Async callable that validates lock ownership (Safety Guard §4.6).
             tracer: Optional tracing port for distributed tracing.
             memory_monitor: Optional memory monitor for adaptive batch sizing.
             memory_config: Memory configuration (used if memory_monitor not provided).
@@ -442,11 +443,6 @@ class ServicesBuilder:
         # Create Gold validator
         gold_validator = PanderaGoldValidator(gold_schema, strict=strict_gold_validation)
 
-        # Create lock context provider if holder is available
-        lock_context_provider = None
-        if lock_context_holder:
-            lock_context_provider = lock_context_holder.get
-
         return BatchExecutor(
             services=pipeline.services,
             context=pipeline.context,
@@ -461,7 +457,7 @@ class ServicesBuilder:
             batch_size=pipeline.config.batch_size,
             checkpoint_interval=pipeline.config.checkpoint_interval,
             tracer=tracer,
-            lock_context_provider=lock_context_provider,
+            lock_validator=lock_validator,
             memory_monitor=memory_monitor,
             memory_config=memory_config,
         )

@@ -136,7 +136,7 @@ class TestSchemaEvolutionErrorMode:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-            require_lock=False,
+
         )
 
         # First write establishes the schema
@@ -177,7 +177,7 @@ class TestSchemaEvolutionErrorMode:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-            require_lock=False,
+
         )
 
         # First write establishes the schema
@@ -233,7 +233,7 @@ class TestSchemaEvolutionEvolveMode:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-            require_lock=False,
+
         )
 
         # First write establishes the base schema
@@ -283,7 +283,7 @@ class TestSchemaEvolutionEvolveMode:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
-            require_lock=False,
+
         )
 
         # First write
@@ -339,7 +339,7 @@ class TestSchemaEvolutionIgnoreMode:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-            require_lock=False,
+
         )
 
         # First write
@@ -391,7 +391,7 @@ class TestSchemaEvolutionEdgeCases:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-            require_lock=False,
+
         )
 
         # Table doesn't exist yet
@@ -426,7 +426,7 @@ class TestSchemaEvolutionEdgeCases:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
-            require_lock=False,
+
         )
 
         # First write
@@ -485,7 +485,7 @@ class TestSchemaEvolutionEdgeCases:
         writer = DeltaWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-            require_lock=False,
+
         )
 
         # First write - base schema

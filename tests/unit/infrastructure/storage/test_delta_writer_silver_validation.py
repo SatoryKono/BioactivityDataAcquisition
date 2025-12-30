@@ -64,7 +64,7 @@ class TestDeltaWriterSilverValidatorInit:
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
         writer = DeltaWriter(
-            base_path="/tmp/silver", logger=noop_logger, require_lock=False
+            base_path="/tmp/silver", logger=noop_logger
         )
         assert isinstance(writer._silver_validator, NoOpSilverValidator)
 
@@ -77,7 +77,7 @@ class TestDeltaWriterSilverValidatorInit:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=custom_validator,
-            require_lock=False,
+
         )
         assert writer._silver_validator is custom_validator
 
@@ -98,7 +98,7 @@ class TestDeltaWriterSilverValidatorInit:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-            require_lock=False,
+
         )
         assert writer._silver_validator is validator
 
@@ -115,7 +115,7 @@ class TestDeltaWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=NoOpSilverValidator(),
-            require_lock=False,
+
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise
@@ -138,7 +138,7 @@ class TestDeltaWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-            require_lock=False,
+
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise
@@ -161,7 +161,7 @@ class TestDeltaWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-            require_lock=False,
+
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]  # Negative value fails
 
@@ -189,7 +189,7 @@ class TestDeltaWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=mock_logger,
             silver_validator=validator,
-            require_lock=False,
+
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
 
@@ -220,7 +220,7 @@ class TestDeltaWriterValidateSilverPandera:
             logger=NoOpLogger(),
             silver_validator=validator,
             metrics=mock_metrics,
-            require_lock=False,
+
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
 
@@ -271,7 +271,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-            require_lock=False,
+
         )
 
         with pytest.raises(SchemaViolationError) as exc_info:
@@ -328,7 +328,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
                 base_path="/tmp/silver",
                 logger=noop_logger,
                 silver_validator=validator,
-                require_lock=False,
+
             )
 
             # Should not raise
@@ -377,7 +377,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
             writer = DeltaWriter(
                 base_path="/tmp/silver",
                 logger=noop_logger,
-                require_lock=False,
+
             )
 
             # Should not raise

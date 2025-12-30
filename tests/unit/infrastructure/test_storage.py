@@ -55,7 +55,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
         assert writer.base_path == tmp_path
 
@@ -65,7 +65,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         records = [b'{"id": 1, "data": "test"}\n']
@@ -92,7 +92,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         records = [b'{"id": 1}\n']
@@ -124,7 +124,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         records = [b'{"id": 1, "data": "test"}\n']
@@ -162,7 +162,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         records = []
@@ -190,7 +190,7 @@ class TestBronzeWriter:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             save_json=True,
-            require_lock=False,
+
         )
 
         records = [b'{"id": 1}\n']
@@ -241,7 +241,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Read it back
@@ -260,7 +260,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         # Write two batches
@@ -289,7 +289,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         batches = await writer.list_batches("nonexistent", "entity", datetime.now())
@@ -302,7 +302,7 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-            require_lock=False,
+
         )
 
         records = [b'{"id": 1}\n']
@@ -339,7 +339,7 @@ class TestDeltaWriter:
     def test_delta_writer_initialization(self, noop_logger):
         """Test DeltaWriter can be initialized."""
         writer = DeltaWriter(
-            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+            base_path="/tmp/delta", logger=noop_logger
         )
         assert writer.base_path == "/tmp/delta"
 
@@ -351,7 +351,7 @@ class TestDeltaWriter:
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
         writer = DeltaWriter(
-            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+            base_path="/tmp/delta", logger=noop_logger
         )
 
         records = [
@@ -415,7 +415,7 @@ class TestDeltaWriter:
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
         writer = DeltaWriter(
-            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+            base_path="/tmp/delta", logger=noop_logger
         )
 
         records = [
@@ -442,7 +442,7 @@ class TestDeltaWriter:
     @pytest.mark.usefixtures("mock_delta_writer")
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
         writer = DeltaWriter(
-            base_path="/tmp/delta", logger=noop_logger, require_lock=False
+            base_path="/tmp/delta", logger=noop_logger
         )
 
         with pytest.raises(ValueError, match="No records to write"):
@@ -478,7 +478,7 @@ class TestGoldWriter:
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 
         writer = GoldWriter(
-            base_path="/tmp/gold", logger=noop_logger, require_lock=False
+            base_path="/tmp/gold", logger=noop_logger
         )
 
         # Records with mixed key order

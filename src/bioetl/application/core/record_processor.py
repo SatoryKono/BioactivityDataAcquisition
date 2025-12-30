@@ -1,11 +1,15 @@
 """Orchestrates batch processing through Bronze, Silver, and Gold layers.
 
 Observability: Nested spans for transform → write_bronze → write_silver → write_gold.
+
+Safety Guard (RULES.md §4.6):
+    Lock validation is performed at BatchWriter level BEFORE any write operation.
+    RecordProcessor passes a lock_validator callback from LockManager.validate().
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -24,7 +28,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.locking import LockContext
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
     from bioetl.domain.types import BatchID
 
@@ -53,8 +56,25 @@ class RecordProcessor:
         gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
-        lock_context_provider: Callable[[], LockContext | None] | None = None,
+        lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ):
+        """Initialize RecordProcessor.
+
+        Args:
+            services: Pipeline services bundle.
+            error_classifier: Service for error classification.
+            context: Pipeline execution context.
+            config: Record processor configuration.
+            transform_callback: Callback for record transformation.
+            gold_filter_callback: Callback for Gold layer filtering.
+            gold_transform_callback: Callback for Gold layer transformation.
+            gold_validator: Validator for Gold layer records.
+            tracer: Optional tracing port for distributed tracing.
+            lock_validator: Async callable that validates lock ownership.
+                Returns True if lock is still held, False otherwise.
+                Typically LockManager.validate(). If None, lock validation
+                is skipped (for tests).
+        """
         self._context = context
         self._tracer = tracer
 
@@ -85,7 +105,7 @@ class RecordProcessor:
             error_classifier=error_classifier,
             batch_metrics=self._batch_metrics,
             tracer=tracer,
-            lock_context_provider=lock_context_provider,
+            lock_validator=lock_validator,
         )
 
     async def process_batch(
