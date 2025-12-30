@@ -23,10 +23,10 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+    from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.record_processor import RecordProcessor
-    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.ports import LoggerPort, MemoryMonitorPort, TracingPort
     from bioetl.domain.types import RunType
 
 
@@ -62,7 +62,7 @@ class PipelineExecutor:
         tracer: TracingPort | None = None,
         pipeline_name: str | None = None,
         run_id: str | None = None,
-        memory_monitor: MemoryMonitor | None = None,
+        memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
         logger: LoggerPort | None = None,
     ):

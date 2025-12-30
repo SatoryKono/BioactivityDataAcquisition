@@ -15,6 +15,7 @@ This package contains all port definitions organized by domain:
 - serialization: JsonEncoderPort for JSON encoding
 - audit: AuditPort for write operation traceability
 - shutdown: ShutdownPort for graceful termination coordination
+- memory: MemoryMonitorPort for adaptive batch sizing
 """
 
 from bioetl.domain.ports.audit import (
@@ -36,7 +37,13 @@ from bioetl.domain.ports.health_check import (
     HealthStatusLiteral,
 )
 from bioetl.domain.ports.locking import LockPort
-from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
+from bioetl.domain.ports.noop import (
+    NoOpAudit,
+    NoOpMemoryMonitor,
+    NoOpMetrics,
+    NoOpTracing,
+)
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
@@ -69,8 +76,11 @@ __all__ = [
     "JsonEncoderPort",
     "LockPort",
     "LoggerPort",
+    "MemoryMonitorPort",
+    "MemoryStats",
     "MetricsPort",
     "NoOpAudit",
+    "NoOpMemoryMonitor",
     "NoOpMetrics",
     "NoOpTracing",
     "QuarantinePort",

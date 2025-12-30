@@ -179,8 +179,9 @@ exclude_lines = [
     "raise NotImplementedError",
     "@abstractmethod",
 ]
-fail_under = 80
+fail_under = 85
 show_missing = true
+precision = 2
 
 # ============ MYPY ============
 # Mypy strict mode validates async/await usage:
