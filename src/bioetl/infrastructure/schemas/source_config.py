@@ -16,6 +16,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bioetl.domain.resilience import AdapterConfig as DomainAdapterConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 
 
@@ -195,6 +196,32 @@ class SourceYamlConfig(BaseModel):
     def base_url(self) -> str | None:
         """Get base URL."""
         return self.source.provider_config.base_url
+
+    def to_adapter_config(self, default_page_size: int = 1000) -> DomainAdapterConfig:
+        """Convert source config to domain AdapterConfig.
+
+        Creates an immutable domain configuration object from YAML settings.
+        This is the single source of truth for adapter parameters.
+
+        Args:
+            default_page_size: Default page size if not specified in config.
+                Different providers may have different defaults.
+
+        Returns:
+            DomainAdapterConfig: Immutable adapter configuration.
+
+        Example:
+            >>> config = SourceYamlConfig.model_validate(yaml_data)
+            >>> adapter_config = config.to_adapter_config()
+            >>> adapter_config.batch_size
+            20
+        """
+        return DomainAdapterConfig(
+            batch_size=self.batch_size,
+            page_size=self.page_size if self.page_size is not None else default_page_size,
+            timeout_sec=self.timeout_sec,
+            max_retries=self.max_retries,
+        )
 
 
 __all__ = [
