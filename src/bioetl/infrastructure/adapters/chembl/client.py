@@ -81,6 +81,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
+        # Resolve configuration with clear priority
         if self.adapter_config is not None:
             # Primary: use AdapterConfig from YAML
             self._page_size = self.adapter_config.page_size
@@ -102,7 +103,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
     @property
     def effective_batch_size(self) -> int:
-        """Get the configured page size for API requests."""
+        """Get configured page size for API requests."""
         return self._page_size
 
     def _get_health_status(self) -> HealthStatus:
@@ -110,18 +111,7 @@ class ChemblAdapter(BaseHttpAdapter):
         return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
-        """Get batch size adjusted for current health status.
-
-        Uses circuit breaker state for health-aware batching.
-
-        Returns:
-            - Normal page_size when HEALTHY
-            - Half page_size when DEGRADED (per RULES.md §3.5)
-
-        Raises:
-            CriticalError: When UNHEALTHY to prevent futile requests
-
-        """
+        """Get batch size adjusted for health: full if HEALTHY, half if DEGRADED."""
         health_status = self._get_health_status()
         failure_count = self.http_client.circuit_breaker.get_failure_count()
 

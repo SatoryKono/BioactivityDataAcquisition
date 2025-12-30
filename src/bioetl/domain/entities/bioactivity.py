@@ -1,8 +1,4 @@
-"""Unified Bioactivity domain entity.
-
-Single source of truth for bioactivity representation in domain layer.
-State tracking via BioactivityState enum. Factory method from_raw() for API data.
-"""
+"""Bioactivity domain entity for ChEMBL/PubChem data."""
 
 from __future__ import annotations
 
@@ -17,7 +13,7 @@ from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
 
 def _safe_int(val: Any) -> int | None:
-    """Convert value to int or None."""
+    """Convert value to int, returning None if conversion fails."""
     if val is None:
         return None
     try:
@@ -27,7 +23,7 @@ def _safe_int(val: Any) -> int | None:
 
 
 def _safe_float(val: Any) -> float | None:
-    """Convert value to float or None."""
+    """Convert value to float, returning None if conversion fails."""
     if val is None:
         return None
     try:
@@ -37,16 +33,22 @@ def _safe_float(val: Any) -> float | None:
 
 
 def _safe_str(val: Any) -> str | None:
-    """Convert value to str or None."""
+    """Convert value to str, returning None if val is None."""
     return None if val is None else str(val)
 
 
-def _validate_required_fields(activity_id: Any, molecule_chembl_id: Any) -> None:
-    """Validate required fields for Bioactivity creation."""
-    if activity_id is None:
-        raise ValueError("raw_data must contain 'activity_id'")
-    if molecule_chembl_id is None:
-        raise ValueError("raw_data must contain 'molecule_chembl_id'")
+def _require_field(raw_data: dict[str, Any], field: str) -> Any:
+    """Extract required field, raise ValueError if missing."""
+    value = raw_data.get(field)
+    if value is None:
+        raise ValueError(f"raw_data must contain '{field}'")
+    return value
+
+
+def _safe_json(val: Any) -> str | None:
+    """Convert to JSON string if not None/empty."""
+    import json
+    return json.dumps(val) if val else None
 
 
 class BioactivityState(str, Enum):
@@ -57,21 +59,17 @@ class BioactivityState(str, Enum):
     VALIDATED = "validated"
 
     def is_ready_for_silver(self) -> bool:
-        """Check if record is ready for Silver layer."""
+        """True if NORMALIZED or VALIDATED."""
         return self in (BioactivityState.NORMALIZED, BioactivityState.VALIDATED)
 
     def is_fully_validated(self) -> bool:
-        """Check if record passed full validation."""
+        """True if VALIDATED."""
         return self == BioactivityState.VALIDATED
 
 
 @dataclass(frozen=True, kw_only=True)
 class Bioactivity(BaseEntity):
-    """Unified bioactivity measurement from ChEMBL.
-
-    Required: activity_id, molecule_chembl_id (validated in __post_init__).
-    All other fields are optional from API response.
-    """
+    """Bioactivity measurement from ChEMBL. Required: activity_id, molecule_chembl_id."""
 
     # Processing state (informational, does not affect behavior)
     _state: BioactivityState = BioactivityState.VALIDATED
@@ -202,14 +200,12 @@ class Bioactivity(BaseEntity):
         index: int = 0,
         source_batch_id: UUID | None = None,
     ) -> Bioactivity:
-        """Create Bioactivity from raw API data in RAW state."""
+        """Create Bioactivity from raw API data. Returns entity in RAW state."""
         import hashlib
         import json
 
-        activity_id = raw_data.get("activity_id")
-        molecule_chembl_id = raw_data.get("molecule_chembl_id")
-        _validate_required_fields(activity_id, molecule_chembl_id)
-
+        activity_id = _require_field(raw_data, "activity_id")
+        molecule_chembl_id = _require_field(raw_data, "molecule_chembl_id")
         entity_id = EntityID(str(activity_id))
         content_hash_str = hashlib.sha256(
             json.dumps(raw_data, sort_keys=True, default=str).encode()
@@ -226,32 +222,39 @@ class Bioactivity(BaseEntity):
             _state=BioactivityState.RAW,
             activity_id=str(activity_id),
             molecule_chembl_id=str(molecule_chembl_id),
+            # Optional identifiers
             target_chembl_id=_safe_str(raw_data.get("target_chembl_id")),
             assay_chembl_id=_safe_str(raw_data.get("assay_chembl_id")),
             document_chembl_id=_safe_str(raw_data.get("document_chembl_id")),
             record_id=_safe_int(raw_data.get("record_id")),
             src_id=_safe_int(raw_data.get("src_id")),
+            # Molecule data
             canonical_smiles=_safe_str(raw_data.get("canonical_smiles")),
             molecule_pref_name=_safe_str(raw_data.get("molecule_pref_name")),
             parent_molecule_chembl_id=_safe_str(
                 raw_data.get("parent_molecule_chembl_id")
             ),
+            # Target data
             target_pref_name=_safe_str(raw_data.get("target_pref_name")),
             target_organism=_safe_str(raw_data.get("target_organism")),
             target_tax_id=_safe_str(raw_data.get("target_tax_id")),
+            # Assay data
             assay_type=_safe_str(raw_data.get("assay_type")),
             assay_description=_safe_str(raw_data.get("assay_description")),
             assay_variant_accession=_safe_str(raw_data.get("assay_variant_accession")),
             assay_variant_mutation=_safe_str(raw_data.get("assay_variant_mutation")),
+            # BAO annotations
             bao_endpoint=_safe_str(raw_data.get("bao_endpoint")),
             bao_format=_safe_str(raw_data.get("bao_format")),
             bao_label=_safe_str(raw_data.get("bao_label")),
+            # Raw activity values
             type=_safe_str(raw_data.get("type")),
             value=_safe_float(raw_data.get("value")),
             units=_safe_str(raw_data.get("units")),
             relation=_safe_str(raw_data.get("relation")),
             upper_value=_safe_float(raw_data.get("upper_value")),
             text_value=_safe_str(raw_data.get("text_value")),
+            # Standardized values
             standard_type=_safe_str(raw_data.get("standard_type")),
             standard_value=_safe_float(raw_data.get("standard_value")),
             standard_units=_safe_str(raw_data.get("standard_units")),
@@ -259,25 +262,24 @@ class Bioactivity(BaseEntity):
             standard_upper_value=_safe_float(raw_data.get("standard_upper_value")),
             standard_text_value=_safe_str(raw_data.get("standard_text_value")),
             standard_flag=_safe_int(raw_data.get("standard_flag")),
+            # Derived metrics
             pchembl_value=_safe_float(raw_data.get("pchembl_value")),
+            # Document data
             document_journal=_safe_str(raw_data.get("document_journal")),
             document_year=_safe_int(raw_data.get("document_year")),
+            # Quality annotations
             activity_comment=_safe_str(raw_data.get("activity_comment")),
             data_validity_comment=_safe_str(raw_data.get("data_validity_comment")),
             data_validity_description=_safe_str(
                 raw_data.get("data_validity_description")
             ),
             potential_duplicate=_safe_int(raw_data.get("potential_duplicate")),
-            activity_properties=(
-                json.dumps(raw_data.get("activity_properties"))
-                if raw_data.get("activity_properties")
-                else None
-            ),
+            activity_properties=_safe_json(raw_data.get("activity_properties")),
             toid=_safe_int(raw_data.get("toid")),
         )
 
     def with_state(self, new_state: BioactivityState) -> Bioactivity:
-        """Create a copy with a new processing state."""
+        """Create copy with new state (immutable pattern)."""
         from dataclasses import asdict
 
         data = asdict(self)
