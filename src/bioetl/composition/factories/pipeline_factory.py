@@ -17,7 +17,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
+from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
+from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
@@ -26,8 +31,8 @@ from bioetl.composition.factories.data_source_factory import (
 from bioetl.composition.factories.services_factory import (
     BaseServicesFactory,
     ServicesBuilder,
-    build_runner_services,
 )
+from bioetl.domain.locking import LockContextHolder
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
 if TYPE_CHECKING:
@@ -398,6 +403,9 @@ def assemble_runner(
     This function handles the construction of the entire pipeline execution graph,
     using the unified BatchExecutor that combines extraction and processing.
 
+    All services are created directly here (DI pattern) instead of through
+    an intermediate RunnerServices bundle for explicit dependency injection.
+
     Args:
         pipeline: Configured pipeline instance
         observability: Unified observability bundle (logger, tracer, metrics, dq_monitor)
@@ -425,16 +433,54 @@ def assemble_runner(
         logger=logger_port,
     )
 
-    # Build runner services via DI factory (composition layer)
-    runner_services = build_runner_services(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        services=pipeline.services,
-        context=pipeline.context,
+    # Create shared LockContextHolder to pass context from LockManager to RecordProcessor
+    context_holder = LockContextHolder()
+
+    # Create application services directly (DI pattern, no intermediate bundle)
+    lock_manager = LockManager.create(
+        lock_port=pipeline.services.lock,
+        run_id=pipeline.context.run_id,
+        provider=pipeline.config.provider,
+        entity_type=pipeline.config.entity_type,
+        run_type=pipeline.runtime.run_type,
+        lock_ttl=pipeline.runtime.effective_lock_ttl,
+        wait_for_lock=pipeline.runtime.wait_for_lock,
+        wait_timeout=pipeline.runtime.lock_wait_timeout,
+        heartbeat_interval=pipeline.runtime.heartbeat_interval,
         logger=logger_port,
         shutdown_signal=pipeline.shutdown_signal,
         checkpoint_manager=checkpoint_manager,
+        context_holder=context_holder,
+    )
+
+    preflight_service = PreflightService(
+        config=pipeline.config,
+        context=pipeline.context,
+        logger=logger_port,
+        metrics=pipeline.services.metrics,
+    )
+
+    postrun_service = PostrunService(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        services=pipeline.services,
+        logger=logger_port,
         lifecycle_service=lifecycle_service,
+    )
+
+    lifecycle_orchestrator = LifecycleOrchestrator(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        logger=logger_port,
+        lifecycle_service=lifecycle_service,
+    )
+
+    observer = PipelineObserver(
+        pipeline_name=pipeline.config.pipeline_name,
+        run_id=pipeline.context.run_id,
+        run_type=pipeline.runtime.run_type,
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
         tracer=observability.tracer,
     )
 
@@ -447,11 +493,11 @@ def assemble_runner(
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         strict_gold_validation=strict_gold_validation,
-        lock_validator=runner_services.lock_manager.validate,
+        lock_validator=lock_manager.validate,
         tracer=observability.tracer,
     )
 
-    # Assemble Runner with injected RunnerServices bundle
+    # Assemble Runner with directly injected services (explicit DI)
     return PipelineRunner(
         config=pipeline.config,
         runtime=pipeline.runtime,
@@ -461,7 +507,11 @@ def assemble_runner(
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         logger=logger_port,
-        runner_services=runner_services,
+        lock_manager=lock_manager,
+        preflight=preflight_service,
+        postrun=postrun_service,
+        lifecycle_orch=lifecycle_orchestrator,
+        observer=observer,
         pipeline=pipeline,
         tracer=observability.tracer,
     )

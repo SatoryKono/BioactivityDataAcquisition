@@ -155,7 +155,6 @@ ALLOWED_NO_SUFFIX = {
     "PipelineRunContext",
     "StorageContext",
     "ObservabilityBundle",
-    "RunnerServices",
     "PipelineServices",
     "PipelineDefinition",
     "ProviderConfig",
