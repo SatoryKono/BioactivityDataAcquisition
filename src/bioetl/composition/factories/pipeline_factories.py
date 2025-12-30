@@ -2,17 +2,24 @@
 """Consolidated pipeline factory definitions.
 
 This module creates all pipeline factories using the GenericPipelineFactory
-pattern. Registration is explicit via register_all_pipelines().
+pattern with GenericPipeline as the unified pipeline class.
+
+All pipeline-specific behavior is encapsulated in:
+- YAML configs (configs/pipelines/{provider}/{entity}.yaml)
+- Transformer classes (injected via DI)
+- Silver/Gold schemas
 
 Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.
-
-Updated: Transformer injection via DI (Phase 1 refactoring).
-All factories now include transformer_class for proper DI.
 
 Instance-level registry support (2025-12):
 - register_all_pipelines() accepts optional registry parameter
 - Default behavior uses global registry for backward compatibility
 - Tests can use isolated registries for parallel execution
+
+Refactored (2025-12):
+- All pipelines now use GenericPipeline instead of provider-specific subclasses
+- Pipeline definitions consolidated into PIPELINE_CONFIGS for loop-based registration
+- Provider-specific pipeline classes are deprecated (backward-compat aliases available)
 
 Usage:
     >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -27,42 +34,31 @@ Usage:
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, NamedTuple
 
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+# Transformers (all DI-injected)
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
-from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.cell_line import ChEMBLCellLinePipeline
 from bioetl.application.pipelines.chembl.cell_line_transformer import (
     CellLineTransformer,
-)
-from bioetl.application.pipelines.chembl.compound_record import (
-    ChEMBLCompoundRecordPipeline,
 )
 from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
-from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
-from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
-from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
-from bioetl.application.pipelines.chembl.target_component import (
-    ChEMBLTargetComponentPipeline,
-)
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
+
+# Gold schemas (required for all pipelines)
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
@@ -76,6 +72,8 @@ from bioetl.infrastructure.schemas.gold import (
     PubMedPublicationGoldSchema,
     UniProtProteinGoldSchema,
 )
+
+# Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
@@ -91,121 +89,172 @@ from bioetl.infrastructure.schemas.silver import (
 )
 
 if TYPE_CHECKING:
-    pass
+    import pyarrow as pa
+
+    from bioetl.application.core.base_transformer import BaseTransformer
+
+
+# =============================================================================
+# Pipeline Configuration Registry
+# =============================================================================
+
+
+class PipelineFactoryConfig(NamedTuple):
+    """Configuration for creating a pipeline factory.
+
+    This is a value object that holds all metadata needed to create a
+    GenericPipelineFactory instance.
+
+    Attributes:
+        pipeline_name: Unique identifier for the pipeline (e.g., "chembl_activity")
+        provider: Data provider name (e.g., "chembl", "pubchem")
+        transformer_class: Transformer class for Bronze→Silver transformation
+        silver_schema: PyArrow schema for Silver layer validation
+        gold_schema: Pandera schema for Gold layer validation (required)
+    """
+
+    pipeline_name: str
+    provider: str
+    transformer_class: type[BaseTransformer]
+    silver_schema: pa.Schema | None
+    gold_schema: Any  # Pandera schema class
+
+
+# Consolidated pipeline definitions - single source of truth
+PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
+    # ChEMBL pipelines
+    PipelineFactoryConfig(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        transformer_class=ActivityTransformer,
+        silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+        gold_schema=ChEMBLActivityGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_assay",
+        provider="chembl",
+        transformer_class=AssayTransformer,
+        silver_schema=CHEMBL_ASSAY_SCHEMA,
+        gold_schema=ChEMBLAssayGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_cell_line",
+        provider="chembl",
+        transformer_class=CellLineTransformer,
+        silver_schema=CHEMBL_CELL_LINE_SCHEMA,
+        gold_schema=ChEMBLCellLineGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_compound_record",
+        provider="chembl",
+        transformer_class=CompoundRecordTransformer,
+        silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
+        gold_schema=ChEMBLCompoundRecordGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_document",
+        provider="chembl",
+        transformer_class=DocumentTransformer,
+        silver_schema=CHEMBL_DOCUMENT_SCHEMA,
+        gold_schema=ChEMBLDocumentGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_molecule",
+        provider="chembl",
+        transformer_class=MoleculeTransformer,
+        silver_schema=CHEMBL_MOLECULE_SCHEMA,
+        gold_schema=ChEMBLMoleculeGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_target",
+        provider="chembl",
+        transformer_class=TargetTransformer,
+        silver_schema=CHEMBL_TARGET_SCHEMA,
+        gold_schema=ChEMBLTargetGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_target_component",
+        provider="chembl",
+        transformer_class=TargetComponentTransformer,
+        silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
+        gold_schema=ChEMBLTargetComponentGoldSchema,
+    ),
+    # PubChem pipeline
+    PipelineFactoryConfig(
+        pipeline_name="pubchem_compound",
+        provider="pubchem",
+        transformer_class=PubChemCompoundTransformer,
+        silver_schema=PUBCHEM_COMPOUND_SCHEMA,
+        gold_schema=PubChemCompoundGoldSchema,
+    ),
+    # UniProt pipeline
+    PipelineFactoryConfig(
+        pipeline_name="uniprot_protein",
+        provider="uniprot",
+        transformer_class=UniProtProteinTransformer,
+        silver_schema=UNIPROT_PROTEIN_SCHEMA,
+        gold_schema=UniProtProteinGoldSchema,
+    ),
+    # PubMed pipeline
+    PipelineFactoryConfig(
+        pipeline_name="pubmed_publications",
+        provider="pubmed",
+        transformer_class=PubMedPublicationTransformer,
+        silver_schema=PUBMED_PUBLICATION_SCHEMA,
+        gold_schema=PubMedPublicationGoldSchema,
+    ),
+)
+
+
+def _create_factory(config: PipelineFactoryConfig) -> GenericPipelineFactory[GenericPipeline]:
+    """Create a GenericPipelineFactory from configuration.
+
+    Args:
+        config: Pipeline factory configuration
+
+    Returns:
+        Configured GenericPipelineFactory instance
+    """
+    return GenericPipelineFactory(
+        pipeline_name=config.pipeline_name,
+        pipeline_class=GenericPipeline,
+        provider=config.provider,
+        silver_schema=config.silver_schema,
+        gold_schema=config.gold_schema,
+        transformer_class=config.transformer_class,
+    )
+
+
+# =============================================================================
+# Factory Instances (created from PIPELINE_CONFIGS)
+# =============================================================================
+
+# Create all factories using loop over configurations
+_factories: dict[str, GenericPipelineFactory[GenericPipeline]] = {
+    config.pipeline_name: _create_factory(config) for config in PIPELINE_CONFIGS
+}
+
+# Export individual factories for backward compatibility
+chembl_activity_factory = _factories["chembl_activity"]
+chembl_assay_factory = _factories["chembl_assay"]
+chembl_cell_line_factory = _factories["chembl_cell_line"]
+chembl_compound_record_factory = _factories["chembl_compound_record"]
+chembl_document_factory = _factories["chembl_document"]
+chembl_molecule_factory = _factories["chembl_molecule"]
+chembl_target_factory = _factories["chembl_target"]
+chembl_target_component_factory = _factories["chembl_target_component"]
+pubchem_compound_factory = _factories["pubchem_compound"]
+uniprot_protein_factory = _factories["uniprot_protein"]
+pubmed_publications_factory = _factories["pubmed_publications"]
+
+
+# =============================================================================
+# Registration Functions
+# =============================================================================
 
 # Thread-safe registration state
 _registration_lock = threading.Lock()
 _factories_registered = False
-
-# ChEMBL Activity Pipeline
-chembl_activity_factory = GenericPipelineFactory(
-    pipeline_name="chembl_activity",
-    pipeline_class=ChEMBLActivityPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_ACTIVITY_SCHEMA,
-    gold_schema=ChEMBLActivityGoldSchema,
-    transformer_class=ActivityTransformer,
-)
-
-# ChEMBL Assay Pipeline
-chembl_assay_factory = GenericPipelineFactory(
-    pipeline_name="chembl_assay",
-    pipeline_class=ChEMBLAssayPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_ASSAY_SCHEMA,
-    gold_schema=ChEMBLAssayGoldSchema,
-    transformer_class=AssayTransformer,
-)
-
-# ChEMBL Document Pipeline
-chembl_document_factory = GenericPipelineFactory(
-    pipeline_name="chembl_document",
-    pipeline_class=ChEMBLDocumentPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_DOCUMENT_SCHEMA,
-    gold_schema=ChEMBLDocumentGoldSchema,
-    transformer_class=DocumentTransformer,
-)
-
-# ChEMBL Target Pipeline
-chembl_target_factory = GenericPipelineFactory(
-    pipeline_name="chembl_target",
-    pipeline_class=ChEMBLTargetPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_TARGET_SCHEMA,
-    gold_schema=ChEMBLTargetGoldSchema,
-    transformer_class=TargetTransformer,
-)
-
-# ChEMBL Target Component Pipeline
-chembl_target_component_factory = GenericPipelineFactory(
-    pipeline_name="chembl_target_component",
-    pipeline_class=ChEMBLTargetComponentPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
-    gold_schema=ChEMBLTargetComponentGoldSchema,
-    transformer_class=TargetComponentTransformer,
-)
-
-# ChEMBL Molecule Pipeline
-chembl_molecule_factory = GenericPipelineFactory(
-    pipeline_name="chembl_molecule",
-    pipeline_class=ChEMBLMoleculePipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_MOLECULE_SCHEMA,
-    gold_schema=ChEMBLMoleculeGoldSchema,
-    transformer_class=MoleculeTransformer,
-)
-
-# ChEMBL Compound Record Pipeline
-chembl_compound_record_factory = GenericPipelineFactory(
-    pipeline_name="chembl_compound_record",
-    pipeline_class=ChEMBLCompoundRecordPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
-    gold_schema=ChEMBLCompoundRecordGoldSchema,
-    transformer_class=CompoundRecordTransformer,
-)
-
-# ChEMBL Cell Line Pipeline
-chembl_cell_line_factory = GenericPipelineFactory(
-    pipeline_name="chembl_cell_line",
-    pipeline_class=ChEMBLCellLinePipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_CELL_LINE_SCHEMA,
-    gold_schema=ChEMBLCellLineGoldSchema,
-    transformer_class=CellLineTransformer,
-)
-
-# PubChem Compound Pipeline
-pubchem_compound_factory = GenericPipelineFactory(
-    pipeline_name="pubchem_compound",
-    pipeline_class=PubChemCompoundPipeline,
-    provider="pubchem",
-    silver_schema=PUBCHEM_COMPOUND_SCHEMA,
-    gold_schema=PubChemCompoundGoldSchema,
-    transformer_class=PubChemCompoundTransformer,
-)
-
-# UniProt Protein Pipeline
-uniprot_protein_factory = GenericPipelineFactory(
-    pipeline_name="uniprot_protein",
-    pipeline_class=UniProtProteinPipeline,
-    provider="uniprot",
-    silver_schema=UNIPROT_PROTEIN_SCHEMA,
-    gold_schema=UniProtProteinGoldSchema,
-    transformer_class=UniProtProteinTransformer,
-)
-
-# PubMed Publications Pipeline
-pubmed_publications_factory = GenericPipelineFactory(
-    pipeline_name="pubmed_publications",
-    pipeline_class=PubMedPublicationsPipeline,
-    provider="pubmed",
-    silver_schema=PUBMED_PUBLICATION_SCHEMA,
-    gold_schema=PubMedPublicationGoldSchema,
-    transformer_class=PubMedPublicationTransformer,
-)
 
 
 def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
@@ -254,21 +303,13 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     """Register all factory instances to the given registry.
 
     Internal helper for register_all_pipelines().
+    Uses loop over _factories dict for DRY registration.
 
     Args:
         registry: Target registry instance.
     """
-    registry.register_factory(chembl_activity_factory)
-    registry.register_factory(chembl_assay_factory)
-    registry.register_factory(chembl_cell_line_factory)
-    registry.register_factory(chembl_compound_record_factory)
-    registry.register_factory(chembl_document_factory)
-    registry.register_factory(chembl_target_factory)
-    registry.register_factory(chembl_target_component_factory)
-    registry.register_factory(chembl_molecule_factory)
-    registry.register_factory(pubchem_compound_factory)
-    registry.register_factory(uniprot_protein_factory)
-    registry.register_factory(pubmed_publications_factory)
+    for factory in _factories.values():
+        registry.register_factory(factory)
 
 
 def is_registered() -> bool:
@@ -298,7 +339,40 @@ def reset_registration() -> None:
         _factories_registered = False
 
 
+def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:
+    """Get a pipeline factory by name.
+
+    Convenience function for accessing factories without going through registry.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., "chembl_activity")
+
+    Returns:
+        GenericPipelineFactory instance
+
+    Raises:
+        KeyError: If pipeline_name is not found
+    """
+    if pipeline_name not in _factories:
+        available = sorted(_factories.keys())
+        raise KeyError(
+            f"Unknown pipeline: {pipeline_name}. Available: {available}"
+        )
+    return _factories[pipeline_name]
+
+
+def list_available_pipelines() -> list[str]:
+    """List all available pipeline names.
+
+    Returns:
+        Sorted list of pipeline names
+    """
+    return sorted(_factories.keys())
+
+
 __all__ = [
+    "PIPELINE_CONFIGS",
+    "PipelineFactoryConfig",
     "chembl_activity_factory",
     "chembl_assay_factory",
     "chembl_cell_line_factory",
@@ -307,7 +381,9 @@ __all__ = [
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
+    "get_factory",
     "is_registered",
+    "list_available_pipelines",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
     "register_all_pipelines",
