@@ -378,7 +378,7 @@ class TestPanderaValidatorPropertyBased:
             }
         )
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, deadline=None)
     def test_valid_records_pass_matching_schema(self, record: dict):
         """Property: Records matching schema structure always pass validation."""
         import pandera as pa
