@@ -126,15 +126,13 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     """
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
     quarantine = UnifiedQuarantine(
-        base_path=quarantine_path,
-        logger=NoOpLogger(),
+        base_path=str(quarantine_path),
     )
 
     manager = QuarantineManager(quarantine=quarantine)
