@@ -123,6 +123,7 @@ def bootstrap_pipeline(
         pipeline=ctx.pipeline_name,
         run_id=ctx.run_id,
         settings=settings,
+        log_level=ctx.log_level,
     )
 
     # Merge YAML maintenance config with CLI overrides
