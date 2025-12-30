@@ -146,6 +146,21 @@ class CircuitBreakerConfig:
 RetryPolicy = RetryConfig
 
 
+def _validate_adapter_config(
+    batch_size: int, page_size: int, timeout_sec: float, max_retries: int
+) -> None:
+    """Validate AdapterConfig parameters (extracted for lower CC)."""
+    checks = [
+        (batch_size <= 0, f"batch_size must be positive, got {batch_size}"),
+        (page_size <= 0, f"page_size must be positive, got {page_size}"),
+        (timeout_sec <= 0, f"timeout_sec must be positive, got {timeout_sec}"),
+        (max_retries < 0, f"max_retries must be non-negative, got {max_retries}"),
+    ]
+    errors = [msg for failed, msg in checks if failed]
+    if errors:
+        raise ValueError("; ".join(errors))
+
+
 @dataclass(frozen=True, slots=True)
 class AdapterConfig:
     """Configuration for data source adapters.
@@ -179,11 +194,6 @@ class AdapterConfig:
 
     def __post_init__(self) -> None:
         """Validate configuration values on creation."""
-        if self.batch_size <= 0:
-            raise ValueError(f"batch_size must be positive, got {self.batch_size}")
-        if self.page_size <= 0:
-            raise ValueError(f"page_size must be positive, got {self.page_size}")
-        if self.timeout_sec <= 0:
-            raise ValueError(f"timeout_sec must be positive, got {self.timeout_sec}")
-        if self.max_retries < 0:
-            raise ValueError(f"max_retries must be non-negative, got {self.max_retries}")
+        _validate_adapter_config(
+            self.batch_size, self.page_size, self.timeout_sec, self.max_retries
+        )
