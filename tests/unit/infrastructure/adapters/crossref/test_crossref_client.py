@@ -167,21 +167,22 @@ async def test_health_check_returns_degraded_on_slow_response(
     mock_response.status_code = 200
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
-    # Simulate slow response by patching time.monotonic in both modules
-    # (adapter module and health_check_mixin where HealthCheckContext uses it)
-    call_count = 0
+    # We need the elapsed time calculation in _probe_health to show >5 seconds.
+    # The adapter measures time internally in _probe_health():
+    #   start_time = time.monotonic()  # Call A
+    #   ... do HTTP request ...
+    #   elapsed = time.monotonic() - start_time  # Call B
+    # elapsed = B - A must be > 5.0
+    #
+    # We use a time source that increments by 6 seconds on each call.
+    # This way: A=0, B=6, elapsed=6 which is >5.
+    call_times = iter([0.0, 6.0, 6.0, 12.0, 12.0, 18.0])  # Extra values for safety
 
     def mock_monotonic():
-        nonlocal call_count
-        call_count += 1
-        # First call (start_time) returns 0, subsequent calls return 6 (elapsed = 6 sec)
-        return 0.0 if call_count == 1 else 6.0
+        return next(call_times)
 
     with patch(
         "bioetl.infrastructure.adapters.crossref.client.time.monotonic",
-        side_effect=mock_monotonic,
-    ), patch(
-        "bioetl.infrastructure.adapters.health_check_mixin.time.monotonic",
         side_effect=mock_monotonic,
     ):
         result = await adapter.health_check()
