@@ -6,6 +6,7 @@
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
     '_source_batch_id': None,
+    '_state': <BioactivityState.VALIDATED: 'validated'>,
     'action_type_action_type': None,
     'action_type_description': None,
     'action_type_parent_type': None,
