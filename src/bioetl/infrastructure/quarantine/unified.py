@@ -19,7 +19,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.types import BatchID, DQStatus, RunID
+from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
 from bioetl.infrastructure.quarantine.helpers import (
     MAX_PAYLOAD_SIZE,
     calculate_hash,
@@ -99,7 +99,7 @@ class UnifiedQuarantine:
             "bronze_batch_id": str(bronze_batch_id),
             "bronze_file_uri": meta.get("bronze_file_uri", ""),
             "error_details": json.dumps(meta.get("error_details", {})),
-            "dq_status": DQStatus.NEW.value,
+            "dq_status": QuarantineRecordStatus.NEW.value,
             "run_id": str(run_id) if run_id else "",
         }
 
@@ -134,7 +134,7 @@ class UnifiedQuarantine:
         pipeline: str,
         limit: int = 100,
         error_code: str | None = None,
-        dq_status: DQStatus | None = None,
+        dq_status: QuarantineRecordStatus | None = None,
     ) -> list[dict[str, Any]]:
         """Inspect quarantine records."""
         return inspect_records(
@@ -182,7 +182,7 @@ class UnifiedQuarantine:
         """
         return purge_records(self.base_path, None, pipeline, older_than_days, now=now)
 
-    def update_status(self, payload_hash: str, new_status: DQStatus) -> bool:
+    def update_status(self, payload_hash: str, new_status: QuarantineRecordStatus) -> bool:
         """Update DQ status for a quarantined record."""
         try:
             dt = DeltaTable(self.base_path)
