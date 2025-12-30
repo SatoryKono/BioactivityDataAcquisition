@@ -393,18 +393,23 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
     from bioetl.domain.locking import LockContext
     from datetime import datetime, timezone
 
-    # Setup lock
-    lock = MemoryLock()
-    lock_key = "lock:test_entity"
-    owner_id = str(uuid4())
-    await lock.acquire(key=lock_key, owner_id=owner_id, ttl=60, wait=False)
+    import time
 
+    # Setup lock - the key format must match what BronzeWriter expects
+    lock = MemoryLock()
+    run_id = RunID(uuid4())
+    provider = "test"
+    entity = "entity"
+    lock_key = f"lock:{provider}_{entity}"
+
+    await lock.acquire(key=lock_key, owner_id=str(run_id), ttl=60, wait=False)
+
+    # Create lock context with correct format
     lock_context = LockContext(
         key=lock_key,
-        owner_id=owner_id,
-        acquired_at=datetime.now(timezone.utc),
-        expires_at=datetime.now(timezone.utc), # Dummy expiry
-        lock_port=lock
+        owner_id=run_id,
+        exclusive=False,
+        acquired_at=time.monotonic(),
     )
 
     writer = BronzeWriter(
@@ -419,21 +424,24 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         b'{"id": 2, "value": "test2"}',
     ]
 
-    path = await writer.write_bronze(
+    from pathlib import Path as PathLib
+
+    path_str = await writer.write_bronze(
         records=iter(records),
-        provider="test",
-        entity="entity",
+        provider=provider,
+        entity=entity,
         date=datetime.now(timezone.utc),
         batch_id=uuid4(),
-        run_id=RunID(uuid4()),
+        run_id=run_id,
         run_type=RunType.INCREMENTAL,
         ingestion_ts=datetime.now(timezone.utc),
         lock_context=lock_context,
     )
 
+    path = PathLib(path_str)
     assert path.exists(), "Bronze file should exist"
     assert path.suffix == ".zst", "Should be zstd compressed"
 
     await writer.aclose()
-    await lock.release(key=lock_key, owner_id=owner_id)
+    await lock.release(key=lock_key, owner_id=str(run_id))
     await lock.aclose()

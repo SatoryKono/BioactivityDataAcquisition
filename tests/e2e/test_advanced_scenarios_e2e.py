@@ -126,7 +126,8 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     """
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.domain.types import ErrorType
+    from datetime import datetime, timezone
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
@@ -134,30 +135,27 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
 
     quarantine = UnifiedQuarantine(
         base_path=str(quarantine_path),
-        logger=NoOpLogger(),
     )
 
     manager = QuarantineManager(quarantine_port=quarantine, pipeline_name="test_pipeline")
 
     # Write a quarantine record
-    run_id = RunID(uuid4())
     test_record = {
         "entity_id": "test_entity_1",
         "data": {"value": 123},
     }
 
-    from datetime import datetime, timezone
     await manager.quarantine_record(
         record=test_record,
-        error_type=DataQualityError.get_error_type(),
-        batch_id=RunID(uuid4()), # Using RunID as BatchID for test
+        error_type=ErrorType.DATA_QUALITY,
+        batch_id=uuid4(),
         error_details="Test DQ error",
         ingestion_ts=datetime.now(timezone.utc),
     )
 
-    # Verify quarantine file exists
-    quarantine_files = list(quarantine_path.rglob("*.jsonl"))
-    assert len(quarantine_files) >= 1, "Quarantine file should exist"
+    # Verify quarantine Delta table exists (not JSONL)
+    quarantine_table = quarantine_path / "common.quarantine"
+    assert quarantine_table.exists(), "Quarantine table should exist"
 
 
 @pytest.mark.e2e
@@ -168,7 +166,6 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     Tests the quarantine inspection flow used by CLI commands.
     """
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
     from datetime import datetime, timezone
 
     # Setup quarantine with test data
@@ -177,17 +174,15 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
 
     quarantine = UnifiedQuarantine(
         base_path=str(quarantine_path),
-        logger=NoOpLogger(),
     )
 
     # Write multiple quarantine records
-    run_id = RunID(uuid4())
     for i in range(3):
         await quarantine.write(
             pipeline="test_pipeline",
             error_code="DataQualityError",
             payload={"entity_id": f"entity_{i}"},
-            bronze_batch_id=RunID(uuid4()),
+            bronze_batch_id=uuid4(),
             metadata={"error_message": f"Error {i}"},
             ingestion_ts=datetime.now(timezone.utc),
         )
@@ -279,7 +274,6 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
     Tests checkpoint save/load flow for recovery scenarios.
     """
     from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     # Setup checkpoint
     checkpoint_path = e2e_data_dir / "checkpoints"
@@ -287,24 +281,24 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
 
     checkpoint = LocalCheckpoint(
         base_path=checkpoint_path,
-        logger=NoOpLogger(),
     )
 
     pipeline_name = "test_pipeline"
     run_id = RunID(uuid4())
 
-    # Save checkpoint
+    # Save checkpoint with metadata containing state
     await checkpoint.save(
         pipeline=pipeline_name,
         run_id=run_id,
         metadata={"state": {"offset": 100, "batch_count": 5}},
     )
 
-    # Load checkpoint
+    # Load checkpoint - returns tuple (run_id, metadata)
     loaded = await checkpoint.load(pipeline=pipeline_name)
     assert loaded is not None, "Checkpoint should be loadable"
-    assert loaded[1]["state"]["offset"] == 100
-    assert loaded[1]["state"]["batch_count"] == 5
+    loaded_run_id, loaded_metadata = loaded
+    assert loaded_metadata["state"]["offset"] == 100
+    assert loaded_metadata["state"]["batch_count"] == 5
 
 
 @pytest.mark.e2e
