@@ -126,6 +126,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     """
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
@@ -133,9 +134,10 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
 
     quarantine = UnifiedQuarantine(
         base_path=str(quarantine_path),
+        logger=NoOpLogger(),
     )
 
-    manager = QuarantineManager(quarantine=quarantine)
+    manager = QuarantineManager(quarantine_port=quarantine, pipeline_name="test_pipeline")
 
     # Write a quarantine record
     run_id = RunID(uuid4())
@@ -144,12 +146,13 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         "data": {"value": 123},
     }
 
+    from datetime import datetime, timezone
     await manager.quarantine_record(
-        pipeline_name="test_pipeline",
-        run_id=run_id,
         record=test_record,
-        error=DataQualityError("Test DQ error"),
-        batch_index=0,
+        error_type=DataQualityError.get_error_type(),
+        batch_id=RunID(uuid4()), # Using RunID as BatchID for test
+        error_details="Test DQ error",
+        ingestion_ts=datetime.now(timezone.utc),
     )
 
     # Verify quarantine file exists
@@ -173,7 +176,7 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     quarantine_path.mkdir(exist_ok=True)
 
     quarantine = UnifiedQuarantine(
-        base_path=quarantine_path,
+        base_path=str(quarantine_path),
         logger=NoOpLogger(),
     )
 
@@ -181,17 +184,16 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     run_id = RunID(uuid4())
     for i in range(3):
         await quarantine.write(
-            pipeline_name="test_pipeline",
-            run_id=run_id,
-            record={"entity_id": f"entity_{i}"},
-            error_type="DataQualityError",
-            error_message=f"Error {i}",
-            batch_index=i,
+            pipeline="test_pipeline",
+            error_code="DataQualityError",
+            payload={"entity_id": f"entity_{i}"},
+            bronze_batch_id=RunID(uuid4()),
+            metadata={"error_message": f"Error {i}"},
             ingestion_ts=datetime.now(timezone.utc),
         )
 
     # List quarantine entries
-    entries = await quarantine.list_entries(pipeline_name="test_pipeline")
+    entries = await quarantine.inspect(pipeline="test_pipeline")
     assert len(entries) >= 3, f"Expected at least 3 entries, got {len(entries)}"
 
 
@@ -295,14 +297,14 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
     await checkpoint.save(
         pipeline=pipeline_name,
         run_id=run_id,
-        state={"offset": 100, "batch_count": 5},
+        metadata={"state": {"offset": 100, "batch_count": 5}},
     )
 
     # Load checkpoint
     loaded = await checkpoint.load(pipeline=pipeline_name)
     assert loaded is not None, "Checkpoint should be loadable"
-    assert loaded["state"]["offset"] == 100
-    assert loaded["state"]["batch_count"] == 5
+    assert loaded[1]["state"]["offset"] == 100
+    assert loaded[1]["state"]["batch_count"] == 5
 
 
 @pytest.mark.e2e
