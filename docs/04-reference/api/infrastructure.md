@@ -22,7 +22,7 @@ flowchart TB
 
         subgraph Observability["Observability"]
             Metrics[MetricsExporter]
-            Tracing[TracingExporter]
+            Tracing[NoOpTracing]
             Logging[StructlogLogger]
         end
 
@@ -64,9 +64,20 @@ Storage writers implementing `StoragePort`:
 Observability infrastructure:
 
 - `PrometheusMetrics` - Prometheus metrics exporter
-- `TracingExporter` - OpenTelemetry tracing
+- `NoOpTracing` - Null Object Pattern tracing (see [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md))
 - `StructlogLogger` - Structured logging
 - `LineageTracker` - Data lineage tracking
+
+#### Tracing (NoOp)
+
+Tracing is implemented via **Null Object Pattern** (`NoOpTracing`).
+
+**Rationale** (ADR-010, ADR-022): Local-Only Deployment does not require distributed
+tracing. Request correlation is provided via `run_id` in structured logs (RULES.md §4.5).
+
+**Extension Point**: For distributed deployment, replace `NoOpTracing` with
+`OpenTelemetryTracingAdapter` implementing `TracingPort`. The `OpenTelemetryTracer`
+class in `tracing.py` provides a ready implementation.
 
 ## Key Concepts
 
@@ -79,7 +90,7 @@ Observability infrastructure:
 | `LockPort` | `MemoryLock` |
 | `CheckpointPort` | `LocalCheckpoint` |
 | `MetricsPort` | `PrometheusMetrics`, `NoOpMetrics` |
-| `TracingPort` | `TracingExporter`, `NoOpTracing` |
+| `TracingPort` | `NoOpTracing`, `OpenTelemetryTracer` |
 | `LoggerPort` | `StructlogLogger`, `NoOpLogger` |
 
 ### Medallion Storage Layers
@@ -141,7 +152,7 @@ from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
 
 # Observability
 from bioetl.infrastructure.observability import PrometheusMetrics
-from bioetl.infrastructure.observability.tracing import TracingExporter
+from bioetl.infrastructure.observability.tracing import NoOpTracing, OpenTelemetryTracer
 ```
 
 ## See Also
