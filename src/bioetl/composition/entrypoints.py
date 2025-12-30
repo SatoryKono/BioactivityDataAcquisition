@@ -113,6 +113,7 @@ class RunOptions:
         dry_run: Preview mode without execution.
         vacuum_after_run: Enable automatic VACUUM after successful run (CLI override).
         vacuum_retention_days: Minimum age of files to remove during VACUUM (CLI override).
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
     """
 
     run_type: str = "incremental"
@@ -124,6 +125,7 @@ class RunOptions:
     dry_run: bool = False
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
+    log_level: str = "INFO"
 
 
 @dataclass(frozen=True)
@@ -275,6 +277,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         dry_run=options.dry_run,
         input_filter=input_filter,
         vacuum=vacuum,
+        log_level=options.log_level,
     )
 
 

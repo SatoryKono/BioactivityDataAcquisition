@@ -82,6 +82,11 @@ _preview_cleanup = show_cleanup_preview
     default=None,
     help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
 )
+@click.option(
+    "--debug",
+    is_flag=True,
+    help="Enable DEBUG level logging for detailed output",
+)
 def run(
     pipeline: str,
     run_type: str,
@@ -94,6 +99,7 @@ def run(
     yes: bool,
     vacuum_after_run: bool | None,
     vacuum_retention_days: int | None,
+    debug: bool,
 ) -> None:
     """Run an ETL pipeline."""
     if not handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
@@ -110,6 +116,7 @@ def run(
             dry_run=dry_run,
             vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
             vacuum_retention_days=vacuum_retention_days,
+            log_level="DEBUG" if debug else "INFO",
         )
         runner = create_pipeline_runner(pipeline, options)
     except (ValueError, FileNotFoundError) as e:
