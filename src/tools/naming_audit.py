@@ -84,7 +84,7 @@ ROLE_SUFFIXES = {
 # Допустимые классы без суффиксов (domain entities, enums, etc.)
 ALLOWED_NO_SUFFIX = {
     # Domain entities
-    "Activity",
+    "Bioactivity",
     "Assay",
     "Target",
     "TargetComponent",

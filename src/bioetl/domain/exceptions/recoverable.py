@@ -6,10 +6,7 @@ Examples: network timeouts, rate limits, temporary service unavailability.
 
 from __future__ import annotations
 
-import warnings
-
 from bioetl.domain.exceptions.base import RecoverableError
-from bioetl.domain.exceptions.external_service import ExternalServiceError
 from bioetl.domain.types import ErrorType
 
 
@@ -81,66 +78,6 @@ class ApiError(RecoverableError):
         if status_code:
             msg = f"[{status_code}] {message}"
         super().__init__(msg)
-
-
-class ChemblApiError(ExternalServiceError):
-    """Raised when ChEMBL API returns an error.
-
-    .. deprecated::
-        Use infrastructure.adapters.chembl.exceptions.ChemblApiError instead.
-        This class remains for backward compatibility and will emit a
-        DeprecationWarning when instantiated.
-
-        Application layer should catch ExternalServiceError instead.
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(self, message: str, status_code: int | None = None) -> None:
-        """Initialize ChemblApiError with deprecation warning.
-
-        Args:
-            message: Error message.
-            status_code: Optional HTTP status code.
-        """
-        warnings.warn(
-            "ChemblApiError in domain.exceptions is deprecated. "
-            "Use infrastructure.adapters.chembl.exceptions.ChemblApiError "
-            "or catch ExternalServiceError instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(message, service_name="chembl", status_code=status_code)
-
-
-class CrossRefApiError(ExternalServiceError):
-    """Raised when CrossRef API returns an error.
-
-    .. deprecated::
-        Use infrastructure.adapters.crossref.exceptions.CrossRefApiError instead.
-        This class remains for backward compatibility and will emit a
-        DeprecationWarning when instantiated.
-
-        Application layer should catch ExternalServiceError instead.
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(self, message: str, status_code: int | None = None) -> None:
-        """Initialize CrossRefApiError with deprecation warning.
-
-        Args:
-            message: Error message.
-            status_code: Optional HTTP status code.
-        """
-        warnings.warn(
-            "CrossRefApiError in domain.exceptions is deprecated. "
-            "Use infrastructure.adapters.crossref.exceptions.CrossRefApiError "
-            "or catch ExternalServiceError instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(message, service_name="crossref", status_code=status_code)
 
 
 class TimeoutError(RecoverableError):
