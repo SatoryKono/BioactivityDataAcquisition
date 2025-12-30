@@ -45,6 +45,7 @@ __all__ = [
     # Resource management (services - new)
     "get_checkpoint_service",
     "get_lock_service",
+    "get_pipeline_runner_service",
     "get_quarantine_service",
     "get_bronze_cleanup_service",
     "get_vacuum_service",
@@ -62,6 +63,7 @@ from bioetl.composition._bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_lock_service,
+    bootstrap_pipeline_runner_service,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
 )
@@ -87,6 +89,7 @@ if TYPE_CHECKING:
         BronzeCleanupService,
         CheckpointService,
         CleanupResult,
+        PipelineRunnerService,
         QuarantineService,
         VacuumService,
     )
@@ -676,3 +679,25 @@ async def cleanup_bronze(
         dry_run=dry_run,
     )
     return result
+
+
+def get_pipeline_runner_service() -> PipelineRunnerService:
+    """Get a pipeline runner service for universal pipeline execution.
+
+    This is the recommended way to run pipelines programmatically from
+    any interface (CLI, REST API, Airflow, etc.). The service provides
+    a clean, stateless API for pipeline execution.
+
+    Returns:
+        PipelineRunnerService instance ready for use.
+
+    Example:
+        >>> from bioetl.application.services import RunOptions
+        >>> service = get_pipeline_runner_service()
+        >>> options = RunOptions(run_type="incremental", limit=100)
+        >>> result = await service.run("chembl_activity", options=options)
+        >>> if result.is_success:
+        ...     print(f"Processed {result.records_silver} records")
+    """
+    _ensure_registrations()
+    return bootstrap_pipeline_runner_service()

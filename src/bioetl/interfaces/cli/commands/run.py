@@ -1,6 +1,6 @@
 """Run command for BioETL CLI.
 
-Implements the main pipeline execution command.
+Implements the main pipeline execution command using PipelineRunnerService.
 """
 
 from __future__ import annotations
@@ -10,23 +10,73 @@ import sys
 
 import click
 
-from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.composition.entrypoints import RunOptions, create_pipeline_runner
+from bioetl.application.services import (
+    PipelineNotFoundError,
+    RunOptions,
+    RunStatus,
+)
+from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
     show_cleanup_preview,
     validate_pipeline_name,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
-from bioetl.interfaces.cli.formatters import echo_error
-from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
+from bioetl.interfaces.cli.exit_codes import ExitCode
+from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
-# Re-export helpers for backward compatibility with tests
-# These are imported by tests/unit/interfaces/test_cli.py
-_get_runner_logger = get_runner_logger
-_handle_destructive_run_confirmation = handle_destructive_run_confirmation
-_preview_cleanup = show_cleanup_preview
+
+def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitCode:
+    """Map RunStatus to CLI exit code.
+
+    Args:
+        status: Run status from service.
+        error_type: Exception type name if failed.
+
+    Returns:
+        Appropriate ExitCode for the status.
+    """
+    if status == RunStatus.SUCCESS:
+        return ExitCode.OK
+    if status == RunStatus.DRY_RUN:
+        return ExitCode.OK
+    if status == RunStatus.SHUTDOWN:
+        return ExitCode.SIGINT
+    # FAILED status - map based on error type
+    if error_type:
+        error_mapping = {
+            "ValueError": ExitCode.CONFIG_ERROR,
+            "FileNotFoundError": ExitCode.EX_NOINPUT,
+            "ConfigValidationError": ExitCode.CONFIG_ERROR,
+            "DataQualityError": ExitCode.DATA_QUALITY_ERROR,
+            "DataQualityThresholdError": ExitCode.DATA_QUALITY_ERROR,
+            "LockAcquisitionError": ExitCode.LOCK_ERROR,
+            "LockLostError": ExitCode.LOCK_ERROR,
+            "StorageError": ExitCode.STORAGE_ERROR,
+            "NetworkError": ExitCode.NETWORK_ERROR,
+            "RateLimitError": ExitCode.NETWORK_ERROR,
+            "CircuitBreakerOpenError": ExitCode.NETWORK_ERROR,
+        }
+        return error_mapping.get(error_type, ExitCode.PIPELINE_ERROR)
+    return ExitCode.PIPELINE_ERROR
+
+
+async def _run_pipeline_async(
+    pipeline: str,
+    options: RunOptions,
+) -> tuple[RunStatus, str | None, str | None]:
+    """Run pipeline asynchronously via service.
+
+    Args:
+        pipeline: Pipeline name.
+        options: Run options.
+
+    Returns:
+        Tuple of (status, error_message, error_type).
+    """
+    service = get_pipeline_runner_service()
+    result = await service.run(pipeline, options=options)
+    return result.status, result.error_message, result.error_type
 
 
 @click.command()
@@ -102,46 +152,56 @@ def run(
     debug: bool,
 ) -> None:
     """Run an ETL pipeline."""
+    # Handle confirmation for destructive operations (CLI responsibility)
     if not handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
         return
 
+    # Build options using application-layer RunOptions
+    options = RunOptions(
+        run_type=run_type,
+        resume=resume,
+        limit=limit,
+        dry_run=dry_run,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
+        vacuum_retention_days=vacuum_retention_days,
+        log_level="DEBUG" if debug else "INFO",
+    )
+
+    # Run pipeline via service
     try:
-        options = RunOptions(
-            run_type=run_type,
-            resume=resume,
-            limit=limit,
-            input_csv=input_csv,
-            filter_column=filter_column,
-            filter_field=filter_field,
-            dry_run=dry_run,
-            vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
-            vacuum_retention_days=vacuum_retention_days,
-            log_level="DEBUG" if debug else "INFO",
+        status, error_message, error_type = asyncio.run(
+            _run_pipeline_async(pipeline, options)
         )
-        runner = create_pipeline_runner(pipeline, options)
-    except (ValueError, FileNotFoundError) as e:
-        echo_error("Configuration error", str(e))
+    except PipelineNotFoundError as e:
+        echo_error("Pipeline not found", str(e))
         sys.exit(ExitCode.CONFIG_ERROR)
-    except Exception as e:
-        echo_error("Initialization failed", str(e))
-        sys.exit(ExitCode.INIT_ERROR)
-
-    logger = get_runner_logger(runner)
-    if logger is None:
-        echo_error("Critical: Logger not initialized.")
-        sys.exit(ExitCode.INIT_ERROR)
-
-    shutdown_signal = getattr(runner, "shutdown_signal", None)
-    if shutdown_signal is not None:
-        setup_shutdown_handlers(shutdown_signal, logger)
-
-    logger.info("Starting pipeline run")
-    try:
-        asyncio.run(runner.run())
-        logger.info("Pipeline completed successfully")
-    except PipelineShutdownError:
-        logger.warning("Pipeline run was gracefully shut down.")
+    except KeyboardInterrupt:
+        echo_warning("Pipeline interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
     except Exception as e:
-        logger.exception("Pipeline failed with an unhandled exception.")
-        sys.exit(get_exit_code_for_exception(e))
+        echo_error("Unexpected error during pipeline execution", str(e))
+        sys.exit(ExitCode.FAIL)
+
+    # Map status to exit code (CLI responsibility)
+    exit_code = _map_status_to_exit_code(status, error_type)
+
+    if status == RunStatus.SUCCESS:
+        echo_info("Pipeline completed successfully")
+    elif status == RunStatus.DRY_RUN:
+        echo_info("Dry-run completed (no changes made)")
+    elif status == RunStatus.SHUTDOWN:
+        echo_warning("Pipeline was gracefully shut down")
+    elif status == RunStatus.FAILED:
+        echo_error("Pipeline failed", error_message or "Unknown error")
+
+    sys.exit(exit_code)
+
+
+# Re-export helpers for backward compatibility with tests
+# These are imported by tests/unit/interfaces/test_cli.py
+_get_runner_logger = get_runner_logger
+_handle_destructive_run_confirmation = handle_destructive_run_confirmation
+_preview_cleanup = show_cleanup_preview
