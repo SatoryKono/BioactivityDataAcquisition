@@ -14,7 +14,6 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -387,8 +386,9 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
     - Partial writes should not corrupt data
     """
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-    from bioetl.domain.ports.noop import NoOpLogger, NoOpMetrics
-    from datetime import datetime, timezone
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.domain.ports.noop import NoOpMetrics
+    from datetime import UTC, datetime
 
     writer = BronzeWriter(
         base_path=e2e_data_dir / "bronze",
@@ -406,11 +406,11 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         records=iter(records),
         provider="test",
         entity="entity",
-        date=datetime.now(timezone.utc),
+        date=datetime.now(UTC),
         batch_id=uuid4(),
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
-        ingestion_ts=datetime.now(timezone.utc),
+        ingestion_ts=datetime.now(UTC),
     )
 
     assert path.exists(), "Bronze file should exist"

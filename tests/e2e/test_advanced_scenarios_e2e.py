@@ -13,26 +13,21 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
-from bioetl.domain.context import PipelineContext, PipelineRunContext
+from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.types import RunID, RunType
 
 from .conftest import (
-    assert_bronze_files_exist,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
 )
 
-if TYPE_CHECKING:
-    from collections.abc import Generator
 
 
 # ============================================================================
@@ -88,7 +83,7 @@ async def test_vacuum_respects_retention_days(e2e_data_dir: Path):
     Files newer than retention_days should not be deleted.
     """
     # Run pipeline twice to create multiple versions
-    for i in range(2):
+    for _i in range(2):
         ctx = create_test_context("chembl_activity", limit=3)
         runner = bootstrap_pipeline(ctx)
         await runner.run()
@@ -125,7 +120,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     """
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-    from bioetl.domain.ports.noop import NoOpLogger
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
@@ -166,8 +161,8 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     Tests the quarantine inspection flow used by CLI commands.
     """
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-    from bioetl.domain.ports.noop import NoOpLogger
-    from datetime import datetime, timezone
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from datetime import UTC, datetime
 
     # Setup quarantine with test data
     quarantine_path = e2e_data_dir / "quarantine"
@@ -188,7 +183,7 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
             error_type="DataQualityError",
             error_message=f"Error {i}",
             batch_index=i,
-            ingestion_ts=datetime.now(timezone.utc),
+            ingestion_ts=datetime.now(UTC),
         )
 
     # List quarantine entries
@@ -278,7 +273,7 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
     Tests checkpoint save/load flow for recovery scenarios.
     """
     from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
-    from bioetl.domain.ports.noop import NoOpLogger
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     # Setup checkpoint
     checkpoint_path = e2e_data_dir / "checkpoints"
@@ -359,7 +354,7 @@ async def test_rebuild_clears_existing_data(e2e_data_dir: Path):
     runner1 = bootstrap_pipeline(ctx1)
     await runner1.run()
 
-    initial_count = assert_silver_table_has_records(
+    assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
     )
 

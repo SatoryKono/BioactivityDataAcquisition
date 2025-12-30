@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from bioetl.domain.ports.audit import AuditEntry, AuditLayer
+    from bioetl.domain.ports.memory import MemoryStats
     from bioetl.domain.types import RunID
 
 
@@ -253,7 +254,7 @@ class NoOpMemoryMonitor:
 
     """
 
-    def get_memory_stats(self) -> "MemoryStats":
+    def get_memory_stats(self) -> MemoryStats:
         """Return conservative memory stats (50% usage).
 
         Returns:
@@ -309,7 +310,7 @@ class NoOpMemoryMonitor:
         overhead_factor = 2.5
         return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
 
-    def calculate_max_batch_size(self, avg_record_size_bytes: int = 1024) -> int:
+    def calculate_max_batch_size(self, avg_record_size_bytes: int = 1024) -> int:  # noqa: ARG002
         """Return a high max batch size (no constraints).
 
         Args:
