@@ -2,7 +2,8 @@
 
 import dataclasses
 
-from bioetl.domain.entities.chembl_activity import Activity, Assay
+from bioetl.domain.entities.bioactivity import Bioactivity
+from bioetl.domain.entities.chembl_activity import Assay
 from bioetl.domain.entities.chembl_structures import Molecule, Target
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
@@ -82,5 +83,7 @@ def check_parity(name, domain_cls, silver_schema, gold_model):
 if __name__ == "__main__":
     check_parity("Molecule", Molecule, CHEMBL_MOLECULE_SCHEMA, ChEMBLMoleculeGoldSchema)
     check_parity("Target", Target, CHEMBL_TARGET_SCHEMA, ChEMBLTargetGoldSchema)
-    check_parity("Activity", Activity, CHEMBL_ACTIVITY_SCHEMA, ChEMBLActivityGoldSchema)
+    check_parity(
+        "Bioactivity", Bioactivity, CHEMBL_ACTIVITY_SCHEMA, ChEMBLActivityGoldSchema
+    )
     check_parity("Assay", Assay, CHEMBL_ASSAY_SCHEMA, ChEMBLAssayGoldSchema)
