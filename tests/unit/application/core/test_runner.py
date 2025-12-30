@@ -8,8 +8,11 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
 from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.services.medallion_lifecycle import (
+    MedallionLifecycleService,
+    PrepareResult,
+)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
@@ -171,32 +174,26 @@ def mock_postrun_service():
 
 
 @pytest.fixture
-def mock_lifecycle_orchestrator():
-    """Create a mock LifecycleOrchestrator (injected via DI)."""
-    from bioetl.application.core.lifecycle_orchestrator import ClearDecision
-    from bioetl.application.services.medallion_lifecycle import ClearResult
+def mock_lifecycle_service():
+    """Create a mock MedallionLifecycleService (injected via DI)."""
+    from bioetl.application.services.medallion_lifecycle import (
+        ClearResult,
+        PrepareResult,
+        VacuumResult,
+    )
     from bioetl.domain.medallion import MedallionPolicy
     from bioetl.domain.types import RunType
 
-    orchestrator = MagicMock(spec=LifecycleOrchestrator)
-    orchestrator.clear_for_run = AsyncMock(
-        return_value=ClearDecision(
-            result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
+    service = MagicMock(spec=MedallionLifecycleService)
+    service.prepare_for_run = AsyncMock(
+        return_value=PrepareResult(
+            clear_result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
             policy=MedallionPolicy.for_run_type(RunType.INCREMENTAL),
         )
     )
-    return orchestrator
-
-
-@pytest.fixture
-def mock_lifecycle_service():
-    """Create a mock lifecycle service."""
-    from bioetl.application.services.medallion_lifecycle import (
-        ClearResult,
-        MedallionLifecycleService,
+    service.finalize_run = AsyncMock(
+        return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
     )
-
-    service = MagicMock(spec=MedallionLifecycleService)
     service.clear = AsyncMock(
         return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
     )
@@ -283,7 +280,7 @@ def runner(
     mock_lock_manager,
     mock_preflight_service,
     mock_postrun_service,
-    mock_lifecycle_orchestrator,
+    mock_lifecycle_service,
     mock_observer,
 ):
     """Create a PipelineRunner instance with directly injected services (DI pattern)."""
@@ -299,7 +296,7 @@ def runner(
         lock_manager=mock_lock_manager,
         preflight=mock_preflight_service,
         postrun=mock_postrun_service,
-        lifecycle_orch=mock_lifecycle_orchestrator,
+        lifecycle_service=mock_lifecycle_service,
         observer=mock_observer,
     )
 
@@ -321,7 +318,7 @@ class TestPipelineRunnerInit:
         mock_lock_manager,
         mock_preflight_service,
         mock_postrun_service,
-        mock_lifecycle_orchestrator,
+        mock_lifecycle_service,
         mock_observer,
     ):
         """Test runner initializes correctly with directly injected services."""
@@ -337,7 +334,7 @@ class TestPipelineRunnerInit:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
-            lifecycle_orch=mock_lifecycle_orchestrator,
+            lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
         )
 
@@ -348,7 +345,7 @@ class TestPipelineRunnerInit:
         assert runner._lock_manager == mock_lock_manager
         assert runner._preflight_service == mock_preflight_service
         assert runner._postrun_service == mock_postrun_service
-        assert runner._lifecycle_orchestrator == mock_lifecycle_orchestrator
+        assert runner._lifecycle_service == mock_lifecycle_service
         assert runner._observer == mock_observer
 
     def test_services_are_injected_not_created(
@@ -364,7 +361,7 @@ class TestPipelineRunnerInit:
         mock_lock_manager,
         mock_preflight_service,
         mock_postrun_service,
-        mock_lifecycle_orchestrator,
+        mock_lifecycle_service,
         mock_observer,
     ):
         """Test services are injected via DI, not created internally."""
@@ -380,7 +377,7 @@ class TestPipelineRunnerInit:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
-            lifecycle_orch=mock_lifecycle_orchestrator,
+            lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
         )
 
@@ -388,7 +385,7 @@ class TestPipelineRunnerInit:
         assert runner._lock_manager is mock_lock_manager
         assert runner._preflight_service is mock_preflight_service
         assert runner._postrun_service is mock_postrun_service
-        assert runner._lifecycle_orchestrator is mock_lifecycle_orchestrator
+        assert runner._lifecycle_service is mock_lifecycle_service
         assert runner._observer is mock_observer
 
 
@@ -532,7 +529,7 @@ class TestPipelineRunnerRun:
         mock_lock_manager,
         mock_preflight_service,
         mock_postrun_service,
-        mock_lifecycle_orchestrator,
+        mock_lifecycle_service,
         mock_observer,
     ):
         """Test run passes limit to executor."""
@@ -552,7 +549,7 @@ class TestPipelineRunnerRun:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
-            lifecycle_orch=mock_lifecycle_orchestrator,
+            lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
         )
 
@@ -565,14 +562,14 @@ class TestPipelineRunnerRun:
 
 @pytest.mark.unit
 class TestPipelineRunnerClearViaLifecycle:
-    """Tests for PipelineRunner._clear_via_lifecycle method with lifecycle orchestrator.
+    """Tests for PipelineRunner._prepare_medallion_layers method with MedallionLifecycleService.
 
-    Verifies delegation pattern: PipelineRunner delegates to LifecycleOrchestrator.
-    The orchestrator handles MedallionPolicy and clear operations.
+    Verifies delegation pattern: PipelineRunner delegates to MedallionLifecycleService.
+    The service handles MedallionPolicy and clear operations.
     """
 
     @pytest.mark.asyncio
-    async def test_clear_via_lifecycle_delegates_to_orchestrator(
+    async def test_prepare_medallion_layers_delegates_to_lifecycle_service(
         self,
         pipeline_config,
         runtime_config,
@@ -585,17 +582,19 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_preflight_service,
         mock_postrun_service,
     ):
-        """Test _clear_via_lifecycle delegates to lifecycle orchestrator."""
-        from bioetl.application.core.lifecycle_orchestrator import ClearDecision
-        from bioetl.application.services.medallion_lifecycle import ClearResult
+        """Test _prepare_medallion_layers delegates to lifecycle service."""
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+            PrepareResult,
+        )
         from bioetl.domain.medallion import MedallionPolicy
 
         services = create_mock_services()
 
-        lifecycle_orchestrator = MagicMock(spec=LifecycleOrchestrator)
-        lifecycle_orchestrator.clear_for_run = AsyncMock(
-            return_value=ClearDecision(
-                result=ClearResult(silver_cleared=5, gold_cleared=3, dry_run=False),
+        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.prepare_for_run = AsyncMock(
+            return_value=PrepareResult(
+                clear_result=ClearResult(silver_cleared=5, gold_cleared=3, dry_run=False),
                 policy=MedallionPolicy.for_run_type(RunType.REBUILD),
             )
         )
@@ -616,16 +615,16 @@ class TestPipelineRunnerClearViaLifecycle:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
-            lifecycle_orch=lifecycle_orchestrator,
+            lifecycle_service=lifecycle_service,
             observer=mock_observer,
         )
 
-        await runner._clear_via_lifecycle()
+        await runner._prepare_medallion_layers()
 
-        lifecycle_orchestrator.clear_for_run.assert_called_once()
+        lifecycle_service.prepare_for_run.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_clear_via_lifecycle_is_called_during_run(
+    async def test_prepare_medallion_layers_is_called_during_run(
         self,
         pipeline_config,
         runtime_config,
@@ -638,19 +637,25 @@ class TestPipelineRunnerClearViaLifecycle:
         mock_preflight_service,
         mock_postrun_service,
     ):
-        """Test _clear_via_lifecycle is called as part of run() execution."""
-        from bioetl.application.core.lifecycle_orchestrator import ClearDecision
-        from bioetl.application.services.medallion_lifecycle import ClearResult
+        """Test _prepare_medallion_layers is called as part of run() execution."""
+        from bioetl.application.services.medallion_lifecycle import (
+            ClearResult,
+            PrepareResult,
+            VacuumResult,
+        )
         from bioetl.domain.medallion import MedallionPolicy
 
         services = create_mock_services()
 
-        lifecycle_orchestrator = MagicMock(spec=LifecycleOrchestrator)
-        lifecycle_orchestrator.clear_for_run = AsyncMock(
-            return_value=ClearDecision(
-                result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
+        lifecycle_service = MagicMock(spec=MedallionLifecycleService)
+        lifecycle_service.prepare_for_run = AsyncMock(
+            return_value=PrepareResult(
+                clear_result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
                 policy=MedallionPolicy.for_run_type(RunType.INCREMENTAL),
             )
+        )
+        lifecycle_service.finalize_run = AsyncMock(
+            return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
         )
 
         mock_observer = MagicMock(spec=PipelineObserver)
@@ -669,14 +674,14 @@ class TestPipelineRunnerClearViaLifecycle:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=mock_postrun_service,
-            lifecycle_orch=lifecycle_orchestrator,
+            lifecycle_service=lifecycle_service,
             observer=mock_observer,
         )
 
         await runner.run()
 
-        # Orchestrator should be called during run()
-        lifecycle_orchestrator.clear_for_run.assert_called_once()
+        # Lifecycle service should be called during run()
+        lifecycle_service.prepare_for_run.assert_called_once()
 
 
 @pytest.mark.unit
@@ -708,7 +713,7 @@ class TestPipelineRunnerCheckDataQuality:
         mock_logger,
         mock_lock_manager,
         mock_preflight_service,
-        mock_lifecycle_orchestrator,
+        mock_lifecycle_service,
     ):
         """Test _check_data_quality delegates to PostrunService."""
         from bioetl.application.core.postrun_service import DQResult, VacuumResult
@@ -744,7 +749,7 @@ class TestPipelineRunnerCheckDataQuality:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=postrun_service,
-            lifecycle_orch=mock_lifecycle_orchestrator,
+            lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
         )
 
@@ -765,7 +770,7 @@ class TestPipelineRunnerCheckDataQuality:
         mock_logger,
         mock_lock_manager,
         mock_preflight_service,
-        mock_lifecycle_orchestrator,
+        mock_lifecycle_service,
     ):
         """Test _check_data_quality is invoked during run()."""
         from bioetl.application.core.postrun_service import DQResult, VacuumResult
@@ -801,7 +806,7 @@ class TestPipelineRunnerCheckDataQuality:
             lock_manager=mock_lock_manager,
             preflight=mock_preflight_service,
             postrun=postrun_service,
-            lifecycle_orch=mock_lifecycle_orchestrator,
+            lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
         )
 
