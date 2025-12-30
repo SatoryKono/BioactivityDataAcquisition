@@ -77,6 +77,10 @@ class HealthAdjustedConfig:
         return max(minimum, base_batch_size // self.batch_size_divisor)
 
 
+# Backward compatibility alias (used by tests importing directly from module)
+AdjustedClientConfig = HealthAdjustedConfig
+
+
 @dataclass
 class ProviderHealthState:
     """Tracks health state for a single provider.
