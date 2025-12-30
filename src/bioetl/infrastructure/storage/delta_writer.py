@@ -602,9 +602,7 @@ class DeltaWriter:
         elif isinstance(ingestion_ts_str, datetime):
             timestamp = ingestion_ts_str
         else:
-            from datetime import UTC
-
-            timestamp = datetime.now(UTC)
+            raise ValueError("_ingestion_ts is required for audit logging")
 
         # Map SilverWriteMode to AuditOperation
         operation_map = {
