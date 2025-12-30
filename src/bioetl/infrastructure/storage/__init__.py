@@ -3,9 +3,8 @@
 Implements RULES.md §2.1 - Medallion Architecture.
 
 This package provides:
-- Writers: BronzeWriter, SilverWriter (formerly DeltaWriter), GoldWriter
+- Writers: BronzeWriter, SilverWriter, GoldWriter
 - Utilities: RetentionManager (VACUUM, optimize, time travel)
-- Deprecated: DeltaWriter (use SilverWriter instead)
 
 Naming Convention (unified with Medallion layers):
 - BronzeWriter - writes to Bronze layer (JSONL + zstd)
@@ -28,9 +27,6 @@ from bioetl.domain.exceptions import (
     UploadError,
 )
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-
-# DeltaWriter is deprecated, use SilverWriter instead
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.retention_manager import RetentionManager
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -38,7 +34,6 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 __all__ = [
     "BronzeWriter",
     "BucketNotFoundError",
-    "DeltaWriter",  # Deprecated: use SilverWriter instead
     "GoldWriter",
     "MergeConflictError",
     "RetentionManager",

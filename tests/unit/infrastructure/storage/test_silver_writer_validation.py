@@ -1,6 +1,6 @@
-"""Unit tests for DeltaWriter Silver Pandera validation.
+"""Unit tests for SilverWriter Silver Pandera validation.
 
-Tests for the integration of PanderaSilverValidator with DeltaWriter.
+Tests for the integration of PanderaSilverValidator with SilverWriter.
 """
 
 from __future__ import annotations
@@ -56,24 +56,24 @@ def valid_records():
 
 
 @pytest.mark.unit
-class TestDeltaWriterSilverValidatorInit:
-    """Tests for DeltaWriter initialization with Silver validator."""
+class TestSilverWriterSilverValidatorInit:
+    """Tests for SilverWriter initialization with Silver validator."""
 
     def test_init_with_default_validator(self, noop_logger):
-        """Test DeltaWriter creates NoOpSilverValidator when not provided."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        """Test SilverWriter creates NoOpSilverValidator when not provided."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         assert isinstance(writer._silver_validator, NoOpSilverValidator)
 
     def test_init_with_custom_validator(self, noop_logger):
-        """Test DeltaWriter accepts custom SilverValidatorPort."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        """Test SilverWriter accepts custom SilverValidatorPort."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         custom_validator = PanderaSilverValidator()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=custom_validator,
@@ -82,10 +82,10 @@ class TestDeltaWriterSilverValidatorInit:
         assert writer._silver_validator is custom_validator
 
     def test_init_with_pandera_schema_validator(self, noop_logger):
-        """Test DeltaWriter with PanderaSilverValidator with schema."""
+        """Test SilverWriter with PanderaSilverValidator with schema."""
         import pandera as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.DataFrameSchema(
             {
@@ -94,7 +94,7 @@ class TestDeltaWriterSilverValidatorInit:
             }
         )
         validator = PanderaSilverValidator(schema=schema)
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
@@ -104,14 +104,14 @@ class TestDeltaWriterSilverValidatorInit:
 
 
 @pytest.mark.unit
-class TestDeltaWriterValidateSilverPandera:
+class TestSilverWriterValidateSilverPandera:
     """Tests for _validate_silver_pandera method."""
 
     def test_validate_silver_pandera_with_noop_validator(self, noop_logger):
         """Test _validate_silver_pandera with NoOp validator passes."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=NoOpSilverValidator(),
@@ -125,7 +125,7 @@ class TestDeltaWriterValidateSilverPandera:
         """Test _validate_silver_pandera passes with valid records."""
         import pandera as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.DataFrameSchema(
             {
@@ -134,7 +134,7 @@ class TestDeltaWriterValidateSilverPandera:
             }
         )
         validator = PanderaSilverValidator(schema=schema)
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
@@ -148,7 +148,7 @@ class TestDeltaWriterValidateSilverPandera:
         """Test _validate_silver_pandera raises SchemaViolationError for invalid records."""
         import pandera as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.DataFrameSchema(
             {
@@ -157,7 +157,7 @@ class TestDeltaWriterValidateSilverPandera:
             }
         )
         validator = PanderaSilverValidator(schema=schema)
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
@@ -175,7 +175,7 @@ class TestDeltaWriterValidateSilverPandera:
         """Test _validate_silver_pandera logs error when validation fails."""
         import pandera as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.DataFrameSchema(
             {
@@ -185,7 +185,7 @@ class TestDeltaWriterValidateSilverPandera:
         )
         validator = PanderaSilverValidator(schema=schema)
         mock_logger = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=mock_logger,
             silver_validator=validator,
@@ -205,7 +205,7 @@ class TestDeltaWriterValidateSilverPandera:
         """Test _validate_silver_pandera increments metric when validation fails."""
         import pandera as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.DataFrameSchema(
             {
@@ -215,7 +215,7 @@ class TestDeltaWriterValidateSilverPandera:
         )
         validator = PanderaSilverValidator(schema=schema)
         mock_metrics = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=NoOpLogger(),
             silver_validator=validator,
@@ -235,7 +235,7 @@ class TestDeltaWriterValidateSilverPandera:
 
 
 @pytest.mark.unit
-class TestDeltaWriterWriteSilverWithPanderaValidation:
+class TestSilverWriterWriteSilverWithPanderaValidation:
     """Tests for write_silver with Pandera validation integration."""
 
     @pytest.mark.asyncio
@@ -246,7 +246,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
         import pandera as pa
         import pyarrow as arrow_pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         # Schema that will fail: requires value >= 100
         pandera_schema = pa.DataFrameSchema(
@@ -267,7 +267,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
             ]
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
@@ -294,7 +294,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
         import pyarrow as arrow_pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         # Schema that will pass: value >= 0
         pandera_schema = pa.DataFrameSchema(
@@ -324,7 +324,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver",
                 logger=noop_logger,
                 silver_validator=validator,
@@ -351,7 +351,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
         import pyarrow as arrow_pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         arrow_schema = arrow_pa.schema(
             [
@@ -374,7 +374,7 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
             ) as mock_write,
         ):
             # Default NoOp validator
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver",
                 logger=noop_logger,
 

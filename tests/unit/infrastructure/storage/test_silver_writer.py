@@ -1,4 +1,4 @@
-"""Unit tests for DeltaWriter."""
+"""Unit tests for SilverWriter."""
 
 from __future__ import annotations
 
@@ -40,14 +40,14 @@ def valid_records():
 
 
 @pytest.mark.unit
-class TestDeltaWriterInit:
-    """Tests for DeltaWriter initialization."""
+class TestSilverWriterInit:
+    """Tests for SilverWriter initialization."""
 
     def test_init_strips_trailing_slash(self, noop_logger):
         """Test that trailing slash is stripped from base_path."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/path/", logger=noop_logger
         )
         assert writer.base_path == "s3://bucket/path"
@@ -56,10 +56,10 @@ class TestDeltaWriterInit:
         """Test initialization with CSV exporter."""
         from unittest.mock import MagicMock
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_exporter = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             csv_exporter=mock_exporter,
@@ -69,26 +69,26 @@ class TestDeltaWriterInit:
 
     def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         assert writer.csv_exporter is None
 
 
 @pytest.mark.unit
-class TestDeltaWriterValidation:
-    """Tests for DeltaWriter validation."""
+class TestSilverWriterValidation:
+    """Tests for SilverWriter validation."""
 
     @pytest.mark.asyncio
     async def test_write_silver_invalid_mode_raises(self, noop_logger, valid_records):
         """Test write_silver raises ValueError for invalid mode."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket", logger=noop_logger
         )
         schema = pa.schema(
@@ -116,9 +116,9 @@ class TestDeltaWriterValidation:
         """Test write_silver raises ValueError for empty records."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket", logger=noop_logger
         )
 
@@ -135,9 +135,9 @@ class TestDeltaWriterValidation:
     @pytest.mark.asyncio
     async def test_write_silver_missing_metadata_raises(self, noop_logger):
         """Test write_silver raises ValueError for missing metadata."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket", logger=noop_logger
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
@@ -157,9 +157,9 @@ class TestDeltaWriterValidation:
     @pytest.mark.asyncio
     async def test_write_silver_missing_run_id_raises(self, noop_logger):
         """Test write_silver raises ValueError when _run_id is missing."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket", logger=noop_logger
         )
         records = [
@@ -185,12 +185,12 @@ class TestDeltaWriterValidation:
 
 
 @pytest.mark.unit
-class TestDeltaWriterWriteModeEnum:
+class TestSilverWriterWriteModeEnum:
     """Tests for SilverWriteMode enum."""
 
     def test_silver_write_mode_values(self):
         """Test all valid SilverWriteMode values."""
-        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         assert SilverWriteMode.MERGE.value == "merge"
         assert SilverWriteMode.APPEND.value == "append"
@@ -198,7 +198,7 @@ class TestDeltaWriterWriteModeEnum:
 
     def test_silver_write_mode_from_string(self):
         """Test creating SilverWriteMode from string."""
-        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         assert SilverWriteMode("merge") == SilverWriteMode.MERGE
         assert SilverWriteMode("append") == SilverWriteMode.APPEND
@@ -206,7 +206,7 @@ class TestDeltaWriterWriteModeEnum:
 
     def test_silver_write_mode_invalid_raises(self):
         """Test invalid mode string raises ValueError."""
-        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         with pytest.raises(ValueError):
             SilverWriteMode("invalid")
@@ -216,12 +216,12 @@ class TestDeltaWriterWriteModeEnum:
 
     def test_validate_write_mode_method(self, noop_logger):
         """Test _validate_write_mode returns correct enum."""
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
 
@@ -237,14 +237,14 @@ class TestDeltaWriterWriteModeEnum:
 
 
 @pytest.mark.unit
-class TestDeltaWriterTablePath:
+class TestSilverWriterTablePath:
     """Tests for table path construction."""
 
     def test_table_path_construction(self, noop_logger):
         """Test table path is constructed correctly."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
 
@@ -257,9 +257,9 @@ class TestDeltaWriterTablePath:
 
     def test_table_path_with_nested_name(self, noop_logger):
         """Test table path with nested table name."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
 
@@ -271,7 +271,7 @@ class TestDeltaWriterTablePath:
 
 
 @pytest.mark.unit
-class TestDeltaWriterMergePredicate:
+class TestSilverWriterMergePredicate:
     """Tests for merge predicate building."""
 
     def test_build_single_key_predicate(self):
@@ -305,14 +305,14 @@ class TestDeltaWriterMergePredicate:
 
 
 @pytest.mark.unit
-class TestDeltaWriterVacuum:
-    """Tests for DeltaWriter vacuum operation."""
+class TestSilverWriterVacuum:
+    """Tests for SilverWriter vacuum operation."""
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_vacuum_returns_deleted_files(self, mock_delta_table, noop_logger):
         """Test vacuum returns list of deleted files."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -321,7 +321,7 @@ class TestDeltaWriterVacuum:
             "file2.parquet",
         ]
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         result = await writer.vacuum("test.table", retention_hours=168)
@@ -335,13 +335,13 @@ class TestDeltaWriterVacuum:
     @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_vacuum_dry_run(self, mock_delta_table, noop_logger):
         """Test vacuum dry run."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
         mock_table_instance.vacuum.return_value = ["file1.parquet"]
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         await writer.vacuum("test.table", retention_hours=24, dry_run=True)
@@ -356,13 +356,13 @@ class TestDeltaWriterVacuum:
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
         from bioetl.domain.exceptions import TableNotFoundError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="s3://bucket/silver", logger=noop_logger
             )
 
@@ -371,14 +371,14 @@ class TestDeltaWriterVacuum:
 
 
 @pytest.mark.unit
-class TestDeltaWriterOptimize:
-    """Tests for DeltaWriter optimize operation."""
+class TestSilverWriterOptimize:
+    """Tests for SilverWriter optimize operation."""
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_optimize_returns_metrics(self, mock_delta_table, noop_logger):
         """Test optimize returns compaction metrics."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -389,7 +389,7 @@ class TestDeltaWriterOptimize:
             "numFilesRemoved": 5,
         }
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         result = await writer.optimize("test.table")
@@ -401,7 +401,7 @@ class TestDeltaWriterOptimize:
     @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_optimize_with_partition_filters(self, mock_delta_table, noop_logger):
         """Test optimize with partition filters."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -409,7 +409,7 @@ class TestDeltaWriterOptimize:
         mock_table_instance.optimize = mock_optimize
         mock_optimize.compact.return_value = {}
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         await writer.optimize("test.table", partition_filters=[("year", "=", 2025)])
@@ -424,13 +424,13 @@ class TestDeltaWriterOptimize:
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
         from bioetl.domain.exceptions import TableNotFoundError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="s3://bucket/silver", logger=noop_logger
             )
 
@@ -439,14 +439,14 @@ class TestDeltaWriterOptimize:
 
 
 @pytest.mark.unit
-class TestDeltaWriterGetTableInfo:
-    """Tests for DeltaWriter get_table_info operation."""
+class TestSilverWriterGetTableInfo:
+    """Tests for SilverWriter get_table_info operation."""
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_get_table_info_returns_metadata(self, mock_delta_table, noop_logger):
         """Test get_table_info returns table metadata."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
@@ -457,7 +457,7 @@ class TestDeltaWriterGetTableInfo:
         mock_table_instance.schema.return_value = mock_schema
         mock_table_instance.metadata.return_value = {"id": "test-table"}
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         result = await writer.get_table_info("test.table")
@@ -471,13 +471,13 @@ class TestDeltaWriterGetTableInfo:
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
         from bioetl.domain.exceptions import TableNotFoundError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="s3://bucket/silver", logger=noop_logger
             )
 
@@ -486,19 +486,19 @@ class TestDeltaWriterGetTableInfo:
 
 
 @pytest.mark.unit
-class TestDeltaWriterTimeTravel:
-    """Tests for DeltaWriter time_travel operation."""
+class TestSilverWriterTimeTravel:
+    """Tests for SilverWriter time_travel operation."""
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.retention_manager.DeltaTable")
     async def test_time_travel_by_version(self, mock_delta_table, noop_logger):
         """Test time_travel by version number."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         result = await writer.time_travel("test.table", version=5)
@@ -512,12 +512,12 @@ class TestDeltaWriterTimeTravel:
         """Test time_travel by timestamp."""
         from datetime import datetime
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
         ts = datetime(2025, 1, 1, 12, 0, 0)
@@ -530,9 +530,9 @@ class TestDeltaWriterTimeTravel:
         """Test time_travel raises ValueError when both version and timestamp given."""
         from datetime import datetime
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
 
@@ -544,9 +544,9 @@ class TestDeltaWriterTimeTravel:
     @pytest.mark.asyncio
     async def test_time_travel_neither_version_nor_timestamp_raises(self, noop_logger):
         """Test time_travel raises ValueError when neither version nor timestamp given."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="s3://bucket/silver", logger=noop_logger
         )
 
@@ -561,13 +561,13 @@ class TestDeltaWriterTimeTravel:
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
         from bioetl.domain.exceptions import TableNotFoundError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="s3://bucket/silver", logger=noop_logger
             )
 
@@ -576,8 +576,8 @@ class TestDeltaWriterTimeTravel:
 
 
 @pytest.mark.unit
-class TestDeltaWriterErrorHandling:
-    """Tests for error handling in DeltaWriter."""
+class TestSilverWriterErrorHandling:
+    """Tests for error handling in SilverWriter."""
 
     @pytest.mark.asyncio
     async def test_write_silver_schema_mismatch_error(self, valid_records, noop_logger):
@@ -588,7 +588,7 @@ class TestDeltaWriterErrorHandling:
         from deltalake.exceptions import SchemaMismatchError
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.schema(
             [
@@ -614,7 +614,7 @@ class TestDeltaWriterErrorHandling:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             delta_table_mock,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="s3://bucket/silver", logger=noop_logger
             )
 
@@ -636,7 +636,7 @@ class TestDeltaWriterErrorHandling:
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
         from bioetl.domain.exceptions import MergeConflictError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.schema(
             [
@@ -669,7 +669,7 @@ class TestDeltaWriterErrorHandling:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             delta_table_mock,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="s3://bucket/silver", logger=noop_logger
             )
 
@@ -683,7 +683,7 @@ class TestDeltaWriterErrorHandling:
 
 
 @pytest.mark.unit
-class TestDeltaWriterSchemaDrift:
+class TestSilverWriterSchemaDrift:
     """Tests for schema drift detection and handling."""
 
     @pytest.mark.asyncio
@@ -691,13 +691,13 @@ class TestDeltaWriterSchemaDrift:
         """Test _get_table_schema returns None when table doesn't exist."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
             result = await writer._get_table_schema("test.table")
@@ -710,7 +710,7 @@ class TestDeltaWriterSchemaDrift:
         """Test _get_table_schema returns schema for existing table."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         expected_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
@@ -723,7 +723,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
             result = await writer._get_table_schema("test.table")
@@ -737,7 +737,7 @@ class TestDeltaWriterSchemaDrift:
         import pyarrow as pa
 
         from bioetl.domain.exceptions import SchemaEvolutionError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         # Existing schema has fewer fields than incoming records
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
@@ -751,7 +751,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -767,7 +767,7 @@ class TestDeltaWriterSchemaDrift:
         import pyarrow as pa
 
         from bioetl.domain.exceptions import SchemaEvolutionError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         # Existing schema has more fields than incoming records
         existing_schema = pa.schema(
@@ -800,7 +800,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -817,7 +817,7 @@ class TestDeltaWriterSchemaDrift:
         """Test schema drift with evolve mode proceeds without error."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
@@ -830,7 +830,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -844,7 +844,7 @@ class TestDeltaWriterSchemaDrift:
         """Test schema drift with ignore mode proceeds without error."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
@@ -857,7 +857,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -871,7 +871,7 @@ class TestDeltaWriterSchemaDrift:
         """Test no error raised when schema matches."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         # Schema matches incoming records exactly
         existing_schema = pa.schema(
@@ -894,7 +894,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -906,13 +906,13 @@ class TestDeltaWriterSchemaDrift:
         """Test schema drift check is skipped for new tables."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -924,7 +924,7 @@ class TestDeltaWriterSchemaDrift:
         """Test schema drift check is skipped for empty records."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         existing_schema = pa.schema([pa.field("entity_id", pa.string())])
         mock_delta_schema = MagicMock()
@@ -937,7 +937,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -955,7 +955,7 @@ class TestDeltaWriterSchemaDrift:
         import pyarrow as pa
 
         from bioetl.domain.exceptions import SchemaEvolutionError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         # Schema for incoming records
         incoming_schema = pa.schema(
@@ -989,7 +989,7 @@ class TestDeltaWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -1010,26 +1010,26 @@ class TestDeltaWriterSchemaDrift:
 
 
 @pytest.mark.unit
-class TestDeltaWriterWriteModePolicy:
-    """Tests for WriteModePolicy integration in DeltaWriter."""
+class TestSilverWriterWriteModePolicy:
+    """Tests for WriteModePolicy integration in SilverWriter."""
 
     def test_init_with_default_policy(self, noop_logger):
-        """Test DeltaWriter creates default WriteModePolicy when not provided."""
+        """Test SilverWriter creates default WriteModePolicy when not provided."""
         from bioetl.domain.medallion import WriteModePolicy
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         assert isinstance(writer._write_policy, WriteModePolicy)
 
     def test_init_with_custom_policy(self, noop_logger):
-        """Test DeltaWriter accepts custom WriteModePolicy."""
+        """Test SilverWriter accepts custom WriteModePolicy."""
         from bioetl.domain.medallion import WriteModePolicy
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         custom_policy = WriteModePolicy()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             write_policy=custom_policy,
@@ -1038,11 +1038,11 @@ class TestDeltaWriterWriteModePolicy:
         assert writer._write_policy is custom_policy
 
     def test_init_with_metrics_port(self, noop_logger):
-        """Test DeltaWriter accepts optional MetricsPort."""
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        """Test SilverWriter accepts optional MetricsPort."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_metrics = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
@@ -1053,12 +1053,12 @@ class TestDeltaWriterWriteModePolicy:
     def test_to_policy_write_mode_merge(self, noop_logger):
         """Test MERGE mode maps correctly."""
         from bioetl.domain.medallion import WriteMode
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         result = writer._to_policy_write_mode(SilverWriteMode.MERGE)
@@ -1067,12 +1067,12 @@ class TestDeltaWriterWriteModePolicy:
     def test_to_policy_write_mode_append(self, noop_logger):
         """Test APPEND mode maps correctly."""
         from bioetl.domain.medallion import WriteMode
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         result = writer._to_policy_write_mode(SilverWriteMode.APPEND)
@@ -1081,12 +1081,12 @@ class TestDeltaWriterWriteModePolicy:
     def test_to_policy_write_mode_delete_maps_to_overwrite(self, noop_logger):
         """Test DELETE mode maps to OVERWRITE (critical for policy enforcement)."""
         from bioetl.domain.medallion import WriteMode
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         result = writer._to_policy_write_mode(SilverWriteMode.DELETE)
@@ -1094,12 +1094,12 @@ class TestDeltaWriterWriteModePolicy:
 
     def test_enforce_write_policy_allows_merge(self, noop_logger):
         """Test policy enforcement allows MERGE mode for Silver."""
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         # Should not raise
@@ -1107,12 +1107,12 @@ class TestDeltaWriterWriteModePolicy:
 
     def test_enforce_write_policy_allows_append(self, noop_logger):
         """Test policy enforcement allows APPEND mode for Silver."""
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         # Should not raise
@@ -1121,12 +1121,12 @@ class TestDeltaWriterWriteModePolicy:
     def test_enforce_write_policy_rejects_delete(self, noop_logger):
         """Test policy enforcement rejects DELETE mode for Silver (maps to OVERWRITE)."""
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
         with pytest.raises(PolicyViolationError) as exc_info:
@@ -1136,13 +1136,13 @@ class TestDeltaWriterWriteModePolicy:
     def test_enforce_write_policy_increments_metric_on_violation(self, noop_logger):
         """Test policy violation increments policy_violations_total metric."""
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
         mock_metrics = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
@@ -1161,13 +1161,13 @@ class TestDeltaWriterWriteModePolicy:
     def test_enforce_write_policy_logs_error_on_violation(self, noop_logger):
         """Test policy violation logs error with context."""
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import (
-            DeltaWriter,
+        from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
+            SilverWriter,
         )
 
         mock_logger = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=mock_logger
         )
 
@@ -1195,7 +1195,7 @@ class TestDeltaWriterWriteModePolicy:
         import pyarrow as pa
 
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.schema(
             [
@@ -1208,7 +1208,7 @@ class TestDeltaWriterWriteModePolicy:
             ]
         )
 
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver", logger=noop_logger
         )
 
@@ -1230,7 +1230,7 @@ class TestDeltaWriterWriteModePolicy:
         import pyarrow as pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.schema(
             [
@@ -1252,7 +1252,7 @@ class TestDeltaWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -1276,7 +1276,7 @@ class TestDeltaWriterWriteModePolicy:
         import pyarrow as pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.schema(
             [
@@ -1298,7 +1298,7 @@ class TestDeltaWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = DeltaWriter(
+            writer = SilverWriter(
                 base_path="/tmp/silver", logger=noop_logger
             )
 
@@ -1322,7 +1322,7 @@ class TestDeltaWriterWriteModePolicy:
         import pyarrow as pa
 
         from bioetl.domain.exceptions import PolicyViolationError
-        from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         schema = pa.schema(
             [
@@ -1336,7 +1336,7 @@ class TestDeltaWriterWriteModePolicy:
         )
 
         mock_metrics = MagicMock()
-        writer = DeltaWriter(
+        writer = SilverWriter(
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,

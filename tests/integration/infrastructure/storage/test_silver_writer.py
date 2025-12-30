@@ -1,4 +1,4 @@
-"""Integration tests for DeltaWriter."""
+"""Integration tests for SilverWriter."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import pytest
 from deltalake import DeltaTable
 
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 
 @pytest.fixture
@@ -26,8 +26,8 @@ def temp_delta_path(tmp_path):
 
 
 @pytest.fixture
-def delta_writer(temp_delta_path, noop_logger):
-    return DeltaWriter(
+def silver_writer(temp_delta_path, noop_logger):
+    return SilverWriter(
         base_path=temp_delta_path, logger=noop_logger
     )
 
@@ -70,10 +70,10 @@ def sample_schema():
 
 @pytest.mark.asyncio
 async def test_write_silver_default_merge(
-    delta_writer, temp_delta_path, sample_records, sample_schema
+    silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test default merge behavior."""
-    await delta_writer.write_silver(
+    await silver_writer.write_silver(
         table_name="test_table",
         records=sample_records,
         primary_keys=["id"],
@@ -103,7 +103,7 @@ async def test_write_silver_default_merge(
         },
     ]
 
-    await delta_writer.write_silver(
+    await silver_writer.write_silver(
         table_name="test_table",
         records=new_records,
         primary_keys=["id"],
@@ -121,10 +121,10 @@ async def test_write_silver_default_merge(
 
 @pytest.mark.asyncio
 async def test_write_silver_append_mode(
-    delta_writer, temp_delta_path, sample_records, sample_schema
+    silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test append mode (duplicates allowed)."""
-    await delta_writer.write_silver(
+    await silver_writer.write_silver(
         table_name="test_append",
         records=sample_records,
         primary_keys=["id"],
@@ -133,7 +133,7 @@ async def test_write_silver_append_mode(
     )
 
     # Append same records again
-    await delta_writer.write_silver(
+    await silver_writer.write_silver(
         table_name="test_append",
         records=sample_records,
         primary_keys=["id"],
@@ -147,7 +147,7 @@ async def test_write_silver_append_mode(
 
 @pytest.mark.asyncio
 async def test_write_silver_delete_mode(
-    delta_writer, temp_delta_path, sample_records, sample_schema
+    silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test delete mode (replaces all existing data)."""
     # Silver layer does not support 'delete' mode (overwrite).
@@ -156,7 +156,7 @@ async def test_write_silver_delete_mode(
     from bioetl.domain.exceptions import PolicyViolationError
 
     with pytest.raises(PolicyViolationError, match="silver does not allow overwrite"):
-        await delta_writer.write_silver(
+        await silver_writer.write_silver(
             table_name="test_overwrite",
             records=sample_records,
             primary_keys=["id"],
@@ -167,11 +167,11 @@ async def test_write_silver_delete_mode(
 
 @pytest.mark.asyncio
 async def test_write_silver_partitioning(
-    delta_writer, temp_delta_path, sample_records, sample_schema
+    silver_writer, temp_delta_path, sample_records, sample_schema
 ):
     """Test partitioning."""
     # Silver layer does not support 'delete' mode, so we use 'append' for partitioning test
-    await delta_writer.write_silver(
+    await silver_writer.write_silver(
         table_name="test_partition",
         records=sample_records,
         primary_keys=["id"],

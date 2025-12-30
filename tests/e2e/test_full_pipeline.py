@@ -18,8 +18,8 @@ import pytest
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.e2e.conftest import create_test_context
 
 
@@ -49,7 +49,7 @@ class TestChEMBLPipelineE2E:
 
         )
 
-        silver_writer = DeltaWriter(
+        silver_writer = SilverWriter(
             base_path=str(storage_paths["silver"]),
             logger=logger,
 
@@ -151,7 +151,7 @@ async def test_pubchem_compound_pipeline(
 
     )
 
-    silver_writer = DeltaWriter(
+    silver_writer = SilverWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
 
@@ -234,7 +234,7 @@ async def test_pipeline_resume_after_failure(
 
     )
 
-    silver_writer = DeltaWriter(
+    silver_writer = SilverWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
 
@@ -328,7 +328,7 @@ async def test_pipeline_idempotency(
 
     )
 
-    silver_writer = DeltaWriter(
+    silver_writer = SilverWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
 

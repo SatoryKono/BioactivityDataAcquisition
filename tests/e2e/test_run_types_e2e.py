@@ -253,7 +253,7 @@ class TestMedallionPolicyIntegration:
 
     async def test_silver_write_mode_enum(self):
         """E2E: SilverWriteMode enum should have expected values."""
-        from bioetl.infrastructure.storage.delta_writer import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         assert hasattr(SilverWriteMode, "MERGE")
         assert hasattr(SilverWriteMode, "APPEND")

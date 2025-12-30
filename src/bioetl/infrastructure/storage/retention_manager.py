@@ -5,7 +5,7 @@ Implements RULES.md §2.1.1 - Delta Lake specifications:
 - REQ-DELTA-003: Forensic retention (7-30 days configurable)
 - REQ-DATA-008: Time Travel support
 
-This module extracts maintenance operations from DeltaWriter for better
+This module extracts maintenance operations from SilverWriter for better
 separation of concerns:
 - VACUUM: Remove old files no longer referenced by Delta log
 - Optimize: Compact files for better query performance
@@ -32,7 +32,7 @@ class RetentionManager:
     """Manager for Delta table retention and maintenance operations.
 
     Handles VACUUM, optimize, time travel, and table metadata retrieval.
-    Extracted from DeltaWriter to improve separation of concerns.
+    Extracted from SilverWriter to improve separation of concerns.
     """
 
     def __init__(self, base_path: str | Path) -> None:

@@ -2,7 +2,7 @@
 
 Verifies that run_id is consistently propagated:
 - Through BronzeWriter (metadata)
-- Through DeltaWriter (Silver layer records)
+- Through SilverWriter (Silver layer records)
 - Through logs
 """
 
