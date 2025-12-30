@@ -281,7 +281,7 @@ class GoldWriter:
                 table=table_name,
                 mode=mode.value,
             )
-            timestamp = datetime.now(UTC)
+            raise ValueError("ingestion_ts is required for audit logging")
 
         if run_id is not None:
             audit_run_id = run_id
