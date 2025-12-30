@@ -333,8 +333,8 @@ async def test_retry_policy_deterministic_jitter():
         max_attempts=3,
         base_delay=1.0,
         multiplier=2.0,
-        jitter=0.1,
-        deterministic=True,
+        jitter_range=(0.1, 0.1),  # Fixed jitter for reproducibility
+        jitter_seed=42,  # Deterministic seed
     )
 
     # Same inputs should give same delay
@@ -357,8 +357,8 @@ async def test_retry_policy_exponential_backoff():
         max_attempts=5,
         base_delay=1.0,
         multiplier=2.0,
-        jitter=0.0,  # No jitter for predictable test
-        deterministic=True,
+        jitter_range=(0.0, 0.0),  # No jitter for predictable test
+        jitter_seed=0,  # Deterministic
     )
 
     delays = [policy.calculate_delay(attempt=i, url="test") for i in range(4)]
