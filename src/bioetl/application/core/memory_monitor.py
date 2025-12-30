@@ -2,6 +2,8 @@
 
 Provides memory pressure detection and adaptive batch size recommendations.
 Uses psutil if available, falls back to resource module on Unix or estimates on Windows.
+
+Implements MemoryMonitorPort from domain/ports/memory.py.
 """
 
 from __future__ import annotations
@@ -10,6 +12,9 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+# Re-export MemoryStats from domain for backward compatibility
+from bioetl.domain.ports.memory import MemoryStats
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -33,31 +38,6 @@ class MemoryConfig:
     min_batch_size: int = 10
     check_interval_records: int = 100
     enable_adaptive_sizing: bool = True
-
-
-@dataclass(slots=True)
-class MemoryStats:
-    """Current memory statistics.
-
-    Attributes:
-        used_mb: Currently used memory in MB.
-        available_mb: Available memory in MB.
-        total_mb: Total system memory in MB.
-        percent_used: Percentage of memory used (0.0-1.0).
-        process_mb: Current process memory usage in MB.
-
-    """
-
-    used_mb: float
-    available_mb: float
-    total_mb: float
-    percent_used: float
-    process_mb: float
-
-    @property
-    def is_under_pressure(self) -> bool:
-        """Check if system is under memory pressure (>80% used)."""
-        return self.percent_used > 0.8
 
 
 @dataclass

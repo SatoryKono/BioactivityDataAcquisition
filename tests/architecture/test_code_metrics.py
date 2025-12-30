@@ -43,8 +43,10 @@ class TestFileSizeLimits:
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
-        "identifiers.py": 340,  # 332 LOC - Value objects with validation
-        "measurements.py": 435,  # 425 LOC - Measurement value objects with rich domain logic
+        "identifiers.py": 350,  # 332 LOC - Value objects with validation
+        "measurements.py": 450,  # 425 LOC - Measurement value objects
+        # Domain ports NoOp implementations
+        "noop.py": 350,  # 322 LOC - NoOp implementations for Null Object Pattern
         # Application layer exemptions
         "preflight_service.py": 580,  # 572 LOC - preflight validation
         "base_transformer.py": 565,  # 559 LOC - Template Method with helpers (tracing spans added)

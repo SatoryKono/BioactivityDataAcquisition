@@ -21,6 +21,7 @@ __all__ = [
 
 from bioetl.composition.entrypoints import preview_cleanup
 from bioetl.composition.registry import get_default_registry
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_cleanup_preview,
     echo_dry_run_prefix,
@@ -121,6 +122,6 @@ def handle_destructive_run_confirmation(
         echo_warning(f"{run_type} will clear existing data for {pipeline}.")
         if not click.confirm("Do you want to continue?"):
             echo_info("Operation cancelled.")
-            sys.exit(0)
+            sys.exit(ExitCode.OK)
 
     return True

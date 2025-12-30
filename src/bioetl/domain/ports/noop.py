@@ -234,3 +234,89 @@ class NoOpAudit:
     async def aclose(self) -> None:
         """No-op close. Idempotent."""
         pass
+
+
+class NoOpMemoryMonitor:
+    """No-op implementation of MemoryMonitorPort.
+
+    Used when memory monitoring is disabled or for testing.
+    Returns conservative default values indicating no memory pressure.
+
+    Implements:
+        MemoryMonitorPort: Domain port for memory monitoring.
+
+    Example:
+        >>> monitor = NoOpMemoryMonitor()
+        >>> stats = monitor.get_memory_stats()
+        >>> assert not stats.is_under_pressure
+        >>> assert monitor.get_recommended_batch_size(1000) == 1000
+
+    """
+
+    def get_memory_stats(self) -> "MemoryStats":
+        """Return conservative memory stats (50% usage).
+
+        Returns:
+            MemoryStats with 50% memory usage (safe default).
+
+        """
+        from bioetl.domain.ports.memory import MemoryStats
+
+        return MemoryStats(
+            used_mb=4096.0,
+            available_mb=4096.0,
+            total_mb=8192.0,
+            percent_used=0.5,
+            process_mb=256.0,
+        )
+
+    def is_under_pressure(self) -> bool:
+        """Return False (no memory pressure).
+
+        Returns:
+            False, indicating no memory pressure.
+
+        """
+        return False
+
+    def get_recommended_batch_size(self, current_batch_size: int) -> int:
+        """Return current batch size (no reduction needed).
+
+        Args:
+            current_batch_size: Current batch size.
+
+        Returns:
+            Unchanged batch size.
+
+        """
+        return current_batch_size
+
+    def estimate_batch_memory_mb(
+        self,
+        record_count: int,
+        avg_record_size_bytes: int = 1024,
+    ) -> float:
+        """Estimate memory usage for a batch.
+
+        Args:
+            record_count: Number of records in batch.
+            avg_record_size_bytes: Average size per record in bytes.
+
+        Returns:
+            Estimated memory usage in MB.
+
+        """
+        overhead_factor = 2.5
+        return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
+
+    def calculate_max_batch_size(self, avg_record_size_bytes: int = 1024) -> int:
+        """Return a high max batch size (no constraints).
+
+        Args:
+            avg_record_size_bytes: Average size per record in bytes.
+
+        Returns:
+            Large max batch size (10000).
+
+        """
+        return 10000
