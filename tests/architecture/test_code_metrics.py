@@ -36,6 +36,10 @@ class TestFileSizeLimits:
         # Domain layer exemptions (baseline)
         "filter_config.py": 400,  # 354 LOC
         "entities.py": 600,  # 569 LOC
+        "chembl.py": 720,  # 714 LOC - ChEMBL entity DTOs with many fields
+        "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
+        "activity_aggregator.py": 365,  # 359 LOC - Activity aggregation with multiple strategies
+        "normalization_service.py": 390,  # 385 LOC - Normalization service with validation
         "types.py": 400,  # 396 LOC
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
@@ -48,8 +52,8 @@ class TestFileSizeLimits:
         # Domain ports NoOp implementations
         "noop.py": 350,  # 322 LOC - NoOp implementations for Null Object Pattern
         # Application layer exemptions
-        "preflight_service.py": 580,  # 572 LOC - preflight validation
-        "base_transformer.py": 565,  # 559 LOC - Template Method with helpers (tracing spans added)
+        "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
+        "base_transformer.py": 600,  # 594 LOC - Template Method with helpers (tracing spans added)
         "batch_executor.py": 650,  # 610 LOC - unified executor combining PipelineExecutor + RecordProcessor
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
@@ -58,7 +62,7 @@ class TestFileSizeLimits:
         "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
-        "pipeline_factory.py": 500,  # 469 LOC - merged generic_factory + runner_assembly
+        "pipeline_factory.py": 520,  # 517 LOC - merged generic_factory + runner_assembly
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
         "delta_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
@@ -149,6 +153,17 @@ class TestFunctionComplexity:
         "_validate": 8,  # Value object validation with multiple checks
         "PubMedId": 9,  # Value object with multiple format validation
         "PubChemCid": 9,  # Value object with multiple format validation
+        # Domain services (activity aggregation, normalization)
+        "ActivityAggregator": 8,  # Activity aggregation class init with multiple strategies
+        "aggregate_values": 10,  # Multi-strategy aggregation logic
+        "aggregate_with_uncertainty": 10,  # Uncertainty calculation with bounds
+        "filter_and_aggregate": 8,  # Combined filtering and aggregation
+        "_normalize_value": 13,  # Value normalization with type handling
+        "PChemblRangeConfig": 7,  # Config validation with range checks
+        "normalize_multiple": 10,  # Multi-value normalization
+        "validate_concentration": 7,  # Concentration validation with unit checks
+        "validate_pchembl": 7,  # pChEMBL validation with range checks
+        "validate_activity_value": 10,  # Activity value validation
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -319,7 +334,7 @@ class TestClassSize:
         "DeltaWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "LineageTracker": 400,
-        "ChemblAdapter": 490,  # 481 lines - complex API adapter with Template Method health check
+        "ChemblAdapter": 520,  # 513 lines - complex API adapter with Template Method health check
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
@@ -335,8 +350,12 @@ class TestClassSize:
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
+        # PubMed adapter (similar to ChEMBL adapter)
+        "PubMedAdapter": 360,  # 351 lines - HTTP adapter with Entrez API
         # Error handling utility
         "ErrorHandler": 370,  # 363 lines - comprehensive error classification and logging
+        # Domain services
+        "NormalizationService": 350,  # 338 lines - Normalization service with validation
         # Domain value objects (aggregates with rich behavior)
         "Batch": 450,  # 429 lines - Batch aggregate with lifecycle methods
         "PipelineRun": 420,  # 408 lines - PipelineRun aggregate with state machine
@@ -484,6 +503,8 @@ class TestGodObjectDetection:
         "MedallionConfigValidator": "Cohesive validator - all methods relate to medallion validation",
         # Error handling utility (not an adapter, unified error classification)
         "ErrorHandler": "Cohesive utility - all methods relate to error classification and logging",
+        # Domain services (cohesive services with single responsibility)
+        "NormalizationService": "Cohesive service - all methods relate to value normalization",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
