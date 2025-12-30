@@ -164,6 +164,27 @@ HEALTH_CHECK_DURATION_SECONDS = Histogram(
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
 )
 
+# Provider-level health check metrics (per RULES.md §4.8)
+# Used by HealthCheckMixin in BaseHttpAdapter and BaseSyncAdapter
+HEALTH_CHECK_SUCCESS_TOTAL = Counter(
+    "bioetl_health_check_success_total",
+    "Total number of successful health checks per provider",
+    ["provider"],
+)
+
+HEALTH_CHECK_FAILURES_TOTAL = Counter(
+    "bioetl_health_check_failures_total",
+    "Total number of failed health checks per provider",
+    ["provider"],
+)
+
+HEALTH_CHECK_LATENCY_SECONDS = Histogram(
+    "bioetl_health_check_latency_seconds",
+    "Duration of health check operations in seconds per provider",
+    ["provider"],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
+)
+
 
 class MetricsCollector:
     """Collector for pipeline metrics.

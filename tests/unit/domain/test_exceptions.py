@@ -10,7 +10,6 @@ from bioetl.domain.exceptions import (
     BioETLError,
     BucketNotFoundError,
     CheckpointConflictError,
-    ChemblApiError,
     CircuitBreakerOpenError,
     CriticalError,
     DataQualityError,
@@ -82,27 +81,6 @@ class TestExceptions:
         assert e.record_id is None
         assert "Missing required field: activity_id" in str(e)
         assert "record_id" not in str(e)
-
-    def test_chembl_api_error_inheritance(self) -> None:
-        """Test ChemblApiError inherits from ExternalServiceError.
-
-        Note: ChemblApiError in domain is deprecated. The canonical version
-        is in infrastructure.adapters.chembl.exceptions.
-        """
-        import warnings
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            e = ChemblApiError("ChEMBL service unavailable", 503)
-            # Check deprecation warning was issued
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()
-
-        assert isinstance(e, ExternalServiceError)
-        assert isinstance(e, RecoverableError)
-        assert e.status_code == 503
-        assert e.service_name == "chembl"
 
     def test_storage_error_inheritance(self) -> None:
         """Test StorageError inheritance."""
@@ -387,15 +365,14 @@ class TestErrorContext:
 
     def test_context_inheritance(self) -> None:
         """Subclass context should include parent class attributes."""
-        import warnings
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            err = ChemblApiError("Service unavailable", status_code=503)
+        # ServiceUnavailableError inherits from ExternalServiceError
+        err = ServiceUnavailableError(
+            "Service unavailable", service_name="chembl", status_code=503
+        )
 
         ctx = err.context
 
-        # ChemblApiError inherits from ExternalServiceError which sets service_name and status_code
+        # ExternalServiceError sets service_name and status_code
         assert ctx["service_name"] == "chembl"
         assert ctx["status_code"] == 503
 
