@@ -19,7 +19,7 @@ from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.domain.entities import Activity
+from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float
 
 if TYPE_CHECKING:
@@ -122,9 +122,12 @@ _ACTIVITY_GROUPS: tuple[FieldGroup, ...] = (
 
 
 class ActivityTransformer(BaseChemblTransformer):
-    """Transforms ChEMBL bronze records to silver."""
+    """Transforms ChEMBL bronze records to silver.
 
-    entity_class = Activity
+    Uses the unified Bioactivity entity for domain representation.
+    """
+
+    entity_class = Bioactivity
     primary_id_field = "activity_id"
 
     def _extract_ligand_efficiency(
