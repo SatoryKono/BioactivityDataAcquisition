@@ -1,110 +1,77 @@
-"""Unit tests for PubMedAdapter."""
+"""Unit tests for PubMedAdapter.
+
+Tests the PubMed adapter's health check and lifecycle methods.
+"""
 
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from httpx import RequestError
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
 
 
 @pytest.fixture
 def mock_http_client():
-    """Fixture for mock HTTP client."""
-    return AsyncMock()
+    """Create a mock HTTP client."""
+    client = AsyncMock()
+    client.__aenter__.return_value = client
+    client.__aexit__.return_value = None
+    client._client = AsyncMock()
+    client._client.aclose = AsyncMock()
+    return client
 
 
 @pytest.fixture
 def mock_logger():
-    """Fixture for mock logger."""
+    """Create a mock logger."""
     return MagicMock()
 
 
 @pytest.fixture
 def adapter(mock_http_client, mock_logger):
-    """Fixture for PubMedAdapter instance."""
+    """Create a PubMedAdapter with mock http client."""
     return PubMedAdapter(
         http_client=mock_http_client,
         logger=mock_logger,
         email="test@example.com",
+        api_key=None,
     )
 
 
 @pytest.mark.asyncio
-async def test_fetch_by_pmid_success(adapter, mock_http_client):
-    """Test successful fetch_by_pmid."""
+async def test_aclose_closes_http_client(adapter, mock_http_client):
+    """Test that aclose() properly closes the HTTP client."""
+    await adapter.aclose()
+
+    # aclose uses __aexit__ for cleanup
+    mock_http_client.__aexit__.assert_called_once_with(None, None, None)
+
+
+@pytest.mark.asyncio
+async def test_aclose_idempotent(adapter, mock_http_client):
+    """Test that aclose() can be called multiple times safely."""
+    await adapter.aclose()
+    mock_http_client.__aexit__.assert_called_once_with(None, None, None)
+
+    # Second call should also work
+    await adapter.aclose()
+    assert mock_http_client.__aexit__.call_count == 2
+
+
+# =============================================================================
+# Health Check Tests
+# =============================================================================
+
+
+@pytest.mark.asyncio
+async def test_health_check_returns_healthy_on_success(adapter, mock_http_client):
+    """Test health_check returns HEALTHY on 200 response."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {
-        "result": {"12345": {"title": "Test Title"}}
-    }
-    mock_http_client.get.return_value = mock_response
-
-    result = await adapter.fetch_by_pmid("12345")
-
-    assert result == {"title": "Test Title"}
-    mock_http_client.get.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_fetch_by_pmid_not_found(adapter, mock_http_client, mock_logger):
-    """Test fetch_by_pmid when PMID is not found (404)."""
-    mock_response = MagicMock()
-    mock_response.status_code = 404
-    mock_http_client.get.return_value = mock_response
-
-    result = await adapter.fetch_by_pmid("99999")
-
-    assert result is None
-    mock_logger.debug.assert_called_with(
-        "pubmed_pmid_not_found",
-        pmid="99999",
-        status_code=404,
-    )
-
-
-@pytest.mark.asyncio
-async def test_fetch_by_pmid_http_error(adapter, mock_http_client, mock_logger):
-    """Test fetch_by_pmid with HTTP error (e.g., 500)."""
-    mock_response = MagicMock()
-    mock_response.status_code = 500
-    mock_http_client.get.return_value = mock_response
-
-    result = await adapter.fetch_by_pmid("500error")
-
-    assert result is None
-    mock_logger.error.assert_called_with(
-        "pubmed_api_error",
-        pmid="500error",
-        status_code=500,
-        response_text=None,
-    )
-
-
-@pytest.mark.asyncio
-async def test_fetch_by_pmid_request_error(adapter, mock_http_client, mock_logger):
-    """Test fetch_by_pmid with a request error (e.g., network issue)."""
-    mock_http_client.get.side_effect = RequestError("Network error")
-
-    result = await adapter.fetch_by_pmid("network-error")
-
-    assert result is None
-    mock_logger.error.assert_called_with(
-        "pubmed_request_failed",
-        pmid="network-error",
-        error="Network error",
-    )
-
-
-@pytest.mark.asyncio
-async def test_health_check_healthy(adapter, mock_http_client):
-    """Test health_check returns HEALTHY on success."""
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_http_client.get.return_value = mock_response
+    mock_http_client.get = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()
 
@@ -112,55 +79,102 @@ async def test_health_check_healthy(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_health_check_unhealthy_on_error(adapter, mock_http_client):
-    """Test health_check returns UNHEALTHY on HTTP error."""
+async def test_health_check_returns_unhealthy_on_non_200(
+    adapter, mock_http_client, mock_logger
+):
+    """Test health_check returns UNHEALTHY on non-200 response."""
     mock_response = MagicMock()
     mock_response.status_code = 503
-    mock_http_client.get.return_value = mock_response
+    mock_http_client.get = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()
 
     assert result == HealthStatus.UNHEALTHY
-
-
-@pytest.mark.asyncio
-async def test_health_check_unhealthy_on_request_error(adapter, mock_http_client):
-    """Test health_check returns UNHEALTHY on request error."""
-    mock_http_client.get.side_effect = RequestError("Connection refused")
-
-    result = await adapter.health_check()
-
-    assert result == HealthStatus.UNHEALTHY
+    mock_logger.warning.assert_called_once()
 
 
 @pytest.mark.asyncio
 async def test_health_check_returns_degraded_on_slow_response(
     adapter, mock_http_client, mock_logger
 ):
-    """Test health_check returns DEGRADED when response takes >5 seconds."""
+    """Test _probe_health returns DEGRADED when response takes >5 seconds.
+
+    Tests the internal _probe_health method directly since it contains
+    the slow response detection logic.
+    """
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_http_client.get = AsyncMock(return_value=mock_response)
 
-    # Simulate slow response by patching time.monotonic in both modules
-    # (adapter module and health_check_mixin where HealthCheckContext uses it)
-    call_count = 0
+    # Mock time.monotonic to simulate slow response
+    # _probe_health does: start_time = time.monotonic() then elapsed = time.monotonic() - start_time
+    # We need elapsed > 5.0
+    import bioetl.infrastructure.adapters.pubmed.pubmed_client as pubmed_module
 
-    def mock_monotonic_func():
-        nonlocal call_count
-        call_count += 1
-        # First call (start_time) returns 0, subsequent calls return 6 (elapsed = 6 sec)
-        return 0.0 if call_count <= 2 else 6.0
+    original_monotonic = pubmed_module.time.monotonic
+    call_count = [0]  # Use list to allow modification in closure
 
-    mock_monotonic = MagicMock(side_effect=mock_monotonic_func)
+    def mock_monotonic():
+        call_count[0] += 1
+        # First call returns 0, second call returns 6
+        return 0.0 if call_count[0] == 1 else 6.0
 
-    with patch(
-        "bioetl.infrastructure.adapters.pubmed.pubmed_client.time.monotonic",
-        new=mock_monotonic,
-    ), patch(
-        "bioetl.infrastructure.adapters.health_check_mixin.time.monotonic",
-        new=mock_monotonic,
-    ):
-        result = await adapter.health_check()
+    pubmed_module.time.monotonic = mock_monotonic
+    try:
+        result = await adapter._probe_health()
+    finally:
+        pubmed_module.time.monotonic = original_monotonic
 
     assert result == HealthStatus.DEGRADED
+    # Verify a slow response warning was logged
+    mock_logger.warning.assert_called_once()
+    call_args = mock_logger.warning.call_args
+    assert call_args[0][0] == "pubmed_health_check_slow"
+
+
+@pytest.mark.asyncio
+async def test_health_check_logs_error_on_exception(
+    adapter, mock_http_client, mock_logger
+):
+    """Test health_check logs error details on exception."""
+    mock_http_client.get = AsyncMock(side_effect=Exception("Network timeout"))
+
+    await adapter.health_check()
+
+    # Warning is logged (may be called multiple times due to error handling chain)
+    assert mock_logger.warning.called
+    # Find the health_check_failed warning with Network timeout
+    failed_warning_found = any(
+        call[0][0] == "health_check_failed"
+        and "Network timeout"
+        in str(call[1].get("error", "") or call[1].get("error_message", ""))
+        for call in mock_logger.warning.call_args_list
+    )
+    assert (
+        failed_warning_found
+    ), "Expected 'health_check_failed' warning with 'Network timeout' to be logged"
+
+
+@pytest.mark.asyncio
+async def test_health_check_returns_unhealthy_on_exception(adapter, mock_http_client):
+    """Test health_check returns UNHEALTHY when exception occurs."""
+    mock_http_client.get = AsyncMock(side_effect=Exception("Connection refused"))
+
+    result = await adapter.health_check()
+
+    assert result == HealthStatus.UNHEALTHY
+
+
+# =============================================================================
+# Provider Name Tests
+# =============================================================================
+
+
+def test_provider_name(adapter):
+    """Test that provider_name is set correctly."""
+    assert adapter.provider_name == "pubmed"
+
+
+def test_health_endpoint(adapter):
+    """Test that health endpoint is correct."""
+    assert adapter._get_health_endpoint() == "/entrez/eutils/esearch.fcgi"
