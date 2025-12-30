@@ -1,141 +1,65 @@
 """ChEMBL bioactivity domain entities.
 
-Contains Activity and Assay entities for ChEMBL bioactivity data.
+Contains Activity (deprecated alias for Bioactivity) and Assay entities.
+
+Migration Note:
+    The `Activity` class is deprecated in favor of `Bioactivity`.
+    Use `from bioetl.domain.entities import Bioactivity` for new code.
+    The `Activity` alias will be removed after 14 days.
 
 Field Classification:
-- REQUIRED: Validated in __post_init__, will raise ValueError if empty
-- API-OPTIONAL: May or may not be present in API response, defaults to None
-- COMPUTED: Derived from other fields, may be None if source data missing
+    - REQUIRED: Validated in __post_init__, will raise ValueError if empty
+    - API-OPTIONAL: May or may not be present in API response, defaults to None
+    - COMPUTED: Derived from other fields, may be None if source data missing
 """
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
+from typing import Any
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.entities.bioactivity import (
+    Bioactivity,
+    BioactivityState,
+)
+
+__all__ = [
+    "Activity",
+    "Assay",
+    "Bioactivity",
+    "BioactivityState",
+]
 
 
-@dataclass(frozen=True, kw_only=True)
-class Activity(BaseEntity):
-    """Represents a bioactivity measurement (ChEMBL Activity).
+class Activity(Bioactivity):
+    """Deprecated alias for Bioactivity.
 
-    Contains all fields from ChEMBL activity API endpoint.
-    See: https://www.ebi.ac.uk/chembl/api/data/activity
+    .. deprecated:: 1.0.0
+        Use :class:`Bioactivity` instead. This alias will be removed in 14 days.
 
-    Required Fields (validated):
-        activity_id: Primary identifier (from BaseEntity fields + this)
-        molecule_chembl_id: Molecule identifier (required for drug discovery)
-        + All BaseEntity fields (entity_id, content_hash, run_id, etc.)
+    This class exists for backward compatibility during migration.
+    All functionality is inherited from Bioactivity.
 
-    API-Optional Fields:
-        All other fields may be None depending on the activity record.
-        Gold layer filters should be used to ensure required fields for analysis.
+    Example:
+        >>> # Old code (deprecated):
+        >>> from bioetl.domain.entities import Activity
+        >>> activity = Activity(...)  # Will emit DeprecationWarning
 
-    Validation:
-        - activity_id and molecule_chembl_id must be non-empty
-        - pchembl_value must be non-negative if present
+        >>> # New code (recommended):
+        >>> from bioetl.domain.entities import Bioactivity
+        >>> bioactivity = Bioactivity(...)
     """
 
-    # REQUIRED: Primary identifier (validated in __post_init__)
-    activity_id: str
-
-    # REQUIRED: Core identifiers (validated in __post_init__)
-    molecule_chembl_id: str
-    target_chembl_id: str | None = None
-    assay_chembl_id: str | None = None
-    document_chembl_id: str | None = None
-    record_id: int | None = None
-    src_id: int | None = None
-
-    # Molecule data
-    canonical_smiles: str | None = None
-    molecule_pref_name: str | None = None
-    parent_molecule_chembl_id: str | None = None
-
-    # Target data
-    target_pref_name: str | None = None
-    target_organism: str | None = None
-    target_tax_id: str | None = None
-
-    # Assay data
-    assay_type: str | None = None
-    assay_description: str | None = None
-    assay_variant_accession: str | None = None
-    assay_variant_mutation: str | None = None
-
-    # BAO (BioAssay Ontology) annotations
-    bao_endpoint: str | None = None
-    bao_format: str | None = None
-    bao_label: str | None = None
-
-    # Raw activity values
-    type: str | None = None
-    value: float | None = None
-    units: str | None = None
-    relation: str | None = None
-    upper_value: float | None = None
-    text_value: str | None = None
-
-    # Standardized activity values
-    standard_type: str | None = None
-    standard_value: float | None = None
-    standard_units: str | None = None
-    standard_relation: str | None = None
-    standard_upper_value: float | None = None
-    standard_text_value: str | None = None
-    standard_flag: int | None = None
-
-    # Derived metrics
-    pchembl_value: float | None = None
-
-    # Ligand efficiency metrics (flattened from ChEMBL API dict)
-    ligand_efficiency_bei: float | None = None  # Binding Efficiency Index
-    ligand_efficiency_le: float | None = None  # Ligand Efficiency
-    ligand_efficiency_lle: float | None = None  # Lipophilic Ligand Efficiency
-    ligand_efficiency_sei: float | None = None  # Surface Efficiency Index
-
-    # Units ontology
-    qudt_units: str | None = None
-    uo_units: str | None = None
-
-    # Document/Publication data
-    document_journal: str | None = None
-    document_year: int | None = None
-
-    # Quality annotations
-    activity_comment: str | None = None
-    data_validity_comment: str | None = None
-    data_validity_description: str | None = None
-    potential_duplicate: int | None = None
-
-    # Action type (flattened from ChEMBL API nested structure)
-    action_type_action_type: str | None = (
-        None  # Type of action (INHIBITOR, AGONIST, etc.)
-    )
-    action_type_description: str | None = None  # Description of the action type
-    action_type_parent_type: str | None = None  # Higher-level grouping (nullable)
-
-    # Activity properties
-    activity_properties: str | None = None  # JSON string of list
-    toid: int | None = None
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
-    def _validate_invariants(self) -> None:
-        if not self.activity_id:
-            raise ValueError("Activity ID is required")
-        if not self.molecule_chembl_id:
-            raise ValueError("Molecule ID is required")
-        self._validate_pchembl_value()
-
-    def _validate_pchembl_value(self) -> None:
-        """Validate pchembl_value is non-negative if present."""
-        if self.pchembl_value is not None and self.pchembl_value < 0:
-            raise ValueError(
-                f"pChemBL value must be non-negative, got {self.pchembl_value}"
-            )
+    def __init__(self, **kwargs: Any) -> None:
+        warnings.warn(
+            "Activity is deprecated, use Bioactivity instead. "
+            "This alias will be removed in 14 days.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**kwargs)
 
 
 @dataclass(frozen=True, kw_only=True)
