@@ -39,17 +39,18 @@ async def test_memory_monitor_adaptive_batching(e2e_data_dir: Path):
     - Batch size should be reduced when memory usage exceeds threshold
     - Pipeline should continue processing with smaller batches
     """
-    from bioetl.application.core.memory_monitor import MemoryMonitor, MemoryStats
+    from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
 
-    # Create memory monitor
-    monitor = MemoryMonitor(
-        warning_threshold_percent=80.0,
-        critical_threshold_percent=95.0,
+    # Create memory monitor with custom thresholds
+    config = MemoryConfig(
+        memory_pressure_threshold=0.8,  # 80%
+        min_batch_size=10,
     )
+    monitor = MemoryMonitor(config=config)
 
     # Get initial stats
-    stats = monitor.get_stats()
-    assert isinstance(stats, MemoryStats)
+    stats = monitor.get_memory_stats()
+    assert stats is not None
 
     # Verify adaptive batch calculation
     initial_batch = 1000
@@ -69,13 +70,13 @@ async def test_memory_monitor_graceful_degradation():
     - MemoryMonitor returns conservative estimates when psutil unavailable
     - This is intentional graceful degradation, not a bug
     """
-    from bioetl.application.core.memory_monitor import MemoryMonitor
+    from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
 
-    # Create monitor
-    monitor = MemoryMonitor()
+    # Create monitor with default config
+    monitor = MemoryMonitor(config=MemoryConfig())
 
     # Should work even without psutil
-    stats = monitor.get_stats()
+    stats = monitor.get_memory_stats()
     assert stats is not None
 
     # Should return valid percentage (0-100)
@@ -259,10 +260,8 @@ async def test_circuit_breaker_opens_on_failures():
     - 5 consecutive failures should open the circuit
     - Open circuit should reject requests immediately
     """
-    from bioetl.infrastructure.adapters.http.circuit_breaker import (
-        CircuitBreaker,
-        CircuitState,
-    )
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.domain.types import CircuitBreakerState
 
     breaker = CircuitBreaker(
         provider="test",
@@ -270,13 +269,13 @@ async def test_circuit_breaker_opens_on_failures():
         recovery_timeout=1,  # Short timeout for testing
     )
 
-    assert breaker.state == CircuitState.CLOSED
+    assert breaker.state == CircuitBreakerState.CLOSED
 
     # Record failures to trigger open
     for _ in range(3):
         breaker.record_failure()
 
-    assert breaker.state == CircuitState.OPEN, "Should be OPEN after 3 failures"
+    assert breaker.state == CircuitBreakerState.OPEN, "Should be OPEN after 3 failures"
 
 
 @pytest.mark.e2e
@@ -289,10 +288,8 @@ async def test_circuit_breaker_half_open_recovery():
     - Single success should close circuit
     - Single failure should re-open circuit
     """
-    from bioetl.infrastructure.adapters.http.circuit_breaker import (
-        CircuitBreaker,
-        CircuitState,
-    )
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.domain.types import CircuitBreakerState
 
     breaker = CircuitBreaker(
         provider="test",
@@ -303,17 +300,17 @@ async def test_circuit_breaker_half_open_recovery():
     # Trigger open state
     breaker.record_failure()
     breaker.record_failure()
-    assert breaker.state == CircuitState.OPEN
+    assert breaker.state == CircuitBreakerState.OPEN
 
     # Wait for recovery timeout
     await asyncio.sleep(0.6)
 
     # Should transition to half-open
-    assert breaker.state == CircuitState.HALF_OPEN
+    assert breaker.state == CircuitBreakerState.HALF_OPEN
 
     # Success should close
     breaker.record_success()
-    assert breaker.state == CircuitState.CLOSED
+    assert breaker.state == CircuitBreakerState.CLOSED
 
 
 # ============================================================================
