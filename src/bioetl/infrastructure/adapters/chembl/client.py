@@ -50,13 +50,10 @@ if TYPE_CHECKING:
 
 @dataclass
 class ChemblAdapter(BaseHttpAdapter):
-    """ChEMBL data source adapter.
+    """ChEMBL data source adapter implementing DataSourcePort.
 
-    Implements DataSourcePort and FilterableDataSourcePort for ChEMBL database.
-    Configuration via AdapterConfig from configs/sources/chembl.yaml (RULES.md §12.1.2).
-
-    Health-Aware Behavior (circuit breaker): HEALTHY=normal batch, DEGRADED=batch÷2,
-    UNHEALTHY=CriticalError.
+    Configuration: Load from configs/sources/chembl.yaml via AdapterConfig.
+    Health-aware: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=CriticalError.
     """
 
     http_client: UnifiedHTTPClient
@@ -83,14 +80,7 @@ class ChemblAdapter(BaseHttpAdapter):
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
 
     def __post_init__(self) -> None:
-        """Initialize adapter with config values and metrics.
-
-        Configuration priority (RULES.md §12.1.2 - YAML as single source of truth):
-        1. adapter_config (from YAML via to_adapter_config())
-        2. Explicit batch_size/filter_batch_size parameters (deprecated, for backward compat)
-        3. Default fallback values (only if nothing else provided)
-        """
-        # Resolve configuration with clear priority
+        """Initialize adapter with config values and metrics."""
         if self.adapter_config is not None:
             # Primary: use AdapterConfig from YAML
             self._page_size = self.adapter_config.page_size
@@ -110,15 +100,13 @@ class ChemblAdapter(BaseHttpAdapter):
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
+    @property
+    def effective_batch_size(self) -> int:
+        """Get the configured page size for API requests."""
+        return self._page_size
+
     def _get_health_status(self) -> HealthStatus:
-        """Get health status from circuit breaker state.
-
-        Uses circuit breaker failure count for health assessment,
-        avoiding duplicate state tracking.
-
-        Returns:
-            HealthStatus based on circuit breaker state.
-        """
+        """Get health status from circuit breaker state."""
         return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
