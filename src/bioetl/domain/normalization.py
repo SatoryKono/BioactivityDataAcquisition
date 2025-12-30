@@ -49,6 +49,7 @@ def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
     if value is None:
         return None
     from datetime import datetime
+
     try:
         return datetime.strptime(value.strip(), fmt).date()
     except (ValueError, AttributeError):

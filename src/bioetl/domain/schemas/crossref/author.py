@@ -62,7 +62,8 @@ class AuthorSchema(ETLRecordSchema):
         nullable=True, description="Primary affiliation (first from affiliations list)"
     )
     affiliation_ids: Series[str] | None = pa.Field(
-        nullable=True, description="Affiliation identifiers (ROR, ISNI; joined with '; ')"
+        nullable=True,
+        description="Affiliation identifiers (ROR, ISNI; joined with '; ')",
     )
 
     # === Metadata ===

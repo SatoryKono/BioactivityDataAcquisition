@@ -168,7 +168,9 @@ class TestExitCodeIntegration:
 
                 assert ConfigValidationError is not None
             else:
-                pytest.skip(f"Exception {exc_name} not found - may be defined elsewhere")
+                pytest.skip(
+                    f"Exception {exc_name} not found - may be defined elsewhere"
+                )
 
     def test_exit_codes_are_unique(self) -> None:
         """BioETL-specific exit codes must be unique (no collisions)."""
@@ -182,4 +184,6 @@ class TestExitCodeIntegration:
             ExitCode.NETWORK_ERROR,
             ExitCode.CHECKPOINT_ERROR,
         ]
-        assert len(bioetl_codes) == len(set(bioetl_codes)), "BioETL codes must be unique"
+        assert len(bioetl_codes) == len(
+            set(bioetl_codes)
+        ), "BioETL codes must be unique"

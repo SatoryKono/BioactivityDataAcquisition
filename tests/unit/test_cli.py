@@ -270,7 +270,6 @@ class TestRunCommandAdvanced:
         """Test run command handles ValueError during bootstrap."""
         mock_create_runner.side_effect = ValueError("Invalid config")
 
-
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
         assert result.exit_code == ExitCode.CONFIG_ERROR

@@ -49,7 +49,9 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
             )
         result = await service.cleanup(retention_days=retention_days, dry_run=dry_run)
         action = "Would remove" if dry_run else "Removed"
-        echo_info(f"{action} {result.files_removed} files ({format_bytes(result.bytes_freed)})")
+        echo_info(
+            f"{action} {result.files_removed} files ({format_bytes(result.bytes_freed)})"
+        )
         echo_info(f"{action} {result.directories_removed} empty directories")
 
     asyncio.run(_run())

@@ -156,9 +156,7 @@ class ChemblActivityRecord(BaseModel):
     toid: int | None = Field(default=None, description="Test Occasion ID")
 
     # Assay Details (denormalized)
-    assay_description: str | None = Field(
-        default=None, description="Assay description"
-    )
+    assay_description: str | None = Field(default=None, description="Assay description")
     assay_type: str | None = Field(default=None, description="Assay type code")
     assay_variant_accession: str | None = Field(
         default=None, description="Assay variant accession"
@@ -185,17 +183,13 @@ class ChemblActivityRecord(BaseModel):
     target_organism: str | None = Field(
         default=None, description="Target organism name"
     )
-    target_tax_id: str | None = Field(
-        default=None, description="Target taxonomy ID"
-    )
+    target_tax_id: str | None = Field(default=None, description="Target taxonomy ID")
 
     # Document Details (denormalized)
     document_journal: str | None = Field(
         default=None, description="Source journal name"
     )
-    document_year: int | None = Field(
-        default=None, description="Publication year"
-    )
+    document_year: int | None = Field(default=None, description="Publication year")
 
     # Activity Properties (complex field)
     activity_properties: list[dict[str, Any]] | None = Field(
@@ -252,15 +246,9 @@ class ChemblAssayRecord(BaseModel):
     document_chembl_id: str | None = Field(
         default=None, description="Source document ChEMBL ID"
     )
-    target_chembl_id: str | None = Field(
-        default=None, description="Target ChEMBL ID"
-    )
-    cell_chembl_id: str | None = Field(
-        default=None, description="Cell line ChEMBL ID"
-    )
-    tissue_chembl_id: str | None = Field(
-        default=None, description="Tissue ChEMBL ID"
-    )
+    target_chembl_id: str | None = Field(default=None, description="Target ChEMBL ID")
+    cell_chembl_id: str | None = Field(default=None, description="Cell line ChEMBL ID")
+    tissue_chembl_id: str | None = Field(default=None, description="Tissue ChEMBL ID")
 
     # Ontology
     bao_format: str | None = Field(default=None, description="BAO format ID")
@@ -365,7 +353,9 @@ class ChemblMoleculeRecord(BaseModel):
     max_phase: float | None = Field(default=None, description="Maximum clinical phase")
     structure_type: str | None = Field(default=None, description="Structure type")
     molecule_type: str | None = Field(default=None, description="Molecule type")
-    first_approval: int | None = Field(default=None, description="Year of first approval")
+    first_approval: int | None = Field(
+        default=None, description="Year of first approval"
+    )
 
     # Flags
     therapeutic_flag: bool | None = Field(default=None)

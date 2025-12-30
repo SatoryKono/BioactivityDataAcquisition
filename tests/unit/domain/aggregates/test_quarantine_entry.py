@@ -23,7 +23,6 @@ from bioetl.domain.aggregates.quarantine_entry import (
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, RunID
 
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────────────────────
@@ -106,9 +105,7 @@ class TestResolutionInfoInvariants:
 class TestQuarantineEntryConstructorValidation:
     """Tests for constructor validation."""
 
-    def test_entry_id_required(
-        self, run_id: RunID, batch_id: BatchID
-    ) -> None:
+    def test_entry_id_required(self, run_id: RunID, batch_id: BatchID) -> None:
         """Invariant: entry_id is required."""
         with pytest.raises(ValueError, match="entry_id is required"):
             QuarantineEntry(
@@ -121,9 +118,7 @@ class TestQuarantineEntryConstructorValidation:
                 batch_id=batch_id,
             )
 
-    def test_pipeline_name_required(
-        self, run_id: RunID, batch_id: BatchID
-    ) -> None:
+    def test_pipeline_name_required(self, run_id: RunID, batch_id: BatchID) -> None:
         """Invariant: pipeline_name is required."""
         with pytest.raises(ValueError, match="pipeline_name is required"):
             QuarantineEntry(
@@ -136,9 +131,7 @@ class TestQuarantineEntryConstructorValidation:
                 batch_id=batch_id,
             )
 
-    def test_error_code_required(
-        self, run_id: RunID, batch_id: BatchID
-    ) -> None:
+    def test_error_code_required(self, run_id: RunID, batch_id: BatchID) -> None:
         """Invariant: error_code is required."""
         with pytest.raises(ValueError, match="error_code is required"):
             QuarantineEntry(
@@ -151,9 +144,7 @@ class TestQuarantineEntryConstructorValidation:
                 batch_id=batch_id,
             )
 
-    def test_payload_cannot_be_empty(
-        self, run_id: RunID, batch_id: BatchID
-    ) -> None:
+    def test_payload_cannot_be_empty(self, run_id: RunID, batch_id: BatchID) -> None:
         """Invariant: payload cannot be empty."""
         with pytest.raises(ValueError, match="payload cannot be empty"):
             QuarantineEntry(
@@ -187,18 +178,14 @@ class TestQuarantineEntryStateTransitions:
         quarantine_entry.start_review()
         assert quarantine_entry.status == QuarantineStatus.UNDER_REVIEW
 
-    def test_cannot_start_review_twice(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_cannot_start_review_twice(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: Cannot start review on non-NEW entry."""
         quarantine_entry.start_review()
 
         with pytest.raises(InvalidStateError, match="Cannot start review"):
             quarantine_entry.start_review()
 
-    def test_mark_ignored_from_new(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_mark_ignored_from_new(self, quarantine_entry: QuarantineEntry) -> None:
         """Should transition NEW -> IGNORED."""
         quarantine_entry.mark_ignored(reason="Known bad data")
 
@@ -215,9 +202,7 @@ class TestQuarantineEntryStateTransitions:
 
         assert quarantine_entry.status == QuarantineStatus.IGNORED
 
-    def test_mark_reprocessed_from_new(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_mark_reprocessed_from_new(self, quarantine_entry: QuarantineEntry) -> None:
         """Should transition NEW -> REPROCESSED."""
         quarantine_entry.mark_reprocessed(new_record_id="silver:456")
 
@@ -285,9 +270,7 @@ class TestQuarantineEntryTerminalStates:
 class TestQuarantineEntryExpiration:
     """Tests for expiration behavior."""
 
-    def test_mark_expired_from_new(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_mark_expired_from_new(self, quarantine_entry: QuarantineEntry) -> None:
         """Should transition NEW -> EXPIRED."""
         quarantine_entry.mark_expired()
 
@@ -312,39 +295,29 @@ class TestQuarantineEntryExpiration:
 class TestQuarantineEntryEncapsulation:
     """Tests for field encapsulation."""
 
-    def test_entry_id_is_immutable(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_entry_id_is_immutable(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: entry_id cannot be changed."""
         with pytest.raises(AttributeError):
             quarantine_entry.entry_id = "new-id"  # type: ignore
 
-    def test_error_code_is_immutable(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_error_code_is_immutable(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: error_code cannot be changed."""
         with pytest.raises(AttributeError):
             quarantine_entry.error_code = "NEW_ERROR"  # type: ignore
 
-    def test_payload_returns_copy(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_payload_returns_copy(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: payload returns a copy, not the original."""
         payload = quarantine_entry.payload
         payload["new_key"] = "new_value"
 
         assert "new_key" not in quarantine_entry.payload
 
-    def test_payload_hash_is_immutable(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_payload_hash_is_immutable(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: payload_hash cannot be changed."""
         with pytest.raises(AttributeError):
             quarantine_entry.payload_hash = ContentHash("newhash")  # type: ignore
 
-    def test_metadata_returns_copy(
-        self, quarantine_entry: QuarantineEntry
-    ) -> None:
+    def test_metadata_returns_copy(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: metadata returns a copy."""
         metadata = quarantine_entry.metadata
         metadata["new_key"] = "new_value"
@@ -434,9 +407,7 @@ class TestQuarantineStatus:
 class TestQuarantineEntryFactory:
     """Tests for factory method behavior."""
 
-    def test_create_generates_entry_id(
-        self, run_id: RunID, batch_id: BatchID
-    ) -> None:
+    def test_create_generates_entry_id(self, run_id: RunID, batch_id: BatchID) -> None:
         """create() should generate unique entry_id."""
         entry = QuarantineEntry.create(
             pipeline_name="test",

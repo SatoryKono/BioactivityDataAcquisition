@@ -99,7 +99,9 @@ _CORE_METADATA = FieldGroup(
 _MOLECULE_FLAGS = FieldGroup(
     name="molecule_flags",
     fields=(
-        *simple_fields("oral", "parenteral", "topical", "therapeutic_flag", "withdrawn_flag"),
+        *simple_fields(
+            "oral", "parenteral", "topical", "therapeutic_flag", "withdrawn_flag"
+        ),
         *int_fields(
             "black_box_warning",
             "natural_product",
@@ -118,7 +120,11 @@ _ADDITIONAL_METADATA = FieldGroup(
     name="additional_metadata",
     fields=(
         *simple_fields(
-            "usan_stem", "usan_stem_definition", "usan_substem", "helm_notation", "molecule_species"
+            "usan_stem",
+            "usan_stem_definition",
+            "usan_substem",
+            "helm_notation",
+            "molecule_species",
         ),
         *int_fields("usan_year"),
     ),

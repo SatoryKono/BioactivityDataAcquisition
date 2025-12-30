@@ -91,9 +91,7 @@ class TestBronzeCleanupServiceCleanup:
     """Test BronzeCleanupService.cleanup method."""
 
     @pytest.mark.asyncio
-    async def test_cleanup_with_defaults(
-        self, bronze_cleanup_service, mock_storage
-    ):
+    async def test_cleanup_with_defaults(self, bronze_cleanup_service, mock_storage):
         """Test cleanup with default retention (90 days)."""
         mock_storage.cleanup_bronze.return_value = {
             "files_removed": 10,
