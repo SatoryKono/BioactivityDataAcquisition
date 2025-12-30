@@ -13,12 +13,10 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from bioetl.interfaces.cli import (
+from bioetl.interfaces.cli import cli, main, validate_pipeline_name
+from bioetl.interfaces.cli.commands.run import (
     _get_runner_logger,
     _handle_destructive_run_confirmation,
-    cli,
-    main,
-    validate_pipeline_name,
 )
 
 

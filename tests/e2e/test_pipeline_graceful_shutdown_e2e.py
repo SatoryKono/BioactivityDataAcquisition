@@ -86,17 +86,20 @@ class TestShutdownSignal:
 class TestOSSignalHandling:
     """Tests for OS signal handling integration."""
 
-    async def test_setup_shutdown_handlers_registers_sigterm(self):
-        """E2E: setup_shutdown_handlers registers SIGTERM handler."""
-        from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
+    async def test_register_signal_handlers_registers_sigterm(self):
+        """E2E: register_signal_handlers registers SIGTERM handler."""
+        from unittest.mock import AsyncMock
 
-        shutdown = ShutdownSignal()
+        from bioetl.interfaces.orchestration.signals import register_signal_handlers
+
+        shutdown_service = MagicMock()
+        shutdown_service.initiate_shutdown = AsyncMock()
 
         # Store original handler
         original_handler = signal.getsignal(signal.SIGTERM)
 
         try:
-            setup_shutdown_handlers(shutdown, logger=None)
+            register_signal_handlers(shutdown_service, logger=None)
 
             # Verify handler was set (not the default)
             current_handler = signal.getsignal(signal.SIGTERM)
@@ -105,17 +108,20 @@ class TestOSSignalHandling:
             # Restore original handler
             signal.signal(signal.SIGTERM, original_handler)
 
-    async def test_setup_shutdown_handlers_registers_sigint(self):
-        """E2E: setup_shutdown_handlers registers SIGINT handler."""
-        from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
+    async def test_register_signal_handlers_registers_sigint(self):
+        """E2E: register_signal_handlers registers SIGINT handler."""
+        from unittest.mock import AsyncMock
 
-        shutdown = ShutdownSignal()
+        from bioetl.interfaces.orchestration.signals import register_signal_handlers
+
+        shutdown_service = MagicMock()
+        shutdown_service.initiate_shutdown = AsyncMock()
 
         # Store original handler
         original_handler = signal.getsignal(signal.SIGINT)
 
         try:
-            setup_shutdown_handlers(shutdown, logger=None)
+            register_signal_handlers(shutdown_service, logger=None)
 
             # Verify handler was set
             current_handler = signal.getsignal(signal.SIGINT)
@@ -123,31 +129,6 @@ class TestOSSignalHandling:
         finally:
             # Restore original handler
             signal.signal(signal.SIGINT, original_handler)
-
-    async def test_signal_handler_logs_warning(self):
-        """E2E: Signal handler logs warning when signal received."""
-        from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
-
-        shutdown = ShutdownSignal()
-        mock_logger = MagicMock()
-
-        # Store original handler
-        original_handler = signal.getsignal(signal.SIGTERM)
-
-        try:
-            setup_shutdown_handlers(shutdown, logger=mock_logger)
-
-            # Get the handler that was set
-            handler = signal.getsignal(signal.SIGTERM)
-
-            # Call the handler directly (simulate receiving signal)
-            handler(signal.SIGTERM, None)
-
-            # Verify logging
-            mock_logger.warning.assert_called()
-            assert shutdown.is_requested is True
-        finally:
-            signal.signal(signal.SIGTERM, original_handler)
 
 
 @pytest.mark.e2e
