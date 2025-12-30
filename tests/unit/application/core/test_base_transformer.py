@@ -22,7 +22,7 @@ from bioetl.application.core.base_transformer import (
     TransformationError,
 )
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.entities import Activity
+from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.types import RunType
 
@@ -226,7 +226,7 @@ class TestCreateEntity:
     ) -> None:
         """Test creates entity with lineage fields from context."""
         entity = transformer._create_entity(
-            Activity,
+            Bioactivity,
             mock_context,
             entity_id="test:activity:123",
             content_hash="abc123",
@@ -250,7 +250,7 @@ class TestCreateEntity:
         """Test raises ValueError when entity validation fails."""
         with pytest.raises(ValueError):
             transformer._create_entity(
-                Activity,
+                Bioactivity,
                 mock_context,
                 entity_id="test:activity:123",
                 content_hash="abc123",

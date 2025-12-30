@@ -30,6 +30,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improves test reliability by testing real integration
 ## [Unreleased]
 
+### Added
+
+- **Unified Bioactivity Entity**: Introduced `Bioactivity` class as the canonical domain entity for bioactivity data:
+  - New `domain/entities/bioactivity.py` module with unified representation
+  - `BioactivityState` enum for tracking processing lifecycle (RAW → NORMALIZED → VALIDATED)
+  - `from_raw()` factory method for creating entities from API data
+  - `with_state()` method for immutable state transitions
+  - Helper methods: `is_ready_for_silver()`, `is_fully_validated()`
+
+### Changed
+
+- **Activity Deprecated**: `Activity` class is now a deprecated alias for `Bioactivity`:
+  - Emits `DeprecationWarning` when instantiated
+  - Will be removed in 14 days
+  - All existing code continues to work via backward-compatible alias
+
+- **ActivityTransformer**: Updated to use `Bioactivity` instead of `Activity`:
+  - Entity class reference updated in `activity_transformer.py:130`
+  - No functional changes to transformation logic
+
+### Tests
+
+- **New Bioactivity Tests**: Added comprehensive tests for new functionality:
+  - `TestBioactivity`: 12 tests for entity creation, validation, state transitions
+  - `TestBioactivityState`: 3 tests for enum behavior
+  - `TestActivityDeprecatedAlias`: 2 tests for deprecation warning
+
 ### Removed
 
 - **Dead Code Cleanup (infrastructure)**: Removed unused import in `infrastructure/config.py`:

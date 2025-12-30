@@ -7,7 +7,16 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.entities import Activity, Compound, Protein, Work
+import warnings
+
+from bioetl.domain.entities import (
+    Activity,
+    Bioactivity,
+    BioactivityState,
+    Compound,
+    Protein,
+    Work,
+)
 from bioetl.domain.types import ContentHash, EntityID, RunType
 
 
@@ -33,7 +42,7 @@ class TestBaseEntity:
         """Test that empty entity_id raises ValueError."""
         base_entity_kwargs["entity_id"] = EntityID("")
         with pytest.raises(ValueError, match="Entity ID cannot be empty"):
-            Activity(
+            Bioactivity(
                 **base_entity_kwargs,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL123",
@@ -45,7 +54,7 @@ class TestBaseEntity:
         """Test that empty content_hash raises ValueError."""
         base_entity_kwargs["content_hash"] = ContentHash("")
         with pytest.raises(ValueError, match="Content hash cannot be empty"):
-            Activity(
+            Bioactivity(
                 **base_entity_kwargs,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL123",
@@ -60,7 +69,7 @@ class TestBaseEntity:
             k: v for k, v in base_entity_kwargs.items() if k != "ingestion_ts"
         }
         with pytest.raises(TypeError, match="ingestion_ts"):
-            Activity(
+            Bioactivity(
                 **kwargs_without_ts,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL123",
@@ -70,39 +79,39 @@ class TestBaseEntity:
 
     def test_base_entity_accepts_explicit_ingestion_ts(self, base_entity_kwargs):
         """Test that explicitly passed ingestion_ts is used."""
-        activity = Activity(
+        bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
             molecule_chembl_id="CHEMBL123",
             target_chembl_id="CHEMBL456",
             assay_chembl_id="CHEMBL789",
         )
-        assert activity.ingestion_ts is not None
-        assert isinstance(activity.ingestion_ts, datetime)
-        assert activity.ingestion_ts.tzinfo == UTC
+        assert bioactivity.ingestion_ts is not None
+        assert isinstance(bioactivity.ingestion_ts, datetime)
+        assert bioactivity.ingestion_ts.tzinfo == UTC
 
 
 @pytest.mark.unit
-class TestActivity:
-    """Tests for Activity entity."""
+class TestBioactivity:
+    """Tests for Bioactivity entity."""
 
-    def test_activity_creation_success(self, base_entity_kwargs):
-        """Test successful Activity creation with required fields."""
-        activity = Activity(
+    def test_bioactivity_creation_success(self, base_entity_kwargs):
+        """Test successful Bioactivity creation with required fields."""
+        bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT123",
             molecule_chembl_id="CHEMBL1",
             target_chembl_id="CHEMBL2",
             assay_chembl_id="CHEMBL3",
         )
-        assert activity.activity_id == "ACT123"
-        assert activity.molecule_chembl_id == "CHEMBL1"
-        assert activity.target_chembl_id == "CHEMBL2"
-        assert activity.assay_chembl_id == "CHEMBL3"
+        assert bioactivity.activity_id == "ACT123"
+        assert bioactivity.molecule_chembl_id == "CHEMBL1"
+        assert bioactivity.target_chembl_id == "CHEMBL2"
+        assert bioactivity.assay_chembl_id == "CHEMBL3"
 
-    def test_activity_with_optional_fields(self, base_entity_kwargs):
-        """Test Activity with all optional fields."""
-        activity = Activity(
+    def test_bioactivity_with_optional_fields(self, base_entity_kwargs):
+        """Test Bioactivity with all optional fields."""
+        bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT456",
             molecule_chembl_id="CHEMBL100",
@@ -116,18 +125,18 @@ class TestActivity:
             activity_comment="High quality",
             data_validity_comment="Valid",
         )
-        assert activity.standard_type == "IC50"
-        assert activity.standard_value == 10.5
-        assert activity.standard_units == "nM"
-        assert activity.standard_relation == "="
-        assert activity.pchembl_value == 7.5
-        assert activity.activity_comment == "High quality"
-        assert activity.data_validity_comment == "Valid"
+        assert bioactivity.standard_type == "IC50"
+        assert bioactivity.standard_value == 10.5
+        assert bioactivity.standard_units == "nM"
+        assert bioactivity.standard_relation == "="
+        assert bioactivity.pchembl_value == 7.5
+        assert bioactivity.activity_comment == "High quality"
+        assert bioactivity.data_validity_comment == "Valid"
 
-    def test_activity_requires_activity_id(self, base_entity_kwargs):
+    def test_bioactivity_requires_activity_id(self, base_entity_kwargs):
         """Test that empty activity_id raises ValueError."""
         with pytest.raises(ValueError, match="Activity ID is required"):
-            Activity(
+            Bioactivity(
                 **base_entity_kwargs,
                 activity_id="",
                 molecule_chembl_id="CHEMBL1",
@@ -135,10 +144,10 @@ class TestActivity:
                 assay_chembl_id="CHEMBL3",
             )
 
-    def test_activity_pchembl_must_be_nonnegative(self, base_entity_kwargs):
+    def test_bioactivity_pchembl_must_be_nonnegative(self, base_entity_kwargs):
         """Test that negative pchembl_value raises ValueError."""
         with pytest.raises(ValueError, match="pChemBL value must be non-negative"):
-            Activity(
+            Bioactivity(
                 **base_entity_kwargs,
                 activity_id="ACT1",
                 molecule_chembl_id="CHEMBL1",
@@ -147,9 +156,9 @@ class TestActivity:
                 pchembl_value=-1.0,
             )
 
-    def test_activity_pchembl_zero_is_valid(self, base_entity_kwargs):
+    def test_bioactivity_pchembl_zero_is_valid(self, base_entity_kwargs):
         """Test that zero pchembl_value is valid."""
-        activity = Activity(
+        bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
             molecule_chembl_id="CHEMBL1",
@@ -157,11 +166,11 @@ class TestActivity:
             assay_chembl_id="CHEMBL3",
             pchembl_value=0.0,
         )
-        assert activity.pchembl_value == 0.0
+        assert bioactivity.pchembl_value == 0.0
 
-    def test_activity_is_frozen(self, base_entity_kwargs):
-        """Test that Activity is immutable."""
-        activity = Activity(
+    def test_bioactivity_is_frozen(self, base_entity_kwargs):
+        """Test that Bioactivity is immutable."""
+        bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
             molecule_chembl_id="CHEMBL1",
@@ -169,7 +178,122 @@ class TestActivity:
             assay_chembl_id="CHEMBL3",
         )
         with pytest.raises(AttributeError):
-            activity.activity_id = "NEW_ID"
+            bioactivity.activity_id = "NEW_ID"
+
+    def test_bioactivity_default_state_is_validated(self, base_entity_kwargs):
+        """Test that default state is VALIDATED."""
+        bioactivity = Bioactivity(
+            **base_entity_kwargs,
+            activity_id="ACT1",
+            molecule_chembl_id="CHEMBL1",
+        )
+        assert bioactivity.state == BioactivityState.VALIDATED
+
+    def test_bioactivity_with_state(self, base_entity_kwargs):
+        """Test creating bioactivity with explicit state."""
+        bioactivity = Bioactivity(
+            **base_entity_kwargs,
+            activity_id="ACT1",
+            molecule_chembl_id="CHEMBL1",
+            _state=BioactivityState.RAW,
+        )
+        assert bioactivity.state == BioactivityState.RAW
+
+    def test_bioactivity_with_state_transition(self, base_entity_kwargs):
+        """Test with_state creates new instance with updated state."""
+        bioactivity = Bioactivity(
+            **base_entity_kwargs,
+            activity_id="ACT1",
+            molecule_chembl_id="CHEMBL1",
+            _state=BioactivityState.RAW,
+        )
+        normalized = bioactivity.with_state(BioactivityState.NORMALIZED)
+        assert normalized.state == BioactivityState.NORMALIZED
+        assert bioactivity.state == BioactivityState.RAW  # Original unchanged
+
+    def test_bioactivity_from_raw_factory(self, base_entity_kwargs):
+        """Test from_raw factory method creates entity in RAW state."""
+        raw_data = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL1",
+            "target_chembl_id": "CHEMBL2",
+            "standard_value": "10.5",
+            "pchembl_value": 7.5,
+        }
+        bioactivity = Bioactivity.from_raw(
+            raw_data=raw_data,
+            run_id=base_entity_kwargs["run_id"],
+            ingestion_ts=base_entity_kwargs["ingestion_ts"],
+        )
+        assert bioactivity.state == BioactivityState.RAW
+        assert bioactivity.activity_id == "12345"
+        assert bioactivity.molecule_chembl_id == "CHEMBL1"
+        assert bioactivity.standard_value == 10.5
+        assert bioactivity.pchembl_value == 7.5
+
+    def test_bioactivity_from_raw_missing_activity_id(self):
+        """Test from_raw raises ValueError if activity_id missing."""
+        with pytest.raises(ValueError, match="activity_id"):
+            Bioactivity.from_raw(
+                raw_data={"molecule_chembl_id": "CHEMBL1"},
+                run_id=uuid4(),
+                ingestion_ts=datetime.now(UTC),
+            )
+
+    def test_bioactivity_from_raw_missing_molecule_id(self):
+        """Test from_raw raises ValueError if molecule_chembl_id missing."""
+        with pytest.raises(ValueError, match="molecule_chembl_id"):
+            Bioactivity.from_raw(
+                raw_data={"activity_id": 123},
+                run_id=uuid4(),
+                ingestion_ts=datetime.now(UTC),
+            )
+
+
+@pytest.mark.unit
+class TestBioactivityState:
+    """Tests for BioactivityState enum."""
+
+    def test_state_values(self):
+        """Test state enum values."""
+        assert BioactivityState.RAW.value == "raw"
+        assert BioactivityState.NORMALIZED.value == "normalized"
+        assert BioactivityState.VALIDATED.value == "validated"
+
+    def test_is_ready_for_silver(self):
+        """Test is_ready_for_silver returns True for NORMALIZED and VALIDATED."""
+        assert not BioactivityState.RAW.is_ready_for_silver()
+        assert BioactivityState.NORMALIZED.is_ready_for_silver()
+        assert BioactivityState.VALIDATED.is_ready_for_silver()
+
+    def test_is_fully_validated(self):
+        """Test is_fully_validated returns True only for VALIDATED."""
+        assert not BioactivityState.RAW.is_fully_validated()
+        assert not BioactivityState.NORMALIZED.is_fully_validated()
+        assert BioactivityState.VALIDATED.is_fully_validated()
+
+
+@pytest.mark.unit
+class TestActivityDeprecatedAlias:
+    """Tests for deprecated Activity alias."""
+
+    def test_activity_emits_deprecation_warning(self, base_entity_kwargs):
+        """Test that Activity emits DeprecationWarning."""
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            Activity(
+                **base_entity_kwargs,
+                activity_id="ACT1",
+                molecule_chembl_id="CHEMBL1",
+            )
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "Activity is deprecated" in str(w[0].message)
+            assert "Bioactivity" in str(w[0].message)
+
+    def test_activity_is_subclass_of_bioactivity(self):
+        """Test that Activity is subclass of Bioactivity."""
+        assert issubclass(Activity, Bioactivity)
 
 
 @pytest.mark.unit
