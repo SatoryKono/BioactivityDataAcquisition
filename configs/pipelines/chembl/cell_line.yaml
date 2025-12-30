@@ -1,0 +1,48 @@
+# configs/pipelines/chembl/cell_line.yaml
+# Pipeline configuration for ChEMBL Cell Line entity.
+#
+# Inherits defaults from ../_defaults.yaml
+
+pipeline_name: chembl_cell_line
+provider: chembl
+entity_type: cell_line
+version: "1.0.0"
+description: "Extract cell lines from ChEMBL API"
+
+primary_keys: ["cell_chembl_id"]
+silver_table: "chembl_cell_line"
+
+source_file: ../../sources/chembl.yaml
+
+# Entity-specific gold filters
+gold_filters:
+  required_fields:
+    - cell_name
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: "data/output/bronze"
+  silver:
+    path: "data/output/silver"
+    primary_key: ["cell_chembl_id"]
+    sort_by:
+      columns: ["cell_chembl_id"]
+      ascending: true
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/output/gold"
+    sort_by:
+      columns: ["cell_chembl_id", "cell_name"]
+      ascending: true
+    csv_export:
+      path: "data/output/csv/gold"
+
+# Entity-specific input filter
+input_filter:
+  enabled: true
+  source_path: "data/input/cell_line.csv"
+  column_name: "cell_chembl_id"
+  filter_field: "cell_chembl_id"
+  batch_size: 20
