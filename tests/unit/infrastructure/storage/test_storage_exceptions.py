@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -16,15 +15,6 @@ from bioetl.domain.exceptions import (
 from bioetl.domain.exceptions import TableNotFoundError as CustomTableNotFoundError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-
-
-def make_sync_executor(loop: asyncio.AbstractEventLoop):
-    """Create a run_in_executor replacement that returns awaitable sync results."""
-
-    async def sync_executor(_, fn, *args):
-        return fn(*args)
-
-    return sync_executor
 
 
 @pytest.fixture
