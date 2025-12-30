@@ -18,6 +18,7 @@ from bioetl.interfaces.cli.commands.run_helpers import (
     show_cleanup_preview,
     validate_pipeline_name,
 )
+from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
 from bioetl.interfaces.cli.formatters import echo_error
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
@@ -113,15 +114,15 @@ def run(
         runner = create_pipeline_runner(pipeline, options)
     except (ValueError, FileNotFoundError) as e:
         echo_error("Configuration error", str(e))
-        sys.exit(1)
+        sys.exit(ExitCode.CONFIG_ERROR)
     except Exception as e:
         echo_error("Initialization failed", str(e))
-        sys.exit(1)
+        sys.exit(ExitCode.INIT_ERROR)
 
     logger = get_runner_logger(runner)
     if logger is None:
         echo_error("Critical: Logger not initialized.")
-        sys.exit(1)
+        sys.exit(ExitCode.INIT_ERROR)
 
     shutdown_signal = getattr(runner, "shutdown_signal", None)
     if shutdown_signal is not None:
@@ -133,7 +134,7 @@ def run(
         logger.info("Pipeline completed successfully")
     except PipelineShutdownError:
         logger.warning("Pipeline run was gracefully shut down.")
-        sys.exit(130)
-    except Exception:
+        sys.exit(ExitCode.SIGINT)
+    except Exception as e:
         logger.exception("Pipeline failed with an unhandled exception.")
-        sys.exit(1)
+        sys.exit(get_exit_code_for_exception(e))
