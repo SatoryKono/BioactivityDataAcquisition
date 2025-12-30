@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.0 | Дата: 2025-12-30 | Обновлено: Версионирование контрактов, property-based тесты, документация стратегий*
+*Версия: 6.1 | Дата: 2025-12-30 | Обновлено: UnifiedHTTPClient — подтверждено SRP-compliant, не god object*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -102,6 +102,7 @@
 | "Требуется хеширование PII (email)" | `default_email` — технический идентификатор NCBI API, **НЕ PII**. Нет персональных данных. | `config.py:454-460` (верификация 2025-12-30) |
 | "Порог покрытия не синхронизирован" | `fail_under = 85` **уже установлен** в pyproject.toml | `pyproject.toml:182` (верификация 2025-12-30) |
 | "architecture-audit.md устарел" | Документ **актуален** — версия 1.0 от 2025-12-29, Score 8.9/10 | `docs/architecture-audit.md:1-4` (верификация 2025-12-30) |
+| "UnifiedAPIClient — god object с rate limiting, caching, parsing" | **445 строк, 14 методов**. Rate limiting → делегирует `RateLimiterPort` (TokenBucket). Circuit breaker → делегирует `CircuitBreakerPort`. **Нет caching**. **Нет parsing** — возвращает raw `httpx.Response`. Порты **уже существуют** в `domain/ports/resilience.py`. | `client.py:87-88,243-244`, `domain/ports/resilience.py:21,68` (верификация 2025-12-30) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
