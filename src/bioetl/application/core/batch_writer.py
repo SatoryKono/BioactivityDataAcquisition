@@ -2,18 +2,23 @@
 
 Handles all storage operations with proper metadata enrichment.
 Extracted from RecordProcessor for single responsibility (SRP).
+
+Safety Guard (RULES.md §4.6):
+    Lock validation is performed at this Application layer BEFORE any write
+    operation. This ensures Infrastructure layer (Writers) remain pure I/O
+    adapters without knowledge of locking mechanisms.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 import orjson
 
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.locking import LockContext
+from bioetl.domain.locking import LockNotHeldError
 
 if TYPE_CHECKING:
     from typing import Any as SpanType
@@ -33,6 +38,10 @@ class BatchWriter:
     - Bronze: JSONL serialization with deterministic ordering
     - Silver: Metadata enrichment (_run_id, _run_type, etc.)
     - Gold: Schema validation and column filtering
+
+    Safety Guard:
+        Lock validation is performed BEFORE each write operation via
+        the lock_validator callback. This implements RULES.md §4.6.
     """
 
     def __init__(
@@ -44,7 +53,7 @@ class BatchWriter:
         error_classifier: ErrorClassifier,
         batch_metrics: BatchMetricsRecorder,
         tracer: TracingPort | None = None,
-        lock_context_provider: Callable[[], LockContext | None] | None = None,
+        lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> None:
         """Initialize batch writer.
 
@@ -56,7 +65,9 @@ class BatchWriter:
             error_classifier: Service for error classification.
             batch_metrics: Metrics recorder for batch processing.
             tracer: Optional tracing port for distributed tracing.
-            lock_context_provider: Callable returning current lock context.
+            lock_validator: Async callable that validates lock ownership.
+                Returns True if lock is still held, False otherwise.
+                If None, lock validation is skipped (for tests).
 
         """
         self._storage = storage
@@ -66,13 +77,36 @@ class BatchWriter:
         self._error_classifier = error_classifier
         self._batch_metrics = batch_metrics
         self._tracer = tracer
-        self._get_lock_context = lock_context_provider or (lambda: None)
+        self._lock_validator = lock_validator
 
         # Convenience properties
         self._provider = config.provider
         self._entity_type = config.entity_type
         self._silver_schema = config.silver_schema
         self._table_config = config.table_config
+
+    async def _validate_lock(self, operation: str) -> None:
+        """Validate lock ownership before write operation (Safety Guard §4.6).
+
+        Args:
+            operation: Name of the operation for error messages.
+
+        Raises:
+            LockNotHeldError: If lock is no longer held.
+        """
+        if self._lock_validator is None:
+            # Lock validation disabled (e.g., for tests)
+            return
+
+        if not await self._lock_validator():
+            table_name = f"{self._provider}_{self._entity_type}"
+            self._context.logger.error(
+                "Lock lost before write",
+                operation=operation,
+                table=table_name,
+                run_id=str(self._context.run_id),
+            )
+            raise LockNotHeldError(operation, f"lock:{table_name}")
 
     def _start_span(
         self, name: str, layer: str, record_count: int, batch_id: BatchID | None = None
@@ -133,7 +167,12 @@ class BatchWriter:
             batch_id: Identifier for the current batch.
             ingestion_ts: Ingestion timestamp from context.
 
+        Raises:
+            LockNotHeldError: If lock is no longer held (Safety Guard §4.6).
         """
+        # Safety Guard: validate lock BEFORE write
+        await self._validate_lock("write_bronze")
+
         span = self._start_span("write_bronze", "bronze", len(records), batch_id)
 
         try:
@@ -158,7 +197,6 @@ class BatchWriter:
                 run_id=self._context.run_id,
                 run_type=self._context.run_type,
                 ingestion_ts=ingestion_ts,
-                lock_context=self._get_lock_context(),
             )
             self._end_span(span)
         except Exception as e:
@@ -177,7 +215,12 @@ class BatchWriter:
             batch_id: Identifier for the source batch.
             ingestion_ts: Ingestion timestamp from context.
 
+        Raises:
+            LockNotHeldError: If lock is no longer held (Safety Guard §4.6).
         """
+        # Safety Guard: validate lock BEFORE write
+        await self._validate_lock("write_silver")
+
         span = self._start_span("write_silver", "silver", len(records), batch_id)
 
         try:
@@ -217,7 +260,6 @@ class BatchWriter:
                 schema=self._silver_schema,
                 mode=silver_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
-                lock_context=self._get_lock_context(),
             )
             self._end_span(span)
         except Exception as e:
@@ -235,8 +277,11 @@ class BatchWriter:
 
         Raises:
             SchemaViolationError: If validation fails.
-
+            LockNotHeldError: If lock is no longer held (Safety Guard §4.6).
         """
+        # Safety Guard: validate lock BEFORE write
+        await self._validate_lock("write_gold")
+
         span = self._start_span("write_gold", "gold", len(records))
 
         try:
@@ -275,7 +320,6 @@ class BatchWriter:
                 mode=gold_mode,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
-                lock_context=self._get_lock_context(),
             )
             self._end_span(span)
         except Exception as e:

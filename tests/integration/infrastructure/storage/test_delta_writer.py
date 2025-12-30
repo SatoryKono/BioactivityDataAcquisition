@@ -28,7 +28,7 @@ def temp_delta_path(tmp_path):
 @pytest.fixture
 def delta_writer(temp_delta_path, noop_logger):
     return DeltaWriter(
-        base_path=temp_delta_path, logger=noop_logger, require_lock=False
+        base_path=temp_delta_path, logger=noop_logger
     )
 
 

@@ -41,6 +41,10 @@ def bootstrap_storage() -> StorageAdapter:
     No CSV export is configured since this is for read-only inspection.
     Uses NoOpLogger since this is for CLI preview operations without observability.
 
+    Note:
+        Lock validation is performed at Application layer (BatchWriter)
+        per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+
     Returns:
         StorageAdapter configured for the current environment.
     """
@@ -48,9 +52,6 @@ def bootstrap_storage() -> StorageAdapter:
     noop_logger = NoOpLogger()
     noop_metrics = NoOpMetrics()
     noop_tracing = NoOpTracing()
-
-    # Disable lock requirement in test mode (BIOETL_TEST_MODE=true)
-    require_lock = not settings.test_mode
 
     return StorageAdapter(
         bronze_writer=BronzeWriter(
@@ -60,21 +61,18 @@ def bootstrap_storage() -> StorageAdapter:
             tracing=noop_tracing,
             save_json=False,
             json_path=None,
-            require_lock=require_lock,
         ),
         silver_writer=DeltaWriter(
             base_path=settings.silver_path,
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
-            require_lock=require_lock,
         ),
         gold_writer=GoldWriter(
             base_path=settings.gold_path,
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
-            require_lock=require_lock,
         ),
     )
 

@@ -143,7 +143,6 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-                lock_context: Any = None,
             ) -> None:
                 pass
 

@@ -81,9 +81,13 @@ class StorageFactory:
         logger: LoggerPort,
         metrics: MetricsPort,
         tracing: TracingPort | None,
-        require_lock: bool,
     ) -> StorageAdapter:
-        """Create StorageAdapter with all writers configured."""
+        """Create StorageAdapter with all writers configured.
+
+        Note:
+            Lock validation is performed at Application layer (BatchWriter)
+            per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+        """
         save_json = bronze_config.save_json if bronze_config else False
         json_path = None
         if bronze_config and bronze_config.save_json:
@@ -102,21 +106,18 @@ class StorageFactory:
                 tracing=effective_tracing,
                 save_json=save_json,
                 json_path=json_path,
-                require_lock=require_lock,
             ),
             silver_writer=DeltaWriter(
                 base_path=silver_path,
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
-                require_lock=require_lock,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=gold_csv_exporter,
-                require_lock=require_lock,
             ),
         )
 
@@ -157,14 +158,11 @@ class StorageFactory:
             gold_config, settings.gold_path, use_yaml_paths
         )
 
-        require_lock = not settings.test_mode
-
         logger.info(
             "Using local storage",
             bronze_path=str(bronze_path),
             silver_path=str(silver_path),
             gold_path=str(gold_path),
-            require_lock=require_lock,
         )
 
         silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
@@ -192,7 +190,6 @@ class StorageFactory:
             logger=logger,
             metrics=metrics,
             tracing=tracing,
-            require_lock=require_lock,
         )
 
         return StorageContext(

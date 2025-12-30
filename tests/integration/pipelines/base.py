@@ -89,19 +89,19 @@ class IntegrationPipelineTestCase:
                 metrics=metrics,
                 save_json=save_json,
                 json_path=self.json_path if save_json else None,
-                require_lock=False,  # Disabled for integration tests
+                # Lock validation at Application layer
             ),
             silver_writer=DeltaWriter(
                 base_path=self.silver_path,
                 logger=logger,
                 csv_exporter=None,
-                require_lock=False,  # Disabled for integration tests
+                # Lock validation at Application layer
             ),
             gold_writer=GoldWriter(
                 base_path=self.gold_path,
                 logger=logger,
                 csv_exporter=None,
-                require_lock=False,  # Disabled for integration tests
+                # Lock validation at Application layer
             ),
         )
 
