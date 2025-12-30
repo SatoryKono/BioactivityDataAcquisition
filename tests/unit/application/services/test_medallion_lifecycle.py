@@ -384,3 +384,280 @@ class TestMedallionLifecycleServiceArchive:
 
         # Should log error
         mock_logger.error.assert_called_once()
+
+
+@pytest.mark.unit
+class TestMedallionLifecycleServicePrepareForRun:
+    """Test MedallionLifecycleService.prepare_for_run method."""
+
+    @pytest.fixture
+    def pipeline_config(self):
+        """Create a pipeline config."""
+        from bioetl.domain.config import PipelineConfig
+
+        return PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+        )
+
+    @pytest.fixture
+    def runtime_config_incremental(self):
+        """Create an incremental runtime config."""
+        from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunType
+
+        return RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
+
+    @pytest.fixture
+    def runtime_config_rebuild(self):
+        """Create a rebuild runtime config."""
+        from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunType
+
+        return RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+
+    @pytest.mark.asyncio
+    async def test_prepare_for_incremental_uses_never_policy(
+        self, lifecycle_service, mock_storage, pipeline_config, runtime_config_incremental
+    ):
+        """prepare_for_run uses NEVER policy for incremental runs."""
+        result = await lifecycle_service.prepare_for_run(
+            config=pipeline_config,
+            runtime=runtime_config_incremental,
+        )
+
+        assert result.policy.clear_policy == ClearPolicy.NEVER
+        mock_storage.clear_silver.assert_not_called()
+        mock_storage.clear_gold.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_prepare_for_rebuild_uses_silver_and_gold_policy(
+        self, lifecycle_service, mock_storage, pipeline_config, runtime_config_rebuild
+    ):
+        """prepare_for_run uses SILVER_AND_GOLD policy for rebuild runs."""
+        mock_storage.clear_silver.return_value = 10
+        mock_storage.clear_gold.return_value = 5
+
+        result = await lifecycle_service.prepare_for_run(
+            config=pipeline_config,
+            runtime=runtime_config_rebuild,
+        )
+
+        assert result.policy.clear_policy == ClearPolicy.SILVER_AND_GOLD
+        mock_storage.clear_silver.assert_called_once()
+        mock_storage.clear_gold.assert_called_once()
+        assert result.clear_result.silver_cleared == 10
+        assert result.clear_result.gold_cleared == 5
+
+    @pytest.mark.asyncio
+    async def test_prepare_uses_default_gold_table(
+        self, mock_storage, mock_logger, runtime_config_rebuild
+    ):
+        """prepare_for_run uses default gold table when not configured."""
+        from bioetl.domain.config import PipelineConfig
+
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            gold_table=None,
+        )
+        service = MedallionLifecycleService(storage=mock_storage, logger=mock_logger)
+
+        await service.prepare_for_run(config=config, runtime=runtime_config_rebuild)
+
+        mock_storage.clear_gold.assert_called_once_with("chembl.activity", dry_run=False)
+
+    @pytest.mark.asyncio
+    async def test_prepare_uses_configured_gold_table(
+        self, mock_storage, mock_logger, runtime_config_rebuild
+    ):
+        """prepare_for_run uses configured gold table when provided."""
+        from bioetl.domain.config import PipelineConfig
+
+        config = PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            gold_table="custom_gold_table",
+        )
+        service = MedallionLifecycleService(storage=mock_storage, logger=mock_logger)
+
+        await service.prepare_for_run(config=config, runtime=runtime_config_rebuild)
+
+        mock_storage.clear_gold.assert_called_once_with("custom_gold_table", dry_run=False)
+
+    @pytest.mark.asyncio
+    async def test_prepare_passes_dry_run_flag(
+        self, mock_storage, mock_logger, pipeline_config
+    ):
+        """prepare_for_run passes dry_run flag to clear."""
+        from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunType
+
+        runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None, dry_run=True)
+        service = MedallionLifecycleService(storage=mock_storage, logger=mock_logger)
+
+        result = await service.prepare_for_run(config=pipeline_config, runtime=runtime)
+
+        assert result.clear_result.dry_run is True
+        mock_storage.clear_silver.assert_called_once_with("test_silver", dry_run=True)
+
+
+@pytest.mark.unit
+class TestMedallionLifecycleServiceFinalizeRun:
+    """Test MedallionLifecycleService.finalize_run method."""
+
+    @pytest.fixture
+    def mock_storage_with_vacuum(self):
+        """Create a mock storage port with vacuum support."""
+        storage = MagicMock()
+        storage.clear_silver = AsyncMock(return_value=0)
+        storage.clear_gold = AsyncMock(return_value=0)
+        storage.vacuum = AsyncMock(return_value=42)
+        return storage
+
+    @pytest.fixture
+    def pipeline_config(self):
+        """Create a pipeline config."""
+        from bioetl.domain.config import PipelineConfig
+
+        return PipelineConfig(
+            pipeline_name="test_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+        )
+
+    @pytest.fixture
+    def runtime_config_vacuum_enabled(self):
+        """Create a runtime config with vacuum enabled."""
+        from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunType
+
+        return RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            vacuum_after_run=True,
+            vacuum_retention_days=7,
+        )
+
+    @pytest.fixture
+    def runtime_config_vacuum_disabled(self):
+        """Create a runtime config with vacuum disabled."""
+        from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunType
+
+        return RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            vacuum_after_run=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_finalize_skipped_when_vacuum_disabled(
+        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_disabled
+    ):
+        """finalize_run skips vacuum when disabled."""
+        service = MedallionLifecycleService(
+            storage=mock_storage_with_vacuum, logger=mock_logger
+        )
+
+        result = await service.finalize_run(
+            config=pipeline_config, runtime=runtime_config_vacuum_disabled
+        )
+
+        assert result.skipped is True
+        assert result.silver_files_removed == 0
+        assert result.gold_files_removed == 0
+        mock_storage_with_vacuum.vacuum.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_finalize_skipped_in_dry_run(
+        self, mock_storage_with_vacuum, mock_logger, pipeline_config
+    ):
+        """finalize_run skips vacuum in dry-run mode."""
+        from bioetl.domain.config import RuntimeConfig
+        from bioetl.domain.types import RunType
+
+        runtime = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            vacuum_after_run=True,
+            dry_run=True,
+        )
+        service = MedallionLifecycleService(
+            storage=mock_storage_with_vacuum, logger=mock_logger
+        )
+
+        result = await service.finalize_run(config=pipeline_config, runtime=runtime)
+
+        assert result.skipped is True
+        mock_storage_with_vacuum.vacuum.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_finalize_vacuums_both_tables(
+        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_enabled
+    ):
+        """finalize_run vacuums both Silver and Gold tables."""
+        service = MedallionLifecycleService(
+            storage=mock_storage_with_vacuum, logger=mock_logger
+        )
+
+        result = await service.finalize_run(
+            config=pipeline_config, runtime=runtime_config_vacuum_enabled
+        )
+
+        assert result.skipped is False
+        assert result.silver_files_removed == 42
+        assert result.gold_files_removed == 42
+        assert mock_storage_with_vacuum.vacuum.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_finalize_handles_vacuum_error_gracefully(
+        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_enabled
+    ):
+        """finalize_run handles vacuum errors gracefully."""
+        mock_storage_with_vacuum.vacuum.side_effect = RuntimeError("Vacuum failed")
+        service = MedallionLifecycleService(
+            storage=mock_storage_with_vacuum, logger=mock_logger
+        )
+
+        result = await service.finalize_run(
+            config=pipeline_config, runtime=runtime_config_vacuum_enabled
+        )
+
+        # Should return 0 files removed on error, not raise
+        assert result.skipped is False
+        assert result.silver_files_removed == 0
+        assert result.gold_files_removed == 0
+
+    @pytest.mark.asyncio
+    async def test_finalize_emits_metrics(
+        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_enabled
+    ):
+        """finalize_run emits metrics when provided."""
+        mock_metrics = MagicMock()
+        service = MedallionLifecycleService(
+            storage=mock_storage_with_vacuum, logger=mock_logger
+        )
+
+        await service.finalize_run(
+            config=pipeline_config,
+            runtime=runtime_config_vacuum_enabled,
+            metrics=mock_metrics,
+        )
+
+        assert mock_metrics.increment_counter.call_count == 2
+        # Verify metric calls
+        calls = mock_metrics.increment_counter.call_args_list
+        assert calls[0][0][0] == "vacuum_files_removed"
+        assert calls[1][0][0] == "vacuum_files_removed"

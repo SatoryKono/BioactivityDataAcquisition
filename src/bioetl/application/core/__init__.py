@@ -28,11 +28,13 @@ from bioetl.application.core.cleanup_service import (
     CleanupService,
     LayerInfo,
 )
-from bioetl.application.core.lifecycle_orchestrator import (
-    ClearDecision,
-    LifecycleOrchestrator,
-)
 from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.services.medallion_lifecycle import (
+    ClearResult,
+    MedallionLifecycleService,
+    PrepareResult,
+    VacuumResult as MedallionVacuumResult,
+)
 from bioetl.application.core.memory_monitor import (
     MemoryConfig,
     MemoryMonitor,
@@ -80,12 +82,12 @@ __all__ = [
     "CleanupPreview",
     "CleanupResult",
     "CleanupService",
-    "ClearDecision",
+    "ClearResult",
     "DQResult",
     "Layer",
     "LayerInfo",
-    "LifecycleOrchestrator",
     "LockManager",
+    "MedallionLifecycleService",
     "MemoryConfig",
     "MemoryMonitor",
     "MemoryStats",
@@ -95,6 +97,7 @@ __all__ = [
     "PipelineShutdownError",
     "PostrunService",
     "PreflightService",
+    "PrepareResult",
     "QuarantineManager",
     "RuntimeConfig",
     "ShutdownReason",

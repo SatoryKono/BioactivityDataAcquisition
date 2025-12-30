@@ -3,7 +3,7 @@
 REQ-ARCH-DI-010: Application layer MUST NOT create infrastructure services.
 
 Application services (LockManager, PreflightService, PostrunService,
-LifecycleOrchestrator, PipelineObserver) should be created in the composition
+MedallionLifecycleService, PipelineObserver) should be created in the composition
 layer and injected via constructors.
 
 See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
@@ -24,7 +24,7 @@ FORBIDDEN_IN_APPLICATION = [
     "LockManager.create",
     "PreflightService(",
     "PostrunService(",
-    "LifecycleOrchestrator(",
+    "MedallionLifecycleService(",
     "PipelineObserver(",
 ]
 
@@ -33,7 +33,7 @@ DEFINITION_FILES = {
     "PipelineObserver(": {"observability/observer.py"},
     "PreflightService(": {"core/preflight_service.py"},
     "PostrunService(": {"core/postrun_service.py"},
-    "LifecycleOrchestrator(": {"core/lifecycle_orchestrator.py"},
+    "MedallionLifecycleService(": {"services/medallion_lifecycle.py"},
 }
 
 
@@ -71,7 +71,7 @@ class TestDIDiscipline:
         """Application layer must not create infrastructure services.
 
         REQ-ARCH-DI-010: Services like LockManager, PreflightService,
-        PostrunService, LifecycleOrchestrator, and PipelineObserver must be
+        PostrunService, MedallionLifecycleService, and PipelineObserver must be
         injected, not created directly in application layer.
 
         These services should be created in composition/bootstrap.py or
