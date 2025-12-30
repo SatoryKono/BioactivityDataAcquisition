@@ -50,44 +50,10 @@ if TYPE_CHECKING:
 
 @dataclass
 class ChemblAdapter(BaseHttpAdapter):
-    """ChEMBL data source adapter.
+    """ChEMBL data source adapter implementing DataSourcePort.
 
-    Implements DataSourcePort and FilterableDataSourcePort for fetching
-    data from ChEMBL database with optional server-side filtering.
-
-    Configuration is loaded from configs/sources/chembl.yaml and passed
-    via AdapterConfig. This ensures YAML is the single source of truth
-    (RULES.md §12.1.2).
-
-    Args:
-        http_client: UnifiedHTTPClient instance
-        logger: LoggerPort instance for structured logging
-        adapter_config: Configuration from YAML (preferred). Contains batch_size,
-            page_size, timeout_sec, max_retries. If not provided, falls back to
-            batch_size/filter_batch_size parameters for backward compatibility.
-        batch_size: DEPRECATED. Use adapter_config.page_size instead.
-            Number of records per API request. Fallback if adapter_config not provided.
-        filter_batch_size: DEPRECATED. Use adapter_config.batch_size instead.
-            Number of IDs per filtered API request. Fallback if adapter_config not provided.
-        thread_pool: ThreadPoolExecutor for sync operations
-        metrics: MetricsPort instance for observability
-
-    Health-Aware Behavior (uses circuit breaker state):
-        - HEALTHY: Uses configured batch_size
-        - DEGRADED: Uses batch_size ÷ 2 to reduce load
-        - UNHEALTHY: Raises CriticalError to prevent futile requests
-
-    Example:
-        >>> # Preferred: use AdapterConfig from YAML
-        >>> from bioetl.infrastructure.config import load_source_config
-        >>> source_config = load_source_config("chembl")
-        >>> adapter_config = source_config.to_adapter_config()
-        >>> adapter = ChemblAdapter(
-        ...     http_client=http_client,
-        ...     logger=logger,
-        ...     adapter_config=adapter_config,
-        ... )
-
+    Configuration: Load from configs/sources/chembl.yaml via AdapterConfig.
+    Health-aware: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=CriticalError.
     """
 
     http_client: UnifiedHTTPClient
