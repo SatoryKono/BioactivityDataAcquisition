@@ -7,7 +7,7 @@ Provides:
 - RetryConfig: Backward compatibility alias for RetryPolicy
 - ProviderHealthMonitor: Centralized provider health monitoring (RULES.md §3.5)
 - ProviderHealthTracker: Per-provider health state machine wrapper
-- AdjustedClientConfig: Health-based client configuration adjustments
+- HealthAdjustedConfig: Health-based client configuration adjustments
 """
 
 from __future__ import annotations
@@ -15,16 +15,20 @@ from __future__ import annotations
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import RetryConfig, UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.health_monitor import (
-    AdjustedClientConfig,
+    HealthAdjustedConfig,
     ProviderHealthMonitor,
     ProviderHealthState,
     ProviderHealthTracker,
 )
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
+# Backward compatibility alias
+AdjustedClientConfig = HealthAdjustedConfig
+
 __all__ = [
-    "AdjustedClientConfig",
+    "AdjustedClientConfig",  # Backward compatibility alias
     "CircuitBreaker",
+    "HealthAdjustedConfig",
     "ProviderHealthMonitor",
     "ProviderHealthState",
     "ProviderHealthTracker",

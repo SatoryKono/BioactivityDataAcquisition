@@ -132,6 +132,32 @@ class CrossRefAdapter(BaseHttpAdapter):
             )
             raise CrossRefApiError(f"Failed to fetch DOI {normalized_doi}: {e}") from e
 
+    async def _fallback_individual_fetch(
+        self, dois: list[str]
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fall back to individual DOI fetches.
+
+        Used when batch endpoint fails.
+
+        Args:
+            dois: List of DOIs to fetch individually.
+
+        Yields:
+            Work records for successfully fetched DOIs.
+
+        """
+        for doi in dois:
+            try:
+                work = await self._fetch_single_work(doi)
+                if work:
+                    yield work
+            except Exception as e:
+                self.logger.debug(
+                    "crossref_individual_fetch_failed",
+                    doi=doi,
+                    error=str(e),
+                )
+
     async def _fetch_batch_works(
         self, dois: list[str]
     ) -> AsyncIterator[dict[str, Any]]:
@@ -171,11 +197,8 @@ class CrossRefAdapter(BaseHttpAdapter):
                     status_code=response.status_code,
                     doi_count=len(dois),
                 )
-                # Fall back to individual fetches
-                for doi in dois:
-                    work = await self._fetch_single_work(doi)
-                    if work:
-                        yield work
+                async for work in self._fallback_individual_fetch(dois):
+                    yield work
                 return
 
             data = response.json()
@@ -189,18 +212,72 @@ class CrossRefAdapter(BaseHttpAdapter):
                 error=str(e),
                 doi_count=len(dois),
             )
-            # Fall back to individual fetches on error
-            for doi in dois:
-                try:
-                    work = await self._fetch_single_work(doi)
-                    if work:
-                        yield work
-                except Exception as inner_e:
-                    self.logger.debug(
-                        "crossref_individual_fetch_failed",
-                        doi=doi,
-                        error=str(inner_e),
-                    )
+            async for work in self._fallback_individual_fetch(dois):
+                yield work
+
+    async def _fetch_search_page(
+        self,
+        query: str,
+        rows: int,
+        cursor: str,
+    ) -> tuple[list[dict[str, Any]], str | None]:
+        """Fetch a single page of search results.
+
+        Args:
+            query: Search query string.
+            rows: Number of results per page.
+            cursor: Pagination cursor.
+
+        Returns:
+            Tuple of (items list, next_cursor or None).
+
+        Raises:
+            CrossRefApiError: On API errors.
+
+        """
+        url = f"{CROSSREF_API_BASE}/works"
+        params = {
+            "query": query,
+            "rows": str(rows),
+            "cursor": cursor,
+            "mailto": self.mailto,
+        }
+
+        with self._adapter_metrics.measure_request("/works?query"):
+            response = await self.http_client.get(
+                url, params=params, headers=self._build_headers()
+            )
+
+        if response.status_code != 200:
+            raise CrossRefApiError(
+                f"CrossRef search failed: {response.status_code}",
+                status_code=response.status_code,
+            )
+
+        data = response.json()
+        message = data.get("message", {})
+        items = message.get("items", [])
+        next_cursor = message.get("next-cursor")
+
+        return items, next_cursor
+
+    def _should_continue_pagination(
+        self, items: list[dict[str, Any]], next_cursor: str | None, current_cursor: str
+    ) -> bool:
+        """Check if pagination should continue.
+
+        Args:
+            items: Items from current page.
+            next_cursor: Next cursor from response.
+            current_cursor: Current cursor value.
+
+        Returns:
+            True if pagination should continue, False otherwise.
+
+        """
+        if not items:
+            return False
+        return bool(next_cursor and next_cursor != current_cursor)
 
     async def _search_works(
         self,
@@ -219,36 +296,12 @@ class CrossRefAdapter(BaseHttpAdapter):
             Work records matching the query.
 
         """
-        url = f"{CROSSREF_API_BASE}/works"
         rows = min(limit, 100) if limit else 100
         fetched = 0
 
-        while True:
-            params = {
-                "query": query,
-                "rows": str(rows),
-                "cursor": cursor,
-                "mailto": self.mailto,
-            }
-
-            try:
-                with self._adapter_metrics.measure_request("/works?query"):
-                    response = await self.http_client.get(
-                        url, params=params, headers=self._build_headers()
-                    )
-
-                if response.status_code != 200:
-                    raise CrossRefApiError(
-                        f"CrossRef search failed: {response.status_code}",
-                        status_code=response.status_code,
-                    )
-
-                data = response.json()
-                message = data.get("message", {})
-                items = message.get("items", [])
-
-                if not items:
-                    break
+        try:
+            while True:
+                items, next_cursor = await self._fetch_search_page(query, rows, cursor)
 
                 for item in items:
                     yield item
@@ -256,21 +309,15 @@ class CrossRefAdapter(BaseHttpAdapter):
                     if limit and fetched >= limit:
                         return
 
-                # Get next cursor
-                next_cursor = message.get("next-cursor")
-                if not next_cursor or next_cursor == cursor:
+                if not self._should_continue_pagination(items, next_cursor, cursor):
                     break
-                cursor = next_cursor
+                cursor = next_cursor  # type: ignore[assignment]
 
-            except CrossRefApiError:
-                raise
-            except Exception as e:
-                self.logger.error(
-                    "crossref_search_failed",
-                    query=query,
-                    error=str(e),
-                )
-                raise CrossRefApiError(f"CrossRef search failed: {e}") from e
+        except CrossRefApiError:
+            raise
+        except Exception as e:
+            self.logger.error("crossref_search_failed", query=query, error=str(e))
+            raise CrossRefApiError(f"CrossRef search failed: {e}") from e
 
     async def fetch_filtered(
         self,

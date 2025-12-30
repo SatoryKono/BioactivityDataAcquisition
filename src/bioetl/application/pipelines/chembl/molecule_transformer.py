@@ -153,21 +153,23 @@ class MoleculeTransformer(BaseChemblTransformer):
             Dictionary of Molecule business fields.
 
         """
+        # Cast to dict for type-safe access to .get() method
+        rec = cast("dict[str, Any]", record)
         return {
             # Primary identifier
             "molecule_chembl_id": str(primary_id),
-            # Declarative field groups
+            # Declarative field groups (uses BronzeRecord type)
             **map_field_groups(record, _MOLECULE_GROUPS),
             # JSON serialization using helper method
-            **self.serialize_json_fields(record, _JSON_FIELDS),
+            **self.serialize_json_fields(rec, _JSON_FIELDS),
             # Nested dict extraction
             **_extract_hierarchy(
-                cast("dict[str, Any] | None", record.get("molecule_hierarchy"))
+                cast("dict[str, Any] | None", rec.get("molecule_hierarchy"))
             ),
             **_extract_properties(
-                cast("dict[str, Any] | None", record.get("molecule_properties"))
+                cast("dict[str, Any] | None", rec.get("molecule_properties"))
             ),
             **_extract_structures(
-                cast("dict[str, Any] | None", record.get("molecule_structures"))
+                cast("dict[str, Any] | None", rec.get("molecule_structures"))
             ),
         }

@@ -65,17 +65,19 @@ class TargetComponentTransformer(BaseChemblTransformer):
             Dictionary of TargetComponent business fields.
 
         """
+        # Cast to dict for type-safe access to .get() method
+        rec = cast("dict[str, Any]", record)
         return {
             # Primary identifier (int)
             "component_id": safe_int(primary_id),
-            # Declarative field groups
+            # Declarative field groups (uses BronzeRecord type)
             **map_field_groups(record, _TARGET_COMPONENT_GROUPS),
             # JSON serialization using helper method
-            **self.serialize_json_fields(record, _JSON_FIELDS),
+            **self.serialize_json_fields(rec, _JSON_FIELDS),
             # Flattened fields (extracted from protein_classifications)
             "protein_classification_ids": extract_list_field(
                 cast(
-                    "list[dict[str, Any]] | None", record.get("protein_classifications")
+                    "list[dict[str, Any]] | None", rec.get("protein_classifications")
                 ),
                 "protein_classification_id",
                 safe_int,
