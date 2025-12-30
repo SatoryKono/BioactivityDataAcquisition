@@ -132,6 +132,9 @@ class TestPubMedContract:
         assert "dbinfo" in data["einforesult"]
 
         dbinfo = data["einforesult"]["dbinfo"]
+        # dbinfo may be a list or dict depending on API version
+        if isinstance(dbinfo, list):
+            dbinfo = dbinfo[0]
         assert dbinfo["dbname"] == "pubmed"
         assert "count" in dbinfo
         assert "fieldlist" in dbinfo
