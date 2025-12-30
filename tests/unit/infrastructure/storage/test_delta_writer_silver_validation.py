@@ -317,11 +317,11 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
-                "bioetl.infrastructure.storage.delta_writer.write_deltalake"
+                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
             writer = DeltaWriter(
@@ -366,11 +366,11 @@ class TestDeltaWriterWriteSilverWithPanderaValidation:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
-                "bioetl.infrastructure.storage.delta_writer.write_deltalake"
+                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
             # Default NoOp validator

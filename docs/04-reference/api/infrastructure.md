@@ -16,7 +16,7 @@ flowchart TB
 
         subgraph Storage["Storage Writers"]
             Bronze[BronzeWriter]
-            Silver[DeltaWriter]
+            Silver[SilverWriter]
             Gold[GoldWriter]
         end
 
@@ -56,8 +56,10 @@ Data source adapters implementing `DataSourcePort`:
 Storage writers implementing `StoragePort`:
 
 - `BronzeWriter` - JSONL + zstd compression
-- `DeltaWriter` - Delta Lake Silver layer
+- `SilverWriter` - Delta Lake Silver layer (formerly DeltaWriter)
 - `GoldWriter` - Delta Lake Gold layer with SCD Type 2
+
+> **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead.
 
 ### [Observability](infrastructure/observability.md)
 
@@ -86,7 +88,7 @@ class in `tracing.py` provides a ready implementation.
 | Domain Port | Infrastructure Adapter |
 |-------------|----------------------|
 | `DataSourcePort` | `ChemblAdapter`, `PubChemAdapter` |
-| `StoragePort` | `BronzeWriter`, `DeltaWriter`, `GoldWriter` |
+| `StoragePort` | `BronzeWriter`, `SilverWriter`, `GoldWriter` |
 | `LockPort` | `MemoryLock` |
 | `CheckpointPort` | `LocalCheckpoint` |
 | `MetricsPort` | `PrometheusMetrics`, `NoOpMetrics` |
@@ -139,7 +141,7 @@ client = UnifiedHTTPClient(
 # Storage writers
 from bioetl.infrastructure.storage import (
     BronzeWriter,
-    DeltaWriter,
+    SilverWriter,  # Preferred (was DeltaWriter)
     GoldWriter,
 )
 
