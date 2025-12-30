@@ -60,6 +60,11 @@ from bioetl.domain.ports.observability import (
 )
 from bioetl.domain.ports.quarantine import QuarantinePort
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
+from bioetl.domain.ports.runner import (
+    MetricsExtractorPort,
+    RunnablePort,
+    RunnerFactoryPort,
+)
 from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort
@@ -87,6 +92,7 @@ __all__ = [
     "LoggerPort",
     "MemoryMonitorPort",
     "MemoryStats",
+    "MetricsExtractorPort",
     "MetricsPort",
     "NoOpAudit",
     "NoOpMemoryMonitor",
@@ -96,6 +102,8 @@ __all__ = [
     "OutlierFilterPort",
     "QuarantinePort",
     "RateLimiterPort",
+    "RunnablePort",
+    "RunnerFactoryPort",
     "ShutdownPort",
     "SilverValidatorPort",
     "StoragePort",
