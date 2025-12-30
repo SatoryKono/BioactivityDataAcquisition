@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
+from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
 @pytest.fixture(autouse=True)
@@ -271,7 +272,7 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        assert result.exit_code == ExitCode.CONFIG_ERROR
         assert "Configuration error" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -281,7 +282,7 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        assert result.exit_code == ExitCode.CONFIG_ERROR
         assert "Configuration error" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -291,7 +292,7 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        assert result.exit_code == ExitCode.INIT_ERROR
         assert "Initialization failed" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run.create_pipeline_runner")
@@ -349,7 +350,7 @@ class TestRunCommandAdvanced:
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
-        assert result.exit_code == 1
+        assert result.exit_code == ExitCode.INIT_ERROR
         assert "Logger not initialized" in result.output
 
 
