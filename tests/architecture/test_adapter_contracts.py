@@ -45,6 +45,7 @@ class TestAdapterHealthCheck:
             "rate_limiter.py",  # Rate limiting utility
             "circuit_breaker.py",  # Circuit breaker utility
             "health_monitor.py",  # Health state utility, not a DataSourcePort adapter
+            "error_handling.py",  # Error handling utility, not a DataSourcePort adapter
         }
         adapter_files = []
         for py_file in adapters_path.rglob("*.py"):
