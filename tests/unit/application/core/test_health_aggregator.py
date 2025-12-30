@@ -1,6 +1,8 @@
-"""Unit tests for HealthAggregator.
+"""Unit tests for _HealthAggregator (internal helper in preflight_service).
 
 Tests the infrastructure health validation before pipeline execution.
+These tests validate the internal _HealthAggregator class that is now
+integrated into preflight_service.py.
 """
 
 from __future__ import annotations
@@ -9,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.health_aggregator import HealthAggregator
+from bioetl.application.core.preflight_service import _HealthAggregator as HealthAggregator
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus

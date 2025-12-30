@@ -1,6 +1,7 @@
-"""Tests for MedallionConfigValidator component.
+"""Tests for _MedallionConfigValidator (internal helper in preflight_service).
 
-Tests the extracted medallion validation functionality from PreflightService.
+Tests the medallion validation functionality integrated into PreflightService.
+These tests validate the internal _MedallionConfigValidator class.
 """
 
 from __future__ import annotations
@@ -9,7 +10,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from bioetl.application.core.medallion_validator import MedallionConfigValidator
+from bioetl.application.core.preflight_service import (
+    _MedallionConfigValidator as MedallionConfigValidator,
+)
 from bioetl.domain.types import RunType
 
 

@@ -28,7 +28,6 @@ from bioetl.application.core.cleanup_service import (
     CleanupService,
     LayerInfo,
 )
-from bioetl.application.core.health_aggregator import HealthAggregator
 from bioetl.application.core.lifecycle_orchestrator import (
     ClearDecision,
     LifecycleOrchestrator,
@@ -83,7 +82,6 @@ __all__ = [
     "CleanupService",
     "ClearDecision",
     "DQResult",
-    "HealthAggregator",
     "Layer",
     "LayerInfo",
     "LifecycleOrchestrator",
