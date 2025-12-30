@@ -17,6 +17,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.lifecycle_orchestrator import LifecycleOrchestrator
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
@@ -57,6 +59,7 @@ if TYPE_CHECKING:
         DQMonitorPort,
         LockPort,
         LoggerPort,
+        MemoryMonitorPort,
         MetricsPort,
         QuarantinePort,
         TracingPort,
@@ -362,6 +365,105 @@ class ServicesBuilder:
             gold_transform_callback=gold_transform_cb,
             strict_gold_validation=strict_gold_validation,
             lock_context_holder=lock_context_holder,
+        )
+
+    @staticmethod
+    def create_batch_executor_from_pipeline(
+        pipeline: BasePipeline,
+        silver_schema: pa.Schema | None,
+        gold_schema: Any,
+        checkpoint_manager: CheckpointManager,
+        shutdown_signal: ShutdownSignal,
+        *,
+        strict_gold_validation: bool = False,
+        lock_context_holder: LockContextHolder | None = None,
+        tracer: TracingPort | None = None,
+        memory_monitor: MemoryMonitorPort | None = None,
+        memory_config: MemoryConfig | None = None,
+    ) -> BatchExecutor:
+        """Create BatchExecutor from pipeline instance.
+
+        This is the preferred method for creating batch executors as it
+        consolidates PipelineExecutor and RecordProcessor into a single component.
+
+        Args:
+            pipeline: Pipeline instance.
+            silver_schema: PyArrow schema for Silver layer.
+            gold_schema: Pandera schema for Gold layer.
+            checkpoint_manager: Checkpoint manager instance.
+            shutdown_signal: Shutdown signal for graceful termination.
+            strict_gold_validation: If True, validation fails when gold_schema is None.
+            lock_context_holder: Optional holder for lock context.
+            tracer: Optional tracing port for distributed tracing.
+            memory_monitor: Optional memory monitor for adaptive batch sizing.
+            memory_config: Memory configuration (used if memory_monitor not provided).
+
+        Returns:
+            Configured BatchExecutor instance.
+        """
+        # Extract callbacks from transformer or pipeline
+        transformer = pipeline.transformer
+        if transformer is not None:
+            transform_cb = transformer.transform
+            gold_filter_cb = transformer.should_write_gold
+            gold_transform_cb = transformer.transform_for_gold
+        else:
+            transform_cb = pipeline.transform_bronze_to_silver
+            gold_filter_cb = getattr(
+                pipeline, "should_write_gold", lambda _context, record: True
+            )
+            gold_transform_cb = getattr(
+                pipeline,
+                "transform_for_gold",
+                lambda _context, silver_record: silver_record,
+            )
+
+        # Build configuration
+        error_classifier = ErrorClassifier()
+        table_config = TableConfig(
+            primary_keys=tuple(pipeline.config.primary_keys),
+            silver_table=pipeline.config.silver_table,
+            gold_table=pipeline.config.gold_table,
+            silver_write_mode=pipeline.config.write_mode,
+            gold_write_mode=pipeline.config.gold_write_mode,
+            on_schema_mismatch=pipeline.config.on_schema_mismatch,
+        )
+
+        processor_config = RecordProcessorConfig(
+            pipeline_name=pipeline.config.pipeline_name,
+            provider=pipeline.config.provider,
+            entity_type=pipeline.config.entity_type,
+            silver_schema=silver_schema,
+            gold_schema=gold_schema,
+            dq_config=pipeline.config.dq,
+            table_config=table_config,
+        )
+
+        # Create Gold validator
+        gold_validator = PanderaGoldValidator(gold_schema, strict=strict_gold_validation)
+
+        # Create lock context provider if holder is available
+        lock_context_provider = None
+        if lock_context_holder:
+            lock_context_provider = lock_context_holder.get
+
+        return BatchExecutor(
+            services=pipeline.services,
+            context=pipeline.context,
+            config=processor_config,
+            error_classifier=error_classifier,
+            transform_callback=transform_cb,  # type: ignore[arg-type]
+            gold_filter_callback=gold_filter_cb,  # type: ignore[arg-type]
+            gold_transform_callback=gold_transform_cb,  # type: ignore[arg-type]
+            gold_validator=gold_validator,
+            checkpoint_manager=checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            batch_size=pipeline.config.batch_size,
+            checkpoint_interval=pipeline.config.checkpoint_interval,
+            tracer=tracer,
+            lock_context_provider=lock_context_provider,
+            memory_monitor=memory_monitor,
+            memory_config=memory_config,
         )
 
 
