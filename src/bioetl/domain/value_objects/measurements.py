@@ -154,7 +154,9 @@ class Concentration:
             ValueError: If string cannot be parsed.
         """
         # Pattern: number (optional whitespace) unit
-        match = re.match(r"([+-]?[\d.]+(?:[eE][+-]?\d+)?)\s*([a-zμ]+)", s.strip(), re.IGNORECASE)
+        match = re.match(
+            r"([+-]?[\d.]+(?:[eE][+-]?\d+)?)\s*([a-zμ]+)", s.strip(), re.IGNORECASE
+        )
         if not match:
             raise ValueError(f"Cannot parse concentration: {s!r}")
 
@@ -188,8 +190,8 @@ class ActivityType(str, Enum):
     # Inhibition constants
     IC50 = "IC50"  # Half-maximal inhibitory concentration
     IC90 = "IC90"  # 90% inhibitory concentration
-    KI = "Ki"      # Inhibition constant
-    KD = "Kd"      # Dissociation constant
+    KI = "Ki"  # Inhibition constant
+    KD = "Kd"  # Dissociation constant
 
     # Activation constants
     EC50 = "EC50"  # Half-maximal effective concentration
@@ -303,9 +305,7 @@ class PChemblValue:
         if self.value < 0:
             raise ValueError(f"pChEMBL value cannot be negative: {self.value}")
         if self.value > 14:
-            raise ValueError(
-                f"pChEMBL value exceeds physical limit (14): {self.value}"
-            )
+            raise ValueError(f"pChEMBL value exceeds physical limit (14): {self.value}")
 
     def to_molar(self) -> float:
         """Convert to molar concentration.
@@ -315,7 +315,9 @@ class PChemblValue:
         """
         return 10 ** (-self.value)
 
-    def to_concentration(self, unit: ConcentrationUnit = ConcentrationUnit.NANOMOLAR) -> Concentration:
+    def to_concentration(
+        self, unit: ConcentrationUnit = ConcentrationUnit.NANOMOLAR
+    ) -> Concentration:
         """Convert to Concentration value object.
 
         Args:
@@ -347,6 +349,7 @@ class PChemblValue:
             )
 
         import math
+
         pchembl = -math.log10(molar_concentration)
         return cls(value=pchembl)
 

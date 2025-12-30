@@ -29,14 +29,10 @@ class PubMedArticleRecord(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Primary Key
-    pmid: str | None = Field(
-        default=None, description="PubMed ID"
-    )
+    pmid: str | None = Field(default=None, description="PubMed ID")
 
     # Article Content
-    article_title: str = Field(
-        default="No title found", description="Article title"
-    )
+    article_title: str = Field(default="No title found", description="Article title")
 
     # Raw XML for forensic analysis (uses underscore prefix in source data)
     raw_xml: str | None = Field(
@@ -181,9 +177,7 @@ class PubMedExtendedRecord(BaseModel):
     )
 
     # Publication Details
-    pub_date: PubMedPubDate | None = Field(
-        default=None, description="Publication date"
-    )
+    pub_date: PubMedPubDate | None = Field(default=None, description="Publication date")
     medline_pgn: str | None = Field(
         default=None, description="Page numbers (MEDLINE format)"
     )
@@ -203,18 +197,14 @@ class PubMedExtendedRecord(BaseModel):
     )
 
     # Keywords
-    keywords: list[str] | None = Field(
-        default_factory=list, description="Keywords"
-    )
+    keywords: list[str] | None = Field(default_factory=list, description="Keywords")
     keyword_count: int | None = Field(default=None, description="Number of keywords")
 
     # Chemicals
     chemicals: list[PubMedChemical] | None = Field(
         default_factory=list, description="Chemical substances"
     )
-    chemical_count: int | None = Field(
-        default=None, description="Number of chemicals"
-    )
+    chemical_count: int | None = Field(default=None, description="Number of chemicals")
 
     # Grants
     grants: list[PubMedGrant] | None = Field(
@@ -234,9 +224,7 @@ class PubMedExtendedRecord(BaseModel):
     date_completed: str | None = Field(
         default=None, description="MEDLINE processing completion date"
     )
-    date_revised: str | None = Field(
-        default=None, description="Record revision date"
-    )
+    date_revised: str | None = Field(default=None, description="Record revision date")
 
     # Citation
     citation_subset: str | None = Field(

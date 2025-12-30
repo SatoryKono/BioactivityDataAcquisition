@@ -68,9 +68,7 @@ class TestShutdownService:
         assert shutdown_service.reason == ShutdownReason.UNKNOWN
 
     @pytest.mark.asyncio
-    async def test_initiate_shutdown_sets_flag(
-        self, shutdown_service: ShutdownService
-    ):
+    async def test_initiate_shutdown_sets_flag(self, shutdown_service: ShutdownService):
         """Test initiate_shutdown sets the shutdown flag."""
         await shutdown_service.initiate_shutdown("test reason")
         assert shutdown_service.is_shutting_down() is True
@@ -119,6 +117,7 @@ class TestShutdownService:
     @pytest.mark.asyncio
     async def test_wait_blocks_until_shutdown(self, shutdown_service: ShutdownService):
         """Test wait() blocks until shutdown is initiated."""
+
         async def initiate_after_delay():
             await asyncio.sleep(0.05)
             await shutdown_service.initiate_shutdown("delayed shutdown")
@@ -130,18 +129,15 @@ class TestShutdownService:
         await task
 
     @pytest.mark.asyncio
-    async def test_wait_for_completion_timeout(
-        self, shutdown_service: ShutdownService
-    ):
+    async def test_wait_for_completion_timeout(self, shutdown_service: ShutdownService):
         """Test wait_for_completion returns False on timeout."""
         result = await shutdown_service.wait_for_completion(timeout=0.01)
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_wait_for_completion_success(
-        self, shutdown_service: ShutdownService
-    ):
+    async def test_wait_for_completion_success(self, shutdown_service: ShutdownService):
         """Test wait_for_completion returns True when marked complete."""
+
         async def mark_complete_after_delay():
             await asyncio.sleep(0.05)
             shutdown_service.mark_completed()
@@ -213,9 +209,7 @@ class TestPipelineShutdownError:
 
     def test_with_reason(self):
         """Test exception with reason."""
-        error = PipelineShutdownError(
-            "Lock lost", reason=ShutdownReason.LOCK_LOST
-        )
+        error = PipelineShutdownError("Lock lost", reason=ShutdownReason.LOCK_LOST)
         assert error.reason == ShutdownReason.LOCK_LOST
         assert "Lock lost" in str(error)
 

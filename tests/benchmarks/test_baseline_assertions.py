@@ -368,7 +368,9 @@ class TestMemoryMonitorBaseline:
     """
 
     MEMORY_STATS_THRESHOLD_MS = 10  # Increased from 5ms to 10ms for CI variability
-    BATCH_SIZE_THRESHOLD_US = 10000  # Increased from 500us to 10000us for CI variability
+    BATCH_SIZE_THRESHOLD_US = (
+        10000  # Increased from 500us to 10000us for CI variability
+    )
 
     def test_memory_stats_baseline(self) -> None:
         """Memory stats retrieval must complete under threshold."""

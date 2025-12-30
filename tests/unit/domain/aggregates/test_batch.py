@@ -22,7 +22,6 @@ from bioetl.domain.aggregates.batch import (
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────────────────────
@@ -208,11 +207,13 @@ class TestBatchRecordManagement:
 
     def test_add_multiple_records(self, batch: Batch) -> None:
         """Should add multiple records at once."""
-        records = batch.add_records([
-            {"id": "1"},
-            {"id": "2"},
-            {"id": "3"},
-        ])
+        records = batch.add_records(
+            [
+                {"id": "1"},
+                {"id": "2"},
+                {"id": "3"},
+            ]
+        )
 
         assert len(records) == 3
         assert batch.record_count == 3
@@ -255,7 +256,9 @@ class TestBatchQuarantine:
         with pytest.raises(InvalidStateError, match="Cannot quarantine"):
             batch.quarantine_record(record, "Error", "ERR")
 
-    def test_cannot_quarantine_foreign_record(self, batch: Batch, run_id: RunID) -> None:
+    def test_cannot_quarantine_foreign_record(
+        self, batch: Batch, run_id: RunID
+    ) -> None:
         """Invariant: Cannot quarantine record from another batch."""
         other_batch = Batch.create(run_id=run_id)
         foreign_record = other_batch.add_record({"id": "1"})

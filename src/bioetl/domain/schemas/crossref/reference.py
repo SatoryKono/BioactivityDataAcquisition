@@ -75,9 +75,7 @@ class ReferenceSchema(ETLRecordSchema):
         str_matches=r"^\d{4}-\d{3}[\dX]$",
         description="ISSN",
     )
-    component: Series[str] | None = pa.Field(
-        nullable=True, description="Component DOI"
-    )
+    component: Series[str] | None = pa.Field(nullable=True, description="Component DOI")
 
     # === Additional Metadata ===
     edition: Series[str] | None = pa.Field(nullable=True, description="Edition number")

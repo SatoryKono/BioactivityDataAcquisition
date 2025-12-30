@@ -284,7 +284,10 @@ class TestYamlConfigToDomain:
         assert isinstance(result_method, PipelineConfig)
         assert result_method.pipeline_name == result_function.pipeline_name
         assert result_method.provider == result_function.provider
-        assert result_method.dq.soft_fail_threshold == result_function.dq.soft_fail_threshold
+        assert (
+            result_method.dq.soft_fail_threshold
+            == result_function.dq.soft_fail_threshold
+        )
 
     def test_gold_filters_config_to_domain_method(self) -> None:
         """Test GoldFiltersConfig.to_domain() method."""

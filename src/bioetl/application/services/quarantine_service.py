@@ -195,8 +195,7 @@ class QuarantineService:
 
         # Filter to specific batch
         batch_records = [
-            rec for rec in records
-            if rec.get("bronze_batch_id") == str(batch_id)
+            rec for rec in records if rec.get("bronze_batch_id") == str(batch_id)
         ]
 
         # Placeholder: actual replay would require pipeline context
@@ -252,7 +251,8 @@ class QuarantineService:
 
         # Filter by date (if ingestion_ts is available)
         records_to_purge = [
-            rec for rec in records
+            rec
+            for rec in records
             if rec.get("ingestion_ts") and rec["ingestion_ts"] < cutoff_date
         ]
 

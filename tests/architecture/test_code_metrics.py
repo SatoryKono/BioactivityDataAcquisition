@@ -541,7 +541,10 @@ class TestGodObjectDetection:
                     # Check if it's self._component.method()
                     value = node.func.value
                     if isinstance(value, ast.Attribute):
-                        if isinstance(value.value, ast.Name) and value.value.id == "self":
+                        if (
+                            isinstance(value.value, ast.Name)
+                            and value.value.id == "self"
+                        ):
                             if value.attr.startswith("_"):
                                 # Found delegation: self._component.method()
                                 delegations.add(f"{value.attr}.{node.func.attr}")

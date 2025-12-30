@@ -24,9 +24,7 @@ class CrossRefAuthor(BaseModel):
 
     given: str | None = Field(default=None, description="Given (first) name")
     family: str | None = Field(default=None, description="Family (last) name")
-    name: str | None = Field(
-        default=None, description="Full name (for organizations)"
-    )
+    name: str | None = Field(default=None, description="Full name (for organizations)")
     suffix: str | None = Field(default=None, description="Name suffix")
     sequence: str | None = Field(
         default=None, description="Author sequence (first, additional)"
@@ -37,7 +35,7 @@ class CrossRefAuthor(BaseModel):
     authenticated_orcid: bool | None = Field(
         default=None,
         alias="authenticated-orcid",
-        description="Whether ORCID is authenticated"
+        description="Whether ORCID is authenticated",
     )
     affiliation: list[dict[str, Any]] | None = Field(
         default_factory=list, description="Author affiliations"
@@ -49,13 +47,9 @@ class CrossRefFunder(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    doi: str | None = Field(
-        default=None, alias="DOI", description="Funder DOI"
-    )
+    doi: str | None = Field(default=None, alias="DOI", description="Funder DOI")
     name: str | None = Field(default=None, description="Funder name")
-    award: list[str] | None = Field(
-        default_factory=list, description="Award numbers"
-    )
+    award: list[str] | None = Field(default_factory=list, description="Award numbers")
     doi_asserted_by: str | None = Field(
         default=None, alias="doi-asserted-by", description="Who asserted the DOI"
     )
@@ -73,9 +67,7 @@ class CrossRefLicense(BaseModel):
     delay_in_days: int | None = Field(
         default=None, alias="delay-in-days", description="Embargo delay"
     )
-    start: dict[str, Any] | None = Field(
-        default=None, description="License start date"
-    )
+    start: dict[str, Any] | None = Field(default=None, description="License start date")
 
 
 class CrossRefLink(BaseModel):
@@ -131,9 +123,7 @@ class CrossRefAssertion(BaseModel):
     name: str | None = Field(default=None, description="Assertion name")
     value: str | None = Field(default=None, description="Assertion value")
     label: str | None = Field(default=None, description="Assertion label")
-    group: dict[str, Any] | None = Field(
-        default=None, description="Assertion group"
-    )
+    group: dict[str, Any] | None = Field(default=None, description="Assertion group")
 
 
 class CrossRefClinicalTrial(BaseModel):
@@ -183,12 +173,8 @@ class CrossRefWorkRecord(BaseModel):
     subtype: str | None = Field(default=None, description="Work subtype")
 
     # Titles
-    title: list[str] | None = Field(
-        default_factory=list, description="Work titles"
-    )
-    subtitle: list[str] | None = Field(
-        default_factory=list, description="Subtitles"
-    )
+    title: list[str] | None = Field(default_factory=list, description="Work titles")
+    subtitle: list[str] | None = Field(default_factory=list, description="Subtitles")
     short_title: list[str] | None = Field(
         default_factory=list, alias="short-title", description="Short titles"
     )
@@ -203,7 +189,7 @@ class CrossRefWorkRecord(BaseModel):
     short_container_title: list[str] | None = Field(
         default_factory=list,
         alias="short-container-title",
-        description="Short container title"
+        description="Short container title",
     )
     publisher: str | None = Field(default=None, description="Publisher name")
     publisher_location: str | None = Field(
@@ -266,9 +252,7 @@ class CrossRefWorkRecord(BaseModel):
     # Content
     abstract: str | None = Field(default=None, description="Abstract text")
     language: str | None = Field(default=None, description="Language code")
-    subject: list[str] | None = Field(
-        default_factory=list, description="Subject areas"
-    )
+    subject: list[str] | None = Field(default_factory=list, description="Subject areas")
 
     # Funding
     funder: list[CrossRefFunder] | None = Field(
@@ -286,9 +270,7 @@ class CrossRefWorkRecord(BaseModel):
     )
 
     # Relations
-    relation: dict[str, Any] | None = Field(
-        default=None, description="Related works"
-    )
+    relation: dict[str, Any] | None = Field(default=None, description="Related works")
     update_to: list[dict[str, Any]] | None = Field(
         default_factory=list, alias="update-to", description="Updates to other works"
     )
@@ -313,7 +295,7 @@ class CrossRefWorkRecord(BaseModel):
     clinical_trial_number: list[CrossRefClinicalTrial] | None = Field(
         default_factory=list,
         alias="clinical-trial-number",
-        description="Clinical trial numbers"
+        description="Clinical trial numbers",
     )
 
     # Assertions
@@ -344,9 +326,7 @@ class CrossRefMessage(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Facets
-    facets: dict[str, Any] | None = Field(
-        default=None, description="Search facets"
-    )
+    facets: dict[str, Any] | None = Field(default=None, description="Search facets")
 
     # Pagination
     total_results: int | None = Field(
@@ -355,9 +335,7 @@ class CrossRefMessage(BaseModel):
     items_per_page: int | None = Field(
         default=None, alias="items-per-page", description="Items per page"
     )
-    query: dict[str, Any] | None = Field(
-        default=None, description="Query information"
-    )
+    query: dict[str, Any] | None = Field(default=None, description="Query information")
 
     # Cursor
     next_cursor: str | None = Field(

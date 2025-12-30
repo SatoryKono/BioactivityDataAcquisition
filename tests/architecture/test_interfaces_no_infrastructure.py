@@ -61,8 +61,7 @@ class TestInterfacesNoDIrectInfrastructure:
         imports = get_imports_from_file(cli_path)
 
         infrastructure_imports = [
-            imp for imp in imports
-            if "bioetl.infrastructure" in imp
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         assert infrastructure_imports == [], (
@@ -84,10 +83,7 @@ class TestInterfacesNoDIrectInfrastructure:
 
         imports = get_imports_from_file(cli_path)
 
-        bootstrap_imports = [
-            imp for imp in imports
-            if "composition._bootstrap" in imp
-        ]
+        bootstrap_imports = [imp for imp in imports if "composition._bootstrap" in imp]
 
         assert bootstrap_imports == [], (
             f"CLI should not import from _bootstrap. "
@@ -105,8 +101,7 @@ class TestInterfacesNoDIrectInfrastructure:
         imports = get_imports_from_file(init_path)
 
         infrastructure_imports = [
-            imp for imp in imports
-            if "bioetl.infrastructure" in imp
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         # Note: observability.py may still import from infrastructure
@@ -132,8 +127,7 @@ class TestInterfacesNoDIrectInfrastructure:
         imports = get_imports_from_file(obs_path)
 
         infrastructure_imports = [
-            imp for imp in imports
-            if "bioetl.infrastructure" in imp
+            imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
         # This is allowed but documented for future refactoring consideration
@@ -178,15 +172,15 @@ class TestEntrypointsExportServices:
         from bioetl.composition import entrypoints
 
         # Check that getter functions exist
-        assert hasattr(entrypoints, "get_checkpoint_service"), (
-            "entrypoints should export get_checkpoint_service"
-        )
-        assert hasattr(entrypoints, "get_quarantine_service"), (
-            "entrypoints should export get_quarantine_service"
-        )
-        assert hasattr(entrypoints, "get_bronze_cleanup_service"), (
-            "entrypoints should export get_bronze_cleanup_service"
-        )
+        assert hasattr(
+            entrypoints, "get_checkpoint_service"
+        ), "entrypoints should export get_checkpoint_service"
+        assert hasattr(
+            entrypoints, "get_quarantine_service"
+        ), "entrypoints should export get_quarantine_service"
+        assert hasattr(
+            entrypoints, "get_bronze_cleanup_service"
+        ), "entrypoints should export get_bronze_cleanup_service"
 
     def test_entrypoints_all_includes_services(self):
         """Test that __all__ includes service getters."""

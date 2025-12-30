@@ -83,6 +83,26 @@ class ResolutionInfo:
             )
 
 
+def _validate_quarantine_required_fields(
+    entry_id: str,
+    pipeline_name: str,
+    error_code: str,
+    payload: dict[str, Any],
+    payload_hash: ContentHash,
+) -> None:
+    """Validate required quarantine entry fields (extracted for lower CC)."""
+    _required = [
+        (entry_id, "entry_id is required"),
+        (pipeline_name, "pipeline_name is required"),
+        (error_code, "error_code is required"),
+        (payload, "payload cannot be empty"),
+        (payload_hash, "payload_hash is required"),
+    ]
+    for field, msg in _required:
+        if not field:
+            raise ValueError(msg)
+
+
 class QuarantineEntry:
     """Aggregate Root for a quarantined record.
 
@@ -148,17 +168,9 @@ class QuarantineEntry:
         Raises:
             ValueError: If required fields are empty.
         """
-        if not entry_id:
-            raise ValueError("entry_id is required")
-        if not pipeline_name:
-            raise ValueError("pipeline_name is required")
-        if not error_code:
-            raise ValueError("error_code is required")
-        if not payload:
-            raise ValueError("payload cannot be empty")
-        if not payload_hash:
-            raise ValueError("payload_hash is required")
-
+        _validate_quarantine_required_fields(
+            entry_id, pipeline_name, error_code, payload, payload_hash
+        )
         self._entry_id = entry_id
         self._pipeline_name = pipeline_name
         self._error_code = error_code

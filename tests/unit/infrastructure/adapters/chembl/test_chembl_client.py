@@ -313,7 +313,9 @@ class TestChemblAdapterHealthAwareBatchSize:
         """Test that HEALTHY status uses full batch size."""
         # Configure circuit breaker for HEALTHY state
         mock_http_client.circuit_breaker = MagicMock()
-        mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+        mock_http_client.circuit_breaker.get_state.return_value = (
+            CircuitBreakerState.CLOSED
+        )
         mock_http_client.circuit_breaker.get_failure_count.return_value = 0
 
         adapter = ChemblAdapter(
@@ -330,7 +332,9 @@ class TestChemblAdapterHealthAwareBatchSize:
         """Test that DEGRADED status halves batch size."""
         # Configure circuit breaker for DEGRADED state (1-2 failures)
         mock_http_client.circuit_breaker = MagicMock()
-        mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+        mock_http_client.circuit_breaker.get_state.return_value = (
+            CircuitBreakerState.CLOSED
+        )
         mock_http_client.circuit_breaker.get_failure_count.return_value = 1
 
         adapter = ChemblAdapter(
@@ -355,7 +359,9 @@ class TestChemblAdapterHealthAwareBatchSize:
         """Test that DEGRADED status respects minimum batch size of 100."""
         # Configure circuit breaker for DEGRADED state
         mock_http_client.circuit_breaker = MagicMock()
-        mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+        mock_http_client.circuit_breaker.get_state.return_value = (
+            CircuitBreakerState.CLOSED
+        )
         mock_http_client.circuit_breaker.get_failure_count.return_value = 1
 
         adapter = ChemblAdapter(
@@ -372,7 +378,9 @@ class TestChemblAdapterHealthAwareBatchSize:
         """Test that UNHEALTHY status raises CriticalError."""
         # Configure circuit breaker for UNHEALTHY state (failure_count > 2)
         mock_http_client.circuit_breaker = MagicMock()
-        mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+        mock_http_client.circuit_breaker.get_state.return_value = (
+            CircuitBreakerState.CLOSED
+        )
         mock_http_client.circuit_breaker.get_failure_count.return_value = 3
 
         adapter = ChemblAdapter(
@@ -393,7 +401,9 @@ class TestChemblAdapterHealthAwareBatchSize:
         """Test that _build_params uses health-aware batch size."""
         # Configure circuit breaker for HEALTHY state
         mock_http_client.circuit_breaker = MagicMock()
-        mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+        mock_http_client.circuit_breaker.get_state.return_value = (
+            CircuitBreakerState.CLOSED
+        )
         mock_http_client.circuit_breaker.get_failure_count.return_value = 0
 
         adapter = ChemblAdapter(
@@ -425,7 +435,9 @@ class TestChemblAdapterHealthTransitions:
         """
         # Configure circuit breaker for DEGRADED state
         mock_http_client.circuit_breaker = MagicMock()
-        mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+        mock_http_client.circuit_breaker.get_state.return_value = (
+            CircuitBreakerState.CLOSED
+        )
         mock_http_client.circuit_breaker.get_failure_count.return_value = 1
 
         adapter = ChemblAdapter(

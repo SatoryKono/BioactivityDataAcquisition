@@ -20,12 +20,8 @@ from collections.abc import Callable
 from datetime import date
 from typing import Any, TypeVar
 
-from bioetl.domain.normalization import (
-    normalize_string as _domain_normalize_string,
-)
-from bioetl.domain.normalization import (
-    parse_date_field as _domain_parse_date_field,
-)
+from bioetl.domain.normalization import normalize_string as _domain_normalize_string
+from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
 
