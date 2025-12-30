@@ -549,10 +549,26 @@ class TestRealProviderRegistration:
         source_config = load_source_config("pubmed")
         assert config.http_config.rate == source_config.rate_limit.requests_per_second
 
+    def test_crossref_is_registered(self):
+        """Verify CrossRef provider is registered with values from source config."""
+        from bioetl.infrastructure.config import load_source_config
+
+        assert ProviderRegistry.is_registered("crossref")
+
+        config = ProviderRegistry.get("crossref")
+        assert config.custom_creator is not None
+        assert config.http_config is not None
+        assert config.data_source_creator is not None
+
+        # Rate should match configs/sources/crossref.yaml (50 req/sec for polite pool)
+        source_config = load_source_config("crossref")
+        assert config.http_config.rate == source_config.rate_limit.requests_per_second
+        assert config.http_config.rate == 50.0
+
     def test_all_providers_listed(self):
         """Verify all expected providers are listed."""
         providers = ProviderRegistry.list_providers()
 
-        expected = ["chembl", "pubchem", "pubmed", "uniprot"]
+        expected = ["chembl", "crossref", "pubchem", "pubmed", "uniprot"]
         for provider in expected:
             assert provider in providers, f"Missing provider: {provider}"
