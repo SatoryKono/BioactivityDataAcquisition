@@ -47,14 +47,12 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
 
 def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
-    import asyncio
-
-    from bioetl.application.services import RunResult, RunStatus
+    from bioetl.application.services import RunStatus
 
     with (
         patch(
             "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
-        ) as mock_get_service,
+        ),
         patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run,
@@ -63,24 +61,15 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
             return_value=mock_registry,
         ),
     ):
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="test_pipe",
-                run_id="test-run-id",
-                run_type="rebuild",
-            )
-        )
-        mock_get_service.return_value = mock_service
-        mock_asyncio_run.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
+        # asyncio.run mock returns the tuple that _run_pipeline_async would return
+        mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
 
         result = cli_runner.invoke(
             cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild", "--yes"]
         )
 
         assert result.exit_code == 0
-        mock_get_service.assert_called_once()
+        mock_asyncio_run.assert_called_once()
 
 
 def test_cli_dry_run_flag(cli_runner, mock_registry):
