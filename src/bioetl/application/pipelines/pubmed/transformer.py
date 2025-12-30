@@ -18,7 +18,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
-from bioetl.domain.transformations import generate_entity_id
+from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -36,6 +36,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
     ):
         """Initialize PubMed publication transformer.
 
@@ -44,10 +45,15 @@ class PubMedPublicationTransformer(BaseTransformer):
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
 
         """
         super().__init__(
-            provider, tracer=tracer, metrics=metrics, gold_filters=gold_filters
+            provider,
+            tracer=tracer,
+            metrics=metrics,
+            gold_filters=gold_filters,
+            identity_service=identity_service,
         )
 
     async def _transform_impl(
@@ -65,8 +71,9 @@ class PubMedPublicationTransformer(BaseTransformer):
                 return None
 
             business_data = self._extract_business_data(root, pmid)
-            entity_id = generate_entity_id(
-                record={"pmid": pmid}, provider=self.provider, id_field="pmid"
+            entity_id = self.compute_entity_id(
+                source_id=pmid,
+                record={"pmid": pmid},
             )
             content_hash = self.compute_content_hash(business_data, exclude_none=False)
             entity = self._create_entity(

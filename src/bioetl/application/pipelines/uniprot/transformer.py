@@ -13,7 +13,7 @@ from bioetl.application.core.base_transformer import (
     TransformationError,
 )
 from bioetl.domain.entities import Protein
-from bioetl.domain.transformations import generate_entity_id
+from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -36,6 +36,7 @@ class UniProtProteinTransformer(BaseTransformer):
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
     ):
         """Initialize UniProt protein transformer.
 
@@ -44,10 +45,15 @@ class UniProtProteinTransformer(BaseTransformer):
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
 
         """
         super().__init__(
-            provider, tracer=tracer, metrics=metrics, gold_filters=gold_filters
+            provider,
+            tracer=tracer,
+            metrics=metrics,
+            gold_filters=gold_filters,
+            identity_service=identity_service,
         )
 
     async def _transform_impl(
@@ -86,11 +92,10 @@ class UniProtProteinTransformer(BaseTransformer):
             "sequence_length": self._extract_nested(record, "sequence.length"),
         }
 
-        # Step 3: Generate entity_id (RULES.md §2.8)
-        entity_id = generate_entity_id(
+        # Step 3: Generate entity_id using IdentityService (RULES.md §2.8)
+        entity_id = self.compute_entity_id(
+            source_id=accession,
             record={"accession": accession},
-            provider=self.provider,
-            id_field="accession",
         )
 
         # Step 4: Compute content_hash (RULES.md §2.8.1)
