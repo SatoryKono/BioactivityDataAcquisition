@@ -15,6 +15,8 @@ from bioetl.domain.exceptions import (
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
+    DataValidationError,
+    ExternalServiceError,
     InvalidDataFormatError,
     LockAcquisitionError,
     LockLostError,
@@ -22,9 +24,12 @@ from bioetl.domain.exceptions import (
     MissingRequiredFieldError,
     NetworkError,
     RateLimitError,
+    RateLimitExceededError,
     RecoverableError,
     RetryExhaustedError,
     SchemaViolationError,
+    ServiceAuthenticationError,
+    ServiceUnavailableError,
     StorageError,
     TableNotFoundError,
     UploadError,
@@ -79,18 +84,92 @@ class TestExceptions:
         assert "record_id" not in str(e)
 
     def test_chembl_api_error_inheritance(self) -> None:
-        """Test ChemblApiError inherits from ApiError."""
-        e = ChemblApiError("ChEMBL service unavailable", 503)
-        assert isinstance(e, ApiError)
+        """Test ChemblApiError inherits from ExternalServiceError.
+
+        Note: ChemblApiError in domain is deprecated. The canonical version
+        is in infrastructure.adapters.chembl.exceptions.
+        """
+        import warnings
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            e = ChemblApiError("ChEMBL service unavailable", 503)
+            # Check deprecation warning was issued
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "deprecated" in str(w[0].message).lower()
+
+        assert isinstance(e, ExternalServiceError)
         assert isinstance(e, RecoverableError)
         assert e.status_code == 503
-        assert "[503]" in str(e)
+        assert e.service_name == "chembl"
 
     def test_storage_error_inheritance(self) -> None:
         """Test StorageError inheritance."""
         e = StorageError("Storage operation failed")
         assert isinstance(e, RecoverableError)
         assert isinstance(e, BioETLError)
+
+    def test_external_service_error(self) -> None:
+        """Test ExternalServiceError base class."""
+        e = ExternalServiceError(
+            "Service error",
+            service_name="test_service",
+            status_code=500,
+            retry_after=60.0,
+        )
+        assert isinstance(e, RecoverableError)
+        assert isinstance(e, BioETLError)
+        assert e.service_name == "test_service"
+        assert e.status_code == 500
+        assert e.retry_after == 60.0
+
+    def test_service_unavailable_error(self) -> None:
+        """Test ServiceUnavailableError."""
+        e = ServiceUnavailableError(
+            "Service down",
+            service_name="chembl",
+            status_code=503,
+            retry_after=30.0,
+        )
+        assert isinstance(e, ExternalServiceError)
+        assert e.service_name == "chembl"
+        assert e.status_code == 503
+
+    def test_rate_limit_exceeded_error(self) -> None:
+        """Test RateLimitExceededError."""
+        e = RateLimitExceededError(
+            "Too many requests",
+            service_name="crossref",
+            retry_after=120.0,
+        )
+        assert isinstance(e, ExternalServiceError)
+        assert e.status_code == 429
+        assert e.retry_after == 120.0
+
+    def test_service_authentication_error(self) -> None:
+        """Test ServiceAuthenticationError."""
+        e = ServiceAuthenticationError(
+            "Invalid API key",
+            service_name="uniprot",
+            status_code=401,
+        )
+        assert isinstance(e, ExternalServiceError)
+        assert e.service_name == "uniprot"
+        assert e.status_code == 401
+
+    def test_data_validation_error(self) -> None:
+        """Test DataValidationError for external service data."""
+        e = DataValidationError(
+            "Invalid JSON response",
+            service_name="pubchem",
+            field="smiles",
+            value="invalid_data",
+        )
+        assert isinstance(e, ExternalServiceError)
+        assert e.service_name == "pubchem"
+        assert e.field == "smiles"
+        assert e.value == "invalid_data"
 
     def test_data_quality_threshold_error(self) -> None:
         """Test DataQualityThresholdError."""
@@ -308,11 +387,16 @@ class TestErrorContext:
 
     def test_context_inheritance(self) -> None:
         """Subclass context should include parent class attributes."""
-        err = ChemblApiError("Service unavailable", status_code=503)
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            err = ChemblApiError("Service unavailable", status_code=503)
+
         ctx = err.context
 
-        # ChemblApiError inherits from ApiError which sets message and status_code
-        assert ctx["message"] == "Service unavailable"
+        # ChemblApiError inherits from ExternalServiceError which sets service_name and status_code
+        assert ctx["service_name"] == "chembl"
         assert ctx["status_code"] == 503
 
     @pytest.mark.parametrize(

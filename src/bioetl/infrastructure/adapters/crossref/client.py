@@ -21,11 +21,11 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions import CrossRefApiError
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

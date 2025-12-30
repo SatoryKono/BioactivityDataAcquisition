@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.exceptions import ChemblApiError, CriticalError
+from bioetl.domain.exceptions import CriticalError
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -32,6 +32,7 @@ from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
 )
+from bioetl.infrastructure.adapters.chembl.exceptions import ChemblApiError
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -255,13 +256,20 @@ class ChemblAdapter(BaseHttpAdapter):
         Error tracking is handled by the circuit breaker in UnifiedHTTPClient,
         so this method focuses on classification and logging only.
 
+        On adapter boundary, provider-specific errors are translated to
+        domain ExternalServiceError hierarchy for application layer consumption.
+
         Args:
             e: The exception that occurred
             context: Operation context for logging (e.g., "fetch", "health_check")
 
         Raises:
             CriticalError: For auth failures and other critical errors
-            ChemblApiError: For recoverable and other errors
+            ChemblApiError: For recoverable and other errors (inherits ExternalServiceError)
+
+        Note:
+            Application layer should catch ExternalServiceError, not ChemblApiError.
+            ChemblApiError inherits from ExternalServiceError, so this works correctly.
 
         """
         # Classify the error for logging
@@ -288,8 +296,8 @@ class ChemblAdapter(BaseHttpAdapter):
                 f"Critical ChEMBL error ({error_type.value}): {e}"
             ) from e
 
-        # Wrap in ChemblApiError for consistent handling
-        raise ChemblApiError(str(e)) from e
+        # Wrap in ChemblApiError (inherits ExternalServiceError) for consistent handling
+        raise ChemblApiError(str(e), operation=context) from e
 
     async def _fetch_filtered(
         self,
