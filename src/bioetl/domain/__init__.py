@@ -37,6 +37,18 @@ from bioetl.domain.context import (
 
 # Entities (Domain objects)
 from bioetl.domain.entities import (
+    # DTO Records (Pydantic)
+    ActivityRecord,
+    ArticleRecord,
+    AssayRecord,
+    CellLineRecord,
+    DocumentRecord,
+    MoleculeRecord,
+    PubChemCompoundRecord,
+    PublicationRecord,
+    TargetComponentRecord,
+    TargetRecord,
+    # Domain Entities (dataclass)
     Assay,
     BaseEntity,
     Bioactivity,
@@ -128,6 +140,7 @@ from bioetl.domain.normalization import (
 
 # Ports
 from bioetl.domain.ports import (
+    ActivityAggregatorPort,
     AuditEntry,
     AuditLayer,
     AuditOperation,
@@ -153,12 +166,16 @@ from bioetl.domain.ports import (
     NoOpMemoryMonitor,
     NoOpMetrics,
     NoOpTracing,
+    NormalizationServicePort,
+    OutlierFilterPort,
     QuarantinePort,
     RateLimiterPort,
     ShutdownPort,
     SilverValidatorPort,
     StoragePort,
     TracingPort,
+    UnitConverterPort,
+    ValueValidatorPort,
 )
 
 # Resilience (domain value objects)
@@ -242,7 +259,18 @@ __all__ = [
     # Context
     "PipelineContext",
     "PipelineRunContext",
-    # Entities
+    # Entity DTOs (Pydantic Records)
+    "ActivityRecord",
+    "ArticleRecord",
+    "AssayRecord",
+    "CellLineRecord",
+    "DocumentRecord",
+    "MoleculeRecord",
+    "PubChemCompoundRecord",
+    "PublicationRecord",
+    "TargetComponentRecord",
+    "TargetRecord",
+    # Domain Entities (dataclass)
     "Assay",
     "BaseEntity",
     "Bioactivity",
