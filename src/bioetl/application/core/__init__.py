@@ -29,12 +29,6 @@ from bioetl.application.core.cleanup_service import (
     LayerInfo,
 )
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.services.medallion_lifecycle import (
-    ClearResult,
-    MedallionLifecycleService,
-    PrepareResult,
-    VacuumResult as MedallionVacuumResult,
-)
 from bioetl.application.core.memory_monitor import (
     MemoryConfig,
     MemoryMonitor,
@@ -43,6 +37,8 @@ from bioetl.application.core.memory_monitor import (
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
     DQResult,
+    DQStatus,
+    PostrunResult,
     PostrunService,
     VacuumResult,
 )
@@ -65,6 +61,11 @@ from bioetl.application.core.transform_utils import (
     safe_extract,
     validate_smiles,
 )
+from bioetl.application.services.medallion_lifecycle import (
+    ClearResult,
+    MedallionLifecycleService,
+    PrepareResult,
+)
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.medallion import (
     Layer,
@@ -84,6 +85,7 @@ __all__ = [
     "CleanupService",
     "ClearResult",
     "DQResult",
+    "DQStatus",
     "Layer",
     "LayerInfo",
     "LockManager",
@@ -95,6 +97,7 @@ __all__ = [
     "PipelineRunner",
     "PipelineServices",
     "PipelineShutdownError",
+    "PostrunResult",
     "PostrunService",
     "PreflightService",
     "PrepareResult",
