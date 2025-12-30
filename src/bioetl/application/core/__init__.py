@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_transformer import (
     BatchTransformer,
     StreamingBatchProcessor,
@@ -73,6 +74,7 @@ from bioetl.domain.medallion import (
 __all__ = [
     "BasePipeline",
     "BaseTransformer",
+    "BatchExecutor",
     "BatchTransformer",
     "BatchWriter",
     "CheckpointManager",
@@ -90,12 +92,14 @@ __all__ = [
     "MemoryMonitor",
     "MemoryStats",
     "PipelineConfig",
+    "PipelineExecutor",  # Deprecated: use BatchExecutor
     "PipelineRunner",
     "PipelineServices",
     "PipelineShutdownError",
     "PostrunService",
     "PreflightService",
     "QuarantineManager",
+    "RecordProcessor",  # Deprecated: use BatchExecutor
     "RuntimeConfig",
     "ShutdownReason",
     "ShutdownService",
@@ -115,3 +119,37 @@ __all__ = [
     "safe_extract",
     "validate_smiles",
 ]
+
+
+# =============================================================================
+# Deprecated Aliases (14-day transition period per RULES.md §7.1)
+# Removal date: 2026-01-13
+# =============================================================================
+
+import warnings as _warnings
+from typing import Any
+
+
+def __getattr__(name: str) -> type[Any]:
+    """Provide deprecated aliases with warnings."""
+    if name == "PipelineExecutor":
+        _warnings.warn(
+            "PipelineExecutor is deprecated and will be removed on 2026-01-13. "
+            "Use BatchExecutor instead, which combines extraction and processing.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from bioetl.application.core.executor import PipelineExecutor
+
+        return PipelineExecutor
+    if name == "RecordProcessor":
+        _warnings.warn(
+            "RecordProcessor is deprecated and will be removed on 2026-01-13. "
+            "Use BatchExecutor instead, which combines extraction and processing.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from bioetl.application.core.record_processor import RecordProcessor
+
+        return RecordProcessor
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

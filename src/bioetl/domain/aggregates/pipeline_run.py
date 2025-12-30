@@ -1,14 +1,4 @@
-"""PipelineRun Aggregate.
-
-Aggregate Root for pipeline execution tracking with protected invariants.
-
-Invariants:
-    1. status == COMPLETED only if all stages have status == SUCCESS
-    2. status == FAILED if at least one stage has status == FAILED
-    3. end_time != None only if status in (COMPLETED, FAILED)
-    4. stages cannot be modified after status == COMPLETED or FAILED
-    5. run_id is unique and immutable after creation
-"""
+"""PipelineRun Aggregate for pipeline execution tracking."""
 
 from __future__ import annotations
 
@@ -22,51 +12,24 @@ from bioetl.domain.types import RunID, RunType
 
 
 class StageStatus(str, Enum):
-    """Status of a pipeline stage execution."""
-
+    """Status of a pipeline stage."""
     PENDING = "pending"
-    """Stage not yet started."""
-
     RUNNING = "running"
-    """Stage currently executing."""
-
     SUCCESS = "success"
-    """Stage completed successfully."""
-
     FAILED = "failed"
-    """Stage failed with an error."""
-
     SKIPPED = "skipped"
-    """Stage was skipped (e.g., due to prior failure)."""
 
 
 class RunStatus(str, Enum):
-    """Status of a pipeline run.
-
-    State machine transitions:
-        PENDING -> RUNNING (via start())
-        RUNNING -> COMPLETED (via complete(), all stages SUCCESS)
-        RUNNING -> FAILED (via record_stage_failure() or fail())
-        RUNNING -> SHUTDOWN (via shutdown())
-    """
-
+    """Status of a pipeline run."""
     PENDING = "pending"
-    """Run created but not yet started."""
-
     RUNNING = "running"
-    """Run is currently executing."""
-
     COMPLETED = "completed"
-    """Run completed successfully (all stages SUCCESS)."""
-
     FAILED = "failed"
-    """Run failed (at least one stage FAILED)."""
-
     SHUTDOWN = "shutdown"
-    """Run was gracefully shut down (SIGTERM/SIGINT)."""
 
     def is_terminal(self) -> bool:
-        """Check if this is a terminal status (no further transitions allowed)."""
+        """Check if terminal (no more transitions)."""
         return self in {RunStatus.COMPLETED, RunStatus.FAILED, RunStatus.SHUTDOWN}
 
 

@@ -18,8 +18,8 @@ from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.executor import PipelineExecutor
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.runner_services import RunnerServices
     from bioetl.application.core.shutdown import ShutdownSignal
@@ -46,7 +46,7 @@ class PipelineRunner:
         runtime: RuntimeConfig,
         services: PipelineServices,
         context: PipelineContext,
-        executor: PipelineExecutor,
+        executor: BatchExecutor,
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: LoggerPort,
@@ -61,7 +61,7 @@ class PipelineRunner:
             runtime: Runtime configuration.
             services: Common pipeline services.
             context: Pipeline execution context.
-            executor: Pipeline executor instance.
+            executor: Batch executor instance (unified extraction + processing).
             checkpoint_manager: Checkpoint manager.
             shutdown_signal: Shutdown signal for graceful termination.
             logger: Structured logger.
