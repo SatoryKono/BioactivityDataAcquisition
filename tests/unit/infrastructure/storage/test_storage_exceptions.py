@@ -69,9 +69,6 @@ class TestDeltaWriterExceptions:
         writer = DeltaWriter(
             base_path="/fake/path", logger=noop_logger
         )
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         import pyarrow as pa
 
@@ -111,9 +108,6 @@ class TestDeltaWriterExceptions:
         writer = DeltaWriter(
             base_path="/fake/path", logger=noop_logger
         )
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         import pyarrow as pa
 
@@ -145,9 +139,6 @@ class TestDeltaWriterExceptions:
         writer = DeltaWriter(
             base_path="/fake/path", logger=noop_logger
         )
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         import pyarrow as pa
 
@@ -169,15 +160,12 @@ class TestDeltaWriterExceptions:
     async def test_vacuum_raises_table_not_found(self, noop_logger):
         """Test that vacuum raises CustomTableNotFoundError."""
         with patch(
-            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=TableNotFoundError,
         ):
             writer = DeltaWriter(
                 base_path="/fake/path", logger=noop_logger
             )
-            # Make run_in_executor execute synchronously for testing
-            writer.loop = asyncio.get_event_loop()
-            writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
             with pytest.raises(CustomTableNotFoundError):
                 await writer.vacuum("test.table")
