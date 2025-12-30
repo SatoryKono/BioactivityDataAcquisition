@@ -153,9 +153,10 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         ingestion_ts=datetime.now(timezone.utc),
     )
 
-    # Verify quarantine Delta table exists (not JSONL)
-    quarantine_table = quarantine_path / "common.quarantine"
-    assert quarantine_table.exists(), "Quarantine table should exist"
+    # Verify quarantine Delta table exists (base_path IS the table path)
+    # Delta Lake creates _delta_log directory in the table path
+    delta_log = quarantine_path / "_delta_log"
+    assert delta_log.exists(), f"Quarantine Delta table should exist at {quarantine_path}"
 
 
 @pytest.mark.e2e

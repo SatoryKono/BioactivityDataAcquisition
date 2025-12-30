@@ -438,10 +438,11 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         lock_context=lock_context,
     )
 
-    path = PathLib(path_str)
-    assert path.exists(), "Bronze file should exist"
+    # write_bronze returns relative path from base_path, so join them
+    path = (e2e_data_dir / "bronze") / path_str
+    assert path.exists(), f"Bronze file should exist at {path}"
     assert path.suffix == ".zst", "Should be zstd compressed"
 
-    await writer.aclose()
+    # Cleanup lock
     await lock.release(key=lock_key, owner_id=str(run_id))
     await lock.aclose()
