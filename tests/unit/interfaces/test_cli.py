@@ -281,90 +281,107 @@ class TestCliCommands:
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_valid_pipeline(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_get_service, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
         from bioetl.application.services import RunResult, RunStatus
 
         mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
+        mock_result = RunResult(
+            status=RunStatus.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
         )
+        mock_service.run = AsyncMock(return_value=mock_result)
         mock_get_service.return_value = mock_service
-        mock_asyncio.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
 
-        cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+        # Use patch for asyncio.run that returns the result directly
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run",
+            return_value=mock_result,
+        ):
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
         # Should have called the service
+        assert result.exit_code == 0, f"Command failed: {result.output}"
         mock_get_service.assert_called_once()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_limit(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_get_service, mock_register, cli_runner, mock_registry
     ):
         """Test that --limit is passed correctly."""
-        from bioetl.application.services import RunResult, RunStatus
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
 
         mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
+        mock_result = RunResult(
+            status=RunStatus.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
         )
+        mock_service.run = AsyncMock(return_value=mock_result)
         mock_get_service.return_value = mock_service
-        mock_asyncio.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
 
-        cli_runner.invoke(
-            cli, ["run", "--pipeline", "chembl_activity", "--limit", "100"]
-        )
+        # Use patch for asyncio.run that actually runs the coroutine
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run",
+            side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
+        ):
+            result = cli_runner.invoke(
+                cli, ["run", "--pipeline", "chembl_activity", "--limit", "100"]
+            )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
 
         # Verify limit was passed via RunOptions
         call_args = mock_service.run.call_args
+        assert call_args is not None, "service.run was not called"
         pipeline_name = call_args[0][0]
         options = call_args[1]["options"]  # RunOptions
         assert pipeline_name == "chembl_activity"
+        assert isinstance(options, RunOptions)
         assert options.limit == 100
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
-    @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_with_resume_flag(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_get_service, mock_register, cli_runner, mock_registry
     ):
         """Test that --resume flag is passed correctly."""
-        from bioetl.application.services import RunResult, RunStatus
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
 
         mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            return_value=RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name="chembl_activity",
-                run_id="test-run-id",
-                run_type="incremental",
-            )
+        mock_result = RunResult(
+            status=RunStatus.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
         )
+        mock_service.run = AsyncMock(return_value=mock_result)
         mock_get_service.return_value = mock_service
-        mock_asyncio.side_effect = lambda coro: asyncio.get_event_loop().run_until_complete(coro)
 
-        cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity", "--resume"])
+        # Use patch for asyncio.run that actually runs the coroutine
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run",
+            side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
+        ):
+            result = cli_runner.invoke(
+                cli, ["run", "--pipeline", "chembl_activity", "--resume"]
+            )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
 
         # Verify resume was passed via RunOptions
         call_args = mock_service.run.call_args
+        assert call_args is not None, "service.run was not called"
         pipeline_name = call_args[0][0]
         options = call_args[1]["options"]  # RunOptions
         assert pipeline_name == "chembl_activity"
+        assert isinstance(options, RunOptions)
         assert options.resume is True
 
 

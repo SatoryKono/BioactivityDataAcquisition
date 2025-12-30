@@ -58,7 +58,7 @@ class TestFileSizeLimits:
         "batch_executor.py": 650,  # 610 LOC - unified executor combining PipelineExecutor + RecordProcessor
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "entrypoints.py": 700,  # 675 LOC - pipeline entrypoints (run_pipeline expanded)
+        "entrypoints.py": 720,  # 703 LOC - pipeline entrypoints (run_pipeline expanded + services)
         "registration.py": 500,  # 478 LOC - provider registration with data source creators
         "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
         # Consolidated factory files (v5.2)

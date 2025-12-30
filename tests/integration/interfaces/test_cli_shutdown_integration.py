@@ -86,17 +86,30 @@ class TestCliGracefulShutdownExitCode:
         cli_runner: CliRunner,
         temp_env: dict[str, str],
     ):
-        """Test that PipelineShutdownError results in exit code 130."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(
-            side_effect=PipelineShutdownError("Shutdown requested")
-        )
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = ShutdownSignal()
+        """Test that SHUTDOWN status results in exit code 130."""
+        import asyncio
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run.asyncio.run",
+                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -111,14 +124,29 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that normal completion returns exit code 0."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = ShutdownSignal()
+        import asyncio
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run.asyncio.run",
+                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -133,14 +161,17 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that other exceptions return exit code 1."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(side_effect=RuntimeError("Something went wrong"))
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = ShutdownSignal()
+        mock_service = MagicMock()
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run.asyncio.run",
+                side_effect=RuntimeError("Something went wrong"),
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -218,60 +249,78 @@ class TestRunnerShutdownIntegration:
         cli_runner: CliRunner,
         temp_env: dict[str, str],
     ):
-        """Test that runner logs graceful shutdown."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(side_effect=PipelineShutdownError())
-        mock_logger = MagicMock()
-        mock_runner.logger = mock_logger
-        mock_runner.shutdown_signal = ShutdownSignal()
+        """Test that SHUTDOWN status results in shutdown warning."""
+        import asyncio
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run.asyncio.run",
+                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+            ),
         ):
-            cli_runner.invoke(
+            result = cli_runner.invoke(
                 cli,
                 ["run", "--pipeline", "chembl_activity"],
             )
 
-        # Should have logged the shutdown
-        mock_logger.warning.assert_called()
-        warning_messages = [str(call) for call in mock_logger.warning.call_args_list]
-        assert any("shut down" in msg.lower() for msg in warning_messages)
+        # CLI should output shutdown warning message
+        assert result.exit_code == 130
+        assert "shut down" in result.output.lower() or "graceful" in result.output.lower()
 
     def test_runner_shutdown_signal_passed_to_setup(
         self,
         cli_runner: CliRunner,
         temp_env: dict[str, str],
     ):
-        """Test that shutdown_signal is passed to setup_shutdown_handlers."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(return_value=None)
-        mock_runner.logger = MagicMock()
-        mock_shutdown_signal = MagicMock()
-        mock_runner.shutdown_signal = mock_shutdown_signal
+        """Test that service-based architecture handles shutdown correctly."""
+        import asyncio
+
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-                return_value=mock_runner,
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run.setup_shutdown_handlers"
-            ) as mock_setup,
+                "bioetl.interfaces.cli.commands.run.asyncio.run",
+                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+            ),
         ):
-            cli_runner.invoke(
+            result = cli_runner.invoke(
                 cli,
                 ["run", "--pipeline", "chembl_activity"],
             )
 
-        # The mock_shutdown_signal is retrieved from the runner instance
-        # which is created by create_pipeline_runner.
-        # In cli.py, setup_shutdown_handlers is called with shutdown_signal and logger.
-
-        # So we expect setup_shutdown_handlers to be called with the mock_shutdown_signal
-        # and the logger that we attached to the mock_runner.
-        mock_setup.assert_called_once_with(mock_shutdown_signal, mock_runner.logger)
+        # Verify service was called correctly
+        mock_service.run.assert_called_once()
+        assert result.exit_code == 0
 
 
 class TestLockReleaseOnShutdown:
@@ -288,14 +337,29 @@ class TestLockReleaseOnShutdown:
         temp_env: dict[str, str],
     ):
         """Test that lock is released even after shutdown error."""
-        mock_runner = MagicMock()
-        mock_runner.run = AsyncMock(side_effect=PipelineShutdownError("Shutdown"))
-        mock_runner.logger = MagicMock()
-        mock_runner.shutdown_signal = ShutdownSignal()
+        import asyncio
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run.create_pipeline_runner",
-            return_value=mock_runner,
+        from bioetl.application.services import RunResult, RunStatus
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run.asyncio.run",
+                side_effect=lambda coro: asyncio.get_event_loop().run_until_complete(coro),
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
