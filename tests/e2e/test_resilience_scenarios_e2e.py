@@ -387,7 +387,8 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
     - Partial writes should not corrupt data
     """
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-    from bioetl.domain.ports.noop import NoOpLogger, NoOpMetrics
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+    from bioetl.domain.ports.noop import NoOpMetrics
     from datetime import datetime, timezone
 
     writer = BronzeWriter(
