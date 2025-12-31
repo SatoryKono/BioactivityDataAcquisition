@@ -2,6 +2,10 @@
 
 Tests the complete pipeline execution from fetch to Gold layer.
 Uses VCR cassettes for HTTP requests and local file storage.
+
+Note: All tests in this module are grouped via xdist_group to prevent
+race conditions when running in parallel. These tests modify global
+environment variables (BIOETL_DATA_DIR) and cached settings.
 """
 
 from __future__ import annotations
@@ -9,6 +13,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
+# Group all tests in this module to run in the same xdist worker
+# This prevents race conditions with BIOETL_DATA_DIR and get_settings cache
+pytestmark = pytest.mark.xdist_group("e2e_chembl_activity")
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
 

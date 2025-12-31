@@ -381,7 +381,7 @@ class TestMemoryMonitorBaseline:
     - get_recommended_batch_size(): < 100 µs
     """
 
-    MEMORY_STATS_THRESHOLD_MS = 50  # Increased for Python 3.14/CI variability
+    MEMORY_STATS_THRESHOLD_MS = 100  # Increased for Python 3.14/CI variability and parallel test execution
     BATCH_SIZE_THRESHOLD_US = 50000  # Increased for Python 3.14/CI variability
 
     def test_memory_stats_baseline(self) -> None:

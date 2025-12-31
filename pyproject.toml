@@ -150,6 +150,7 @@ markers = [
     "vcr: VCR.py recorded HTTP interactions",
     "performance: Performance regression tests (optional CI stage)",
     "architecture: Architecture tests (layer boundaries, contracts)",
+    "xdist_group: Group tests to run in the same xdist worker (prevents race conditions)",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
