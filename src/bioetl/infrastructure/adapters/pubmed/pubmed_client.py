@@ -268,7 +268,7 @@ class PubMedAdapter(BaseHttpAdapter):
 
         Example:
             >>> async for article in adapter.fetch_as_models("publication", limit=10):
-            ...     print(article.pmid, article.title)
+            ...     logger.debug("article_fetched", pmid=article.pmid, title=article.title)
 
         """
         model_class = PUBMED_DTO_MODELS.get(entity_type)

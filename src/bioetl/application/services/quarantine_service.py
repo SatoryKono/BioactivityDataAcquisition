@@ -84,7 +84,7 @@ class QuarantineService:
         >>> service = QuarantineService(quarantine_port=port, logger=logger)
         >>> records = await service.inspect("chembl_activity", limit=10)
         >>> for rec in records:
-        ...     print(f"{rec.error_code}: {rec.payload}")
+        ...     logger.info("quarantine_record", error_code=rec.error_code, payload=rec.payload)
     """
 
     quarantine_port: QuarantinePort
