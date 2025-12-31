@@ -31,7 +31,7 @@ _LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {
     "bei": safe_float,
     "le": safe_float,
     "lle": safe_float,
-    "sei": safe_float,
+    "sei": safe_hthtib rjyakbrnckbzybzfloat,
 }
 
 # Mapping for action type fields extraction (nested dict)
