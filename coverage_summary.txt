@@ -1,0 +1,46 @@
+# Coverage Report Summary
+# Generated: 2025-12-31
+# BioETL Project
+
+## Overall Statistics
+- Total Coverage: 90.00%
+- Coverage Threshold: 85% (PASSED)
+- Total Tests: 4378 passed, 34 skipped, 1 failed (benchmark only)
+
+## Test Results
+- Unit tests: PASSED
+- Architecture tests: PASSED  
+- Contract tests: SKIPPED (Live API disabled)
+- Benchmark tests: 1 FAILED (test_memory_stats_baseline - environment dependent)
+
+## Coverage by Layer (14742 statements total)
+| Layer | Coverage |
+|-------|----------|
+| domain/ | ~95% |
+| application/ | ~88-92% |
+| composition/ | ~85-90% |
+| infrastructure/ | ~88-92% |
+| interfaces/ | ~70-100% |
+
+## Files with 100% Coverage (sample)
+- src/bioetl/domain/ports/__init__.py
+- src/bioetl/domain/events.py
+- src/bioetl/application/core/config.py
+- src/bioetl/infrastructure/observability/__init__.py
+- Multiple transformer and adapter files
+
+## Files Requiring Attention (<80% coverage)
+- src/bioetl/interfaces/cli/commands/run_all.py: 72.68%
+- src/bioetl/interfaces/cli/commands/vacuum.py: 65.12%
+- src/bioetl/interfaces/cli/formatters.py: 60.94%
+- src/bioetl/interfaces/orchestration/__init__.py: 0.00% (stub)
+
+## Generated Reports Location
+- HTML Report: coverage_report/index.html (gitignored)
+- XML Report: coverage.xml (gitignored)
+
+## Commands to Regenerate
+```bash
+make test                 # Run all tests with coverage
+uv run pytest tests/ --cov=src/bioetl --cov-report=html:coverage_report
+```
