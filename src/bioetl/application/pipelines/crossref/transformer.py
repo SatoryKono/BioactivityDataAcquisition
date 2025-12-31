@@ -32,7 +32,7 @@ from bioetl.domain.validation import validate_year_range
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -55,6 +55,7 @@ class CrossRefTransformer(BaseTransformer):
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
     ) -> None:
         """Initialize CrossRef transformer.
 
@@ -64,6 +65,7 @@ class CrossRefTransformer(BaseTransformer):
             metrics: Optional metrics port for duration/error tracking.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
+            pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
 
         """
         super().__init__(
@@ -73,6 +75,7 @@ class CrossRefTransformer(BaseTransformer):
             metrics=metrics,
             gold_filters=gold_filters,
             identity_service=identity_service,
+            pii_hasher=pii_hasher,
         )
 
     # ========================================================================
@@ -175,11 +178,15 @@ class CrossRefTransformer(BaseTransformer):
         abstract_raw = rec.get("abstract", "")
         abstract = strip_html_tags(abstract_raw) if abstract_raw else None
 
+        # Extract and hash PII fields (RULES.md §5.4)
+        raw_authors = self._extract_authors(rec)
+        hashed_authors = self.hash_pii_list(raw_authors) or []
+
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
             "abstract": abstract,
-            "authors": self._extract_authors(rec),
+            "authors": hashed_authors,
             "journal": extract_first_string(rec.get("container-title", [])),
             "issn": rec.get("ISSN", []),
             "publisher": rec.get("publisher"),

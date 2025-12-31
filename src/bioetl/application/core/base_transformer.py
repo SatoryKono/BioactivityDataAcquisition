@@ -21,7 +21,14 @@ from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 
 import orjson
 
-from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
+from bioetl.domain.ports import (
+    MetricsPort,
+    NoOpMetrics,
+    NoOpPiiHasher,
+    NoOpTracing,
+    PiiHasherPort,
+    TracingPort,
+)
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import ContentHash, EntityID
 
@@ -90,6 +97,7 @@ class BaseTransformer(ABC):
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -101,6 +109,8 @@ class BaseTransformer(ABC):
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
                 Defaults to a new IdentityService instance.
+            pii_hasher: Optional PII hasher for hashing author names and other PII.
+                Defaults to NoOpPiiHasher (no hashing) for backward compatibility.
 
         """
         self.provider = provider
@@ -111,6 +121,41 @@ class BaseTransformer(ABC):
         self._identity: IdentityService = (
             identity_service if identity_service is not None else IdentityService()
         )
+        self._pii_hasher: PiiHasherPort = (
+            pii_hasher if pii_hasher is not None else NoOpPiiHasher()
+        )
+
+    # ========================================================================
+    # PII Hashing Methods (RULES.md §5.4)
+    # ========================================================================
+
+    def hash_pii_value(self, value: str | None) -> str | None:
+        """Hash a single PII value (e.g., author name).
+
+        Delegates to PiiHasherPort. Uses NoOpPiiHasher by default
+        (no hashing) for backward compatibility.
+
+        Args:
+            value: PII value to hash, or None.
+
+        Returns:
+            Hashed value, or None if input is None.
+        """
+        return self._pii_hasher.hash_value(value)
+
+    def hash_pii_list(self, values: list[str] | None) -> list[str] | None:
+        """Hash a list of PII values (e.g., list of author names).
+
+        Delegates to PiiHasherPort. Uses NoOpPiiHasher by default
+        (no hashing) for backward compatibility.
+
+        Args:
+            values: List of PII values to hash, or None.
+
+        Returns:
+            List of hashed values, or None if input is None.
+        """
+        return self._pii_hasher.hash_list(values)
 
     async def transform(
         self,

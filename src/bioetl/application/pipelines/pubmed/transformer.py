@@ -23,7 +23,7 @@ from bioetl.domain.services import IdentityService
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -37,6 +37,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
     ):
         """Initialize PubMed publication transformer.
 
@@ -46,6 +47,7 @@ class PubMedPublicationTransformer(BaseTransformer):
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
+            pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
 
         """
         super().__init__(
@@ -54,6 +56,7 @@ class PubMedPublicationTransformer(BaseTransformer):
             metrics=metrics,
             gold_filters=gold_filters,
             identity_service=identity_service,
+            pii_hasher=pii_hasher,
         )
 
     async def _transform_impl(
@@ -104,12 +107,16 @@ class PubMedPublicationTransformer(BaseTransformer):
         journal_data = self._extract_journal_data(article)
         date_data = self._extract_date_data(article, pubmed_data)
 
+        # Extract and hash PII fields (RULES.md §5.4)
+        raw_authors = AuthorExtractor.parse_authors(article)
+        hashed_authors = self.hash_pii_list(raw_authors) or []
+
         return {
             "pmid": pmid,
             "doi": IdentifierExtractor.extract_doi(root),
             "title": get_text(article.find(".//ArticleTitle")),
             "abstract": AbstractExtractor.extract_abstract(article),
-            "authors": AuthorExtractor.parse_authors(article),
+            "authors": hashed_authors,
             **journal_data,
             **date_data,
             "publication_types": ClassificationExtractor.parse_publication_types(
