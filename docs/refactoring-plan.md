@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.2 | Дата: 2025-12-31 | Обновлено: Подтверждено — MemoryLock полностью реализует TTL/heartbeat/fencing, Redis НЕ требуется*
+*Версия: 6.3 | Дата: 2025-12-31 | Обновлено: Добавлено 6 ложных утверждений из action_plan.md (OPS-001, ARCH-001, SOLID-001/002, DATA-001)*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -118,6 +118,11 @@
 | "Pandera strict=False позволяет пропускать невалидные данные" | **BY DESIGN**: `strict=False` для backward-compat. При `strict=True` и отсутствии схемы — ошибка | `pandera_validator.py:26-27` (верификация 2025-12-31) |
 | "40 вызовов print() нарушают требования UnifiedLogger" | **ВСЕ В DOCSTRINGS**: Все 40 вхождений — doctest примеры (`>>> print()`), не runtime код. Doctest — стандартный Python pattern для документации. | `grep -v ">>> \|\.\.\.     print" src/bioetl` → 0 вхождений (верификация 2025-12-31) |
 | "BatchExecutor 581-643 LOC — монолит, требует декомпозиции" | **ДЕКОМПОЗИРОВАН**: Tracing извлечён в `BatchTracingManager` (245 LOC), BatchExecutor = 540 LOC < 550 лимита | `batch_executor.py`, `batch_tracing.py` (верификация 2025-12-31) |
+| "MemoryLock TTL/heartbeat не соответствуют ADR-010" | **КОРРЕКТНО РЕАЛИЗОВАНО**: MemoryLock принимает TTL как параметр `acquire(ttl=...)`, не хардкодит значения. ADR-010 указывает defaults в `RuntimeConfig`, а не в lock | `memory_lock.py:111-128`, `ADR-010:108-111` (верификация 2025-12-31) |
+| "Content hash не исключает все _dq_* поля" | **УЖЕ РЕАЛИЗОВАНО**: `META_FIELDS` в `identity_service.py:25-31` и `transformations.py:29-34` содержит `_dq_warn`, `_dq_error` | `identity_service.py:25-31,157`, `transformations.py:29-36,85` (верификация 2025-12-31) |
+| "Domain сервисы (normalization_service, value_validator, activity_aggregator) требуют декомпозиции" | **ПРАВИЛЬНАЯ АРХИТЕКТУРА**: `NormalizationService` (411 LOC) — **Facade**, оркестрирует `UnitConverter`, `ValueValidator`, `ActivityAggregator`. Каждый сервис — когезивен с single responsibility. | `normalization_service.py:49-57,78-81` (верификация 2025-12-31) |
+| "ValueValidator и ActivityAggregator без делегации/стратегий" | **УЖЕ РЕАЛИЗОВАНО**: `ActivityAggregator` использует strategy dict (`aggregators` в строках 155-161). `ValueValidator` использует extracted methods (`_check_*`, `_validate_*`) | `activity_aggregator.py:155-165`, `value_validator.py:98-104,106-117` (верификация 2025-12-31) |
+| "Bronze формат не зафиксирован на JSONL+zstd" | **ЗАФИКСИРОВАН**: `BronzeWriter` использует `.jsonl.zst` (строка 335), `zstandard` compression (строки 231-235). Docstring явно указывает: "JSONL + zstd compression" | `bronze_writer.py:1,335,231-235` (верификация 2025-12-31) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
