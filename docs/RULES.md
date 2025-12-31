@@ -666,10 +666,13 @@ async with services:  # __aenter__ инициализирует ресурсы
 - **Staging**: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя. 
 - **Prod**: Боевая среда. Доступ на запись только у CI/CD. 
  
-### 5.6.1. Environment Isolation 
-Изоляция ресурсов для предотвращения "Cross-Env Pollution". 
-- **S3**: Разные бакеты (`bioetl-dev`, `bioetl-staging`, `bioetl-prod`). 
-- **Redis**: Разные префиксы ключей или отдельные инстансы DB (`db0`, `db1`). 
+### 5.6.1. Environment Isolation
+Изоляция ресурсов для предотвращения "Cross-Env Pollution".
+
+> **Note**: Текущая архитектура — Local-Only (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)).
+> Нижеследующие примеры относятся к будущему распределённому развёртыванию.
+
+- **Storage**: Разные директории или бакеты (`data/dev`, `data/staging`, `data/prod` или `bioetl-dev`, `bioetl-staging`, `bioetl-prod`).
 - **Configs**: Строгое разделение переменных окружения. Доступ к Prod-секретам только у CI Runner. 
  
 ## 6. Документация (Автоматизация — приоритет) 
