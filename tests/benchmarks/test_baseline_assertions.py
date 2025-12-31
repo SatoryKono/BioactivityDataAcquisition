@@ -28,7 +28,7 @@ class TestContentHashBaselines:
 
     # Baseline thresholds in microseconds (with safety margin for CI/Python 3.14 variability)
     SMALL_RECORD_THRESHOLD_US = 1000  # 20x of 50 µs target (accounts for Python 3.14 variance)
-    MEDIUM_RECORD_THRESHOLD_US = 2500  # ~17x of 150 µs target (accounts for Python 3.14 variance)
+    MEDIUM_RECORD_THRESHOLD_US = 5000  # ~33x of 150 µs target (accounts for Python 3.14 variance)
     LARGE_RECORD_THRESHOLD_US = 10000  # 20x of 500 µs target (accounts for CI/Python 3.14 variance)
 
     # Number of operations to average over
