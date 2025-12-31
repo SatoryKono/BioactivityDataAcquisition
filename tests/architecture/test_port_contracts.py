@@ -1055,9 +1055,9 @@ class TestLockPortErrorConditions:
 
             # Owner2 tries to release - should fail
             released = await lock.release("test_key", owner2)
-            assert not released, (
-                "LockPort.release() MUST return False when owner does not match"
-            )
+            assert (
+                not released
+            ), "LockPort.release() MUST return False when owner does not match"
 
             # Lock should still be held by owner1
             is_owner = await lock.validate_owner("test_key", owner1)
@@ -1076,9 +1076,9 @@ class TestLockPortErrorConditions:
 
         try:
             result = await lock.heartbeat("non_existent_key", uuid4())
-            assert not result, (
-                "LockPort.heartbeat() MUST return False for non-existent locks"
-            )
+            assert (
+                not result
+            ), "LockPort.heartbeat() MUST return False for non-existent locks"
         finally:
             await lock.aclose()
 
@@ -1096,9 +1096,9 @@ class TestLockPortErrorConditions:
         try:
             await lock.acquire("test_key", owner1)
             result = await lock.heartbeat("test_key", owner2)
-            assert not result, (
-                "LockPort.heartbeat() MUST return False when owner does not match"
-            )
+            assert (
+                not result
+            ), "LockPort.heartbeat() MUST return False when owner does not match"
         finally:
             await lock.aclose()
 
@@ -1113,9 +1113,9 @@ class TestLockPortErrorConditions:
 
         try:
             result = await lock.validate_owner("non_existent_key", uuid4())
-            assert not result, (
-                "LockPort.validate_owner() MUST return False for non-existent locks"
-            )
+            assert (
+                not result
+            ), "LockPort.validate_owner() MUST return False for non-existent locks"
         finally:
             await lock.aclose()
 
@@ -1135,12 +1135,10 @@ class TestLockPortErrorConditions:
             await lock.acquire("test_key", owner1)
 
             # Owner2 tries to acquire with short timeout
-            acquired = await lock.acquire(
-                "test_key", owner2, wait=True, wait_timeout=1
-            )
-            assert not acquired, (
-                "LockPort.acquire() MUST return False when wait times out"
-            )
+            acquired = await lock.acquire("test_key", owner2, wait=True, wait_timeout=1)
+            assert (
+                not acquired
+            ), "LockPort.acquire() MUST return False when wait times out"
         finally:
             await lock.aclose()
 
@@ -1165,9 +1163,9 @@ class TestCheckpointPortErrorConditions:
 
         try:
             result = await checkpoint.load("non_existent_pipeline")
-            assert result is None, (
-                "CheckpointPort.load() MUST return None for non-existent checkpoints"
-            )
+            assert (
+                result is None
+            ), "CheckpointPort.load() MUST return None for non-existent checkpoints"
         finally:
             await checkpoint.aclose()
 
@@ -1197,9 +1195,9 @@ class TestCheckpointPortErrorConditions:
 
         try:
             result = await checkpoint.list_all()
-            assert result == [], (
-                "CheckpointPort.list_all() MUST return empty list when no checkpoints"
-            )
+            assert (
+                result == []
+            ), "CheckpointPort.list_all() MUST return empty list when no checkpoints"
         finally:
             await checkpoint.aclose()
 
@@ -1235,9 +1233,9 @@ class TestCircuitBreakerPortErrorConditions:
         with pytest.raises(CircuitBreakerOpenError) as exc_info:
             await breaker.call(failing_func)
 
-        assert exc_info.value.provider == "test", (
-            "CircuitBreakerOpenError MUST include provider name"
-        )
+        assert (
+            exc_info.value.provider == "test"
+        ), "CircuitBreakerOpenError MUST include provider name"
 
     @pytest.mark.asyncio
     async def test_circuit_breaker_propagates_exceptions(self) -> None:
@@ -1265,12 +1263,12 @@ class TestCircuitBreakerPortErrorConditions:
 
         breaker.reset()
 
-        assert breaker.get_failure_count() == 0, (
-            "CircuitBreakerPort.reset() MUST clear failure count"
-        )
-        assert breaker.get_state() == CircuitBreakerState.CLOSED, (
-            "CircuitBreakerPort.reset() MUST set state to CLOSED"
-        )
+        assert (
+            breaker.get_failure_count() == 0
+        ), "CircuitBreakerPort.reset() MUST clear failure count"
+        assert (
+            breaker.get_state() == CircuitBreakerState.CLOSED
+        ), "CircuitBreakerPort.reset() MUST set state to CLOSED"
 
 
 class TestRateLimiterPortErrorConditions:
@@ -1302,9 +1300,9 @@ class TestRateLimiterPortErrorConditions:
             bucket.try_acquire()
 
         result = bucket.try_acquire()
-        assert not result, (
-            "RateLimiterPort.try_acquire() MUST return False when insufficient tokens"
-        )
+        assert (
+            not result
+        ), "RateLimiterPort.try_acquire() MUST return False when insufficient tokens"
 
     def test_rate_limiter_available_tokens_non_negative(self) -> None:
         """RateLimiterPort.available_tokens() MUST return non-negative value."""
@@ -1317,9 +1315,9 @@ class TestRateLimiterPortErrorConditions:
             pass
 
         result = bucket.available_tokens()
-        assert result >= 0, (
-            "RateLimiterPort.available_tokens() MUST return non-negative value"
-        )
+        assert (
+            result >= 0
+        ), "RateLimiterPort.available_tokens() MUST return non-negative value"
 
 
 # ============================================================================
@@ -1358,9 +1356,9 @@ class TestLockPortConcurrentAccess:
             results = await asyncio.gather(*tasks)
 
             successful_acquires = sum(results)
-            assert successful_acquires == 1, (
-                f"Only one concurrent acquire MUST succeed, got {successful_acquires}"
-            )
+            assert (
+                successful_acquires == 1
+            ), f"Only one concurrent acquire MUST succeed, got {successful_acquires}"
         finally:
             await lock.aclose()
 
@@ -1390,9 +1388,9 @@ class TestLockPortConcurrentAccess:
             ]
             results = await asyncio.gather(*tasks)
 
-            assert all(results), (
-                "All concurrent operations on different keys MUST succeed"
-            )
+            assert all(
+                results
+            ), "All concurrent operations on different keys MUST succeed"
         finally:
             await lock.aclose()
 
@@ -1416,9 +1414,9 @@ class TestLockPortConcurrentAccess:
             tasks = [heartbeat() for _ in range(10)]
             results = await asyncio.gather(*tasks)
 
-            assert all(results), (
-                "Concurrent heartbeat operations from owner MUST all succeed"
-            )
+            assert all(
+                results
+            ), "Concurrent heartbeat operations from owner MUST all succeed"
         finally:
             await lock.aclose()
 
@@ -1454,9 +1452,9 @@ class TestCheckpointPortConcurrentAccess:
             tasks = [save_checkpoint(p) for p in pipelines]
             results = await asyncio.gather(*tasks)
 
-            assert all(results), (
-                "Concurrent saves to different pipelines MUST all succeed"
-            )
+            assert all(
+                results
+            ), "Concurrent saves to different pipelines MUST all succeed"
 
             # Verify all saved
             saved_pipelines = await checkpoint.list_all()
@@ -1558,9 +1556,9 @@ class TestCircuitBreakerPortConcurrentAccess:
         tasks = [success_call() for _ in range(5)]
         await asyncio.gather(*tasks)
 
-        assert breaker.get_failure_count() == 0, (
-            "Concurrent successful calls MUST reset failure count to 0"
-        )
+        assert (
+            breaker.get_failure_count() == 0
+        ), "Concurrent successful calls MUST reset failure count to 0"
 
 
 class TestRateLimiterPortConcurrentAccess:
@@ -1594,9 +1592,9 @@ class TestRateLimiterPortConcurrentAccess:
         tasks = [try_acquire_token() for _ in range(20)]
         await asyncio.gather(*tasks)
 
-        assert acquired_count <= 10, (
-            f"Concurrent acquires MUST respect capacity, got {acquired_count}"
-        )
+        assert (
+            acquired_count <= 10
+        ), f"Concurrent acquires MUST respect capacity, got {acquired_count}"
 
     def test_token_count_never_negative(self) -> None:
         """Token count MUST never go negative after concurrent try_acquire."""
@@ -1608,6 +1606,4 @@ class TestRateLimiterPortConcurrentAccess:
         for _ in range(10):
             bucket.try_acquire()
 
-        assert bucket.available_tokens() >= 0, (
-            "Token count MUST never go negative"
-        )
+        assert bucket.available_tokens() >= 0, "Token count MUST never go negative"

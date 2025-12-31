@@ -206,7 +206,9 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
 )
 
 
-def _create_factory(config: PipelineFactoryConfig) -> GenericPipelineFactory[GenericPipeline]:
+def _create_factory(
+    config: PipelineFactoryConfig,
+) -> GenericPipelineFactory[GenericPipeline]:
     """Create a GenericPipelineFactory from configuration.
 
     Args:
@@ -355,9 +357,7 @@ def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:
     """
     if pipeline_name not in _factories:
         available = sorted(_factories.keys())
-        raise KeyError(
-            f"Unknown pipeline: {pipeline_name}. Available: {available}"
-        )
+        raise KeyError(f"Unknown pipeline: {pipeline_name}. Available: {available}")
     return _factories[pipeline_name]
 
 

@@ -218,7 +218,9 @@ class SourceYamlConfig(BaseModel):
         """
         return DomainAdapterConfig(
             batch_size=self.batch_size,
-            page_size=self.page_size if self.page_size is not None else default_page_size,
+            page_size=(
+                self.page_size if self.page_size is not None else default_page_size
+            ),
             timeout_sec=self.timeout_sec,
             max_retries=self.max_retries,
         )

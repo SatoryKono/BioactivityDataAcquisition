@@ -14,7 +14,7 @@ from datetime import date, datetime
 
 import pytest
 
-from bioetl.domain.services.identity_service import IdentityService, META_FIELDS
+from bioetl.domain.services.identity_service import META_FIELDS, IdentityService
 
 
 class TestIdentityServiceDeterminism:

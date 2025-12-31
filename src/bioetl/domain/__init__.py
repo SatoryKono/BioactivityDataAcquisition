@@ -36,11 +36,9 @@ from bioetl.domain.context import (
 )
 
 # Entities (Domain objects)
-from bioetl.domain.entities import (
-    # DTO Records (Pydantic)
+from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities (dataclass)
     ActivityRecord,
     ArticleRecord,
-    # Domain Entities (dataclass)
     Assay,
     AssayRecord,
     BaseEntity,

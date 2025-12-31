@@ -57,9 +57,7 @@ def dq_service(mock_logger, mock_metrics, dq_config):
 class TestDataQualityServiceInit:
     """Tests for DataQualityService initialization."""
 
-    def test_initialization_without_monitor(
-        self, mock_logger, mock_metrics, dq_config
-    ):
+    def test_initialization_without_monitor(self, mock_logger, mock_metrics, dq_config):
         """Test service initializes correctly without dq_monitor."""
         service = DataQualityService(
             dq_monitor=None,
@@ -75,9 +73,7 @@ class TestDataQualityServiceInit:
         assert service._metrics == mock_metrics
         assert service._pipeline_name == "test_pipeline"
 
-    def test_initialization_with_monitor(
-        self, mock_logger, mock_metrics, dq_config
-    ):
+    def test_initialization_with_monitor(self, mock_logger, mock_metrics, dq_config):
         """Test service initializes correctly with dq_monitor."""
         mock_dq_monitor = MagicMock()
 
@@ -257,9 +253,7 @@ class TestDataQualityServiceGracefulDegradation:
         assert result.anomalies == ()
 
     @pytest.mark.asyncio
-    async def test_no_metrics_port_still_logs_warning(
-        self, mock_logger, dq_config
-    ):
+    async def test_no_metrics_port_still_logs_warning(self, mock_logger, dq_config):
         """Test that soft threshold logs warning even when metrics port is None."""
         service = DataQualityService(
             dq_monitor=None,

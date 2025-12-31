@@ -53,9 +53,7 @@ class TestSilverWriterExceptions:
             TableNotFoundError("Not found"),  # Schema check
             SchemaMismatchError("Invalid schema"),  # Write attempt
         ]
-        writer = SilverWriter(
-            base_path="/fake/path", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
 
         import pyarrow as pa
 
@@ -92,9 +90,7 @@ class TestSilverWriterExceptions:
             mock_table_instance,  # Write attempt
         ]
 
-        writer = SilverWriter(
-            base_path="/fake/path", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
 
         import pyarrow as pa
 
@@ -123,9 +119,7 @@ class TestSilverWriterExceptions:
     ):
         """Test SchemaViolationError on table creation."""
         mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
-        writer = SilverWriter(
-            base_path="/fake/path", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
 
         import pyarrow as pa
 
@@ -150,9 +144,7 @@ class TestSilverWriterExceptions:
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=TableNotFoundError,
         ):
-            writer = SilverWriter(
-                base_path="/fake/path", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
 
             with pytest.raises(CustomTableNotFoundError):
                 await writer.vacuum("test.table")

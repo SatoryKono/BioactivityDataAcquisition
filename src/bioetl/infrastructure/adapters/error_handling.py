@@ -251,8 +251,17 @@ class ErrorService:
             error_type=error_type,
             error_category=error_category,
             retry_after=context.get("retry_after"),
-            extra={k: v for k, v in context.items()
-                   if k not in {"status_code", "retry_count", "circuit_breaker_state", "retry_after"}},
+            extra={
+                k: v
+                for k, v in context.items()
+                if k
+                not in {
+                    "status_code",
+                    "retry_count",
+                    "circuit_breaker_state",
+                    "retry_after",
+                }
+            },
         )
 
         # Log with unified format
