@@ -263,6 +263,9 @@ Rejected because:
 
 ## Related ADRs
 
-- [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports (initial decision)
-- [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes (logging constraints)
-- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (metric integration)
+- [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — initial decision for LoggerPort/MetricsPort
+- [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes — logging constraints for reproducibility
+- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — metric integration
+- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — logging integration
+- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces this architecture
+- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern for tracing defined here

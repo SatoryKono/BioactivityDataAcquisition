@@ -86,8 +86,9 @@ class BronzeWriter:
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
         # Use NoOpTracing if not provided (test convenience, production uses composition)
+        # Import from domain.ports.noop to maintain proper layer separation
         if tracing is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports.noop import NoOpTracing
 
             tracing = NoOpTracing()
 

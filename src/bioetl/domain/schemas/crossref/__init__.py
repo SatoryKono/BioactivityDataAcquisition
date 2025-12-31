@@ -16,11 +16,9 @@ from bioetl.domain.schemas.crossref.work import (
 )
 
 __all__ = [
-    # Main schemas
+    "PUBLICATION_TYPES",
+    "WORK_TYPES",
     "PublicationEnrichedSchema",
     "PublicationSchema",
-    "PUBLICATION_TYPES",
-    # Deprecated aliases (backward compatibility)
     "WorkSchema",
-    "WORK_TYPES",
 ]

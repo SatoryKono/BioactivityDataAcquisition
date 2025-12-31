@@ -276,6 +276,40 @@ class BatchExecutor:
             start_index = self.records_fetched - len(batch)
             await self._process_batch(batch, start_index)
 
+    async def process(
+        self, records: list[dict[str, Any]], start_index: int = 0
+    ) -> BatchResult:
+        """Process a batch of records through the full ETL pipeline.
+
+        Public API for processing individual batches. Delegates to internal
+        processing with full tracing and observability.
+
+        This method is the public entry point for batch processing, enabling:
+        - Direct batch processing from external callers
+        - Integration testing of the processing logic
+        - Custom orchestration scenarios
+
+        Args:
+            records: Raw records to process through Bronze → Silver → Gold.
+            start_index: Starting index for records in this batch. Default 0.
+
+        Returns:
+            BatchResult with counts for each layer.
+
+        Example:
+            >>> executor = BatchExecutor(...)
+            >>> result = await executor.process(records, start_index=0)
+            >>> print(f"Processed: {result.silver_count} to Silver")
+
+        """
+        await self._process_batch(records, start_index)
+        return BatchResult(
+            bronze_count=self.records_bronze,
+            silver_count=self.records_silver,
+            gold_count=self.records_gold,
+            quarantined_count=self.records_quarantined,
+        )
+
     async def _process_batch(
         self, records: list[dict[str, Any]], start_index: int
     ) -> None:

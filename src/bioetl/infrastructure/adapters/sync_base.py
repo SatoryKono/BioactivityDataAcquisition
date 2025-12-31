@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Any, Self
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.error_handling import ErrorHandler
+from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckMixin
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -74,7 +74,7 @@ class BaseSyncAdapter(HealthCheckMixin, DataSourcePort):
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
-    _error_handler: ErrorHandler
+    _error_handler: ErrorService
 
     def __init__(
         self,
@@ -104,7 +104,7 @@ class BaseSyncAdapter(HealthCheckMixin, DataSourcePort):
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
         self.strict_error_handling = strict_error_handling
-        self._error_handler = ErrorHandler(logger)
+        self._error_handler = ErrorService(logger)
 
         # Safety: ensure shutdown if aclose/context manager is misused
         self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
