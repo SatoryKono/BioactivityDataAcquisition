@@ -2,8 +2,8 @@
 
 *Версия: 1.1 | Дата: 2025-12-31 | Протокол: Двойная Верификация (REQ-ARCH-040)*
 
-> **ОБНОВЛЕНИЕ 2025-12-31**: Добавлены ложные утверждения из action_plan.md (OPS-001 MemoryLock, RedisLock).
-> MemoryLock полностью реализует TTL/heartbeat/fencing. Redis НЕ требуется per ADR-010.
+> **ОБНОВЛЕНИЕ 2025-12-31**: Подтверждено — MemoryLock полностью реализует TTL/heartbeat/fencing.
+> Redis НЕ требуется per ADR-010 (Local-Only Deployment).
 
 ---
 
@@ -51,8 +51,6 @@
 | 10 | "Логи LockManager без run_id" | audit-2026-02-07 | Требует верификации | ⚠️ ПРОВЕРИТЬ |
 | 11 | "api_key как str — уязвимость" | audit.md v2.0 | CLI маскирует; env-чтение реализовано | ⚠️ НИЗКИЙ РИСК |
 | 12 | "MemoryMonitor возвращает нули" | - | Возвращает 50% (graceful degradation) | ❌ ЛОЖНО |
-| 13 | **"OPS-001: MemoryLock без стандартных TTL/heartbeat/max duration"** | action_plan.md (diff) | **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**: `_ttl_checker_loop()` (43-64), `heartbeat()` (176-204), `validate_owner()` (206-238), `aclose()` (240-255) в `memory_lock.py` | ❌ ЛОЖНО |
-| 14 | **"Implement RedisLock per RULES.md §3.3"** | action_plan.md (diff) | **Redis НЕ требуется** per ADR-010 (Local-Only Deployment). MemoryLock полностью достаточен для локальных пайплайнов. | ❌ ЛОЖНО |
 
 ---
 
@@ -205,7 +203,6 @@ grep -n 'Literal\["delta", "parquet"\]' src/bioetl/domain/config_types.py
 |----------|---------|
 | `reports/architecture-audit-2025-01-06.md` | Ложные рекомендации Redis, устаревший |
 | `docs/architecture/architecture-audit-2026-02-07.md` | Некорректная дата (2026), дублирует функционал |
-| **action_plan.md (если создан)** | **Содержит ложные утверждения OPS-001 о MemoryLock**. НЕ ИСПОЛЬЗОВАТЬ. |
 
 ### 5.2. Обновить
 
@@ -224,15 +221,6 @@ grep -n 'Literal\["delta", "parquet"\]' src/bioetl/domain/config_types.py
 | 4 | `docs/domain-services-integration-plan.md` | ⚠️ Опциональный | План интеграции неиспользуемых сервисов |
 | 5 | `docs/plans/refactoring-detail-2025-12-29.md` | ⚠️ Детали | Детализация 3 конкретных задач |
 | 6 | `docs/archived/refactoring-plan-bronze-validation.md` | ❌ Архивный | Устаревший, в archived/ |
-
-### 5.4. Ложные Утверждения из action_plan.md (diff)
-
-> **⚠️ НЕ ИСПОЛЬЗОВАТЬ action_plan.md!** Содержит ложные утверждения:
-
-| Утверждение | Почему ЛОЖНО |
-|-------------|--------------|
-| OPS-001: "MemoryLock без стандартных TTL/heartbeat/max duration" | **ПОЛНОСТЬЮ РЕАЛИЗОВАНО** в `memory_lock.py:43-255` |
-| "Implement RedisLock per RULES.md §3.3" | **Redis НЕ требуется** per ADR-010 (Local-Only Deployment) |
 
 ---
 
