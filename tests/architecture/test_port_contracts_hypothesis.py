@@ -21,6 +21,9 @@ from hypothesis import given, settings, strategies as st
 
 from bioetl.domain import ports
 
+# Python version check for skipping tests with Hypothesis lambda reflection issues
+PYTHON_314 = sys.version_info >= (3, 14)
+
 # Mark all tests in this module as slow and hypothesis-based
 pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
@@ -99,7 +102,7 @@ class TestLockPortProperties:
             finally:
                 await lock.aclose()
 
-        run_async(test_cycle())
+        asyncio.run(test_cycle())
 
     @given(key=lock_key_strategy, ttl=ttl_strategy)
     @settings(max_examples=30, deadline=None)
@@ -126,7 +129,7 @@ class TestLockPortProperties:
             finally:
                 await lock.aclose()
 
-        run_async(test_heartbeat())
+        asyncio.run(test_heartbeat())
 
     @given(keys=st.lists(lock_key_strategy, min_size=1, max_size=10, unique=True))
     @settings(max_examples=20, deadline=None)
@@ -156,7 +159,7 @@ class TestLockPortProperties:
             finally:
                 await lock.aclose()
 
-        run_async(test_independence())
+        asyncio.run(test_independence())
 
 
 # ============================================================================
@@ -194,7 +197,7 @@ class TestCheckpointPortProperties:
                 finally:
                     await checkpoint.aclose()
 
-        run_async(test_roundtrip())
+        asyncio.run(test_roundtrip())
 
     @given(
         pipelines=st.lists(pipeline_name_strategy, min_size=1, max_size=10, unique=True)
@@ -225,7 +228,7 @@ class TestCheckpointPortProperties:
                 finally:
                     await checkpoint.aclose()
 
-        run_async(test_list())
+        asyncio.run(test_list())
 
     @given(pipeline=pipeline_name_strategy)
     @settings(max_examples=30, deadline=None)
@@ -252,7 +255,7 @@ class TestCheckpointPortProperties:
                 finally:
                     await checkpoint.aclose()
 
-        run_async(test_delete())
+        asyncio.run(test_delete())
 
 
 # ============================================================================
@@ -325,7 +328,7 @@ class TestRateLimiterPortProperties:
                 f"Wrong remaining tokens: {remaining} != {capacity - tokens}"
             )
 
-        run_async(test_acquire())
+        asyncio.run(test_acquire())
 
     @given(rate=rate_strategy, capacity=capacity_strategy)
     @settings(max_examples=30, deadline=None)
@@ -431,7 +434,7 @@ class TestCircuitBreakerPortProperties:
                 f"Circuit not open after {failure_threshold} failures"
             )
 
-        run_async(test_threshold())
+        asyncio.run(test_threshold())
 
 
 # ============================================================================
