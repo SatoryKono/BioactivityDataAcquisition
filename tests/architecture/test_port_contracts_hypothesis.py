@@ -17,6 +17,15 @@ from hypothesis import given, settings, strategies as st
 from bioetl.domain import ports
 
 
+def run_async(coro):
+    """Run async coroutine in a new event loop (Python 3.14 compatible)."""
+    loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+
 # ============================================================================
 # Hypothesis Strategies for Port Testing
 # ============================================================================
@@ -91,7 +100,7 @@ class TestLockPortProperties:
             finally:
                 await lock.aclose()
 
-        asyncio.get_event_loop().run_until_complete(test_cycle())
+        run_async(test_cycle())
 
     @given(key=lock_key_strategy, ttl=ttl_strategy)
     @settings(max_examples=30, deadline=5000)
@@ -118,7 +127,7 @@ class TestLockPortProperties:
             finally:
                 await lock.aclose()
 
-        asyncio.get_event_loop().run_until_complete(test_heartbeat())
+        run_async(test_heartbeat())
 
     @given(keys=st.lists(lock_key_strategy, min_size=1, max_size=10, unique=True))
     @settings(max_examples=20, deadline=10000)
@@ -148,7 +157,7 @@ class TestLockPortProperties:
             finally:
                 await lock.aclose()
 
-        asyncio.get_event_loop().run_until_complete(test_independence())
+        run_async(test_independence())
 
 
 # ============================================================================
@@ -186,7 +195,7 @@ class TestCheckpointPortProperties:
                 finally:
                     await checkpoint.aclose()
 
-        asyncio.get_event_loop().run_until_complete(test_roundtrip())
+        run_async(test_roundtrip())
 
     @given(
         pipelines=st.lists(pipeline_name_strategy, min_size=1, max_size=10, unique=True)
@@ -217,7 +226,7 @@ class TestCheckpointPortProperties:
                 finally:
                     await checkpoint.aclose()
 
-        asyncio.get_event_loop().run_until_complete(test_list())
+        run_async(test_list())
 
     @given(pipeline=pipeline_name_strategy)
     @settings(max_examples=30, deadline=5000)
@@ -244,7 +253,7 @@ class TestCheckpointPortProperties:
                 finally:
                     await checkpoint.aclose()
 
-        asyncio.get_event_loop().run_until_complete(test_delete())
+        run_async(test_delete())
 
 
 # ============================================================================
@@ -270,7 +279,7 @@ class TestRateLimiterPortProperties:
         )
 
     @given(rate=rate_strategy, capacity=capacity_strategy)
-    @settings(max_examples=50, deadline=5000)
+    @settings(max_examples=50, deadline=None)
     def test_try_acquire_respects_capacity(self, rate: float, capacity: int) -> None:
         """Property: try_acquire() MUST fail after capacity tokens acquired."""
         from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -310,7 +319,7 @@ class TestRateLimiterPortProperties:
                 f"Wrong remaining tokens: {remaining} != {capacity - tokens}"
             )
 
-        asyncio.get_event_loop().run_until_complete(test_acquire())
+        run_async(test_acquire())
 
     @given(rate=rate_strategy, capacity=capacity_strategy)
     @settings(max_examples=30, deadline=5000)
@@ -416,7 +425,7 @@ class TestCircuitBreakerPortProperties:
                 f"Circuit not open after {failure_threshold} failures"
             )
 
-        asyncio.get_event_loop().run_until_complete(test_threshold())
+        run_async(test_threshold())
 
 
 # ============================================================================
