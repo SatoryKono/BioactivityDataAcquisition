@@ -196,8 +196,7 @@ class TestValidateRecords:
     def test_yields_results_lazily(self) -> None:
         """Test that results are yielded lazily."""
         records: list[dict[str, Any]] = [
-            {"id": str(i), "name": f"test{i}", "value": i}
-            for i in range(100)
+            {"id": str(i), "name": f"test{i}", "value": i} for i in range(100)
         ]
 
         # Generator should not consume all records immediately
