@@ -8,7 +8,7 @@ This directory contains Architecture Decision Records documenting significant ar
 |-----|-------|--------|----------|------|
 | [ADR-001](ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Accepted | Storage | 2025-05-20 |
 | [ADR-002](ADR-002-medallion-architecture.md) | Medallion Architecture | Accepted | Architecture | 2025-05-20 |
-| [ADR-003](ADR-003-redis-for-distributed-locking.md) | Redis for Distributed Locking | **Superseded** | Locking | 2025-05-20 |
+| [ADR-003](ADR-003-in-memory-locking-strategy.md) | In-Memory Locking (MemoryLock) | Accepted (Revised) | Locking | 2025-12-23 |
 | [ADR-004](ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Accepted | Data Modeling | 2025-05-20 |
 | [ADR-005](ADR-005-composition-layer-separation.md) | Composition Layer Separation | Accepted | Architecture | 2025-12-15 |
 | [ADR-006](ADR-006-logger-metrics-ports.md) | Logger and Metrics Ports | Accepted | Observability | 2025-12-18 |
@@ -69,8 +69,8 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Deployment
 - [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment
 
-### Locking (Superseded)
-- [ADR-003](ADR-003-redis-for-distributed-locking.md): Redis for Distributed Locking — **Superseded by ADR-010**
+### Locking
+- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — Local-Only locking strategy
 
 ### Reproducibility
 - [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes and Retries
