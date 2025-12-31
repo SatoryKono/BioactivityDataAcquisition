@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.2 | Дата: 2025-12-31 | Обновлено: Консолидация аудитов 2025-02, добавлено 11 ложных утверждений*
+*Версия: 6.3 | Дата: 2025-12-31 | Обновлено: BatchExecutor декомпозиция (643→540 LOC), print() — doctest, не нарушение*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -50,6 +50,7 @@
 | **Property-based тесты Pandera** | `test_pandera_validator.py:292-395` | 5 hypothesis-тестов для валидаторов с arbitrary input |
 | **Документация Hypothesis стратегий** | `tests/strategies.py:1-118` | Добавлены docstrings с примерами использования |
 | **Порог покрытия 85%** | `pyproject.toml:182` | `fail_under = 85` уже установлен |
+| **BatchExecutor декомпозиция** | `batch_executor.py:540 LOC`, `batch_tracing.py:245 LOC` | Трacing извлечён в `BatchTracingManager`, размер < 550 лимита (верификация 2025-12-31) |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -115,6 +116,8 @@
 | "Пороги DQ не проверяются автоматически" | **АВТОМАТИЧЕСКАЯ ПРОВЕРКА**: `_check_hard_threshold()` вызывается в `evaluate()` | `data_quality_service.py:91` (верификация 2025-12-31) |
 | "VACUUM/retention не интегрирован в пайплайн" | **ИНТЕГРИРОВАНО**: `PostrunService.run_vacuum_if_enabled()` вызывается автоматически | `postrun_service.py:137-153` (верификация 2025-12-31) |
 | "Pandera strict=False позволяет пропускать невалидные данные" | **BY DESIGN**: `strict=False` для backward-compat. При `strict=True` и отсутствии схемы — ошибка | `pandera_validator.py:26-27` (верификация 2025-12-31) |
+| "40 вызовов print() нарушают требования UnifiedLogger" | **ВСЕ В DOCSTRINGS**: Все 40 вхождений — doctest примеры (`>>> print()`), не runtime код. Doctest — стандартный Python pattern для документации. | `grep -v ">>> \|\.\.\.     print" src/bioetl` → 0 вхождений (верификация 2025-12-31) |
+| "BatchExecutor 581-643 LOC — монолит, требует декомпозиции" | **ДЕКОМПОЗИРОВАН**: Tracing извлечён в `BatchTracingManager` (245 LOC), BatchExecutor = 540 LOC < 550 лимита | `batch_executor.py`, `batch_tracing.py` (верификация 2025-12-31) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
