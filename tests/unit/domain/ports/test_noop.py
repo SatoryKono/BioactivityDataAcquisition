@@ -128,6 +128,7 @@ class TestNoOpAudit:
     async def test_log_write_no_error(self) -> None:
         """Test log_write is a no-op."""
         from unittest.mock import MagicMock
+
         audit = NoOpAudit()
         entry = MagicMock()
         await audit.log_write(entry)  # Should not raise
@@ -141,6 +142,7 @@ class TestNoOpAudit:
     async def test_get_entries_with_filters_returns_empty(self) -> None:
         """Test get_entries with filters still returns empty."""
         from datetime import datetime
+
         audit = NoOpAudit()
         entries = await audit.get_entries(
             run_id="test-run",  # type: ignore[arg-type]
