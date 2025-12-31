@@ -24,6 +24,14 @@ from bioetl.domain import ports
 # Mark all tests in this module as slow and hypothesis-based
 pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
+# Python version check for skipif decorators
+PYTHON_314 = sys.version_info >= (3, 14)
+
+
+def run_async(coro) -> Any:
+    """Run async coroutine in sync context for hypothesis tests."""
+    return asyncio.run(coro)
+
 
 # ============================================================================
 # Hypothesis Strategies for Port Testing
