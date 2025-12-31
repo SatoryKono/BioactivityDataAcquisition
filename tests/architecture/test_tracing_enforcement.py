@@ -360,10 +360,7 @@ class TestMandatorySpans:
     MANDATORY_SPAN_LOCATIONS = [
         # Critical pipeline operations
         ("runner.py", ["run", "execute"]),
-<<<<<<< HEAD
-=======
         ("batch_executor.py", ["execute", "process"]),
->>>>>>> 47c0bb13d9f8eed23b21313d7ac0214e886910b2
         # Storage operations
         ("bronze_writer.py", ["write_bronze"]),
         ("silver_writer.py", ["write_silver"]),
@@ -387,11 +384,6 @@ class TestMandatorySpans:
                                 found = True
                                 break
 
-<<<<<<< HEAD
-            if not found and filename == "runner.py":
-                # runner.py is critical - fail if not found
-=======
             if not found and filename in ["runner.py", "batch_executor.py"]:
                 # These are critical - fail if not found
->>>>>>> 47c0bb13d9f8eed23b21313d7ac0214e886910b2
                 assert found, f"Critical file {filename} should have methods {methods}"
