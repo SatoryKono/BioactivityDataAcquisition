@@ -22,6 +22,7 @@ class TestMeasurementsDeprecation:
             warnings.simplefilter("always")
             # Force reimport by removing from cache if present
             import sys
+
             if "bioetl.domain.value_objects.measurements" in sys.modules:
                 del sys.modules["bioetl.domain.value_objects.measurements"]
 
@@ -30,7 +31,8 @@ class TestMeasurementsDeprecation:
 
             # Check that a DeprecationWarning was issued
             deprecation_warnings = [
-                warning for warning in w
+                warning
+                for warning in w
                 if issubclass(warning.category, DeprecationWarning)
             ]
             assert len(deprecation_warnings) >= 1
@@ -43,6 +45,7 @@ class TestMeasurementsDeprecation:
     def test_reexports_activity_values(self) -> None:
         """Test that measurements re-exports symbols from activity_values."""
         import sys
+
         if "bioetl.domain.value_objects.measurements" in sys.modules:
             del sys.modules["bioetl.domain.value_objects.measurements"]
 
@@ -57,5 +60,10 @@ class TestMeasurementsDeprecation:
             assert hasattr(measurements, "PChemblValue")
 
             # Verify __all__ contains expected exports
-            expected = {"ActivityType", "Concentration", "ConcentrationUnit", "PChemblValue"}
+            expected = {
+                "ActivityType",
+                "Concentration",
+                "ConcentrationUnit",
+                "PChemblValue",
+            }
             assert set(measurements.__all__) == expected
