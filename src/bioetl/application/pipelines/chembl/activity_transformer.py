@@ -41,7 +41,6 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
     "parent_type": None,
 }
 
-tests\benchmarks\test_baseline_assertions.py ....F.....
 # ============================================================================
 # Declarative field groups for Activity entity
 # ============================================================================
