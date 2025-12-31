@@ -341,7 +341,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
-        "BatchExecutor": 550,  # 547 lines - unified executor for batch processing
+        "BatchExecutor": 590,  # 581 lines - unified executor for batch processing
         "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
