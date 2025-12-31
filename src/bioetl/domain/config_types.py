@@ -60,10 +60,14 @@ class CsvExportDict(TypedDict, total=False):
 
 
 class BronzeSinkDict(TypedDict, total=False):
-    """YAML structure for Bronze layer sink configuration."""
+    """YAML structure for Bronze layer sink configuration.
+
+    Note: Bronze format MUST be "jsonl" per RULES.md §2.1 and Medallion Architecture.
+    Parquet is not allowed for Bronze layer - only JSONL + zstd compression.
+    """
 
     path: str
-    format: Literal["jsonl", "parquet"]
+    format: Literal["jsonl"]  # RULES.md §2.1: Bronze MUST use JSONL + zstd
     save_json: bool
 
 
