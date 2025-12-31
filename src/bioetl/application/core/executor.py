@@ -37,7 +37,9 @@ __all__ = ["BatchExecutor", "BatchResult", "Executor", "execute", "process"]
 Executor = BatchExecutor
 
 
-async def execute(executor: BatchExecutor, limit: int | None, query: str | None = None) -> None:
+async def execute(
+    executor: BatchExecutor, limit: int | None, query: str | None = None
+) -> None:
     """Execute the pipeline with the given executor.
 
     Convenience function for executing a pipeline with tracing.

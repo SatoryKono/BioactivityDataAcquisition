@@ -17,7 +17,8 @@ from typing import Any
 from uuid import uuid4
 
 import pytest
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from bioetl.domain import ports
 
@@ -198,7 +199,9 @@ class TestCheckpointPortProperties:
                     loaded_run_id, loaded_metadata = result
 
                     assert loaded_run_id == run_id, "Run ID mismatch after roundtrip"
-                    assert loaded_metadata == metadata, "Metadata mismatch after roundtrip"
+                    assert (
+                        loaded_metadata == metadata
+                    ), "Metadata mismatch after roundtrip"
                 finally:
                     await checkpoint.aclose()
 
@@ -208,9 +211,7 @@ class TestCheckpointPortProperties:
         pipelines=st.lists(pipeline_name_strategy, min_size=1, max_size=10, unique=True)
     )
     @settings(max_examples=20, deadline=None)
-    def test_list_all_returns_all_saved_pipelines(
-        self, pipelines: list[str]
-    ) -> None:
+    def test_list_all_returns_all_saved_pipelines(self, pipelines: list[str]) -> None:
         """Property: list_all() MUST return all saved pipeline names."""
         import tempfile
 
@@ -227,9 +228,9 @@ class TestCheckpointPortProperties:
 
                     # List should return all pipelines
                     listed = await checkpoint.list_all()
-                    assert set(listed) == set(pipelines), (
-                        f"list_all() mismatch: expected {set(pipelines)}, got {set(listed)}"
-                    )
+                    assert set(listed) == set(
+                        pipelines
+                    ), f"list_all() mismatch: expected {set(pipelines)}, got {set(listed)}"
                 finally:
                     await checkpoint.aclose()
 
@@ -237,9 +238,7 @@ class TestCheckpointPortProperties:
 
     @given(pipeline=pipeline_name_strategy)
     @settings(max_examples=30, deadline=None)
-    def test_delete_makes_load_return_none(
-        self, pipeline: str
-    ) -> None:
+    def test_delete_makes_load_return_none(self, pipeline: str) -> None:
         """Property: delete() followed by load() MUST return None."""
         import tempfile
 
@@ -256,7 +255,9 @@ class TestCheckpointPortProperties:
 
                     # Load should return None
                     result = await checkpoint.load(pipeline)
-                    assert result is None, f"Load returned data after delete: {pipeline}"
+                    assert (
+                        result is None
+                    ), f"Load returned data after delete: {pipeline}"
                 finally:
                     await checkpoint.aclose()
 
@@ -281,9 +282,9 @@ class TestRateLimiterPortProperties:
 
         # Available tokens should equal capacity at start
         available = bucket.available_tokens()
-        assert available == capacity, (
-            f"Initial tokens ({available}) != capacity ({capacity})"
-        )
+        assert (
+            available == capacity
+        ), f"Initial tokens ({available}) != capacity ({capacity})"
 
     @given(
         # Low rate to prevent token replenishment during test execution
@@ -303,7 +304,9 @@ class TestRateLimiterPortProperties:
         # Acquire all tokens
         for i in range(capacity):
             result = bucket.try_acquire()
-            assert result, f"try_acquire() failed at iteration {i} for capacity {capacity}"
+            assert (
+                result
+            ), f"try_acquire() failed at iteration {i} for capacity {capacity}"
 
         # Next attempt should fail (rate is low enough that no replenishment occurs)
         result = bucket.try_acquire()
@@ -329,9 +332,9 @@ class TestRateLimiterPortProperties:
             await bucket.acquire(tokens=tokens)
             # Should succeed without exception
             remaining = bucket.available_tokens()
-            assert remaining == capacity - tokens, (
-                f"Wrong remaining tokens: {remaining} != {capacity - tokens}"
-            )
+            assert (
+                remaining == capacity - tokens
+            ), f"Wrong remaining tokens: {remaining} != {capacity - tokens}"
 
         asyncio.run(test_acquire())
 
@@ -350,9 +353,9 @@ class TestRateLimiterPortProperties:
         bucket._refill()
 
         available = bucket.available_tokens()
-        assert available <= capacity, (
-            f"Tokens ({available}) exceeded capacity ({capacity})"
-        )
+        assert (
+            available <= capacity
+        ), f"Tokens ({available}) exceeded capacity ({capacity})"
 
 
 # ============================================================================
@@ -381,9 +384,9 @@ class TestCircuitBreakerPortProperties:
             recovery_timeout=recovery_timeout,
         )
 
-        assert breaker.get_state() == CircuitBreakerState.CLOSED, (
-            f"Initial state is not CLOSED for threshold={failure_threshold}"
-        )
+        assert (
+            breaker.get_state() == CircuitBreakerState.CLOSED
+        ), f"Initial state is not CLOSED for threshold={failure_threshold}"
 
     @given(
         failure_threshold=failure_threshold_strategy,
@@ -435,9 +438,9 @@ class TestCircuitBreakerPortProperties:
                 except RuntimeError:
                     pass
 
-            assert breaker.get_state() == CircuitBreakerState.OPEN, (
-                f"Circuit not open after {failure_threshold} failures"
-            )
+            assert (
+                breaker.get_state() == CircuitBreakerState.OPEN
+            ), f"Circuit not open after {failure_threshold} failures"
 
         asyncio.run(test_threshold())
 
@@ -476,9 +479,7 @@ class TestMetricsPortProperties:
         )
     )
     @settings(max_examples=30, deadline=None)
-    def test_noop_metrics_accepts_various_labels(
-        self, labels: dict[str, str]
-    ) -> None:
+    def test_noop_metrics_accepts_various_labels(self, labels: dict[str, str]) -> None:
         """Property: NoOpMetrics MUST accept various label combinations."""
         from bioetl.domain.ports.noop import NoOpMetrics
 
@@ -502,7 +503,9 @@ class TestLoggerPortProperties:
         message=st.text(max_size=200),
         context=st.dictionaries(
             keys=st.text(min_size=1, max_size=20).filter(lambda x: x.strip() != ""),
-            values=st.one_of(st.text(max_size=50), st.integers(), st.floats(allow_nan=False)),
+            values=st.one_of(
+                st.text(max_size=50), st.integers(), st.floats(allow_nan=False)
+            ),
             max_size=5,
         ),
     )
@@ -529,18 +532,16 @@ class TestLoggerPortProperties:
         )
     )
     @settings(max_examples=30, deadline=None)
-    def test_logger_bind_returns_logger_port(
-        self, bindings: dict[str, Any]
-    ) -> None:
+    def test_logger_bind_returns_logger_port(self, bindings: dict[str, Any]) -> None:
         """Property: LoggerPort.bind() MUST return LoggerPort instance."""
         from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
         logger = NoOpLogger()
         bound = logger.bind(**bindings)
 
-        assert isinstance(bound, ports.LoggerPort), (
-            "bind() MUST return LoggerPort instance"
-        )
+        assert isinstance(
+            bound, ports.LoggerPort
+        ), "bind() MUST return LoggerPort instance"
 
 
 # ============================================================================
@@ -556,7 +557,9 @@ class TestJsonEncoderPortProperties:
         st.none(),
         st.booleans(),
         st.integers(min_value=-10000, max_value=10000),
-        st.floats(allow_nan=False, allow_infinity=False, min_value=-1e10, max_value=1e10),
+        st.floats(
+            allow_nan=False, allow_infinity=False, min_value=-1e10, max_value=1e10
+        ),
         st.text(max_size=100),
     )
 
@@ -590,9 +593,9 @@ class TestJsonEncoderPortProperties:
 
         # Handle float comparison (floats may have small precision differences)
         if isinstance(data, float):
-            assert abs(data - loaded) < 1e-10, (
-                f"Float roundtrip failed: {data} != {loaded}"
-            )
+            assert (
+                abs(data - loaded) < 1e-10
+            ), f"Float roundtrip failed: {data} != {loaded}"
         else:
             assert data == loaded, f"Roundtrip failed: {data} != {loaded}"
 
@@ -618,9 +621,9 @@ class TestJsonEncoderPortProperties:
         result1 = encoder.dumps_canonical(data)
         result2 = encoder.dumps_canonical(data)
 
-        assert result1 == result2, (
-            f"dumps_canonical() not deterministic:\n{result1}\n!=\n{result2}"
-        )
+        assert (
+            result1 == result2
+        ), f"dumps_canonical() not deterministic:\n{result1}\n!=\n{result2}"
 
     @pytest.mark.skipif(
         PYTHON_314,
@@ -648,9 +651,9 @@ class TestJsonEncoderPortProperties:
         expected_keys = sorted(data.keys())
         actual_keys = list(loaded.keys())
 
-        assert actual_keys == expected_keys, (
-            f"Keys not sorted: {actual_keys} != {expected_keys}"
-        )
+        assert (
+            actual_keys == expected_keys
+        ), f"Keys not sorted: {actual_keys} != {expected_keys}"
 
 
 # ============================================================================
@@ -670,9 +673,9 @@ class TestMemoryMonitorPortProperties:
         monitor = MemoryMonitor(config=MemoryConfig())
 
         recommended = monitor.get_recommended_batch_size(batch_size)
-        assert recommended > 0, (
-            f"Recommended batch size must be positive, got {recommended}"
-        )
+        assert (
+            recommended > 0
+        ), f"Recommended batch size must be positive, got {recommended}"
 
     @given(batch_size=st.integers(min_value=1, max_value=10000))
     @settings(max_examples=50, deadline=None)
@@ -683,9 +686,9 @@ class TestMemoryMonitorPortProperties:
         monitor = NoOpMemoryMonitor()
 
         recommended = monitor.get_recommended_batch_size(batch_size)
-        assert recommended == batch_size, (
-            f"NoOpMemoryMonitor changed batch size: {batch_size} -> {recommended}"
-        )
+        assert (
+            recommended == batch_size
+        ), f"NoOpMemoryMonitor changed batch size: {batch_size} -> {recommended}"
 
     @given(
         records_count=st.integers(min_value=0, max_value=100000),

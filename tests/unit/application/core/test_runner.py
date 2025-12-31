@@ -9,16 +9,16 @@ import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.services.medallion_lifecycle import (
-    MedallionLifecycleService,
-    PrepareResult,
-)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.services.medallion_lifecycle import (
+    MedallionLifecycleService,
+    PrepareResult,
+)
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -87,8 +87,6 @@ def create_mock_services():
     services.logger.warning = MagicMock()
     services.logger.error = MagicMock()
     return services
-
-
 
 
 @pytest.fixture
@@ -195,7 +193,9 @@ def mock_lifecycle_service():
         )
     )
     service.finalize_run = AsyncMock(
-        return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
+        return_value=VacuumResult(
+            silver_files_removed=0, gold_files_removed=0, skipped=True
+        )
     )
     service.clear = AsyncMock(
         return_value=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False)
@@ -596,7 +596,9 @@ class TestPipelineRunnerClearViaLifecycle:
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
         lifecycle_service.prepare_for_run = AsyncMock(
             return_value=PrepareResult(
-                clear_result=ClearResult(silver_cleared=5, gold_cleared=3, dry_run=False),
+                clear_result=ClearResult(
+                    silver_cleared=5, gold_cleared=3, dry_run=False
+                ),
                 policy=MedallionPolicy.for_run_type(RunType.REBUILD),
             )
         )
@@ -651,12 +653,16 @@ class TestPipelineRunnerClearViaLifecycle:
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
         lifecycle_service.prepare_for_run = AsyncMock(
             return_value=PrepareResult(
-                clear_result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
+                clear_result=ClearResult(
+                    silver_cleared=0, gold_cleared=0, dry_run=False
+                ),
                 policy=MedallionPolicy.for_run_type(RunType.INCREMENTAL),
             )
         )
         lifecycle_service.finalize_run = AsyncMock(
-            return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
+            return_value=VacuumResult(
+                silver_files_removed=0, gold_files_removed=0, skipped=True
+            )
         )
 
         mock_observer = MagicMock(spec=PipelineObserver)
@@ -717,7 +723,11 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality delegates to PostrunService."""
-        from bioetl.application.core.postrun_service import DQResult, DQStatus, VacuumResult
+        from bioetl.application.core.postrun_service import (
+            DQResult,
+            DQStatus,
+            VacuumResult,
+        )
 
         services = create_mock_services()
 
@@ -778,7 +788,11 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality is invoked during run()."""
-        from bioetl.application.core.postrun_service import DQResult, DQStatus, VacuumResult
+        from bioetl.application.core.postrun_service import (
+            DQResult,
+            DQStatus,
+            VacuumResult,
+        )
 
         services = create_mock_services()
 

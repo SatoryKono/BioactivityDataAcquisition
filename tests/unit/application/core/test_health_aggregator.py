@@ -11,7 +11,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.preflight_service import _HealthAggregator as HealthAggregator
+from bioetl.application.core.preflight_service import (
+    _HealthAggregator as HealthAggregator,
+)
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus

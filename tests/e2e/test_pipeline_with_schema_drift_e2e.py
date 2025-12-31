@@ -136,7 +136,6 @@ class TestSchemaEvolutionErrorMode:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-
         )
 
         # First write establishes the schema
@@ -177,7 +176,6 @@ class TestSchemaEvolutionErrorMode:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-
         )
 
         # First write establishes the schema
@@ -233,7 +231,6 @@ class TestSchemaEvolutionEvolveMode:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-
         )
 
         # First write establishes the base schema
@@ -283,7 +280,6 @@ class TestSchemaEvolutionEvolveMode:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
-
         )
 
         # First write
@@ -339,7 +335,6 @@ class TestSchemaEvolutionIgnoreMode:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-
         )
 
         # First write
@@ -391,7 +386,6 @@ class TestSchemaEvolutionEdgeCases:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-
         )
 
         # Table doesn't exist yet
@@ -426,7 +420,6 @@ class TestSchemaEvolutionEdgeCases:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=mock_logger,
-
         )
 
         # First write
@@ -485,7 +478,6 @@ class TestSchemaEvolutionEdgeCases:
         writer = SilverWriter(
             base_path=str(e2e_data_dir / "silver"),
             logger=logger,
-
         )
 
         # First write - base schema

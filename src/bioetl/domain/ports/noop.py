@@ -368,9 +368,7 @@ class NoOpMemoryMonitor:
         overhead_factor = 2.5
         return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
 
-    def calculate_max_batch_size(
-        self, _avg_record_size_bytes: int = 1024
-    ) -> int:
+    def calculate_max_batch_size(self, _avg_record_size_bytes: int = 1024) -> int:
         """Return a high max batch size (no constraints).
 
         Args:

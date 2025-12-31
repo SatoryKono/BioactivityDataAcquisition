@@ -233,7 +233,9 @@ class TestRunnerShutdownIntegration:
 
         # CLI should output shutdown warning message
         assert result.exit_code == 130
-        assert "shut down" in result.output.lower() or "graceful" in result.output.lower()
+        assert (
+            "shut down" in result.output.lower() or "graceful" in result.output.lower()
+        )
 
     def test_runner_shutdown_signal_passed_to_setup(
         self,

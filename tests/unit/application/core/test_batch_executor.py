@@ -303,7 +303,9 @@ class TestBatchExecutorExecute:
 
         mock_checkpoint_manager.save_checkpoint.assert_called()
 
-    async def test_execute_empty_data(self, batch_executor, mock_services, mock_storage):
+    async def test_execute_empty_data(
+        self, batch_executor, mock_services, mock_storage
+    ):
         """Test execute with no data."""
 
         async def mock_fetch(**kwargs):

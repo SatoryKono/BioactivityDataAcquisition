@@ -40,7 +40,12 @@ class TestAggregateBoundaryIsolation:
         # Map of aggregate file -> aggregate classes defined
         aggregate_classes = {
             "batch.py": {"Batch", "BatchRecord", "BatchStatus"},
-            "pipeline_run.py": {"PipelineRun", "StageResult", "StageStatus", "RunStatus"},
+            "pipeline_run.py": {
+                "PipelineRun",
+                "StageResult",
+                "StageStatus",
+                "RunStatus",
+            },
             "quarantine_entry.py": {
                 "QuarantineEntry",
                 "QuarantineStatus",
@@ -139,7 +144,10 @@ class TestAggregateBoundaryIsolation:
                 if isinstance(node, ast.ClassDef):
                     for item in node.body:
                         # Check __init__ parameters
-                        if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                        if (
+                            isinstance(item, ast.FunctionDef)
+                            and item.name == "__init__"
+                        ):
                             for arg in item.args.args:
                                 if arg.annotation:
                                     ann_str = ast.unparse(arg.annotation)
@@ -325,9 +333,7 @@ class TestDomainEventsForCoordination:
 class TestAggregateConsistencyBoundary:
     """Tests ensuring aggregates are units of consistency."""
 
-    def test_aggregate_state_changes_through_methods_only(
-        self, src_dir: Path
-    ) -> None:
+    def test_aggregate_state_changes_through_methods_only(self, src_dir: Path) -> None:
         """Aggregate state should only change through defined methods.
 
         REQ-ARCH-026: State changes only via aggregate methods.
@@ -383,9 +389,9 @@ class TestAggregateConsistencyBoundary:
 
             for prop in properties:
                 # Should have @property but not setter
-                assert f"def {prop}(self)" in content, (
-                    f"{filename}: {prop} should be a property"
-                )
-                assert f"@{prop}.setter" not in content, (
-                    f"{filename}: {prop} should not have a setter (immutable)"
-                )
+                assert (
+                    f"def {prop}(self)" in content
+                ), f"{filename}: {prop} should be a property"
+                assert (
+                    f"@{prop}.setter" not in content
+                ), f"{filename}: {prop} should not have a setter (immutable)"
