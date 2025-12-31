@@ -154,9 +154,12 @@ src/bioetl/
 - No performance impact
 - No additional dependencies
 
-## Related Decisions
+## Related ADRs
 
-- **ADR-0005**: BasePipeline Decomposition — defines components that composition/ assembles
+- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — simplified composition factories
+- [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — removed watermark factories from composition
+- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — services assembled in composition
+- [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition — defines components that composition/ assembles
 - **RULES.md §1.1**: Ports & Adapters architecture — composition implements the "glue" layer
 
 ## References

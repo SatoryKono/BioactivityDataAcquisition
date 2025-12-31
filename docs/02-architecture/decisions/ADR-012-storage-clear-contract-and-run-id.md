@@ -107,8 +107,13 @@ should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
 | Чекпоинты со старым форматом | Низкая | `load()` игнорирует `run_id` в файле |
 | Дубликаты при incremental | Средняя | Merge по `content_hash` предотвращает дубли |
 
+## Related ADRs
+
+- [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet — storage format being cleared
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — Medallion invariants for clear operations
+- [ADR-013](ADR-013-async-storage-cleanup.md): Async Storage Cleanup — async implementation of clear methods
+
 ## References
 
 - RULES.md §1.1 — Ports & Adapters architecture
-- ADR-002 — Medallion Architecture
 - CLAUDE.md §3.2 — Content Hash нормализация

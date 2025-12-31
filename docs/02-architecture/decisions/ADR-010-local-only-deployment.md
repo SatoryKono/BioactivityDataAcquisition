@@ -185,9 +185,12 @@ class Settings:
 
 ## Related ADRs
 
-- **ADR-003**: Superseded — Redis больше не используется
-- **ADR-002**: Medallion Architecture — сохраняется, меняется только storage backend
-- **ADR-005**: Composition Layer — упрощён, удалены cloud factories
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — сохраняется, меняется только storage backend
+- [ADR-003](ADR-003-redis-for-distributed-locking.md): **Superseded** — Redis больше не используется
+- [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — упрощён, удалены cloud factories
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — MemoryLock shutdown behavior
+- [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplification aligned with Local-Only
+- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern consistent with Local-Only (no external infra)
 
 ## Migration Notes
 

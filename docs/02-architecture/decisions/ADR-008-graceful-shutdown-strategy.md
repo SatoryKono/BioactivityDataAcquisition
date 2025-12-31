@@ -206,5 +206,8 @@ The 5-minute grace period allows:
 
 ## Related ADRs
 
-- ADR-003: Redis for Distributed Locking (lock safety)
-- ADR-007: Circuit Breaker Implementation (failure handling)
+- [ADR-003](ADR-003-redis-for-distributed-locking.md): Redis for Distributed Locking — lock safety (superseded by ADR-010)
+- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation — failure handling coordination
+- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — MemoryLock shutdown behavior
+- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — aclose() during shutdown
+- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — shutdown on critical errors
