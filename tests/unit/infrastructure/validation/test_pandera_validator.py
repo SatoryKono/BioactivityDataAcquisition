@@ -290,11 +290,16 @@ arbitrary_record = st.dictionaries(
 
 
 @pytest.mark.unit
+@pytest.mark.slow
+@pytest.mark.hypothesis
 class TestPanderaValidatorPropertyBased:
     """Property-based tests for Pandera validators using Hypothesis.
 
     These tests verify that validators handle arbitrary input gracefully
     without raising unexpected exceptions.
+
+    Marked as slow because Hypothesis property tests with complex JSON
+    strategies can take 5-8 seconds each.
     """
 
     @given(records=st.lists(arbitrary_record, max_size=10))
