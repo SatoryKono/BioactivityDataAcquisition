@@ -12,7 +12,6 @@ from bioetl.composition.factories.runner_factory import (
     create_runner_factory,
 )
 from bioetl.composition.registry import PipelineRegistry
-from bioetl.infrastructure.config import get_settings
 
 
 def bootstrap_pipeline_runner_service(
@@ -35,13 +34,10 @@ def bootstrap_pipeline_runner_service(
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
     """
-    settings = get_settings()
-
-    # Bootstrap logger for the service
+    # Bootstrap logger for the service (run_id=None generates a new UUID)
     logger = bootstrap_logger(
         pipeline="pipeline_runner_service",
-        run_id=None,  # Service-level logger without specific run_id
-        settings=settings,
+        run_id=None,
         log_level="INFO",
     )
 
