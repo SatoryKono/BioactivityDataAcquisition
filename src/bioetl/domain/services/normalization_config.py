@@ -92,8 +92,8 @@ class NormalizationConfig:
         ...     strict_validation=True,
         ...     potency_threshold=6.0,
         ... )
-        >>> print(config.default_output_unit)
-        nM
+        >>> config.default_output_unit
+        'nM'
     """
 
     default_output_unit: str = "nM"

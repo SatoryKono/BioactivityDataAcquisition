@@ -51,12 +51,12 @@ class ValueValidator:
     Example:
         >>> validator = ValueValidator()
         >>> valid, error = validator.validate_concentration(100.0, "nM")
-        >>> print(valid)
+        >>> valid
         True
 
         >>> valid, error = validator.validate_pchembl(20.0)
-        >>> print(valid, error)
-        False pChEMBL value 20.00 exceeds maximum 14.00
+        >>> valid, error
+        (False, 'pChEMBL value 20.00 exceeds maximum 14.00')
     """
 
     config: NormalizationConfig | None = None

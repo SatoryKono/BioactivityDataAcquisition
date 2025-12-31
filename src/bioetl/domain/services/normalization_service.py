@@ -66,13 +66,13 @@ class NormalizationService:
         >>> config = NormalizationConfig()
         >>> service = NormalizationService(config)
         >>> result = service.normalize_activity(100.0, "nM", "IC50")
-        >>> print(f"{result.value} {result.unit}, pChEMBL={result.pchembl}")
-        100.0 nM, pChEMBL=7.00
+        >>> f"{result.value} {result.unit}, pChEMBL={result.pchembl}"
+        '100.0 nM, pChEMBL=7.00'
 
         >>> # With validation
         >>> result = service.normalize_activity(-50.0, "nM", "IC50")
-        >>> print(result.is_valid, result.validation_message)
-        False Concentration cannot be negative: -50.0
+        >>> result.is_valid, result.validation_message
+        (False, 'Concentration cannot be negative: -50.0')
     """
 
     config: NormalizationConfig = field(default_factory=NormalizationConfig)
@@ -109,8 +109,8 @@ class NormalizationService:
         Example:
             >>> service = NormalizationService()
             >>> result = service.normalize_activity(1.0, "µM", "IC50")
-            >>> print(f"{result.value} {result.unit}")
-            1000.0 nM
+            >>> f"{result.value} {result.unit}"
+            '1000.0 nM'
         """
         # Validate first if requested
         if validate:
@@ -173,8 +173,8 @@ class NormalizationService:
         Example:
             >>> service = NormalizationService()
             >>> pchembl = service.normalize_to_pchembl(100.0, "nM")
-            >>> print(pchembl)
-            7.00
+            >>> str(pchembl)
+            '7.00'
         """
         try:
             pchembl = self.converter.value_to_pchembl(value, unit)
@@ -219,8 +219,8 @@ class NormalizationService:
             ...     "nM",
             ...     "IC50"
             ... )
-            >>> print(f"{result.value} {result.unit}")
-            100.0 nM
+            >>> f"{result.value} {result.unit}"
+            '100.0 nM'
         """
         # Normalize each value
         results = [
