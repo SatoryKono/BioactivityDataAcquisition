@@ -10,11 +10,20 @@ import sys
 
 import pytest
 
+# Check if black is available
+try:
+    import black  # noqa: F401
+
+    BLACK_AVAILABLE = True
+except ImportError:
+    BLACK_AVAILABLE = False
+
 
 class TestCodeFormatting:
     """Tests ensuring code follows black formatting standards."""
 
     @pytest.mark.slow
+    @pytest.mark.skipif(not BLACK_AVAILABLE, reason="black not installed")
     def test_black_formatting_src(self) -> None:
         """Source code MUST be formatted with black.
 
@@ -33,6 +42,7 @@ class TestCodeFormatting:
         )
 
     @pytest.mark.slow
+    @pytest.mark.skipif(not BLACK_AVAILABLE, reason="black not installed")
     def test_black_formatting_tests(self) -> None:
         """Test code MUST be formatted with black.
 
