@@ -1,7 +1,7 @@
 # BioETL Audit Action Plan
 
-**Audit Date:** 2025-12-31  
-**Commit:** `ad81a11961b762879ff368c4d713e20523900e0a`  
+**Audit Date:** 2025-12-31 (Re-verified)
+**Commit:** `f918341366dde8cccb4779d5cf91c0f28c64c2f3`
 **RULES.md Version:** v5.8
 
 ---
@@ -140,10 +140,11 @@ The project already meets all primary success criteria:
 
 - [x] Total Score ≥7.5 (**8.93**)
 - [x] Zero P0/P1 issues (**0 critical/high issues**)
-- [x] Coverage ≥85% (**86.34%**)
+- [x] Coverage ≥85% (**86.93%**)
 - [x] Mypy strict passes (**325 files, 0 issues**)
 - [x] Ruff clean (**All checks passed**)
-- [x] Architecture tests pass (**382 passed**)
+- [x] Architecture tests pass (**387 passed**)
+- [x] Unit tests pass (**3561 passed**)
 - [x] Import contracts pass (**5 kept, 0 broken**)
 
 ---

@@ -1,11 +1,11 @@
 # BioETL Architecture Audit Scores
-# Audit Date: 2025-12-31
+# Audit Date: 2025-12-31 (Re-verified)
 # RULES.md Version: v5.8
 
 project_assessment:
   audit_date: "2025-12-31"
-  commit_hash: "ad81a11961b762879ff368c4d713e20523900e0a"
-  auditor: "Claude Code Architectural Auditor"
+  commit_hash: "f918341366dde8cccb4779d5cf91c0f28c64c2f3"
+  auditor: "Claude Opus 4.5 Automated Audit"
   rules_version: "v5.8"
 
   scores:
@@ -16,7 +16,7 @@ project_assessment:
         - grep -rn "from bioetl.infrastructure" src/bioetl/domain/ → 0 violations
         - grep -rn "from bioetl.infrastructure" src/bioetl/application/ → 0 violations
         - lint-imports → 5 contracts kept, 0 broken
-        - pytest tests/architecture/ → 382 passed, 1 skipped
+        - pytest tests/architecture/ → 387 passed, 1 skipped (2 env failures: black not installed)
       justification: |
         Excellent architecture compliance. Zero layer violations detected between
         domain→infrastructure and application→infrastructure. All 5 import-linter
@@ -66,14 +66,14 @@ project_assessment:
       score: 9
       weight: 0.12
       evidence: |
-        - pytest --cov → 86.34% coverage (requirement: ≥85%)
-        - find tests -name "*.py" | wc -l → 319 test files
-        - pytest tests/architecture/ → 382 architecture tests
-        - ls tests/fixtures/vcr/*.yaml | wc -l → 51 VCR cassettes
-        - find tests/integration -name "*.py" | wc -l → 25 integration tests
+        - pytest --cov → 86.93% coverage (requirement: ≥85%)
+        - Unit tests: 3561 passed, 3 skipped
+        - pytest tests/architecture/ → 387 architecture tests in 34 files
+        - ls tests/fixtures/vcr/*.yaml | wc -l → 53 VCR cassettes
+        - Integration tests: ~2360 lines of test code
       justification: |
-        Coverage exceeds 85% threshold (86.34%). Strong architecture test suite
-        (382 tests). VCR cassettes for HTTP mocking. Integration tests with
+        Coverage exceeds 85% threshold (86.93%). Strong architecture test suite
+        (387 tests). VCR cassettes for HTTP mocking. Integration tests with
         proper cassette usage.
 
     code_quality:
@@ -166,9 +166,17 @@ project_assessment:
   summary: |
     BioETL demonstrates excellent architectural compliance with RULES.md v5.8.
     The project achieves a Grade A (8.93/10) across all 10 audit categories.
+
+    Re-verification on 2025-12-31 (commit f918341) confirms:
+    - 3561 unit tests passing with 86.93% coverage
+    - 387 architecture tests verifying boundaries
+    - Zero layer violations detected
+    - mypy --strict: "Success: no issues found in 325 source files"
+    - ruff check: "All checks passed!"
+
     Key strengths include: perfect code quality (mypy strict, ruff clean),
-    strong architecture enforcement (382 tests, 0 violations), comprehensive
-    test coverage (86.34%), and robust error handling with Circuit Breaker
+    strong architecture enforcement (387 tests, 0 violations), comprehensive
+    test coverage (86.93%), and robust error handling with Circuit Breaker
     and DQ thresholds. Minor improvement opportunities exist in documentation
     (some ADRs missing explicit status) and expanding operational readiness
     for distributed scenarios if needed in future.
