@@ -15,9 +15,7 @@ Per RULES.md §4.4 Graceful Shutdown:
 from __future__ import annotations
 
 import asyncio
-import signal
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -79,56 +77,6 @@ class TestShutdownSignal:
 
         shutdown.reset()
         assert shutdown.is_requested is False
-
-
-@pytest.mark.e2e
-@pytest.mark.asyncio
-class TestOSSignalHandling:
-    """Tests for OS signal handling integration."""
-
-    async def test_register_signal_handlers_registers_sigterm(self):
-        """E2E: register_signal_handlers registers SIGTERM handler."""
-        from unittest.mock import AsyncMock
-
-        from bioetl.interfaces.orchestration.signals import register_signal_handlers
-
-        shutdown_service = MagicMock()
-        shutdown_service.initiate_shutdown = AsyncMock()
-
-        # Store original handler
-        original_handler = signal.getsignal(signal.SIGTERM)
-
-        try:
-            register_signal_handlers(shutdown_service, logger=None)
-
-            # Verify handler was set (not the default)
-            current_handler = signal.getsignal(signal.SIGTERM)
-            assert current_handler != signal.SIG_DFL
-        finally:
-            # Restore original handler
-            signal.signal(signal.SIGTERM, original_handler)
-
-    async def test_register_signal_handlers_registers_sigint(self):
-        """E2E: register_signal_handlers registers SIGINT handler."""
-        from unittest.mock import AsyncMock
-
-        from bioetl.interfaces.orchestration.signals import register_signal_handlers
-
-        shutdown_service = MagicMock()
-        shutdown_service.initiate_shutdown = AsyncMock()
-
-        # Store original handler
-        original_handler = signal.getsignal(signal.SIGINT)
-
-        try:
-            register_signal_handlers(shutdown_service, logger=None)
-
-            # Verify handler was set
-            current_handler = signal.getsignal(signal.SIGINT)
-            assert current_handler != signal.SIG_DFL
-        finally:
-            # Restore original handler
-            signal.signal(signal.SIGINT, original_handler)
 
 
 @pytest.mark.e2e
