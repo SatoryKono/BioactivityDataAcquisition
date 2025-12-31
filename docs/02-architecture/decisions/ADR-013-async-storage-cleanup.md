@@ -106,8 +106,12 @@ async def test_clear_exports(...):
     services.storage.clear_silver = AsyncMock(return_value=0)
 ```
 
+## Related ADRs
+
+- [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — defines the contract being implemented
+- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — async cleanup coordination
+
 ## References
 
-- ADR-012: Storage Clear Contract and Run ID Consistency
 - CLAUDE.md §3: Medallion Architecture
 - tests/integration/test_runner_lifecycle.py — Тесты инвариантов

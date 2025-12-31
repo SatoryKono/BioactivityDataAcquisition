@@ -1,0 +1,286 @@
+# Domain Layer Architecture Audit
+# BioETL Project
+# Date: 2025-12-30
+# Auditor: Claude Code (Opus 4.5)
+# Protocol: Double Verification (RULES.md §7)
+
+domain_layer_audit:
+  date: "2025-12-30"
+  rules_version: "5.8"
+
+  # ============================================================================
+  # EXECUTIVE SUMMARY
+  # ============================================================================
+  summary: |
+    Domain Layer демонстрирует превосходное соответствие DDD и Hexagonal Architecture.
+    Все 29 Ports реализованы как typing.Protocol с @runtime_checkable.
+    Domain чист от I/O операций - нет HTTP, DB, или файловых импортов.
+    Value Objects используют frozen dataclasses с proper validation.
+    Aggregates (Batch, PipelineRun, QuarantineEntry) реализуют state machines с domain events.
+    IdentityService полностью реализует RULES.md §2.8.1 для content hashing.
+    Exceptions организованы в чёткую иерархию с ErrorType классификацией.
+
+    Weighted Total: 9.85/10 - Отличный результат.
+
+  # ============================================================================
+  # VERIFIED PROBLEMS
+  # ============================================================================
+  problems:
+    - id: "DOM-001"
+      category: "DOMAIN"
+      subcategory: "Schemas"
+      title: "Missing centralized DQ rules directory"
+
+      description: |
+        Ожидаемая структура domain layer включает директорию `rules/` для DQ rules
+        и Schema Drift detection (согласно task prompt), однако она отсутствует.
+        DQ rules распределены по другим компонентам.
+
+      verification_1:
+        command: "ls -la src/bioetl/domain/rules/ 2>/dev/null || echo 'not found'"
+        expected: "Directory with DQ rules"
+        actual: "rules directory not found"
+        evidence: "src/bioetl/domain/ structure"
+
+      verification_2:
+        command: "grep -rn 'DQConfig\\|soft_fail_threshold' src/bioetl/domain/"
+        expected: "DQ rules in dedicated directory"
+        actual: "DQConfig found in domain/config.py (centralized config)"
+        evidence: "src/bioetl/domain/config.py - DQ rules integrated in config"
+
+      rules_violation:
+        section: "N/A"
+        requirement: "Not a violation - DQ logic exists, just organized differently"
+
+      impact:
+        severity: "Low"
+        affected_components:
+          - "Domain organization"
+        risk_if_unfixed: |
+          Minor discoverability issue. DQ rules are functional but located
+          in config.py rather than dedicated rules/ directory.
+
+      assessment:
+        complexity: 2
+        effort_days: 0.5
+        priority: "P3"
+        dependencies: []
+
+      resolution:
+        approach: |
+          OPTIONAL: Consider extracting DQ rules to dedicated module if
+          the rules grow in complexity. Current centralization in config.py
+          is acceptable for the current scope.
+        steps:
+          - step: "Evaluate if DQ rules complexity warrants extraction"
+            verification: "grep -c 'DQ\\|threshold' src/bioetl/domain/config.py"
+        breaking_changes: false
+        tests_to_add: []
+
+  # ============================================================================
+  # VERIFIED NON-PROBLEMS (False Positive Prevention)
+  # ============================================================================
+  non_problems:
+    - id: "NON-DOM-001"
+      description: "Ports correctly use Protocol, not ABC"
+      verification: "grep -rn 'class.*Protocol' src/bioetl/domain/ports/ returns 29 matches"
+      evidence: "All ports use typing.Protocol with @runtime_checkable"
+
+    - id: "NON-DOM-002"
+      description: "Domain layer is pure - no I/O operations"
+      verification: "grep -rn 'import httpx\\|import requests' src/bioetl/domain/ returns 0"
+      evidence: "No HTTP, DB, or file I/O imports in domain layer"
+
+    - id: "NON-DOM-003"
+      description: "Value Objects are properly immutable"
+      verification: "grep -rn 'frozen=True' src/bioetl/domain/value_objects/ returns 6 matches"
+      evidence: "ValueObject base class + frozen dataclasses with __setattr__ override"
+
+    - id: "NON-DOM-004"
+      description: "Content hash follows RULES.md §2.8.1"
+      verification: "Read src/bioetl/domain/services/identity_service.py"
+      evidence: |
+        - sha256(provider + canonical_json(record)) at line 127
+        - NaN/Inf → null at line 184
+        - round(val, 10) at line 185
+        - Meta-fields excluded via META_FIELDS frozenset
+
+  # ============================================================================
+  # CATEGORY SCORES
+  # ============================================================================
+  scores:
+    ports_quality:
+      score: 10
+      weight: 0.20
+      justification: |
+        EVIDENCE:
+        - 29 Protocols found via grep -rn "class.*Protocol" src/bioetl/domain/ports/
+        - 29 @runtime_checkable decorators found
+        - 0 ABC classes (grep -rn "class.*ABC" returns empty)
+        - Complete __init__.py facade with 41 exports in __all__
+        - aclose() on all I/O ports (storage, data_source, audit, checkpoint, locking, quarantine)
+
+        All requirements from RULES.md §1.1.1 satisfied.
+
+    domain_purity:
+      score: 10
+      weight: 0.20
+      justification: |
+        EVIDENCE:
+        - grep -rn "import httpx\\|import requests\\|import aiohttp" returns 0
+        - grep -rn "from bioetl.infrastructure" returns 0
+        - grep -rn "from bioetl.application\\|composition\\|interfaces" returns 0
+        - 31 architecture tests in tests/architecture/
+        - test_domain_purity.py validates no I/O patterns
+
+        Domain layer is completely pure with no I/O operations.
+
+    value_objects:
+      score: 10
+      weight: 0.15
+      justification: |
+        EVIDENCE:
+        - ValueObject base class (base.py:23) with __slots__, __setattr__, __delattr__
+        - 6 frozen dataclasses with slots=True (activity.py, compound_ids.py, etc.)
+        - Equality by value via __eq__ and __hash__ in base class
+        - Validation in _validate() method pattern
+        - Complete test coverage in tests/unit/domain/value_objects/ (5 test files)
+
+        Full DDD Value Object pattern implementation.
+
+    aggregates_entities:
+      score: 10
+      weight: 0.15
+      justification: |
+        EVIDENCE:
+        - 3 Aggregates: Batch (534 LOC), PipelineRun (562 LOC), QuarantineEntry (514 LOC)
+        - State machines with explicit transitions (BatchStatus, RunStatus, QuarantineStatus)
+        - Domain events (BatchCreated, BatchSealed, PipelineFailed, etc.)
+        - Invariant validation in _assert_* methods
+        - BaseEntity (frozen=True, kw_only=True) with __post_init__ validation
+
+        Excellent DDD aggregate implementation with events.
+
+    schemas:
+      score: 9
+      weight: 0.15
+      justification: |
+        EVIDENCE:
+        - ETLRecordSchema as Pandera DataFrameModel (base.py:15)
+        - content_hash with regex validation: str_matches=r"^[a-f0-9]{64}$"
+        - nullable=True explicitly used (30+ fields across providers)
+        - No sentinel values (grep for "-1", "N/A", 9999 returns only "NONE" which is valid ChEMBL value)
+        - Provider schemas in subdirectories (chembl, pubmed, pubchem, uniprot, crossref)
+
+        Minor: Schemas distributed per provider without shared field definitions.
+        Could benefit from more base schema inheritance.
+
+    content_hash:
+      score: 10
+      weight: 0.10
+      justification: |
+        EVIDENCE from identity_service.py:
+        - sha256(provider + canonical_json(record)) at line 126-128
+        - META_FIELDS frozenset excludes _ingestion_ts, _run_id, _run_type, _dq_* (lines 25-34)
+        - NaN/Inf → None at lines 182-184
+        - round(value, 10) at line 185
+        - datetime → date().isoformat() at line 188
+        - string.strip() at line 194
+        - Canonical JSON with sort_keys=True at line 219
+
+        100% compliance with RULES.md §2.8.1.
+
+    exceptions:
+      score: 10
+      weight: 0.05
+      justification: |
+        EVIDENCE:
+        - Clear hierarchy: BioETLError → CriticalError/RecoverableError/DataQualityError
+        - ErrorType classification via class attribute
+        - context property for unified logging (base.py:54-79)
+        - with_context() method for exception enrichment
+        - 26 specific exception types in __all__
+
+        Complete exception classification as per RULES.md §3.
+
+  # ============================================================================
+  # FINAL CALCULATION
+  # ============================================================================
+  weighted_calculation:
+    ports_quality: "10 × 0.20 = 2.00"
+    domain_purity: "10 × 0.20 = 2.00"
+    value_objects: "10 × 0.15 = 1.50"
+    aggregates_entities: "10 × 0.15 = 1.50"
+    schemas: "9 × 0.15 = 1.35"
+    content_hash: "10 × 0.10 = 1.00"
+    exceptions: "10 × 0.05 = 0.50"
+
+  weighted_total: 9.85
+
+  # ============================================================================
+  # TOP PRIORITIES
+  # ============================================================================
+  top_priorities:
+    - id: "NONE"
+      reason: |
+        Domain Layer is in excellent state. No critical or high priority issues found.
+        The single identified item (DOM-001) is P3 organizational suggestion,
+        not a functional or architectural issue.
+
+  # ============================================================================
+  # RECOMMENDATIONS
+  # ============================================================================
+  recommendations:
+    maintain:
+      - "Continue using Protocol for all ports"
+      - "Keep domain layer pure from I/O"
+      - "Maintain frozen dataclasses for Value Objects"
+      - "Keep aggregate state machines with domain events"
+
+    consider:
+      - "Extract shared schema fields to reduce duplication across providers"
+      - "Consider dedicated rules/ module if DQ logic grows"
+
+    avoid:
+      - "Do not add I/O operations to domain layer"
+      - "Do not use ABC for ports - stick with Protocol"
+      - "Do not make Value Objects mutable"
+
+  # ============================================================================
+  # VERIFICATION COMMANDS USED
+  # ============================================================================
+  verification_commands:
+    ports:
+      - "grep -rn 'class.*Protocol' src/bioetl/domain/ports/"
+      - "grep -rn '@runtime_checkable' src/bioetl/domain/ports/"
+      - "grep -rn 'class.*ABC' src/bioetl/domain/ports/"
+      - "cat src/bioetl/domain/ports/__init__.py"
+
+    purity:
+      - "grep -rn 'import httpx\\|import requests\\|import aiohttp' src/bioetl/domain/"
+      - "grep -rn 'from bioetl.infrastructure' src/bioetl/domain/"
+      - "grep -rn 'open(\\|Path(' src/bioetl/domain/"
+
+    value_objects:
+      - "grep -rn 'frozen=True' src/bioetl/domain/value_objects/"
+      - "cat src/bioetl/domain/value_objects/base.py"
+      - "ls tests/unit/domain/value_objects/"
+
+    aggregates:
+      - "cat src/bioetl/domain/aggregates/__init__.py"
+      - "wc -l src/bioetl/domain/aggregates/*.py"
+      - "grep -rn 'def _assert' src/bioetl/domain/aggregates/"
+
+    schemas:
+      - "grep -rn 'pa\\.DataFrameModel' src/bioetl/domain/schemas/"
+      - "grep -rn 'nullable=True' src/bioetl/domain/schemas/"
+      - "grep -rn '\"-1\"\\|\"N/A\"\\|9999' src/bioetl/domain/schemas/"
+
+    content_hash:
+      - "cat src/bioetl/domain/services/identity_service.py"
+      - "grep -rn 'sha256\\|hashlib' src/bioetl/domain/"
+
+    exceptions:
+      - "cat src/bioetl/domain/exceptions/__init__.py"
+      - "cat src/bioetl/domain/exceptions/base.py"
+      - "grep -rn 'error_type = ErrorType' src/bioetl/domain/exceptions/"
