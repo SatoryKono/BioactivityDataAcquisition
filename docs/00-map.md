@@ -1,6 +1,11 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.8 | Last updated: 2025-12-29*
+*Synced with RULES.md v5.8 | Last updated: 2025-12-31*
+
+> **Documentation Audit Completed:** 2025-12-31
+> - Consolidated 4 audit directories → `audits/`
+> - Moved 8 outdated plans → `archived/`
+> - Merged 25 Mermaid diagrams → `02-architecture/diagrams/`
 
 ## Quick Links
 
@@ -33,7 +38,12 @@
 ```
 docs/
 ├── 00-map.md                    # This file (Project Navigator)
+├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
+├── RULES.md                     # Canonical rules document (v5.8)
+├── REQUIREMENTS.md              # 127 testable requirements
+├── CHANGELOG.md                 # Version history
+├── refactoring-plan.md          # Current refactoring roadmap
 │
 ├── 00-project_rules/            # Project governance
 │   ├── 00-rules-summary.md      # TL;DR of RULES.md
@@ -43,17 +53,6 @@ docs/
 │   ├── 05-cleanup-policy.md     # Cleanup and retention
 │   ├── 06-rules-mapping.md      # RULES.md to docs mapping
 │   └── 07-consistency-check.md  # Consistency verification guide
-│
-├── domain/                      # Domain model documentation
-│   └── schemas/                 # Schema documentation by provider
-│       ├── chembl/              # ChEMBL entity schemas
-│       │   ├── activity-schema.md
-│       │   ├── molecule-schema.md
-│       │   ├── target-schema.md
-│       │   └── assay-schema.md
-│       ├── pubchem/             # PubChem entity schemas
-│       ├── uniprot/             # UniProt entity schemas
-│       └── pubmed/              # PubMed entity schemas
 │
 ├── 02-architecture/             # System architecture
 │   ├── 01-domain-layer.md       # Domain layer architecture
@@ -67,16 +66,23 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # Architecture Decision Records (ADR-001..021)
-│   └── diagrams/                # Diagram source files
+│   ├── decisions/               # ADR-001..022 (22 records)
+│   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
 │
-├── 03-guides/                   # How-to guides
+├── 03-guides/                   # How-to guides (10 guides)
 │   ├── quick-start.md           # Quick start guide
 │   ├── getting-started.md       # Getting started
 │   ├── running-pipelines.md     # Running pipelines
+│   ├── testing.md               # Testing guide
+│   ├── local-storage-layout.md  # Storage layout explanation
+│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
+│   ├── registry-pattern.md      # Registry pattern guide
 │   ├── troubleshooting.md       # Troubleshooting
 │   ├── add-new-source.md        # Adding new data source
 │   └── add-pipeline-existing-source.md
+│
+├── 03-data-contracts/           # Data contracts
+│   └── gold-schemas.md          # Gold layer schema documentation
 │
 ├── 04-reference/                # Reference documentation
 │   ├── api/                     # API reference by layer
@@ -84,18 +90,37 @@ docs/
 │   └── pipelines/               # Pipeline-specific reference
 │
 ├── 05-operations/               # Operational runbooks
-│   └── runbooks/                # Incident response playbooks
+│   ├── runbooks/                # 11 incident response playbooks
+│   └── performance-baselines.md # Performance metrics
 │
-├── contracts/                   # Data contracts
-│   └── gold/                    # Gold layer JSON schemas
+├── audits/                      # Architecture audits (consolidated)
+│   ├── audit-2025-12-31-comprehensive.md  # Latest comprehensive audit
+│   ├── architecture-audit-2025-12-31.md   # Architecture audit
+│   ├── application-layer-audit.md         # Application layer
+│   ├── infrastructure-layer-audit.md      # Infrastructure layer
+│   ├── interfaces-layer-audit-2025-12-30.md # Interfaces layer
+│   ├── false_positives.md                 # Documented false positives
+│   └── validation-matrix-2025-12-31.md    # Validation matrix
+│
+├── archived/                    # Historical documents
+│   ├── refactoring-plan-bronze-validation.md
+│   ├── consolidated-refactoring-analysis.md
+│   └── (7 more archived plans/issues)
+│
+├── domain/schemas/              # Schema documentation
+│   └── chembl/                  # ChEMBL entity schemas (4 files)
 │
 ├── providers/                   # Provider-specific documentation
+│   ├── chembl/                  # ChEMBL (6 entities)
+│   ├── pubchem/                 # PubChem (1 entity)
+│   ├── uniprot/                 # UniProt (1 entity)
+│   └── pubmed/                  # PubMed (1 entity)
 │
-├── RULES.md                     # Canonical rules document (v5.8)
-├── REQUIREMENTS.md              # Testable requirements
-├── refactoring-plan.md          # Current refactoring roadmap
+├── contracts/gold/              # Gold layer JSON schemas
 │
-└── templates/                   # Document & code templates
+├── templates/                   # Document & code templates
+│
+└── __-prompts/                  # Claude prompts (internal)
 ```
 
 ---
@@ -142,10 +167,10 @@ docs/
 | Topic            | Document                                                                                            | RULES.md |
 |------------------|-----------------------------------------------------------------------------------------------------|----------|
 | Medallion Layers | [data-flow.md](02-architecture/data-flow.md)                                                        | §2.1     |
-| Schema Drift     | [01-project-rules.md](00-project_rules/01-project-rules.md)   | §2.2     |
+| Schema Drift     | [RULES.md](RULES.md#22-обработка-дрейфа-схемы)   | §2.2     |
 | Data Lineage     | [system-context.md](02-architecture/system-context.md)                                              | §2.3     |
-| Backfill/Replay  | [01-project-rules.md](00-project_rules/01-project-rules.md)            | §2.4     |
-| Quarantine       | [01-project-rules.md](00-project_rules/01-project-rules.md) | §2.6     |
+| Backfill/Replay  | [RULES.md](RULES.md#24-стратегия-backfill-и-replay)            | §2.4     |
+| Quarantine       | [RULES.md](RULES.md#26-dead-letter-queue--quarantine) | §2.6     |
 | Content Hash     | [system-context.md](02-architecture/system-context.md)                                              | §2.8     |
 
 ### Schema Documentation
@@ -161,13 +186,13 @@ docs/
 
 | Topic             | Document                                                                                          | RULES.md |
 |-------------------|---------------------------------------------------------------------------------------------------|----------|
-| Error Handling    | [data-flow.md](02-architecture/data-flow.md)                                    | §3.1     |
-| Circuit Breaker   | [data-flow.md](02-architecture/data-flow.md)                                  | §3.1.4   |
-| Locking           | [data-flow.md](02-architecture/data-flow.md)                                | §3.3     |
-| DQ Metrics        | [01-project-rules.md](00-project_rules/01-project-rules.md) | §3.4     |
-| Graceful Shutdown | [data-flow.md](02-architecture/data-flow.md)                                 | §5.3     |
-| DR Procedures     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                                                      | §5.5     |
-| Cleanup           | [05-cleanup-policy.md](00-project_rules/05-cleanup-policy.md)                                     | §2.1.1   |
+| Error Handling    | [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md)         | §3.1     |
+| Circuit Breaker   | [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)  | §3.1.4   |
+| Locking           | [ADR-003](02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)      | §3.3     |
+| DQ Metrics        | [RULES.md](RULES.md#34-data-quality-метрики)                                    | §3.4     |
+| Graceful Shutdown | [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
+| DR Procedures     | [runbooks/index.md](05-operations/runbooks/index.md)                            | §5.5     |
+| Cleanup           | [05-cleanup-policy.md](00-project_rules/05-cleanup-policy.md)                   | §2.1.1   |
 
 ### Development
 
@@ -175,10 +200,10 @@ docs/
 |------------------|-------------------------------------------------------------------------------------------------|----------|
 | Adding Providers | [add-new-source.md](03-guides/add-new-source.md)                                                | App D    |
 | Adding Pipelines | [add-pipeline-existing-source.md](03-guides/add-pipeline-existing-source.md)                    | App D    |
-| Pipeline Review  | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                | §4.2     |
-| Testing          | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4.2     |
-| E2E Testing      | [tests/e2e/](../tests/e2e/) + [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md) | §4.2.3 |
-| Code Style       | [01-project-rules.md](00-project_rules/01-project-rules.md)                                     | §4       |
+| Pipeline Review  | [pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                          | §4.2     |
+| Testing          | [testing.md](03-guides/testing.md)                                                              | §4.2     |
+| E2E Testing      | [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
+| Code Style       | [02-user-rules.md](00-project_rules/02-user-rules.md)                                           | §4       |
 
 ---
 
@@ -310,17 +335,19 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md (docs/)         | 2025-12-27   | v5.7 (Pre-Refactoring)       |
-| refactoring-plan.md      | 2025-12-27   | v5.6 (Consolidated)          |
+| RULES.md                 | 2025-12-29   | v5.8 (TTL/Heartbeat Sync)    |
+| refactoring-plan.md      | 2025-12-31   | Active refactoring roadmap   |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2025-12-29   | v5.9 Glossary added          |
+| 00-map.md                | 2025-12-31   | v6.0 Post-audit consolidated |
 | 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
-| 03-guides/               | 2025-12-20   | Consolidated (10 guides)     |
-| ADR-001..020             | 2025-12-27   | All 20 ADRs documented       |
-| 05-operations/runbooks/  | 2025-12-27   | 4 active runbooks            |
+| 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
+| ADR-001..022             | 2025-12-31   | All 22 ADRs documented       |
+| 05-operations/runbooks/  | 2025-12-27   | 11 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
+| audits/                  | 2025-12-31   | Consolidated (18 files)      |
+| 02-architecture/diagrams/| 2025-12-31   | 35 Mermaid diagrams          |
 
 ---
 
-*Last updated: 2025-12-29. Update when adding new documentation.*
+*Last updated: 2025-12-31. Documentation audit completed.*
