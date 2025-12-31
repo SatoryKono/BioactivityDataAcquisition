@@ -5,7 +5,7 @@ Implements RULES.md §3.2.1 - Log Schema with mandatory fields:
 - level: log level (from method call)
 - run_id: correlation ID (MUST be provided at initialization)
 - pipeline: pipeline name (MUST be provided at initialization)
-- stage: extract | transform | load (MUST be provided on each call)
+- stage: extract | transform | load (defaults to "init" if not provided)
 
 Optional fields:
 - dataset: logical table name (SHOULD)
@@ -44,16 +44,22 @@ if TYPE_CHECKING:
 # Stage values allowed by Log Schema
 StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
 
+# Default stage when not provided (for LoggerPort compatibility)
+_DEFAULT_STAGE: StageType = "init"
+
 
 class UnifiedLogger:
     """Unified logger with enforced Log Schema fields.
 
     This logger enforces the mandatory fields defined in RULES.md §3.2.1:
     - run_id and pipeline are bound at initialization
-    - stage is required on every log call
+    - stage defaults to "init" if not provided (for LoggerPort compatibility)
 
     The logger also includes secret filtering to prevent accidental
     logging of sensitive data like API keys, tokens, and passwords.
+
+    Implements LoggerPort protocol with signature: method(_event: str, **kwargs: Any)
+    Schema fields (stage, dataset, record_count, error_type) are extracted from kwargs.
 
     Note:
         Uses centralized logging configuration from logging_config.py.
@@ -113,116 +119,90 @@ class UnifiedLogger:
         new_logger._logger = self._logger.bind(**kwargs)
         return new_logger
 
-    def info(
-        self,
-        message: str,
-        *,
-        stage: StageType,
-        dataset: str | None = None,
-        record_count: int | None = None,
-        **kwargs: Any,
-    ) -> Any:
-        """Log an informational message with mandatory stage.
+    def _ensure_stage(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """Ensure stage field is present in kwargs.
+
+        If stage is not provided, defaults to "init" for LoggerPort compatibility.
 
         Args:
-            message: The event message
-            stage: Pipeline stage (extract, transform, load, validate, init, cleanup)
-            dataset: Logical table name (SHOULD provide)
-            record_count: Count of records (SHOULD provide)
-            **kwargs: Additional context for the log entry
+            kwargs: Original keyword arguments
+
+        Returns:
+            kwargs with stage field ensured
         """
-        extra = {"stage": stage, **kwargs}
-        if dataset is not None:
-            extra["dataset"] = dataset
-        if record_count is not None:
-            extra["record_count"] = record_count
+        if "stage" not in kwargs:
+            kwargs["stage"] = _DEFAULT_STAGE
+        return kwargs
 
-        return self._logger.info(message, **extra)
+    def info(self, _event: str, **kwargs: Any) -> Any:
+        """Log an informational message.
 
-    def warning(
-        self,
-        message: str,
-        *,
-        stage: StageType,
-        dataset: str | None = None,
-        **kwargs: Any,
-    ) -> Any:
-        """Log a warning message with mandatory stage.
+        Implements LoggerPort.info() with Log Schema enforcement.
+        Stage defaults to "init" if not provided.
 
         Args:
-            message: The event message
-            stage: Pipeline stage
-            dataset: Logical table name (SHOULD provide)
-            **kwargs: Additional context for the log entry
+            _event: The event message
+            **kwargs: Additional context. Recognized schema fields:
+                - stage: Pipeline stage (extract, transform, load, validate, init, cleanup)
+                - dataset: Logical table name
+                - record_count: Count of records
         """
-        extra = {"stage": stage, **kwargs}
-        if dataset is not None:
-            extra["dataset"] = dataset
+        return self._logger.info(_event, **self._ensure_stage(kwargs))
 
-        return self._logger.warning(message, **extra)
+    def warning(self, _event: str, **kwargs: Any) -> Any:
+        """Log a warning message.
 
-    def error(
-        self,
-        message: str,
-        *,
-        stage: StageType,
-        error_type: str,
-        dataset: str | None = None,
-        **kwargs: Any,
-    ) -> Any:
-        """Log an error message with mandatory stage and error_type.
+        Implements LoggerPort.warning() with Log Schema enforcement.
+        Stage defaults to "init" if not provided.
 
         Args:
-            message: The event message
-            stage: Pipeline stage
-            error_type: Classification of the error (e.g., "network", "validation", "schema")
-            dataset: Logical table name (SHOULD provide)
-            **kwargs: Additional context for the log entry
+            _event: The event message
+            **kwargs: Additional context. Recognized schema fields:
+                - stage: Pipeline stage
+                - dataset: Logical table name
         """
-        extra = {"stage": stage, "error_type": error_type, **kwargs}
-        if dataset is not None:
-            extra["dataset"] = dataset
+        return self._logger.warning(_event, **self._ensure_stage(kwargs))
 
-        return self._logger.error(message, **extra)
+    def error(self, _event: str, **kwargs: Any) -> Any:
+        """Log an error message.
 
-    def debug(
-        self,
-        message: str,
-        *,
-        stage: StageType,
-        **kwargs: Any,
-    ) -> Any:
-        """Log a debug message with mandatory stage.
+        Implements LoggerPort.error() with Log Schema enforcement.
+        Stage defaults to "init" if not provided.
 
         Args:
-            message: The event message
-            stage: Pipeline stage
-            **kwargs: Additional context for the log entry
+            _event: The event message
+            **kwargs: Additional context. Recognized schema fields:
+                - stage: Pipeline stage
+                - error_type: Classification of the error
+                - dataset: Logical table name
         """
-        return self._logger.debug(message, stage=stage, **kwargs)
+        return self._logger.error(_event, **self._ensure_stage(kwargs))
 
-    def exception(
-        self,
-        message: str,
-        *,
-        stage: StageType,
-        error_type: str,
-        **kwargs: Any,
-    ) -> Any:
+    def debug(self, _event: str, **kwargs: Any) -> Any:
+        """Log a debug message.
+
+        Implements LoggerPort.debug() with Log Schema enforcement.
+        Stage defaults to "init" if not provided.
+
+        Args:
+            _event: The event message
+            **kwargs: Additional context
+        """
+        return self._logger.debug(_event, **self._ensure_stage(kwargs))
+
+    def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback.
 
+        Implements LoggerPort.exception() with Log Schema enforcement.
+        Stage defaults to "init" if not provided.
+
         Args:
-            message: The event message
-            stage: Pipeline stage
-            error_type: Classification of the error
-            **kwargs: Additional context for the log entry
+            _event: The event message
+            **kwargs: Additional context. Recognized schema fields:
+                - stage: Pipeline stage
+                - error_type: Classification of the error
         """
-        return self._logger.exception(
-            message,
-            stage=stage,
-            error_type=error_type,
-            **kwargs,
-        )
+        return self._logger.exception(_event, **self._ensure_stage(kwargs))
 
 
 def create_unified_logger(
