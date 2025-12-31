@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.3 | Дата: 2025-12-31 | Обновлено: Добавлено 6 ложных утверждений из action_plan.md (OPS-001, ARCH-001, SOLID-001/002, DATA-001)*
+*Версия: 6.4 | Дата: 2025-12-31 | Обновлено: Анализ 4 планов action_plan.md — добавлено 6 ложных утверждений, выявлено 3 реальные проблемы*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -123,6 +123,11 @@
 | "Domain сервисы (normalization_service, value_validator, activity_aggregator) требуют декомпозиции" | **ПРАВИЛЬНАЯ АРХИТЕКТУРА**: `NormalizationService` (411 LOC) — **Facade**, оркестрирует `UnitConverter`, `ValueValidator`, `ActivityAggregator`. Каждый сервис — когезивен с single responsibility. | `normalization_service.py:49-57,78-81` (верификация 2025-12-31) |
 | "ValueValidator и ActivityAggregator без делегации/стратегий" | **УЖЕ РЕАЛИЗОВАНО**: `ActivityAggregator` использует strategy dict (`aggregators` в строках 155-161). `ValueValidator` использует extracted methods (`_check_*`, `_validate_*`) | `activity_aggregator.py:155-165`, `value_validator.py:98-104,106-117` (верификация 2025-12-31) |
 | "Bronze формат не зафиксирован на JSONL+zstd" | **ЗАФИКСИРОВАН**: `BronzeWriter` использует `.jsonl.zst` (строка 335), `zstandard` compression (строки 231-235). Docstring явно указывает: "JSONL + zstd compression" | `bronze_writer.py:1,335,231-235` (верификация 2025-12-31) |
+| "Bronze разрешает Parquet (ARCH-002 action_plan)" | **ЛОЖНОЕ**: `BronzeSinkDict` type допускает parquet в схеме, но `BronzeWriter` реализует ТОЛЬКО JSONL+zstd. Тип не равен реализации. | `bronze_writer.py:1,335`, `config_types.py:66` (верификация 2025-12-31) |
+| "Покрытие ≥85% не настроено (QA-002 action_plan)" | **УЖЕ РЕАЛИЗОВАНО**: `pyproject.toml:182` содержит `fail_under = 85` | `pyproject.toml:182` (верификация 2025-12-31) |
+| "MemoryLock TTL=90s, heartbeat=30s нужно применить (OPS-001 action_plan)" | **ЛОЖНОЕ**: MemoryLock НЕ хардкодит значения — принимает TTL как параметр `acquire(ttl=...)`. RuntimeConfig определяет defaults. | `memory_lock.py:111-128` (верификация 2025-12-31) |
+| "content_hash в Bioactivity.from_raw не использует IdentityService" | **LOW PRIORITY**: `Bioactivity.from_raw` хэширует `raw_data` из API, которые не содержат meta-полей. Разная семантика — hash идентичности vs hash версионирования. | `bioactivity.py:210-212`, `identity_service.py:98-128` (верификация 2025-12-31) |
+| "QuarantineEntry payload_hash требует IdentityService" | **LOW PRIORITY**: `QuarantineEntry.create()` хэширует error payload, не бизнес-данные. Разная семантика — hash дедупликации ошибок vs hash контента. | `quarantine_entry.py:220-223` (верификация 2025-12-31) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
@@ -131,8 +136,11 @@
 | ~~**PipelineRunner создаёт сервисы**~~ | ~~`runner.py:90-126`~~ | ✅ ВЫПОЛНЕНО: DI через `RunnerServices` bundle (2025-12-26) |
 | ~~**CLI вызывает bootstrap напрямую**~~ | ~~`cli.py:224,265,337`~~ | ✅ ВЫПОЛНЕНО: CLI использует `composition/entrypoints.py` (верифицировано 2025-12-26) |
 | ~~**Мёртвый код в ChemblAdapter**~~ | ~~`client.py:147`~~ | ✅ ВЫПОЛНЕНО: Удалён в коммите `9214cfb` |
+| **Несоответствие валидации Gold Parquet** | `preflight_service.py:420-428`, `pipeline_config.py:446-449` | ⏳ Preflight разрешает "delta or parquet", но pipeline_config блокирует parquet. Нужна синхронизация. (выявлено 2025-12-31) |
+| **Несоответствие heartbeat_interval** | `ADR-010:108-111`, `config.py:254` | ⏳ ADR-010 документирует 30s, config.py имеет default=20s. Нужна синхронизация. (выявлено 2025-12-31) |
+| **Отсутствие _dq_error в ETLRecordSchema** | `domain/schemas/base.py:43-44` | ⏳ Схема имеет `_dq_warn`, но не `_dq_error`. identity_service.py исключает `_dq_error` из хеша. (выявлено 2025-12-31) |
 
-> **Все критические проблемы решены.** Актуальный план см. в "Фаза 5" ниже.
+> **Статус:** 3 реальные проблемы выявлены при анализе action_plan.md (2025-12-31). См. `docs/audits/consolidated-action-plan-analysis-2025-12-31.md`.
 
 ---
 
