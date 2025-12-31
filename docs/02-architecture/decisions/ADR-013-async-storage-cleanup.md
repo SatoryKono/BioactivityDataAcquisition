@@ -1,12 +1,7 @@
 # ADR-013: Асинхронная очистка хранилища в PipelineRunner
 
-## Status
-
-Accepted
-
-## Date
-
-2024-12-24
+*   **Status**: Accepted
+*   **Date**: 2024-12-24
 
 ## Context
 
