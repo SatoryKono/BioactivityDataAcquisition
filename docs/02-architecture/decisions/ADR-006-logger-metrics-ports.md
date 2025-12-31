@@ -139,3 +139,11 @@ Rejected because:
 1. New code should use `LoggerPort` directly
 2. Existing code using `BoundLogger` continues to work
 3. Gradual migration as files are modified
+
+## Related ADRs
+
+- [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes — logging constraints for reproducibility
+- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — MetricsPort lifecycle management
+- [ADR-017](ADR-017-observability-architecture.md): Observability Architecture — extends this with TracingPort and full observability stack
+- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces LoggerPort usage in all layers
+- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — applies NoOp pattern established here to tracing

@@ -473,50 +473,8 @@ class ErrorService:
         )
 
 
-# Backward-compatibility alias (deprecated)
-def _deprecated_error_handler_alias() -> type[ErrorService]:
-    """Return ErrorService with deprecation warning."""
-    import warnings
-
-    warnings.warn(
-        "ErrorHandler is deprecated. Use ErrorService instead. "
-        "See glossary.md for Ubiquitous Language terminology.",
-        DeprecationWarning,
-        stacklevel=3,
-    )
-    return ErrorService
-
-
-# Create deprecated alias - accessing this triggers warning
-class _ErrorHandlerMeta(type):
-    """Metaclass to emit deprecation warning on ErrorHandler usage."""
-
-    def __instancecheck__(cls, instance: object) -> bool:
-        return isinstance(instance, ErrorService)
-
-
-class ErrorHandler(ErrorService, metaclass=_ErrorHandlerMeta):
-    """Deprecated alias for ErrorService.
-
-    .. deprecated:: 1.0.0
-        Use :class:`ErrorService` instead.
-    """
-
-    def __init__(self, *args: object, **kwargs: object) -> None:
-        import warnings
-
-        warnings.warn(
-            "ErrorHandler is deprecated. Use ErrorService instead. "
-            "See glossary.md for Ubiquitous Language terminology.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
-
-
 __all__ = [
     "AdapterErrorContext",
     "ErrorCategory",
-    "ErrorHandler",  # Deprecated: kept for backward compatibility
     "ErrorService",
 ]

@@ -137,6 +137,9 @@ class TestObservabilityPortLifecycle:
 
 ## Related ADRs
 
-- [ADR-006: Logger and Metrics as Ports](ADR-006-logger-metrics-ports.md)
-- [ADR-008: Graceful Shutdown Strategy](ADR-008-graceful-shutdown-strategy.md)
-- [ADR-020: BasePipeline Decomposition](ADR-020-basepipeline-decomposition.md)
+- [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — services assembled in composition
+- [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — defines observability ports
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — shutdown coordination
+- [ADR-013](ADR-013-async-storage-cleanup.md): Async Storage Cleanup — async cleanup methods
+- [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition — PipelineServices design
+- [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses PipelineServices lifecycle

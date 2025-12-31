@@ -18,23 +18,13 @@ Structure:
 
 from __future__ import annotations
 
-# Re-export entrypoint functions for backward compatibility with tests
+# Re-export entrypoint functions for convenience
 from bioetl.composition.entrypoints import create_pipeline_runner
 from bioetl.composition.registry import get_default_registry
-
-# Re-export helper functions for backward compatibility with tests
-from bioetl.interfaces.cli.commands.run import (
-    _get_runner_logger,
-    _handle_destructive_run_confirmation,
-    _preview_cleanup,
-)
 from bioetl.interfaces.cli.commands.run_helpers import validate_pipeline_name
 from bioetl.interfaces.cli.main import cli, main
 
 __all__ = [
-    "_get_runner_logger",
-    "_handle_destructive_run_confirmation",
-    "_preview_cleanup",
     "cli",
     "create_pipeline_runner",
     "get_default_registry",
