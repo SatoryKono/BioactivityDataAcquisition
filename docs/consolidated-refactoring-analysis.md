@@ -1,6 +1,9 @@
 # Консолидированный Анализ Планов Рефакторинга BioETL
 
-*Версия: 1.0 | Дата: 2025-12-30 | Протокол: Двойная Верификация (REQ-ARCH-040)*
+*Версия: 1.1 | Дата: 2025-12-31 | Протокол: Двойная Верификация (REQ-ARCH-040)*
+
+> **ОБНОВЛЕНИЕ 2025-12-31**: Добавлены ложные утверждения из action_plan.md (OPS-001 MemoryLock, RedisLock).
+> MemoryLock полностью реализует TTL/heartbeat/fencing. Redis НЕ требуется per ADR-010.
 
 ---
 
@@ -48,6 +51,8 @@
 | 10 | "Логи LockManager без run_id" | audit-2026-02-07 | Требует верификации | ⚠️ ПРОВЕРИТЬ |
 | 11 | "api_key как str — уязвимость" | audit.md v2.0 | CLI маскирует; env-чтение реализовано | ⚠️ НИЗКИЙ РИСК |
 | 12 | "MemoryMonitor возвращает нули" | - | Возвращает 50% (graceful degradation) | ❌ ЛОЖНО |
+| 13 | **"OPS-001: MemoryLock без стандартных TTL/heartbeat/max duration"** | action_plan.md (diff) | **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**: `_ttl_checker_loop()` (43-64), `heartbeat()` (176-204), `validate_owner()` (206-238), `aclose()` (240-255) в `memory_lock.py` | ❌ ЛОЖНО |
+| 14 | **"Implement RedisLock per RULES.md §3.3"** | action_plan.md (diff) | **Redis НЕ требуется** per ADR-010 (Local-Only Deployment). MemoryLock полностью достаточен для локальных пайплайнов. | ❌ ЛОЖНО |
 
 ---
 
@@ -182,14 +187,25 @@ grep -n 'Literal\["delta", "parquet"\]' src/bioetl/domain/config_types.py
 
 ---
 
-## Часть 5. Рекомендации по Документам
+## Часть 5. Рекомендации по Документам (Консолидация)
 
-### 5.1. Удалить/Архивировать
+### 5.0. Авторитетные Источники (ЕДИНСТВЕННЫЕ)
+
+> **ВАЖНО**: Только эти документы содержат верифицированную информацию.
+
+| Документ | Версия | Назначение |
+|----------|--------|------------|
+| `docs/refactoring-plan.md` | v6.1 | **Авторитетный** план рефакторинга с 50+ верифицированными ложными утверждениями |
+| `docs/architecture-audit.md` | v1.0 | Аудит архитектуры от 2025-12-29, оценка **8.9/10** |
+| `CLAUDE.md` | актуальный | Справочник с протоколом двойной верификации |
+
+### 5.1. Удалить/Архивировать (НЕ использовать)
 
 | Документ | Причина |
 |----------|---------|
 | `reports/architecture-audit-2025-01-06.md` | Ложные рекомендации Redis, устаревший |
-| `docs/architecture/architecture-audit-2026-02-07.md` | Некорректная дата, дублирует функционал |
+| `docs/architecture/architecture-audit-2026-02-07.md` | Некорректная дата (2026), дублирует функционал |
+| **action_plan.md (если создан)** | **Содержит ложные утверждения OPS-001 о MemoryLock**. НЕ ИСПОЛЬЗОВАТЬ. |
 
 ### 5.2. Обновить
 
@@ -198,11 +214,25 @@ grep -n 'Literal\["delta", "parquet"\]' src/bioetl/domain/config_types.py
 | `docs/architecture-audit.md` | Исправить дату на 2025-12-30, убрать ложные утверждения о Parquet |
 | `docs/reports/architecture-audit-2026-01-06.md` | Исправить дату, синхронизировать с верифицированным статусом |
 
-### 5.3. Оставить Без Изменений
+### 5.3. Карта Планов Рефакторинга
 
-| Документ | Причина |
-|----------|---------|
-| `docs/refactoring-plan.md` v6.0 | Актуальный, верифицированный, детальный |
+| # | Документ | Статус | Рекомендация |
+|---|----------|--------|--------------|
+| 1 | `docs/refactoring-plan.md` | ✅ Авторитетный | Использовать как primary source |
+| 2 | `docs/consolidated-refactoring-analysis.md` | ✅ Актуальный | Использовать как обзор аудитов |
+| 3 | `docs/pipeline-refactoring-plan.md` | ⚠️ Вспомогательный | Только для YAML/transformer optimization |
+| 4 | `docs/domain-services-integration-plan.md` | ⚠️ Опциональный | План интеграции неиспользуемых сервисов |
+| 5 | `docs/plans/refactoring-detail-2025-12-29.md` | ⚠️ Детали | Детализация 3 конкретных задач |
+| 6 | `docs/archived/refactoring-plan-bronze-validation.md` | ❌ Архивный | Устаревший, в archived/ |
+
+### 5.4. Ложные Утверждения из action_plan.md (diff)
+
+> **⚠️ НЕ ИСПОЛЬЗОВАТЬ action_plan.md!** Содержит ложные утверждения:
+
+| Утверждение | Почему ЛОЖНО |
+|-------------|--------------|
+| OPS-001: "MemoryLock без стандартных TTL/heartbeat/max duration" | **ПОЛНОСТЬЮ РЕАЛИЗОВАНО** в `memory_lock.py:43-255` |
+| "Implement RedisLock per RULES.md §3.3" | **Redis НЕ требуется** per ADR-010 (Local-Only Deployment) |
 
 ---
 

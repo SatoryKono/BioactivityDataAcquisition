@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.1 | Дата: 2025-12-30 | Обновлено: UnifiedHTTPClient — подтверждено SRP-compliant, не god object*
+*Версия: 6.2 | Дата: 2025-12-31 | Обновлено: Добавлены ложные утверждения из action_plan.md (OPS-001 MemoryLock, RedisLock)*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -103,6 +103,8 @@
 | "Порог покрытия не синхронизирован" | `fail_under = 85` **уже установлен** в pyproject.toml | `pyproject.toml:182` (верификация 2025-12-30) |
 | "architecture-audit.md устарел" | Документ **актуален** — версия 1.0 от 2025-12-29, Score 8.9/10 | `docs/architecture-audit.md:1-4` (верификация 2025-12-30) |
 | "UnifiedAPIClient — god object с rate limiting, caching, parsing" | **445 строк, 14 методов**. Rate limiting → делегирует `RateLimiterPort` (TokenBucket). Circuit breaker → делегирует `CircuitBreakerPort`. **Нет caching**. **Нет parsing** — возвращает raw `httpx.Response`. Порты **уже существуют** в `domain/ports/resilience.py`. | `client.py:87-88,243-244`, `domain/ports/resilience.py:21,68` (верификация 2025-12-30) |
+| "action_plan.md OPS-001: MemoryLock без стандартных TTL/heartbeat/max duration" | **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**: TTL через `_ttl_checker_loop()` (строки 43-64), heartbeat через `heartbeat()` (строки 176-204), safety guard через `validate_owner()` (строки 206-238), graceful shutdown через `aclose()` (строки 240-255). | `memory_lock.py:1-256` (верификация 2025-12-31) |
+| "action_plan.md: Implement RedisLock per RULES.md §3.3" | **Redis НЕ требуется** по design. Проект использует Local-Only Deployment согласно ADR-010. MemoryLock полностью достаточен для локальных пайплайнов. Redis нужен только при масштабировании на несколько workers. | `CLAUDE.md` §5, ADR-010 (верификация 2025-12-31) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
