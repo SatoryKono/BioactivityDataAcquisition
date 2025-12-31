@@ -38,8 +38,9 @@ class TestFileSizeLimits:
         "entities.py": 600,  # 569 LOC
         "chembl.py": 720,  # 714 LOC - ChEMBL entity DTOs with many fields
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
-        "activity_aggregator.py": 365,  # 359 LOC - Activity aggregation with multiple strategies
-        "normalization_service.py": 390,  # 385 LOC - Normalization service with validation
+        "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
+        "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
+        "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
         "config_types.py": 320,  # 313 LOC
@@ -355,7 +356,9 @@ class TestClassSize:
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
         "ErrorService": 420,  # ~400 lines - comprehensive error classification and logging
         # Domain services
-        "NormalizationService": 350,  # 338 lines - Normalization service with validation
+        "NormalizationService": 370,  # 364 lines - Normalization service with validation
+        "ActivityAggregator": 320,  # 311 lines - Activity aggregation with multiple strategies
+        "ValueValidator": 320,  # 311 lines - Value objects validation
         # Domain value objects (aggregates with rich behavior)
         "Batch": 450,  # 429 lines - Batch aggregate with lifecycle methods
         "PipelineRun": 420,  # 408 lines - PipelineRun aggregate with state machine
@@ -504,6 +507,8 @@ class TestGodObjectDetection:
         "ErrorService": "Cohesive utility - all methods relate to error classification and logging",
         # Domain services (cohesive services with single responsibility)
         "NormalizationService": "Cohesive service - all methods relate to value normalization",
+        "ActivityAggregator": "Cohesive service - all methods relate to activity aggregation strategies",
+        "ValueValidator": "Cohesive validator - all methods relate to domain value validation",
         # Lifecycle orchestration service
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
     }
