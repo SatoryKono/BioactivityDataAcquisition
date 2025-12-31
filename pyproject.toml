@@ -72,6 +72,8 @@ tests = [
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
     "pytest-vcr>=1.0",
+    # Code formatting (required by architecture tests)
+    "black>=24.0",
 ]
 dev = [
     "pytest>=8.0",
@@ -124,6 +126,13 @@ docs = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# ============ UV ============
+[tool.uv]
+# Include tests dependencies when using uv run
+dev-dependencies = [
+    "bioetl[tests]",
+]
 
 # ============ PYTEST ============
 [tool.pytest.ini_options]
