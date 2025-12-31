@@ -138,16 +138,14 @@ addopts = [
     "--strict-markers",
     "--strict-config",
 ]
-required_plugins = [
-    "pytest-asyncio>=0.23",
-    "pytest-cov>=4.0",
-]
+# required_plugins check moved to CI for compatibility
 markers = [
     "unit: Unit tests (fast, no I/O)",
     "integration: Integration tests (may use I/O)",
     "e2e: End-to-end tests (slow, requires Docker)",
     "asyncio: Async IO tests powered by pytest-asyncio",
-    "slow: Slow tests",
+    "slow: Slow tests (hypothesis, long-running)",
+    "hypothesis: Property-based tests using Hypothesis",
     "security: Security tests",
     "vcr: VCR.py recorded HTTP interactions",
     "performance: Performance regression tests (optional CI stage)",

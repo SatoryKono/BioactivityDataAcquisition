@@ -58,21 +58,29 @@ install-pip: ## Install dependencies using pip (fallback)
 	$(VENV_PIP) install -e ".[dev,tracing]"
 	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
-test: ## Run unit and integration tests (serial, with coverage)
-	@echo "$(BLUE)Running tests...$(NC)"
+test: ## Run all tests in parallel with coverage (default)
+	@echo "$(BLUE)Running tests in parallel...$(NC)"
+	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+
+test-serial: ## Run all tests serially (for debugging)
+	@echo "$(BLUE)Running tests (serial mode)...$(NC)"
 	$(RUN) pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85
 
-test-fast: ## Run tests in parallel (faster, no benchmarks)
-	@echo "$(BLUE)Running tests (parallel mode)...$(NC)"
-	$(RUN) pytest tests/ -v -n auto --dist loadscope --ignore=tests/benchmarks --cov=src/bioetl --cov-report=term-missing
+test-fast: ## Run fast tests only (no slow markers, CI hypothesis profile)
+	@echo "$(BLUE)Running fast tests (parallel mode)...$(NC)"
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ tests/architecture/ -n auto --dist loadscope -m "not slow" --ignore=tests/benchmarks
 
-test-unit: ## Run only unit tests (fast, no I/O)
+test-unit: ## Run only unit tests (parallel)
 	@echo "$(BLUE)Running unit tests...$(NC)"
-	$(RUN) pytest tests/ -v -m unit -n auto --dist loadscope --ignore=tests/benchmarks
+	$(RUN) pytest tests/unit/ -n auto --dist loadscope --ignore=tests/benchmarks
 
-test-integration: ## Run integration tests
+test-unit-fast: ## Run unit tests without slow tests (fastest)
+	@echo "$(BLUE)Running fast unit tests...$(NC)"
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -n auto --dist loadscope -m "not slow" --ignore=tests/benchmarks
+
+test-integration: ## Run integration tests with VCR
 	@echo "$(BLUE)Running integration tests...$(NC)"
-	$(RUN) pytest tests/ -v -m integration --vcr-record=none
+	$(RUN) pytest tests/integration/ -v --vcr-record=none
 
 test-e2e: ## Run E2E tests with Docker (requires docker-compose)
 	@echo "$(BLUE)Starting Docker services...$(NC)"
