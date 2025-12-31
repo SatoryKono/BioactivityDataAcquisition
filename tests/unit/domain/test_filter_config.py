@@ -147,7 +147,7 @@ class TestGoldColumnFilter:
 
     def test_empty_values_raises(self):
         """Test that empty values raises ValueError."""
-        with pytest.raises(ValueError, match="values for column .* cannot be empty"):
+        with pytest.raises(ValueError, match=r"values for column .* cannot be empty"):
             GoldColumnFilter(column="standard_type", values=frozenset())
 
     def test_filter_is_frozen(self):
