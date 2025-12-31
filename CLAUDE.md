@@ -422,7 +422,7 @@ async def aclose() -> None                             # Graceful shutdown
 **Всего тестов:** ~1471+
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`)
+**Цель покрытия:** ≥85% line coverage (проверяется в CI через `--cov-fail-under=85`)
 
 ### Тестовые Зависимости
 

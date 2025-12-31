@@ -75,7 +75,7 @@ Before contributing, read these documents:
 | Integration | `tests/integration/` | VCR.py for HTTP, sanitize secrets from cassettes |
 | Architecture | `tests/test_architecture.py` | Validates layer imports |
 
-**Coverage target:** >80% line coverage
+**Coverage target:** ≥85% line coverage
 
 ## Pull Request Checklist
 

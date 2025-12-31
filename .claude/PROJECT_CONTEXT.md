@@ -283,7 +283,7 @@ sha256(provider + canonical_json(record))
 | **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** >80% line coverage
+**Цель покрытия:** ≥85% line coverage
 
 ### Команды
 
