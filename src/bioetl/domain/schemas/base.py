@@ -43,6 +43,9 @@ class ETLRecordSchema(pa.DataFrameModel):
     _dq_warn: Series[bool] = pa.Field(
         nullable=False, default=False, description="Flag for data quality warnings."
     )
+    _dq_error: Series[bool] = pa.Field(
+        nullable=False, default=False, description="Flag for data quality errors."
+    )
     _index: Series[int] = pa.Field(
         nullable=False,
         ge=0,

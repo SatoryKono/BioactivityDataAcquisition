@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.4 | Дата: 2025-12-31 | Обновлено: Анализ 4 планов action_plan.md — добавлено 6 ложных утверждений, выявлено 3 реальные проблемы*
+*Версия: 6.5 | Дата: 2025-12-31 | Обновлено: Исправлены 3 реальные проблемы (Gold Parquet validation, heartbeat_interval, _dq_error)*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -136,11 +136,11 @@
 | ~~**PipelineRunner создаёт сервисы**~~ | ~~`runner.py:90-126`~~ | ✅ ВЫПОЛНЕНО: DI через `RunnerServices` bundle (2025-12-26) |
 | ~~**CLI вызывает bootstrap напрямую**~~ | ~~`cli.py:224,265,337`~~ | ✅ ВЫПОЛНЕНО: CLI использует `composition/entrypoints.py` (верифицировано 2025-12-26) |
 | ~~**Мёртвый код в ChemblAdapter**~~ | ~~`client.py:147`~~ | ✅ ВЫПОЛНЕНО: Удалён в коммите `9214cfb` |
-| **Несоответствие валидации Gold Parquet** | `preflight_service.py:420-428`, `pipeline_config.py:446-449` | ⏳ Preflight разрешает "delta or parquet", но pipeline_config блокирует parquet. Нужна синхронизация. (выявлено 2025-12-31) |
-| **Несоответствие heartbeat_interval** | `ADR-010:108-111`, `config.py:254` | ⏳ ADR-010 документирует 30s, config.py имеет default=20s. Нужна синхронизация. (выявлено 2025-12-31) |
-| **Отсутствие _dq_error в ETLRecordSchema** | `domain/schemas/base.py:43-44` | ⏳ Схема имеет `_dq_warn`, но не `_dq_error`. identity_service.py исключает `_dq_error` из хеша. (выявлено 2025-12-31) |
+| ~~**Несоответствие валидации Gold Parquet**~~ | ~~`preflight_service.py:420-428`~~ | ✅ ИСПРАВЛЕНО: Preflight теперь требует delta для Gold (2025-12-31) |
+| ~~**Несоответствие heartbeat_interval**~~ | ~~`ADR-010:108-111`~~ | ✅ ИСПРАВЛЕНО: ADR-010 обновлён на актуальное значение 20s (2025-12-31) |
+| ~~**Отсутствие _dq_error в ETLRecordSchema**~~ | ~~`domain/schemas/base.py:46-48`~~ | ✅ ИСПРАВЛЕНО: Добавлено поле `_dq_error: Series[bool]` (2025-12-31) |
 
-> **Статус:** 3 реальные проблемы выявлены при анализе action_plan.md (2025-12-31). См. `docs/audits/consolidated-action-plan-analysis-2025-12-31.md`.
+> **Все критические проблемы решены.** Анализ см. в `docs/audits/consolidated-action-plan-analysis-2025-12-31.md`.
 
 ---
 
