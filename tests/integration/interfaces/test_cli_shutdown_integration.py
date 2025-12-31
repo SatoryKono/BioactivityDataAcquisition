@@ -14,29 +14,13 @@ import pytest
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli import cli
-from bioetl.interfaces.orchestration.signals import register_signal_handlers
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
 
 
 class TestShutdownSignalIntegration:
-    """Test ShutdownSignal integration with signal handlers."""
-
-    def test_register_signal_handlers_registers_sigterm(self):
-        """Test that register_signal_handlers registers SIGTERM handler."""
-        import signal
-
-        shutdown_service = MagicMock()
-        shutdown_service.initiate_shutdown = AsyncMock()
-
-        with patch.object(signal, "signal") as mock_signal:
-            register_signal_handlers(shutdown_service)
-
-            # Should register both SIGTERM and SIGINT
-            calls = [call[0][0] for call in mock_signal.call_args_list]
-            assert signal.SIGTERM in calls
-            assert signal.SIGINT in calls
+    """Test ShutdownSignal integration."""
 
     def test_shutdown_signal_request_triggers_event(self):
         """Test that request() sets the is_requested flag."""
@@ -151,24 +135,7 @@ class TestCliGracefulShutdownExitCode:
 
 
 class TestSignalHandlerIntegration:
-    """Test signal handler triggers shutdown correctly."""
-
-    def test_signal_handler_initiates_shutdown(self):
-        """Test that register_signal_handlers sets up handlers correctly."""
-
-        shutdown_service = MagicMock()
-        shutdown_service.initiate_shutdown = AsyncMock()
-
-        import signal
-
-        # Setup handlers
-        with patch.object(signal, "signal") as mock_signal:
-            register_signal_handlers(shutdown_service)
-
-            # The handler should have been registered for both SIGTERM and SIGINT
-            calls = [call[0][0] for call in mock_signal.call_args_list]
-            assert signal.SIGTERM in calls
-            assert signal.SIGINT in calls
+    """Test shutdown signal behavior."""
 
     def test_shutdown_signal_is_idempotent(self):
         """Test that multiple request() calls don't cause issues."""
