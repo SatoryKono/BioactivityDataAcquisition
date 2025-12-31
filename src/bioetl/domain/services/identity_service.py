@@ -178,28 +178,43 @@ class IdentityService:
         """
         if value is None:
             return None
+        return self._normalize_by_type(value)
 
+    def _normalize_by_type(self, value: Any) -> Any:
+        """Dispatch normalization by type."""
+        # Handle scalar types first
+        scalar_result = self._normalize_scalar(value)
+        if scalar_result is not value:  # Was processed
+            return scalar_result
+
+        # Handle container types
+        return self._normalize_container(value)
+
+    def _normalize_scalar(self, value: Any) -> Any:
+        """Normalize scalar types: float, datetime, date, str."""
         if isinstance(value, float):
-            if math.isnan(value) or math.isinf(value):
-                return None
-            return round(value, 10)
-
+            return self._normalize_float(value)
         if isinstance(value, datetime):
             return value.date().isoformat()
-
         if isinstance(value, date):
             return value.isoformat()
-
         if isinstance(value, str):
             return value.strip()
+        return value  # Return unchanged if not a scalar type we handle
 
+    def _normalize_container(self, value: Any) -> Any:
+        """Normalize container types: dict, list."""
         if isinstance(value, dict):
             return {k: self._normalize_value(v) for k, v in value.items()}
-
         if isinstance(value, list):
             return [self._normalize_value(v) for v in value]
-
         return value
+
+    def _normalize_float(self, value: float) -> float | None:
+        """Normalize float value: NaN/Inf → None, else round to 10 decimals."""
+        if math.isnan(value) or math.isinf(value):
+            return None
+        return round(value, 10)
 
     @staticmethod
     def _canonical_json_dumps(obj: dict[str, Any]) -> str:

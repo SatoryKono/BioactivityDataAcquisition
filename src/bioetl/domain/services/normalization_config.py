@@ -53,12 +53,20 @@ class PChemblRangeConfig:
 
     def __post_init__(self) -> None:
         """Validate pChEMBL range configuration."""
+        self._validate_absolute_range()
+        self._validate_typical_range()
+
+    def _validate_absolute_range(self) -> None:
+        """Validate absolute min/max range."""
         if self.min_value < 0:
             raise ValueError("min_value cannot be negative")
         if self.max_value > 15:
             raise ValueError("max_value exceeds physical limit")
         if self.min_value >= self.max_value:
             raise ValueError("min_value must be less than max_value")
+
+    def _validate_typical_range(self) -> None:
+        """Validate typical range is ordered."""
         if self.typical_min >= self.typical_max:
             raise ValueError("typical_min must be less than typical_max")
 
