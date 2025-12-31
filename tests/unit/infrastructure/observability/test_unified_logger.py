@@ -30,27 +30,29 @@ class TestUnifiedLogger:
 
         assert logger is not None
 
-    def test_unified_logger_info_requires_stage(self) -> None:
-        """Test that info() requires stage parameter."""
+    def test_unified_logger_info_with_stage(self) -> None:
+        """Test that info() works with explicit stage parameter."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
 
         # Should work with stage
         logger.info("Test message", stage="extract")
 
-        # Without stage should raise TypeError (missing required kwarg)
-        with pytest.raises(TypeError, match="stage"):
-            logger.info("Test message")  # type: ignore[call-arg]
+    def test_unified_logger_info_defaults_stage_to_init(self) -> None:
+        """Test that info() defaults stage to 'init' for LoggerPort compatibility."""
+        logger = UnifiedLogger(pipeline="test", run_id="abc-123")
 
-    def test_unified_logger_error_requires_stage_and_error_type(self) -> None:
-        """Test that error() requires both stage and error_type."""
+        # Without stage should not raise, stage defaults to "init"
+        logger.info("Test message")
+
+    def test_unified_logger_error_with_stage_and_error_type(self) -> None:
+        """Test that error() works with stage and error_type."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
 
         # Should work with both parameters
         logger.error("Error occurred", stage="transform", error_type="validation")
 
-        # Without error_type should raise TypeError
-        with pytest.raises(TypeError, match="error_type"):
-            logger.error("Error occurred", stage="transform")  # type: ignore[call-arg]
+        # Should also work without error_type (optional for LoggerPort compatibility)
+        logger.error("Error occurred", stage="transform")
 
     def test_unified_logger_bind_preserves_context(self) -> None:
         """Test that bind() returns new logger with additional context."""
@@ -92,23 +94,36 @@ class TestUnifiedLogger:
             # Should not raise
             logger.info(f"Testing stage {stage}", stage=stage)  # type: ignore[arg-type]
 
-    def test_unified_logger_debug_requires_stage(self) -> None:
-        """Test that debug() requires stage parameter."""
+    def test_unified_logger_debug_with_stage(self) -> None:
+        """Test that debug() works with explicit stage parameter."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
 
         # Should work with stage
         logger.debug("Debug message", stage="extract")
 
-        # Without stage should raise TypeError
-        with pytest.raises(TypeError):
-            logger.debug("Debug message")  # type: ignore[call-arg]
+    def test_unified_logger_debug_defaults_stage_to_init(self) -> None:
+        """Test that debug() defaults stage to 'init' for LoggerPort compatibility."""
+        logger = UnifiedLogger(pipeline="test", run_id="abc-123")
 
-    def test_unified_logger_exception_requires_stage_and_error_type(self) -> None:
-        """Test that exception() requires stage and error_type."""
+        # Without stage should not raise, defaults to "init"
+        logger.debug("Debug message")
+
+    def test_unified_logger_exception_with_stage_and_error_type(self) -> None:
+        """Test that exception() works with stage and error_type."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")
 
         # Should work with both parameters
         logger.exception("Exception occurred", stage="load", error_type="io_error")
+
+        # Should also work without error_type (optional for LoggerPort compatibility)
+        logger.exception("Exception occurred", stage="load")
+
+    def test_unified_logger_exception_defaults_stage_to_init(self) -> None:
+        """Test that exception() defaults stage to 'init' for LoggerPort compatibility."""
+        logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+
+        # Without stage should not raise, defaults to "init"
+        logger.exception("Exception occurred")
 
 
 @pytest.mark.unit

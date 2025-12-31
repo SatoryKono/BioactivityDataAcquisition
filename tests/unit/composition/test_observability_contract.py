@@ -102,10 +102,10 @@ class TestBootstrapObservability:
 
     @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
     @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
-    @patch("bioetl.composition._bootstrap.observability.create_infra_logger")
+    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
     def test_bootstrap_returns_valid_bundle(
         self,
-        mock_create_logger: MagicMock,
+        mock_unified_logger_cls: MagicMock,
         mock_prometheus: MagicMock,
         mock_start_server: MagicMock,
     ) -> None:
@@ -115,7 +115,7 @@ class TestBootstrapObservability:
         # Setup mocks
         mock_logger = MagicMock()
         mock_logger.info = MagicMock()
-        mock_create_logger.return_value = mock_logger
+        mock_unified_logger_cls.return_value = mock_logger
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics
 
@@ -137,17 +137,17 @@ class TestBootstrapObservability:
         assert bundle.tracer is not None  # NoOpTracing
         assert bundle.dq_monitor is None
 
-    @patch("bioetl.composition._bootstrap.observability.create_infra_logger")
+    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
     def test_bootstrap_uses_noop_metrics_when_disabled(
         self,
-        mock_create_logger: MagicMock,
+        mock_unified_logger_cls: MagicMock,
     ) -> None:
         """Test that NoOpMetrics is used when metrics disabled."""
         from bioetl.composition._bootstrap.observability import bootstrap_observability
 
         mock_logger = MagicMock()
         mock_logger.info = MagicMock()
-        mock_create_logger.return_value = mock_logger
+        mock_unified_logger_cls.return_value = mock_logger
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
@@ -162,16 +162,16 @@ class TestBootstrapObservability:
 
         assert isinstance(bundle.metrics, NoOpMetrics)
 
-    @patch("bioetl.composition._bootstrap.observability.create_infra_logger")
+    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
     def test_bootstrap_logs_initialization_status(
         self,
-        mock_create_logger: MagicMock,
+        mock_unified_logger_cls: MagicMock,
     ) -> None:
         """Test that bootstrap logs observability initialization."""
         from bioetl.composition._bootstrap.observability import bootstrap_observability
 
         mock_logger = MagicMock()
-        mock_create_logger.return_value = mock_logger
+        mock_unified_logger_cls.return_value = mock_logger
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
@@ -450,17 +450,17 @@ class TestObservabilityPreflightValidation:
         mock_logger.warning.assert_not_called()
 
     @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.create_infra_logger")
+    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
     def test_bootstrap_observability_calls_preflight_validation(
         self,
-        mock_create_logger: MagicMock,
+        mock_unified_logger_cls: MagicMock,
         mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap_observability calls preflight validation."""
         from bioetl.composition._bootstrap.observability import bootstrap_observability
 
         mock_logger = MagicMock()
-        mock_create_logger.return_value = mock_logger
+        mock_unified_logger_cls.return_value = mock_logger
 
         settings = MagicMock()
         settings.env = "prod"
