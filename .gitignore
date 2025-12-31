@@ -112,3 +112,6 @@ data/input/chembl_target_component.csv
 .output.txt
 site/
 coverage.json
+.coverage
+.coverage.*
+htmlcov/
