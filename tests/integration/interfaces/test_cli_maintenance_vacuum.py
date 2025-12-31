@@ -296,3 +296,371 @@ class TestCliMaintenanceVacuumOutput:
 
         assert result.exit_code == 0
         assert "Would" in result.output or "would" in result.output
+
+
+# =============================================================================
+# vacuum-all Command Tests
+# =============================================================================
+
+
+class TestCliMaintenanceVacuumAllHelp:
+    """Test vacuum-all command help and argument handling."""
+
+    def test_maintenance_vacuum_all_help(self, cli_runner: CliRunner):
+        """Test that maintenance vacuum-all --help works."""
+        result = cli_runner.invoke(cli, ["maintenance", "vacuum-all", "--help"])
+
+        assert result.exit_code == 0
+        assert "vacuum" in result.output.lower()
+        assert "--retention-days" in result.output
+        assert "--dry-run" in result.output
+        assert "--layer" in result.output
+
+
+class TestCliMaintenanceVacuumAllExecution:
+    """Test vacuum-all command execution scenarios."""
+
+    @pytest.fixture
+    def mock_vacuum_service(self):
+        """Create a mock vacuum service."""
+        from bioetl.application.services.vacuum_service import (
+            TableVacuumResult,
+            VacuumAllResult,
+        )
+
+        service = MagicMock()
+        service.collect_tables = MagicMock(
+            return_value=[
+                ("chembl_activity", "silver"),
+                ("chembl_activity", "gold"),
+            ]
+        )
+        service.vacuum_all = AsyncMock(
+            return_value=VacuumAllResult(
+                results=(
+                    TableVacuumResult("chembl_activity", "silver", 20, None),
+                    TableVacuumResult("chembl_activity", "gold", 10, None),
+                ),
+                dry_run=False,
+            )
+        )
+        return service
+
+    def test_vacuum_all_success(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service: MagicMock,
+    ):
+        """Test successful vacuum-all operation."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all"])
+
+        assert result.exit_code == 0
+        assert "30" in result.output  # Total files removed (20 + 10)
+        mock_vacuum_service.collect_tables.assert_called_once_with("all")
+
+    def test_vacuum_all_with_layer_silver(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service: MagicMock,
+    ):
+        """Test vacuum-all filtering by silver layer."""
+        mock_vacuum_service.collect_tables.return_value = [
+            ("chembl_activity", "silver"),
+        ]
+
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum-all", "--layer", "silver"]
+            )
+
+        assert result.exit_code == 0
+        mock_vacuum_service.collect_tables.assert_called_once_with("silver")
+
+    def test_vacuum_all_with_layer_gold(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service: MagicMock,
+    ):
+        """Test vacuum-all filtering by gold layer."""
+        mock_vacuum_service.collect_tables.return_value = [
+            ("chembl_activity", "gold"),
+        ]
+
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum-all", "--layer", "gold"]
+            )
+
+        assert result.exit_code == 0
+        mock_vacuum_service.collect_tables.assert_called_once_with("gold")
+
+    def test_vacuum_all_with_custom_retention(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service: MagicMock,
+    ):
+        """Test vacuum-all with custom retention days."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum-all", "--retention-days", "30"]
+            )
+
+        assert result.exit_code == 0
+        call_args = mock_vacuum_service.vacuum_all.call_args
+        assert call_args[1]["retention_days"] == 30
+
+
+class TestCliMaintenanceVacuumAllDryRun:
+    """Test vacuum-all command dry-run mode."""
+
+    @pytest.fixture
+    def mock_vacuum_service_dry_run(self):
+        """Create a mock vacuum service for dry-run."""
+        from bioetl.application.services.vacuum_service import (
+            TableVacuumResult,
+            VacuumAllResult,
+        )
+
+        service = MagicMock()
+        service.collect_tables = MagicMock(
+            return_value=[
+                ("chembl_activity", "silver"),
+            ]
+        )
+        service.vacuum_all = AsyncMock(
+            return_value=VacuumAllResult(
+                results=(TableVacuumResult("chembl_activity", "silver", 15, None),),
+                dry_run=True,
+            )
+        )
+        return service
+
+    def test_vacuum_all_dry_run_shows_preview(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_dry_run: MagicMock,
+    ):
+        """Test that --dry-run shows what would be removed."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_dry_run,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum-all", "--dry-run"]
+            )
+
+        assert result.exit_code == 0
+        assert "[DRY-RUN]" in result.output or "Would" in result.output
+
+    def test_vacuum_all_dry_run_passes_flag_to_service(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_dry_run: MagicMock,
+    ):
+        """Test that dry_run flag is passed to vacuum service."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_dry_run,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum-all", "--dry-run"]
+            )
+
+        assert result.exit_code == 0
+        call_args = mock_vacuum_service_dry_run.vacuum_all.call_args
+        assert call_args[1]["dry_run"] is True
+
+
+class TestCliMaintenanceVacuumAllNoTables:
+    """Test vacuum-all when no tables are found."""
+
+    @pytest.fixture
+    def mock_vacuum_service_empty(self):
+        """Create a mock vacuum service with no tables."""
+        service = MagicMock()
+        service.collect_tables = MagicMock(return_value=[])
+        return service
+
+    def test_vacuum_all_no_tables_found(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_empty: MagicMock,
+    ):
+        """Test vacuum-all when no tables to vacuum."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_empty,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all"])
+
+        assert result.exit_code == 0
+        assert "No tables found" in result.output
+
+
+class TestCliMaintenanceVacuumAllErrors:
+    """Test vacuum-all command error handling."""
+
+    @pytest.fixture
+    def mock_vacuum_service_partial_failure(self):
+        """Create a mock vacuum service with partial failures."""
+        from bioetl.application.services.vacuum_service import (
+            TableVacuumResult,
+            VacuumAllResult,
+        )
+
+        service = MagicMock()
+        service.collect_tables = MagicMock(
+            return_value=[
+                ("table1", "silver"),
+                ("table2", "gold"),
+            ]
+        )
+        service.vacuum_all = AsyncMock(
+            return_value=VacuumAllResult(
+                results=(
+                    TableVacuumResult("table1", "silver", 10, None),
+                    TableVacuumResult("table2", "gold", 0, "Delta table corrupted"),
+                ),
+                dry_run=False,
+            )
+        )
+        return service
+
+    def test_vacuum_all_partial_failure_shows_errors(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_partial_failure: MagicMock,
+    ):
+        """Test that partial failures show error messages."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_partial_failure,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all"])
+
+        assert result.exit_code == 0  # Partial failure still exits 0
+        assert "Error:" in result.output
+        assert "Delta table corrupted" in result.output
+
+    def test_vacuum_all_partial_failure_shows_failed_tables(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_partial_failure: MagicMock,
+    ):
+        """Test that partial failures list failed table names."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_partial_failure,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all"])
+
+        assert "Failed tables:" in result.output
+        assert "gold/table2" in result.output
+
+
+class TestCliMaintenanceVacuumAllOutput:
+    """Test vacuum-all command output formatting."""
+
+    @pytest.fixture
+    def mock_vacuum_service_multi(self):
+        """Create a mock vacuum service with multiple tables."""
+        from bioetl.application.services.vacuum_service import (
+            TableVacuumResult,
+            VacuumAllResult,
+        )
+
+        service = MagicMock()
+        service.collect_tables = MagicMock(
+            return_value=[
+                ("chembl_activity", "silver"),
+                ("chembl_activity", "gold"),
+                ("chembl_assay", "silver"),
+            ]
+        )
+        service.vacuum_all = AsyncMock(
+            return_value=VacuumAllResult(
+                results=(
+                    TableVacuumResult("chembl_activity", "silver", 10, None),
+                    TableVacuumResult("chembl_activity", "gold", 5, None),
+                    TableVacuumResult("chembl_assay", "silver", 8, None),
+                ),
+                dry_run=False,
+            )
+        )
+        return service
+
+    def test_vacuum_all_shows_each_table_result(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_multi: MagicMock,
+    ):
+        """Test that output shows result for each table."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_multi,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all"])
+
+        assert "silver/chembl_activity" in result.output
+        assert "gold/chembl_activity" in result.output
+        assert "silver/chembl_assay" in result.output
+
+    def test_vacuum_all_shows_total_files(
+        self,
+        cli_runner: CliRunner,
+        mock_vacuum_service_multi: MagicMock,
+    ):
+        """Test that output shows total files removed."""
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_vacuum_service_multi,
+        ):
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all"])
+
+        assert "Total:" in result.output
+        assert "23" in result.output  # 10 + 5 + 8
+
+    def test_vacuum_all_dry_run_shows_would_remove(
+        self,
+        cli_runner: CliRunner,
+    ):
+        """Test that dry-run output says 'would remove'."""
+        from bioetl.application.services.vacuum_service import (
+            TableVacuumResult,
+            VacuumAllResult,
+        )
+
+        mock_service = MagicMock()
+        mock_service.collect_tables = MagicMock(
+            return_value=[("chembl_activity", "silver")]
+        )
+        mock_service.vacuum_all = AsyncMock(
+            return_value=VacuumAllResult(
+                results=(TableVacuumResult("chembl_activity", "silver", 10, None),),
+                dry_run=True,
+            )
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
+            return_value=mock_service,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum-all", "--dry-run"]
+            )
+
+        assert result.exit_code == 0
+        assert "would remove" in result.output.lower()
