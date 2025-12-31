@@ -37,6 +37,10 @@ ALLOWED_INFRASTRUCTURE_FILES: set[str] = {
     # encoders.py reads BIOETL_JSON_ENCODER to select JSON encoder at import time.
     # This is infrastructure-level configuration for encoder selection.
     "encoders.py",
+    # pii_hasher.py reads BIOETL_PII_SALT_* for security-critical salt configuration.
+    # Salt is security configuration that should not be passed through Settings
+    # to minimize exposure in logs and error messages.
+    "pii_hasher.py",
 }
 
 

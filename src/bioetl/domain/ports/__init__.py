@@ -43,6 +43,7 @@ from bioetl.domain.ports.noop import (
     NoOpAudit,
     NoOpMemoryMonitor,
     NoOpMetrics,
+    NoOpPiiHasher,
     NoOpTracing,
 )
 from bioetl.domain.ports.normalization import (
@@ -58,6 +59,7 @@ from bioetl.domain.ports.observability import (
     MetricsPort,
     TracingPort,
 )
+from bioetl.domain.ports.pii import PiiHasherPort
 from bioetl.domain.ports.quarantine import QuarantinePort
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.runner import (
@@ -97,9 +99,11 @@ __all__ = [
     "NoOpAudit",
     "NoOpMemoryMonitor",
     "NoOpMetrics",
+    "NoOpPiiHasher",
     "NoOpTracing",
     "NormalizationServicePort",
     "OutlierFilterPort",
+    "PiiHasherPort",
     "QuarantinePort",
     "RateLimiterPort",
     "RunnablePort",

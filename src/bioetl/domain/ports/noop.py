@@ -237,6 +237,64 @@ class NoOpAudit:
         pass
 
 
+class NoOpPiiHasher:
+    """No-op implementation of PiiHasherPort.
+
+    Used when PII hashing is disabled or for testing.
+    Returns input values unchanged (ONLY for testing purposes).
+
+    WARNING: This implementation does NOT hash values. Use only for:
+    - Unit tests where hashing is not the focus
+    - Development with non-PII test data
+
+    For production, use Sha256PiiHasher from infrastructure.security.
+
+    Implements:
+        PiiHasherPort: Domain port for PII hashing.
+
+    Example:
+        >>> hasher = NoOpPiiHasher()
+        >>> hasher.hash_value("test")  # Returns unchanged
+        'test'
+        >>> hasher.hash_list(["a", "b"])
+        ['a', 'b']
+
+    """
+
+    def hash_value(self, value: str | None) -> str | None:
+        """Return value unchanged (no-op).
+
+        Args:
+            value: The value (returned unchanged).
+
+        Returns:
+            Input value unchanged.
+
+        """
+        return value
+
+    def hash_list(self, values: list[str] | None) -> list[str] | None:
+        """Return values unchanged (no-op).
+
+        Args:
+            values: The values (returned unchanged).
+
+        Returns:
+            Input values unchanged.
+
+        """
+        return values
+
+    def get_salt_id(self) -> str:
+        """Return placeholder salt ID.
+
+        Returns:
+            "noop" as salt identifier.
+
+        """
+        return "noop"
+
+
 class NoOpMemoryMonitor:
     """No-op implementation of MemoryMonitorPort.
 

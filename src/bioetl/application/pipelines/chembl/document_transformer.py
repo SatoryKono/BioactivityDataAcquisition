@@ -87,7 +87,15 @@ class DocumentTransformer(BaseChemblTransformer):
             Dictionary of Document business fields.
 
         """
-        return {
+        # Extract base fields using declarative DSL
+        data = {
             "document_chembl_id": str(primary_id),
             **map_field_groups(record, _DOCUMENT_GROUPS),
         }
+
+        # Hash PII field (RULES.md §5.4)
+        # ChEMBL authors is a single string, not a list
+        if data.get("authors"):
+            data["authors"] = self.hash_pii_value(data["authors"])
+
+        return data
