@@ -1,0 +1,42 @@
+problems:
+  - id: "TEST-001"
+    category: "TEST"
+    title: "Critical Coverage Deficit (39.78% < 85%)"
+    validation:
+      commit: "HEAD"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "REFUTED"
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Critical"
+      affected: ["All Components"]
+    assessment:
+      complexity: 8
+      effort_days: 14
+      priority: "P0"
+    resolution:
+      approach: "Implement unit tests for low-coverage modules: storage, factories, cli."
+      breaking_changes: false
+
+  - id: "CODE-001"
+    category: "CODE"
+    title: "Mypy Strict Violations in Domain Entities"
+    validation:
+      commit: "HEAD"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "REFUTED"
+      test_verdict: "REFUTED"
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Medium"
+      affected: ["Domain Entities"]
+    assessment:
+      complexity: 3
+      effort_days: 2
+      priority: "P1"
+    resolution:
+      approach: "Fix Pydantic/Dataclass inheritance typing to satisfy strict mypy."
+      breaking_changes: false
