@@ -337,7 +337,9 @@ class TestDataQualityServiceMetricsEmission:
         assert result.status == DQStatus.WARNING
 
         # Verify counter was emitted
-        counter_calls = recording_metrics.get_counter_calls("dq_soft_threshold_exceeded")
+        counter_calls = recording_metrics.get_counter_calls(
+            "dq_soft_threshold_exceeded"
+        )
         assert len(counter_calls) == 1
         name, value, labels = counter_calls[0]
         assert name == "dq_soft_threshold_exceeded"
@@ -455,11 +457,13 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Evaluate with multiple metrics
-        await service.evaluate({
-            "error_rate": 0.01,
-            "record_count": 100.0,
-            "silver_yield": 0.95,
-        })
+        await service.evaluate(
+            {
+                "error_rate": 0.01,
+                "record_count": 100.0,
+                "silver_yield": 0.95,
+            }
+        )
 
         # Verify baseline_updated counter was emitted for each metric
         counter_calls = recording_metrics.get_counter_calls("dq_baseline_updated")
@@ -506,7 +510,9 @@ class TestDataQualityServiceMetricsEmission:
         assert result.status == DQStatus.PASSED
 
         # Verify NO counter was emitted
-        counter_calls = recording_metrics.get_counter_calls("dq_soft_threshold_exceeded")
+        counter_calls = recording_metrics.get_counter_calls(
+            "dq_soft_threshold_exceeded"
+        )
         assert len(counter_calls) == 0
 
     @pytest.mark.asyncio
@@ -542,10 +548,12 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Trigger soft threshold warning
-        await service.evaluate({
-            "error_rate": 0.10,      # Above soft threshold (5%)
-            "record_count": 1000.0,
-        })
+        await service.evaluate(
+            {
+                "error_rate": 0.10,  # Above soft threshold (5%)
+                "record_count": 1000.0,
+            }
+        )
 
         # Verify soft threshold counter
         soft_calls = recording_metrics.get_counter_calls("dq_soft_threshold_exceeded")
@@ -557,4 +565,6 @@ class TestDataQualityServiceMetricsEmission:
 
         # Verify baseline update counters
         baseline_calls = recording_metrics.get_counter_calls("dq_baseline_updated")
-        assert len(baseline_calls) == 2, "dq_baseline_updated should be emitted for each metric"
+        assert (
+            len(baseline_calls) == 2
+        ), "dq_baseline_updated should be emitted for each metric"
