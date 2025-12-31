@@ -72,9 +72,7 @@ class PublicationRecord(BaseModel):
     )
 
     # Authors (list of "given family" formatted names)
-    authors: list[str] = PydanticField(
-        default_factory=list, description="Author names"
-    )
+    authors: list[str] = PydanticField(default_factory=list, description="Author names")
 
     # Journal information
     journal: str | None = PydanticField(

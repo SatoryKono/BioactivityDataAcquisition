@@ -50,12 +50,8 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     from bioetl.application.services import RunStatus
 
     with (
-        patch(
-            "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"
-        ),
-        patch(
-            "bioetl.interfaces.cli.commands.run.asyncio.run"
-        ) as mock_asyncio_run,
+        patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"),
+        patch("bioetl.interfaces.cli.commands.run.asyncio.run") as mock_asyncio_run,
         patch(
             "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
             return_value=mock_registry,

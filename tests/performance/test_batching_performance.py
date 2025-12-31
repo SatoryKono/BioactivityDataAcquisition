@@ -77,9 +77,7 @@ def logger() -> NoOpLogger:
 @pytest.fixture
 def bronze_writer(tmp_path: Path, logger: NoOpLogger) -> BronzeWriter:
     """Create BronzeWriter for performance tests."""
-    return BronzeWriter(
-        base_path=tmp_path, logger=logger, metrics=NoOpMetrics()
-    )
+    return BronzeWriter(base_path=tmp_path, logger=logger, metrics=NoOpMetrics())
 
 
 @pytest.fixture

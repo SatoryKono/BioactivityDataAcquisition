@@ -27,9 +27,15 @@ class TestContentHashBaselines:
     """
 
     # Baseline thresholds in microseconds (with safety margin for CI/Python 3.14 variability)
-    SMALL_RECORD_THRESHOLD_US = 1000  # 20x of 50 µs target (accounts for Python 3.14 variance)
-    MEDIUM_RECORD_THRESHOLD_US = 5000  # ~33x of 150 µs target (accounts for Python 3.14 variance)
-    LARGE_RECORD_THRESHOLD_US = 10000  # 20x of 500 µs target (accounts for CI/Python 3.14 variance)
+    SMALL_RECORD_THRESHOLD_US = (
+        1000  # 20x of 50 µs target (accounts for Python 3.14 variance)
+    )
+    MEDIUM_RECORD_THRESHOLD_US = (
+        5000  # ~33x of 150 µs target (accounts for Python 3.14 variance)
+    )
+    LARGE_RECORD_THRESHOLD_US = (
+        10000  # 20x of 500 µs target (accounts for CI/Python 3.14 variance)
+    )
 
     # Number of operations to average over
     NUM_OPS = 1000
@@ -173,8 +179,12 @@ class TestBatchProcessingBaselines:
     - 1000 records: < 100 ms
     """
 
-    SMALL_BATCH_THRESHOLD_MS = 100  # 10x of 10 ms target (accounts for Python 3.14 variance)
-    MEDIUM_BATCH_THRESHOLD_MS = 500  # 5x of 100 ms target (accounts for Python 3.14 variance)
+    SMALL_BATCH_THRESHOLD_MS = (
+        100  # 10x of 10 ms target (accounts for Python 3.14 variance)
+    )
+    MEDIUM_BATCH_THRESHOLD_MS = (
+        500  # 5x of 100 ms target (accounts for Python 3.14 variance)
+    )
 
     @pytest.fixture
     def small_batch(self) -> list[dict[str, Any]]:
@@ -261,9 +271,13 @@ class TestPolarsBaselines:
     - Group + Aggregate: < 10 ms
     """
 
-    DF_CREATION_THRESHOLD_MS = 100  # 5x of 20 ms target (accounts for Python 3.14 variance)
+    DF_CREATION_THRESHOLD_MS = (
+        100  # 5x of 20 ms target (accounts for Python 3.14 variance)
+    )
     FILTER_THRESHOLD_MS = 30  # 6x of 5 ms target (accounts for Python 3.14 variance)
-    GROUP_AGG_THRESHOLD_MS = 150  # 15x of 10 ms target (accounts for Python 3.14 variance)
+    GROUP_AGG_THRESHOLD_MS = (
+        150  # 15x of 10 ms target (accounts for Python 3.14 variance)
+    )
 
     @pytest.fixture
     def records_for_df(self) -> list[dict[str, Any]]:
@@ -368,9 +382,7 @@ class TestMemoryMonitorBaseline:
     """
 
     MEMORY_STATS_THRESHOLD_MS = 50  # Increased for Python 3.14/CI variability
-    BATCH_SIZE_THRESHOLD_US = (
-        50000  # Increased for Python 3.14/CI variability
-    )
+    BATCH_SIZE_THRESHOLD_US = 50000  # Increased for Python 3.14/CI variability
 
     def test_memory_stats_baseline(self) -> None:
         """Memory stats retrieval must complete under threshold."""

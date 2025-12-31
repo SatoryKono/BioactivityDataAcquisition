@@ -79,6 +79,21 @@ async def _run_pipeline_async(
     return result.status, result.error_message, result.error_type
 
 
+def _echo_run_result(status: RunStatus, error_message: str | None) -> None:
+    """Output run result message based on status."""
+    status_handlers = {
+        RunStatus.SUCCESS: lambda: echo_info("Pipeline completed successfully"),
+        RunStatus.DRY_RUN: lambda: echo_info("Dry-run completed (no changes made)"),
+        RunStatus.SHUTDOWN: lambda: echo_warning("Pipeline was gracefully shut down"),
+        RunStatus.FAILED: lambda: echo_error(
+            "Pipeline failed", error_message or "Unknown error"
+        ),
+    }
+    handler = status_handlers.get(status)
+    if handler:
+        handler()
+
+
 @click.command()
 @click.option(
     "--pipeline",
@@ -185,18 +200,9 @@ def run(
         echo_error("Unexpected error during pipeline execution", str(e))
         sys.exit(ExitCode.FAIL)
 
-    # Map status to exit code (CLI responsibility)
+    # Map status to exit code and output result
     exit_code = _map_status_to_exit_code(status, error_type)
-
-    if status == RunStatus.SUCCESS:
-        echo_info("Pipeline completed successfully")
-    elif status == RunStatus.DRY_RUN:
-        echo_info("Dry-run completed (no changes made)")
-    elif status == RunStatus.SHUTDOWN:
-        echo_warning("Pipeline was gracefully shut down")
-    elif status == RunStatus.FAILED:
-        echo_error("Pipeline failed", error_message or "Unknown error")
-
+    _echo_run_result(status, error_message)
     sys.exit(exit_code)
 
 

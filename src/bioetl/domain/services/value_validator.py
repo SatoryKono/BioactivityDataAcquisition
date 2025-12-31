@@ -126,13 +126,11 @@ class ValueValidator:
         """Check if value is within min/max range."""
         if value < min_val:
             return False, (
-                f"Concentration {value} {unit} below minimum "
-                f"({min_val} {unit})"
+                f"Concentration {value} {unit} below minimum " f"({min_val} {unit})"
             )
         if value > max_val:
             return False, (
-                f"Concentration {value} {unit} exceeds maximum "
-                f"({max_val} {unit})"
+                f"Concentration {value} {unit} exceeds maximum " f"({max_val} {unit})"
             )
         return True, None
 

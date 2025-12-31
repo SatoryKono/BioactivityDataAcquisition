@@ -171,7 +171,9 @@ class PostrunService:
                     error=str(e),
                 )
 
-    def _collect_batch_metrics(self, executor: ExecutorMetricsProtocol) -> dict[str, float]:
+    def _collect_batch_metrics(
+        self, executor: ExecutorMetricsProtocol
+    ) -> dict[str, float]:
         """Collect batch metrics from executor.
 
         Args:

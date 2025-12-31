@@ -131,7 +131,9 @@ class ConfidenceScore:
     def __post_init__(self) -> None:
         """Validate confidence score invariants."""
         if not isinstance(self.value, int):
-            raise TypeError(f"ConfidenceScore must be int, got {type(self.value).__name__}")
+            raise TypeError(
+                f"ConfidenceScore must be int, got {type(self.value).__name__}"
+            )
         if not 0 <= self.value <= 9:
             raise ValueError(f"Confidence score must be 0-9, got {self.value}")
 

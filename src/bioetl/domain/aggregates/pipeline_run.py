@@ -13,6 +13,7 @@ from bioetl.domain.types import RunID, RunType
 
 class StageStatus(str, Enum):
     """Status of a pipeline stage."""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -22,6 +23,7 @@ class StageStatus(str, Enum):
 
 class RunStatus(str, Enum):
     """Status of a pipeline run."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
