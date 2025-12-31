@@ -5,7 +5,7 @@ monitoring. These functions configure the observability stack for the pipeline.
 
 Unified Observability Contract:
 - bootstrap_observability() always returns valid implementations
-- Logger: StructlogLogger (always valid)
+- Logger: UnifiedLogger with Log Schema enforcement (run_id, pipeline, stage)
 - Metrics: PrometheusMetrics or NoOpMetrics (never None)
 - Tracer: OpenTelemetryTracer or NoOpTracing (never None)
 - DQMonitor: DataQualityMonitor or None (optional)
@@ -19,14 +19,12 @@ from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
-from bioetl.infrastructure.observability.logging import (
-    create_logger as create_infra_logger,
-)
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.server import start_metrics_server
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
+from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DQMonitorPort
@@ -94,18 +92,22 @@ def bootstrap_logger(
 ) -> LoggerPort:
     """Create a logger for the application layer (e.g., CLI).
 
+    Uses UnifiedLogger which enforces the Log Schema from RULES.md §3.2.1:
+    - Mandatory fields: run_id, pipeline (bound at initialization)
+    - Stage field: defaults to "init" for LoggerPort compatibility
+
     Args:
         pipeline: Pipeline name for logger context.
         run_id: Unique run identifier. If None, generates a new UUID.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
 
     Returns:
-        StructlogLogger implementing LoggerPort.
+        UnifiedLogger implementing LoggerPort with Log Schema enforcement.
     """
     from uuid import uuid4
 
     effective_run_id = run_id if run_id is not None else uuid4()
-    return create_infra_logger(
+    return UnifiedLogger(
         pipeline=pipeline,
         run_id=effective_run_id,
         log_level=log_level,
@@ -248,7 +250,8 @@ def bootstrap_observability(
 
     Unified Observability Contract:
     - Always returns a valid ObservabilityBundle with non-None logger and metrics
-    - Fallback to StructlogLogger + NoOpMetrics when Prometheus is disabled
+    - Logger: UnifiedLogger with Log Schema enforcement (run_id, pipeline, stage)
+    - Fallback to NoOpMetrics when Prometheus is disabled
     - Tracer and DQ monitor remain optional
 
     Creates a unified observability bundle containing logger, tracer, metrics,
