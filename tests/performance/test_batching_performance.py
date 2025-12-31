@@ -7,6 +7,9 @@ Requirements:
 - REQ-PERF-001: Bronze batch write 1000 records under 1s
 - REQ-PERF-002: Silver transformation 1000 records under 2s
 - REQ-PERF-003: Content hash generation 1000 records under 0.5s
+
+Note: These tests are marked with @pytest.mark.benchmark and excluded from
+standard test runs. Run explicitly with: make bench or pytest -m benchmark
 """
 
 from __future__ import annotations
@@ -120,6 +123,7 @@ def activity_schema() -> pa.Schema:
     )
 
 
+@pytest.mark.benchmark
 @pytest.mark.performance
 class TestBatchingPerformance:
     """Performance tests for batch operations."""
@@ -342,6 +346,7 @@ class TestBatchingPerformance:
         )
 
 
+@pytest.mark.benchmark
 @pytest.mark.performance
 class TestScalabilityPerformance:
     """Scalability tests for larger batch sizes."""
