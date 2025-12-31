@@ -5,6 +5,8 @@ Provides bootstrap functions for PipelineRunnerService assembly.
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 from bioetl.application.services import PipelineRunnerService
 from bioetl.composition._bootstrap.observability import bootstrap_logger
 from bioetl.composition.factories.runner_factory import (
@@ -34,10 +36,10 @@ def bootstrap_pipeline_runner_service(
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
     """
-    # Bootstrap logger for the service (run_id=None generates a new UUID)
+    # Bootstrap logger for the service (using a unique ID for service-level logging)
     logger = bootstrap_logger(
         pipeline="pipeline_runner_service",
-        run_id=None,
+        run_id=uuid4(),
         log_level="INFO",
     )
 
