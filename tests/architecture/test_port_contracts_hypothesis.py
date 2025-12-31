@@ -269,7 +269,12 @@ class TestRateLimiterPortProperties:
             f"Initial tokens ({available}) != capacity ({capacity})"
         )
 
-    @given(rate=rate_strategy, capacity=capacity_strategy)
+    @given(
+        # Limit rate to avoid token refill during test execution.
+        # At rate=10.0, only 0.1 tokens refill in 10ms - not enough for a whole token.
+        rate=st.floats(min_value=0.1, max_value=10.0),
+        capacity=capacity_strategy,
+    )
     @settings(max_examples=50, deadline=5000)
     def test_try_acquire_respects_capacity(self, rate: float, capacity: int) -> None:
         """Property: try_acquire() MUST fail after capacity tokens acquired."""
