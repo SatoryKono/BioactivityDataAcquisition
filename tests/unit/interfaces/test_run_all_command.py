@@ -249,10 +249,14 @@ class TestRunAllCommand:
         mock_service.run = AsyncMock(side_effect=mock_run)
         mock_get_service.return_value = mock_service
 
-        # Make asyncio.run execute the coroutine
+        # Make asyncio.run execute the coroutine with a fresh event loop
         def run_coro(coro):
             import asyncio
-            return asyncio.get_event_loop().run_until_complete(coro)
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
 
         mock_asyncio.side_effect = run_coro
 
@@ -283,10 +287,14 @@ class TestRunAllCommand:
         mock_service.run = AsyncMock(side_effect=mock_run)
         mock_get_service.return_value = mock_service
 
-        # Make asyncio.run execute the coroutine
+        # Make asyncio.run execute the coroutine with a fresh event loop
         def run_coro(coro):
             import asyncio
-            return asyncio.get_event_loop().run_until_complete(coro)
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
 
         mock_asyncio.side_effect = run_coro
 
@@ -331,7 +339,11 @@ class TestRunAllCommand:
 
         def run_coro(coro):
             import asyncio
-            return asyncio.get_event_loop().run_until_complete(coro)
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
 
         mock_asyncio.side_effect = run_coro
 
@@ -392,7 +404,11 @@ class TestRunAllExitCodes:
 
         def run_coro(coro):
             import asyncio
-            return asyncio.get_event_loop().run_until_complete(coro)
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
 
         mock_asyncio.side_effect = run_coro
 
@@ -433,7 +449,11 @@ class TestRunAllExitCodes:
 
         def run_coro(coro):
             import asyncio
-            return asyncio.get_event_loop().run_until_complete(coro)
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(coro)
+            finally:
+                loop.close()
 
         mock_asyncio.side_effect = run_coro
 
