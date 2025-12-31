@@ -52,10 +52,10 @@ class TestFileSizeLimits:
         "identifiers.py": 350,  # 332 LOC - Value objects with validation
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
-        "noop.py": 350,  # 322 LOC - NoOp implementations for Null Object Pattern
+        "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
-        "base_transformer.py": 600,  # 594 LOC - Template Method with helpers (tracing spans added)
+        "base_transformer.py": 650,  # 639 LOC - Template Method with helpers (tracing + PII hashing)
         "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
@@ -332,7 +332,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 520,  # 510 lines - storage adapter with writers
-        "BaseTransformer": 560,  # 559 lines - Template Method with helpers (tracing added)
+        "BaseTransformer": 580,  # 577 lines - Template Method with helpers (tracing + PII hashing)
         "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
