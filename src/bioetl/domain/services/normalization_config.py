@@ -102,9 +102,7 @@ class NormalizationConfig:
     concentration_range: ConcentrationRangeConfig = field(
         default_factory=ConcentrationRangeConfig
     )
-    pchembl_range: PChemblRangeConfig = field(
-        default_factory=PChemblRangeConfig
-    )
+    pchembl_range: PChemblRangeConfig = field(default_factory=PChemblRangeConfig)
     potency_threshold: float = 5.0  # pChEMBL >= 5 = active at 10 µM
     high_potency_threshold: float = 7.0  # pChEMBL >= 7 = active at 100 nM
 
@@ -113,9 +111,7 @@ class NormalizationConfig:
         if self.potency_threshold < 0:
             raise ValueError("potency_threshold cannot be negative")
         if self.high_potency_threshold < self.potency_threshold:
-            raise ValueError(
-                "high_potency_threshold must be >= potency_threshold"
-            )
+            raise ValueError("high_potency_threshold must be >= potency_threshold")
         valid_methods = {"mean", "median", "geometric_mean"}
         if self.default_aggregation_method not in valid_methods:
             raise ValueError(

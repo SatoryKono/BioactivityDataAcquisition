@@ -280,9 +280,7 @@ class TestRunAllCommand:
             ],
         )
 
-        result = cli_runner.invoke(
-            cli, ["run-all", "--source", "chembl", "--dry-run"]
-        )
+        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--dry-run"])
 
         assert result.exit_code == 0
         assert "[DRY-RUN]" in result.output
@@ -293,7 +291,8 @@ class TestRunAllCommand:
     ):
         """Test that rebuild requires confirmation without --yes."""
         result = cli_runner.invoke(
-            cli, ["run-all", "--source", "chembl", "--run-type", "rebuild"],
+            cli,
+            ["run-all", "--source", "chembl", "--run-type", "rebuild"],
             input="n\n",  # Say no to confirmation
         )
 
@@ -340,9 +339,7 @@ class TestRunAllExitCodes:
     """Tests for run-all exit codes."""
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    def test_exit_code_0_for_list_only(
-        self, mock_register, cli_runner, mock_registry
-    ):
+    def test_exit_code_0_for_list_only(self, mock_register, cli_runner, mock_registry):
         """Test exit code 0 for successful --list-only."""
         result = cli_runner.invoke(
             cli, ["run-all", "--source", "chembl", "--list-only"]

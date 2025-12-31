@@ -51,9 +51,7 @@ def _geometric_mean(values: Sequence[float]) -> float:
 
     for v in values:
         if v <= 0:
-            raise ValueError(
-                f"Geometric mean requires positive values, got {v}"
-            )
+            raise ValueError(f"Geometric mean requires positive values, got {v}")
 
     log_sum = sum(math.log(v) for v in values)
     return math.exp(log_sum / len(values))
@@ -375,10 +373,7 @@ class ActivityAggregator:
         max_value: float | None,
     ) -> list[float]:
         """Filter values to those within the specified range."""
-        return [
-            v for v in values
-            if self._is_in_range(v, min_value, max_value)
-        ]
+        return [v for v in values if self._is_in_range(v, min_value, max_value)]
 
     def _is_in_range(
         self,

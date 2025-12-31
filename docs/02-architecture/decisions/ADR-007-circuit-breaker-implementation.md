@@ -147,7 +147,7 @@ async def fetch_activity(activity_id: int) -> dict:
 
 ## Related ADRs
 
-- [ADR-003](ADR-003-redis-for-distributed-locking.md): Redis for Distributed Locking — complementary resilience pattern (superseded by ADR-010)
+- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — complementary resilience pattern
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — coordinates with circuit breaker during shutdown
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin — wraps fetch calls with circuit breaker
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — circuit breaker is part of error handling

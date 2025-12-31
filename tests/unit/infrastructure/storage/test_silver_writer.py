@@ -47,9 +47,7 @@ class TestSilverWriterInit:
         """Test that trailing slash is stripped from base_path."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket/path/", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/path/", logger=noop_logger)
         assert writer.base_path == "s3://bucket/path"
 
     def test_init_with_csv_exporter(self, noop_logger):
@@ -63,7 +61,6 @@ class TestSilverWriterInit:
             base_path="/tmp/silver",
             logger=noop_logger,
             csv_exporter=mock_exporter,
-
         )
         assert writer.csv_exporter is mock_exporter
 
@@ -71,9 +68,7 @@ class TestSilverWriterInit:
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         assert writer.csv_exporter is None
 
 
@@ -88,9 +83,7 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -118,9 +111,7 @@ class TestSilverWriterValidation:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
 
         dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
 
@@ -137,9 +128,7 @@ class TestSilverWriterValidation:
         """Test write_silver raises ValueError for missing metadata."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
         import pyarrow as pa
@@ -159,9 +148,7 @@ class TestSilverWriterValidation:
         """Test write_silver raises ValueError when _run_id is missing."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -221,9 +208,7 @@ class TestSilverWriterWriteModeEnum:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
         assert writer._validate_write_mode("append") == SilverWriteMode.APPEND
@@ -244,9 +229,7 @@ class TestSilverWriterTablePath:
         """Test table path is constructed correctly."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         # Access internal path construction
         table_name = "chembl.activity"
@@ -259,9 +242,7 @@ class TestSilverWriterTablePath:
         """Test table path with nested table name."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         table_name = "provider.schema.table"
         expected_path = "s3://bucket/silver/provider/schema/table"
@@ -321,9 +302,7 @@ class TestSilverWriterVacuum:
             "file2.parquet",
         ]
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.vacuum("test.table", retention_hours=168)
 
         assert len(result) == 2
@@ -341,9 +320,7 @@ class TestSilverWriterVacuum:
         mock_delta_table.return_value = mock_table_instance
         mock_table_instance.vacuum.return_value = ["file1.parquet"]
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         await writer.vacuum("test.table", retention_hours=24, dry_run=True)
 
         mock_table_instance.vacuum.assert_called_once_with(
@@ -362,9 +339,7 @@ class TestSilverWriterVacuum:
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                base_path="s3://bucket/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.vacuum("nonexistent.table")
@@ -389,9 +364,7 @@ class TestSilverWriterOptimize:
             "numFilesRemoved": 5,
         }
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.optimize("test.table")
 
         assert result["numFilesRemoved"] == 5
@@ -409,9 +382,7 @@ class TestSilverWriterOptimize:
         mock_table_instance.optimize = mock_optimize
         mock_optimize.compact.return_value = {}
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         await writer.optimize("test.table", partition_filters=[("year", "=", 2025)])
 
         mock_optimize.compact.assert_called_once_with(
@@ -430,9 +401,7 @@ class TestSilverWriterOptimize:
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                base_path="s3://bucket/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.optimize("nonexistent.table")
@@ -457,9 +426,7 @@ class TestSilverWriterGetTableInfo:
         mock_table_instance.schema.return_value = mock_schema
         mock_table_instance.metadata.return_value = {"id": "test-table"}
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.get_table_info("test.table")
 
         assert result["version"] == 10
@@ -477,9 +444,7 @@ class TestSilverWriterGetTableInfo:
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                base_path="s3://bucket/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.get_table_info("nonexistent.table")
@@ -498,9 +463,7 @@ class TestSilverWriterTimeTravel:
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         result = await writer.time_travel("test.table", version=5)
 
         assert result == mock_table_instance
@@ -517,9 +480,7 @@ class TestSilverWriterTimeTravel:
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
         ts = datetime(2025, 1, 1, 12, 0, 0)
         result = await writer.time_travel("test.table", timestamp=ts)
 
@@ -532,9 +493,7 @@ class TestSilverWriterTimeTravel:
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         with pytest.raises(ValueError, match="Specify either version or timestamp"):
             await writer.time_travel(
@@ -546,9 +505,7 @@ class TestSilverWriterTimeTravel:
         """Test time_travel raises ValueError when neither version nor timestamp given."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="s3://bucket/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
         with pytest.raises(
             ValueError, match="Must specify either version or timestamp"
@@ -567,9 +524,7 @@ class TestSilverWriterTimeTravel:
             "bioetl.infrastructure.storage.retention_manager.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                base_path="s3://bucket/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(TableNotFoundError):
                 await writer.time_travel("nonexistent.table", version=1)
@@ -614,9 +569,7 @@ class TestSilverWriterErrorHandling:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             delta_table_mock,
         ):
-            writer = SilverWriter(
-                base_path="s3://bucket/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
@@ -669,9 +622,7 @@ class TestSilverWriterErrorHandling:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             delta_table_mock,
         ):
-            writer = SilverWriter(
-                base_path="s3://bucket/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
             with pytest.raises(MergeConflictError):
                 await writer.write_silver(
@@ -697,9 +648,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
             result = await writer._get_table_schema("test.table")
             assert result is None
 
@@ -723,9 +672,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
             result = await writer._get_table_schema("test.table")
             assert result == expected_schema
 
@@ -751,9 +698,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
                 await writer._check_schema_drift("test.table", valid_records, "error")
@@ -800,9 +745,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             with pytest.raises(SchemaEvolutionError) as exc_info:
                 await writer._check_schema_drift("test.table", records, "error")
@@ -830,9 +773,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise
             await writer._check_schema_drift("test.table", valid_records, "evolve")
@@ -857,9 +798,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise
             await writer._check_schema_drift("test.table", valid_records, "ignore")
@@ -894,9 +833,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise even in error mode
             await writer._check_schema_drift("test.table", valid_records, "error")
@@ -912,9 +849,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise for new table
             await writer._check_schema_drift("test.table", valid_records, "error")
@@ -937,9 +872,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise for empty records
             await writer._check_schema_drift("test.table", [], "error")
@@ -989,9 +922,7 @@ class TestSilverWriterSchemaDrift:
             "bioetl.infrastructure.storage.silver_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # write_silver with on_schema_mismatch="error" should raise
             with pytest.raises(SchemaEvolutionError) as exc_info:
@@ -1018,9 +949,7 @@ class TestSilverWriterWriteModePolicy:
         from bioetl.domain.medallion import WriteModePolicy
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         assert isinstance(writer._write_policy, WriteModePolicy)
 
     def test_init_with_custom_policy(self, noop_logger):
@@ -1033,7 +962,6 @@ class TestSilverWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             write_policy=custom_policy,
-
         )
         assert writer._write_policy is custom_policy
 
@@ -1046,7 +974,6 @@ class TestSilverWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
-
         )
         assert writer._metrics is mock_metrics
 
@@ -1058,9 +985,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.MERGE)
         assert result == WriteMode.MERGE
 
@@ -1072,9 +997,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.APPEND)
         assert result == WriteMode.APPEND
 
@@ -1086,9 +1009,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.DELETE)
         assert result == WriteMode.OVERWRITE
 
@@ -1099,9 +1020,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         # Should not raise
         writer._enforce_write_policy(SilverWriteMode.MERGE, "test.table")
 
@@ -1112,9 +1031,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         # Should not raise
         writer._enforce_write_policy(SilverWriteMode.APPEND, "test.table")
 
@@ -1126,9 +1043,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         with pytest.raises(PolicyViolationError) as exc_info:
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
         assert "silver does not allow overwrite" in str(exc_info.value)
@@ -1146,7 +1061,6 @@ class TestSilverWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
-
         )
 
         with pytest.raises(PolicyViolationError):
@@ -1167,9 +1081,7 @@ class TestSilverWriterWriteModePolicy:
         )
 
         mock_logger = MagicMock()
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=mock_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=mock_logger)
 
         with pytest.raises(PolicyViolationError):
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
@@ -1208,9 +1120,7 @@ class TestSilverWriterWriteModePolicy:
             ]
         )
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
         with pytest.raises(PolicyViolationError) as exc_info:
             await writer.write_silver(
@@ -1252,9 +1162,7 @@ class TestSilverWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise PolicyViolationError
             await writer.write_silver(
@@ -1298,9 +1206,7 @@ class TestSilverWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = SilverWriter(
-                base_path="/tmp/silver", logger=noop_logger
-            )
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
             # Should not raise PolicyViolationError
             await writer.write_silver(
@@ -1340,7 +1246,6 @@ class TestSilverWriterWriteModePolicy:
             base_path="/tmp/silver",
             logger=noop_logger,
             metrics=mock_metrics,
-
         )
 
         with pytest.raises(PolicyViolationError):

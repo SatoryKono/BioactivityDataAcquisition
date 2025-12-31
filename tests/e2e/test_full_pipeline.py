@@ -46,19 +46,16 @@ class TestChEMBLPipelineE2E:
             metrics=AsyncMock(),
             save_json=True,
             json_path=str(storage_paths["bronze"] / "json"),
-
         )
 
         silver_writer = SilverWriter(
             base_path=str(storage_paths["silver"]),
             logger=logger,
-
         )
 
         gold_writer = GoldWriter(
             base_path=str(storage_paths["gold"]),
             logger=logger,
-
         )
 
         return StorageAdapter(
@@ -148,19 +145,16 @@ async def test_pubchem_compound_pipeline(
         metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
-
     )
 
     silver_writer = SilverWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
-
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
         logger=logger,
-
     )
 
     storage_adapter = StorageAdapter(
@@ -231,19 +225,16 @@ async def test_pipeline_resume_after_failure(
         metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
-
     )
 
     silver_writer = SilverWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
-
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
         logger=logger,
-
     )
 
     storage_adapter = StorageAdapter(
@@ -325,19 +316,16 @@ async def test_pipeline_idempotency(
         metrics=AsyncMock(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
-
     )
 
     silver_writer = SilverWriter(
         base_path=str(e2e_temp_storage["silver"]),
         logger=logger,
-
     )
 
     gold_writer = GoldWriter(
         base_path=str(e2e_temp_storage["gold"]),
         logger=logger,
-
     )
 
     storage_adapter = StorageAdapter(

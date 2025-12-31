@@ -19,14 +19,14 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
     VacuumResult,
 )
-from bioetl.application.core.preflight_service import PreflightService
-from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -418,12 +418,16 @@ class TestPipelineRunnerLifecycle:
         lifecycle_service_no_clear = MagicMock(spec=MedallionLifecycleService)
         lifecycle_service_no_clear.prepare_for_run = AsyncMock(
             return_value=PrepareResult(
-                clear_result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
+                clear_result=ClearResult(
+                    silver_cleared=0, gold_cleared=0, dry_run=False
+                ),
                 policy=MedallionPolicy.for_run_type(RunType.INCREMENTAL),
             )
         )
         lifecycle_service_no_clear.finalize_run = AsyncMock(
-            return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
+            return_value=VacuumResult(
+                silver_files_removed=0, gold_files_removed=0, skipped=True
+            )
         )
 
         lock_manager = MagicMock()
@@ -568,11 +572,15 @@ class TestPipelineRunnerLifecycle:
             call_recorder.record("storage.clear_silver")
             call_recorder.record("storage.clear_gold")
             return PrepareResult(
-                clear_result=ClearResult(silver_cleared=0, gold_cleared=0, dry_run=False),
+                clear_result=ClearResult(
+                    silver_cleared=0, gold_cleared=0, dry_run=False
+                ),
                 policy=MedallionPolicy.for_run_type(runtime.run_type),
             )
 
-        mock_lifecycle_service.prepare_for_run = AsyncMock(side_effect=prepare_for_run_with_recording)
+        mock_lifecycle_service.prepare_for_run = AsyncMock(
+            side_effect=prepare_for_run_with_recording
+        )
 
         lock_manager = MagicMock()
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)

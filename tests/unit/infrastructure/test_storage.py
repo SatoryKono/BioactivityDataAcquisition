@@ -55,7 +55,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
         assert writer.base_path == tmp_path
 
@@ -65,7 +64,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         records = [b'{"id": 1, "data": "test"}\n']
@@ -92,7 +90,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         records = [b'{"id": 1}\n']
@@ -124,7 +121,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         records = [b'{"id": 1, "data": "test"}\n']
@@ -162,7 +158,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         records = []
@@ -190,7 +185,6 @@ class TestBronzeWriter:
             logger=noop_logger,
             metrics=NoOpMetrics(),
             save_json=True,
-
         )
 
         records = [b'{"id": 1}\n']
@@ -241,7 +235,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         # Read it back
@@ -260,7 +253,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         # Write two batches
@@ -289,7 +281,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         batches = await writer.list_batches("nonexistent", "entity", datetime.now())
@@ -302,7 +293,6 @@ class TestBronzeWriter:
             base_path=tmp_path,
             logger=noop_logger,
             metrics=NoOpMetrics(),
-
         )
 
         records = [b'{"id": 1}\n']
@@ -338,21 +328,19 @@ class TestSilverWriter:
 
     def test_silver_writer_initialization(self, noop_logger):
         """Test SilverWriter can be initialized."""
-        writer = SilverWriter(
-            base_path="/tmp/delta", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
         assert writer.base_path == "/tmp/delta"
 
-    async def test_write_silver_creates_new_table(self, mock_silver_writer, noop_logger):
+    async def test_write_silver_creates_new_table(
+        self, mock_silver_writer, noop_logger
+    ):
         """Test write_silver creates table if not exists."""
         from deltalake.exceptions import TableNotFoundError
 
         mock_delta_table, mock_write_deltalake = mock_silver_writer
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        writer = SilverWriter(
-            base_path="/tmp/delta", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
 
         records = [
             {
@@ -414,9 +402,7 @@ class TestSilverWriter:
         mock_merge.when_matched_update_all.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
-        writer = SilverWriter(
-            base_path="/tmp/delta", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
 
         records = [
             {
@@ -441,9 +427,7 @@ class TestSilverWriter:
 
     @pytest.mark.usefixtures("mock_silver_writer")
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
-        writer = SilverWriter(
-            base_path="/tmp/delta", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
@@ -477,9 +461,7 @@ class TestGoldWriter:
 
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 
-        writer = GoldWriter(
-            base_path="/tmp/gold", logger=noop_logger
-        )
+        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
 
         # Records with mixed key order
         records = [

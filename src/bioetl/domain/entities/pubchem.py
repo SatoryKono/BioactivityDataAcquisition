@@ -47,9 +47,7 @@ class PubChemCompoundRecord(BaseModel):
     cid: str = Field(description="PubChem Compound ID")
 
     # Molecular properties
-    molecular_formula: str | None = Field(
-        default=None, description="Molecular formula"
-    )
+    molecular_formula: str | None = Field(default=None, description="Molecular formula")
     molecular_weight: float | None = Field(
         default=None, description="Molecular weight in g/mol"
     )
@@ -61,22 +59,14 @@ class PubChemCompoundRecord(BaseModel):
     isomeric_smiles: str | None = Field(
         default=None, description="Isomeric SMILES (with stereochemistry)"
     )
-    inchi: str | None = Field(
-        default=None, description="InChI string"
-    )
-    inchikey: str | None = Field(
-        default=None, description="InChI Key"
-    )
+    inchi: str | None = Field(default=None, description="InChI string")
+    inchikey: str | None = Field(default=None, description="InChI Key")
 
     # Names
-    iupac_name: str | None = Field(
-        default=None, description="IUPAC systematic name"
-    )
+    iupac_name: str | None = Field(default=None, description="IUPAC systematic name")
 
     # Physical/Chemical properties
-    charge: int | None = Field(
-        default=None, description="Formal charge"
-    )
+    charge: int | None = Field(default=None, description="Formal charge")
     complexity: float | None = Field(
         default=None, description="Molecular complexity score"
     )
@@ -91,9 +81,7 @@ class PubChemCompoundRecord(BaseModel):
     )
 
     # Fingerprints
-    fingerprint: str | None = Field(
-        default=None, description="PubChem fingerprint"
-    )
+    fingerprint: str | None = Field(default=None, description="PubChem fingerprint")
 
 
 # === Dataclass Domain Entity ===

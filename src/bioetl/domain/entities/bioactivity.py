@@ -48,6 +48,7 @@ def _require_field(raw_data: dict[str, Any], field: str) -> Any:
 def _safe_json(val: Any) -> str | None:
     """Convert to JSON string if not None/empty."""
     import json
+
     return json.dumps(val) if val else None
 
 

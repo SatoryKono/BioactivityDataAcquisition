@@ -428,26 +428,37 @@ class PipelineYamlConfig(BaseModel):
     def validate_medallion_formats(self) -> PipelineYamlConfig:
         """Validate Medallion Architecture format constraints.
 
-        RULES.md §2.1: Silver and Gold MUST use Delta Lake format.
-        Bronze MAY use JSONL (preferred) or Delta.
+        RULES.md §2.1:
+        - Bronze MUST use JSONL + zstd format (not parquet, not delta)
+        - Silver MUST use Delta Lake format (not parquet)
+        - Gold MAY use Delta Lake or Parquet
+
+        Note:
+            Bronze format is auto-defaulted to 'jsonl' since that's the only
+            allowed format per RULES.md. This allows pipeline configs to omit
+            the format field for Bronze layer.
 
         Raises:
-            ValueError: If Silver or Gold layer uses Parquet format.
+            ValueError: If layer format violates Medallion Architecture constraints.
         """
+        bronze_config = self.sink.get("bronze")
         silver_config = self.sink.get("silver")
-        gold_config = self.sink.get("gold")
 
+        # Bronze MUST use JSONL only (RULES.md §2.1)
+        # Auto-default to jsonl since it's the only allowed format
+        if bronze_config:
+            # Since SinkLayerConfig defaults to "delta", we auto-correct to "jsonl"
+            # This allows pipeline configs to omit format for Bronze
+            bronze_config.format = "jsonl"
+
+        # Silver MUST use Delta Lake (RULES.md §2.1)
         if silver_config and silver_config.format == "parquet":
             raise ValueError(
                 "Silver layer MUST use 'delta' format (RULES.md §2.1). "
                 "Parquet is not allowed for Silver layer."
             )
 
-        if gold_config and gold_config.format == "parquet":
-            raise ValueError(
-                "Gold layer MUST use 'delta' format (RULES.md §2.1). "
-                "Parquet is not allowed for Gold layer."
-            )
+        # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed
 
         return self
 
