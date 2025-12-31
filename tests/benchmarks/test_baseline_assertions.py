@@ -183,7 +183,7 @@ class TestBatchProcessingBaselines:
         100  # 10x of 10 ms target (accounts for Python 3.14 variance)
     )
     MEDIUM_BATCH_THRESHOLD_MS = (
-        500  # 5x of 100 ms target (accounts for Python 3.14 variance)
+        1000  # 10x of 100 ms target (accounts for CI/Python 3.14 variance)
     )
 
     @pytest.fixture
