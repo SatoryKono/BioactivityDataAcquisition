@@ -384,6 +384,14 @@ class TestMandatorySpans:
                                 found = True
                                 break
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+            if not found and filename == "runner.py":
+                # runner.py is critical - fail if not found
+=======
+=======
+>>>>>>> 1b895dd6a35231a3b5bdf40aa0f32224cdcd1964
             if not found and filename in ["runner.py", "batch_executor.py"]:
                 # These are critical - fail if not found
+>>>>>>> 47c0bb13d9f8eed23b21313d7ac0214e886910b2
                 assert found, f"Critical file {filename} should have methods {methods}"
