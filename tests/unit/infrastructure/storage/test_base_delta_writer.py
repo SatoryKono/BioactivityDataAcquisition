@@ -70,20 +70,24 @@ class TestGetStringFields:
 
     def test_extracts_string_fields(self) -> None:
         """Test extraction of string type fields from schema."""
-        schema = pa.schema([
-            pa.field("id", pa.string()),
-            pa.field("count", pa.int64()),
-            pa.field("name", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("count", pa.int64()),
+                pa.field("name", pa.string()),
+            ]
+        )
         result = _get_string_fields(schema)
         assert result == {"id", "name"}
 
     def test_extracts_large_string_fields(self) -> None:
         """Test extraction of large_string type fields."""
-        schema = pa.schema([
-            pa.field("description", pa.large_string()),
-            pa.field("value", pa.float64()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("description", pa.large_string()),
+                pa.field("value", pa.float64()),
+            ]
+        )
         result = _get_string_fields(schema)
         assert result == {"description"}
 
@@ -95,10 +99,12 @@ class TestGetStringFields:
 
     def test_no_string_fields(self) -> None:
         """Test schema with no string fields."""
-        schema = pa.schema([
-            pa.field("id", pa.int64()),
-            pa.field("value", pa.float64()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("value", pa.float64()),
+            ]
+        )
         result = _get_string_fields(schema)
         assert result == set()
 
@@ -158,10 +164,12 @@ class TestBaseDeltaWriter:
             {"id": "1", "name": "test", "extra": "ignored"},
             {"id": "2", "name": "test2"},
         ]
-        schema = pa.schema([
-            pa.field("id", pa.string()),
-            pa.field("name", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("name", pa.string()),
+            ]
+        )
 
         result = writer._prepare_arrow_data(
             records=records,
@@ -181,10 +189,12 @@ class TestBaseDeltaWriter:
         records: list[dict[str, Any]] = [
             {"id": "1", "metadata": {"key": "value"}},
         ]
-        schema = pa.schema([
-            pa.field("id", pa.string()),
-            pa.field("metadata", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("metadata", pa.string()),
+            ]
+        )
 
         result = writer._prepare_arrow_data(
             records=records,
@@ -198,10 +208,12 @@ class TestBaseDeltaWriter:
 
     def test_sort_by_primary_keys(self, writer: BaseDeltaWriter) -> None:
         """Test _sort_by_primary_keys method."""
-        table = pa.table({
-            "id": ["c", "a", "b"],
-            "value": [3, 1, 2],
-        })
+        table = pa.table(
+            {
+                "id": ["c", "a", "b"],
+                "value": [3, 1, 2],
+            }
+        )
 
         result = writer._sort_by_primary_keys(
             table=table,

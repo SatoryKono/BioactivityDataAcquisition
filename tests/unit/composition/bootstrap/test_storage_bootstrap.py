@@ -37,7 +37,6 @@ class TestBootstrapStorage:
         assert isinstance(result, StorageAdapter)
 
 
-
 @pytest.mark.unit
 class TestBootstrapCleanup:
     """Test bootstrap_cleanup function."""
@@ -52,6 +51,7 @@ class TestBootstrapCleanup:
         result = bootstrap_cleanup()
 
         from bioetl.application.core.cleanup_service import CleanupService
+
         assert isinstance(result, CleanupService)
 
 
@@ -74,6 +74,7 @@ class TestBootstrapLifecycleService:
         from bioetl.application.services.medallion_lifecycle import (
             MedallionLifecycleService,
         )
+
         assert isinstance(result, MedallionLifecycleService)
 
 
@@ -94,6 +95,7 @@ class TestBootstrapBronzeCleanupService:
         result = bootstrap_bronze_cleanup_service()
 
         from bioetl.application.services import BronzeCleanupService
+
         assert isinstance(result, BronzeCleanupService)
 
 
@@ -111,6 +113,7 @@ class TestBootstrapVacuumService:
         result = bootstrap_vacuum_service()
 
         from bioetl.application.services import VacuumService
+
         assert isinstance(result, VacuumService)
 
 
