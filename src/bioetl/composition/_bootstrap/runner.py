@@ -34,7 +34,7 @@ def bootstrap_pipeline_runner_service(
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
     """
-    # Bootstrap logger for the service (no run_id for service-level logging)
+    # Bootstrap logger for the service (run_id=None generates a new UUID)
     logger = bootstrap_logger(
         pipeline="pipeline_runner_service",
         run_id=None,
