@@ -92,12 +92,12 @@ class ActivityAggregator:
         >>> aggregator = ActivityAggregator()
         >>> values = [95.0, 100.0, 105.0, 110.0]
         >>> result = aggregator.aggregate_values(values)
-        >>> print(result)
+        >>> result
         102.5
 
         >>> value, uncertainty = aggregator.aggregate_with_uncertainty(values)
-        >>> print(f"{value:.1f} +/- {uncertainty:.1f}")
-        102.5 +/- 5.0
+        >>> f"{value:.1f} +/- {uncertainty:.1f}"
+        '102.5 +/- 5.0'
     """
 
     config: NormalizationConfig | None = None
@@ -184,8 +184,8 @@ class ActivityAggregator:
             >>> aggregator = ActivityAggregator()
             >>> values = [95.0, 100.0, 105.0, 110.0]
             >>> value, uncertainty = aggregator.aggregate_with_uncertainty(values, "mean")
-            >>> print(f"{value:.1f} +/- {uncertainty:.1f}")
-            102.5 +/- 6.5
+            >>> f"{value:.1f} +/- {uncertainty:.1f}"
+            '102.5 +/- 6.5'
         """
         if not values:
             raise ValueError("Cannot aggregate empty sequence")
@@ -254,8 +254,8 @@ class ActivityAggregator:
             ...     Concentration(0.15, ConcentrationUnit.MICROMOLAR),
             ... ]
             >>> result = aggregator.aggregate_concentrations(concs)
-            >>> print(f"{result.value:.1f} {result.unit.value}")
-            100.0 nM
+            >>> f"{result.value:.1f} {result.unit.value}"
+            '100.0 nM'
         """
         if not concentrations:
             raise ValueError("Cannot aggregate empty sequence of concentrations")
