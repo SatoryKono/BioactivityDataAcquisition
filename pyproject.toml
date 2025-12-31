@@ -72,6 +72,8 @@ tests = [
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
     "pytest-vcr>=1.0",
+    # Code formatting (required by architecture tests)
+    "black>=24.0",
 ]
 dev = [
     "pytest>=8.0",
@@ -125,6 +127,13 @@ docs = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# ============ UV ============
+[tool.uv]
+# Include tests dependencies when using uv run
+dev-dependencies = [
+    "bioetl[tests]",
+]
+
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -153,6 +162,7 @@ markers = [
     "performance: Performance regression tests (optional CI stage)",
     "architecture: Architecture tests (layer boundaries, contracts)",
     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
+    "smoke: Smoke tests (quick sanity checks for local development)",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

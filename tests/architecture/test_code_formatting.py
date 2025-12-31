@@ -7,14 +7,19 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from importlib.util import find_spec
 
 import pytest
+
+# Check if black is available
+_black_available = find_spec("black") is not None
 
 
 class TestCodeFormatting:
     """Tests ensuring code follows black formatting standards."""
 
     @pytest.mark.slow
+    @pytest.mark.skipif(not _black_available, reason="black not installed")
     def test_black_formatting_src(self) -> None:
         """Source code MUST be formatted with black.
 
@@ -33,6 +38,7 @@ class TestCodeFormatting:
         )
 
     @pytest.mark.slow
+    @pytest.mark.skipif(not _black_available, reason="black not installed")
     def test_black_formatting_tests(self) -> None:
         """Test code MUST be formatted with black.
 

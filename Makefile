@@ -70,6 +70,11 @@ test-fast: ## Run fast tests only (no slow markers, CI hypothesis profile)
 	@echo "$(BLUE)Running fast tests (parallel mode)...$(NC)"
 	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ tests/architecture/ -n auto --dist loadscope -m "not slow" --ignore=tests/benchmarks
 
+test-smoke: ## Run smoke tests (quick sanity check for local development)
+	@echo "$(BLUE)Running smoke tests...$(NC)"
+	$(RUN) pytest tests/smoke/ -v --tb=short
+	@echo "$(GREEN)Smoke tests passed!$(NC)"
+
 test-unit: ## Run only unit tests (parallel)
 	@echo "$(BLUE)Running unit tests...$(NC)"
 	$(RUN) pytest tests/unit/ -n auto --dist loadscope --ignore=tests/benchmarks
