@@ -27,13 +27,13 @@ class UnitConverter:
     Example:
         >>> converter = UnitConverter()
         >>> result = converter.convert(100.0, "nM", "µM")
-        >>> print(result)
+        >>> result
         0.1
 
         >>> conc = converter.to_concentration(100.0, "nM")
         >>> pchembl = converter.to_pchembl(conc)
-        >>> print(pchembl)
-        7.00
+        >>> str(pchembl)
+        '7.00'
     """
 
     def convert(
@@ -118,8 +118,8 @@ class UnitConverter:
             >>> converter = UnitConverter()
             >>> conc = Concentration(100.0, ConcentrationUnit.NANOMOLAR)
             >>> pchembl = converter.to_pchembl(conc)
-            >>> print(pchembl)
-            7.00
+            >>> str(pchembl)
+            '7.00'
         """
         return PChemblValue.from_concentration(concentration)
 
@@ -141,8 +141,8 @@ class UnitConverter:
             >>> converter = UnitConverter()
             >>> pchembl = PChemblValue(7.0)  # 100 nM
             >>> conc = converter.pchembl_to_concentration(pchembl)
-            >>> print(f"{conc.value:.1f} {conc.unit.value}")
-            100.0 nM
+            >>> f"{conc.value:.1f} {conc.unit.value}"
+            '100.0 nM'
         """
         if isinstance(target_unit, str):
             target_unit = ConcentrationUnit.from_string(target_unit)
@@ -214,8 +214,8 @@ class UnitConverter:
         Example:
             >>> converter = UnitConverter()
             >>> pchembl = converter.value_to_pchembl(100.0, "nM")
-            >>> print(pchembl)
-            7.00
+            >>> str(pchembl)
+            '7.00'
         """
         concentration = self.to_concentration(value, unit)
         return self.to_pchembl(concentration)
