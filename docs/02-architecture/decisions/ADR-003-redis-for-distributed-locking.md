@@ -38,3 +38,9 @@ Several options were considered for distributed locking, including database lock
 *   **New Dependency**: The project now has a hard dependency on a running Redis instance for all pipeline executions. This is managed via Docker Compose for local development.
 *   **Single Point of Failure**: If the Redis server goes down, no pipelines can start. This risk is mitigated by using a managed, high-availability Redis instance in production.
 *   **Clock Drift**: The TTL mechanism relies on a reasonably consistent sense of time between Redis and the workers. Severe clock drift could theoretically cause issues, but this is rare in modern cloud environments.
+
+## Related ADRs
+
+- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — **SUPERSEDES this ADR**, replaces Redis with MemoryLock
+- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker — complementary resilience pattern
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — lock release during shutdown
