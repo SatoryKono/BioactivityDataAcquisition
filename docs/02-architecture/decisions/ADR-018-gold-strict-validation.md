@@ -326,6 +326,8 @@ def test_non_strict_validation_warns_without_schema(caplog):
 
 ## Related ADRs
 
-- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture (Gold layer definition)
-- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (error classification)
-- [ADR-017](ADR-017-observability-architecture.md): Observability Architecture (logging integration)
+- [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet — Gold layer uses Delta Lake
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — Gold layer definition
+- [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses — Pydantic/Pandera for validation
+- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — error classification for validation errors
+- [ADR-017](ADR-017-observability-architecture.md): Observability Architecture — logging integration

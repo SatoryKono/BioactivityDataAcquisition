@@ -43,9 +43,11 @@
 **Философия**: "Прагматичная инженерия". Избегаем избыточной сложности (Over-engineering), архитектура должна ускорять вывод продукта на рынок (time-to-market). 
 **Паттерн**: Слоистая архитектура с инверсией зависимостей (Ports & Adapters). 
  
-### 1.1. Слои и Контракты 
-- **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система). 
-- **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты. 
+### 1.1. Слои и Контракты
+См. также [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer и [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline архитектуры.
+
+- **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
+- **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
 - **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O). 
  
 ### 1.1.1. Обеспечение Контрактов (Enforcement)
@@ -87,8 +89,10 @@ class MyAdapter:
 **Проверка:** Архитектурный тест `tests/architecture/` валидирует сигнатуры.
 
 ## 2. Поток Данных и Стратегия Medallion
-Пайплайны реализуются как направленные ациклические графы (**DAG**). 
- 
+Пайплайны реализуются как направленные ациклические графы (**DAG**).
+
+См. [ADR-002](02-architecture/decisions/ADR-002-medallion-architecture.md).
+
 ### 2.1. Архитектура Medallion 
 | Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность | 
 |---------|--------|-----------|----------------------|-----------------| 
@@ -117,6 +121,8 @@ class MyAdapter:
 - **SCD2**: Slowly Changing Dimensions Type 2 (историчность). Требует `scd_config` (ключи, valid_from/to).
 
 ### 2.1.3. Инфраструктура Delta Lake
+См. [ADR-001](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md).
+
 - **Engine**: Использовать `delta-rs` (Rust core) для Python-воркеров для производительности. 
 - **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1. 
 - **Maintenance**: Обязательный запуск `VACUUM` с `retention_period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения. **VACUUM MUST** запускаться еженедельно.
@@ -387,10 +393,12 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
  
 ## 4. Стандарты Кода и Тестирование 
  
-### 4.1. Стек и Матрица Решений 
-| Задача | Инструмент | Альтернатива | Критерий выбора | 
-|--------|------------|--------------|-----------------| 
-| **Оркестрация** | **PipelineRunner** | Prefect/Airflow | Используем собственный легковесный Runner. Внешние фреймворки при >5 DAG-ов. | 
+### 4.1. Стек и Матрица Решений
+См. также [ADR-004](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) для решения Pydantic vs Dataclasses.
+
+| Задача | Инструмент | Альтернатива | Критерий выбора |
+|--------|------------|--------------|-----------------|
+| **Оркестрация** | **PipelineRunner** | Prefect/Airflow | Используем собственный легковесный Runner. Внешние фреймворки при >5 DAG-ов. |
 | **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. | 
 | **HTTP Клиент** | **httpx** via `UnifiedHTTPClient` | requests | Поддержка `async`. Все адаптеры **MUST** использовать `UnifiedHTTPClient` (см. §4.1.1). **Legacy Wrappers**: Для библиотек без async поддержки (pubchempy) — `BaseSyncAdapter` с `ThreadPoolExecutor`. | 
 | **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |
