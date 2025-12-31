@@ -110,7 +110,7 @@ class VacuumService:
         ... )
         >>> tables = service.collect_tables(layer="all")
         >>> result = await service.vacuum_all(tables, retention_days=7)
-        >>> print(f"Removed {result.total_files_removed} files")
+        >>> logger.info("vacuum_complete", files_removed=result.total_files_removed)
     """
 
     lifecycle: MedallionLifecycleService

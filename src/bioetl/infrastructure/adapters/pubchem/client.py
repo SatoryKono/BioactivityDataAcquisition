@@ -277,7 +277,7 @@ class PubChemAdapter(BaseSyncAdapter):
 
         Example:
             >>> async for compound in adapter.fetch_as_models("compound", query="aspirin"):
-            ...     print(compound.cid, compound.canonical_smiles)
+            ...     logger.debug("compound_fetched", cid=compound.cid, smiles=compound.canonical_smiles)
 
         """
         model_class = PUBCHEM_DTO_MODELS.get(entity_type)

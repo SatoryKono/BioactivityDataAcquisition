@@ -56,7 +56,7 @@ class BronzeCleanupService:
     Example:
         >>> service = BronzeCleanupService(storage=storage, logger=logger)
         >>> result = await service.cleanup(retention_days=90)
-        >>> print(f"Removed {result.files_removed} files")
+        >>> logger.info("cleanup_complete", files_removed=result.files_removed)
     """
 
     storage: StoragePort
