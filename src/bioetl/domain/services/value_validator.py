@@ -87,33 +87,53 @@ class ValueValidator:
             >>> validator.validate_concentration(-1.0, "nM")
             (False, 'Concentration cannot be negative: -1.0')
         """
-        # Negative values are always invalid
+        # Check basic value constraints
+        basic_error = self._check_basic_concentration(value)
+        if basic_error:
+            return False, basic_error
+
+        # Check unit and range
+        return self._check_concentration_range(value, unit)
+
+    def _check_basic_concentration(self, value: float) -> str | None:
+        """Check basic concentration constraints (non-negative, non-zero)."""
         if value < 0:
-            return False, f"Concentration cannot be negative: {value}"
-
-        # Zero is technically valid but suspicious
+            return f"Concentration cannot be negative: {value}"
         if value == 0:
-            return False, "Concentration cannot be zero"
+            return "Concentration cannot be zero"
+        return None
 
-        # Normalize unit for lookup
+    def _check_concentration_range(
+        self,
+        value: float,
+        unit: str,
+    ) -> tuple[bool, str | None]:
+        """Check if concentration is within valid range for unit."""
         normalized_unit = self._normalize_unit(unit)
         if normalized_unit not in self._concentration_ranges:
             return False, f"Unknown concentration unit: {unit}"
 
         min_val, max_val = self._concentration_ranges[normalized_unit]
+        return self._check_value_in_range(value, min_val, max_val, unit)
 
+    def _check_value_in_range(
+        self,
+        value: float,
+        min_val: float,
+        max_val: float,
+        unit: str,
+    ) -> tuple[bool, str | None]:
+        """Check if value is within min/max range."""
         if value < min_val:
             return False, (
                 f"Concentration {value} {unit} below minimum "
                 f"({min_val} {unit})"
             )
-
         if value > max_val:
             return False, (
                 f"Concentration {value} {unit} exceeds maximum "
                 f"({max_val} {unit})"
             )
-
         return True, None
 
     def validate_pchembl(
@@ -138,27 +158,40 @@ class ValueValidator:
             >>> validator.validate_pchembl(-1.0)
             (False, 'pChEMBL value cannot be negative: -1.00')
         """
-        if value < PCHEMBL_MIN:
-            return False, f"pChEMBL value cannot be negative: {value:.2f}"
+        # Check absolute range
+        range_error = self._check_pchembl_absolute_range(value)
+        if range_error:
+            return False, range_error
 
-        if value > PCHEMBL_MAX:
-            return False, (
-                f"pChEMBL value {value:.2f} exceeds maximum {PCHEMBL_MAX:.2f}"
-            )
-
-        # In strict mode, check typical range
+        # Check strict mode typical range
         if self.strict:
-            if value < PCHEMBL_TYPICAL_MIN:
-                return False, (
-                    f"pChEMBL value {value:.2f} below typical minimum "
-                    f"{PCHEMBL_TYPICAL_MIN:.2f} (very weak activity)"
-                )
-            if value > PCHEMBL_TYPICAL_MAX:
-                return False, (
-                    f"pChEMBL value {value:.2f} exceeds typical maximum "
-                    f"{PCHEMBL_TYPICAL_MAX:.2f} (unusually potent)"
-                )
+            return self._check_pchembl_typical_range(value)
 
+        return True, None
+
+    def _check_pchembl_absolute_range(self, value: float) -> str | None:
+        """Check pChEMBL value against absolute physical limits."""
+        if value < PCHEMBL_MIN:
+            return f"pChEMBL value cannot be negative: {value:.2f}"
+        if value > PCHEMBL_MAX:
+            return f"pChEMBL value {value:.2f} exceeds maximum {PCHEMBL_MAX:.2f}"
+        return None
+
+    def _check_pchembl_typical_range(
+        self,
+        value: float,
+    ) -> tuple[bool, str | None]:
+        """Check pChEMBL value against typical drug-like range."""
+        if value < PCHEMBL_TYPICAL_MIN:
+            return False, (
+                f"pChEMBL value {value:.2f} below typical minimum "
+                f"{PCHEMBL_TYPICAL_MIN:.2f} (very weak activity)"
+            )
+        if value > PCHEMBL_TYPICAL_MAX:
+            return False, (
+                f"pChEMBL value {value:.2f} exceeds typical maximum "
+                f"{PCHEMBL_TYPICAL_MAX:.2f} (unusually potent)"
+            )
         return True, None
 
     def validate_activity_value(
@@ -184,14 +217,7 @@ class ValueValidator:
             >>> validator.validate_activity_value(100.0, "IC50", "nM")
             (True, None)
         """
-        # Parse activity type if string
-        parsed_type: ActivityType | str = activity_type
-        if isinstance(activity_type, str):
-            try:
-                parsed_type = ActivityType.from_string(activity_type)
-            except ValueError:
-                # Unknown activity type - allow with basic validation
-                parsed_type = activity_type
+        parsed_type = self._parse_activity_type(activity_type)
 
         # Basic numeric validation
         if value < 0:
@@ -201,14 +227,43 @@ class ValueValidator:
         if unit:
             return self.validate_concentration(value, unit)
 
+        # Type-specific validation
+        return self._validate_by_activity_type(value, parsed_type)
+
+    def _parse_activity_type(
+        self,
+        activity_type: ActivityType | str,
+    ) -> ActivityType | str:
+        """Parse activity type string to enum if possible."""
+        if isinstance(activity_type, ActivityType):
+            return activity_type
+        try:
+            return ActivityType.from_string(activity_type)
+        except ValueError:
+            return activity_type
+
+    def _validate_by_activity_type(
+        self,
+        value: float,
+        parsed_type: ActivityType | str,
+    ) -> tuple[bool, str | None]:
+        """Validate value based on specific activity type."""
         # For percentage values (e.g., % Inhibition)
-        if (
+        if self._is_percent_inhibition_type(parsed_type):
+            return self._validate_percent_value(value)
+        return True, None
+
+    def _is_percent_inhibition_type(self, parsed_type: ActivityType | str) -> bool:
+        """Check if activity type is percent inhibition."""
+        return (
             isinstance(parsed_type, ActivityType)
             and parsed_type == ActivityType.PERCENT_INHIBITION
-            and (value < 0 or value > 100)
-        ):
-            return False, f"Percent inhibition must be 0-100, got {value}"
+        )
 
+    def _validate_percent_value(self, value: float) -> tuple[bool, str | None]:
+        """Validate percentage value is within 0-100 range."""
+        if value < 0 or value > 100:
+            return False, f"Percent inhibition must be 0-100, got {value}"
         return True, None
 
     def is_potent(

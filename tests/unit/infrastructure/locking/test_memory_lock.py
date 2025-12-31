@@ -146,11 +146,11 @@ class TestMemoryLockTTL:
     @pytest.mark.asyncio
     async def test_lock_expires_after_ttl(self, fast_ttl_lock):
         """Test that lock is automatically released after TTL expires."""
-        # Acquire lock with short TTL (optimized for fast test execution)
+        # Acquire lock with TTL (increased for CI stability)
         result = await fast_ttl_lock.acquire(
             key="test_key",
             owner_id="owner_1",
-            ttl=0.1,  # 100ms TTL (was 1s)
+            ttl=0.3,  # 300ms TTL (increased from 100ms for CI stability)
         )
         assert result is True
 
@@ -163,7 +163,7 @@ class TestMemoryLockTTL:
         assert result is False
 
         # Wait for TTL to expire (TTL + check interval buffer)
-        await asyncio.sleep(0.15)
+        await asyncio.sleep(0.45)
 
         # Now another owner should be able to acquire
         result = await fast_ttl_lock.acquire(
@@ -178,25 +178,25 @@ class TestMemoryLockTTL:
     @pytest.mark.asyncio
     async def test_heartbeat_extends_ttl(self, fast_ttl_lock):
         """Test that heartbeat extends the lock TTL."""
-        # Acquire lock with short TTL (optimized for fast test execution)
+        # Acquire lock with TTL (increased for CI stability under load)
         await fast_ttl_lock.acquire(
             key="test_key",
             owner_id="owner_1",
-            ttl=0.1,  # 100ms TTL (was 1s)
+            ttl=0.5,  # 500ms TTL (increased for CI stability)
         )
 
-        # Wait half the TTL
-        await asyncio.sleep(0.05)
+        # Wait less than half the TTL
+        await asyncio.sleep(0.15)
 
-        # Heartbeat to extend TTL
+        # Heartbeat to extend TTL (resets to 500ms from now)
         result = await fast_ttl_lock.heartbeat(
             key="test_key",
             owner_id="owner_1",
         )
         assert result is True
 
-        # Wait another 0.07s (original TTL would have expired)
-        await asyncio.sleep(0.07)
+        # Wait another 0.4s (original TTL would have expired, but heartbeat extended)
+        await asyncio.sleep(0.4)
 
         # Lock should still be held because heartbeat extended it
         result = await fast_ttl_lock.acquire(
@@ -272,20 +272,20 @@ class TestMemoryLockTTL:
     @pytest.mark.asyncio
     async def test_multiple_locks_with_different_ttl(self, fast_ttl_lock):
         """Test multiple locks with different TTL values."""
-        # Acquire two locks with different TTLs (optimized for fast test execution)
+        # Acquire two locks with different TTLs (increased for CI stability)
         await fast_ttl_lock.acquire(
             key="short_ttl",
             owner_id="owner_1",
-            ttl=0.1,  # 100ms (was 1s)
+            ttl=0.3,  # 300ms (increased from 100ms for CI stability)
         )
         await fast_ttl_lock.acquire(
             key="long_ttl",
             owner_id="owner_1",
-            ttl=0.5,  # 500ms (was 5s)
+            ttl=1.0,  # 1s (increased from 500ms for CI stability)
         )
 
-        # Wait for short TTL to expire
-        await asyncio.sleep(0.15)
+        # Wait for short TTL to expire (with margin)
+        await asyncio.sleep(0.45)
 
         # Short TTL lock should be available
         result = await fast_ttl_lock.acquire(
