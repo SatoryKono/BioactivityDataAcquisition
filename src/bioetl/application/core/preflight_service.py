@@ -151,6 +151,7 @@ class _HealthAggregator:
         try:
             if hasattr(services.data_source, "check_health"):
                 health_result = await services.data_source.check_health()
+                assert health_result is not None  # check_health always returns result
                 status = health_result.status
                 duration = time.perf_counter() - start_time
 

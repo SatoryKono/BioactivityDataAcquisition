@@ -318,7 +318,7 @@ known-first-party = ["bioetl", "tests"]
 # E402: Allow imports after future imports and docstrings
 # RUF012: Mutable class attributes for parametrize test data are intentional
 # RUF059: Unused unpacked variables are common in test fixtures
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "RUF043", "I001", "C901", "E402", "RUF012", "RUF059", "T201"]
+"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "I001", "C901", "E402", "RUF012", "RUF059", "T201"]
 # Domain __init__.py uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/domain/__init__.py" = ["RUF022"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
