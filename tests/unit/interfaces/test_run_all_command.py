@@ -5,7 +5,7 @@ Tests for the universal run-all command that runs all pipelines for a provider.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
