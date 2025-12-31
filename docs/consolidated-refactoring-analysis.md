@@ -1,9 +1,9 @@
 # Консолидированный Анализ Планов Рефакторинга BioETL
 
-*Версия: 1.1 | Дата: 2025-12-31 | Протокол: Двойная Верификация (REQ-ARCH-040)*
+*Версия: 1.2 | Дата: 2025-12-31 | Протокол: Двойная Верификация (REQ-ARCH-040)*
 
-> **ОБНОВЛЕНИЕ 2025-12-31**: Подтверждено — MemoryLock полностью реализует TTL/heartbeat/fencing.
-> Redis НЕ требуется per ADR-010 (Local-Only Deployment).
+> **ОБНОВЛЕНИЕ 2025-12-31**: Добавлено 6 ложных утверждений из action_plan.md (OPS-001, ARCH-001, SOLID-001/002, DATA-001).
+> MemoryLock полностью реализует TTL/heartbeat/fencing. Redis НЕ требуется per ADR-010.
 
 ---
 
@@ -16,7 +16,7 @@
 4. `docs/reports/architecture-audit-2026-01-06.md` — Общий балл 8.21
 
 **Обнаружено:**
-- 12 ложных/неточных утверждений
+- 17 ложных/неточных утверждений (включая 5 из action_plan.md)
 - 6 противоречий между планами
 - 3 критических ошибки в датах документов
 
@@ -51,6 +51,11 @@
 | 10 | "Логи LockManager без run_id" | audit-2026-02-07 | Требует верификации | ⚠️ ПРОВЕРИТЬ |
 | 11 | "api_key как str — уязвимость" | audit.md v2.0 | CLI маскирует; env-чтение реализовано | ⚠️ НИЗКИЙ РИСК |
 | 12 | "MemoryMonitor возвращает нули" | - | Возвращает 50% (graceful degradation) | ❌ ЛОЖНО |
+| 13 | "MemoryLock TTL/heartbeat не соответствуют ADR-010" | action_plan.md | MemoryLock принимает TTL как параметр, не хардкодит | ❌ ЛОЖНО |
+| 14 | "Content hash не исключает _dq_* поля" | action_plan.md | `META_FIELDS` содержит `_dq_warn`, `_dq_error` | ❌ ЛОЖНО |
+| 15 | "Domain сервисы требуют декомпозиции" | action_plan.md | `NormalizationService` — Facade, когезивные сервисы | ❌ ЛОЖНО |
+| 16 | "ValueValidator/ActivityAggregator без стратегий" | action_plan.md | Используют strategy dict и extracted methods | ❌ ЛОЖНО |
+| 17 | "Bronze формат не зафиксирован на JSONL+zstd" | action_plan.md | `bronze_writer.py` явно использует `.jsonl.zst` | ❌ ЛОЖНО |
 
 ---
 
