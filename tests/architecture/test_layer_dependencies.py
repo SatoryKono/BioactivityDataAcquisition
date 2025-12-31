@@ -52,6 +52,8 @@ def _check_imports_in_file(file_path: Path, disallowed: set[str]) -> list[str]:
         List of error messages for any disallowed imports found
     """
     errors = []
+    if not file_path.exists():
+        return errors  # Skip non-existent files (may be stale cache references)
     with file_path.open(encoding="utf-8") as f:
         content = f.read()
 
