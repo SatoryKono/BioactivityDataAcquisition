@@ -67,8 +67,12 @@ class TestRelationOperator:
     def test_from_string_greater_than(self) -> None:
         """Test parsing greater than operators."""
         assert RelationOperator.from_string(">") == RelationOperator.GREATER_THAN
-        assert RelationOperator.from_string(">=") == RelationOperator.GREATER_THAN_OR_EQUAL
-        assert RelationOperator.from_string("=>") == RelationOperator.GREATER_THAN_OR_EQUAL
+        assert (
+            RelationOperator.from_string(">=") == RelationOperator.GREATER_THAN_OR_EQUAL
+        )
+        assert (
+            RelationOperator.from_string("=>") == RelationOperator.GREATER_THAN_OR_EQUAL
+        )
 
     def test_from_string_approximately(self) -> None:
         """Test parsing approximately operators."""
@@ -225,7 +229,9 @@ class TestActivityValue:
 
     def test_creation_with_relation(self) -> None:
         """Test creation with custom relation."""
-        av = ActivityValue(value=10.0, unit="μM", relation=RelationOperator.GREATER_THAN)
+        av = ActivityValue(
+            value=10.0, unit="μM", relation=RelationOperator.GREATER_THAN
+        )
         assert av.value == 10.0
         assert av.unit == "μM"
         assert av.relation == RelationOperator.GREATER_THAN
@@ -248,14 +254,18 @@ class TestActivityValue:
     def test_is_exact_property(self) -> None:
         """Test is_exact property."""
         exact = ActivityValue(value=100.0, unit="nM", relation=RelationOperator.EQUAL)
-        bound = ActivityValue(value=100.0, unit="nM", relation=RelationOperator.GREATER_THAN)
+        bound = ActivityValue(
+            value=100.0, unit="nM", relation=RelationOperator.GREATER_THAN
+        )
         assert exact.is_exact is True
         assert bound.is_exact is False
 
     def test_is_bounded_property(self) -> None:
         """Test is_bounded property."""
         exact = ActivityValue(value=100.0, unit="nM", relation=RelationOperator.EQUAL)
-        bound = ActivityValue(value=100.0, unit="nM", relation=RelationOperator.LESS_THAN)
+        bound = ActivityValue(
+            value=100.0, unit="nM", relation=RelationOperator.LESS_THAN
+        )
         assert exact.is_bounded is False
         assert bound.is_bounded is True
 
@@ -287,6 +297,7 @@ class TestActivityValue:
         conc = av.to_concentration()
         assert conc.value == 100.0
         from bioetl.domain.value_objects import ConcentrationUnit
+
         assert conc.unit == ConcentrationUnit.NANOMOLAR
 
     def test_to_concentration_invalid_unit(self) -> None:
@@ -317,7 +328,9 @@ class TestActivityValue:
 
     def test_str(self) -> None:
         """Test string representation."""
-        av = ActivityValue(value=100.0, unit="nM", relation=RelationOperator.GREATER_THAN)
+        av = ActivityValue(
+            value=100.0, unit="nM", relation=RelationOperator.GREATER_THAN
+        )
         assert str(av) == "> 100.0 nM"
 
     def test_can_be_used_in_set(self) -> None:

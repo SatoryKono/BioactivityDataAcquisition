@@ -239,12 +239,17 @@ class TestRunCommandAdvanced:
         from bioetl.application.services import PipelineNotFoundError
 
         # PipelineNotFoundError is caught at the CLI level when asyncio.run raises it
-        mock_asyncio_run.side_effect = PipelineNotFoundError("chembl_activity", "Invalid config")
+        mock_asyncio_run.side_effect = PipelineNotFoundError(
+            "chembl_activity", "Invalid config"
+        )
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
         assert result.exit_code == ExitCode.CONFIG_ERROR
-        assert "Pipeline not found" in result.output or "not found" in result.output.lower()
+        assert (
+            "Pipeline not found" in result.output
+            or "not found" in result.output.lower()
+        )
 
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_bootstrap_file_not_found(self, mock_asyncio_run, runner):
@@ -265,7 +270,9 @@ class TestRunCommandAdvanced:
 
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
-    def test_run_command_bootstrap_generic_error(self, mock_asyncio_run, mock_get_service, runner):
+    def test_run_command_bootstrap_generic_error(
+        self, mock_asyncio_run, mock_get_service, runner
+    ):
         """Test run command handles generic Exception during execution."""
         mock_get_service.side_effect = RuntimeError("Unexpected error")
 

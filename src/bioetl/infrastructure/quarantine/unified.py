@@ -182,7 +182,9 @@ class UnifiedQuarantine:
         """
         return purge_records(self.base_path, None, pipeline, older_than_days, now=now)
 
-    def update_status(self, payload_hash: str, new_status: QuarantineRecordStatus) -> bool:
+    def update_status(
+        self, payload_hash: str, new_status: QuarantineRecordStatus
+    ) -> bool:
         """Update DQ status for a quarantined record."""
         try:
             dt = DeltaTable(self.base_path)

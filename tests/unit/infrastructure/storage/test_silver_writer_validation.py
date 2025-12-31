@@ -67,9 +67,7 @@ class TestSilverWriterSilverValidatorInit:
         """Test SilverWriter creates NoOpSilverValidator when not provided."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger
-        )
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         assert isinstance(writer._silver_validator, NoOpSilverValidator)
 
     def test_init_with_custom_validator(self, noop_logger):
@@ -81,7 +79,6 @@ class TestSilverWriterSilverValidatorInit:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=custom_validator,
-
         )
         assert writer._silver_validator is custom_validator
 
@@ -102,7 +99,6 @@ class TestSilverWriterSilverValidatorInit:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-
         )
         assert writer._silver_validator is validator
 
@@ -119,7 +115,6 @@ class TestSilverWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=NoOpSilverValidator(),
-
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise
@@ -142,7 +137,6 @@ class TestSilverWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise
@@ -169,7 +163,6 @@ class TestSilverWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]  # Negative value fails
 
@@ -201,7 +194,6 @@ class TestSilverWriterValidateSilverPandera:
             base_path="/tmp/silver",
             logger=mock_logger,
             silver_validator=validator,
-
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
 
@@ -236,7 +228,6 @@ class TestSilverWriterValidateSilverPandera:
             logger=NoOpLogger(),
             silver_validator=validator,
             metrics=mock_metrics,
-
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
 
@@ -291,7 +282,6 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
             base_path="/tmp/silver",
             logger=noop_logger,
             silver_validator=validator,
-
         )
 
         with pytest.raises(SchemaViolationError) as exc_info:
@@ -352,7 +342,6 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
                 base_path="/tmp/silver",
                 logger=noop_logger,
                 silver_validator=validator,
-
             )
 
             # Should not raise
@@ -401,7 +390,6 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
             writer = SilverWriter(
                 base_path="/tmp/silver",
                 logger=noop_logger,
-
             )
 
             # Should not raise

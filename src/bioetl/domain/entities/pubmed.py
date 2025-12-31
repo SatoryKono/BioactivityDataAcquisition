@@ -48,42 +48,24 @@ class ArticleRecord(BaseModel):
     doi: str | None = PydanticField(
         default=None, description="Digital Object Identifier"
     )
-    pmc_id: str | None = PydanticField(
-        default=None, description="PubMed Central ID"
-    )
+    pmc_id: str | None = PydanticField(default=None, description="PubMed Central ID")
 
     # Title and abstract
-    title: str | None = PydanticField(
-        default=None, description="Article title"
-    )
-    abstract: str | None = PydanticField(
-        default=None, description="Abstract text"
-    )
+    title: str | None = PydanticField(default=None, description="Article title")
+    abstract: str | None = PydanticField(default=None, description="Abstract text")
 
     # Journal information
-    journal: str | None = PydanticField(
-        default=None, description="Full journal title"
-    )
+    journal: str | None = PydanticField(default=None, description="Full journal title")
     journal_abbrev: str | None = PydanticField(
         default=None, description="Journal abbreviation (ISO)"
     )
-    issn: str | None = PydanticField(
-        default=None, description="ISSN"
-    )
-    volume: str | None = PydanticField(
-        default=None, description="Volume number"
-    )
-    issue: str | None = PydanticField(
-        default=None, description="Issue number"
-    )
-    pages: str | None = PydanticField(
-        default=None, description="Page numbers"
-    )
+    issn: str | None = PydanticField(default=None, description="ISSN")
+    volume: str | None = PydanticField(default=None, description="Volume number")
+    issue: str | None = PydanticField(default=None, description="Issue number")
+    pages: str | None = PydanticField(default=None, description="Page numbers")
 
     # Authors (list of formatted names)
-    authors: list[str] = PydanticField(
-        default_factory=list, description="Author names"
-    )
+    authors: list[str] = PydanticField(default_factory=list, description="Author names")
 
     # Dates (ISO format: YYYY-MM-DD or partial)
     pub_date: str | None = PydanticField(
@@ -92,15 +74,9 @@ class ArticleRecord(BaseModel):
     pub_year: int | None = PydanticField(
         default=None, description="Publication year (for partitioning)"
     )
-    accepted_date: str | None = PydanticField(
-        default=None, description="Date accepted"
-    )
-    received_date: str | None = PydanticField(
-        default=None, description="Date received"
-    )
-    revised_date: str | None = PydanticField(
-        default=None, description="Date revised"
-    )
+    accepted_date: str | None = PydanticField(default=None, description="Date accepted")
+    received_date: str | None = PydanticField(default=None, description="Date received")
+    revised_date: str | None = PydanticField(default=None, description="Date revised")
     epub_date: str | None = PydanticField(
         default=None, description="Electronic publication date"
     )
@@ -109,9 +85,7 @@ class ArticleRecord(BaseModel):
     publication_types: list[str] = PydanticField(
         default_factory=list, description="Publication types"
     )
-    keywords: list[str] = PydanticField(
-        default_factory=list, description="Keywords"
-    )
+    keywords: list[str] = PydanticField(default_factory=list, description="Keywords")
     mesh_terms: list[str] = PydanticField(
         default_factory=list, description="MeSH terms"
     )

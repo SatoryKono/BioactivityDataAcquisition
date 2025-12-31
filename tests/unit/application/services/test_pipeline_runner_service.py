@@ -345,9 +345,7 @@ class TestPipelineRunnerServiceRun:
         mock_metrics_extractor.extract_metrics.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_pipeline_failure(
-        self, service, mock_runner, mock_metrics_extractor
-    ):
+    async def test_pipeline_failure(self, service, mock_runner, mock_metrics_extractor):
         """Test exception handling."""
         mock_runner.run.side_effect = ValueError("Invalid configuration")
 

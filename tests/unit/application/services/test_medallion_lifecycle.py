@@ -421,7 +421,11 @@ class TestMedallionLifecycleServicePrepareForRun:
 
     @pytest.mark.asyncio
     async def test_prepare_for_incremental_uses_never_policy(
-        self, lifecycle_service, mock_storage, pipeline_config, runtime_config_incremental
+        self,
+        lifecycle_service,
+        mock_storage,
+        pipeline_config,
+        runtime_config_incremental,
     ):
         """prepare_for_run uses NEVER policy for incremental runs."""
         result = await lifecycle_service.prepare_for_run(
@@ -471,7 +475,9 @@ class TestMedallionLifecycleServicePrepareForRun:
 
         await service.prepare_for_run(config=config, runtime=runtime_config_rebuild)
 
-        mock_storage.clear_gold.assert_called_once_with("chembl.activity", dry_run=False)
+        mock_storage.clear_gold.assert_called_once_with(
+            "chembl.activity", dry_run=False
+        )
 
     @pytest.mark.asyncio
     async def test_prepare_uses_configured_gold_table(
@@ -492,7 +498,9 @@ class TestMedallionLifecycleServicePrepareForRun:
 
         await service.prepare_for_run(config=config, runtime=runtime_config_rebuild)
 
-        mock_storage.clear_gold.assert_called_once_with("custom_gold_table", dry_run=False)
+        mock_storage.clear_gold.assert_called_once_with(
+            "custom_gold_table", dry_run=False
+        )
 
     @pytest.mark.asyncio
     async def test_prepare_passes_dry_run_flag(
@@ -564,7 +572,11 @@ class TestMedallionLifecycleServiceFinalizeRun:
 
     @pytest.mark.asyncio
     async def test_finalize_skipped_when_vacuum_disabled(
-        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_disabled
+        self,
+        mock_storage_with_vacuum,
+        mock_logger,
+        pipeline_config,
+        runtime_config_vacuum_disabled,
     ):
         """finalize_run skips vacuum when disabled."""
         service = MedallionLifecycleService(
@@ -605,7 +617,11 @@ class TestMedallionLifecycleServiceFinalizeRun:
 
     @pytest.mark.asyncio
     async def test_finalize_vacuums_both_tables(
-        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_enabled
+        self,
+        mock_storage_with_vacuum,
+        mock_logger,
+        pipeline_config,
+        runtime_config_vacuum_enabled,
     ):
         """finalize_run vacuums both Silver and Gold tables."""
         service = MedallionLifecycleService(
@@ -623,7 +639,11 @@ class TestMedallionLifecycleServiceFinalizeRun:
 
     @pytest.mark.asyncio
     async def test_finalize_handles_vacuum_error_gracefully(
-        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_enabled
+        self,
+        mock_storage_with_vacuum,
+        mock_logger,
+        pipeline_config,
+        runtime_config_vacuum_enabled,
     ):
         """finalize_run handles vacuum errors gracefully."""
         mock_storage_with_vacuum.vacuum.side_effect = RuntimeError("Vacuum failed")
@@ -642,7 +662,11 @@ class TestMedallionLifecycleServiceFinalizeRun:
 
     @pytest.mark.asyncio
     async def test_finalize_emits_metrics(
-        self, mock_storage_with_vacuum, mock_logger, pipeline_config, runtime_config_vacuum_enabled
+        self,
+        mock_storage_with_vacuum,
+        mock_logger,
+        pipeline_config,
+        runtime_config_vacuum_enabled,
     ):
         """finalize_run emits metrics when provided."""
         mock_metrics = MagicMock()

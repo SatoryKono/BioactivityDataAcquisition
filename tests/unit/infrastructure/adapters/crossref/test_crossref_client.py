@@ -38,7 +38,9 @@ async def test_fetch_by_doi_success(adapter, mock_http_client):
     """Test successful fetch by DOI."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {"message": {"items": [{"title": ["Test Title"]}]}}
+    mock_response.json.return_value = {
+        "message": {"items": [{"title": ["Test Title"]}]}
+    }
     mock_http_client.get.return_value = mock_response
 
     results = [
@@ -170,12 +172,15 @@ async def test_health_check_returns_degraded_on_slow_response(
 
     mock_monotonic = MagicMock(side_effect=mock_monotonic_func)
 
-    with patch(
-        "bioetl.infrastructure.adapters.crossref.client.time.monotonic",
-        new=mock_monotonic,
-    ), patch(
-        "bioetl.infrastructure.adapters.health_check_mixin.time.monotonic",
-        new=mock_monotonic,
+    with (
+        patch(
+            "bioetl.infrastructure.adapters.crossref.client.time.monotonic",
+            new=mock_monotonic,
+        ),
+        patch(
+            "bioetl.infrastructure.adapters.health_check_mixin.time.monotonic",
+            new=mock_monotonic,
+        ),
     ):
         result = await adapter.health_check()
 

@@ -436,7 +436,9 @@ class ServicesBuilder:
         )
 
         # Create Gold validator
-        gold_validator = PanderaGoldValidator(gold_schema, strict=strict_gold_validation)
+        gold_validator = PanderaGoldValidator(
+            gold_schema, strict=strict_gold_validation
+        )
 
         return BatchExecutor(
             services=pipeline.services,

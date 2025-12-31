@@ -87,7 +87,10 @@ def test_normalize_doi():
 
 def test_extract_title(sample_publication):
     """Test title extraction using domain function."""
-    assert extract_first_string(sample_publication.get("title", [])) == "Test Article Title"
+    assert (
+        extract_first_string(sample_publication.get("title", []))
+        == "Test Article Title"
+    )
     assert extract_first_string([]) is None
 
 
@@ -163,7 +166,9 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
 
 
 @pytest.mark.asyncio
-async def test_transform_minimal_record(transformer, pipeline_context, minimal_publication):
+async def test_transform_minimal_record(
+    transformer, pipeline_context, minimal_publication
+):
     """Test transforming minimal work record to SilverRecord."""
     result = await transformer.transform(pipeline_context, minimal_publication, index=1)
 

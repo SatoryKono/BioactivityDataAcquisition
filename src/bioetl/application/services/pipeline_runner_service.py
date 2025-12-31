@@ -148,9 +148,7 @@ class PipelineNotFoundError(ValueError):
     def __init__(self, pipeline_name: str, available: list[str]) -> None:
         self.pipeline_name = pipeline_name
         self.available = available
-        super().__init__(
-            f"Unknown pipeline: {pipeline_name}. Available: {available}"
-        )
+        super().__init__(f"Unknown pipeline: {pipeline_name}. Available: {available}")
 
 
 @dataclass
@@ -259,7 +257,9 @@ class PipelineRunnerService:
             )
 
         # Build context and create runner
-        context = self._build_context(pipeline_name, effective_run_id, effective_options)
+        context = self._build_context(
+            pipeline_name, effective_run_id, effective_options
+        )
         runner = self.runner_factory.create(context)
 
         # Execute pipeline
