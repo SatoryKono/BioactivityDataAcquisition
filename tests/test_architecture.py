@@ -534,11 +534,13 @@ def test_no_unsafe_functions(src_dir: Path):
 
 
 def test_env_var_centralization(src_dir: Path):
-    """os.getenv only in config.py and encoders.py."""
+    """os.getenv only in config.py, encoders.py, and pii_hasher.py."""
     # Files allowed to use os.getenv/environ
     allowed_files = {
         src_dir / "bioetl" / "infrastructure" / "config.py",
         src_dir / "bioetl" / "infrastructure" / "serialization" / "encoders.py",
+        # pii_hasher.py reads BIOETL_PII_SALT_* for security-critical salt
+        src_dir / "bioetl" / "infrastructure" / "security" / "pii_hasher.py",
     }
     allowed_resolved = {f.resolve() for f in allowed_files}
     violations = []
