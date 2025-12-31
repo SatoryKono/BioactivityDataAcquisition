@@ -46,7 +46,7 @@ class CheckpointService:
         >>> service = CheckpointService(checkpoint_port=port, logger=logger)
         >>> checkpoints = await service.list_checkpoints()
         >>> for cp in checkpoints:
-        ...     print(f"{cp.pipeline_name}: {cp.metadata}")
+        ...     logger.info("checkpoint", pipeline=cp.pipeline_name, metadata=cp.metadata)
     """
 
     checkpoint_port: CheckpointPort

@@ -286,7 +286,7 @@ class BatchExecutor:
         Example:
             >>> executor = BatchExecutor(...)
             >>> result = await executor.process(records, start_index=0)
-            >>> print(f"Processed: {result.silver_count} to Silver")
+            >>> logger.info("batch_processed", silver_count=result.silver_count)
 
         """
         await self._process_batch(records, start_index)
