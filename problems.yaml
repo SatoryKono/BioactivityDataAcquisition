@@ -1,0 +1,196 @@
+problem:
+  id: "ARCH-001"
+  category: "DEBT"
+  title: "Dead Code: BaseDeltaWriter"
+  description: |
+    The class `BaseDeltaWriter` in `src/bioetl/infrastructure/storage/base_delta_writer.py` is defined but never instantiated or inherited from in the codebase. Both `SilverWriter` and `GoldWriter` use `DeltaTable` directly or independent implementations.
+
+  validation:
+    commit_hash: "HEAD"
+    validated_at: "2025-12-30"
+
+    code_evidence:
+      commands_executed:
+        - command: "grep -rn 'BaseDeltaWriter' src/"
+          output: "Only definition found"
+      files_examined:
+        - path: "src/bioetl/infrastructure/storage/base_delta_writer.py"
+          lines: "1-134"
+          finding: "Class defined but unused"
+      code_verdict: "CONFIRMED"
+
+    doc_evidence:
+      rules_md:
+        section: "N/A"
+        states: "N/A"
+        code_matches: false
+      doc_verdict: "CONFIRMED"
+
+    test_evidence:
+      unit_tests:
+        path: "tests/"
+        count: 0
+        coverage: "0%"
+      test_verdict: "CONFIRMED"
+
+    triangulation:
+      code_weight: 40
+      doc_weight: 30
+      test_weight: 30
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+      confidence: "HIGH"
+
+  impact:
+    severity: "Low"
+    affected_components:
+      - "infrastructure/storage"
+    risk_if_unfixed: |
+      Confusion for developers, maintenance burden of dead code.
+
+  assessment:
+    complexity: 1
+    effort_days: 0.1
+    priority: "P3"
+    dependencies: []
+
+  resolution:
+    approach: |
+      Delete the file.
+    steps:
+      - step: "Delete src/bioetl/infrastructure/storage/base_delta_writer.py"
+        verification: "Run tests to ensure no regressions"
+    breaking_changes: false
+    migration_required: false
+    tests_to_add: []
+
+problem:
+  id: "ARCH-002"
+  category: "TEST"
+  title: "Insufficient Code Coverage"
+  description: |
+    Project coverage is 77.00%, which is below the strict hard gate of 85% defined in `pyproject.toml`. Major gaps in `interfaces/cli` (0%) and `infrastructure/storage` (~70-76%).
+
+  validation:
+    commit_hash: "HEAD"
+    validated_at: "2025-12-30"
+
+    code_evidence:
+      commands_executed:
+        - command: "pytest --cov"
+          output: "77.00%"
+      files_examined:
+        - path: "src/bioetl/interfaces/cli/"
+          finding: "0% coverage"
+      code_verdict: "CONFIRMED"
+
+    doc_evidence:
+      rules_md:
+        section: "§4.2"
+        states: ">80% (Conflict: pyproject says 85%)"
+        code_matches: false
+      doc_verdict: "CONFIRMED"
+
+    test_evidence:
+      unit_tests:
+        path: "tests/"
+        coverage: "77%"
+      test_verdict: "CONFIRMED"
+
+    triangulation:
+      code_weight: 40
+      doc_weight: 30
+      test_weight: 30
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+      confidence: "HIGH"
+
+  impact:
+    severity: "High"
+    affected_components:
+      - "CLI"
+      - "Storage Writers"
+    risk_if_unfixed: |
+      CI failures, undetected regressions in critical storage logic.
+
+  assessment:
+    complexity: 5
+    effort_days: 3
+    priority: "P1"
+    dependencies: []
+
+  resolution:
+    approach: |
+      Add unit tests for CLI commands and Storage Writers.
+    steps:
+      - step: "Write tests for CLI commands"
+        verification: "Coverage > 85%"
+      - step: "Write tests for Bronze/Silver/Gold writers"
+        verification: "Coverage > 85%"
+    breaking_changes: false
+    migration_required: false
+    tests_to_add:
+      - "tests/unit/interfaces/cli/test_commands.py"
+      - "tests/unit/infrastructure/storage/test_writers.py"
+
+problem:
+  id: "ARCH-003"
+  category: "ARCH"
+  title: "Missing 'dataset' field in Logging"
+  description: |
+    `RULES.md` §3.2.1 specifies `dataset` as a SHOULD field in the log schema, but `UnifiedLogger` does not implement it, preventing standardization of dataset-level observability.
+
+  validation:
+    commit_hash: "HEAD"
+    validated_at: "2025-12-30"
+
+    code_evidence:
+      commands_executed:
+        - command: "grep 'dataset' unified_logger.py"
+          output: "None"
+      files_examined:
+        - path: "src/bioetl/infrastructure/observability/unified_logger.py"
+          finding: "Missing argument"
+      code_verdict: "CONFIRMED"
+
+    doc_evidence:
+      rules_md:
+        section: "§3.2.1"
+        states: "dataset | SHOULD"
+        code_matches: false
+      doc_verdict: "CONFIRMED"
+
+    test_evidence:
+      test_verdict: "CONFIRMED"
+
+    triangulation:
+      code_weight: 40
+      doc_weight: 30
+      test_weight: 30
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+      confidence: "HIGH"
+
+  impact:
+    severity: "Low"
+    affected_components:
+      - "Observability"
+    risk_if_unfixed: |
+      Inconsistent logging context for dataset-specific operations.
+
+  assessment:
+    complexity: 2
+    effort_days: 0.5
+    priority: "P2"
+    dependencies: []
+
+  resolution:
+    approach: |
+      Update `UnifiedLogger` to accept `dataset` in `log` method and bind it if present.
+    steps:
+      - step: "Modify UnifiedLogger.log"
+        verification: "Test logs contain dataset"
+    breaking_changes: false
+    migration_required: false
+    tests_to_add:
+      - "tests/unit/infrastructure/observability/test_unified_logger.py"

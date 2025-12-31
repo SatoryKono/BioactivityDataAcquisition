@@ -1,0 +1,19 @@
+# BioETL Audit Scores
+Date: 2025-12-30
+
+## Scores by Category (0-10)
+
+| Category | Score | Justification |
+|----------|-------|---------------|
+| 1. Architecture Layers | 10.0 | Perfect isolation verified by tests. |
+| 2. Modularity | 9.0 | High cohesion, factories used, but some factories are large. |
+| 3. Domain Model | 9.5 | Pure domain, rich entities, frozen dataclasses. |
+| 4. Testing | 7.0 | Architecture tests are great, but Unit coverage (77%) is failing. |
+| 5. Error Handling | 9.0 | Typed exceptions, Circuit Breaker, standard logging. |
+| 6. Observability | 8.5 | UnifiedLogger, Prometheus, but missing `dataset` field. |
+| 7. Performance | 9.0 | Medallion architecture, Delta Lake, but no async I/O in some parts (CLI). |
+| 8. Security | 9.5 | No secrets in code, PII hashing impl exists (verified by test). |
+| 9. Documentation | 9.0 | RULES.md, ADRs, but some mismatch in coverage target. |
+| 10. Technical Debt | 8.0 | Dead code (`BaseDeltaWriter`) and coverage gap. |
+
+**Overall Score**: 8.85 / 10
