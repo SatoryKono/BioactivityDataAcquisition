@@ -132,13 +132,15 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Base options without parallelization (compatible with pytest-benchmark)
 # For parallel execution, use: pytest -n auto --dist loadscope
-# Benchmark tests are excluded by default - run with: pytest -m benchmark
+# Benchmark and E2E tests are excluded by default
+# Run benchmarks with: pytest -m benchmark
+# Run E2E with: make test-e2e (requires Docker)
 addopts = [
     "-ra",
     "-q",
     "--strict-markers",
     "--strict-config",
-    "-m", "not benchmark",
+    "-m", "not benchmark and not e2e",
 ]
 # required_plugins check moved to CI for compatibility
 markers = [
