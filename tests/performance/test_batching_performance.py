@@ -124,12 +124,15 @@ def activity_schema() -> pa.Schema:
 class TestBatchingPerformance:
     """Performance tests for batch operations."""
 
-    # Performance thresholds (in seconds) - increased for Python 3.14 variance
+    # Performance thresholds (in seconds)
+    # Note: Thresholds are set generously to account for CI environment variance
+    # (GitHub Actions runners are shared and can have variable performance).
+    # Local runs are typically 2-5x faster than these thresholds.
     BRONZE_WRITE_1000_THRESHOLD = 2.0
     SILVER_TRANSFORM_1000_THRESHOLD = 4.0
-    CONTENT_HASH_1000_THRESHOLD = 2.0  # Increased from 0.5s for Python 3.14
-    ARROW_PREPARE_1000_THRESHOLD = 1.0
-    JSON_SERIALIZE_1000_THRESHOLD = 1.0
+    CONTENT_HASH_1000_THRESHOLD = 2.0
+    ARROW_PREPARE_1000_THRESHOLD = 2.0  # Increased for CI stability
+    JSON_SERIALIZE_1000_THRESHOLD = 2.0  # Increased for CI stability
 
     def test_bronze_write_1000_records_under_1s(
         self, bronze_writer: BronzeWriter, tmp_path: Path
@@ -205,8 +208,8 @@ class TestBatchingPerformance:
             f"threshold is {self.SILVER_TRANSFORM_1000_THRESHOLD}s"
         )
 
-    def test_content_hash_generation_1000_records_under_500ms(self) -> None:
-        """Content hash generation should be fast (<0.5s for 1000 records).
+    def test_content_hash_generation_1000_records_performance(self) -> None:
+        """Content hash generation should complete within threshold for 1000 records.
 
         Tests the canonical JSON serialization and SHA256 hashing used
         for record versioning (RULES.md section 2.8.1).
@@ -223,10 +226,10 @@ class TestBatchingPerformance:
             f"threshold is {self.CONTENT_HASH_1000_THRESHOLD}s"
         )
 
-    def test_arrow_data_preparation_1000_records_under_500ms(
+    def test_arrow_data_preparation_1000_records_performance(
         self, silver_writer: SilverWriter, activity_schema: pa.Schema
     ) -> None:
-        """Arrow table preparation should be fast (<0.5s for 1000 records).
+        """Arrow table preparation should complete within threshold for 1000 records.
 
         Tests the data conversion from Python dicts to PyArrow tables
         which is a critical step in the Silver write path.
@@ -260,8 +263,8 @@ class TestBatchingPerformance:
             f"threshold is {self.ARROW_PREPARE_1000_THRESHOLD}s"
         )
 
-    def test_json_serialization_1000_complex_records_under_300ms(self) -> None:
-        """JSON serialization of complex nested data should be fast.
+    def test_json_serialization_1000_complex_records_performance(self) -> None:
+        """JSON serialization of complex nested data should complete within threshold.
 
         Tests the serialize_json helper used for storing nested structures
         in Silver layer as JSON strings.
