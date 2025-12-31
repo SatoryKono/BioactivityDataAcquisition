@@ -4,6 +4,9 @@ These tests use property-based testing to verify that port implementations
 maintain their contracts across a wide range of inputs and edge cases.
 
 Implements the refactoring plan: "Расширение контрактных тестов портов".
+
+Marked as slow tests because Hypothesis property tests generate many examples
+and can take 1-2 seconds each.
 """
 
 from __future__ import annotations
@@ -18,22 +21,8 @@ from hypothesis import given, settings, strategies as st
 
 from bioetl.domain import ports
 
-# Python 3.14 has compatibility issues with Hypothesis lambda reflection
-# Skip entire module on Python 3.14
-PYTHON_314 = sys.version_info >= (3, 14)
-pytestmark = pytest.mark.skipif(
-    PYTHON_314,
-    reason="Hypothesis 6.x has lambda reflection issues on Python 3.14",
-)
-
-
-def run_async(coro):
-    """Run async coroutine in a new event loop (Python 3.14 compatible)."""
-    loop = asyncio.new_event_loop()
-    try:
-        return loop.run_until_complete(coro)
-    finally:
-        loop.close()
+# Mark all tests in this module as slow and hypothesis-based
+pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
 
 # ============================================================================
