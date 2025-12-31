@@ -460,7 +460,7 @@ class LegacyAdapter(BaseSyncAdapter):
 ```
 
 ### 4.2. Политика Тестирования
-**Цель покрытия:** >80% line coverage (проверяется в CI через `--cov-fail-under=80`).
+**Цель покрытия:** ≥85% line coverage (проверяется в CI через `--cov-fail-under=85`).
 
 - **Unit**: Только доменная логика. In-memory fakes предпочтительны, MagicMock допустим.
 - **Integration**:
