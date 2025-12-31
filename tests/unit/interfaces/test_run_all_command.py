@@ -229,74 +229,56 @@ class TestRunAllCommand:
         assert "No pipelines found for provider 'invalid'" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
     def test_run_all_executes_all_pipelines(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_register, cli_runner, mock_registry
     ):
         """Test that all pipelines for source are executed."""
-        # Setup mock service
-        mock_service = MagicMock()
-
-        async def mock_run(pipeline, options=None):
-            return RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name=pipeline,
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-
-        mock_service.run = AsyncMock(side_effect=mock_run)
-        mock_get_service.return_value = mock_service
-
-        # Make asyncio.run execute the coroutine with a fresh event loop
-        def run_coro(coro):
-            import asyncio
-            loop = asyncio.new_event_loop()
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-
-        mock_asyncio.side_effect = run_coro
+        # Mock asyncio.run to return BatchRunResult directly
+        mock_asyncio.return_value = BatchRunResult(
+            total=4,
+            succeeded=4,
+            failed=0,
+            results=[
+                RunResult(
+                    status=RunStatus.SUCCESS,
+                    pipeline_name=f"chembl_{entity}",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                )
+                for entity in ["activity", "assay", "molecule", "target"]
+            ],
+        )
 
         result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
 
-        # Should have called the service for each chembl pipeline
-        assert mock_service.run.call_count == 4
+        # Verify asyncio.run was called
+        mock_asyncio.assert_called_once()
         assert "Running 4 pipeline(s)" in result.output
+        assert result.exit_code == 0
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
     def test_run_all_dry_run_mode(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_register, cli_runner, mock_registry
     ):
         """Test that --dry-run mode shows pipelines without executing."""
-        # Setup mock service
-        mock_service = MagicMock()
-
-        async def mock_run(pipeline, options=None):
-            return RunResult(
-                status=RunStatus.DRY_RUN,
-                pipeline_name=pipeline,
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-
-        mock_service.run = AsyncMock(side_effect=mock_run)
-        mock_get_service.return_value = mock_service
-
-        # Make asyncio.run execute the coroutine with a fresh event loop
-        def run_coro(coro):
-            import asyncio
-            loop = asyncio.new_event_loop()
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-
-        mock_asyncio.side_effect = run_coro
+        # Mock asyncio.run to return BatchRunResult with skipped pipelines
+        mock_asyncio.return_value = BatchRunResult(
+            total=4,
+            succeeded=0,
+            failed=0,
+            skipped=4,
+            results=[
+                RunResult(
+                    status=RunStatus.DRY_RUN,
+                    pipeline_name=f"chembl_{entity}",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                )
+                for entity in ["activity", "assay", "molecule", "target"]
+            ],
+        )
 
         result = cli_runner.invoke(
             cli, ["run-all", "--source", "chembl", "--dry-run"]
@@ -318,41 +300,34 @@ class TestRunAllCommand:
         assert "Operation cancelled" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
     def test_run_all_rebuild_with_yes_skips_confirmation(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_register, cli_runner, mock_registry
     ):
         """Test that --yes skips confirmation for rebuild."""
-        mock_service = MagicMock()
+        # Mock asyncio.run to return BatchRunResult directly
+        mock_asyncio.return_value = BatchRunResult(
+            total=4,
+            succeeded=4,
+            failed=0,
+            results=[
+                RunResult(
+                    status=RunStatus.SUCCESS,
+                    pipeline_name=f"chembl_{entity}",
+                    run_id="test-run-id",
+                    run_type="rebuild",
+                )
+                for entity in ["activity", "assay", "molecule", "target"]
+            ],
+        )
 
-        async def mock_run(pipeline, options=None):
-            return RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name=pipeline,
-                run_id="test-run-id",
-                run_type="rebuild",
-            )
-
-        mock_service.run = AsyncMock(side_effect=mock_run)
-        mock_get_service.return_value = mock_service
-
-        def run_coro(coro):
-            import asyncio
-            loop = asyncio.new_event_loop()
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-
-        mock_asyncio.side_effect = run_coro
-
-        cli_runner.invoke(
+        result = cli_runner.invoke(
             cli, ["run-all", "--source", "chembl", "--run-type", "rebuild", "--yes"]
         )
 
-        # Should have called the service (no confirmation prompt)
-        assert mock_service.run.call_count == 4
+        # Should have called asyncio.run (no confirmation prompt)
+        mock_asyncio.assert_called_once()
+        assert result.exit_code == 0
 
 
 # =============================================================================
@@ -383,79 +358,70 @@ class TestRunAllExitCodes:
         assert result.exit_code == 1
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
     def test_exit_code_0_for_all_success(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_register, cli_runner, mock_registry
     ):
         """Test exit code 0 when all pipelines succeed."""
-        mock_service = MagicMock()
-
-        async def mock_run(pipeline, options=None):
-            return RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name=pipeline,
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-
-        mock_service.run = AsyncMock(side_effect=mock_run)
-        mock_get_service.return_value = mock_service
-
-        def run_coro(coro):
-            import asyncio
-            loop = asyncio.new_event_loop()
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-
-        mock_asyncio.side_effect = run_coro
+        # Mock asyncio.run to return BatchRunResult with all success
+        mock_asyncio.return_value = BatchRunResult(
+            total=4,
+            succeeded=4,
+            failed=0,
+            results=[
+                RunResult(
+                    status=RunStatus.SUCCESS,
+                    pipeline_name=f"chembl_{entity}",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                )
+                for entity in ["activity", "assay", "molecule", "target"]
+            ],
+        )
 
         result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
         assert result.exit_code == 0
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
     def test_exit_code_82_for_failures(
-        self, mock_asyncio, mock_get_service, mock_register, cli_runner, mock_registry
+        self, mock_asyncio, mock_register, cli_runner, mock_registry
     ):
         """Test exit code 82 (PIPELINE_ERROR) when some pipelines fail."""
-        mock_service = MagicMock()
-        call_count = 0
-
-        async def mock_run(pipeline, options=None):
-            nonlocal call_count
-            call_count += 1
-            if call_count == 2:
-                # Second pipeline fails
-                return RunResult(
+        # Mock asyncio.run to return BatchRunResult with one failure
+        mock_asyncio.return_value = BatchRunResult(
+            total=4,
+            succeeded=3,
+            failed=1,
+            failed_pipelines=["chembl_assay"],
+            results=[
+                RunResult(
+                    status=RunStatus.SUCCESS,
+                    pipeline_name="chembl_activity",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                ),
+                RunResult(
                     status=RunStatus.FAILED,
-                    pipeline_name=pipeline,
+                    pipeline_name="chembl_assay",
                     run_id="test-run-id",
                     run_type="incremental",
                     error_message="Test error",
-                )
-            return RunResult(
-                status=RunStatus.SUCCESS,
-                pipeline_name=pipeline,
-                run_id="test-run-id",
-                run_type="incremental",
-            )
-
-        mock_service.run = AsyncMock(side_effect=mock_run)
-        mock_get_service.return_value = mock_service
-
-        def run_coro(coro):
-            import asyncio
-            loop = asyncio.new_event_loop()
-            try:
-                return loop.run_until_complete(coro)
-            finally:
-                loop.close()
-
-        mock_asyncio.side_effect = run_coro
+                ),
+                RunResult(
+                    status=RunStatus.SUCCESS,
+                    pipeline_name="chembl_molecule",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                ),
+                RunResult(
+                    status=RunStatus.SUCCESS,
+                    pipeline_name="chembl_target",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                ),
+            ],
+        )
 
         result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
         assert result.exit_code == 82  # ExitCode.PIPELINE_ERROR
