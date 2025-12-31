@@ -115,7 +115,7 @@ class StructlogLogger:
 
 def create_logger(
     pipeline: str,
-    run_id: UUID,
+    run_id: UUID | None = None,
     log_level: str = "INFO",
     json_format: bool = True,
 ) -> LoggerPort:
@@ -123,7 +123,7 @@ def create_logger(
 
     Args:
         pipeline: Pipeline name for log context.
-        run_id: Unique run identifier for tracing.
+        run_id: Unique run identifier for tracing. None for service-level loggers.
         log_level: Logging level (default: INFO).
         json_format: Use JSON output format (default: True).
 
@@ -154,7 +154,10 @@ def create_logger(
     )
 
     logger = structlog.get_logger(f"bioetl.{pipeline}")
-    bound_logger = logger.bind(run_id=str(run_id), pipeline=pipeline)
+    bind_context = {"pipeline": pipeline}
+    if run_id is not None:
+        bind_context["run_id"] = str(run_id)
+    bound_logger = logger.bind(**bind_context)
 
     # Set the log level for the underlying standard logger
     logging.basicConfig(

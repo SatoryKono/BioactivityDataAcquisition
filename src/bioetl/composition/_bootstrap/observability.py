@@ -88,9 +88,15 @@ def validate_observability_preflight(
 
 
 def bootstrap_logger(
-    pipeline: str, run_id: UUID, log_level: str = "INFO"
+    pipeline: str, run_id: UUID | None = None, log_level: str = "INFO"
 ) -> LoggerPort:
     """Create a logger for the application layer (e.g., CLI).
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier. None for service-level loggers
+            without a specific run context.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
 
     Returns:
         StructlogLogger implementing LoggerPort.

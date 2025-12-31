@@ -15,12 +15,12 @@ from bioetl.domain.schemas.crossref.work import (
     WorkSchema,  # Deprecated alias
 )
 
+# Main schemas: PublicationEnrichedSchema, PublicationSchema, PUBLICATION_TYPES
+# Deprecated aliases (backward compatibility): WorkSchema, WORK_TYPES
 __all__ = [
-    # Main schemas
+    "PUBLICATION_TYPES",
+    "WORK_TYPES",
     "PublicationEnrichedSchema",
     "PublicationSchema",
-    "PUBLICATION_TYPES",
-    # Deprecated aliases (backward compatibility)
     "WorkSchema",
-    "WORK_TYPES",
 ]
