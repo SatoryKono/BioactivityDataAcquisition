@@ -48,7 +48,9 @@ def _extract_docstrings(source: str) -> list[tuple[int, str]]:
 
     for node in ast.walk(tree):
         # Module, class, and function docstrings
-        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(
+            node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ):
             if (
                 node.body
                 and isinstance(node.body[0], ast.Expr)
@@ -133,6 +135,6 @@ def test_all_layers_checked() -> None:
     expected_layers = {"application", "composition", "interfaces", "infrastructure"}
     checked_layers = {d.name for d in CHECKED_DIRS}
 
-    assert checked_layers == expected_layers, (
-        f"Layer mismatch. Expected: {expected_layers}, Got: {checked_layers}"
-    )
+    assert (
+        checked_layers == expected_layers
+    ), f"Layer mismatch. Expected: {expected_layers}, Got: {checked_layers}"
