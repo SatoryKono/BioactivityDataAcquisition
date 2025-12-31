@@ -153,6 +153,7 @@ markers = [
     "performance: Performance regression tests (optional CI stage)",
     "architecture: Architecture tests (layer boundaries, contracts)",
     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
+    "smoke: Smoke tests (quick sanity checks, < 30s total)",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

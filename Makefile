@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip test lint run-local docker-up docker-down docker-reset seed-local clean clean-all
+.PHONY: help install install-uv install-pip test lint run-local docker-up docker-down docker-reset seed-local clean clean-all smoke
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -77,6 +77,10 @@ test-unit: ## Run only unit tests (parallel)
 test-unit-fast: ## Run unit tests without slow tests (fastest)
 	@echo "$(BLUE)Running fast unit tests...$(NC)"
 	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -n auto --dist loadscope -m "not slow" --ignore=tests/benchmarks
+
+smoke: ## Run smoke tests (quick sanity check, < 30s)
+	@echo "$(BLUE)Running smoke tests...$(NC)"
+	$(RUN) pytest -m smoke -v --tb=short
 
 test-integration: ## Run integration tests with VCR
 	@echo "$(BLUE)Running integration tests...$(NC)"
