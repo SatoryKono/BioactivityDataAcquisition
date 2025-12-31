@@ -21,13 +21,10 @@ from hypothesis import given, settings, strategies as st
 
 from bioetl.domain import ports
 
-# Python version check for skipping tests with Hypothesis lambda reflection issues
-PYTHON_314 = sys.version_info >= (3, 14)
-
 # Mark all tests in this module as slow and hypothesis-based
 pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
-# Python version check for skipif decorators
+# Python version check for Hypothesis compatibility
 PYTHON_314 = sys.version_info >= (3, 14)
 
 
