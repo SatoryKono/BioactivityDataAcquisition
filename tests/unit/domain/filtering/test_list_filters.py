@@ -93,7 +93,7 @@ class TestGoldListContainsFilter:
 
     def test_empty_values_raises_error(self) -> None:
         """Test that empty values set raises ValueError."""
-        with pytest.raises(ValueError, match="values .* cannot be empty"):
+        with pytest.raises(ValueError, match=r"values .* cannot be empty"):
             GoldListContainsFilter(column="tags", values=frozenset())
 
     def test_invalid_mode_raises_error(self) -> None:
