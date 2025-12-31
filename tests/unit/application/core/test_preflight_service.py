@@ -712,7 +712,7 @@ class TestValidateWriteModes:
         The 'overwrite' mode is not a valid SilverWriteMode.
         PipelineConfig raises ValueError during construction.
         """
-        with pytest.raises(ValueError, match="Invalid Silver write mode.*overwrite"):
+        with pytest.raises(ValueError, match=r"Invalid Silver write mode.*overwrite"):
             PipelineConfig(
                 pipeline_name="test",
                 provider="chembl",
