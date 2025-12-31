@@ -5,8 +5,6 @@ Tests the complete Gold layer filter configuration and evaluation.
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
@@ -97,7 +95,9 @@ class TestGoldFilterConfigColumnFilters:
         """Test column value in allowed list passes."""
         config = GoldFilterConfig(
             column_filters=(
-                GoldColumnFilter(column="status", values=frozenset({"active", "pending"})),
+                GoldColumnFilter(
+                    column="status", values=frozenset({"active", "pending"})
+                ),
             ),
         )
         assert config.should_include({"status": "active"}) is True
@@ -209,36 +209,28 @@ class TestGoldFilterConfigListLengthFilters:
     def test_list_too_short(self) -> None:
         """Test list shorter than min fails."""
         config = GoldFilterConfig(
-            list_length_filters=(
-                GoldListLengthFilter(column="tags", min_length=2),
-            ),
+            list_length_filters=(GoldListLengthFilter(column="tags", min_length=2),),
         )
         assert config.should_include({"tags": ["a"]}) is False
 
     def test_list_too_long(self) -> None:
         """Test list longer than max fails."""
         config = GoldFilterConfig(
-            list_length_filters=(
-                GoldListLengthFilter(column="tags", max_length=2),
-            ),
+            list_length_filters=(GoldListLengthFilter(column="tags", max_length=2),),
         )
         assert config.should_include({"tags": ["a", "b", "c"]}) is False
 
     def test_none_value_length_zero(self) -> None:
         """Test None value has length 0."""
         config = GoldFilterConfig(
-            list_length_filters=(
-                GoldListLengthFilter(column="tags", min_length=1),
-            ),
+            list_length_filters=(GoldListLengthFilter(column="tags", min_length=1),),
         )
         assert config.should_include({"tags": None}) is False
 
     def test_scalar_value_length_one(self) -> None:
         """Test scalar value has length 1."""
         config = GoldFilterConfig(
-            list_length_filters=(
-                GoldListLengthFilter(column="tags", min_length=1),
-            ),
+            list_length_filters=(GoldListLengthFilter(column="tags", min_length=1),),
         )
         assert config.should_include({"tags": "single"}) is True
 
@@ -356,6 +348,9 @@ class TestGoldFilterConfigCombined:
         # Missing required field
         assert config.should_include({"score": 50}) is False
         # Has excluded field
-        assert config.should_include({"name": "test", "score": 50, "deleted": True}) is False
+        assert (
+            config.should_include({"name": "test", "score": 50, "deleted": True})
+            is False
+        )
         # Fails range
         assert config.should_include({"name": "test", "score": -1}) is False

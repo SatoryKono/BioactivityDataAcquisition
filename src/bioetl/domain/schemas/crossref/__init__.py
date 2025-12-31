@@ -8,11 +8,11 @@ Terminology:
 """
 
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
+from bioetl.domain.schemas.crossref.work import WORK_TYPES  # Deprecated alias
+from bioetl.domain.schemas.crossref.work import WorkSchema  # Deprecated alias
 from bioetl.domain.schemas.crossref.work import (
     PUBLICATION_TYPES,
-    WORK_TYPES,  # Deprecated alias
     PublicationSchema,
-    WorkSchema,  # Deprecated alias
 )
 
 __all__ = [

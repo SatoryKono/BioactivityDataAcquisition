@@ -28,6 +28,10 @@ from typing import Any
 
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
+# Store OTLP exporter class if available (for runtime use)
+# This avoids reassigning an imported type to None, which mypy strict rejects
+_OtlpExporterClass: type[Any] | None = None
+
 try:
     from opentelemetry import trace
     from opentelemetry.sdk.trace import TracerProvider
@@ -38,9 +42,9 @@ try:
             OTLPSpanExporter,
         )
 
+        _OtlpExporterClass = OTLPSpanExporter
         OTLP_AVAILABLE = True
     except ImportError:
-        OTLPSpanExporter = None
         OTLP_AVAILABLE = False
 
     OTEL_AVAILABLE = True
@@ -70,7 +74,11 @@ class OpenTelemetryTracer:
         self._provider = TracerProvider()
 
         # Prefer OTLP if available (production), fall back to Console (dev/debug)
-        exporter = OTLPSpanExporter() if OTLP_AVAILABLE else ConsoleSpanExporter()
+        exporter = (
+            _OtlpExporterClass()
+            if OTLP_AVAILABLE and _OtlpExporterClass is not None
+            else ConsoleSpanExporter()
+        )
 
         processor = BatchSpanProcessor(exporter)
         self._provider.add_span_processor(processor)
