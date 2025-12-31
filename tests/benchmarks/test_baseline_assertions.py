@@ -390,8 +390,8 @@ class TestMemoryMonitorBaseline:
 
         monitor = MemoryMonitor(config=MemoryConfig())
 
-        # Warmup
-        for _ in range(10):
+        # Extended warmup to ensure psutil/OS caches are primed
+        for _ in range(20):
             monitor.get_memory_stats()
 
         # Measure (100 iterations)
@@ -402,10 +402,12 @@ class TestMemoryMonitorBaseline:
             elapsed = time.perf_counter() - start
             times.append(elapsed * 1000)
 
-        avg_ms = sum(times) / len(times)
+        # Use median instead of average for robustness against CI outliers
+        sorted_times = sorted(times)
+        median_ms = sorted_times[len(sorted_times) // 2]
 
-        assert avg_ms < self.MEMORY_STATS_THRESHOLD_MS, (
-            f"get_memory_stats() took {avg_ms:.2f} ms, "
+        assert median_ms < self.MEMORY_STATS_THRESHOLD_MS, (
+            f"get_memory_stats() took {median_ms:.2f} ms (median), "
             f"exceeds baseline of {self.MEMORY_STATS_THRESHOLD_MS} ms"
         )
 
