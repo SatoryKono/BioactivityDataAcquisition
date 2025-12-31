@@ -60,11 +60,11 @@ install-pip: ## Install dependencies using pip (fallback)
 
 test: ## Run all tests in parallel with coverage (default)
 	@echo "$(BLUE)Running tests in parallel...$(NC)"
-	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=80
+	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
 test-serial: ## Run all tests serially (for debugging)
 	@echo "$(BLUE)Running tests (serial mode)...$(NC)"
-	$(RUN) pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=80
+	$(RUN) pytest tests/ -v --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85
 
 test-fast: ## Run fast tests only (no slow markers, CI hypothesis profile)
 	@echo "$(BLUE)Running fast tests (parallel mode)...$(NC)"
