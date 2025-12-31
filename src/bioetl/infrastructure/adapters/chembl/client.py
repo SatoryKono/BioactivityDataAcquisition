@@ -460,7 +460,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Example:
             >>> async for activity in adapter.fetch_as_models("activity", limit=100):
-            ...     print(activity.activity_id, activity.pchembl_value)
+            ...     logger.debug("activity_fetched", activity_id=activity.activity_id, pchembl=activity.pchembl_value)
 
         """
         model_class = CHEMBL_DTO_MODELS.get(entity_type)
