@@ -69,6 +69,44 @@ def pytest_configure() -> None:
     # requiring endpoint_url
     os.environ.setdefault("BIOETL_ENV", "staging")
 
+    # Configure Hypothesis profiles for CI vs local development
+    # CI profile uses fewer examples for faster execution
+    try:
+        from hypothesis import Phase, Verbosity, settings
+
+        # CI profile: faster execution with fewer examples
+        settings.register_profile(
+            "ci",
+            max_examples=10,
+            deadline=None,
+            suppress_health_check=[],
+            verbosity=Verbosity.quiet,
+            phases=[Phase.explicit, Phase.reuse, Phase.generate],
+        )
+        # Fast profile: minimal examples for quick smoke tests
+        settings.register_profile(
+            "fast",
+            max_examples=5,
+            deadline=None,
+            verbosity=Verbosity.quiet,
+            phases=[Phase.explicit, Phase.reuse, Phase.generate],
+        )
+        # Dev profile: standard development settings
+        settings.register_profile(
+            "dev",
+            max_examples=50,
+            deadline=None,
+            verbosity=Verbosity.normal,
+        )
+
+        # Select profile based on environment
+        profile = os.environ.get("HYPOTHESIS_PROFILE", "dev")
+        if os.environ.get("CI"):
+            profile = "ci"
+        settings.load_profile(profile)
+    except ImportError:
+        pass  # Hypothesis not installed
+
     # Mock pubchempy if not installed
     try:
         __import__("pubchempy")
