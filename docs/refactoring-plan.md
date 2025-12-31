@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.5 | Дата: 2025-12-31 | Обновлено: Исправлены 3 реальные проблемы (Gold Parquet validation, heartbeat_interval, _dq_error)*
+*Версия: 6.6 | Дата: 2025-12-31 | Обновлено: Добавлены 4 ложных утверждения (coverage gate, OTLPSpanExporter, OpenTelemetryTracer, signal handlers). Удалён неиспользуемый код signals.py*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -128,6 +128,10 @@
 | "MemoryLock TTL=90s, heartbeat=30s нужно применить (OPS-001 action_plan)" | **ЛОЖНОЕ**: MemoryLock НЕ хардкодит значения — принимает TTL как параметр `acquire(ttl=...)`. RuntimeConfig определяет defaults. | `memory_lock.py:111-128` (верификация 2025-12-31) |
 | "content_hash в Bioactivity.from_raw не использует IdentityService" | **LOW PRIORITY**: `Bioactivity.from_raw` хэширует `raw_data` из API, которые не содержат meta-полей. Разная семантика — hash идентичности vs hash версионирования. | `bioactivity.py:210-212`, `identity_service.py:98-128` (верификация 2025-12-31) |
 | "QuarantineEntry payload_hash требует IdentityService" | **LOW PRIORITY**: `QuarantineEntry.create()` хэширует error payload, не бизнес-данные. Разная семантика — hash дедупликации ошибок vs hash контента. | `quarantine_entry.py:220-223` (верификация 2025-12-31) |
+| "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `pyproject.toml:180` (`fail_under = 85`), `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:45` | `pyproject.toml`, `Makefile`, `.github/workflows/tests.yml` (верификация 2025-12-31) |
+| "OTLPSpanExporter ошибка Optional-аннотации, mypy --strict падает" | **ОШИБОК НЕТ**: `uv run mypy src/bioetl --strict` → "Success: no issues found in 326 source files" | `tracing.py:36-44` (верификация 2025-12-31) |
+| "OpenTelemetryTracer типизация сломана, mypy --strict не проходит" | **ОШИБОК НЕТ**: mypy strict проходит без ошибок | `tracing.py:52-108` (верификация 2025-12-31) |
+| "Обработчик SIGINT/SIGTERM падает без активного event loop" | **КОД УДАЛЁН**: `register_signal_handlers` экспортировался, но не вызывался нигде. CLI обрабатывает `KeyboardInterrupt` напрямую. Мёртвый код удалён. | `interfaces/orchestration/signals.py` удалён (2025-12-31) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
