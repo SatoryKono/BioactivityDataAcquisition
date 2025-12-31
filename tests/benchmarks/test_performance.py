@@ -6,6 +6,9 @@ Or with comparison: pytest tests/benchmarks/ --benchmark-compare
 Requirements:
 - pytest-benchmark must be installed
 - Benchmarks are skipped if pytest-benchmark is not available
+
+Note: These tests are marked with @pytest.mark.benchmark and excluded from
+standard test runs. Run explicitly with: make bench or pytest -m benchmark
 """
 
 from __future__ import annotations
@@ -24,10 +27,11 @@ except ImportError:
     BenchmarkFixture = Any  # type: ignore[misc, assignment]
 
 
-pytestmark = pytest.mark.skipif(
-    not HAS_BENCHMARK,
-    reason="pytest-benchmark not installed",
-)
+# Mark all tests in this module as benchmark tests (excluded from standard runs)
+pytestmark = [
+    pytest.mark.benchmark,
+    pytest.mark.skipif(not HAS_BENCHMARK, reason="pytest-benchmark not installed"),
+]
 
 
 # =============================================================================

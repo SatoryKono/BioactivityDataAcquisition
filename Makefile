@@ -58,8 +58,8 @@ install-pip: ## Install dependencies using pip (fallback)
 	$(VENV_PIP) install -e ".[dev,tracing]"
 	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
-test: ## Run all tests in parallel with coverage (default)
-	@echo "$(BLUE)Running tests in parallel...$(NC)"
+test: ## Run all tests in parallel with coverage (excludes benchmarks)
+	@echo "$(BLUE)Running tests in parallel (excluding benchmarks)...$(NC)"
 	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
 test-serial: ## Run all tests serially (for debugging)
@@ -257,18 +257,29 @@ complexity-report: ## Generate detailed complexity report
 	$(RUN) radon mi src/ -s >> reports/complexity.txt
 	@echo "$(GREEN)Report saved to reports/complexity.txt$(NC)"
 
-bench: ## Run performance benchmarks
-	@echo "$(BLUE)Running benchmarks...$(NC)"
+bench: ## Run all benchmark tests (standalone + assertion-based + performance)
+	@echo "$(BLUE)Running all benchmarks...$(NC)"
 	@mkdir -p reports
-	$(RUN) pytest benchmarks/ -v --tb=short
+	$(RUN) pytest benchmarks/ tests/benchmarks/ tests/performance/ -v --tb=short -m benchmark
 	@echo "$(GREEN)Benchmarks complete!$(NC)"
 
-bench-json: ## Run benchmarks with JSON output
+bench-standalone: ## Run only pytest-benchmark standalone tests
+	@echo "$(BLUE)Running standalone benchmarks...$(NC)"
+	@mkdir -p reports
+	$(RUN) pytest benchmarks/ -v --tb=short
+	@echo "$(GREEN)Standalone benchmarks complete!$(NC)"
+
+bench-json: ## Run benchmarks with JSON output (pytest-benchmark only)
 	@echo "$(BLUE)Running benchmarks with JSON output...$(NC)"
 	@mkdir -p reports
 	$(RUN) pytest benchmarks/ -v --benchmark-only --benchmark-json=reports/benchmark.json 2>/dev/null || \
 		$(RUN) pytest benchmarks/ -v --tb=short
 	@echo "$(GREEN)Benchmarks complete! Results in reports/benchmark.json$(NC)"
+
+bench-baselines: ## Run assertion-based benchmark baseline tests
+	@echo "$(BLUE)Running baseline assertion benchmarks...$(NC)"
+	$(RUN) pytest tests/benchmarks/ tests/performance/ -v --tb=short -m benchmark
+	@echo "$(GREEN)Baseline benchmarks complete!$(NC)"
 
 mutation-test: ## Run mutation testing (slow, domain layer only)
 	@echo "$(BLUE)Running mutation testing on domain layer...$(NC)"

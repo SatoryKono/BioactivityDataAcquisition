@@ -7,6 +7,9 @@ Unlike regular benchmarks (test_performance.py) which measure and report,
 these tests FAIL if performance degrades below baseline thresholds.
 
 Part of architecture review refactoring plan (R5).
+
+Note: These tests are marked with @pytest.mark.benchmark and excluded from
+standard test runs. Run explicitly with: make bench or pytest -m benchmark
 """
 
 from __future__ import annotations
@@ -15,6 +18,9 @@ import time
 from typing import Any
 
 import pytest
+
+# Mark all tests in this module as benchmark tests (excluded from standard runs)
+pytestmark = pytest.mark.benchmark
 
 
 class TestContentHashBaselines:
