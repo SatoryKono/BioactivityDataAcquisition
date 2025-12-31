@@ -26,6 +26,8 @@ Example:
 
 from __future__ import annotations
 
+from typing import Any
+
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
 
 __all__ = ["BatchExecutor", "BatchResult", "Executor", "execute", "process"]
@@ -51,7 +53,7 @@ async def execute(executor: BatchExecutor, limit: int | None, query: str | None 
 
 async def process(
     executor: BatchExecutor,
-    records: list[dict],
+    records: list[dict[str, Any]],
     start_index: int = 0,
 ) -> BatchResult:
     """Process a batch of records through the ETL pipeline.
