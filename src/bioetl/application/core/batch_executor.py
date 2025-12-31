@@ -1,16 +1,7 @@
-"""Unified Batch Executor.
+"""Unified Batch Executor for ETL pipeline orchestration.
 
-Combines functionality from PipelineExecutor and RecordProcessor into a single
-component that orchestrates the complete ETL flow: extraction → transformation → writing.
-
-This consolidation reduces the call stack depth by one level while maintaining
-all functionality: adaptive batch sizing, checkpointing, graceful shutdown,
-Bronze/Silver/Gold processing, and quarantine management.
-
-Observability:
-- Root span for pipeline execution
-- Nested spans for each batch
-- Per-layer spans for transform/write operations
+Combines extraction, transformation, and writing into a single component with
+adaptive batch sizing, checkpointing, and graceful shutdown handling.
 """
 
 from __future__ import annotations
@@ -21,11 +12,11 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+from bioetl.application.core.batch_tracing import BatchTracingManager
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.ports import NoOpTracing
 from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
@@ -61,26 +52,7 @@ class BatchResult:
 
 
 class BatchExecutor:
-    """Unified executor for ETL pipeline batches.
-
-    Combines the extraction loop (formerly PipelineExecutor) with batch
-    processing logic (formerly RecordProcessor) into a single component.
-
-    Responsibilities:
-    - Extract records from data source
-    - Accumulate records into batches
-    - Adaptive batch sizing based on memory pressure
-    - Transform Bronze → Silver → Gold
-    - Write to all layers
-    - Quarantine failed records
-    - Checkpoint management
-    - Graceful shutdown handling
-
-    Observability:
-    - Root span for complete execution
-    - Per-batch spans with record counts
-    - Per-layer spans (transform, write_bronze, write_silver, write_gold)
-    """
+    """Unified executor for ETL batches: fetch → transform → write with tracing."""
 
     DEFAULT_BATCH_SIZE = 100
     DEFAULT_CHECKPOINT_INTERVAL = 1000
@@ -142,9 +114,6 @@ class BatchExecutor:
             checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
         )
 
-        # Tracing
-        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
-
         # Memory management
         self._memory_monitor = memory_monitor
         self._memory_config = memory_config
@@ -192,6 +161,15 @@ class BatchExecutor:
             lock_validator=lock_validator,
         )
 
+        # Tracing manager (extracted for class size reduction)
+        self._tracing = BatchTracingManager(
+            tracer=tracer,
+            context=context,
+            config=config,
+            initial_batch_size=self._initial_batch_size,
+            adaptive_sizing_enabled=self._adaptive_batch_size_enabled,
+        )
+
     @property
     def entity_type(self) -> str:
         """Get entity type being processed."""
@@ -225,19 +203,28 @@ class BatchExecutor:
             - records_quarantined: Records sent to quarantine
 
         """
-        root_span = self._start_execution_span()
+        root_span = self._tracing.start_execution_span()
 
         try:
             await self._run_extraction_loop(limit, query)
-            self._set_execution_span_stats(root_span)
+            self._tracing.set_execution_stats(
+                root_span,
+                total_fetched=self.records_fetched,
+                total_bronze=self.records_bronze,
+                total_silver=self.records_silver,
+                total_gold=self.records_gold,
+                total_quarantined=self.records_quarantined,
+                batch_size_reductions=self._batch_size_reductions,
+                min_batch_size_used=self._min_batch_size_used,
+            )
         except PipelineShutdownError:
             await self._handle_shutdown(root_span)
             raise
         except Exception as e:
-            self._handle_execution_error(root_span, e)
+            self._tracing.end_span(root_span, e)
             raise
         else:
-            self._finalize_span(root_span)
+            self._tracing.end_span(root_span)
 
     async def _run_extraction_loop(self, limit: int | None, query: str | None) -> None:
         """Run the main extraction and processing loop.
@@ -327,7 +314,7 @@ class BatchExecutor:
         ingestion_ts = self._context.started_at
 
         # Start batch tracing span
-        span = self._start_batch_span(batch_id, len(records), start_index)
+        span = self._tracing.start_batch_span(batch_id, len(records), start_index)
 
         try:
             # Write to Bronze
@@ -390,20 +377,19 @@ class BatchExecutor:
             self.records_quarantined += result.quarantined_count
 
             # Add result attributes to span
-            if span:
-                span.set_attribute("bioetl.bronze_count", len(records))
-                span.set_attribute("bioetl.silver_count", len(result.silver_records))
-                span.set_attribute("bioetl.gold_count", len(result.gold_records))
-                span.set_attribute("bioetl.quarantined_count", result.quarantined_count)
+            self._tracing.set_batch_result(
+                span,
+                bronze_count=len(records),
+                silver_count=len(result.silver_records),
+                gold_count=len(result.gold_records),
+                quarantined_count=result.quarantined_count,
+            )
 
         except Exception as e:
-            if span:
-                span.set_attribute("error", True)
-                span.record_exception(e)
+            self._tracing.end_span(span, e)
             raise
-        finally:
-            if span:
-                span.__exit__(None, None, None)
+        else:
+            self._tracing.end_span(span)
 
     async def _execute_with_span(
         self,
@@ -414,13 +400,13 @@ class BatchExecutor:
         on_error: Any = None,
     ) -> Any:
         """Execute coroutine with tracing span."""
-        span = self._start_layer_span(name, batch_id, count)
+        span = self._tracing.start_layer_span(name, batch_id, count)
         try:
             result = await coro
-            self._end_span(span)
+            self._tracing.end_span(span)
             return result
         except Exception as e:
-            self._end_span(span, e)
+            self._tracing.end_span(span, e)
             if on_error:
                 on_error(e)
             raise
@@ -429,104 +415,24 @@ class BatchExecutor:
         self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int
     ) -> TransformResult:
         """Execute transformation with extended span attributes."""
-        span = self._start_layer_span(
+        span = self._tracing.start_layer_span(
             "transform", batch_id, len(records), input_count=True
         )
         try:
             result = await self._transformer.transform_batch(
                 records, batch_id, start_index=start_index
             )
-            if span:
-                span.set_attribute("bioetl.silver_count", len(result.silver_records))
-                span.set_attribute("bioetl.gold_count", len(result.gold_records))
-                span.set_attribute("bioetl.quarantined_count", result.quarantined_count)
-            self._end_span(span)
+            self._tracing.set_transform_result(
+                span,
+                silver_count=len(result.silver_records),
+                gold_count=len(result.gold_records),
+                quarantined_count=result.quarantined_count,
+            )
+            self._tracing.end_span(span)
             return result
         except Exception as e:
-            self._end_span(span, e)
+            self._tracing.end_span(span, e)
             raise
-
-    # -------------------------------------------------------------------------
-    # Tracing helpers
-    # -------------------------------------------------------------------------
-
-    def _start_execution_span(self) -> Any | None:
-        """Start root tracing span for pipeline execution."""
-        otel_tracer = self._tracer.get_tracer("bioetl.batch_executor")
-        span = otel_tracer.start_as_current_span(
-            "pipeline_execution",
-            attributes={
-                "bioetl.pipeline": self._config.pipeline_name or "unknown",
-                "bioetl.run_id": str(self._context.run_id),
-                "bioetl.entity_type": self._config.entity_type,
-                "bioetl.run_type": self._context.run_type.value,
-                "bioetl.adaptive_batch_sizing": self._adaptive_batch_size_enabled,
-                "bioetl.initial_batch_size": self._initial_batch_size,
-            },
-        )
-        span.__enter__()
-        return span
-
-    def _start_batch_span(
-        self, batch_id: BatchID, record_count: int, start_index: int
-    ) -> Any | None:
-        """Start tracing span for a batch."""
-        otel_tracer = self._tracer.get_tracer("bioetl.batch_executor")
-        span = otel_tracer.start_as_current_span(
-            f"batch_{batch_id}",
-            attributes={
-                "bioetl.batch_id": str(batch_id),
-                "bioetl.record_count": record_count,
-                "bioetl.run_type": self._context.run_type.value,
-                "bioetl.entity_type": self._config.entity_type,
-                "bioetl.start_index": start_index,
-            },
-        )
-        span.__enter__()
-        return span
-
-    def _start_layer_span(
-        self,
-        name: str,
-        batch_id: BatchID,
-        count: int,
-        input_count: bool = False,
-    ) -> Any:
-        """Start a tracing span for a layer operation."""
-        count_key = "bioetl.input_count" if input_count else "bioetl.record_count"
-        attrs = {"bioetl.batch_id": str(batch_id), count_key: count}
-        span = self._tracer.get_tracer("bioetl.batch_executor").start_as_current_span(
-            name, attributes=attrs
-        )
-        span.__enter__()
-        return span
-
-    def _set_execution_span_stats(self, span: Any | None) -> None:
-        """Set final statistics on the execution span."""
-        if not span:
-            return
-
-        span.set_attribute("bioetl.total_fetched", self.records_fetched)
-        span.set_attribute("bioetl.total_bronze", self.records_bronze)
-        span.set_attribute("bioetl.total_silver", self.records_silver)
-        span.set_attribute("bioetl.total_gold", self.records_gold)
-        span.set_attribute("bioetl.total_quarantined", self.records_quarantined)
-        span.set_attribute("bioetl.batch_size_reductions", self._batch_size_reductions)
-        span.set_attribute("bioetl.min_batch_size_used", self._min_batch_size_used)
-
-    def _end_span(self, span: Any, error: Exception | None = None) -> None:
-        """End a tracing span."""
-        if not span:
-            return
-        if error:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-        span.__exit__(None, None, None)
-
-    def _finalize_span(self, span: Any | None) -> None:
-        """Finalize span on successful completion."""
-        if span:
-            span.__exit__(None, None, None)
 
     async def _handle_shutdown(self, span: Any | None) -> None:
         """Handle graceful shutdown with checkpoint save."""
@@ -535,16 +441,7 @@ class BatchExecutor:
         except Exception:
             pass  # Ignore errors during emergency checkpoint save
 
-        if span:
-            span.set_attribute("bioetl.shutdown", True)
-            span.__exit__(None, None, None)
-
-    def _handle_execution_error(self, span: Any | None, error: Exception) -> None:
-        """Handle execution error with span cleanup."""
-        if span:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-            span.__exit__(None, None, None)
+        self._tracing.end_span_with_shutdown(span)
 
     # -------------------------------------------------------------------------
     # Memory management helpers (from PipelineExecutor)
