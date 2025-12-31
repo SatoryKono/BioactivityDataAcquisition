@@ -1065,7 +1065,7 @@ fields:
 |-----|----------|--------|------|
 | [ADR-001](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Accepted | 2025-05 |
 | [ADR-002](02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Accepted | 2025-05 |
-| [ADR-003](02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis for Distributed Locking | Superseded by ADR-010 | 2025-05 |
+| [ADR-003](02-architecture/decisions/ADR-003-in-memory-locking-strategy.md) | In-Memory Locking (MemoryLock) | Accepted (Revised) | 2025-12 |
 | [ADR-004](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Accepted | 2025-05 |
 | [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) | Composition Layer Separation | Accepted | 2025-12 |
 | [ADR-006](02-architecture/decisions/ADR-006-logger-metrics-ports.md) | Logger and Metrics Ports | Accepted | 2025-12-18 |
