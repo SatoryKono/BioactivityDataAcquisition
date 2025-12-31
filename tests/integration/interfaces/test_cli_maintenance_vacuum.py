@@ -458,9 +458,7 @@ class TestCliMaintenanceVacuumAllDryRun:
             "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
             return_value=mock_vacuum_service_dry_run,
         ):
-            result = cli_runner.invoke(
-                cli, ["maintenance", "vacuum-all", "--dry-run"]
-            )
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all", "--dry-run"])
 
         assert result.exit_code == 0
         assert "[DRY-RUN]" in result.output or "Would" in result.output
@@ -475,9 +473,7 @@ class TestCliMaintenanceVacuumAllDryRun:
             "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
             return_value=mock_vacuum_service_dry_run,
         ):
-            result = cli_runner.invoke(
-                cli, ["maintenance", "vacuum-all", "--dry-run"]
-            )
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all", "--dry-run"])
 
         assert result.exit_code == 0
         call_args = mock_vacuum_service_dry_run.vacuum_all.call_args
@@ -658,9 +654,7 @@ class TestCliMaintenanceVacuumAllOutput:
             "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
             return_value=mock_service,
         ):
-            result = cli_runner.invoke(
-                cli, ["maintenance", "vacuum-all", "--dry-run"]
-            )
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all", "--dry-run"])
 
         assert result.exit_code == 0
         assert "would remove" in result.output.lower()

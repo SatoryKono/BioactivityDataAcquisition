@@ -618,9 +618,7 @@ class TestRunAllAsyncFunction:
     async def test_run_all_pipelines_async_handles_exception(self):
         """Test _run_all_pipelines_async handles runtime exceptions."""
         mock_service = MagicMock()
-        mock_service.run = AsyncMock(
-            side_effect=RuntimeError("Unexpected error")
-        )
+        mock_service.run = AsyncMock(side_effect=RuntimeError("Unexpected error"))
 
         with patch(
             "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",

@@ -267,9 +267,7 @@ class TestVacuumAllCommand:
             "bioetl.interfaces.cli.commands.vacuum.get_vacuum_service",
             return_value=mock_vacuum_service,
         ):
-            result = cli_runner.invoke(
-                cli, ["maintenance", "vacuum-all", "-r", "14"]
-            )
+            result = cli_runner.invoke(cli, ["maintenance", "vacuum-all", "-r", "14"])
 
         assert result.exit_code == 0
         mock_vacuum_service.vacuum_all.assert_called_once()
@@ -439,9 +437,7 @@ class TestVacuumNegativeScenarios:
         assert "15" in result.output  # 10 + 5 files removed
         assert "Failed tables:" in result.output
 
-    def test_vacuum_all_handles_service_error(
-        self, cli_runner, mock_vacuum_service
-    ):
+    def test_vacuum_all_handles_service_error(self, cli_runner, mock_vacuum_service):
         """Test vacuum-all handles VacuumService exceptions."""
         mock_vacuum_service.collect_tables.return_value = [
             ("table1", "silver"),
