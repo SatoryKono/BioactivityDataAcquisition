@@ -126,7 +126,7 @@ class TestLayerBoundaries:
 
     def test_domain_has_no_httpx(self) -> None:
         """Domain layer does not import httpx."""
-        import bioetl.domain as domain  # noqa: F401
+        import bioetl.domain  # noqa: F401 - import for side effect
         import sys
 
         domain_modules = [
@@ -140,7 +140,7 @@ class TestLayerBoundaries:
 
     def test_domain_has_no_polars(self) -> None:
         """Domain layer does not import polars directly."""
-        import bioetl.domain as domain  # noqa: F401
+        import bioetl.domain  # noqa: F401 - import for side effect
         import sys
 
         domain_modules = [
