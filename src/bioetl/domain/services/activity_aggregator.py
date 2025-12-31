@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import math
 import statistics
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -133,29 +133,36 @@ class ActivityAggregator:
         if not values:
             raise ValueError("Cannot aggregate empty sequence")
 
-        # Convert to list for operations
         value_list = list(values)
+        parsed_method = self._parse_method(method)
+        return self._apply_aggregation(value_list, parsed_method)
 
-        # Parse method
-        if isinstance(method, str):
-            try:
-                method = AggregationMethod(method.lower())
-            except ValueError as err:
-                raise ValueError(f"Unknown aggregation method: {method}") from err
+    def _parse_method(self, method: str | AggregationMethod) -> AggregationMethod:
+        """Parse aggregation method string to enum."""
+        if isinstance(method, AggregationMethod):
+            return method
+        try:
+            return AggregationMethod(method.lower())
+        except ValueError as err:
+            raise ValueError(f"Unknown aggregation method: {method}") from err
 
-        # Apply method
-        if method == AggregationMethod.MEAN:
-            return statistics.mean(value_list)
-        elif method == AggregationMethod.MEDIAN:
-            return statistics.median(value_list)
-        elif method == AggregationMethod.GEOMETRIC_MEAN:
-            return _geometric_mean(value_list)
-        elif method == AggregationMethod.MINIMUM:
-            return min(value_list)
-        elif method == AggregationMethod.MAXIMUM:
-            return max(value_list)
-        else:
+    def _apply_aggregation(
+        self,
+        values: list[float],
+        method: AggregationMethod,
+    ) -> float:
+        """Apply aggregation method to values."""
+        aggregators: dict[AggregationMethod, Callable[[Sequence[float]], float]] = {
+            AggregationMethod.MEAN: statistics.mean,
+            AggregationMethod.MEDIAN: statistics.median,
+            AggregationMethod.GEOMETRIC_MEAN: _geometric_mean,
+            AggregationMethod.MINIMUM: min,
+            AggregationMethod.MAXIMUM: max,
+        }
+        aggregator = aggregators.get(method)
+        if aggregator is None:
             raise ValueError(f"Unsupported aggregation method: {method}")
+        return aggregator(values)
 
     def aggregate_with_uncertainty(
         self,
@@ -187,29 +194,38 @@ class ActivityAggregator:
 
         value_list = list(values)
         aggregated = self.aggregate_values(value_list, method)
-
-        # Calculate uncertainty based on method
-        if isinstance(method, str):
-            method = AggregationMethod(method.lower())
-
-        if len(value_list) < 2:
-            uncertainty = 0.0
-        elif method == AggregationMethod.MEDIAN:
-            # Use MAD for median (more robust)
-            uncertainty = _median_absolute_deviation(value_list)
-        elif method == AggregationMethod.GEOMETRIC_MEAN:
-            # Use geometric standard deviation
-            log_values = [math.log(v) for v in value_list if v > 0]
-            if len(log_values) >= 2:
-                log_std = statistics.stdev(log_values)
-                uncertainty = aggregated * (math.exp(log_std) - 1)
-            else:
-                uncertainty = 0.0
-        else:
-            # Use standard deviation for mean and others
-            uncertainty = statistics.stdev(value_list)
+        parsed_method = self._parse_method(method)
+        uncertainty = self._calculate_uncertainty(value_list, parsed_method, aggregated)
 
         return aggregated, uncertainty
+
+    def _calculate_uncertainty(
+        self,
+        values: list[float],
+        method: AggregationMethod,
+        aggregated: float,
+    ) -> float:
+        """Calculate uncertainty based on aggregation method."""
+        if len(values) < 2:
+            return 0.0
+
+        if method == AggregationMethod.MEDIAN:
+            return _median_absolute_deviation(values)
+        if method == AggregationMethod.GEOMETRIC_MEAN:
+            return self._geometric_uncertainty(values, aggregated)
+        return statistics.stdev(values)
+
+    def _geometric_uncertainty(
+        self,
+        values: list[float],
+        aggregated: float,
+    ) -> float:
+        """Calculate uncertainty for geometric mean using log-space std."""
+        log_values = [math.log(v) for v in values if v > 0]
+        if len(log_values) < 2:
+            return 0.0
+        log_std = statistics.stdev(log_values)
+        return aggregated * (math.exp(log_std) - 1)
 
     def aggregate_concentrations(
         self,
@@ -345,15 +361,32 @@ class ActivityAggregator:
             >>> aggregator.filter_and_aggregate(values, min_value=50.0, max_value=500.0)
             150.0
         """
-        filtered = []
-        for v in values:
-            if min_value is not None and v < min_value:
-                continue
-            if max_value is not None and v > max_value:
-                continue
-            filtered.append(v)
+        filtered = self._filter_by_range(values, min_value, max_value)
 
         if not filtered:
             return None
 
         return self.aggregate_values(filtered, method)
+
+    def _filter_by_range(
+        self,
+        values: Sequence[float],
+        min_value: float | None,
+        max_value: float | None,
+    ) -> list[float]:
+        """Filter values to those within the specified range."""
+        return [
+            v for v in values
+            if self._is_in_range(v, min_value, max_value)
+        ]
+
+    def _is_in_range(
+        self,
+        value: float,
+        min_value: float | None,
+        max_value: float | None,
+    ) -> bool:
+        """Check if value is within the specified range (inclusive)."""
+        if min_value is not None and value < min_value:
+            return False
+        return not (max_value is not None and value > max_value)
