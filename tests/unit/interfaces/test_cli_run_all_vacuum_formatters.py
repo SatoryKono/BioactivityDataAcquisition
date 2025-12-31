@@ -325,11 +325,10 @@ class TestEchoBatchSummary:
             failed_pipelines=["pipeline_a", "pipeline_b"],
         )
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.echo_info"
-        ) as mock_info, patch(
-            "bioetl.interfaces.cli.commands.run_all.echo_error"
-        ) as mock_error:
+        with (
+            patch("bioetl.interfaces.cli.commands.run_all.echo_info") as mock_info,
+            patch("bioetl.interfaces.cli.commands.run_all.echo_error") as mock_error,
+        ):
             _echo_batch_summary(result, dry_run=False)
 
         # Check that failure count was output
@@ -422,9 +421,7 @@ class TestRunAllCommand:
             "bioetl.interfaces.cli.commands.run_all.get_default_registry",
             return_value=mock_registry,
         ):
-            result = cli_runner.invoke(
-                cli, ["run-all", "--source", "chembl", "--yes"]
-            )
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
         assert result.exit_code == 0
         mock_asyncio_run.assert_called_once()
@@ -462,9 +459,7 @@ class TestRunAllCommand:
             "bioetl.interfaces.cli.commands.run_all.get_default_registry",
             return_value=mock_registry,
         ):
-            result = cli_runner.invoke(
-                cli, ["run-all", "--source", "chembl", "--yes"]
-            )
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
         # Should exit with pipeline error code
         assert result.exit_code == ExitCode.PIPELINE_ERROR
@@ -480,9 +475,7 @@ class TestRunAllCommand:
             "bioetl.interfaces.cli.commands.run_all.get_default_registry",
             return_value=mock_registry,
         ):
-            result = cli_runner.invoke(
-                cli, ["run-all", "--source", "chembl", "--yes"]
-            )
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
         assert result.exit_code == ExitCode.SIGINT
         assert "interrupted" in result.output.lower()
