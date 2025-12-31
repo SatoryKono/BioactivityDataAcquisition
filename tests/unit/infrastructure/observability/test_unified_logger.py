@@ -7,10 +7,8 @@ from uuid import uuid4
 import pytest
 
 from bioetl.infrastructure.observability.logging_config import (
-    secret_filter_processor,
-)
-from bioetl.infrastructure.observability.logging_config import (
     _mask_secrets,
+    secret_filter_processor,
 )
 from bioetl.infrastructure.observability.unified_logger import (
     UnifiedLogger,

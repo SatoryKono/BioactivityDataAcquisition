@@ -81,7 +81,9 @@ def mock_lifecycle_service():
     service = MagicMock()
     service.vacuum = AsyncMock(return_value=10)
     service.finalize_run = AsyncMock(
-        return_value=VacuumResult(silver_files_removed=10, gold_files_removed=5, skipped=False)
+        return_value=VacuumResult(
+            silver_files_removed=10, gold_files_removed=5, skipped=False
+        )
     )
     return service
 
@@ -104,7 +106,12 @@ def mock_dq_service():
 
 @pytest.fixture
 def postrun_service(
-    pipeline_config, runtime_config, mock_dq_service, mock_lifecycle_service, mock_metrics, mock_logger
+    pipeline_config,
+    runtime_config,
+    mock_dq_service,
+    mock_lifecycle_service,
+    mock_metrics,
+    mock_logger,
 ):
     """Create a PostrunService instance."""
     return PostrunService(
@@ -240,7 +247,9 @@ class TestPostrunServiceVacuum:
         from bioetl.application.services.medallion_lifecycle import VacuumResult
 
         mock_lifecycle_service.finalize_run = AsyncMock(
-            return_value=VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
+            return_value=VacuumResult(
+                silver_files_removed=0, gold_files_removed=0, skipped=True
+            )
         )
 
         runtime = RuntimeConfig(

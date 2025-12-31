@@ -129,9 +129,7 @@ class TestNormalizationServiceNormalizeMultiple:
     def service(self) -> NormalizationService:
         return NormalizationService()
 
-    def test_normalize_multiple_aggregates(
-        self, service: NormalizationService
-    ) -> None:
+    def test_normalize_multiple_aggregates(self, service: NormalizationService) -> None:
         """Test aggregation of multiple values."""
         result = service.normalize_multiple(
             [90.0, 100.0, 110.0], "nM", "IC50", aggregate=True

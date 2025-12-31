@@ -44,29 +44,27 @@ class TestPiiHasherPortContract:
 
         for method in required_methods:
             assert hasattr(port, method), (
-                f"PiiHasherPort MUST define {method}() method "
-                f"per RULES.md §5.4"
+                f"PiiHasherPort MUST define {method}() method " f"per RULES.md §5.4"
             )
 
     def test_pii_hasher_port_exported_in_all(self) -> None:
         """PiiHasherPort MUST be in domain.ports.__all__."""
-        assert "PiiHasherPort" in ports.__all__, (
-            "PiiHasherPort MUST be exported in domain.ports.__all__"
-        )
+        assert (
+            "PiiHasherPort" in ports.__all__
+        ), "PiiHasherPort MUST be exported in domain.ports.__all__"
 
     def test_noop_pii_hasher_exists(self) -> None:
         """NoOpPiiHasher MUST exist for testing and backward compatibility."""
         assert hasattr(ports, "NoOpPiiHasher"), (
-            "NoOpPiiHasher MUST be defined for testing "
-            "and backward compatibility"
+            "NoOpPiiHasher MUST be defined for testing " "and backward compatibility"
         )
 
     def test_noop_pii_hasher_implements_port(self) -> None:
         """NoOpPiiHasher MUST implement PiiHasherPort."""
         hasher = ports.NoOpPiiHasher()
-        assert isinstance(hasher, ports.PiiHasherPort), (
-            "NoOpPiiHasher MUST implement PiiHasherPort"
-        )
+        assert isinstance(
+            hasher, ports.PiiHasherPort
+        ), "NoOpPiiHasher MUST implement PiiHasherPort"
 
 
 class TestBaseTransformerPiiSupport:
@@ -88,12 +86,12 @@ class TestBaseTransformerPiiSupport:
         """BaseTransformer MUST provide hash_pii_value and hash_pii_list methods."""
         from bioetl.application.core.base_transformer import BaseTransformer
 
-        assert hasattr(BaseTransformer, "hash_pii_value"), (
-            "BaseTransformer MUST provide hash_pii_value() method"
-        )
-        assert hasattr(BaseTransformer, "hash_pii_list"), (
-            "BaseTransformer MUST provide hash_pii_list() method"
-        )
+        assert hasattr(
+            BaseTransformer, "hash_pii_value"
+        ), "BaseTransformer MUST provide hash_pii_value() method"
+        assert hasattr(
+            BaseTransformer, "hash_pii_list"
+        ), "BaseTransformer MUST provide hash_pii_list() method"
 
 
 class TestTransformersWithPii:
@@ -144,9 +142,9 @@ class TestPiiHasherImplementation:
         config = SaltConfig(current_salt="x" * 64)
         hasher = Sha256PiiHasher(salt_config=config)
 
-        assert isinstance(hasher, ports.PiiHasherPort), (
-            "Sha256PiiHasher MUST implement PiiHasherPort"
-        )
+        assert isinstance(
+            hasher, ports.PiiHasherPort
+        ), "Sha256PiiHasher MUST implement PiiHasherPort"
 
 
 class TestPiiFieldsInTransformers:
@@ -160,9 +158,9 @@ class TestPiiFieldsInTransformers:
         content = transformer_path.read_text()
 
         # Check that hash_pii_list is called for authors
-        assert "hash_pii_list" in content, (
-            "CrossRefTransformer MUST use hash_pii_list() for authors field"
-        )
+        assert (
+            "hash_pii_list" in content
+        ), "CrossRefTransformer MUST use hash_pii_list() for authors field"
 
     def test_pubmed_transformer_hashes_authors(self) -> None:
         """PubMedPublicationTransformer MUST hash authors field."""
@@ -171,9 +169,9 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text()
 
-        assert "hash_pii_list" in content, (
-            "PubMedPublicationTransformer MUST use hash_pii_list() for authors field"
-        )
+        assert (
+            "hash_pii_list" in content
+        ), "PubMedPublicationTransformer MUST use hash_pii_list() for authors field"
 
     def test_chembl_document_transformer_hashes_authors(self) -> None:
         """DocumentTransformer MUST hash authors field."""
@@ -183,6 +181,6 @@ class TestPiiFieldsInTransformers:
         content = transformer_path.read_text()
 
         # ChEMBL uses single string authors, so hash_pii_value
-        assert "hash_pii_value" in content, (
-            "ChEMBL DocumentTransformer MUST use hash_pii_value() for authors field"
-        )
+        assert (
+            "hash_pii_value" in content
+        ), "ChEMBL DocumentTransformer MUST use hash_pii_value() for authors field"

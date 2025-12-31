@@ -27,9 +27,7 @@ def temp_delta_path(tmp_path):
 
 @pytest.fixture
 def silver_writer(temp_delta_path, noop_logger):
-    return SilverWriter(
-        base_path=temp_delta_path, logger=noop_logger
-    )
+    return SilverWriter(base_path=temp_delta_path, logger=noop_logger)
 
 
 @pytest.fixture

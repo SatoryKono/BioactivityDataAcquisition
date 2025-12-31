@@ -212,18 +212,12 @@ class AssayRecord(BaseModel):
     assay_chembl_id: str = Field(description="Unique assay ChEMBL ID")
 
     # Core identifiers
-    target_chembl_id: str | None = Field(
-        default=None, description="Target ChEMBL ID"
-    )
+    target_chembl_id: str | None = Field(default=None, description="Target ChEMBL ID")
     document_chembl_id: str | None = Field(
         default=None, description="Source document ChEMBL ID"
     )
-    cell_chembl_id: str | None = Field(
-        default=None, description="Cell line ChEMBL ID"
-    )
-    tissue_chembl_id: str | None = Field(
-        default=None, description="Tissue ChEMBL ID"
-    )
+    cell_chembl_id: str | None = Field(default=None, description="Cell line ChEMBL ID")
+    tissue_chembl_id: str | None = Field(default=None, description="Tissue ChEMBL ID")
     src_id: int | None = Field(default=None, description="Data source ID")
     src_assay_id: str | None = Field(
         default=None, description="Original source assay ID"
@@ -237,9 +231,7 @@ class AssayRecord(BaseModel):
     assay_type_description: str | None = Field(
         default=None, description="Full assay type description"
     )
-    assay_category: str | None = Field(
-        default=None, description="Assay category"
-    )
+    assay_category: str | None = Field(default=None, description="Assay category")
     assay_test_type: str | None = Field(
         default=None, description="Test type (in vivo/in vitro)"
     )
@@ -252,15 +244,9 @@ class AssayRecord(BaseModel):
     assay_tax_id: int | None = Field(
         default=None, description="NCBI Taxonomy ID for assay organism"
     )
-    assay_cell_type: str | None = Field(
-        default=None, description="Cell type used"
-    )
-    assay_tissue: str | None = Field(
-        default=None, description="Tissue type used"
-    )
-    assay_strain: str | None = Field(
-        default=None, description="Strain used"
-    )
+    assay_cell_type: str | None = Field(default=None, description="Cell type used")
+    assay_tissue: str | None = Field(default=None, description="Tissue type used")
+    assay_strain: str | None = Field(default=None, description="Strain used")
     assay_subcellular_fraction: str | None = Field(
         default=None, description="Subcellular fraction"
     )
@@ -270,9 +256,7 @@ class AssayRecord(BaseModel):
     bao_label: str | None = Field(default=None, description="BAO label")
 
     # Description and confidence
-    description: str | None = Field(
-        default=None, description="Full assay description"
-    )
+    description: str | None = Field(default=None, description="Full assay description")
     confidence_score: int | None = Field(
         default=None, description="Target confidence score (0-9)"
     )
@@ -298,15 +282,11 @@ class AssayRecord(BaseModel):
     variant_accession: str | None = Field(
         default=None, description="Variant UniProt accession"
     )
-    variant_isoform: str | None = Field(
-        default=None, description="Variant isoform"
-    )
+    variant_isoform: str | None = Field(default=None, description="Variant isoform")
     variant_mutation: str | None = Field(
         default=None, description="Variant mutation (e.g., V600E)"
     )
-    variant_organism: str | None = Field(
-        default=None, description="Variant organism"
-    )
+    variant_organism: str | None = Field(default=None, description="Variant organism")
     variant_sequence: str | None = Field(
         default=None, description="Variant amino acid sequence"
     )
@@ -339,9 +319,7 @@ class MoleculeRecord(BaseModel):
     molecule_chembl_id: str = Field(description="Unique molecule ChEMBL ID")
 
     # Core metadata
-    pref_name: str | None = Field(
-        default=None, description="Preferred molecule name"
-    )
+    pref_name: str | None = Field(default=None, description="Preferred molecule name")
     molecule_type: str | None = Field(
         default=None, description="Type (Small molecule, Protein, Antibody, etc.)"
     )
@@ -369,24 +347,19 @@ class MoleculeRecord(BaseModel):
     natural_product: int | None = Field(
         default=None, description="Natural product flag"
     )
-    first_in_class: int | None = Field(
-        default=None, description="First in class flag"
-    )
+    first_in_class: int | None = Field(default=None, description="First in class flag")
     prodrug: int | None = Field(default=None, description="Prodrug flag")
     therapeutic_flag: bool | None = Field(
         default=None, description="Therapeutic use flag"
     )
-    withdrawn_flag: bool | None = Field(
-        default=None, description="Withdrawn drug flag"
-    )
+    withdrawn_flag: bool | None = Field(default=None, description="Withdrawn drug flag")
     inorganic_flag: int | None = Field(
         default=None, description="Inorganic compound flag"
     )
-    polymer_flag: int | None = Field(
-        default=None, description="Polymer flag"
-    )
+    polymer_flag: int | None = Field(default=None, description="Polymer flag")
     chirality: int | None = Field(
-        default=None, description="Chirality (-1 single, 0 achiral, 1 racemic, 2 mixture)"
+        default=None,
+        description="Chirality (-1 single, 0 achiral, 1 racemic, 2 mixture)",
     )
     dosed_ingredient: int | None = Field(
         default=None, description="Dosed ingredient flag"
@@ -430,18 +403,10 @@ class MoleculeRecord(BaseModel):
     property_full_mwt: float | None = Field(
         default=None, description="Full molecular weight"
     )
-    property_hba: int | None = Field(
-        default=None, description="H-bond acceptor count"
-    )
-    property_hbd: int | None = Field(
-        default=None, description="H-bond donor count"
-    )
-    property_psa: float | None = Field(
-        default=None, description="Polar surface area"
-    )
-    property_rtb: int | None = Field(
-        default=None, description="Rotatable bond count"
-    )
+    property_hba: int | None = Field(default=None, description="H-bond acceptor count")
+    property_hbd: int | None = Field(default=None, description="H-bond donor count")
+    property_psa: float | None = Field(default=None, description="Polar surface area")
+    property_rtb: int | None = Field(default=None, description="Rotatable bond count")
     property_ro5_violations: int | None = Field(
         default=None, description="Rule of 5 violations"
     )
@@ -506,32 +471,23 @@ class TargetRecord(BaseModel):
     target_chembl_id: str = Field(description="Unique target ChEMBL ID")
 
     # Core metadata
-    pref_name: str | None = Field(
-        default=None, description="Preferred target name"
-    )
+    pref_name: str | None = Field(default=None, description="Preferred target name")
     target_type: str | None = Field(
-        default=None, description="Type (SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, etc.)"
+        default=None,
+        description="Type (SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, etc.)",
     )
-    organism: str | None = Field(
-        default=None, description="Target organism"
-    )
-    tax_id: int | None = Field(
-        default=None, description="NCBI Taxonomy ID"
-    )
+    organism: str | None = Field(default=None, description="Target organism")
+    tax_id: int | None = Field(default=None, description="NCBI Taxonomy ID")
     species_group_flag: bool | None = Field(
         default=None, description="Species group flag"
     )
-    description: str | None = Field(
-        default=None, description="Target description"
-    )
+    description: str | None = Field(default=None, description="Target description")
     downgraded: bool | None = Field(
         default=None, description="Deprecated/downgraded flag"
     )
 
     # Optional fields
-    dap_id: int | None = Field(
-        default=None, description="Drug-Affinity Panel ID"
-    )
+    dap_id: int | None = Field(default=None, description="Drug-Affinity Panel ID")
     pipeline_stages: str | None = Field(
         default=None, description="Pipeline stages JSON"
     )
@@ -543,9 +499,7 @@ class TargetRecord(BaseModel):
     component_accessions: list[str] | None = Field(
         default=None, description="Component UniProt accessions"
     )
-    component_ids: list[int] | None = Field(
-        default=None, description="Component IDs"
-    )
+    component_ids: list[int] | None = Field(default=None, description="Component IDs")
     component_types: list[str] | None = Field(
         default=None, description="Component types"
     )
@@ -635,9 +589,7 @@ class CellLineRecord(BaseModel):
     )
 
     # Source information
-    cell_source_tissue: str | None = Field(
-        default=None, description="Source tissue"
-    )
+    cell_source_tissue: str | None = Field(default=None, description="Source tissue")
     cell_source_organism: str | None = Field(
         default=None, description="Source organism"
     )
@@ -646,15 +598,9 @@ class CellLineRecord(BaseModel):
     )
 
     # External identifiers
-    cellosaurus_id: str | None = Field(
-        default=None, description="Cellosaurus ID"
-    )
-    cl_lincs_id: str | None = Field(
-        default=None, description="LINCS cell line ID"
-    )
-    efo_id: str | None = Field(
-        default=None, description="EFO ontology ID"
-    )
+    cellosaurus_id: str | None = Field(default=None, description="Cellosaurus ID")
+    cl_lincs_id: str | None = Field(default=None, description="LINCS cell line ID")
+    efo_id: str | None = Field(default=None, description="EFO ontology ID")
 
 
 class TargetComponentRecord(BaseModel):
@@ -670,21 +616,11 @@ class TargetComponentRecord(BaseModel):
     component_id: int = Field(description="Unique component ID")
 
     # Core metadata
-    accession: str | None = Field(
-        default=None, description="UniProt accession"
-    )
-    component_type: str | None = Field(
-        default=None, description="Component type"
-    )
-    description: str | None = Field(
-        default=None, description="Component description"
-    )
-    organism: str | None = Field(
-        default=None, description="Organism name"
-    )
-    tax_id: int | None = Field(
-        default=None, description="NCBI Taxonomy ID"
-    )
+    accession: str | None = Field(default=None, description="UniProt accession")
+    component_type: str | None = Field(default=None, description="Component type")
+    description: str | None = Field(default=None, description="Component description")
+    organism: str | None = Field(default=None, description="Organism name")
+    tax_id: int | None = Field(default=None, description="NCBI Taxonomy ID")
 
     # Flattened fields
     protein_classification_ids: list[int] | None = Field(

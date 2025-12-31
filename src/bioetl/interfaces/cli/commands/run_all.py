@@ -81,10 +81,7 @@ def _filter_pipelines_by_provider(provider: str) -> list[str]:
     """
     registry = get_default_registry()
     all_pipelines = registry.list_pipelines()
-    return sorted([
-        name for name in all_pipelines
-        if name.startswith(f"{provider}_")
-    ])
+    return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
 
 
 def _validate_provider(provider: str) -> tuple[bool, str | None]:
@@ -164,8 +161,7 @@ async def _run_all_pipelines_async(
                 batch_result.failed += 1
                 batch_result.failed_pipelines.append(pipeline)
                 echo_error(
-                    f"✗ {pipeline}: failed",
-                    result.error_message or "Unknown error"
+                    f"✗ {pipeline}: failed", result.error_message or "Unknown error"
                 )
         except PipelineNotFoundError as e:
             batch_result.failed += 1
@@ -201,6 +197,59 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
 
     if result.failed_pipelines:
         echo_error("Failed pipelines:", ", ".join(result.failed_pipelines))
+
+
+def _handle_list_only(source: str, pipelines: list[str]) -> None:
+    """Handle --list-only mode and exit."""
+    echo_info(f"Pipelines for provider '{source}':")
+    for pipeline in pipelines:
+        echo_info(f"  - {pipeline}")
+    echo_info(f"\nTotal: {len(pipelines)} pipeline(s)")
+    sys.exit(ExitCode.OK)
+
+
+def _handle_destructive_confirmation(
+    run_type: str, pipelines: list[str], dry_run: bool, yes: bool
+) -> bool:
+    """Handle confirmation for destructive operations.
+
+    Returns:
+        True if should continue, False if cancelled.
+    """
+    if run_type not in ("rebuild", "backfill") or dry_run or yes:
+        return True
+
+    echo_warning(f"{run_type} will clear existing data for {len(pipelines)} pipelines.")
+    echo_info("Pipelines to be affected:")
+    for pipeline in pipelines:
+        echo_info(f"  - {pipeline}")
+
+    if not click.confirm("\nDo you want to continue?"):
+        echo_info("Operation cancelled.")
+        sys.exit(ExitCode.OK)
+    return True
+
+
+def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
+    """Show what pipelines will be run."""
+    if dry_run:
+        echo_info(f"[DRY-RUN] Would run {len(pipelines)} pipeline(s) for '{source}':")
+    else:
+        echo_info(f"Running {len(pipelines)} pipeline(s) for '{source}':")
+
+    for pipeline in pipelines:
+        echo_info(f"  - {pipeline}")
+    echo_info("")
+
+
+def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
+    """Determine exit code from batch result."""
+    if batch_result.all_succeeded:
+        return ExitCode.OK
+    if batch_result.failed > 0:
+        return ExitCode.PIPELINE_ERROR
+    # All skipped (shutdown)
+    return ExitCode.SIGINT
 
 
 @click.command("run-all")
@@ -272,35 +321,15 @@ def run_all(
 
     # Handle --list-only mode
     if list_only:
-        echo_info(f"Pipelines for provider '{source}':")
-        for pipeline in pipelines:
-            echo_info(f"  - {pipeline}")
-        echo_info(f"\nTotal: {len(pipelines)} pipeline(s)")
-        sys.exit(ExitCode.OK)
+        _handle_list_only(source, pipelines)
 
     # Handle confirmation for destructive operations (CLI responsibility)
-    if run_type in ("rebuild", "backfill") and not dry_run and not yes:
-        echo_warning(
-            f"{run_type} will clear existing data for {len(pipelines)} pipelines."
-        )
-        echo_info("Pipelines to be affected:")
-        for pipeline in pipelines:
-            echo_info(f"  - {pipeline}")
-        if not click.confirm("\nDo you want to continue?"):
-            echo_info("Operation cancelled.")
-            sys.exit(ExitCode.OK)
+    _handle_destructive_confirmation(run_type, pipelines, dry_run, yes)
 
     # Show what we're about to do
-    if dry_run:
-        echo_info(f"[DRY-RUN] Would run {len(pipelines)} pipeline(s) for '{source}':")
-    else:
-        echo_info(f"Running {len(pipelines)} pipeline(s) for '{source}':")
+    _show_run_preview(source, pipelines, dry_run)
 
-    for pipeline in pipelines:
-        echo_info(f"  - {pipeline}")
-    echo_info("")
-
-    # Build options
+    # Build options and run pipelines
     options = RunOptions(
         run_type=run_type,
         limit=limit,
@@ -308,7 +337,6 @@ def run_all(
         log_level="DEBUG" if debug else "INFO",
     )
 
-    # Run pipelines
     try:
         batch_result = asyncio.run(_run_all_pipelines_async(pipelines, options))
     except KeyboardInterrupt:
@@ -318,17 +346,9 @@ def run_all(
         echo_error("Unexpected error during batch execution", str(e))
         sys.exit(ExitCode.FAIL)
 
-    # Output summary
+    # Output summary and exit
     _echo_batch_summary(batch_result, dry_run)
-
-    # Determine exit code
-    if batch_result.all_succeeded:
-        sys.exit(ExitCode.OK)
-    elif batch_result.failed > 0:
-        sys.exit(ExitCode.PIPELINE_ERROR)
-    else:
-        # All skipped (shutdown)
-        sys.exit(ExitCode.SIGINT)
+    sys.exit(_determine_exit_code(batch_result))
 
 
 __all__ = [
