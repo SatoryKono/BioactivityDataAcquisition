@@ -143,10 +143,8 @@ class TestMedallionFormatValidation:
         with pytest.raises(ValidationError, match="Silver layer MUST use 'delta'"):
             PipelineYamlConfig.model_validate(config_dict)
 
-    def test_gold_parquet_format_rejected(self):
-        """Test that Parquet format is rejected for Gold layer."""
-        from pydantic import ValidationError
-
+    def test_gold_parquet_format_allowed(self):
+        """Test that Parquet format is allowed for Gold layer (RULES.md §2.1)."""
         config_dict = {
             "pipeline_name": "test_pipeline",
             "provider": "test",
@@ -158,8 +156,9 @@ class TestMedallionFormatValidation:
             },
         }
 
-        with pytest.raises(ValidationError, match="Gold layer MUST use 'delta'"):
-            PipelineYamlConfig.model_validate(config_dict)
+        # Gold MAY use parquet (RULES.md §2.1)
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+        assert yaml_config.sink["gold"].format == "parquet"
 
     def test_silver_delta_format_accepted(self):
         """Test that Delta format is accepted for Silver layer."""
@@ -209,8 +208,12 @@ class TestMedallionFormatValidation:
         yaml_config = PipelineYamlConfig.model_validate(config_dict)
         assert yaml_config.sink["bronze"].format == "jsonl"
 
-    def test_bronze_delta_format_accepted(self):
-        """Test that Delta format is also accepted for Bronze layer."""
+    def test_bronze_delta_format_autocorrected_to_jsonl(self):
+        """Test that Delta format is auto-corrected to JSONL for Bronze layer.
+
+        RULES.md §2.1: Bronze MUST use JSONL format.
+        The validator auto-corrects any format to jsonl.
+        """
         config_dict = {
             "pipeline_name": "test_pipeline",
             "provider": "test",
@@ -222,11 +225,16 @@ class TestMedallionFormatValidation:
             },
         }
 
+        # Bronze format is auto-corrected to jsonl (RULES.md §2.1)
         yaml_config = PipelineYamlConfig.model_validate(config_dict)
-        assert yaml_config.sink["bronze"].format == "delta"
+        assert yaml_config.sink["bronze"].format == "jsonl"
 
-    def test_bronze_parquet_format_allowed(self):
-        """Test that Parquet format IS allowed for Bronze layer (legacy support)."""
+    def test_bronze_parquet_format_autocorrected_to_jsonl(self):
+        """Test that Parquet format is auto-corrected to JSONL for Bronze layer.
+
+        RULES.md §2.1: Bronze MUST use JSONL format.
+        The validator auto-corrects any format to jsonl.
+        """
         config_dict = {
             "pipeline_name": "test_pipeline",
             "provider": "test",
@@ -238,6 +246,6 @@ class TestMedallionFormatValidation:
             },
         }
 
-        # Bronze allows parquet for backward compatibility
+        # Bronze format is auto-corrected to jsonl (RULES.md §2.1)
         yaml_config = PipelineYamlConfig.model_validate(config_dict)
-        assert yaml_config.sink["bronze"].format == "parquet"
+        assert yaml_config.sink["bronze"].format == "jsonl"

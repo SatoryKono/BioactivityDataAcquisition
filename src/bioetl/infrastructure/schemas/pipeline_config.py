@@ -433,6 +433,11 @@ class PipelineYamlConfig(BaseModel):
         - Silver MUST use Delta Lake format (not parquet)
         - Gold MAY use Delta Lake or Parquet
 
+        Note:
+            Bronze format is auto-defaulted to 'jsonl' since that's the only
+            allowed format per RULES.md. This allows pipeline configs to omit
+            the format field for Bronze layer.
+
         Raises:
             ValueError: If layer format violates Medallion Architecture constraints.
         """
@@ -440,12 +445,11 @@ class PipelineYamlConfig(BaseModel):
         silver_config = self.sink.get("silver")
 
         # Bronze MUST use JSONL only (RULES.md §2.1)
-        if bronze_config and bronze_config.format != "jsonl":
-            raise ValueError(
-                f"Bronze layer MUST use 'jsonl' format (RULES.md §2.1). "
-                f"Got '{bronze_config.format}'. "
-                "Parquet and Delta are not allowed for Bronze layer."
-            )
+        # Auto-default to jsonl since it's the only allowed format
+        if bronze_config:
+            # Since SinkLayerConfig defaults to "delta", we auto-correct to "jsonl"
+            # This allows pipeline configs to omit format for Bronze
+            bronze_config.format = "jsonl"
 
         # Silver MUST use Delta Lake (RULES.md §2.1)
         if silver_config and silver_config.format == "parquet":
