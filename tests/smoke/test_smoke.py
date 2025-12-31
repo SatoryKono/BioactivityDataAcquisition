@@ -20,12 +20,12 @@ class TestCoreImports:
 
     def test_domain_imports(self) -> None:
         """Domain layer imports successfully."""
-        from bioetl.domain import types, config, ports  # noqa: F401
+        from bioetl.domain import config, ports, types  # noqa: F401
 
     def test_application_imports(self) -> None:
         """Application layer imports successfully."""
-        from bioetl.application.core import runner  # noqa: F401
         from bioetl.application.core import base_transformer  # noqa: F401
+        from bioetl.application.core import runner  # noqa: F401
 
     def test_infrastructure_imports(self) -> None:
         """Infrastructure layer imports successfully."""
@@ -129,6 +129,8 @@ class TestLayerBoundaries:
         import bioetl.domain  # noqa: F401 - import for side effect
         import sys
 
+        import bioetl.domain as domain  # noqa: F401
+
         domain_modules = [
             name for name in sys.modules if name.startswith("bioetl.domain")
         ]
@@ -142,6 +144,8 @@ class TestLayerBoundaries:
         """Domain layer does not import polars directly."""
         import bioetl.domain  # noqa: F401 - import for side effect
         import sys
+
+        import bioetl.domain as domain  # noqa: F401
 
         domain_modules = [
             name for name in sys.modules if name.startswith("bioetl.domain")
@@ -164,7 +168,8 @@ class TestCLILoadable:
 
     def test_cli_is_click_group(self) -> None:
         """CLI group is a Click group."""
-        from bioetl.interfaces.cli import cli
         import click
+
+        from bioetl.interfaces.cli import cli
 
         assert isinstance(cli, click.core.Group)

@@ -1,6 +1,7 @@
-"""Architecture test: проверка форматирования кода с помощью black.
+"""Architecture test: проверка форматирования кода с помощью black и isort.
 
 REQ-ARCH-050: Consistent code formatting across the codebase.
+REQ-ARCH-051: Consistent import ordering via isort.
 """
 
 from __future__ import annotations
@@ -13,6 +14,8 @@ import pytest
 
 # Check if black is available
 _black_available = find_spec("black") is not None
+# Check if isort is available
+_isort_available = find_spec("isort") is not None
 
 
 class TestCodeFormatting:
@@ -54,4 +57,23 @@ class TestCodeFormatting:
             "Code formatting issues found in tests/:\n"
             f"{result.stdout}\n{result.stderr}\n\n"
             "Run `black tests` to fix formatting issues."
+        )
+
+    @pytest.mark.slow
+    @pytest.mark.skipif(not _isort_available, reason="isort not installed")
+    def test_isort_check(self) -> None:
+        """Imports MUST be sorted with isort.
+
+        Run `isort src tests` to fix import ordering issues.
+        """
+        result = subprocess.run(
+            [sys.executable, "-m", "isort", "--check-only", "src", "tests"],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, (
+            "Import ordering issues found:\n"
+            f"{result.stdout}\n{result.stderr}\n\n"
+            "Run `isort src tests` to fix import ordering issues."
         )
