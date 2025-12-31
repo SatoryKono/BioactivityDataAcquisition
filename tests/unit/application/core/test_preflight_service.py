@@ -330,7 +330,7 @@ class TestValidateMedallionConfig:
         assert errors[0].field == "sink.silver.format"
         assert errors[0].expected == "delta"
         assert errors[0].actual == "parquet"
-        assert "RULES §4.1" in errors[0].rule
+        assert "RULES §2.1" in errors[0].rule
 
     def test_gold_format_allows_delta(self, preflight_service, incremental_runtime):
         """Test that Gold format 'delta' is valid."""
@@ -344,8 +344,8 @@ class TestValidateMedallionConfig:
         )
         assert errors == []
 
-    def test_gold_format_allows_parquet(self, preflight_service, incremental_runtime):
-        """Test that Gold format 'parquet' is valid."""
+    def test_gold_format_rejects_parquet(self, preflight_service, incremental_runtime):
+        """Test that Gold format 'parquet' is invalid (RULES §2.1)."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
             bronze_path="/data/bronze",
@@ -354,7 +354,11 @@ class TestValidateMedallionConfig:
             silver_format="delta",
             gold_format="parquet",
         )
-        assert errors == []
+        assert len(errors) == 1
+        assert errors[0].field == "sink.gold.format"
+        assert errors[0].expected == "delta"
+        assert errors[0].actual == "parquet"
+        assert "RULES §2.1" in errors[0].rule
 
     def test_gold_format_rejects_jsonl(self, preflight_service, incremental_runtime):
         """Test that Gold format 'jsonl' is invalid."""
@@ -369,9 +373,9 @@ class TestValidateMedallionConfig:
 
         assert len(errors) == 1
         assert errors[0].field == "sink.gold.format"
-        assert errors[0].expected == "delta or parquet"
+        assert errors[0].expected == "delta"
         assert errors[0].actual == "jsonl"
-        assert "RULES §4.1" in errors[0].rule
+        assert "RULES §2.1" in errors[0].rule
 
     def test_paths_must_be_unique_bronze_silver(
         self, preflight_service, incremental_runtime

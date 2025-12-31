@@ -105,16 +105,16 @@ lock = MemoryLock()
 | **Safety Guard** | `validate_owner()` — проверяет владельца перед записью в storage | `memory_lock.py:206-238` |
 | **Graceful Shutdown** | `aclose()` — отменяет TTL checker и освобождает все блокировки | `memory_lock.py:240-256` |
 
-**Конфигурация по умолчанию** (из `RuntimeConfig`):
-- `heartbeat_interval = 30s`
-- `effective_lock_ttl = heartbeat_interval * 3 = 90s`
+**Конфигурация по умолчанию** (из `PipelineSettings`):
+- `heartbeat_interval = 20s` (см. `config.py:254`)
+- `effective_lock_ttl = heartbeat_interval * 3 = 60s`
 - TTL check interval = 1s
 
 **Пример использования:**
 
 ```python
 lock = MemoryLock()
-await lock.acquire(key="pipeline:chembl", owner_id=run_id, ttl=90)
+await lock.acquire(key="pipeline:chembl", owner_id=run_id, ttl=60)
 
 # В пайплайне — периодически продлевать
 await lock.heartbeat(key="pipeline:chembl", owner_id=run_id)

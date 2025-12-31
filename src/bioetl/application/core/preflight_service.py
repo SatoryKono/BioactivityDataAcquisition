@@ -413,17 +413,17 @@ class _MedallionConfigValidator:
                     field="sink.silver.format",
                     expected="delta",
                     actual=silver_format,
-                    rule="RULES §4.1: Silver MUST use Delta Lake",
+                    rule="RULES §2.1: Silver MUST use Delta Lake",
                 )
             )
 
-        if gold_format is not None and gold_format not in ("delta", "parquet"):
+        if gold_format is not None and gold_format != "delta":
             errors.append(
                 ConfigValidationError(
                     field="sink.gold.format",
-                    expected="delta or parquet",
+                    expected="delta",
                     actual=gold_format,
-                    rule="RULES §4.1: Gold MUST use Delta Lake or Parquet",
+                    rule="RULES §2.1: Gold MUST use Delta Lake",
                 )
             )
 
