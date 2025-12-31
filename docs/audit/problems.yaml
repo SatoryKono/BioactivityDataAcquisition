@@ -1,26 +1,140 @@
-# BioETL Architecture Audit - Problems
+# BioETL Validated Problems
 # Audit Date: 2025-12-31
-# Commit: ad81a11961b762879ff368c4d713e20523900e0a
+# Commit: 205f1d736e79d85cc768fe95b2a66e75814652aa
 
-# No critical or high-priority problems identified
-# All RULES.md v5.8 requirements are met
+problems:
+  - id: "TEST-001"
+    category: "TEST"
+    title: "ChEMBL activity integration test failing"
+    
+    validation:
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "CONFIRMED"
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+    
+    evidence:
+      test_output: |
+        FAILED tests/integration/pipelines/test_chembl_activity.py::TestChemblActivityPipeline::test_chembl_activity_happy_path
+      location: "tests/integration/pipelines/test_chembl_activity.py"
+    
+    impact:
+      severity: "Medium"
+      affected: ["ChEMBL pipeline integration tests"]
+    
+    assessment:
+      complexity: 3
+      effort_days: 0.5
+      priority: "P2"
+    
+    resolution:
+      approach: "Investigate VCR cassette or API response changes. Update cassette if needed."
+      breaking_changes: false
 
-problems: []
+  - id: "DOC-001"
+    category: "DOC"
+    title: "isort not installed, architecture test skipped"
+    
+    validation:
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "CONFIRMED"
+      total_confirmed: "100%"
+      final_verdict: "VALID"
+    
+    evidence:
+      test_output: "SKIPPED [1] tests/architecture/test_code_formatting.py:62: isort not installed"
+      location: "tests/architecture/test_code_formatting.py:62"
+    
+    impact:
+      severity: "Low"
+      affected: ["Import sorting verification"]
+    
+    assessment:
+      complexity: 1
+      effort_days: 0.1
+      priority: "P3"
+    
+    resolution:
+      approach: "Add isort to dev dependencies or mark test as optional"
+      breaking_changes: false
 
-# Minor improvements documented in action_plan.md:
-# - DOC-001: ADR status consistency (P2)
-# - DOC-002: Glossary cross-references (P3)
-# - OPS-001: Distributed locking documentation (P2)
-# - TEST-001: E2E test documentation (P3)
+  - id: "COV-001"
+    category: "TEST"
+    title: "Some CLI commands have low coverage"
+    
+    validation:
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "PARTIAL"
+      total_confirmed: "75%"
+      final_verdict: "VALID"
+    
+    evidence:
+      coverage_output: |
+        src/bioetl/interfaces/cli/commands/cleanup.py: 45.00%
+        src/bioetl/interfaces/cli/commands/config.py: 38.20%
+        src/bioetl/interfaces/cli/commands/lock.py: 39.58%
+    
+    impact:
+      severity: "Low"
+      affected: ["CLI maintenance commands"]
+    
+    assessment:
+      complexity: 4
+      effort_days: 2
+      priority: "P3"
+    
+    resolution:
+      approach: "Add unit tests for CLI commands (cleanup, config, lock)"
+      breaking_changes: false
 
+  - id: "STOR-001"
+    category: "TEST"
+    title: "Storage writers have coverage below 85%"
+    
+    validation:
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "PARTIAL"
+      total_confirmed: "75%"
+      final_verdict: "VALID"
+    
+    evidence:
+      coverage_output: |
+        src/bioetl/infrastructure/storage/bronze_writer.py: 78.20%
+        src/bioetl/infrastructure/storage/gold_writer.py: 77.32%
+        src/bioetl/infrastructure/storage/silver_writer.py: 71.07%
+    
+    impact:
+      severity: "Medium"
+      affected: ["Bronze, Silver, Gold writers"]
+    
+    assessment:
+      complexity: 5
+      effort_days: 3
+      priority: "P2"
+    
+    resolution:
+      approach: "Add tests for uncovered branches in storage writers (error paths, edge cases)"
+      breaking_changes: false
+
+# Summary
 summary:
-  critical_count: 0
-  high_count: 0
-  medium_count: 2
-  low_count: 2
-  total_count: 4
-  
-  verdict: |
-    No architectural violations found. All identified items are 
-    documentation improvements (P2/P3), not code issues.
-    Project fully complies with RULES.md v5.8.
+  total_problems: 4
+  by_severity:
+    critical: 0
+    high: 0
+    medium: 2
+    low: 2
+  by_priority:
+    p0: 0
+    p1: 0
+    p2: 2
+    p3: 2
+  estimated_total_effort: "5.6 person-days"
