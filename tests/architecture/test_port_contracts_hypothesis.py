@@ -19,7 +19,12 @@ from hypothesis import given, settings, strategies as st
 from bioetl.domain import ports
 
 # Python 3.14 has compatibility issues with Hypothesis lambda reflection
+# Skip entire module on Python 3.14
 PYTHON_314 = sys.version_info >= (3, 14)
+pytestmark = pytest.mark.skipif(
+    PYTHON_314,
+    reason="Hypothesis 6.x has lambda reflection issues on Python 3.14",
+)
 
 
 def run_async(coro):
