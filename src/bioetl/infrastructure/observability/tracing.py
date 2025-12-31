@@ -40,7 +40,7 @@ try:
 
         OTLP_AVAILABLE = True
     except ImportError:
-        OTLPSpanExporter = None  # type: ignore[misc,assignment,unused-ignore]
+        OTLPSpanExporter = None
         OTLP_AVAILABLE = False
 
     OTEL_AVAILABLE = True

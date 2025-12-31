@@ -289,7 +289,8 @@ class TestRateLimiterPortProperties:
         )
 
     @given(
-        rate=st.floats(min_value=0.001, max_value=1.0),  # Low rate to prevent replenishment
+        # Low rate to prevent token replenishment during test execution
+        rate=st.floats(min_value=0.001, max_value=1.0),
         capacity=capacity_strategy,
     )
     @settings(max_examples=50, deadline=None)

@@ -1,6 +1,6 @@
 # План Рефакторинга BioETL
 
-*Версия: 6.1 | Дата: 2025-12-30 | Обновлено: UnifiedHTTPClient — подтверждено SRP-compliant, не god object*
+*Версия: 6.2 | Дата: 2025-12-31 | Обновлено: Подтверждено — MemoryLock полностью реализует TTL/heartbeat/fencing, Redis НЕ требуется*
 
 > **⚠️ ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 >
@@ -11,6 +11,8 @@
 > Невыполнение протокола привело к ~60% ложных утверждений в 4 предыдущих аудитах.
 >
 > **📊 Консолидированный анализ:** [`reports/consolidated-refactoring-analysis.md`](../reports/consolidated-refactoring-analysis.md)
+>
+> **📋 Верификация аудитов 2025-02:** [`audits/consolidated-audit-verification-2025-12.md`](audits/consolidated-audit-verification-2025-12.md) — 74% утверждений ложны
 
 ---
 
@@ -48,6 +50,7 @@
 | **Property-based тесты Pandera** | `test_pandera_validator.py:292-395` | 5 hypothesis-тестов для валидаторов с arbitrary input |
 | **Документация Hypothesis стратегий** | `tests/strategies.py:1-118` | Добавлены docstrings с примерами использования |
 | **Порог покрытия 85%** | `pyproject.toml:182` | `fail_under = 85` уже установлен |
+| **BatchExecutor декомпозиция** | `batch_executor.py:540 LOC`, `batch_tracing.py:245 LOC` | Трacing извлечён в `BatchTracingManager`, размер < 550 лимита (верификация 2025-12-31) |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
 
@@ -103,6 +106,18 @@
 | "Порог покрытия не синхронизирован" | `fail_under = 85` **уже установлен** в pyproject.toml | `pyproject.toml:182` (верификация 2025-12-30) |
 | "architecture-audit.md устарел" | Документ **актуален** — версия 1.0 от 2025-12-29, Score 8.9/10 | `docs/architecture-audit.md:1-4` (верификация 2025-12-30) |
 | "UnifiedAPIClient — god object с rate limiting, caching, parsing" | **445 строк, 14 методов**. Rate limiting → делегирует `RateLimiterPort` (TokenBucket). Circuit breaker → делегирует `CircuitBreakerPort`. **Нет caching**. **Нет parsing** — возвращает raw `httpx.Response`. Порты **уже существуют** в `domain/ports/resilience.py`. | `client.py:87-88,243-244`, `domain/ports/resilience.py:21,68` (верификация 2025-12-30) |
+| "CircuitBreaker отсутствует полностью" | **ПОЛНОСТЬЮ РЕАЛИЗОВАН**: state machine (CLOSED→OPEN→HALF_OPEN→CLOSED), failure_threshold=5, recovery_timeout=300, метрики `circuit_breaker_state`, `circuit_breaker_trips_total` | `circuit_breaker.py:44-213` (верификация 2025-12-31) |
+| "CircuitBreaker — только конфигурация без реализации" | **ПОЛНАЯ РЕАЛИЗАЦИЯ**: `CircuitBreaker` class с методами `call()`, `reset()`, `force_open()`, метрики, state machine | `infrastructure/adapters/http/circuit_breaker.py:44-213` (верификация 2025-12-31) |
+| "MemoryLock TTL/heartbeat необязательны, нет fencing" | **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**: `_ttl_checker_loop()` (lines 43-47), `heartbeat()` (lines 176-204), `validate_owner()` safety guard (lines 206-238) | `memory_lock.py:43-238` (верификация 2025-12-31) |
+| "TokenBucket.try_acquire допускает перерасход capacity" | **НЕКОРРЕКТНО**: Token bucket ДОЛЖЕН пополнять токены по времени. Вызов `_refill()` в `try_acquire()` — **корректное поведение** алгоритма, не баг. | `rate_limiter.py:124-139` (верификация 2025-12-31) |
+| "TokenBucket нарушает контракт capacity" | **АЛГОРИТМ РАБОТАЕТ ВЕРНО**: Токены восстанавливаются со скоростью `rate` токенов/секунду — это спецификация token bucket алгоритма | `rate_limiter.py:57-63` (верификация 2025-12-31) |
+| "Нет DQ пороговой логики 5%/20%" | **УЖЕ РЕАЛИЗОВАНО**: `DQConfig.soft_fail_threshold=0.05`, `hard_fail_threshold=0.20`, `_check_hard_threshold()` raises `DataQualityThresholdError` | `domain/config.py:37-38`, `data_quality_service.py:112-131` (верификация 2025-12-31) |
+| "DQ ошибки не отправляются в quarantine" | **РЕАЛИЗОВАНО**: `DataQualityThresholdError` останавливает pipeline при превышении hard threshold | `data_quality_service.py:128-131` (верификация 2025-12-31) |
+| "Пороги DQ не проверяются автоматически" | **АВТОМАТИЧЕСКАЯ ПРОВЕРКА**: `_check_hard_threshold()` вызывается в `evaluate()` | `data_quality_service.py:91` (верификация 2025-12-31) |
+| "VACUUM/retention не интегрирован в пайплайн" | **ИНТЕГРИРОВАНО**: `PostrunService.run_vacuum_if_enabled()` вызывается автоматически | `postrun_service.py:137-153` (верификация 2025-12-31) |
+| "Pandera strict=False позволяет пропускать невалидные данные" | **BY DESIGN**: `strict=False` для backward-compat. При `strict=True` и отсутствии схемы — ошибка | `pandera_validator.py:26-27` (верификация 2025-12-31) |
+| "40 вызовов print() нарушают требования UnifiedLogger" | **ВСЕ В DOCSTRINGS**: Все 40 вхождений — doctest примеры (`>>> print()`), не runtime код. Doctest — стандартный Python pattern для документации. | `grep -v ">>> \|\.\.\.     print" src/bioetl` → 0 вхождений (верификация 2025-12-31) |
+| "BatchExecutor 581-643 LOC — монолит, требует декомпозиции" | **ДЕКОМПОЗИРОВАН**: Tracing извлечён в `BatchTracingManager` (245 LOC), BatchExecutor = 540 LOC < 550 лимита | `batch_executor.py`, `batch_tracing.py` (верификация 2025-12-31) |
 
 ### 🔴 ПОДТВЕРЖДЁННЫЕ ПРОБЛЕМЫ (актуальные задачи)
 
