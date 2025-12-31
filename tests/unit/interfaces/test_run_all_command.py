@@ -252,7 +252,6 @@ class TestRunAllCommand:
         # Make asyncio.run execute the coroutine with a fresh event loop
         def run_coro(coro):
             import asyncio
-
             loop = asyncio.new_event_loop()
             try:
                 return loop.run_until_complete(coro)
@@ -291,7 +290,6 @@ class TestRunAllCommand:
         # Make asyncio.run execute the coroutine with a fresh event loop
         def run_coro(coro):
             import asyncio
-
             loop = asyncio.new_event_loop()
             try:
                 return loop.run_until_complete(coro)
@@ -341,7 +339,6 @@ class TestRunAllCommand:
 
         def run_coro(coro):
             import asyncio
-
             loop = asyncio.new_event_loop()
             try:
                 return loop.run_until_complete(coro)
@@ -407,7 +404,6 @@ class TestRunAllExitCodes:
 
         def run_coro(coro):
             import asyncio
-
             loop = asyncio.new_event_loop()
             try:
                 return loop.run_until_complete(coro)
@@ -453,7 +449,6 @@ class TestRunAllExitCodes:
 
         def run_coro(coro):
             import asyncio
-
             loop = asyncio.new_event_loop()
             try:
                 return loop.run_until_complete(coro)
