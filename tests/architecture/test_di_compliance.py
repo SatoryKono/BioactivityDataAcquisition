@@ -342,16 +342,16 @@ class TestCompositionRootIntegrity:
         REQ-ARCH-DI-005: Composition layer must have factories for DI.
         """
         factories_dir = src_dir / "bioetl" / "composition" / "factories"
-        assert (
-            factories_dir.exists()
-        ), "factories/ directory not found in composition layer."
+        assert factories_dir.exists(), (
+            "factories/ directory not found in composition layer."
+        )
         assert factories_dir.is_dir(), "factories should be a directory (package)"
 
         # Check for factory files
         factory_files = list(factories_dir.glob("*_factory.py"))
-        assert (
-            len(factory_files) >= 1
-        ), "Expected at least one *_factory.py file in composition/factories/"
+        assert len(factory_files) >= 1, (
+            "Expected at least one *_factory.py file in composition/factories/"
+        )
 
     def test_no_circular_dependencies_in_composition(self, src_dir: Path) -> None:
         """Composition layer should not import from itself circularly.

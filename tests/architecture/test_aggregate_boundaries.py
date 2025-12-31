@@ -389,9 +389,9 @@ class TestAggregateConsistencyBoundary:
 
             for prop in properties:
                 # Should have @property but not setter
-                assert (
-                    f"def {prop}(self)" in content
-                ), f"{filename}: {prop} should be a property"
-                assert (
-                    f"@{prop}.setter" not in content
-                ), f"{filename}: {prop} should not have a setter (immutable)"
+                assert f"def {prop}(self)" in content, (
+                    f"{filename}: {prop} should be a property"
+                )
+                assert f"@{prop}.setter" not in content, (
+                    f"{filename}: {prop} should not have a setter (immutable)"
+                )

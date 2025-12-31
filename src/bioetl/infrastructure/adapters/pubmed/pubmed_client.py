@@ -7,6 +7,7 @@ DTO Support:
 - fetch_as_models(): Returns typed DTO models (ArticleRecord)
 - fetch(): Returns raw dicts (backward compatible)
 """
+
 from __future__ import annotations
 
 import time

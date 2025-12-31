@@ -224,12 +224,10 @@ def main() -> int:
     test_dir = Path("tests/unit/pipelines") / provider
 
     files_to_create = {
-        config_dir
-        / f"{entity}.yaml": YAML_TEMPLATE.substitute(
+        config_dir / f"{entity}.yaml": YAML_TEMPLATE.substitute(
             provider=provider, entity=entity, pipeline_name=pipeline_name
         ),
-        pipeline_dir
-        / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
+        pipeline_dir / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
@@ -237,16 +235,14 @@ def main() -> int:
             pipeline_name=pipeline_name,
             class_prefix=class_prefix,
         ),
-        pipeline_dir
-        / "transformer.py": TRANSFORMER_TEMPLATE.substitute(
+        pipeline_dir / "transformer.py": TRANSFORMER_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
             entity_title=entity_title,
             class_prefix=class_prefix,
         ),
-        test_dir
-        / f"test_{entity}_pipeline.py": TEST_TEMPLATE.substitute(
+        test_dir / f"test_{entity}_pipeline.py": TEST_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,

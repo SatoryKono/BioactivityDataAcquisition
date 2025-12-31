@@ -59,8 +59,10 @@ install-pip: ## Install dependencies using pip (fallback)
 	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
 test: ## Run all tests in parallel with coverage (excludes benchmarks)
-	@echo "$(BLUE)Running tests in parallel (excluding benchmarks)...$(NC)"
-	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+	@echo "$(BLUE)Running tests in parallel (excluding benchmarks and E2E)...$(NC)"
+	$(RUN) pytest tests/ -n auto --dist loadscope --ignore=tests/e2e --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+	@echo "$(BLUE)Running E2E tests (serial to avoid race conditions)...$(NC)"
+	$(RUN) pytest tests/e2e/ --cov=src/bioetl --cov-append --cov-report=term-missing --cov-fail-under=85
 
 test-serial: ## Run all tests serially (for debugging)
 	@echo "$(BLUE)Running tests (serial mode)...$(NC)"

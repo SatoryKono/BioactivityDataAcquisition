@@ -172,15 +172,15 @@ class TestEntrypointsExportServices:
         from bioetl.composition import entrypoints
 
         # Check that getter functions exist
-        assert hasattr(
-            entrypoints, "get_checkpoint_service"
-        ), "entrypoints should export get_checkpoint_service"
-        assert hasattr(
-            entrypoints, "get_quarantine_service"
-        ), "entrypoints should export get_quarantine_service"
-        assert hasattr(
-            entrypoints, "get_bronze_cleanup_service"
-        ), "entrypoints should export get_bronze_cleanup_service"
+        assert hasattr(entrypoints, "get_checkpoint_service"), (
+            "entrypoints should export get_checkpoint_service"
+        )
+        assert hasattr(entrypoints, "get_quarantine_service"), (
+            "entrypoints should export get_quarantine_service"
+        )
+        assert hasattr(entrypoints, "get_bronze_cleanup_service"), (
+            "entrypoints should export get_bronze_cleanup_service"
+        )
 
     def test_entrypoints_all_includes_services(self):
         """Test that __all__ includes service getters."""

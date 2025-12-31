@@ -212,10 +212,9 @@ class TestFunctionComplexity:
             except SyntaxError:
                 continue
 
-        assert (
-            not violations
-        ), f"Functions with CC > {max_cc} in {layer}:\n" + "\n".join(
-            f"  - {v}" for v in violations
+        assert not violations, (
+            f"Functions with CC > {max_cc} in {layer}:\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
 

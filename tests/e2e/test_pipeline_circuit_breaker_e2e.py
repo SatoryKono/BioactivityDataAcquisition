@@ -280,9 +280,9 @@ class TestCircuitBreakerErrorClassification:
             error = httpx.HTTPStatusError(
                 "Client error", request=request, response=response
             )
-            assert (
-                is_circuit_breaker_error(error) is False
-            ), f"Status {status_code} should not trigger"
+            assert is_circuit_breaker_error(error) is False, (
+                f"Status {status_code} should not trigger"
+            )
 
     def test_business_error_does_not_trigger_breaker(self):
         """E2E: Business logic errors don't trigger circuit breaker."""
