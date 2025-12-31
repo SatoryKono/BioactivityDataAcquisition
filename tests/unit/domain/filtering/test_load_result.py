@@ -46,7 +46,7 @@ class TestFilterLoadResult:
 
     def test_unique_count_mismatch_raises_error(self) -> None:
         """Test that unique_count must match len(ids)."""
-        with pytest.raises(ValueError, match="unique_count .* must match len\\(ids\\)"):
+        with pytest.raises(ValueError, match=r"unique_count .* must match len\(ids\)"):
             FilterLoadResult(
                 ids=("id1", "id2"),
                 total_count=2,
@@ -57,7 +57,7 @@ class TestFilterLoadResult:
 
     def test_duplicate_count_mismatch_raises_error(self) -> None:
         """Test that duplicate_count must equal total - unique."""
-        with pytest.raises(ValueError, match="duplicate_count .* must equal"):
+        with pytest.raises(ValueError, match=r"duplicate_count .* must equal"):
             FilterLoadResult(
                 ids=("id1", "id2"),
                 total_count=5,

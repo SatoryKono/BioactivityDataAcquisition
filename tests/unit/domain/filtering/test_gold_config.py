@@ -5,8 +5,6 @@ Tests the complete Gold layer filter configuration and evaluation.
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
