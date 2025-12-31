@@ -71,12 +71,12 @@ class TestMedallionConfigValidator:
         )
         assert len(errors) == 0
 
-    def test_validate_layer_formats_valid_parquet_gold(
+    def test_validate_layer_formats_rejects_parquet_gold(
         self,
         validator: MedallionConfigValidator,
         mock_runtime: Mock,
     ) -> None:
-        """Test validation passes for parquet gold format."""
+        """Test validation fails for parquet gold format (RULES §2.1)."""
         errors = validator.validate_medallion_config(
             runtime=mock_runtime,
             bronze_path="/bronze",
@@ -85,7 +85,10 @@ class TestMedallionConfigValidator:
             silver_format="delta",
             gold_format="parquet",
         )
-        assert len(errors) == 0
+        assert len(errors) == 1
+        assert errors[0].field == "sink.gold.format"
+        assert errors[0].expected == "delta"
+        assert errors[0].actual == "parquet"
 
     def test_validate_layer_formats_invalid_silver(
         self,
