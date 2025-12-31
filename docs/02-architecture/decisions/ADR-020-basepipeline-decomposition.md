@@ -291,6 +291,13 @@ async def run_pipeline_flow(
                     (uses CHEMBL_ACTIVITY_CONFIG)
 ```
 
+## Related ADRs
+
+- [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — assembles decomposed components
+- [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports — LoggerPort in PipelineServices
+- [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — PipelineServices design
+- [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — further domain layer improvements
+
 ## Связанные документы
 
 - `docs/refactoring/basepipeline-dependency-map.md`

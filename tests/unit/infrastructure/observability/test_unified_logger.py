@@ -6,10 +6,14 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.infrastructure.observability.logging_config import (
+    secret_filter_processor,
+)
+from bioetl.infrastructure.observability.logging_config import (
+    _mask_secrets,
+)
 from bioetl.infrastructure.observability.unified_logger import (
     UnifiedLogger,
-    _mask_secrets,
-    _secret_filter_processor,
     create_unified_logger,
 )
 
@@ -199,7 +203,7 @@ class TestSecretFiltering:
             "count": 100,  # Should not be affected
         }
 
-        result = _secret_filter_processor(None, "info", event_dict)
+        result = secret_filter_processor(None, "info", event_dict)
 
         # Check that secrets are masked
         assert "secret123" not in result["message"]
@@ -217,7 +221,7 @@ class TestSecretFiltering:
             }
         }
 
-        result = _secret_filter_processor(None, "info", event_dict)
+        result = secret_filter_processor(None, "info", event_dict)
 
         # Password should be masked if it contains secret pattern
         # (Note: the key "password" triggers the pattern match)

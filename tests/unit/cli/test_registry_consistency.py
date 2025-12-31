@@ -10,7 +10,6 @@ Update snapshots: pytest tests/unit/cli/test_registry_consistency.py --snapshot-
 
 from __future__ import annotations
 
-import importlib
 import inspect
 import re
 from typing import Any
@@ -286,7 +285,7 @@ class TestFactoryValidity:
             assert hasattr(factory, "create_with_services"), (
                 f"Factory {name} missing create_with_services method"
             )
-            assert callable(getattr(factory, "create_with_services")), (
+            assert callable(factory.create_with_services), (
                 f"Factory {name}.create_with_services is not callable"
             )
 
@@ -298,7 +297,7 @@ class TestFactoryValidity:
             assert hasattr(factory, "create_runner"), (
                 f"Factory {name} missing create_runner method"
             )
-            assert callable(getattr(factory, "create_runner")), (
+            assert callable(factory.create_runner), (
                 f"Factory {name}.create_runner is not callable"
             )
 
@@ -327,7 +326,6 @@ class TestRegistryConfigConsistency:
 
         This ensures pipelines can actually be run.
         """
-        from pathlib import Path
 
         from bioetl.infrastructure.config import load_pipeline_config
 

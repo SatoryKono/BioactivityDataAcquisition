@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import sys
-import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -332,80 +331,7 @@ def run_all(
         sys.exit(ExitCode.SIGINT)
 
 
-@click.command("run-chembl-all")
-@click.option(
-    "--run-type",
-    type=click.Choice(["incremental", "backfill", "rebuild"]),
-    default="incremental",
-    help="Type of run for all pipelines",
-)
-@click.option("--limit", type=int, help="Maximum records per pipeline")
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    help="Preview mode - show pipelines without execution",
-)
-@click.option(
-    "--yes",
-    "-y",
-    is_flag=True,
-    help="Skip confirmation prompt for rebuild/backfill",
-)
-@click.option(
-    "--list-only",
-    is_flag=True,
-    help="List pipelines without running them",
-)
-@click.option(
-    "--debug",
-    is_flag=True,
-    help="Enable DEBUG level logging",
-)
-def run_chembl_all(
-    run_type: str,
-    limit: int | None,
-    dry_run: bool,
-    yes: bool,
-    list_only: bool,
-    debug: bool,
-) -> None:
-    """[DEPRECATED] Run all ChEMBL pipelines.
-
-    This command is deprecated. Use 'run-all --source chembl' instead.
-
-    Examples:
-
-        bioetl run-all --source chembl  # Preferred
-
-        bioetl run-chembl-all  # Deprecated
-    """
-    warnings.warn(
-        "'run-chembl-all' is deprecated. Use 'run-all --source chembl' instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    echo_warning(
-        "DEPRECATION: 'run-chembl-all' is deprecated. "
-        "Use 'run-all --source chembl' instead."
-    )
-
-    # Delegate to run_all with source=chembl
-    # We use click's Context.invoke for proper delegation
-    ctx = click.get_current_context()
-    ctx.invoke(
-        run_all,
-        source="chembl",
-        run_type=run_type,
-        limit=limit,
-        dry_run=dry_run,
-        yes=yes,
-        list_only=list_only,
-        debug=debug,
-    )
-
-
 __all__ = [
     "BatchRunResult",
     "run_all",
-    "run_chembl_all",
 ]

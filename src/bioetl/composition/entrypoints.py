@@ -18,20 +18,23 @@ entrypoints instead of directly accessing bootstrap or runner internals.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
 from typing import TYPE_CHECKING, Any, cast
 from uuid import uuid4
+
+# Re-export canonical DTO classes from application.services (H1 refactoring)
+# These are the single source of truth for pipeline execution interfaces.
+from bioetl.application.services import RunOptions, RunResult, RunStatus
 
 __all__ = [
     # Configuration
     "load_pipeline_config",
-    # Option classes
+    # Option classes (re-exported from application.services)
     "RunOptions",
     "VacuumOptions",
     "ArchiveOptions",
-    # Result classes
+    # Result classes (re-exported from application.services)
     "RunResult",
     "RunStatus",
     # Pipeline operations
@@ -100,38 +103,6 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class RunOptions:
-    """Options for running a pipeline.
-
-    These are the user-facing options that can be set via CLI or REST API.
-    The entrypoint converts these to internal domain types.
-
-    Attributes:
-        run_type: Type of run (incremental, backfill, rebuild). Default: incremental.
-        resume: Whether to resume from the last checkpoint.
-        limit: Maximum number of records to process.
-        input_csv: Path to CSV file with filter IDs.
-        filter_column: Column name in CSV containing filter IDs.
-        filter_field: API field name to filter by.
-        dry_run: Preview mode without execution.
-        vacuum_after_run: Enable automatic VACUUM after successful run (CLI override).
-        vacuum_retention_days: Minimum age of files to remove during VACUUM (CLI override).
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
-    """
-
-    run_type: str = "incremental"
-    resume: bool = False
-    limit: int | None = None
-    input_csv: str | None = None
-    filter_column: str | None = None
-    filter_field: str | None = None
-    dry_run: bool = False
-    vacuum_after_run: bool | None = None
-    vacuum_retention_days: int | None = None
-    log_level: str = "INFO"
-
-
-@dataclass(frozen=True)
 class VacuumOptions:
     """Options for vacuum operation.
 
@@ -155,76 +126,6 @@ class ArchiveOptions:
 
     target_path: str
     remove_source: bool = False
-
-
-class RunStatus(str, Enum):
-    """Pipeline run completion status.
-
-    Attributes:
-        SUCCESS: Pipeline completed successfully.
-        SHUTDOWN: Pipeline was gracefully shut down (SIGTERM/SIGINT).
-        FAILED: Pipeline failed with an error.
-    """
-
-    SUCCESS = "success"
-    SHUTDOWN = "shutdown"
-    FAILED = "failed"
-
-
-@dataclass(frozen=True)
-class RunResult:
-    """Result of pipeline execution.
-
-    Provides execution metrics and status for orchestration layers.
-    This is the unified return type for run_pipeline() and enables
-    programmatic access to execution results without parsing logs.
-
-    Attributes:
-        status: Completion status (success, shutdown, failed).
-        pipeline_name: Name of the executed pipeline.
-        run_id: Unique identifier for this run.
-        run_type: Type of run (incremental, backfill, rebuild).
-        records_fetched: Total records retrieved from source.
-        records_bronze: Records written to Bronze layer.
-        records_silver: Records written to Silver layer.
-        records_gold: Records written to Gold layer.
-        records_quarantined: Records sent to quarantine.
-        started_at: Timestamp when execution started.
-        completed_at: Timestamp when execution completed.
-        error_message: Error message if status is FAILED.
-
-    Example:
-        >>> result = await run_pipeline("chembl_activity", options)
-        >>> if result.status == RunStatus.SUCCESS:
-        ...     print(f"Processed {result.records_silver} records")
-        >>> else:
-        ...     print(f"Failed: {result.error_message}")
-    """
-
-    status: RunStatus
-    pipeline_name: str
-    run_id: str
-    run_type: str
-    records_fetched: int = 0
-    records_bronze: int = 0
-    records_silver: int = 0
-    records_gold: int = 0
-    records_quarantined: int = 0
-    started_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
-    completed_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
-    error_message: str | None = None
-
-    @property
-    def duration_seconds(self) -> float:
-        """Calculate execution duration in seconds."""
-        return (self.completed_at - self.started_at).total_seconds()
-
-    @property
-    def success_rate(self) -> float:
-        """Calculate success rate (non-quarantined / fetched)."""
-        if self.records_fetched == 0:
-            return 1.0
-        return (self.records_fetched - self.records_quarantined) / self.records_fetched
 
 
 def _ensure_registrations() -> None:
@@ -355,6 +256,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
 
     status = RunStatus.SUCCESS
     error_message: str | None = None
+    error_type: str | None = None
 
     try:
         await runner.run()
@@ -363,6 +265,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     except Exception as e:
         status = RunStatus.FAILED
         error_message = str(e)
+        error_type = type(e).__name__
 
     completed_at = datetime.now(tz=UTC)
 
@@ -381,6 +284,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         started_at=started_at,
         completed_at=completed_at,
         error_message=error_message,
+        error_type=error_type,
     )
 
 

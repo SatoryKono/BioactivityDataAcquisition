@@ -48,7 +48,7 @@ from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
 )
-from bioetl.infrastructure.adapters.error_handling import ErrorHandler
+from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
 )
@@ -105,7 +105,7 @@ class ChemblAdapter(BaseHttpAdapter):
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
-        self._error_handler = ErrorHandler(self.logger)
+        self._error_handler = ErrorService(self.logger)
         # Resolve configuration with clear priority
         if self.adapter_config is not None:
             # Primary: use AdapterConfig from YAML

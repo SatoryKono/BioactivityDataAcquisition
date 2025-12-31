@@ -367,16 +367,7 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# =============================================================================
-# Re-exports for CLI/interfaces convenience
-# =============================================================================
-
-# RuntimeConfig is defined in domain.config but re-exported here
-# for convenience when used in CLI/interfaces layer
-from bioetl.domain.config import RuntimeConfig  # noqa: E402
-
 __all__ = [
-    "RuntimeConfig",
     "Settings",
     "SourceYamlConfig",
     "get_pipeline_config",

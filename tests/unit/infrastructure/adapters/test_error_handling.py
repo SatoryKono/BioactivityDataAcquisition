@@ -1,6 +1,6 @@
 """Tests for unified error handling in adapters.
 
-Verifies ErrorHandler provides consistent error classification, logging,
+Verifies ErrorService provides consistent error classification, logging,
 and wrapping across all DataSourcePort adapters (RULES.md §4.1).
 """
 
@@ -21,7 +21,7 @@ from bioetl.domain.types import ErrorType
 from bioetl.infrastructure.adapters.error_handling import (
     AdapterErrorContext,
     ErrorCategory,
-    ErrorHandler,
+    ErrorService,
 )
 
 
@@ -40,8 +40,8 @@ class TestErrorCategory:
         assert ErrorCategory.CRITICAL.value == "CRITICAL"
 
 
-class TestErrorHandler:
-    """Tests for ErrorHandler class."""
+class TestErrorService:
+    """Tests for ErrorService class."""
 
     @pytest.fixture
     def mock_logger(self) -> MagicMock:
@@ -53,82 +53,82 @@ class TestErrorHandler:
         return logger
 
     @pytest.fixture
-    def handler(self, mock_logger: MagicMock) -> ErrorHandler:
-        """Create ErrorHandler instance with mock logger."""
-        return ErrorHandler(mock_logger)
+    def handler(self, mock_logger: MagicMock) -> ErrorService:
+        """Create ErrorService instance with mock logger."""
+        return ErrorService(mock_logger)
 
     # HTTP Status Classification Tests
 
-    def test_classify_http_401_as_critical(self, handler: ErrorHandler) -> None:
+    def test_classify_http_401_as_critical(self, handler: ErrorService) -> None:
         """HTTP 401 Unauthorized should be CRITICAL."""
         category = handler.classify_http_error(401)
         assert category == ErrorCategory.CRITICAL
 
-    def test_classify_http_403_as_critical(self, handler: ErrorHandler) -> None:
+    def test_classify_http_403_as_critical(self, handler: ErrorService) -> None:
         """HTTP 403 Forbidden should be CRITICAL."""
         category = handler.classify_http_error(403)
         assert category == ErrorCategory.CRITICAL
 
-    def test_classify_http_429_as_recoverable(self, handler: ErrorHandler) -> None:
+    def test_classify_http_429_as_recoverable(self, handler: ErrorService) -> None:
         """HTTP 429 Rate Limit should be RECOVERABLE."""
         category = handler.classify_http_error(429)
         assert category == ErrorCategory.RECOVERABLE
 
-    def test_classify_http_500_as_recoverable(self, handler: ErrorHandler) -> None:
+    def test_classify_http_500_as_recoverable(self, handler: ErrorService) -> None:
         """HTTP 500 Internal Server Error should be RECOVERABLE."""
         category = handler.classify_http_error(500)
         assert category == ErrorCategory.RECOVERABLE
 
-    def test_classify_http_502_as_recoverable(self, handler: ErrorHandler) -> None:
+    def test_classify_http_502_as_recoverable(self, handler: ErrorService) -> None:
         """HTTP 502 Bad Gateway should be RECOVERABLE."""
         category = handler.classify_http_error(502)
         assert category == ErrorCategory.RECOVERABLE
 
-    def test_classify_http_503_as_recoverable(self, handler: ErrorHandler) -> None:
+    def test_classify_http_503_as_recoverable(self, handler: ErrorService) -> None:
         """HTTP 503 Service Unavailable should be RECOVERABLE."""
         category = handler.classify_http_error(503)
         assert category == ErrorCategory.RECOVERABLE
 
-    def test_classify_http_504_as_recoverable(self, handler: ErrorHandler) -> None:
+    def test_classify_http_504_as_recoverable(self, handler: ErrorService) -> None:
         """HTTP 504 Gateway Timeout should be RECOVERABLE."""
         category = handler.classify_http_error(504)
         assert category == ErrorCategory.RECOVERABLE
 
-    def test_classify_http_400_as_data_quality(self, handler: ErrorHandler) -> None:
+    def test_classify_http_400_as_data_quality(self, handler: ErrorService) -> None:
         """HTTP 400 Bad Request should be DATA_QUALITY."""
         category = handler.classify_http_error(400)
         assert category == ErrorCategory.DATA_QUALITY
 
-    def test_classify_http_404_as_data_quality(self, handler: ErrorHandler) -> None:
+    def test_classify_http_404_as_data_quality(self, handler: ErrorService) -> None:
         """HTTP 404 Not Found should be DATA_QUALITY."""
         category = handler.classify_http_error(404)
         assert category == ErrorCategory.DATA_QUALITY
 
-    def test_classify_http_422_as_data_quality(self, handler: ErrorHandler) -> None:
+    def test_classify_http_422_as_data_quality(self, handler: ErrorService) -> None:
         """HTTP 422 Unprocessable Entity should be DATA_QUALITY."""
         category = handler.classify_http_error(422)
         assert category == ErrorCategory.DATA_QUALITY
 
-    def test_classify_unknown_5xx_as_recoverable(self, handler: ErrorHandler) -> None:
+    def test_classify_unknown_5xx_as_recoverable(self, handler: ErrorService) -> None:
         """Unknown 5xx errors should be RECOVERABLE."""
         category = handler.classify_http_error(599)
         assert category == ErrorCategory.RECOVERABLE
 
-    def test_classify_unknown_4xx_as_data_quality(self, handler: ErrorHandler) -> None:
+    def test_classify_unknown_4xx_as_data_quality(self, handler: ErrorService) -> None:
         """Unknown 4xx errors (except auth) should be DATA_QUALITY."""
         category = handler.classify_http_error(451)
         assert category == ErrorCategory.DATA_QUALITY
 
     # Exception Classification Tests
 
-    def test_classify_auth_exception_as_critical(self, handler: ErrorHandler) -> None:
+    def test_classify_auth_exception_as_critical(self, handler: ErrorService) -> None:
         """Auth exceptions should be classified as CRITICAL."""
         error = ServiceAuthenticationError("Auth failed", service_name="test")
         category = handler.classify_exception(error)
         assert category == ErrorCategory.CRITICAL
 
     def test_classify_rate_limit_exception_as_recoverable(
-        self, handler: ErrorHandler
+        self, handler: ErrorService
     ) -> None:
         """Rate limit exceptions should be classified as RECOVERABLE."""
         error = RateLimitExceededError("Rate limit", service_name="test")
@@ -136,7 +136,7 @@ class TestErrorHandler:
         assert category == ErrorCategory.RECOVERABLE
 
     def test_classify_service_unavailable_as_recoverable(
-        self, handler: ErrorHandler
+        self, handler: ErrorService
     ) -> None:
         """Service unavailable exceptions should be RECOVERABLE."""
         error = ServiceUnavailableError("Service down", service_name="test")
@@ -146,7 +146,7 @@ class TestErrorHandler:
     # Error Logging Tests
 
     def test_log_error_format(
-        self, handler: ErrorHandler, mock_logger: MagicMock
+        self, handler: ErrorService, mock_logger: MagicMock
     ) -> None:
         """Verify error log format matches RULES.md §10.4.2."""
         error = ValueError("Test error")
@@ -180,7 +180,7 @@ class TestErrorHandler:
         assert context.status_code == 500
 
     def test_log_error_includes_error_type(
-        self, handler: ErrorHandler, mock_logger: MagicMock
+        self, handler: ErrorService, mock_logger: MagicMock
     ) -> None:
         """Error log should include ErrorType classification."""
         error = RateLimitExceededError("Rate limit", service_name="test")
@@ -195,7 +195,7 @@ class TestErrorHandler:
         assert kwargs["error_type"] == ErrorType.RATE_LIMIT.value
 
     def test_log_error_includes_circuit_breaker_state(
-        self, handler: ErrorHandler, mock_logger: MagicMock
+        self, handler: ErrorService, mock_logger: MagicMock
     ) -> None:
         """Error log should include circuit breaker state if provided."""
         error = ValueError("Test error")
@@ -212,17 +212,17 @@ class TestErrorHandler:
 
     # should_retry Tests
 
-    def test_should_retry_rate_limit(self, handler: ErrorHandler) -> None:
+    def test_should_retry_rate_limit(self, handler: ErrorService) -> None:
         """Rate limit errors should be retried."""
         error = RateLimitExceededError("Rate limit", service_name="test")
         assert handler.should_retry(error) is True
 
-    def test_should_retry_timeout(self, handler: ErrorHandler) -> None:
+    def test_should_retry_timeout(self, handler: ErrorService) -> None:
         """Timeout errors should be retried."""
         error = ServiceUnavailableError("Timeout", service_name="test")
         assert handler.should_retry(error) is True
 
-    def test_should_not_retry_auth_error(self, handler: ErrorHandler) -> None:
+    def test_should_not_retry_auth_error(self, handler: ErrorService) -> None:
         """Auth errors should NOT be retried."""
         error = ServiceAuthenticationError("Auth failed", service_name="test")
         # Auth errors are critical but may not return False for should_retry
@@ -231,26 +231,26 @@ class TestErrorHandler:
         error_type = handler.get_error_type(error)
         assert error_type.is_critical() is True
 
-    def test_should_retry_status_429(self, handler: ErrorHandler) -> None:
+    def test_should_retry_status_429(self, handler: ErrorService) -> None:
         """HTTP 429 should be retried."""
         assert handler.should_retry_status(429) is True
 
-    def test_should_retry_status_500(self, handler: ErrorHandler) -> None:
+    def test_should_retry_status_500(self, handler: ErrorService) -> None:
         """HTTP 500 should be retried."""
         assert handler.should_retry_status(500) is True
 
-    def test_should_not_retry_status_401(self, handler: ErrorHandler) -> None:
+    def test_should_not_retry_status_401(self, handler: ErrorService) -> None:
         """HTTP 401 should NOT be retried."""
         assert handler.should_retry_status(401) is False
 
-    def test_should_not_retry_status_400(self, handler: ErrorHandler) -> None:
+    def test_should_not_retry_status_400(self, handler: ErrorService) -> None:
         """HTTP 400 should NOT be retried."""
         assert handler.should_retry_status(400) is False
 
     # Error Wrapping Tests
 
     def test_wrap_error_429_returns_rate_limit_error(
-        self, handler: ErrorHandler
+        self, handler: ErrorService
     ) -> None:
         """HTTP 429 should be wrapped as RateLimitExceededError."""
         error = ValueError("Rate limit exceeded")
@@ -266,7 +266,7 @@ class TestErrorHandler:
         assert wrapped.retry_after == 60.0
 
     def test_wrap_error_500_returns_service_unavailable(
-        self, handler: ErrorHandler
+        self, handler: ErrorService
     ) -> None:
         """HTTP 5xx should be wrapped as ServiceUnavailableError."""
         error = ValueError("Server error")
@@ -280,7 +280,7 @@ class TestErrorHandler:
         assert wrapped.service_name == "uniprot"
         assert wrapped.status_code == 500
 
-    def test_wrap_error_401_raises_critical(self, handler: ErrorHandler) -> None:
+    def test_wrap_error_401_raises_critical(self, handler: ErrorService) -> None:
         """HTTP 401 should raise CriticalError."""
         error = ValueError("Unauthorized")
 
@@ -294,7 +294,7 @@ class TestErrorHandler:
         assert "pubmed" in str(exc_info.value)
         assert "authentication failed" in str(exc_info.value).lower()
 
-    def test_wrap_error_403_raises_critical(self, handler: ErrorHandler) -> None:
+    def test_wrap_error_403_raises_critical(self, handler: ErrorService) -> None:
         """HTTP 403 should raise CriticalError."""
         error = ValueError("Forbidden")
 
@@ -307,7 +307,7 @@ class TestErrorHandler:
 
         assert "chembl" in str(exc_info.value)
 
-    def test_wrap_error_without_status_code(self, handler: ErrorHandler) -> None:
+    def test_wrap_error_without_status_code(self, handler: ErrorService) -> None:
         """Wrapping without status_code should use exception type."""
         error = RateLimitExceededError("Rate limit", service_name="test")
         wrapped = handler.wrap_error(
@@ -319,7 +319,7 @@ class TestErrorHandler:
 
     # Retry-After Header Tests
 
-    def test_get_retry_after_numeric(self, handler: ErrorHandler) -> None:
+    def test_get_retry_after_numeric(self, handler: ErrorService) -> None:
         """Extract numeric Retry-After header."""
         response = MagicMock(spec=httpx.Response)
         response.headers = {"Retry-After": "120"}
@@ -327,7 +327,7 @@ class TestErrorHandler:
         retry_after = handler.get_retry_after(response)
         assert retry_after == 120.0
 
-    def test_get_retry_after_missing(self, handler: ErrorHandler) -> None:
+    def test_get_retry_after_missing(self, handler: ErrorService) -> None:
         """Return None when Retry-After header is missing."""
         response = MagicMock(spec=httpx.Response)
         response.headers = {}
@@ -336,7 +336,7 @@ class TestErrorHandler:
         assert retry_after is None
 
     def test_get_retry_after_non_numeric_returns_default(
-        self, handler: ErrorHandler
+        self, handler: ErrorService
     ) -> None:
         """Return default when Retry-After is HTTP-date format."""
         response = MagicMock(spec=httpx.Response)
@@ -348,7 +348,7 @@ class TestErrorHandler:
     # handle_error Integration Tests
 
     def test_handle_error_logs_and_wraps(
-        self, handler: ErrorHandler, mock_logger: MagicMock
+        self, handler: ErrorService, mock_logger: MagicMock
     ) -> None:
         """handle_error should log and wrap error in one call."""
         error = ValueError("Test error")
@@ -368,7 +368,7 @@ class TestErrorHandler:
         assert wrapped.service_name == "chembl"
 
     def test_handle_error_raises_critical_for_auth(
-        self, handler: ErrorHandler, mock_logger: MagicMock
+        self, handler: ErrorService, mock_logger: MagicMock
     ) -> None:
         """handle_error should raise CriticalError for auth failures."""
         error = ValueError("Unauthorized")
@@ -428,7 +428,7 @@ class TestAdapterErrorContext:
         assert context.extra == {}
 
 
-class TestErrorHandlerConsistency:
+class TestErrorServiceConsistency:
     """Tests to verify consistent error handling across adapters."""
 
     @pytest.fixture
@@ -437,16 +437,16 @@ class TestErrorHandlerConsistency:
         return MagicMock()
 
     @pytest.fixture
-    def handler(self, mock_logger: MagicMock) -> ErrorHandler:
-        """Create ErrorHandler instance."""
-        return ErrorHandler(mock_logger)
+    def handler(self, mock_logger: MagicMock) -> ErrorService:
+        """Create ErrorService instance."""
+        return ErrorService(mock_logger)
 
     @pytest.mark.parametrize(
         "provider",
         ["chembl", "uniprot", "pubchem", "pubmed"],
     )
     def test_consistent_log_format_across_providers(
-        self, handler: ErrorHandler, mock_logger: MagicMock, provider: str
+        self, handler: ErrorService, mock_logger: MagicMock, provider: str
     ) -> None:
         """All providers should produce consistent log format."""
         error = ValueError("Test error")
@@ -485,7 +485,7 @@ class TestErrorHandlerConsistency:
     )
     def test_consistent_http_classification(
         self,
-        handler: ErrorHandler,
+        handler: ErrorService,
         status_code: int,
         expected_category: ErrorCategory,
     ) -> None:

@@ -17,7 +17,14 @@ Requirements:
 - REQ-OBS-004: Structured JSON format
 - REQ-OBS-005: Log Schema with mandatory fields
 
+Note:
+    This module uses centralized logging configuration from logging_config.py.
+    The configuration is applied automatically on first logger creation.
+    For explicit control, call configure_logging() at application startup.
+
 Example:
+    >>> from bioetl.infrastructure.observability.logging_config import configure_logging
+    >>> configure_logging(json_format=True)
     >>> logger = UnifiedLogger(pipeline="chembl_activity", run_id="abc-123")
     >>> logger.info("Fetching page", stage="extract", page=5)
     >>> logger.error("Validation failed", stage="transform", error_type="schema_error")
@@ -25,107 +32,17 @@ Example:
 
 from __future__ import annotations
 
-import logging
-import re
-import sys
 from typing import TYPE_CHECKING, Any, Literal, Self
 
 import structlog
+
+from bioetl.infrastructure.observability.logging_config import configure_logging
 
 if TYPE_CHECKING:
     from uuid import UUID
 
 # Stage values allowed by Log Schema
 StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
-
-
-# Patterns for secret detection in log values
-_SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    (
-        re.compile(
-            r"(?i)(api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
-        ),
-        "[REDACTED_API_KEY]",
-    ),
-    (
-        re.compile(
-            r"(?i)(auth|authorization)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
-        ),
-        "[REDACTED_AUTH]",
-    ),
-    (
-        re.compile(r"(?i)(token|bearer)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE),
-        "[REDACTED_TOKEN]",
-    ),
-    (
-        re.compile(
-            r"(?i)(password|passwd|pwd)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
-        ),
-        "[REDACTED_PASSWORD]",
-    ),
-    (
-        re.compile(
-            r"(?i)(secret|private[_-]?key)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
-        ),
-        "[REDACTED_SECRET]",
-    ),
-    # Bearer tokens in headers
-    (re.compile(r"Bearer\s+[\w.-]+", re.IGNORECASE), "Bearer [REDACTED]"),
-    # AWS-style keys
-    (re.compile(r"AKIA[0-9A-Z]{16}"), "[REDACTED_AWS_KEY]"),
-    # Generic long alphanumeric that look like keys (32+ chars)
-    (re.compile(r"(?<![a-zA-Z0-9])[a-zA-Z0-9]{32,}(?![a-zA-Z0-9])"), "[REDACTED_KEY]"),
-]
-
-
-def _mask_secrets(value: Any) -> Any:
-    """Mask potential secrets in log values.
-
-    Args:
-        value: Value to check and potentially mask
-
-    Returns:
-        Original value or masked version if secrets detected
-    """
-    if not isinstance(value, str):
-        return value
-
-    result = value
-    for pattern, replacement in _SECRET_PATTERNS:
-        result = pattern.sub(replacement, result)
-
-    return result
-
-
-def _secret_filter_processor(
-    logger: Any,
-    _method_name: str,
-    event_dict: dict[str, Any],
-) -> dict[str, Any]:
-    """Structlog processor that filters secrets from log entries.
-
-    Scans all string values in the event dict and masks potential secrets
-    like API keys, tokens, passwords, and authorization headers.
-
-    Args:
-        logger: The wrapped logger object
-        method_name: Name of the log method called
-        event_dict: Dictionary of event data
-
-    Returns:
-        Event dict with secrets masked
-    """
-    for key, value in event_dict.items():
-        if isinstance(value, str):
-            event_dict[key] = _mask_secrets(value)
-        elif isinstance(value, dict):
-            # Recursively mask nested dicts
-            event_dict[key] = {
-                k: _mask_secrets(v) if isinstance(v, str) else v
-                for k, v in value.items()
-            }
-
-    return event_dict
 
 
 class UnifiedLogger:
@@ -137,6 +54,10 @@ class UnifiedLogger:
 
     The logger also includes secret filtering to prevent accidental
     logging of sensitive data like API keys, tokens, and passwords.
+
+    Note:
+        Uses centralized logging configuration from logging_config.py.
+        Configuration is applied automatically if not already done.
 
     Example:
         >>> logger = UnifiedLogger(pipeline="chembl_activity", run_id="abc-123")
@@ -164,43 +85,14 @@ class UnifiedLogger:
         self._pipeline = pipeline
         self._run_id = str(run_id)
 
-        # Build processor chain with secret filtering
-        processors: list[Any] = [
-            structlog.contextvars.merge_contextvars,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.processors.UnicodeDecoder(),
-            _secret_filter_processor,  # Filter secrets before output
-        ]
-
-        if json_format:
-            processors.append(structlog.processors.JSONRenderer())
-        else:
-            processors.append(structlog.dev.ConsoleRenderer())
-
-        structlog.configure(
-            processors=processors,
-            logger_factory=structlog.stdlib.LoggerFactory(),
-            wrapper_class=structlog.stdlib.BoundLogger,
-            cache_logger_on_first_use=True,
-        )
+        # Use centralized configuration (no-op if already configured)
+        configure_logging(json_format=json_format, log_level=log_level)
 
         # Create logger with mandatory bound context
         base_logger = structlog.get_logger(f"bioetl.{pipeline}")
         self._logger = base_logger.bind(
             run_id=self._run_id,
             pipeline=pipeline,
-        )
-
-        # Configure stdlib logging level
-        logging.basicConfig(
-            level=log_level.upper(),
-            stream=sys.stdout,
-            format="%(message)s",
         )
 
     def bind(self, **kwargs: Any) -> Self:
