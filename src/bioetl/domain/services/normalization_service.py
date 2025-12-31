@@ -231,11 +231,15 @@ class NormalizationService:
         if not aggregate:
             return results
 
-        # Filter to valid values if requested
-        if filter_invalid:
-            valid_results = [r for r in results if r.is_valid]
-        else:
-            valid_results = results
+        return self._aggregate_results(results, filter_invalid)
+
+    def _aggregate_results(
+        self,
+        results: list[NormalizationResult],
+        filter_invalid: bool,
+    ) -> NormalizationResult:
+        """Aggregate multiple normalization results into one."""
+        valid_results = self._filter_valid_results(results, filter_invalid)
 
         if not valid_results:
             return NormalizationResult(
@@ -245,30 +249,52 @@ class NormalizationService:
                 validation_message="No valid values to aggregate",
             )
 
-        # Aggregate values
+        return self._build_aggregated_result(valid_results)
+
+    def _filter_valid_results(
+        self,
+        results: list[NormalizationResult],
+        filter_invalid: bool,
+    ) -> list[NormalizationResult]:
+        """Filter results to valid ones if requested."""
+        if filter_invalid:
+            return [r for r in results if r.is_valid]
+        return results
+
+    def _build_aggregated_result(
+        self,
+        valid_results: list[NormalizationResult],
+    ) -> NormalizationResult:
+        """Build aggregated result from valid results."""
         valid_values = [r.value for r in valid_results]
         aggregated = self.aggregator.aggregate_values(
             valid_values,
             self.config.default_aggregation_method,
         )
 
-        # Calculate pChEMBL for aggregated value
-        pchembl = None
-        is_potent = False
-        target_unit = self.config.default_output_unit
-        try:
-            pchembl = self.converter.value_to_pchembl(aggregated, target_unit)
-            is_potent = pchembl.value >= self.config.potency_threshold
-        except ValueError:
-            pass
+        pchembl, is_potent = self._compute_pchembl_for_value(aggregated)
 
         return NormalizationResult(
             value=aggregated,
-            unit=target_unit,
+            unit=self.config.default_output_unit,
             pchembl=pchembl,
             is_valid=True,
             is_potent=is_potent,
         )
+
+    def _compute_pchembl_for_value(
+        self,
+        value: float,
+    ) -> tuple[PChemblValue | None, bool]:
+        """Compute pChEMBL value and potency for a normalized value."""
+        try:
+            pchembl = self.converter.value_to_pchembl(
+                value, self.config.default_output_unit
+            )
+            is_potent = pchembl.value >= self.config.potency_threshold
+            return pchembl, is_potent
+        except ValueError:
+            return None, False
 
     def normalize_concentrations(
         self,
