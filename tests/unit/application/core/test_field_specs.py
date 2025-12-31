@@ -111,14 +111,14 @@ class TestMapField:
         """Test that missing required field raises ValueError."""
         record: dict[str, str] = {}
         spec = FieldSpec("required_field", required=True)
-        with pytest.raises(ValueError, match="Required field.*missing"):
+        with pytest.raises(ValueError, match=r"Required field.*missing"):
             map_field(record, spec)
 
     def test_required_field_none_raises(self) -> None:
         """Test that None value for required field raises ValueError."""
         record = {"required_field": None}
         spec = FieldSpec("required_field", required=True)
-        with pytest.raises(ValueError, match="Required field.*missing"):
+        with pytest.raises(ValueError, match=r"Required field.*missing"):
             map_field(record, spec)
 
     def test_default_value_when_missing(self) -> None:

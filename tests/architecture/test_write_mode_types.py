@@ -193,7 +193,7 @@ def test_overwrite_for_silver_raises_error() -> None:
     """
     from bioetl.domain.config import TableConfig
 
-    with pytest.raises(ValueError, match="Invalid Silver write mode.*overwrite"):
+    with pytest.raises(ValueError, match=r"Invalid Silver write mode.*overwrite"):
         TableConfig(silver_write_mode="overwrite")
 
 
