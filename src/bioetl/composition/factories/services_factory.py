@@ -443,9 +443,9 @@ class ServicesBuilder:
             context=pipeline.context,
             config=processor_config,
             error_classifier=error_classifier,
-            transform_callback=transform_cb,  # type: ignore[arg-type]
-            gold_filter_callback=gold_filter_cb,  # type: ignore[arg-type]
-            gold_transform_callback=gold_transform_cb,  # type: ignore[arg-type]
+            transform_callback=transform_cb,
+            gold_filter_callback=gold_filter_cb,
+            gold_transform_callback=gold_transform_cb,
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=shutdown_signal,
