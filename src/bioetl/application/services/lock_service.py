@@ -50,7 +50,7 @@ class LockService:
     Example:
         >>> service = LockService(lock_port=port, logger=logger)
         >>> released = await service.release_lock("chembl_activity", run_id)
-        >>> print(f"Lock released: {released}")
+        >>> logger.info("lock_released", pipeline="chembl_activity", released=released)
     """
 
     lock_port: LockPort

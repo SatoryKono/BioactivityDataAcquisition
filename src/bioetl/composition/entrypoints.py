@@ -239,11 +239,11 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await run_pipeline("chembl_activity", options)
         >>> if result.status == RunStatus.SUCCESS:
-        ...     print(f"Processed {result.records_silver} records")
+        ...     logger.info("pipeline_success", records_silver=result.records_silver)
         >>> elif result.status == RunStatus.SHUTDOWN:
-        ...     print("Pipeline was gracefully shut down")
+        ...     logger.info("pipeline_shutdown", pipeline="chembl_activity")
         >>> else:
-        ...     print(f"Pipeline failed: {result.error_message}")
+        ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
     from bioetl.application.core.shutdown import PipelineShutdownError
 
@@ -474,7 +474,7 @@ def get_checkpoint_service() -> CheckpointService:
         >>> service = get_checkpoint_service()
         >>> checkpoints = await service.list_checkpoints()
         >>> for cp in checkpoints:
-        ...     print(f"{cp.pipeline_name}: {cp.metadata}")
+        ...     logger.info("checkpoint", pipeline=cp.pipeline_name, metadata=cp.metadata)
     """
     _ensure_registrations()
     return bootstrap_checkpoint_service()
@@ -493,7 +493,7 @@ def get_quarantine_service() -> QuarantineService:
         >>> service = get_quarantine_service()
         >>> records = await service.inspect("chembl_activity", limit=10)
         >>> for rec in records:
-        ...     print(f"{rec.error_code}: {rec.payload}")
+        ...     logger.info("quarantine_record", error_code=rec.error_code, payload=rec.payload)
     """
     _ensure_registrations()
     return bootstrap_quarantine_service()
@@ -511,7 +511,7 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
     Example:
         >>> service = get_bronze_cleanup_service()
         >>> result = await service.cleanup(retention_days=90, dry_run=True)
-        >>> print(f"Would remove {result.files_removed} files")
+        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
     """
     _ensure_registrations()
     return bootstrap_bronze_cleanup_service()
@@ -530,7 +530,7 @@ def get_vacuum_service() -> VacuumService:
         >>> service = get_vacuum_service()
         >>> tables = service.collect_tables(layer="all")
         >>> result = await service.vacuum_all(tables, retention_days=7)
-        >>> print(f"Removed {result.total_files_removed} files")
+        >>> logger.info("vacuum_complete", files_removed=result.total_files_removed)
     """
     _ensure_registrations()
     return bootstrap_vacuum_service()
@@ -551,7 +551,7 @@ def get_lock_service() -> LockService:
     Example:
         >>> service = get_lock_service()
         >>> released = await service.release_lock("chembl_activity", run_id)
-        >>> print(f"Lock released: {released}")
+        >>> logger.info("lock_released", pipeline="chembl_activity", released=released)
     """
     _ensure_registrations()
     return bootstrap_lock_service()
@@ -575,7 +575,7 @@ async def cleanup_bronze(
 
     Example:
         >>> result = await cleanup_bronze(retention_days=90, dry_run=True)
-        >>> print(f"Would remove {result.files_removed} files")
+        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
     """
     service = get_bronze_cleanup_service()
     result: CleanupResult = await service.cleanup(
@@ -601,7 +601,7 @@ def get_pipeline_runner_service() -> PipelineRunnerService:
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
         >>> if result.is_success:
-        ...     print(f"Processed {result.records_silver} records")
+        ...     logger.info("pipeline_success", records_silver=result.records_silver)
     """
     _ensure_registrations()
     return bootstrap_pipeline_runner_service()

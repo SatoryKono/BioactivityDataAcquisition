@@ -73,9 +73,9 @@ class RunResult:
     Example:
         >>> result = await service.run("chembl_activity")
         >>> if result.status == RunStatus.SUCCESS:
-        ...     print(f"Processed {result.records_silver} records")
+        ...     logger.info("pipeline_success", records_silver=result.records_silver)
         >>> elif result.status == RunStatus.FAILED:
-        ...     print(f"Failed: {result.error_message}")
+        ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
 
     status: RunStatus
@@ -173,7 +173,7 @@ class PipelineRunnerService:
         >>> service = get_pipeline_runner_service()
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
-        >>> print(f"Processed {result.records_silver} records in {result.duration_seconds}s")
+        >>> logger.info("pipeline_complete", records_silver=result.records_silver, duration_s=result.duration_seconds)
     """
 
     runner_factory: RunnerFactoryPort
@@ -216,7 +216,7 @@ class PipelineRunnerService:
         Example:
             >>> result = await service.run("chembl_activity", dry_run=True)
             >>> if result.status == RunStatus.DRY_RUN:
-            ...     print("Would process pipeline chembl_activity")
+            ...     logger.info("dry_run_complete", pipeline="chembl_activity")
         """
         started_at = datetime.now(tz=UTC)
 
