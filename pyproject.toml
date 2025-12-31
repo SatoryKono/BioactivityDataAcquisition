@@ -132,11 +132,13 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Base options without parallelization (compatible with pytest-benchmark)
 # For parallel execution, use: pytest -n auto --dist loadscope
+# Benchmark tests are excluded by default - run with: pytest -m benchmark
 addopts = [
     "-ra",
     "-q",
     "--strict-markers",
     "--strict-config",
+    "-m", "not benchmark",
 ]
 # required_plugins check moved to CI for compatibility
 markers = [
@@ -150,6 +152,7 @@ markers = [
     "vcr: VCR.py recorded HTTP interactions",
     "performance: Performance regression tests (optional CI stage)",
     "architecture: Architecture tests (layer boundaries, contracts)",
+    "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
