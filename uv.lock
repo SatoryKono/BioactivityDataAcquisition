@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -203,6 +203,7 @@ performance = [
     { name = "orjson" },
 ]
 tests = [
+    { name = "black" },
     { name = "hypothesis" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
@@ -226,6 +227,7 @@ tracing = [
 [package.dev-dependencies]
 dev = [
     { name = "bandit" },
+    { name = "bioetl", extra = ["tests"] },
     { name = "hypothesis" },
     { name = "import-linter" },
     { name = "mypy" },
@@ -250,6 +252,7 @@ dev = [
 requires-dist = [
     { name = "bandit", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=1.7" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.0" },
+    { name = "black", marker = "extra == 'tests'", specifier = ">=24.0" },
     { name = "click", specifier = ">=8.1" },
     { name = "deltalake", specifier = ">=0.18" },
     { name = "httpx", specifier = ">=0.27" },
@@ -319,6 +322,7 @@ provides-extras = ["tracing", "performance", "tests", "dev", "docs"]
 [package.metadata.requires-dev]
 dev = [
     { name = "bandit", extras = ["toml"], specifier = ">=1.7" },
+    { name = "bioetl", extras = ["tests"] },
     { name = "hypothesis", specifier = ">=6.100" },
     { name = "import-linter", specifier = ">=2.0" },
     { name = "mypy", specifier = ">=1.10" },
