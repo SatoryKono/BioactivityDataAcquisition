@@ -24,6 +24,12 @@ from bioetl.domain import ports
 # Mark all tests in this module as slow and hypothesis-based
 pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
+# Python version check for Hypothesis compatibility
+PYTHON_314 = sys.version_info >= (3, 14)
+
+# Helper to run async functions in sync tests
+run_async = asyncio.run
+
 
 # ============================================================================
 # Hypothesis Strategies for Port Testing
