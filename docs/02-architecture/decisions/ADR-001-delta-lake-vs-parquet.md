@@ -34,3 +34,9 @@ While Parquet is an excellent columnar storage format, it lacks critical feature
 *   **Increased Dependency**: The project now has a hard dependency on the `delta-rs` library.
 *   **Operational Overhead**: The database requires regular maintenance (`VACUUM`, `OPTIMIZE`). This is enforced as a weekly job in `RULES.md`.
 *   **Vendor Lock-in**: While Delta Lake is an open format, it is most heavily supported by Databricks. However, the growing ecosystem and open-source Rust core (`delta-rs`) mitigate this risk.
+
+## Related ADRs
+
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — uses Delta Lake for Silver and Gold layers
+- [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — defines clear/cleanup operations for Delta tables
+- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — schema validation for Gold layer Delta tables

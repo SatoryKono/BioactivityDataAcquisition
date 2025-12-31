@@ -35,3 +35,8 @@ While `dataclasses` provide a convenient way to create classes for storing data,
 
 *   **Dependency**: The project has a dependency on the Pydantic library.
 *   **Performance**: The runtime validation adds a small performance overhead compared to `dataclasses`. However, this is a negligible and worthwhile trade-off for the massive gains in data quality and developer productivity.
+
+## Related ADRs
+
+- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — uses Pydantic/Pandera for Gold schema validation
+- [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses dataclasses for domain aggregates (different concern)
