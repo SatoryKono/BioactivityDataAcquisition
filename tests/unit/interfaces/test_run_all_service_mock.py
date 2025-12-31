@@ -22,7 +22,6 @@ from bioetl.application.services import (
     RunStatus,
 )
 from bioetl.interfaces.cli.commands.run_all import (
-    BatchRunResult,
     _run_all_pipelines_async,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
