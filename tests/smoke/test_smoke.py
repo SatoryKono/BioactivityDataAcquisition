@@ -126,8 +126,10 @@ class TestLayerBoundaries:
 
     def test_domain_has_no_httpx(self) -> None:
         """Domain layer does not import httpx."""
-        import bioetl.domain as domain
+        import bioetl.domain as _domain
         import sys
+
+        del _domain  # Import for side effect only
 
         domain_modules = [
             name for name in sys.modules if name.startswith("bioetl.domain")
@@ -140,8 +142,10 @@ class TestLayerBoundaries:
 
     def test_domain_has_no_polars(self) -> None:
         """Domain layer does not import polars directly."""
-        import bioetl.domain as domain
+        import bioetl.domain as _domain
         import sys
+
+        del _domain  # Import for side effect only
 
         domain_modules = [
             name for name in sys.modules if name.startswith("bioetl.domain")
