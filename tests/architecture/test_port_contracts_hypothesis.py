@@ -4,6 +4,9 @@ These tests use property-based testing to verify that port implementations
 maintain their contracts across a wide range of inputs and edge cases.
 
 Implements the refactoring plan: "Расширение контрактных тестов портов".
+
+Marked as slow tests because Hypothesis property tests generate many examples
+and can take 1-2 seconds each.
 """
 
 from __future__ import annotations
@@ -12,9 +15,13 @@ import asyncio
 from typing import Any
 from uuid import uuid4
 
+import pytest
 from hypothesis import given, settings, strategies as st
 
 from bioetl.domain import ports
+
+# Mark all tests in this module as slow and hypothesis-based
+pytestmark = [pytest.mark.slow, pytest.mark.hypothesis, pytest.mark.architecture]
 
 
 # ============================================================================
