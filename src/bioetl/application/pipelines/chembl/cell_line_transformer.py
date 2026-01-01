@@ -63,8 +63,11 @@ class CellLineTransformer(BaseChemblTransformer):
             "cell_source_tax_id": validate_positive_int(
                 record.get("cell_source_tax_id")
             ),
+            # Cell type classification
+            "cell_type": normalize_to_string(record.get("cell_type")),
             # External identifiers (strip, NULL if empty) using domain normalization
             "cellosaurus_id": normalize_to_string(record.get("cellosaurus_id")),
+            "clo_id": normalize_to_string(record.get("clo_id")),
             "cl_lincs_id": normalize_to_string(record.get("cl_lincs_id")),
             "efo_id": normalize_to_string(record.get("efo_id")),
         }
