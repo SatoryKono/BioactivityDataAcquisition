@@ -44,10 +44,10 @@ sink:
     csv_export:
       path: "data/output/csv/gold"
 
-# Entity-specific input filter (disabled by default)
+# Entity-specific input filter - SMILES-based filtering (primary mode)
 input_filter:
-  enabled: false
-  source_path: "data/input/compounds.csv"
-  column_name: "cid"
-  filter_field: "cid"
-  batch_size: 100
+  enabled: true
+  source_path: "data/input/molecule.csv"
+  column_name: "canonical_smiles"
+  filter_field: "smiles"
+  batch_size: 1  # SMILES search is per-compound due to API limitations

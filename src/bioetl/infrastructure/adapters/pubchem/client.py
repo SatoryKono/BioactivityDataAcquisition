@@ -8,6 +8,11 @@ Requirements:
 - Health: lightweight query
 - Entities: compounds, substances, assays, bioassays
 
+Fetch modes:
+- SMILES filtering: Primary mode - fetch compounds by SMILES list from CSV
+- CID filtering: Optional - fetch compounds by CID list
+- Query search: Legacy - search by compound name
+
 DTO Support:
 - fetch_as_models(): Returns typed DTO models (PubChemCompoundRecord)
 - fetch(): Returns raw dicts (backward compatible)
@@ -111,11 +116,39 @@ class PubChemAdapter(BaseSyncAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from PubChem."""
-        # Note: filter_ids and filter_field are ignored for PubChem -
-        # filtering should be done via query parameter
-        _ = filter_ids, filter_field  # Mark as intentionally unused
+        """Fetch records from PubChem.
 
+        Supports three fetch modes:
+        1. SMILES filtering (primary): filter_ids + filter_field='smiles'
+        2. CID filtering (optional): filter_ids + filter_field='cid'
+        3. Query search (legacy): query parameter for name search
+
+        Args:
+            entity_type: Type of entity (compound, substance, assay).
+            limit: Maximum number of records to fetch.
+            query: Search query string (for name search).
+            filter_ids: List of SMILES or CIDs to filter by.
+            filter_field: Field type - 'smiles', 'canonical_smiles', or 'cid'.
+
+        Yields:
+            Dictionary records from PubChem.
+
+        Raises:
+            ValueError: If no valid fetch mode parameters provided.
+
+        """
+        # Priority 1: Use filter_ids if provided (SMILES or CID mode)
+        if filter_ids and filter_field:
+            async for record in self.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                limit=limit,
+            ):
+                yield record
+            return
+
+        # Priority 2: Use query for name search (legacy mode)
         strategy = self._fetch_strategies.get(entity_type)
         if not strategy:
             raise ValueError(
@@ -142,7 +175,7 @@ class PubChemAdapter(BaseSyncAdapter):
     async def _fetch_by_query(
         self, query: str, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds by query."""
+        """Fetch compounds by query (name search)."""
         await self.rate_limiter.acquire()
         compounds = await self.circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, query, "name"
@@ -151,6 +184,158 @@ class PubChemAdapter(BaseSyncAdapter):
             if limit and i >= limit:
                 break
             yield self._compound_to_dict(compound)
+
+    async def _fetch_by_smiles(
+        self,
+        smiles_list: list[str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by SMILES strings.
+
+        Primary fetch mode for PubChem. Each SMILES is searched individually
+        due to PubChem API limitations.
+
+        Args:
+            smiles_list: List of SMILES strings to search.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for found compounds.
+
+        Note:
+            Invalid SMILES strings are logged and skipped (not raised).
+            Rate limiting is applied per SMILES query.
+
+        """
+        fetched = 0
+        for smiles in smiles_list:
+            if limit and fetched >= limit:
+                break
+
+            if not smiles or not smiles.strip():
+                continue
+
+            try:
+                await self.rate_limiter.acquire()
+                compounds = await self.circuit_breaker.call(
+                    self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
+                )
+
+                for compound in compounds or []:
+                    if limit and fetched >= limit:
+                        break
+                    yield self._compound_to_dict(compound)
+                    fetched += 1
+
+            except Exception as e:
+                # Log and skip invalid SMILES (DQ error, not critical)
+                self.logger.warning(
+                    "smiles_fetch_failed",
+                    provider=self.provider_name,
+                    smiles=smiles[:50],  # Truncate for logging
+                    error=str(e),
+                )
+                continue
+
+    async def _fetch_by_cids(
+        self,
+        cid_list: list[str],
+        limit: int | None = None,
+        batch_size: int = 50,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by CID list (optional mode).
+
+        Args:
+            cid_list: List of CID strings to fetch.
+            limit: Maximum number of records to fetch.
+            batch_size: Number of CIDs per batch request.
+
+        Yields:
+            Dictionary records for found compounds.
+
+        """
+        fetched = 0
+        # Convert to integers, filter invalid
+        valid_cids: list[int] = []
+        for cid in cid_list:
+            try:
+                valid_cids.append(int(cid))
+            except (ValueError, TypeError):
+                self.logger.warning(
+                    "invalid_cid_skipped",
+                    provider=self.provider_name,
+                    cid=cid,
+                )
+
+        # Batch CIDs for efficiency
+        for i in range(0, len(valid_cids), batch_size):
+            if limit and fetched >= limit:
+                break
+
+            batch = valid_cids[i : i + batch_size]
+            await self.rate_limiter.acquire()
+
+            try:
+                compounds = await self.circuit_breaker.call(
+                    self._run_in_executor, pcp.get_compounds, batch, "cid"
+                )
+
+                for compound in compounds or []:
+                    if limit and fetched >= limit:
+                        break
+                    yield self._compound_to_dict(compound)
+                    fetched += 1
+
+            except Exception as e:
+                self.logger.warning(
+                    "cid_batch_fetch_failed",
+                    provider=self.provider_name,
+                    batch_start=batch[0] if batch else None,
+                    batch_size=len(batch),
+                    error=str(e),
+                )
+                continue
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch PubChem records by filter ID list.
+
+        Implements FilterableDataSourcePort.fetch_filtered().
+
+        Args:
+            entity_type: Must be 'compound'.
+            filter_ids: List of identifiers (SMILES or CIDs).
+            filter_field: Field type - 'smiles' (primary) or 'cid' (optional).
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for each found compound.
+
+        Raises:
+            ValueError: If entity_type is not 'compound' or filter_field unsupported.
+
+        """
+        if entity_type != "compound":
+            raise ValueError(
+                f"PubChemAdapter fetch_filtered only supports 'compound', got: {entity_type}"
+            )
+
+        if filter_field in ("smiles", "canonical_smiles"):
+            async for record in self._fetch_by_smiles(filter_ids, limit):
+                yield record
+        elif filter_field == "cid":
+            async for record in self._fetch_by_cids(filter_ids, limit):
+                yield record
+        else:
+            raise ValueError(
+                f"Unsupported filter_field: {filter_field}. "
+                "Supported: 'smiles', 'canonical_smiles', 'cid'"
+            )
 
     async def _fetch_substances(
         self,
