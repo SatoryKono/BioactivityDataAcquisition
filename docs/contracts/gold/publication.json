@@ -1,0 +1,123 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
+    "title": "Publication Data Contract",
+    "description": "Defines the schema for the gold 'Publication' entity (CrossRef-enriched), aligned with RULES.md §7.1. This contract is for data consumers.",
+    "type": "object",
+    "properties": {
+        "doi": {
+            "type": "string",
+            "description": "Digital Object Identifier (normalized: lowercase, stripped).",
+            "pattern": "^10\\.\\d{4,}/.+$"
+        },
+        "title": {
+            "type": ["string", "null"],
+            "description": "Publication title.",
+            "minLength": 1
+        },
+        "abstract": {
+            "type": ["string", "null"],
+            "description": "Abstract text (HTML tags stripped)."
+        },
+        "authors": {
+            "type": ["string", "null"],
+            "description": "JSON array of author names in 'given family' format."
+        },
+        "journal": {
+            "type": ["string", "null"],
+            "description": "Journal name (container-title[0])."
+        },
+        "issn": {
+            "type": ["string", "null"],
+            "description": "JSON array of ISSNs."
+        },
+        "publisher": {
+            "type": ["string", "null"],
+            "description": "Publisher name."
+        },
+        "volume": {
+            "type": ["string", "null"],
+            "description": "Journal volume."
+        },
+        "issue": {
+            "type": ["string", "null"],
+            "description": "Journal issue."
+        },
+        "first_page": {
+            "type": ["string", "null"],
+            "description": "First page (extracted from 'page' field)."
+        },
+        "last_page": {
+            "type": ["string", "null"],
+            "description": "Last page (extracted from 'page' field)."
+        },
+        "year": {
+            "type": ["integer", "null"],
+            "description": "Publication year.",
+            "minimum": 1800,
+            "maximum": 2100
+        },
+        "published_print": {
+            "type": ["string", "null"],
+            "description": "Print publication date (ISO format)."
+        },
+        "published_online": {
+            "type": ["string", "null"],
+            "description": "Online publication date (ISO format)."
+        },
+        "doc_type": {
+            "type": "string",
+            "description": "Document type: PUBLICATION or PREPRINT.",
+            "enum": ["PUBLICATION", "PREPRINT"]
+        },
+        "citation_count": {
+            "type": ["integer", "null"],
+            "description": "Number of citations (is-referenced-by-count).",
+            "minimum": 0
+        },
+        "reference_count": {
+            "type": ["integer", "null"],
+            "description": "Number of references in the work.",
+            "minimum": 0
+        },
+        "language": {
+            "type": ["string", "null"],
+            "description": "Publication language code."
+        },
+        "license_url": {
+            "type": ["string", "null"],
+            "description": "License URL.",
+            "format": "uri"
+        },
+        "subjects": {
+            "type": ["string", "null"],
+            "description": "JSON array of subject areas."
+        },
+        "source": {
+            "type": "string",
+            "description": "Data source identifier.",
+            "const": "crossref"
+        },
+        "_source_batch_id": {
+            "type": "string",
+            "description": "Internal ID linking to the source Bronze batch for lineage.",
+            "format": "uuid"
+        },
+        "_content_hash": {
+            "type": "string",
+            "description": "SHA-256 hash of the record's content for versioning and deduplication."
+        },
+        "_ingestion_ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the record was ingested."
+        }
+    },
+    "required": [
+        "doi",
+        "doc_type",
+        "source",
+        "_content_hash",
+        "_ingestion_ts"
+    ]
+}
