@@ -13,8 +13,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import pytest
-
 SRC_DIR = Path("src/bioetl")
 
 # Files where f-string in docstrings is acceptable (documentation examples)
