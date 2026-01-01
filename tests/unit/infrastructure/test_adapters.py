@@ -174,7 +174,7 @@ class TestPubChemAdapter:
             rotatable_bond_count = 3
             fingerprint = "00000000"
 
-        result = adapter._compound_to_dict(MockCompound())
+        result = adapter._mapper.compound_to_dict(MockCompound())
 
         assert result["cid"] == 2244
         assert result["molecular_formula"] == "C9H8O4"
