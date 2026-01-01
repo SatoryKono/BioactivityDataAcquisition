@@ -7,22 +7,22 @@ sequenceDiagram
     participant HeartbeatA as Heartbeat Thread A
     participant Storage as DeltaWriter
 
-    Note over Lock: Lock Key: lock:chembl_activity<br/>TTL: 90s, Heartbeat: 30s
+    Note over Lock: Lock Key: lock:chembl_activity<br/>TTL: 60s, Heartbeat: 20s
 
     rect rgb(230, 255, 230)
         Note over WorkerA,Lock: Worker A acquires lock successfully
-        WorkerA->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_a_uuid",<br/>ttl=90s, wait=False)
+        WorkerA->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_a_uuid",<br/>ttl=60s, wait=False)
         Lock->>Lock: Check key not exists
-        Lock->>Lock: Store (owner, expires_at=now+90s)
+        Lock->>Lock: Store (owner, expires_at=now+60s)
         Lock-->>WorkerA: True (acquired)
 
-        WorkerA->>HeartbeatA: start(interval=30s)
+        WorkerA->>HeartbeatA: start(interval=20s)
         activate HeartbeatA
     end
 
     rect rgb(255, 230, 230)
         Note over WorkerB,Lock: Worker B fails to acquire (lock held)
-        WorkerB->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_b_uuid",<br/>ttl=90s, wait=False)
+        WorkerB->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_b_uuid",<br/>ttl=60s, wait=False)
         Lock->>Lock: Check key exists
         Lock->>Lock: Owner != worker_b_uuid
         Lock-->>WorkerB: False (not acquired)
@@ -32,10 +32,10 @@ sequenceDiagram
 
     rect rgb(240, 248, 255)
         Note over HeartbeatA,Lock: Heartbeat keeps lock alive
-        loop Every 30 seconds
+        loop Every 20 seconds
             HeartbeatA->>Lock: heartbeat(key="chembl_activity",<br/>owner_id="worker_a_uuid")
             Lock->>Lock: Verify owner == worker_a_uuid
-            Lock->>Lock: Update expires_at = now + 90s
+            Lock->>Lock: Update expires_at = now + 60s
             Lock-->>HeartbeatA: True (refreshed)
         end
     end
@@ -70,12 +70,12 @@ sequenceDiagram
 
     rect rgb(255, 240, 245)
         Note over Lock: TTL Expiration (failure scenario)
-        Note right of Lock: If Worker A crashes without release:<br/>1. Heartbeat stops<br/>2. TTL checker runs every 1s<br/>3. After 90s, lock auto-expires<br/>4. Lock becomes available
+        Note right of Lock: If Worker A crashes without release:<br/>1. Heartbeat stops<br/>2. TTL checker runs every 1s<br/>3. After 60s, lock auto-expires<br/>4. Lock becomes available
     end
 
     rect rgb(230, 255, 230)
         Note over WorkerB,Lock: Worker B can now acquire
-        WorkerB->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_b_uuid",<br/>ttl=90s, wait=False)
+        WorkerB->>Lock: acquire(key="chembl_activity",<br/>owner_id="worker_b_uuid",<br/>ttl=60s, wait=False)
         Lock->>Lock: Key expired/deleted
         Lock-->>WorkerB: True (acquired)
     end
