@@ -369,17 +369,23 @@ class TestMixedErrorTypesDuringDegradation:
 
         # 404 should NOT trigger breaker
         response_404 = httpx.Response(404, request=request)
-        error_404 = httpx.HTTPStatusError("Not found", request=request, response=response_404)
+        error_404 = httpx.HTTPStatusError(
+            "Not found", request=request, response=response_404
+        )
         assert is_circuit_breaker_error(error_404) is False
 
         # 500 SHOULD trigger breaker
         response_500 = httpx.Response(500, request=request)
-        error_500 = httpx.HTTPStatusError("Server error", request=request, response=response_500)
+        error_500 = httpx.HTTPStatusError(
+            "Server error", request=request, response=response_500
+        )
         assert is_circuit_breaker_error(error_500) is True
 
         # 429 SHOULD trigger breaker
         response_429 = httpx.Response(429, request=request)
-        error_429 = httpx.HTTPStatusError("Rate limited", request=request, response=response_429)
+        error_429 = httpx.HTTPStatusError(
+            "Rate limited", request=request, response=response_429
+        )
         assert is_circuit_breaker_error(error_429) is True
 
     @pytest.mark.unit
@@ -698,8 +704,12 @@ class TestErrorClassificationCompleteness:
 
         for status_code in range(500, 512):
             response = httpx.Response(status_code, request=request)
-            error = httpx.HTTPStatusError(f"Error {status_code}", request=request, response=response)
-            assert is_circuit_breaker_error(error) is True, f"Status {status_code} should trigger"
+            error = httpx.HTTPStatusError(
+                f"Error {status_code}", request=request, response=response
+            )
+            assert (
+                is_circuit_breaker_error(error) is True
+            ), f"Status {status_code} should trigger"
 
     @pytest.mark.unit
     def test_all_4xx_except_429_dont_trigger(self) -> None:
@@ -708,13 +718,21 @@ class TestErrorClassificationCompleteness:
 
         for status_code in range(400, 429):
             response = httpx.Response(status_code, request=request)
-            error = httpx.HTTPStatusError(f"Error {status_code}", request=request, response=response)
-            assert is_circuit_breaker_error(error) is False, f"Status {status_code} should NOT trigger"
+            error = httpx.HTTPStatusError(
+                f"Error {status_code}", request=request, response=response
+            )
+            assert (
+                is_circuit_breaker_error(error) is False
+            ), f"Status {status_code} should NOT trigger"
 
         for status_code in range(430, 452):
             response = httpx.Response(status_code, request=request)
-            error = httpx.HTTPStatusError(f"Error {status_code}", request=request, response=response)
-            assert is_circuit_breaker_error(error) is False, f"Status {status_code} should NOT trigger"
+            error = httpx.HTTPStatusError(
+                f"Error {status_code}", request=request, response=response
+            )
+            assert (
+                is_circuit_breaker_error(error) is False
+            ), f"Status {status_code} should NOT trigger"
 
     @pytest.mark.unit
     def test_httpx_timeout_variants_trigger(self) -> None:
