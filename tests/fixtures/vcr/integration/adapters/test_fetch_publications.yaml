@@ -394,11 +394,11 @@ interactions:
         ValidYN="Y"><LastName>Voineagu</LastName><ForeName>Irina</ForeName><Initials>I</Initials><Identifier
         Source="ORCID">0000-0003-4162-3872</Identifier><AffiliationInfo><Affiliation>School
         of Biotechnology and Biomolecular Sciences, University of New South Wales,
-        Sydney, New South Wales, Australia. i.voineagu@unsw.edu.au.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Cellular
+        Sydney, New South Wales, Australia. redacted@example.com.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Cellular
         Genomics Futures Institute, University of New South Wales, Sydney, New South
-        Wales, Australia. i.voineagu@unsw.edu.au.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>RNA
+        Wales, Australia. redacted@example.com.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>RNA
         Institute, University of New South Wales, Sydney, New South Wales, Australia.
-        i.voineagu@unsw.edu.au.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList
+        redacted@example.com.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList
         CompleteYN="Y"><Grant><GrantID>2020814</GrantID><Agency>Department of Health
         | National Health and Medical Research Council (NHMRC)</Agency><Country/></Grant></GrantList><PublicationTypeList><PublicationType
         UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
@@ -876,16 +876,16 @@ interactions:
         NY, 10016, New York, USA.</Affiliation></AffiliationInfo></Author><Author
         ValidYN="Y"><LastName>Barthel</LastName><ForeName>Steven R</ForeName><Initials>SR</Initials><AffiliationInfo><Affiliation>Department
         of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
-        MA, 02115, USA. sbarthel@bwh.harvard.edu.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        MA, 02115, USA. redacted@example.com.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
         of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
-        School, Boston, MA, 02115, USA. sbarthel@bwh.harvard.edu.</Affiliation></AffiliationInfo></Author><Author
+        School, Boston, MA, 02115, USA. redacted@example.com.</Affiliation></AffiliationInfo></Author><Author
         ValidYN="Y"><LastName>Schatton</LastName><ForeName>Tobias</ForeName><Initials>T</Initials><AffiliationInfo><Affiliation>Department
         of Dermatology, Brigham and Women''s Hospital, Harvard Medical School, Boston,
-        MA, 02115, USA. tschatton@bwh.harvard.edu.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
+        MA, 02115, USA. redacted@example.com.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Program
         of Glyco-Immunology and Oncology, Brigham and Women''s Hospital, Harvard Medical
-        School, Boston, MA, 02115, USA. tschatton@bwh.harvard.edu.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Department
+        School, Boston, MA, 02115, USA. redacted@example.com.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Department
         of Medicine, Boston Children''s Hospital, Harvard Medical School, Boston,
-        MA, 02115, USA. tschatton@bwh.harvard.edu.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList
+        MA, 02115, USA. redacted@example.com.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><GrantList
         CompleteYN="Y"><Grant><GrantID>470684420</GrantID><Agency>Walter Benjamin
         Scholarship from the German Research Foundation</Agency><Country/></Grant><Grant><GrantID>R01CA247957</GrantID><Agency>NIH/NCI
         grant</Agency><Country/></Grant><Grant><GrantID>R01CA247957</GrantID><Agency>NIH/NCI
@@ -1141,7 +1141,7 @@ interactions:
         General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA.</Affiliation></AffiliationInfo></Author><Author
         ValidYN="Y"><LastName>Yeku</LastName><ForeName>Oladapo O</ForeName><Initials>OO</Initials><Identifier
         Source="ORCID">0000-0002-6319-1647</Identifier><AffiliationInfo><Affiliation>Massachusetts
-        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA. oyeku@mgh.harvard.edu.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        General Hospital Cancer Center, Harvard Medical School, Boston, MA, USA. redacted@example.com.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
         UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
         DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>19</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Signal
         Transduct Target Ther</MedlineTA><NlmUniqueID>101676423</NlmUniqueID><ISSNLinking>2059-3635</ISSNLinking></MedlineJournalInfo><ChemicalList><Chemical><RegistryNumber>0</RegistryNumber><NameOfSubstance
@@ -1423,10 +1423,10 @@ interactions:
         Wuhan, China.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Sun</LastName><ForeName>Yuhui</ForeName><Initials>Y</Initials><Identifier
         Source="ORCID">0000-0001-5720-9620</Identifier><AffiliationInfo><Affiliation>School
         of Pharmacy, Huazhong University of Science and Technology, Wuhan, China.
-        sunyuhui@hust.edu.cn.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Key
+        redacted@example.com.</Affiliation></AffiliationInfo><AffiliationInfo><Affiliation>Key
         Laboratory of Combinatorial Biosynthesis and Drug Discovery (Wuhan University),
         Ministry of Education and Wuhan University School of Pharmaceutical Sciences,
-        Wuhan, China. sunyuhui@hust.edu.cn.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        Wuhan, China. redacted@example.com.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
         UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
         DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>19</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Nat
         Commun</MedlineTA><NlmUniqueID>101528555</NlmUniqueID><ISSNLinking>2041-1723</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><CoiStatement>Competing
@@ -1575,7 +1575,7 @@ interactions:
         Ltd. All rights reserved.</CopyrightInformation></Abstract><AuthorList CompleteYN="Y"><Author
         ValidYN="Y"><LastName>Mandrioli</LastName><ForeName>Mauro</ForeName><Initials>M</Initials><AffiliationInfo><Affiliation>Department
         of Life Sciences, University of Modena and Reggio Emilia, Biology Building,
-        via Campi 213/D, Modena, Italy. Electronic address: mauro.mandrioli@unimore.it.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        via Campi 213/D, Modena, Italy. Electronic address: redacted@example.com.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
         UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
         DateType="Electronic"><Year>2025</Year><Month>12</Month><Day>17</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Trends
         Biotechnol</MedlineTA><NlmUniqueID>8310903</NlmUniqueID><ISSNLinking>0167-7799</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
