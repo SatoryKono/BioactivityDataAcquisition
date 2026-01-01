@@ -1247,9 +1247,7 @@ class TestRunAllCommandExceptions:
         assert "Unexpected error" in result.output or "error" in result.output.lower()
 
     @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_with_debug_flag(
-        self, mock_asyncio_run, cli_runner, mock_registry
-    ):
+    def test_run_all_with_debug_flag(self, mock_asyncio_run, cli_runner, mock_registry):
         """Test run-all with --debug flag."""
         mock_asyncio_run.return_value = BatchRunResult(
             total=2, succeeded=2, failed=0, skipped=0
@@ -1264,8 +1262,6 @@ class TestRunAllCommandExceptions:
             )
 
         assert result.exit_code == 0
-        # Verify options include DEBUG log level
-        call_args = mock_asyncio_run.call_args
         # The async function is called, check that it was called
         mock_asyncio_run.assert_called_once()
 
