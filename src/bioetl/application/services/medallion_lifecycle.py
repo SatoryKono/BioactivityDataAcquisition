@@ -436,11 +436,10 @@ class MedallionLifecycleService:
                 dry_run=False,
             )
             self.logger.info(
-                f"VACUUM completed for {layer.capitalize()} table",
-                extra={
-                    "table": table,
-                    "files_removed": files_removed,
-                },
+                "vacuum_completed",
+                layer=layer,
+                table=table,
+                files_removed=files_removed,
             )
 
             if metrics:
@@ -452,8 +451,10 @@ class MedallionLifecycleService:
             return files_removed
         except Exception as e:
             self.logger.warning(
-                f"VACUUM failed for {layer.capitalize()} table",
-                extra={"table": table, "error": str(e)},
+                "vacuum_failed",
+                layer=layer,
+                table=table,
+                error=str(e),
             )
             return 0
 

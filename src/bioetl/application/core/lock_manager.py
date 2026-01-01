@@ -156,9 +156,17 @@ class LockManager:
             # Update shared context holder for writers
             if self._context_holder is not None:
                 self._context_holder.set(self.get_context())  # type: ignore[arg-type]
-            self._logger.info(f"Lock acquired for {self._config.lock_key}")
+            self._logger.info(
+                "lock_acquired",
+                lock_key=self._config.lock_key,
+                run_id=str(self._run_id),
+            )
         else:
-            self._logger.error(f"Failed to acquire lock for {self._config.lock_key}")
+            self._logger.error(
+                "lock_acquisition_failed",
+                lock_key=self._config.lock_key,
+                run_id=str(self._run_id),
+            )
         return acquired
 
     async def release(self) -> None:

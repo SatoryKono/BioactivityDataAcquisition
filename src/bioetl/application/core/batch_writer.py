@@ -363,7 +363,8 @@ class BatchWriter:
         """
         error_type = self._error_classifier.classify(error)
         self._context.logger.error(
-            f"{layer} write failed",
+            "layer_write_failed",
+            layer=layer,
             error=str(error),
             error_type=error_type.value,
             batch_id=str(batch_id),
