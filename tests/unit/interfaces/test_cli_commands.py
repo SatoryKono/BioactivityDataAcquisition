@@ -815,3 +815,507 @@ class TestEchoFunctions:
 
         captured = capsys.readouterr()
         assert "[DRY-RUN] Would do something" in captured.out
+
+
+# =============================================================================
+# quarantine.py Tests - quarantine_inspect
+# =============================================================================
+
+
+@pytest.fixture
+def mock_quarantine_manager():
+    """Create a mock QuarantineManager."""
+    manager = MagicMock()
+    # echo_quarantine_record expects dict[str, Any], not dataclass
+    manager.inspect = AsyncMock(
+        return_value=[
+            {
+                "record_id": "rec_001",
+                "pipeline": "chembl_activity",
+                "reason": "Invalid SMILES",
+                "timestamp": "2025-01-01T00:00:00Z",
+            },
+            {
+                "record_id": "rec_002",
+                "pipeline": "chembl_activity",
+                "reason": "Missing field",
+                "timestamp": "2025-01-01T00:01:00Z",
+            },
+        ]
+    )
+    return manager
+
+
+@pytest.mark.unit
+class TestQuarantineInspectCommand:
+    """Tests for quarantine inspect command."""
+
+    def test_quarantine_help(self, cli_runner):
+        """Test quarantine --help shows subcommands."""
+        result = cli_runner.invoke(cli, ["quarantine", "--help"])
+
+        assert result.exit_code == 0
+        assert "inspect" in result.output
+
+    def test_quarantine_inspect_help(self, cli_runner):
+        """Test quarantine inspect --help shows options."""
+        result = cli_runner.invoke(cli, ["quarantine", "inspect", "--help"])
+
+        assert result.exit_code == 0
+        assert "--pipeline" in result.output
+        assert "--limit" in result.output
+
+    def test_quarantine_inspect_success(self, cli_runner, mock_quarantine_manager):
+        """Test successful quarantine inspection."""
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli, ["quarantine", "inspect", "--pipeline", "chembl_activity"]
+            )
+
+        assert result.exit_code == 0
+        mock_quarantine_manager.inspect.assert_called_once_with(limit=100)
+
+    def test_quarantine_inspect_with_custom_limit(
+        self, cli_runner, mock_quarantine_manager
+    ):
+        """Test quarantine inspection with custom limit."""
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_quarantine_manager,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                ["quarantine", "inspect", "--pipeline", "chembl_activity", "--limit", "50"],
+            )
+
+        assert result.exit_code == 0
+        mock_quarantine_manager.inspect.assert_called_once_with(limit=50)
+
+    def test_quarantine_inspect_no_records(self, cli_runner):
+        """Test quarantine inspection with no records."""
+        mock_manager = MagicMock()
+        mock_manager.inspect = AsyncMock(return_value=[])
+
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=mock_manager,
+        ):
+            result = cli_runner.invoke(
+                cli, ["quarantine", "inspect", "--pipeline", "chembl_activity"]
+            )
+
+        assert result.exit_code == 0
+        assert "No records found" in result.output
+
+
+# =============================================================================
+# checkpoint.py Tests - checkpoint_list
+# =============================================================================
+
+
+@dataclass
+class MockCheckpoint:
+    """Mock Checkpoint for testing."""
+
+    checkpoint_id: str
+    pipeline: str
+    created_at: str
+    offset: int
+
+
+@pytest.fixture
+def mock_checkpoint_manager():
+    """Create a mock CheckpointManager."""
+    manager = MagicMock()
+    manager.list_all = AsyncMock(
+        return_value=[
+            MockCheckpoint(
+                checkpoint_id="cp_001",
+                pipeline="chembl_activity",
+                created_at="2025-01-01T00:00:00Z",
+                offset=1000,
+            ),
+            MockCheckpoint(
+                checkpoint_id="cp_002",
+                pipeline="chembl_activity",
+                created_at="2025-01-01T01:00:00Z",
+                offset=2000,
+            ),
+        ]
+    )
+    return manager
+
+
+@pytest.mark.unit
+class TestCheckpointListCommand:
+    """Tests for checkpoint list command."""
+
+    def test_checkpoint_help(self, cli_runner):
+        """Test checkpoint --help shows subcommands."""
+        result = cli_runner.invoke(cli, ["checkpoint", "--help"])
+
+        assert result.exit_code == 0
+        assert "list" in result.output
+
+    def test_checkpoint_list_help(self, cli_runner):
+        """Test checkpoint list --help shows options."""
+        result = cli_runner.invoke(cli, ["checkpoint", "list", "--help"])
+
+        assert result.exit_code == 0
+        assert "--pipeline" in result.output
+
+    def test_checkpoint_list_success(self, cli_runner, mock_checkpoint_manager):
+        """Test successful checkpoint listing."""
+        with patch(
+            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager",
+            return_value=mock_checkpoint_manager,
+        ):
+            result = cli_runner.invoke(
+                cli, ["checkpoint", "list", "--pipeline", "chembl_activity"]
+            )
+
+        assert result.exit_code == 0
+        mock_checkpoint_manager.list_all.assert_called_once()
+
+
+# =============================================================================
+# archive.py Tests - archive_command
+# =============================================================================
+
+
+@pytest.fixture
+def mock_lifecycle_service():
+    """Create a mock MedallionLifecycleService."""
+    service = MagicMock()
+    service.archive = AsyncMock(return_value=42)  # 42 files archived
+    return service
+
+
+@pytest.mark.unit
+class TestArchiveCommand:
+    """Tests for archive command."""
+
+    def test_archive_help(self, cli_runner):
+        """Test archive --help shows options."""
+        result = cli_runner.invoke(cli, ["maintenance", "archive", "--help"])
+
+        assert result.exit_code == 0
+        assert "TABLE" in result.output
+        assert "TARGET_PATH" in result.output
+        assert "--remove-source" in result.output
+
+    def test_archive_success(self, cli_runner, mock_lifecycle_service):
+        """Test successful archive operation."""
+        with patch(
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
+            return_value=mock_lifecycle_service,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                ["maintenance", "archive", "chembl.activity", "/archive/chembl"],
+            )
+
+        assert result.exit_code == 0
+        assert "Archived 42 files" in result.output
+        mock_lifecycle_service.archive.assert_called_once_with(
+            table="chembl.activity",
+            target_path="/archive/chembl",
+            remove_source=False,
+        )
+
+    def test_archive_with_remove_source(self, cli_runner, mock_lifecycle_service):
+        """Test archive with --remove-source flag."""
+        with patch(
+            "bioetl.interfaces.cli.commands.archive.get_lifecycle_service",
+            return_value=mock_lifecycle_service,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "maintenance",
+                    "archive",
+                    "chembl.activity",
+                    "/archive/chembl",
+                    "--remove-source",
+                ],
+            )
+
+        assert result.exit_code == 0
+        mock_lifecycle_service.archive.assert_called_once_with(
+            table="chembl.activity",
+            target_path="/archive/chembl",
+            remove_source=True,
+        )
+
+
+# =============================================================================
+# exit_codes.py Tests - get_exit_code_for_exception
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestGetExitCodeForException:
+    """Tests for get_exit_code_for_exception function."""
+
+    def test_direct_mapping_value_error(self):
+        """Test direct mapping for ValueError."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+
+        exc = ValueError("Invalid value")
+        result = get_exit_code_for_exception(exc)
+
+        assert result == ExitCode.CONFIG_ERROR
+
+    def test_direct_mapping_file_not_found(self):
+        """Test direct mapping for FileNotFoundError."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+
+        exc = FileNotFoundError("File not found")
+        result = get_exit_code_for_exception(exc)
+
+        assert result == ExitCode.EX_NOINPUT
+
+    def test_direct_mapping_keyboard_interrupt(self):
+        """Test direct mapping for KeyboardInterrupt."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+
+        exc = KeyboardInterrupt()
+        result = get_exit_code_for_exception(exc)
+
+        assert result == ExitCode.SIGINT
+
+    def test_mro_fallback_for_subclass(self):
+        """Test MRO fallback for exception subclass."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+
+        # Create a custom ValueError subclass
+        class CustomValueError(ValueError):
+            pass
+
+        exc = CustomValueError("Custom error")
+        result = get_exit_code_for_exception(exc)
+
+        # Should fall back to ValueError mapping via MRO
+        assert result == ExitCode.CONFIG_ERROR
+
+    def test_unknown_exception_returns_fail(self):
+        """Test unknown exception returns FAIL."""
+        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+
+        # Create an exception not in the mapping
+        class UnknownError(Exception):
+            pass
+
+        exc = UnknownError("Unknown")
+        result = get_exit_code_for_exception(exc)
+
+        assert result == ExitCode.FAIL
+
+
+# =============================================================================
+# run.py Tests - _map_status_to_exit_code
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestMapStatusToExitCode:
+    """Tests for _map_status_to_exit_code function."""
+
+    def test_success_status(self):
+        """Test SUCCESS status maps to OK."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.SUCCESS, None)
+
+        assert result == ExitCode.OK
+
+    def test_dry_run_status(self):
+        """Test DRY_RUN status maps to OK."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.DRY_RUN, None)
+
+        assert result == ExitCode.OK
+
+    def test_shutdown_status(self):
+        """Test SHUTDOWN status maps to SIGINT."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.SHUTDOWN, None)
+
+        assert result == ExitCode.SIGINT
+
+    def test_failed_with_value_error(self):
+        """Test FAILED with ValueError maps to CONFIG_ERROR."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.FAILED, "ValueError")
+
+        assert result == ExitCode.CONFIG_ERROR
+
+    def test_failed_with_data_quality_error(self):
+        """Test FAILED with DataQualityError maps to DATA_QUALITY_ERROR."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.FAILED, "DataQualityError")
+
+        assert result == ExitCode.DATA_QUALITY_ERROR
+
+    def test_failed_with_lock_error(self):
+        """Test FAILED with LockAcquisitionError maps to LOCK_ERROR."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.FAILED, "LockAcquisitionError")
+
+        assert result == ExitCode.LOCK_ERROR
+
+    def test_failed_with_network_error(self):
+        """Test FAILED with NetworkError maps to NETWORK_ERROR."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.FAILED, "NetworkError")
+
+        assert result == ExitCode.NETWORK_ERROR
+
+    def test_failed_with_unknown_error(self):
+        """Test FAILED with unknown error type maps to PIPELINE_ERROR."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.FAILED, "SomeUnknownError")
+
+        assert result == ExitCode.PIPELINE_ERROR
+
+    def test_failed_without_error_type(self):
+        """Test FAILED without error type maps to PIPELINE_ERROR."""
+        from bioetl.application.services import RunStatus
+        from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
+        from bioetl.interfaces.cli.exit_codes import ExitCode
+
+        result = _map_status_to_exit_code(RunStatus.FAILED, None)
+
+        assert result == ExitCode.PIPELINE_ERROR
+
+
+# =============================================================================
+# run.py Tests - Exception handlers in run command
+# =============================================================================
+
+
+@dataclass
+class MockRunResult:
+    """Mock RunResult for testing."""
+
+    status: object
+    error_message: str | None = None
+    error_type: str | None = None
+
+
+@pytest.mark.unit
+class TestRunCommandExceptionHandlers:
+    """Tests for exception handlers in run command."""
+
+    def test_run_pipeline_not_found(self, cli_runner):
+        """Test run command handles PipelineNotFoundError."""
+        from bioetl.application.services import PipelineNotFoundError
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            side_effect=PipelineNotFoundError("foo", available=["bar", "baz"])
+        )
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_helpers.get_default_registry"
+            ) as mock_registry,
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+        ):
+            mock_registry.return_value.list_pipelines.return_value = ["foo"]
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
+
+        assert result.exit_code == 80  # CONFIG_ERROR
+        assert "Pipeline not found" in result.output
+
+    def test_run_unexpected_exception(self, cli_runner):
+        """Test run command handles unexpected exceptions."""
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(side_effect=RuntimeError("Unexpected failure"))
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_helpers.get_default_registry"
+            ) as mock_registry,
+            patch(
+                "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
+                return_value=mock_service,
+            ),
+        ):
+            mock_registry.return_value.list_pipelines.return_value = ["foo"]
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
+
+        assert result.exit_code == 1  # FAIL
+        assert "Unexpected error" in result.output
+
+
+# =============================================================================
+# run_helpers.py Tests - show_cleanup_preview error handling
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestShowCleanupPreview:
+    """Tests for show_cleanup_preview function."""
+
+    def test_show_cleanup_preview_success(self, capsys):
+        """Test show_cleanup_preview success path."""
+        from bioetl.interfaces.cli.commands.run_helpers import show_cleanup_preview
+
+        mock_preview = MagicMock()
+        mock_preview.bronze_files = 10
+        mock_preview.silver_rows = 1000
+        mock_preview.gold_rows = 500
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            return_value=mock_preview,
+        ):
+            # Need to make preview_cleanup an async mock
+            with patch(
+                "bioetl.interfaces.cli.commands.run_helpers._preview_cleanup_async",
+                new_callable=AsyncMock,
+            ):
+                show_cleanup_preview("chembl_activity")
+
+    def test_show_cleanup_preview_error(self, capsys):
+        """Test show_cleanup_preview handles errors."""
+        from bioetl.interfaces.cli.commands.run_helpers import show_cleanup_preview
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
+            side_effect=Exception("Preview failed"),
+        ):
+            show_cleanup_preview("chembl_activity")
+
+        captured = capsys.readouterr()
+        assert "Error previewing cleanup" in captured.err
