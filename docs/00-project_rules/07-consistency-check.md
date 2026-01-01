@@ -1,8 +1,8 @@
-# Consistency Check Guide (RULES.md v5.6)
+# Consistency Check Guide (RULES.md v5.9)
 
-*Синхронизировано с RULES.md v5.6 (2025-12-27)*
+*Синхронизировано с RULES.md v5.9 (2026-01-01)*
 
-Цель: описать автоматическую проверку согласованности документов `docs/*` с RULES.md v5.6 без реализации кода.
+Цель: описать автоматическую проверку согласованности документов `docs/*` с RULES.md v5.9 без реализации кода.
 
 ## Проверяемые инварианты
 
@@ -20,7 +20,6 @@
 ## Файлы-мишени
 
 - `docs/00-project_rules/00-rules-summary.md`
-- `docs/00-project_rules/01-project-rules.md`
 - `docs/00-project_rules/02-user-rules.md`
 - `docs/templates/pipeline-review-checklist.md`
 
@@ -28,7 +27,7 @@
 
 ```bash
 # 1) Проверка шапок документов на версию RULES
-grep -R "Синхронизировано с RULES.md v5.0" docs/00-project_rules/ | wc -l
+grep -R "Синхронизировано с RULES.md v5.9" docs/00-project_rules/ | wc -l
 
 # 2) Ключевые формулировки (примерный набор)
 grep -R "Raw Parquet" docs/00-project_rules/00-rules-summary.md
