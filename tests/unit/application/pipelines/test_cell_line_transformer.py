@@ -46,7 +46,9 @@ class TestCellLineTransformer:
             "cell_source_tissue": "Cervix",
             "cell_source_organism": "Homo sapiens",
             "cell_source_tax_id": 9606,
+            "cell_type": "Cancer cell line",
             "cellosaurus_id": "CVCL_0030",
+            "clo_id": "CLO_0003684",
             "cl_lincs_id": "LCL-1234",
             "efo_id": "EFO_0001185",
         }
@@ -60,7 +62,9 @@ class TestCellLineTransformer:
         assert result["cell_source_tissue"] == "Cervix"
         assert result["cell_source_organism"] == "Homo sapiens"
         assert result["cell_source_tax_id"] == 9606
+        assert result["cell_type"] == "Cancer cell line"
         assert result["cellosaurus_id"] == "CVCL_0030"
+        assert result["clo_id"] == "CLO_0003684"
         assert result["cl_lincs_id"] == "LCL-1234"
         assert result["efo_id"] == "EFO_0001185"
         assert "entity_id" in result
@@ -96,7 +100,9 @@ class TestCellLineTransformer:
         assert result["cell_source_tissue"] is None
         assert result["cell_source_organism"] is None
         assert result["cell_source_tax_id"] is None
+        assert result["cell_type"] is None
         assert result["cellosaurus_id"] is None
+        assert result["clo_id"] is None
         assert result["cl_lincs_id"] is None
         assert result["efo_id"] is None
 
@@ -122,6 +128,7 @@ class TestCellLineTransformer:
             "cell_chembl_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cellosaurus_id": "",
+            "clo_id": "   ",
             "cl_lincs_id": "   ",
             "efo_id": None,
         }
@@ -130,6 +137,7 @@ class TestCellLineTransformer:
 
         assert result is not None
         assert result["cellosaurus_id"] is None
+        assert result["clo_id"] is None
         assert result["cl_lincs_id"] is None
         assert result["efo_id"] is None
 
@@ -142,6 +150,7 @@ class TestCellLineTransformer:
             "cell_chembl_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cellosaurus_id": "  CVCL_0030  ",
+            "clo_id": "\tCLO_0003684\n",
             "cl_lincs_id": "\tLCL-1234\n",
         }
 
@@ -149,6 +158,7 @@ class TestCellLineTransformer:
 
         assert result is not None
         assert result["cellosaurus_id"] == "CVCL_0030"
+        assert result["clo_id"] == "CLO_0003684"
         assert result["cl_lincs_id"] == "LCL-1234"
 
     @pytest.mark.asyncio
@@ -265,7 +275,9 @@ class TestCellLineTransformer:
             "cell_source_tissue": None,
             "cell_source_organism": None,
             "cell_source_tax_id": None,
+            "cell_type": None,
             "cellosaurus_id": None,
+            "clo_id": None,
             "cl_lincs_id": None,
             "efo_id": None,
         }
@@ -277,6 +289,8 @@ class TestCellLineTransformer:
         assert result["cell_source_tissue"] is None
         assert result["cell_source_organism"] is None
         assert result["cell_source_tax_id"] is None
+        assert result["cell_type"] is None
         assert result["cellosaurus_id"] is None
+        assert result["clo_id"] is None
         assert result["cl_lincs_id"] is None
         assert result["efo_id"] is None
