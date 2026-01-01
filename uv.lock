@@ -141,7 +141,7 @@ wheels = [
 
 [[package]]
 name = "bioetl"
-version = "5.0.1"
+version = "5.0.6"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
