@@ -170,8 +170,6 @@ interactions:
       - Apache
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       X-Throttling-Control:
@@ -402,6 +400,2323 @@ interactions:
       X-Throttling-Control:
       - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
         status: Green (13%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.Br.CN%28C%29CCCSC%28%3DN%29N
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 71717291\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29\n        ],\n        \"element\":
+        [\n          35,\n          35,\n          16,\n          7,\n          7,\n
+        \         7,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1\n
+        \       ]\n      },\n      \"bonds\": {\n        \"aid1\": [\n          1,\n
+        \         2,\n          3,\n          3,\n          4,\n          4,\n          4,\n
+        \         5,\n          5,\n          5,\n          6,\n          6,\n          7,\n
+        \         7,\n          7,\n          8,\n          8,\n          8,\n          9,\n
+        \         9,\n          10,\n          10,\n          10,\n          11,\n
+        \         11,\n          11\n        ],\n        \"aid2\": [\n          28,\n
+        \         29,\n          9,\n          12,\n          7,\n          10,\n
+        \         11,\n          12,\n          25,\n          26,\n          12,\n
+        \         27,\n          8,\n          13,\n          14,\n          9,\n
+        \         15,\n          16,\n          17,\n          18,\n          19,\n
+        \         20,\n          21,\n          22,\n          23,\n          24\n
+        \       ],\n        \"order\": [\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1\n        ]\n
+        \     },\n      \"coords\": [\n        {\n          \"type\": [\n            1,\n
+        \           5,\n            255\n          ],\n          \"aid\": [\n            1,\n
+        \           2,\n            3,\n            4,\n            5,\n            6,\n
+        \           7,\n            8,\n            9,\n            10,\n            11,\n
+        \           12,\n            13,\n            14,\n            15,\n            16,\n
+        \           17,\n            18,\n            19,\n            20,\n            21,\n
+        \           22,\n            23,\n            24,\n            25,\n            26,\n
+        \           27,\n            28,\n            29\n          ],\n          \"conformers\":
+        [\n            {\n              \"x\": [\n                3.068,\n                3.068,\n
+        \               4.8671,\n                1.403,\n                6.5991,\n
+        \               5.7331,\n                2.269,\n                3.135,\n
+        \               4.001,\n                0.5369,\n                1.403,\n
+        \               5.7331,\n                2.6675,\n                1.8705,\n
+        \               2.7365,\n                3.5335,\n                4.3996,\n
+        \               3.6025,\n                0.8469,\n                0,\n                0.2269,\n
+        \               0.783,\n                1.403,\n                2.023,\n                7.136,\n
+        \               6.5991,\n                6.27,\n                4.068,\n                4.068\n
+        \             ],\n              \"y\": [\n                0,\n                2.5,\n
+        \               6.62,\n                6.62,\n                6.62,\n                8.12,\n
+        \               7.12,\n                6.62,\n                7.12,\n                7.12,\n
+        \               5.62,\n                7.12,\n                7.595,\n                7.595,\n
+        \               6.145,\n                6.145,\n                7.595,\n                7.595,\n
+        \               7.6569,\n                7.43,\n                6.5831,\n
+        \               5.62,\n                5,\n                5.62,\n                6.93,\n
+        \               6,\n                8.43,\n                0,\n                2.5\n
+        \             ]\n            }\n          ]\n        }\n      ],\n      \"charge\":
+        0,\n      \"props\": [\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound\",\n            \"name\": \"Canonicalized\",\n            \"datatype\":
+        5,\n            \"release\": \"2012.11.26\"\n          },\n          \"value\":
+        {\n            \"ival\": 1\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"Compound Complexity\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_COMPLEXITY\",\n            \"version\":
+        \"3.4.6.11\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"xemistry.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"fval\": 103\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Acceptor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHACCEPTORS\",\n            \"version\": \"3.4.6.11\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"xemistry.com\",\n            \"release\":
+        \"2019.06.18\"\n          },\n          \"value\": {\n            \"ival\":
+        3\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Donor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHDONORS\",\n            \"version\":
+        \"3.4.6.11\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"xemistry.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"ival\": 4\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Rotatable Bond\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NROTBONDS\",\n            \"version\": \"3.4.6.11\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"xemistry.com\",\n            \"release\":
+        \"2019.06.18\"\n          },\n          \"value\": {\n            \"ival\":
+        5\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Fingerprint\",\n            \"name\": \"SubStructure Keys\",\n            \"datatype\":
+        16,\n            \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.6.11\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"xemistry.com\",\n            \"release\":
+        \"2019.06.18\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371E0630000401800000000000000000000000000000000000000000000000000000000001C04100000000800C54004830003400008200000002000000200C000100000000800000000002000000400000000000000000000000000000000000000000000000000000000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"2-[3-(dimethylamino)propyl]isothiourea;dihydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"carbamimidothioic
+        acid 3-(dimethylamino)propyl ester;dihydrobromide\"\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"IUPAC Name\",\n
+        \           \"name\": \"Markup\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.6.6\",\n            \"software\": \"LexiChem\",\n            \"source\":
+        \"openeye.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"3-(dimethylamino)propyl carbamimidothioate;dihydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"3-(dimethylamino)propyl
+        carbamimidothioate;dihydrobromide\"\n          }\n        },\n        {\n
+        \         \"urn\": {\n            \"label\": \"IUPAC Name\",\n            \"name\":
+        \"Systematic\",\n            \"datatype\": 1,\n            \"version\": \"2.6.6\",\n
+        \           \"software\": \"LexiChem\",\n            \"source\": \"openeye.com\",\n
+        \           \"release\": \"2019.06.18\"\n          },\n          \"value\":
+        {\n            \"sval\": \"3-(dimethylamino)propyl carbamimidothioate;dihydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"2-[3-(dimethylamino)propyl]isothiourea;dihydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.5\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C6H15N3S.2BrH/c1-9(2)4-3-5-10-6(7)8;;/h3-5H2,1-2H3,(H3,7,8);2*1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.5\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CIXMYWKUNWSRAA-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.1\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"322.94894\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C6H17Br2N3S\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.1\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2021.05.07\"\n          },\n          \"value\":
+        {\n            \"sval\": \"323.10\"\n          }\n        },\n        {\n
+        \         \"urn\": {\n            \"label\": \"SMILES\",\n            \"name\":
+        \"Absolute\",\n            \"datatype\": 1,\n            \"version\": \"2.3.0\",\n
+        \           \"software\": \"OEChem\",\n            \"source\": \"OpenEye Scientific
+        Software\",\n            \"release\": \"2024.12.12\"\n          },\n          \"value\":
+        {\n            \"sval\": \"CN(C)CCCSC(=N)N.Br.Br\"\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"SMILES\",\n            \"name\":
+        \"Connectivity\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1.5\",\n            \"software\": \"OEChem\",\n            \"source\":
+        \"openeye.com\",\n            \"release\": \"2025.06.30\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"CN(C)CCCSC(=N)N.Br.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.6.11\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"xemistry.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"fval\": 78.4\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"320.95099\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 12,\n        \"atom_chiral\":
+        0,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 0,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 3,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 22:44:24 GMT
+      Expires:
+      - Thu, 01 Jan 2026 23:44:25 GMT
+      NCBI-PHID:
+      - 90C6A4EB956F8C810000000000000001.m_2
+      NCBI-SID:
+      - 90C6A4EB956F8C81_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (13%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.C%3DCCOC%28C%29C1%3DCC%28C%29%28C%29Nc2ccc%28-c3cc%28F%29ccc3OC%29cc21
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '80'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 45265930\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42,\n          43,\n          44,\n          45,\n          46,\n
+        \         47,\n          48,\n          49,\n          50,\n          51,\n
+        \         52,\n          53,\n          54,\n          55\n        ],\n        \"element\":
+        [\n          35,\n          9,\n          8,\n          8,\n          7,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1\n        ]\n      },\n      \"bonds\": {\n        \"aid1\":
+        [\n          1,\n          2,\n          3,\n          3,\n          4,\n
+        \         4,\n          5,\n          5,\n          5,\n          6,\n          6,\n
+        \         6,\n          7,\n          7,\n          7,\n          8,\n          9,\n
+        \         9,\n          10,\n          11,\n          11,\n          12,\n
+        \         12,\n          12,\n          13,\n          13,\n          13,\n
+        \         14,\n          14,\n          15,\n          15,\n          16,\n
+        \         16,\n          17,\n          17,\n          17,\n          18,\n
+        \         19,\n          19,\n          20,\n          20,\n          20,\n
+        \         21,\n          22,\n          22,\n          23,\n          23,\n
+        \         24,\n          25,\n          25,\n          26,\n          27,\n
+        \         27,\n          28,\n          28,\n          28\n        ],\n        \"aid2\":
+        [\n          55,\n          24,\n          11,\n          20,\n          21,\n
+        \         28,\n          6,\n          10,\n          30,\n          8,\n
+        \         12,\n          13,\n          8,\n          9,\n          11,\n
+        \         29,\n          10,\n          14,\n          15,\n          17,\n
+        \         31,\n          32,\n          33,\n          34,\n          35,\n
+        \         36,\n          37,\n          16,\n          38,\n          18,\n
+        \         39,\n          18,\n          19,\n          40,\n          41,\n
+        \         42,\n          43,\n          21,\n          22,\n          25,\n
+        \         44,\n          45,\n          23,\n          24,\n          46,\n
+        \         26,\n          47,\n          26,\n          27,\n          48,\n
+        \         49,\n          50,\n          51,\n          52,\n          53,\n
+        \         54\n        ],\n        \"order\": [\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          2,\n          1,\n
+        \         1,\n          1,\n          2,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          2,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          2,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          2,\n
+        \         1,\n          2,\n          1,\n          1,\n          2,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1\n
+        \       ]\n      },\n      \"stereo\": [\n        {\n          \"tetrahedral\":
+        {\n            \"center\": 11,\n            \"above\": 3,\n            \"top\":
+        7,\n            \"bottom\": 17,\n            \"below\": 31,\n            \"parity\":
+        3,\n            \"type\": 1\n          }\n        }\n      ],\n      \"coords\":
+        [\n        {\n          \"type\": [\n            1,\n            5,\n            255\n
+        \         ],\n          \"aid\": [\n            1,\n            2,\n            3,\n
+        \           4,\n            5,\n            6,\n            7,\n            8,\n
+        \           9,\n            10,\n            11,\n            12,\n            13,\n
+        \           14,\n            15,\n            16,\n            17,\n            18,\n
+        \           19,\n            20,\n            21,\n            22,\n            23,\n
+        \           24,\n            25,\n            26,\n            27,\n            28,\n
+        \           29,\n            30,\n            31,\n            32,\n            33,\n
+        \           34,\n            35,\n            36,\n            37,\n            38,\n
+        \           39,\n            40,\n            41,\n            42,\n            43,\n
+        \           44,\n            45,\n            46,\n            47,\n            48,\n
+        \           49,\n            50,\n            51,\n            52,\n            53,\n
+        \           54,\n            55\n          ],\n          \"conformers\": [\n
+        \           {\n              \"x\": [\n                3.8081,\n                0,\n
+        \               6.9961,\n                3.4718,\n                6.1301,\n
+        \               6.9961,\n                6.1301,\n                6.9961,\n
+        \               5.2641,\n                5.2641,\n                6.1301,\n
+        \               7.9961,\n                7.4961,\n                4.3701,\n
+        \               4.3701,\n                3.4641,\n                5.2641,\n
+        \               3.4641,\n                2.6,\n                6.9961,\n                2.6038,\n
+        \               1.732,\n                1.7398,\n                0.8679,\n
+        \               7.8622,\n                0.8718,\n                7.8622,\n
+        \               3.4756,\n                7.5331,\n                6.1301,\n
+        \               6.1301,\n                7.9961,\n                8.6161,\n
+        \               7.9961,\n                6.9592,\n                7.8061,\n
+        \               8.0331,\n                4.3773,\n                4.3773,\n
+        \               5.5741,\n                4.7272,\n                4.9541,\n
+        \               2.9283,\n                6.7841,\n                6.3856,\n
+        \               1.7296,\n                1.7421,\n                8.3991,\n
+        \               0.3361,\n                8.3991,\n                7.3252,\n
+        \               4.0956,\n                3.478,\n                2.8556,\n
+        \               4.8081\n              ],\n              \"y\": [\n                0,\n
+        \               4.9551,\n                6.9209,\n                6.9417,\n
+        \               3.4209,\n                3.9209,\n                5.4209,\n
+        \               4.9209,\n                4.9209,\n                3.9209,\n
+        \               6.4209,\n                3.9209,\n                3.0549,\n
+        \               5.4556,\n                3.3862,\n                4.9417,\n
+        \               6.9209,\n                3.9001,\n                5.4451,\n
+        \               7.9209,\n                6.445,\n                4.9484,\n
+        \               6.9484,\n                5.4517,\n                8.4209,\n
+        \               6.4517,\n                9.4209,\n                7.9417,\n
+        \               5.2309,\n                2.8009,\n                7.0409,\n
+        \               3.3009,\n                3.9209,\n                4.5409,\n
+        \               2.7449,\n                2.5179,\n                3.3649,\n
+        \               6.0755,\n                2.7663,\n                7.4578,\n
+        \               7.2309,\n                6.384,\n                3.588,\n
+        \               8.5035,\n                7.8132,\n                4.3284,\n
+        \               7.5684,\n                8.1109,\n                6.7638,\n
+        \               9.7309,\n                9.7309,\n                7.9393,\n
+        \               8.5617,\n                7.9441,\n                0\n              ],\n
+        \             \"style\": {\n                \"annotation\": [\n                  8,\n
+        \                 8,\n                  8,\n                  3,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8\n
+        \               ],\n                \"aid1\": [\n                  9,\n                  9,\n
+        \                 10,\n                  11,\n                  14,\n                  15,\n
+        \                 16,\n                  19,\n                  19,\n                  21,\n
+        \                 22,\n                  23,\n                  24\n                ],\n
+        \               \"aid2\": [\n                  10,\n                  14,\n
+        \                 15,\n                  17,\n                  16,\n                  18,\n
+        \                 18,\n                  21,\n                  22,\n                  23,\n
+        \                 24,\n                  26,\n                  26\n                ]\n
+        \             }\n            }\n          ]\n        }\n      ],\n      \"charge\":
+        0,\n      \"props\": [\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound\",\n            \"name\": \"Canonicalized\",\n            \"datatype\":
+        5,\n            \"release\": \"2019.01.04\"\n          },\n          \"value\":
+        {\n            \"ival\": 1\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"Compound Complexity\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_COMPLEXITY\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2024.11.20\"\n          },\n
+        \         \"value\": {\n            \"fval\": 546\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Acceptor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHACCEPTORS\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"ival\":
+        4\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Donor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHDONORS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2024.11.20\"\n          },\n
+        \         \"value\": {\n            \"ival\": 2\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Rotatable Bond\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NROTBONDS\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"ival\":
+        6\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Fingerprint\",\n            \"name\": \"SubStructure Keys\",\n            \"datatype\":
+        16,\n            \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371E07A3100001000000000000000000000000000000000306080000000000000814000001F00100000000C9CA1980A32C682C00400800224424000820800212200088800066C880C2622C4B19B86302864D011C8E807B0C0F00E88000200000A00001000040000140000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"sval\":
+        \"4-(1-allyloxyethyl)-6-(5-fluoro-2-methoxy-phenyl)-2,2-dimethyl-1H-quinoline;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"sval\":
+        \"6-(5-fluoro-2-methoxyphenyl)-2,2-dimethyl-4-(1-prop-2-enoxyethyl)-1H-quinoline;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"sval\":
+        \"6-(5-fluoro-2-methoxyphenyl)-2,2-dimethyl-4-(1-prop-2-enoxyethyl)-1<I>H</I>-quinoline;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"sval\":
+        \"6-(5-fluoro-2-methoxyphenyl)-2,2-dimethyl-4-(1-prop-2-enoxyethyl)-1H-quinoline;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"sval\":
+        \"6-(5-fluoranyl-2-methoxy-phenyl)-2,2-dimethyl-4-(1-prop-2-enoxyethyl)-1H-quinoline;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.11.20\"\n          },\n          \"value\": {\n            \"sval\":
+        \"4-(1-allyloxyethyl)-6-(5-fluoro-2-methoxy-phenyl)-2,2-dimethyl-1H-quinoline;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.0\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2024.11.20\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C23H26FNO2.BrH/c1-6-11-27-15(2)20-14-23(3,4)25-21-9-7-16(12-19(20)21)18-13-17(24)8-10-22(18)26-5;/h6-10,12-15,25H,1,11H2,2-5H3;1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.0\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2024.11.20\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"YKAWXLKLBCDEQW-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.2\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2024.11.20\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"447.12092\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2024.11.20\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C23H27BrFNO2\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.2\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2024.11.20\"\n          },\n          \"value\":
+        {\n            \"sval\": \"448.4\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"2.3.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.12.12\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CC(C1=CC(NC2=C1C=C(C=C2)C3=C(C=CC(=C3)F)OC)(C)C)OCC=C.Br\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"SMILES\",\n
+        \           \"name\": \"Connectivity\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.3.0\",\n            \"software\": \"OEChem\",\n            \"source\":
+        \"OpenEye Scientific Software\",\n            \"release\": \"2025.06.30\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CC(C1=CC(NC2=C1C=C(C=C2)C3=C(C=CC(=C3)F)OC)(C)C)OCC=C.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2024.11.20\"\n          },\n
+        \         \"value\": {\n            \"fval\": 30.5\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2024.11.20\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"447.12092\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 28,\n        \"atom_chiral\":
+        1,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 1,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 22:44:35 GMT
+      Expires:
+      - Thu, 01 Jan 2026 23:44:35 GMT
+      NCBI-PHID:
+      - 95B7FCB4956F8D310000000000000001.m_2
+      NCBI-SID:
+      - 95B7FCB4956F8D31_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (7%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.CCOC%28%3DO%29C%2FN%3Dc1%5Cnc%28-c2ccccc2%29n%28-c2ccccc2%29s1
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '72'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 57326116\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42,\n          43\n        ],\n        \"element\": [\n          35,\n
+        \         16,\n          8,\n          8,\n          7,\n          7,\n          7,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1\n
+        \       ]\n      },\n      \"bonds\": {\n        \"aid1\": [\n          1,\n
+        \         2,\n          2,\n          3,\n          3,\n          4,\n          5,\n
+        \         5,\n          6,\n          6,\n          7,\n          7,\n          8,\n
+        \         9,\n          9,\n          10,\n          10,\n          12,\n
+        \         12,\n          13,\n          13,\n          14,\n          14,\n
+        \         15,\n          15,\n          16,\n          16,\n          17,\n
+        \         17,\n          18,\n          18,\n          19,\n          19,\n
+        \         20,\n          21,\n          22,\n          22,\n          22,\n
+        \         24,\n          24,\n          24,\n          25,\n          25,\n
+        \         25\n        ],\n        \"aid2\": [\n          43,\n          5,\n
+        \         11,\n          23,\n          24,\n          23,\n          8,\n
+        \         9,\n          8,\n          11,\n          11,\n          22,\n
+        \         10,\n          12,\n          13,\n          14,\n          15,\n
+        \         16,\n          26,\n          17,\n          27,\n          18,\n
+        \         28,\n          19,\n          29,\n          20,\n          30,\n
+        \         20,\n          31,\n          21,\n          32,\n          21,\n
+        \         33,\n          34,\n          35,\n          23,\n          36,\n
+        \         37,\n          25,\n          38,\n          39,\n          40,\n
+        \         41,\n          42\n        ],\n        \"order\": [\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          2,\n          1,\n
+        \         1,\n          2,\n          1,\n          2,\n          1,\n          1,\n
+        \         2,\n          1,\n          2,\n          1,\n          1,\n          1,\n
+        \         2,\n          1,\n          1,\n          1,\n          2,\n          1,\n
+        \         2,\n          1,\n          1,\n          1,\n          2,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1\n        ]\n      },\n      \"coords\": [\n        {\n          \"type\":
+        [\n            1,\n            5,\n            255\n          ],\n          \"aid\":
+        [\n            1,\n            2,\n            3,\n            4,\n            5,\n
+        \           6,\n            7,\n            8,\n            9,\n            10,\n
+        \           11,\n            12,\n            13,\n            14,\n            15,\n
+        \           16,\n            17,\n            18,\n            19,\n            20,\n
+        \           21,\n            22,\n            23,\n            24,\n            25,\n
+        \           26,\n            27,\n            28,\n            29,\n            30,\n
+        \           31,\n            32,\n            33,\n            34,\n            35,\n
+        \           36,\n            37,\n            38,\n            39,\n            40,\n
+        \           41,\n            42,\n            43\n          ],\n          \"conformers\":
+        [\n            {\n              \"x\": [\n                8.5152,\n                1.4543,\n
+        \               1.4013,\n                0,\n                2.2634,\n                2.7634,\n
+        \               1.1756,\n                3.0724,\n                2.2634,\n
+        \               4.0234,\n                1.7634,\n                1.3973,\n
+        \               3.1294,\n                4.7666,\n                4.2313,\n
+        \               1.3973,\n                3.1294,\n                5.7176,\n
+        \               5.1824,\n                2.2634,\n                5.9255,\n
+        \               1.5823,\n                0.9945,\n                0.8135,\n
+        \               1.2202,\n                0.8604,\n                3.6663,\n
+        \               4.6377,\n                3.7706,\n                0.8604,\n
+        \               3.6663,\n                6.1784,\n                5.3113,\n
+        \               2.2634,\n                6.5152,\n                2.0963,\n
+        \               2.013,\n                0.2995,\n                0.3828,\n
+        \               1.7866,\n                1.4724,\n                0.6538,\n
+        \               9.5152\n              ],\n              \"y\": [\n                5.1965,\n
+        \               4.2078,\n                8.604,\n                7.5859,\n
+        \               3.62,\n                5.1588,\n                5.9679,\n
+        \               4.2078,\n                2.62,\n                3.8988,\n
+        \               5.1588,\n                2.12,\n                2.12,\n                4.5679,\n
+        \               2.9206,\n                1.12,\n                1.12,\n                4.2589,\n
+        \               2.6116,\n                0.62,\n                3.2807,\n
+        \               6.8814,\n                7.6904,\n                9.413,\n
+        \               10.3265,\n                2.43,\n                2.43,\n                5.1744,\n
+        \               2.5058,\n                0.81,\n                0.81,\n                4.6737,\n
+        \               2.0052,\n                0,\n                3.0891,\n                6.5347,\n
+        \               7.3274,\n                9.7597,\n                8.967,\n
+        \               10.0744,\n                10.8929,\n                10.5787,\n
+        \               5.1965\n              ],\n              \"style\": {\n                \"annotation\":
+        [\n                  8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8\n                ],\n                \"aid1\": [\n                  2,\n
+        \                 2,\n                  5,\n                  6,\n                  6,\n
+        \                 9,\n                  9,\n                  10,\n                  10,\n
+        \                 12,\n                  13,\n                  14,\n                  15,\n
+        \                 16,\n                  17,\n                  18,\n                  19\n
+        \               ],\n                \"aid2\": [\n                  5,\n                  11,\n
+        \                 8,\n                  8,\n                  11,\n                  12,\n
+        \                 13,\n                  14,\n                  15,\n                  16,\n
+        \                 17,\n                  18,\n                  19,\n                  20,\n
+        \                 20,\n                  21,\n                  21\n                ]\n
+        \             }\n            }\n          ]\n        }\n      ],\n      \"charge\":
+        0,\n      \"props\": [\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound\",\n            \"name\": \"Canonicalized\",\n            \"datatype\":
+        5,\n            \"release\": \"2025.09.15\"\n          },\n          \"value\":
+        {\n            \"ival\": 1\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"Compound Complexity\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_COMPLEXITY\",\n            \"version\":
+        \"3.4.8.24\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"fval\": 494\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Acceptor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHACCEPTORS\",\n            \"version\": \"3.4.8.24\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"ival\":
+        4\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Donor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHDONORS\",\n            \"version\":
+        \"3.4.8.24\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"ival\": 1\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Rotatable Bond\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NROTBONDS\",\n            \"version\": \"3.4.8.24\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"ival\":
+        6\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Fingerprint\",\n            \"name\": \"SubStructure Keys\",\n            \"datatype\":
+        16,\n            \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.24\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371E07B3000401000000000000000000000000100000000306000000000000000014000001E04004000000C08E1980633C882000400A80226F26C00821001210200098800A064980A20A2C09991872008608000C8C8071080000E00000000000000000000000000000000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"ethyl 2-[(2,3-diphenyl-1,2,4-thiadiazol-5-ylidene)amino]acetate;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[(2,3-diphenyl-1,2,4-thiadiazol-5-ylidene)amino]acetic acid ethyl ester;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"ethyl 2-[(2,3-diphenyl-1,2,4-thiadiazol-5-ylidene)amino]acetate;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"ethyl 2-[(2,3-diphenyl-1,2,4-thiadiazol-5-ylidene)amino]acetate;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"ethyl 2-[(2,3-diphenyl-1,2,4-thiadiazol-5-ylidene)amino]ethanoate;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[(2,3-diphenyl-1,2,4-thiadiazol-5-ylidene)amino]acetic acid ethyl ester;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.4\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C18H17N3O2S.BrH/c1-2-23-16(22)13-19-18-20-17(14-9-5-3-6-10-14)21(24-18)15-11-7-4-8-12-15;/h3-12H,2,13H2,1H3;1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.4\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"LYILKDDTRUIVIP-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.2\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"419.03031\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C18H18BrN3O2S\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.2\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2025.09.15\"\n          },\n          \"value\":
+        {\n            \"sval\": \"420.3\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"4.2.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CCOC(=O)CN=C1N=C(N(S1)C2=CC=CC=C2)C3=CC=CC=C3.Br\"\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"SMILES\",\n            \"name\":
+        \"Connectivity\",\n            \"datatype\": 1,\n            \"version\":
+        \"4.2.0\",\n            \"software\": \"OEChem\",\n            \"source\":
+        \"OpenEye Scientific Software\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CCOC(=O)CN=C1N=C(N(S1)C2=CC=CC=C2)C3=CC=CC=C3.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.24\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"fval\": 79.6\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"419.03031\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 25,\n        \"atom_chiral\":
+        0,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 0,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 22:44:44 GMT
+      Expires:
+      - Thu, 01 Jan 2026 23:44:44 GMT
+      NCBI-PHID:
+      - 95B704A8956F8DC10000000000000001.m_2
+      NCBI-SID:
+      - 95B704A8956F8DC1_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (10%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.CN1CC%28O%29%28c2ccc%28-c3cc%28C%28C%29%28C%29C%29c%28O%29c%28C%28C%29%28C%29C%29c3%29cc2%29OC2CCCCC21
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '112'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 60162272\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42,\n          43,\n          44,\n          45,\n          46,\n
+        \         47,\n          48,\n          49,\n          50,\n          51,\n
+        \         52,\n          53,\n          54,\n          55,\n          56,\n
+        \         57,\n          58,\n          59,\n          60,\n          61,\n
+        \         62,\n          63,\n          64,\n          65,\n          66,\n
+        \         67,\n          68,\n          69,\n          70,\n          71,\n
+        \         72,\n          73,\n          74,\n          75,\n          76\n
+        \       ],\n        \"element\": [\n          35,\n          8,\n          8,\n
+        \         8,\n          7,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1\n        ]\n      },\n      \"bonds\": {\n        \"aid1\": [\n
+        \         1,\n          2,\n          2,\n          3,\n          3,\n          4,\n
+        \         4,\n          5,\n          5,\n          5,\n          6,\n          6,\n
+        \         6,\n          7,\n          7,\n          8,\n          8,\n          8,\n
+        \         9,\n          9,\n          9,\n          10,\n          10,\n          10,\n
+        \         11,\n          11,\n          12,\n          12,\n          13,\n
+        \         13,\n          14,\n          14,\n          14,\n          15,\n
+        \         15,\n          16,\n          16,\n          17,\n          17,\n
+        \         18,\n          18,\n          18,\n          19,\n          20,\n
+        \         21,\n          21,\n          22,\n          22,\n          22,\n
+        \         22,\n          23,\n          23,\n          23,\n          23,\n
+        \         24,\n          24,\n          25,\n          25,\n          26,\n
+        \         27,\n          29,\n          29,\n          29,\n          30,\n
+        \         30,\n          30,\n          31,\n          31,\n          31,\n
+        \         32,\n          32,\n          32,\n          33,\n          33,\n
+        \         33,\n          34,\n          34,\n          34\n        ],\n        \"aid2\":
+        [\n          76,\n          7,\n          12,\n          12,\n          50,\n
+        \         28,\n          75,\n          6,\n          13,\n          14,\n
+        \         7,\n          8,\n          35,\n          9,\n          36,\n          10,\n
+        \         37,\n          38,\n          11,\n          39,\n          40,\n
+        \         11,\n          41,\n          42,\n          43,\n          44,\n
+        \         13,\n          15,\n          45,\n          46,\n          47,\n
+        \         48,\n          49,\n          16,\n          17,\n          19,\n
+        \         51,\n          20,\n          52,\n          19,\n          20,\n
+        \         21,\n          53,\n          54,\n          26,\n          27,\n
+        \         24,\n          29,\n          30,\n          31,\n          25,\n
+        \         32,\n          33,\n          34,\n          27,\n          28,\n
+        \         26,\n          28,\n          55,\n          56,\n          57,\n
+        \         58,\n          59,\n          60,\n          61,\n          62,\n
+        \         63,\n          64,\n          65,\n          66,\n          67,\n
+        \         68,\n          69,\n          70,\n          71,\n          72,\n
+        \         73,\n          74\n        ],\n        \"order\": [\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          2,\n          1,\n          1,\n          1,\n
+        \         2,\n          1,\n          2,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          2,\n
+        \         1,\n          1,\n          2,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1\n        ]\n
+        \     },\n      \"stereo\": [\n        {\n          \"tetrahedral\": {\n            \"center\":
+        6,\n            \"above\": 5,\n            \"top\": 7,\n            \"bottom\":
+        8,\n            \"below\": 35,\n            \"parity\": 3,\n            \"type\":
+        1\n          }\n        },\n        {\n          \"tetrahedral\": {\n            \"center\":
+        7,\n            \"above\": 2,\n            \"top\": 6,\n            \"bottom\":
+        9,\n            \"below\": 36,\n            \"parity\": 3,\n            \"type\":
+        1\n          }\n        },\n        {\n          \"tetrahedral\": {\n            \"center\":
+        12,\n            \"above\": 2,\n            \"top\": 3,\n            \"bottom\":
+        13,\n            \"below\": 15,\n            \"parity\": 3,\n            \"type\":
+        1\n          }\n        }\n      ],\n      \"coords\": [\n        {\n          \"type\":
+        [\n            1,\n            5,\n            255\n          ],\n          \"aid\":
+        [\n            1,\n            2,\n            3,\n            4,\n            5,\n
+        \           6,\n            7,\n            8,\n            9,\n            10,\n
+        \           11,\n            12,\n            13,\n            14,\n            15,\n
+        \           16,\n            17,\n            18,\n            19,\n            20,\n
+        \           21,\n            22,\n            23,\n            24,\n            25,\n
+        \           26,\n            27,\n            28,\n            29,\n            30,\n
+        \           31,\n            32,\n            33,\n            34,\n            35,\n
+        \           36,\n            37,\n            38,\n            39,\n            40,\n
+        \           41,\n            42,\n            43,\n            44,\n            45,\n
+        \           46,\n            47,\n            48,\n            49,\n            50,\n
+        \           51,\n            52,\n            53,\n            54,\n            55,\n
+        \           56,\n            57,\n            58,\n            59,\n            60,\n
+        \           61,\n            62,\n            63,\n            64,\n            65,\n
+        \           66,\n            67,\n            68,\n            69,\n            70,\n
+        \           71,\n            72,\n            73,\n            74,\n            75,\n
+        \           76\n          ],\n          \"conformers\": [\n            {\n
+        \             \"x\": [\n                5.2729,\n                3.2769,\n
+        \               4.6429,\n                11.1429,\n                3.2769,\n
+        \               2.4109,\n                2.4109,\n                1.5169,\n
+        \               1.5169,\n                0.6109,\n                0.6109,\n
+        \               4.1429,\n                4.1429,\n                3.2769,\n
+        \               5.1429,\n                5.6429,\n                5.6429,\n
+        \               7.1429,\n                6.6429,\n                6.6429,\n
+        \               8.1429,\n                10.1429,\n                10.1429,\n
+        \               9.6429,\n                9.6429,\n                8.6429,\n
+        \               8.6429,\n                10.1429,\n                10.6429,\n
+        \               9.2769,\n                11.0089,\n                10.6429,\n
+        \               9.2769,\n                11.0089,\n                2.4156,\n
+        \               2.4156,\n                1.9215,\n                1.1233,\n
+        \               1.1233,\n                1.9215,\n                0.4018,\n
+        \               0,\n                0,\n                0.4018,\n                4.7535,\n
+        \               4.355,\n                3.8969,\n                3.2769,\n
+        \               2.6569,\n                4.3329,\n                5.3329,\n
+        \               5.3329,\n                6.9529,\n                6.9529,\n
+        \               8.3329,\n                8.3329,\n                11.1799,\n
+        \               10.9529,\n                10.106,\n                9.5869,\n
+        \               8.74,\n                8.9669,\n                10.6989,\n
+        \               11.5459,\n                11.3189,\n                10.106,\n
+        \               10.9529,\n                11.1799,\n                8.9669,\n
+        \               8.74,\n                9.5869,\n                11.3189,\n
+        \               11.5459,\n                10.6989,\n                11.4529,\n
+        \               6.2729\n              ],\n              \"y\": [\n                0,\n
+        \               5.1495,\n                4.7834,\n                5.6495,\n
+        \               7.1495,\n                6.6495,\n                5.6495,\n
+        \               7.1841,\n                5.1148,\n                6.6703,\n
+        \               5.6287,\n                5.6495,\n                6.6495,\n
+        \               8.1495,\n                5.6495,\n                6.5155,\n
+        \               4.7834,\n                5.6495,\n                6.5155,\n
+        \               4.7834,\n                5.6495,\n                7.3815,\n
+        \               3.9174,\n                6.5155,\n                4.7834,\n
+        \               4.7834,\n                6.5155,\n                5.6495,\n
+        \               8.2475,\n                7.8815,\n                6.8815,\n
+        \               3.0514,\n                3.4174,\n                4.4174,\n
+        \               7.2694,\n                5.0295,\n                7.6539,\n
+        \               7.6632,\n                4.6358,\n                4.645,\n
+        \               7.254,\n                6.5642,\n                5.7347,\n
+        \               5.045,\n                6.5418,\n                7.2321,\n
+        \               8.1495,\n                8.7695,\n                8.1495,\n
+        \               4.2465,\n                7.0524,\n                4.2465,\n
+        \               7.0524,\n                4.2465,\n                4.2465,\n
+        \               7.0524,\n                7.9375,\n                8.7845,\n
+        \               8.5575,\n                8.4184,\n                8.1915,\n
+        \               7.3446,\n                6.3446,\n                6.5715,\n
+        \               7.4184,\n                2.7414,\n                2.5145,\n
+        \               3.3614,\n                3.9544,\n                3.1074,\n
+        \               2.8805,\n                3.8805,\n                4.7274,\n
+        \               4.9544,\n                5.1125,\n                0\n              ],\n
+        \             \"style\": {\n                \"annotation\": [\n                  3,\n
+        \                 3,\n                  3,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8\n                ],\n                \"aid1\":
+        [\n                  6,\n                  7,\n                  12,\n                  15,\n
+        \                 15,\n                  16,\n                  17,\n                  18,\n
+        \                 18,\n                  21,\n                  21,\n                  24,\n
+        \                 24,\n                  25,\n                  25\n                ],\n
+        \               \"aid2\": [\n                  8,\n                  9,\n
+        \                 3,\n                  16,\n                  17,\n                  19,\n
+        \                 20,\n                  19,\n                  20,\n                  26,\n
+        \                 27,\n                  27,\n                  28,\n                  26,\n
+        \                 28\n                ]\n              }\n            }\n
+        \         ]\n        }\n      ],\n      \"charge\": 0,\n      \"props\": [\n
+        \       {\n          \"urn\": {\n            \"label\": \"Compound\",\n            \"name\":
+        \"Canonicalized\",\n            \"datatype\": 5,\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"ival\":
+        1\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound Complexity\",\n            \"datatype\": 7,\n            \"implementation\":
+        \"E_COMPLEXITY\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"fval\":
+        635\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Acceptor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHACCEPTORS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"ival\": 4\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Donor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHDONORS\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"ival\":
+        3\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Rotatable Bond\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NROTBONDS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"ival\": 4\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Fingerprint\",\n
+        \           \"name\": \"SubStructure Keys\",\n            \"datatype\": 16,\n
+        \           \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371F07A30000010000000000000000000000000000000003C60C1000000000000B14000001E00000800000E3CE19806320E830006008002204200000200002020000888000C08881A262282B11B87700024C0119CB80790C0F00FE000020000080000C000040000102000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[4-(3,5-ditert-butyl-4-hydroxy-phenyl)phenyl]-4-methyl-4a,5,6,7,8,8a-hexahydro-3H-benzo[b][1,4]oxazin-2-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[4-(3,5-ditert-butyl-4-hydroxyphenyl)phenyl]-4-methyl-4a,5,6,7,8,8a-hexahydro-3H-benzo[b][1,4]oxazin-2-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[4-(3,5-di<I>tert</I>-butyl-4-hydroxyphenyl)phenyl]-4-methyl-4<I>a</I>,5,6,7,8,8<I>a</I>-hexahydro-3<I>H</I>-benzo[b][1,4]oxazin-2-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[4-(3,5-ditert-butyl-4-hydroxyphenyl)phenyl]-4-methyl-4a,5,6,7,8,8a-hexahydro-3H-benzo[b][1,4]oxazin-2-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[4-(3,5-ditert-butyl-4-oxidanyl-phenyl)phenyl]-4-methyl-4a,5,6,7,8,8a-hexahydro-3H-benzo[b][1,4]oxazin-2-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"2-[4-(3,5-ditert-butyl-4-hydroxy-phenyl)phenyl]-4-methyl-4a,5,6,7,8,8a-hexahydro-3H-benzo[b][1,4]oxazin-2-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.6\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C29H41NO3.BrH/c1-27(2,3)22-16-20(17-23(26(22)31)28(4,5)6)19-12-14-21(15-13-19)29(32)18-30(7)24-10-8-9-11-25(24)33-29;/h12-17,24-25,31-32H,8-11,18H2,1-7H3;1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.6\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CNFRXVLYDLPPCN-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.1\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"531.23481\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C29H42BrNO3\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.1\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2021.05.07\"\n          },\n          \"value\":
+        {\n            \"sval\": \"532.6\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"2.3.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.12.12\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CC(C)(C)C1=CC(=CC(=C1O)C(C)(C)C)C2=CC=C(C=C2)C3(CN(C4CCCCC4O3)C)O.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"SMILES\",\n            \"name\": \"Connectivity\",\n            \"datatype\":
+        1,\n            \"version\": \"2.3.0\",\n            \"software\": \"OEChem\",\n
+        \           \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.06.30\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CC(C)(C)C1=CC(=CC(=C1O)C(C)(C)C)C2=CC=C(C=C2)C3(CN(C4CCCCC4O3)C)O.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"fval\": 52.9\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"531.23481\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 34,\n        \"atom_chiral\":
+        3,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 3,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 22:44:49 GMT
+      Expires:
+      - Thu, 01 Jan 2026 23:44:50 GMT
+      NCBI-PHID:
+      - 90C6B8B6956F8E110000000000000001.m_2
+      NCBI-SID:
+      - 90C6B8B6956F8E11_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (7%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.CN1CCc2ccccc2Cc2ccc%28O%29cc2CC1
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 52946556\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42,\n          43\n        ],\n        \"element\": [\n          35,\n
+        \         8,\n          7,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1\n
+        \       ]\n      },\n      \"bonds\": {\n        \"aid1\": [\n          1,\n
+        \         2,\n          2,\n          3,\n          3,\n          3,\n          4,\n
+        \         4,\n          4,\n          5,\n          5,\n          5,\n          6,\n
+        \         6,\n          6,\n          7,\n          7,\n          7,\n          8,\n
+        \         8,\n          9,\n          9,\n          9,\n          9,\n          10,\n
+        \         10,\n          11,\n          12,\n          13,\n          13,\n
+        \         13,\n          14,\n          14,\n          15,\n          15,\n
+        \         16,\n          16,\n          17,\n          17,\n          18,\n
+        \         19,\n          20,\n          20,\n          21\n        ],\n        \"aid2\":
+        [\n          43,\n          18,\n          42,\n          4,\n          5,\n
+        \         13,\n          6,\n          22,\n          23,\n          7,\n
+        \         24,\n          25,\n          8,\n          26,\n          27,\n
+        \         10,\n          28,\n          29,\n          11,\n          14,\n
+        \         11,\n          12,\n          30,\n          31,\n          12,\n
+        \         16,\n          15,\n          17,\n          32,\n          33,\n
+        \         34,\n          18,\n          35,\n          19,\n          36,\n
+        \         20,\n          37,\n          21,\n          38,\n          19,\n
+        \         39,\n          21,\n          40,\n          41\n        ],\n        \"order\":
+        [\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          2,\n          1,\n          2,\n          1,\n
+        \         1,\n          1,\n          2,\n          1,\n          2,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         2,\n          1,\n          1\n        ]\n      },\n      \"coords\":
+        [\n        {\n          \"type\": [\n            1,\n            5,\n            255\n
+        \         ],\n          \"aid\": [\n            1,\n            2,\n            3,\n
+        \           4,\n            5,\n            6,\n            7,\n            8,\n
+        \           9,\n            10,\n            11,\n            12,\n            13,\n
+        \           14,\n            15,\n            16,\n            17,\n            18,\n
+        \           19,\n            20,\n            21,\n            22,\n            23,\n
+        \           24,\n            25,\n            26,\n            27,\n            28,\n
+        \           29,\n            30,\n            31,\n            32,\n            33,\n
+        \           34,\n            35,\n            36,\n            37,\n            38,\n
+        \           39,\n            40,\n            41,\n            42,\n            43\n
+        \         ],\n          \"conformers\": [\n            {\n              \"x\":
+        [\n                2.724,\n                0.0024,\n                2.6544,\n
+        \               2.6544,\n                3.5204,\n                1.7884,\n
+        \               4.3864,\n                1.7884,\n                3.5204,\n
+        \               4.3864,\n                2.6544,\n                3.5204,\n
+        \               1.7884,\n                0.8784,\n                2.6705,\n
+        \               5.7978,\n                3.3146,\n                0.8703,\n
+        \               1.7724,\n                5.9009,\n                4.5804,\n
+        \               2.8664,\n                3.265,\n                3.919,\n
+        \               3.1219,\n                1.5763,\n                1.1778,\n
+        \               4.997,\n                4.5985,\n                3.7325,\n
+        \               4.131,\n                2.0984,\n                1.2514,\n
+        \               1.4784,\n                0.3451,\n                3.2109,\n
+        \               6.3005,\n                2.749,\n                1.7748,\n
+        \               6.448,\n                4.5594,\n                0,\n                3.724\n
+        \             ],\n              \"y\": [\n                0,\n                3.466,\n
+        \               8.0111,\n                7.0111,\n                8.5111,\n
+        \               6.5111,\n                8.0111,\n                5.5111,\n
+        \               5.5111,\n                7.0111,\n                5.0111,\n
+        \               6.5111,\n                8.5111,\n                5.0042,\n
+        \               3.9696,\n                6.4339,\n                5.0003,\n
+        \               3.9626,\n                3.4418,\n                4.9127,\n
+        \               4.1503,\n                6.4285,\n                7.1187,\n
+        \               8.986,\n                8.986,\n                7.0937,\n
+        \               6.4034,\n                7.9034,\n                8.5937,\n
+        \               4.9285,\n                5.6187,\n                9.048,\n
+        \               8.8211,\n                7.9741,\n                5.3204,\n
+        \               3.6658,\n                6.7968,\n                4.7463,\n
+        \               2.8218,\n                4.621,\n                3.5307,\n
+        \               2.846,\n                0\n              ],\n              \"style\":
+        {\n                \"annotation\": [\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8\n                ],\n                \"aid1\":
+        [\n                  8,\n                  8,\n                  10,\n                  10,\n
+        \                 11,\n                  12,\n                  14,\n                  15,\n
+        \                 16,\n                  17,\n                  18,\n                  20\n
+        \               ],\n                \"aid2\": [\n                  11,\n                  14,\n
+        \                 12,\n                  16,\n                  15,\n                  17,\n
+        \                 18,\n                  19,\n                  20,\n                  21,\n
+        \                 19,\n                  21\n                ]\n              }\n
+        \           }\n          ]\n        }\n      ],\n      \"charge\": 0,\n      \"props\":
+        [\n        {\n          \"urn\": {\n            \"label\": \"Compound\",\n
+        \           \"name\": \"Canonicalized\",\n            \"datatype\": 5,\n            \"release\":
+        \"2011.04.04\"\n          },\n          \"value\": {\n            \"ival\":
+        1\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound Complexity\",\n            \"datatype\": 7,\n            \"implementation\":
+        \"E_COMPLEXITY\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"fval\":
+        306\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Acceptor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHACCEPTORS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"ival\": 2\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Donor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHDONORS\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"ival\":
+        2\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Rotatable Bond\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NROTBONDS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"ival\": 0\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Fingerprint\",\n
+        \           \"name\": \"SubStructure Keys\",\n            \"datatype\": 16,\n
+        \           \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371E07A2000001000000000000000000000000000000000306000000000000000B14000001E00000800000C04C198043206830002008002204200000200002020000888000E088808262282911384700024C01188980790D0F20EA0000100001000004000020000200000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"11-methyl-11-azatricyclo[12.4.0.03,8]octadeca-1(18),3(8),4,6,14,16-hexaen-6-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"11-methyl-11-azatricyclo[12.4.0.03,8]octadeca-1(18),3(8),4,6,14,16-hexaen-6-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"11-methyl-11-azatricyclo[12.4.0.0<SUP>3,8</SUP>]octadeca-1(18),3(8),4,6,14,16-hexaen-6-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"11-methyl-11-azatricyclo[12.4.0.03,8]octadeca-1(18),3(8),4,6,14,16-hexaen-6-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"11-methyl-11-azatricyclo[12.4.0.03,8]octadeca-1(18),3(8),4,6,14,16-hexaen-6-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2021.05.07\"\n          },\n          \"value\": {\n            \"sval\":
+        \"11-methyl-11-azatricyclo[12.4.0.03,8]octadeca-1(18),3(8),4,6,14,16-hexaen-6-ol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.6\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C18H21NO.BrH/c1-19-10-8-14-4-2-3-5-15(14)12-16-6-7-18(20)13-17(16)9-11-19;/h2-7,13,20H,8-12H2,1H3;1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.6\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"UCIOVGXNJAERJD-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.1\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"347.08848\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C18H22BrNO\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.1\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2021.05.07\"\n          },\n          \"value\":
+        {\n            \"sval\": \"348.3\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"2.3.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.12.12\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CN1CCC2=CC=CC=C2CC3=C(CC1)C=C(C=C3)O.Br\"\n          }\n        },\n        {\n
+        \         \"urn\": {\n            \"label\": \"SMILES\",\n            \"name\":
+        \"Connectivity\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.3.0\",\n            \"software\": \"OEChem\",\n            \"source\":
+        \"OpenEye Scientific Software\",\n            \"release\": \"2025.06.30\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CN1CCC2=CC=CC=C2CC3=C(CC1)C=C(C=C3)O.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"fval\": 23.5\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"347.08848\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 21,\n        \"atom_chiral\":
+        0,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 0,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 22:44:57 GMT
+      Expires:
+      - Thu, 01 Jan 2026 23:44:58 GMT
+      NCBI-PHID:
+      - 95B70F5B956F8E910000000000000001.m_2
+      NCBI-SID:
+      - 95B70F5B956F8E91_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (10%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.CN%28C%29CCCC1%28c2ccc%28F%29cc2%29OCc2cc%28C%23N%29ccc21
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '67'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 77995\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42,\n          43,\n          44,\n          45,\n          46,\n
+        \         47\n        ],\n        \"element\": [\n          35,\n          9,\n
+        \         8,\n          7,\n          7,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1\n        ]\n      },\n      \"bonds\":
+        {\n        \"aid1\": [\n          1,\n          2,\n          3,\n          3,\n
+        \         4,\n          4,\n          4,\n          5,\n          6,\n          6,\n
+        \         6,\n          7,\n          7,\n          7,\n          8,\n          8,\n
+        \         9,\n          9,\n          10,\n          10,\n          11,\n
+        \         11,\n          11,\n          12,\n          12,\n          13,\n
+        \         13,\n          14,\n          14,\n          15,\n          15,\n
+        \         16,\n          16,\n          17,\n          17,\n          18,\n
+        \         18,\n          19,\n          20,\n          20,\n          21,\n
+        \         21,\n          23,\n          23,\n          23,\n          24,\n
+        \         24,\n          24\n        ],\n        \"aid2\": [\n          47,\n
+        \         22,\n          6,\n          12,\n          13,\n          23,\n
+        \         24,\n          25,\n          7,\n          8,\n          10,\n
+        \         11,\n          26,\n          27,\n          9,\n          14,\n
+        \         12,\n          15,\n          16,\n          17,\n          13,\n
+        \         28,\n          29,\n          30,\n          31,\n          32,\n
+        \         33,\n          18,\n          34,\n          19,\n          35,\n
+        \         20,\n          36,\n          21,\n          37,\n          19,\n
+        \         38,\n          25,\n          22,\n          39,\n          22,\n
+        \         40,\n          41,\n          42,\n          43,\n          44,\n
+        \         45,\n          46\n        ],\n        \"order\": [\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         3,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          2,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          2,\n          1,\n          2,\n          1,\n
+        \         1,\n          1,\n          2,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1\n        ]\n
+        \     },\n      \"stereo\": [\n        {\n          \"tetrahedral\": {\n            \"center\":
+        6,\n            \"above\": 3,\n            \"top\": 7,\n            \"bottom\":
+        8,\n            \"below\": 10,\n            \"parity\": 3,\n            \"type\":
+        1\n          }\n        }\n      ],\n      \"coords\": [\n        {\n          \"type\":
+        [\n            1,\n            5,\n            255\n          ],\n          \"aid\":
+        [\n            1,\n            2,\n            3,\n            4,\n            5,\n
+        \           6,\n            7,\n            8,\n            9,\n            10,\n
+        \           11,\n            12,\n            13,\n            14,\n            15,\n
+        \           16,\n            17,\n            18,\n            19,\n            20,\n
+        \           21,\n            22,\n            23,\n            24,\n            25,\n
+        \           26,\n            27,\n            28,\n            29,\n            30,\n
+        \           31,\n            32,\n            33,\n            34,\n            35,\n
+        \           36,\n            37,\n            38,\n            39,\n            40,\n
+        \           41,\n            42,\n            43,\n            44,\n            45,\n
+        \           46,\n            47\n          ],\n          \"conformers\": [\n
+        \           {\n              \"x\": [\n                3.3252,\n                7.6505,\n
+        \               4.9939,\n                1.84,\n                0,\n                4.4103,\n
+        \               4.103,\n                3.4641,\n                3.4641,\n
+        \               5.2204,\n                3.1252,\n                4.4103,\n
+        \               2.8178,\n                2.5981,\n                2.5981,\n
+        \               5.1176,\n                6.1332,\n                1.7321,\n
+        \               1.7321,\n                5.9276,\n                6.9432,\n
+        \               6.8404,\n                1.5326,\n                1.1696,\n
+        \               0.866,\n                4.7171,\n                4.1257,\n
+        \               2.5111,\n                3.1025,\n                4.1593,\n
+        \               4.9477,\n                3.4319,\n                2.8405,\n
+        \               2.5981,\n                2.5981,\n                4.5516,\n
+        \               6.1969,\n                1.1951,\n                5.8638,\n
+        \               7.5092,\n                2.1226,\n                1.3421,\n
+        \               0.9427,\n                0.7096,\n                0.7539,\n
+        \               1.6296,\n                4.3252\n              ],\n              \"y\":
+        [\n                0,\n                7.268,\n                4.1177,\n                7.2448,\n
+        \               2.6177,\n                4.9225,\n                5.874,\n
+        \               4.6177,\n                3.6177,\n                5.5088,\n
+        \               6.0837,\n                3.313,\n                7.0352,\n
+        \               5.1177,\n                3.1177,\n                6.5035,\n
+        \               5.1005,\n                4.6177,\n                3.6177,\n
+        \               7.0899,\n                5.6869,\n                6.6816,\n
+        \               8.1964,\n                6.5029,\n                3.1177,\n
+        \               5.9593,\n                6.4936,\n                5.9984,\n
+        \               5.4641,\n                2.7461,\n                3.0038,\n
+        \               7.1205,\n                7.6548,\n                5.7377,\n
+        \               2.4977,\n                6.7567,\n                4.4838,\n
+        \               4.9277,\n                7.7066,\n                5.4338,\n
+        \               8.387,\n                8.7864,\n                8.0059,\n
+        \               6.9185,\n                6.0428,\n                6.0872,\n
+        \               0\n              ],\n              \"style\": {\n                \"annotation\":
+        [\n                  3,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8\n                ],\n                \"aid1\": [\n                  6,\n
+        \                 8,\n                  8,\n                  9,\n                  10,\n
+        \                 10,\n                  14,\n                  15,\n                  16,\n
+        \                 17,\n                  18,\n                  20,\n                  21\n
+        \               ],\n                \"aid2\": [\n                  7,\n                  9,\n
+        \                 14,\n                  15,\n                  16,\n                  17,\n
+        \                 18,\n                  19,\n                  20,\n                  21,\n
+        \                 19,\n                  22,\n                  22\n                ]\n
+        \             }\n            }\n          ]\n        }\n      ],\n      \"charge\":
+        0,\n      \"props\": [\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound\",\n            \"name\": \"Canonicalized\",\n            \"datatype\":
+        5,\n            \"release\": \"2025.09.15\"\n          },\n          \"value\":
+        {\n            \"ival\": 1\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"Compound Complexity\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_COMPLEXITY\",\n            \"version\":
+        \"3.4.8.24\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"fval\": 466\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Acceptor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHACCEPTORS\",\n            \"version\": \"3.4.8.24\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"ival\":
+        4\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Donor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHDONORS\",\n            \"version\":
+        \"3.4.8.24\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"ival\": 1\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Rotatable Bond\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NROTBONDS\",\n            \"version\": \"3.4.8.24\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"ival\":
+        5\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Fingerprint\",\n            \"name\": \"SubStructure Keys\",\n            \"datatype\":
+        16,\n            \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.24\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371E07B2100001000000000000000000000000120000000306000000000000048014000001F00000000000C44E1980E32008300040090062042000022000020000008880008088808A62280B11886300024C00108A80FB0C0F00EC0000200001000008000040000200000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"1-[3-(dimethylamino)propyl]-1-(4-fluorophenyl)-3H-isobenzofuran-5-carbonitrile;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"1-[3-(dimethylamino)propyl]-1-(4-fluorophenyl)-3H-isobenzofuran-5-carbonitrile;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"1-[3-(dimethylamino)propyl]-1-(4-fluorophenyl)-3<I>H</I>-2-benzofuran-5-carbonitrile;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"1-[3-(dimethylamino)propyl]-1-(4-fluorophenyl)-3H-2-benzofuran-5-carbonitrile;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"1-[3-(dimethylamino)propyl]-1-(4-fluorophenyl)-3H-2-benzofuran-5-carbonitrile;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.9.3\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"1-[3-(dimethylamino)propyl]-1-(4-fluorophenyl)phthalan-5-carbonitrile;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.4\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C20H21FN2O.BrH/c1-23(2)11-3-10-20(17-5-7-18(21)8-6-17)19-9-4-15(13-22)12-16(19)14-24-20;/h4-9,12H,3,10-11,14H2,1-2H3;1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.4\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"WIHMBLDNRMIGDW-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.2\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"404.08995\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C20H22BrFN2O\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.2\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2025.09.15\"\n          },\n          \"value\":
+        {\n            \"sval\": \"405.3\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"4.2.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.09.15\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CN(C)CCCC1(C2=C(CO1)C=C(C=C2)C#N)C3=CC=C(C=C3)F.Br\"\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"SMILES\",\n            \"name\":
+        \"Connectivity\",\n            \"datatype\": 1,\n            \"version\":
+        \"4.2.0\",\n            \"software\": \"OEChem\",\n            \"source\":
+        \"OpenEye Scientific Software\",\n            \"release\": \"2025.09.15\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CN(C)CCCC1(C2=C(CO1)C=C(C=C2)C#N)C3=CC=C(C=C3)F.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.24\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"fval\": 36.3\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.09.15\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"404.08995\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 25,\n        \"atom_chiral\":
+        1,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 1,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 23:31:08 GMT
+      Expires:
+      - Fri, 02 Jan 2026 00:31:08 GMT
+      NCBI-PHID:
+      - 95B767B095703BC10000000000000001.m_2
+      NCBI-SID:
+      - 95B767B095703BC1_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (7%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.CN1CC%5BC%40%5D23c4c5ccc%28O%29c4O%5BC%40H%5D2%5BC%40%40H%5D%28O%29C%3DC%5BC%40H%5D3%5BC%40H%5D1C5
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '108'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 44147069\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42\n        ],\n        \"element\": [\n          35,\n          8,\n
+        \         8,\n          8,\n          7,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1\n        ]\n      },\n
+        \     \"bonds\": {\n        \"aid1\": [\n          1,\n          2,\n          2,\n
+        \         3,\n          3,\n          4,\n          4,\n          5,\n          5,\n
+        \         5,\n          6,\n          6,\n          6,\n          6,\n          7,\n
+        \         7,\n          7,\n          8,\n          8,\n          9,\n          9,\n
+        \         10,\n          10,\n          10,\n          11,\n          11,\n
+        \         12,\n          12,\n          12,\n          13,\n          13,\n
+        \         14,\n          15,\n          15,\n          16,\n          16,\n
+        \         17,\n          18,\n          19,\n          19,\n          19,\n
+        \         20,\n          20,\n          21,\n          22\n        ],\n        \"aid2\":
+        [\n          42,\n          9,\n          17,\n          15,\n          40,\n
+        \         21,\n          41,\n          8,\n          13,\n          19,\n
+        \         7,\n          9,\n          10,\n          11,\n          8,\n          16,\n
+        \         23,\n          12,\n          24,\n          15,\n          25,\n
+        \         13,\n          26,\n          27,\n          14,\n          17,\n
+        \         14,\n          28,\n          29,\n          30,\n          31,\n
+        \         20,\n          18,\n          32,\n          18,\n          33,\n
+        \         21,\n          34,\n          35,\n          36,\n          37,\n
+        \         22,\n          38,\n          22,\n          39\n        ],\n        \"order\":
+        [\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          2,\n
+        \         1,\n          2,\n          1,\n          1,\n          1,\n          1,\n
+        \         2,\n          1,\n          1,\n          1\n        ]\n      },\n
+        \     \"stereo\": [\n        {\n          \"tetrahedral\": {\n            \"center\":
+        6,\n            \"above\": 7,\n            \"top\": 9,\n            \"bottom\":
+        10,\n            \"below\": 11,\n            \"parity\": 1,\n            \"type\":
+        1\n          }\n        },\n        {\n          \"tetrahedral\": {\n            \"center\":
+        7,\n            \"above\": 6,\n            \"top\": 16,\n            \"bottom\":
+        8,\n            \"below\": 23,\n            \"parity\": 2,\n            \"type\":
+        1\n          }\n        },\n        {\n          \"tetrahedral\": {\n            \"center\":
+        8,\n            \"above\": 5,\n            \"top\": 7,\n            \"bottom\":
+        12,\n            \"below\": 24,\n            \"parity\": 1,\n            \"type\":
+        1\n          }\n        },\n        {\n          \"tetrahedral\": {\n            \"center\":
+        9,\n            \"above\": 2,\n            \"top\": 15,\n            \"bottom\":
+        6,\n            \"below\": 25,\n            \"parity\": 2,\n            \"type\":
+        1\n          }\n        },\n        {\n          \"tetrahedral\": {\n            \"center\":
+        15,\n            \"above\": 3,\n            \"top\": 18,\n            \"bottom\":
+        9,\n            \"below\": 32,\n            \"parity\": 2,\n            \"type\":
+        1\n          }\n        }\n      ],\n      \"coords\": [\n        {\n          \"type\":
+        [\n            1,\n            5,\n            255\n          ],\n          \"aid\":
+        [\n            1,\n            2,\n            3,\n            4,\n            5,\n
+        \           6,\n            7,\n            8,\n            9,\n            10,\n
+        \           11,\n            12,\n            13,\n            14,\n            15,\n
+        \           16,\n            17,\n            18,\n            19,\n            20,\n
+        \           21,\n            22,\n            23,\n            24,\n            25,\n
+        \           26,\n            27,\n            28,\n            29,\n            30,\n
+        \           31,\n            32,\n            33,\n            34,\n            35,\n
+        \           36,\n            37,\n            38,\n            39,\n            40,\n
+        \           41,\n            42\n          ],\n          \"conformers\": [\n
+        \           {\n              \"x\": [\n                7.2957,\n                0.2314,\n
+        \               0,\n                0,\n                4.1607,\n                1.6897,\n
+        \               2.5133,\n                3.337,\n                0.866,\n
+        \               2.2392,\n                1.6897,\n                3.337,\n
+        \               3.5918,\n                2.5133,\n                0.866,\n
+        \               2.5133,\n                0.866,\n                1.6897,\n
+        \               4.8418,\n                2.5133,\n                0.866,\n
+        \               1.6897,\n                3.0597,\n                3.6284,\n
+        \               0.0496,\n                2.376,\n                1.6795,\n
+        \               3.9476,\n                3.5491,\n                4.184,\n
+        \               3.4989,\n                0.866,\n                3.0503,\n
+        \               1.6897,\n                4.3879,\n                5.2641,\n
+        \               5.2957,\n                3.0503,\n                1.6897,\n
+        \               0,\n                0,\n                8.2957\n              ],\n
+        \             \"y\": [\n                2.7722,\n                3.075,\n
+        \               0.62,\n                5.4243,\n                2.0711,\n
+        \               2.5466,\n                2.0711,\n                2.5466,\n
+        \               2.0711,\n                3.2441,\n                3.4977,\n
+        \               3.4977,\n                3.2441,\n                3.9732,\n
+        \               1.12,\n                1.12,\n                3.9732,\n                0.6445,\n
+        \               1.3389,\n                4.9243,\n                4.9243,\n
+        \               5.3998,\n                1.4199,\n                1.7481,\n
+        \               1.8346,\n                3.8488,\n                3.5109,\n
+        \               3.39,\n                4.0803,\n                3.4279,\n
+        \               3.8571,\n                0.5,\n                0.81,\n                0.0245,\n
+        \               0.9166,\n                0.885,\n                1.7613,\n
+        \               5.2343,\n                6.0198,\n                0,\n                6.0443,\n
+        \               2.7722\n              ],\n              \"style\": {\n                \"annotation\":
+        [\n                  5,\n                  5,\n                  6,\n                  5,\n
+        \                 8,\n                  8,\n                  8,\n                  6,\n
+        \                 8,\n                  8,\n                  8\n                ],\n
+        \               \"aid1\": [\n                  6,\n                  7,\n
+        \                 8,\n                  9,\n                  11,\n                  11,\n
+        \                 14,\n                  15,\n                  17,\n                  20,\n
+        \                 21\n                ],\n                \"aid2\": [\n                  10,\n
+        \                 23,\n                  24,\n                  25,\n                  14,\n
+        \                 17,\n                  20,\n                  3,\n                  21,\n
+        \                 22,\n                  22\n                ]\n              }\n
+        \           }\n          ]\n        }\n      ],\n      \"charge\": 0,\n      \"props\":
+        [\n        {\n          \"urn\": {\n            \"label\": \"Compound\",\n
+        \           \"name\": \"Canonicalized\",\n            \"datatype\": 5,\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"ival\":
+        1\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound Complexity\",\n            \"datatype\": 7,\n            \"implementation\":
+        \"E_COMPLEXITY\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"fval\":
+        494\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Acceptor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHACCEPTORS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"ival\": 4\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Donor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHDONORS\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"ival\":
+        3\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Rotatable Bond\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NROTBONDS\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"ival\": 0\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Fingerprint\",\n
+        \           \"name\": \"SubStructure Keys\",\n            \"datatype\": 16,\n
+        \           \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.8.18\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"Xemistry GmbH\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371E07A30000010000000000000000000000001200000003C6081000000160048C10000001E00000800000F3CE198063206830006008002204200000208002020000888000E88880D362286B11B867823A4C0118BB807B0F0F70FA000010000184000D000068000348000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"(4R,4aR,7S,7aR,12bS)-3-methyl-2,4,4a,7,7a,13-hexahydro-1H-4,12-methanobenzofuro[3,2-e]isoquinoline-7,9-diol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"(4R,4aR,7S,7aR,12bS)-3-methyl-2,4,4a,7,7a,13-hexahydro-1H-4,12-methanobenzofuro[3,2-e]isoquinoline-7,9-diol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"(4<I>R</I>,4<I>a</I><I>R</I>,7<I>S</I>,7<I>a</I><I>R</I>,12<I>b</I><I>S</I>)-3-methyl-2,4,4<I>a</I>,7,7<I>a</I>,13-hexahydro-1<I>H</I>-4,12-methanobenzofuro[3,2-e]isoquinoline-7,9-diol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"(4R,4aR,7S,7aR,12bS)-3-methyl-2,4,4a,7,7a,13-hexahydro-1H-4,12-methanobenzofuro[3,2-e]isoquinoline-7,9-diol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"(4R,4aR,7S,7aR,12bS)-3-methyl-2,4,4a,7,7a,13-hexahydro-1H-4,12-methanobenzofuro[3,2-e]isoquinoline-7,9-diol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.7.0\",\n            \"software\": \"Lexichem
+        TK\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"(4R,4aR,7S,7aR,12bS)-3-methyl-2,4,4a,7,7a,13-hexahydro-1H-4,12-methanobenzofuro[3,2-e]isoquinoline-7,9-diol;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.2\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.04.14\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C17H19NO3.BrH/c1-18-7-6-17-10-3-5-13(20)16(17)21-15-12(19)4-2-9(14(15)17)8-11(10)18;/h2-5,10-11,13,16,19-20H,6-8H2,1H3;1H/t10-,11+,13-,16-,17-;/m0./s1\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.07.2\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2025.04.14\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"OUOYRIJSFITIHQ-VYKNHSEDSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.2\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.04.14\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"365.06266\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C17H20BrNO3\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.2\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2025.04.14\"\n          },\n          \"value\":
+        {\n            \"sval\": \"366.2\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"2.3.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2025.04.14\"\n          },\n          \"value\": {\n            \"sval\":
+        \"CN1CC[C@]23[C@@H]4[C@H]1CC5=C2C(=C(C=C5)O)O[C@H]3[C@H](C=C4)O.Br\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"SMILES\",\n
+        \           \"name\": \"Connectivity\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.3.0\",\n            \"software\": \"OEChem\",\n            \"source\":
+        \"OpenEye Scientific Software\",\n            \"release\": \"2025.06.30\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"CN1CCC23C4C1CC5=C2C(=C(C=C5)O)OC3C(C=C4)O.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.8.18\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"Xemistry GmbH\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"fval\": 52.9\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.2\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2025.04.14\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"365.06266\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 22,\n        \"atom_chiral\":
+        5,\n        \"atom_chiral_def\": 5,\n        \"atom_chiral_undef\": 0,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 23:31:26 GMT
+      Expires:
+      - Fri, 02 Jan 2026 00:31:26 GMT
+      NCBI-PHID:
+      - 90C6FA1F95703CE10000000000000001.m_2
+      NCBI-SID:
+      - 90C6FA1F95703CE1_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (10%)'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: smiles=Br.COc1ccc%28S%28%3DO%29%28%3DO%29N2c3ccccc3CCC2CCS%28%3DO%29%28%3DO%29N2CCC%28NCC3CCCCC3%29CC2%29c%28OC%29c1
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '116'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.14
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "{\n  \"PC_Compounds\": [\n    {\n      \"id\": {\n        \"id\": {\n
+        \         \"cid\": 52949017\n        }\n      },\n      \"atoms\": {\n        \"aid\":
+        [\n          1,\n          2,\n          3,\n          4,\n          5,\n
+        \         6,\n          7,\n          8,\n          9,\n          10,\n          11,\n
+        \         12,\n          13,\n          14,\n          15,\n          16,\n
+        \         17,\n          18,\n          19,\n          20,\n          21,\n
+        \         22,\n          23,\n          24,\n          25,\n          26,\n
+        \         27,\n          28,\n          29,\n          30,\n          31,\n
+        \         32,\n          33,\n          34,\n          35,\n          36,\n
+        \         37,\n          38,\n          39,\n          40,\n          41,\n
+        \         42,\n          43,\n          44,\n          45,\n          46,\n
+        \         47,\n          48,\n          49,\n          50,\n          51,\n
+        \         52,\n          53,\n          54,\n          55,\n          56,\n
+        \         57,\n          58,\n          59,\n          60,\n          61,\n
+        \         62,\n          63,\n          64,\n          65,\n          66,\n
+        \         67,\n          68,\n          69,\n          70,\n          71,\n
+        \         72,\n          73,\n          74,\n          75,\n          76,\n
+        \         77,\n          78,\n          79,\n          80,\n          81,\n
+        \         82,\n          83,\n          84,\n          85,\n          86,\n
+        \         87,\n          88,\n          89\n        ],\n        \"element\":
+        [\n          35,\n          16,\n          16,\n          8,\n          8,\n
+        \         8,\n          8,\n          8,\n          8,\n          7,\n          7,\n
+        \         7,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          6,\n          6,\n          6,\n          6,\n
+        \         6,\n          6,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1\n
+        \       ]\n      },\n      \"bonds\": {\n        \"aid1\": [\n          1,\n
+        \         2,\n          2,\n          2,\n          2,\n          3,\n          3,\n
+        \         3,\n          3,\n          8,\n          8,\n          9,\n          9,\n
+        \         10,\n          10,\n          11,\n          11,\n          11,\n
+        \         12,\n          12,\n          13,\n          13,\n          13,\n
+        \         14,\n          14,\n          14,\n          14,\n          15,\n
+        \         15,\n          15,\n          16,\n          16,\n          16,\n
+        \         17,\n          17,\n          18,\n          18,\n          19,\n
+        \         19,\n          20,\n          20,\n          20,\n          21,\n
+        \         21,\n          21,\n          22,\n          22,\n          22,\n
+        \         23,\n          23,\n          23,\n          24,\n          24,\n
+        \         24,\n          25,\n          25,\n          25,\n          26,\n
+        \         26,\n          27,\n          27,\n          28,\n          28,\n
+        \         28,\n          29,\n          29,\n          29,\n          30,\n
+        \         30,\n          31,\n          32,\n          32,\n          33,\n
+        \         33,\n          34,\n          34,\n          35,\n          35,\n
+        \         36,\n          37,\n          38,\n          38,\n          39,\n
+        \         39,\n          40,\n          40,\n          42,\n          42,\n
+        \         42,\n          43,\n          43,\n          43\n        ],\n        \"aid2\":
+        [\n          89,\n          4,\n          5,\n          10,\n          26,\n
+        \         6,\n          7,\n          12,\n          34,\n          37,\n
+        \         42,\n          41,\n          43,\n          18,\n          19,\n
+        \         13,\n          17,\n          61,\n          22,\n          30,\n
+        \         15,\n          16,\n          44,\n          17,\n          20,\n
+        \         21,\n          45,\n          18,\n          46,\n          47,\n
+        \         19,\n          48,\n          49,\n          50,\n          51,\n
+        \         52,\n          53,\n          54,\n          55,\n          23,\n
+        \         56,\n          57,\n          24,\n          58,\n          59,\n
+        \         25,\n          28,\n          60,\n          27,\n          62,\n
+        \         63,\n          27,\n          64,\n          65,\n          26,\n
+        \         66,\n          67,\n          68,\n          69,\n          70,\n
+        \         71,\n          29,\n          72,\n          73,\n          31,\n
+        \         74,\n          75,\n          31,\n          32,\n          33,\n
+        \         35,\n          76,\n          36,\n          77,\n          37,\n
+        \         38,\n          36,\n          78,\n          79,\n          39,\n
+        \         40,\n          80,\n          41,\n          81,\n          41,\n
+        \         82,\n          83,\n          84,\n          85,\n          86,\n
+        \         87,\n          88\n        ],\n        \"order\": [\n          1,\n
+        \         2,\n          2,\n          1,\n          1,\n          2,\n          2,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          2,\n          1,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          2,\n          1,\n          1,\n
+        \         1,\n          2,\n          1,\n          2,\n          1,\n          1,\n
+        \         1,\n          1,\n          1,\n          1,\n          1,\n          1,\n
+        \         1\n        ]\n      },\n      \"stereo\": [\n        {\n          \"tetrahedral\":
+        {\n            \"center\": 22,\n            \"above\": 12,\n            \"top\":
+        25,\n            \"bottom\": 28,\n            \"below\": 60,\n            \"parity\":
+        3,\n            \"type\": 1\n          }\n        }\n      ],\n      \"coords\":
+        [\n        {\n          \"type\": [\n            1,\n            5,\n            255\n
+        \         ],\n          \"aid\": [\n            1,\n            2,\n            3,\n
+        \           4,\n            5,\n            6,\n            7,\n            8,\n
+        \           9,\n            10,\n            11,\n            12,\n            13,\n
+        \           14,\n            15,\n            16,\n            17,\n            18,\n
+        \           19,\n            20,\n            21,\n            22,\n            23,\n
+        \           24,\n            25,\n            26,\n            27,\n            28,\n
+        \           29,\n            30,\n            31,\n            32,\n            33,\n
+        \           34,\n            35,\n            36,\n            37,\n            38,\n
+        \           39,\n            40,\n            41,\n            42,\n            43,\n
+        \           44,\n            45,\n            46,\n            47,\n            48,\n
+        \           49,\n            50,\n            51,\n            52,\n            53,\n
+        \           54,\n            55,\n            56,\n            57,\n            58,\n
+        \           59,\n            60,\n            61,\n            62,\n            63,\n
+        \           64,\n            65,\n            66,\n            67,\n            68,\n
+        \           69,\n            70,\n            71,\n            72,\n            73,\n
+        \           74,\n            75,\n            76,\n            77,\n            78,\n
+        \           79,\n            80,\n            81,\n            82,\n            83,\n
+        \           84,\n            85,\n            86,\n            87,\n            88,\n
+        \           89\n          ],\n          \"conformers\": [\n            {\n
+        \             \"x\": [\n                6.6023,\n                6.6659,\n
+        \               3.2018,\n                7.1659,\n                6.1659,\n
+        \               4.2018,\n                2.2018,\n                1.4697,\n
+        \               3.2018,\n                7.5319,\n                10.13,\n
+        \               3.2018,\n                9.264,\n                11.862,\n
+        \               8.3979,\n                9.264,\n                10.996,\n
+        \               7.5319,\n                8.3979,\n                11.862,\n
+        \               12.7281,\n                4.0678,\n                12.7281,\n
+        \               13.5941,\n                4.9338,\n                5.7998,\n
+        \               13.5941,\n                4.0678,\n                3.2018,\n
+        \               2.3358,\n                2.3358,\n                1.4418,\n
+        \               1.4418,\n                3.2018,\n                0.5357,\n
+        \               0.5357,\n                2.3358,\n                4.0678,\n
+        \               2.3358,\n                4.0678,\n                3.2018,\n
+        \               0.6037,\n                2.3358,\n                9.8009,\n
+        \               11.3251,\n                7.9994,\n                8.7964,\n
+        \               9.8745,\n                9.476,\n                11.3945,\n
+        \               10.5975,\n                6.9213,\n                7.3198,\n
+        \               8.7964,\n                7.9994,\n                11.2514,\n
+        \               11.65,\n                13.1266,\n                12.3295,\n
+        \               4.0678,\n                10.13,\n                12.3295,\n
+        \               13.1266,\n                14.2047,\n                13.8061,\n
+        \               4.5353,\n                5.3324,\n                6.1984,\n
+        \               5.4013,\n                13.8061,\n                14.2047,\n
+        \               4.6784,\n                4.2798,\n                3.6003,\n
+        \               2.8032,\n                1.449,\n                1.449,\n
+        \               0,\n                0,\n                4.6047,\n                1.7988,\n
+        \               4.6047,\n                0.2937,\n                0.0668,\n
+        \               0.9137,\n                2.0258,\n                1.7988,\n
+        \               2.6458,\n                7.6023\n              ],\n              \"y\":
+        [\n                0,\n                8.5482,\n                7.5482,\n
+        \               9.4143,\n                7.6822,\n                7.5482,\n
+        \               7.5482,\n                6.5482,\n                3.5482,\n
+        \               8.0482,\n                6.5482,\n                8.5482,\n
+        \               7.0482,\n                6.5482,\n                6.5482,\n
+        \               8.0482,\n                7.0482,\n                7.0482,\n
+        \               8.5482,\n                5.5482,\n                7.0482,\n
+        \               9.0482,\n                5.0482,\n                6.5482,\n
+        \               8.5482,\n                9.0482,\n                5.5482,\n
+        \               10.0482,\n                10.5482,\n                9.0482,\n
+        \               10.0482,\n                8.5136,\n                10.5829,\n
+        \               6.5482,\n                9.0274,\n                10.0691,\n
+        \               6.0482,\n                6.0482,\n                5.0482,\n
+        \               5.0482,\n                4.5482,\n                6.0482,\n
+        \               3.0482,\n                7.3582,\n                6.2382,\n
+        \               6.0733,\n                6.0733,\n                7.9406,\n
+        \               8.6309,\n                7.5232,\n                7.5232,\n
+        \               7.1559,\n                6.4656,\n                9.0232,\n
+        \               9.0232,\n                5.6559,\n                4.9656,\n
+        \               7.5232,\n                7.5232,\n                8.4282,\n
+        \               5.9282,\n                4.5733,\n                4.5733,\n
+        \               6.4406,\n                7.1309,\n                8.0733,\n
+        \               8.0733,\n                9.5232,\n                9.5232,\n
+        \               4.9656,\n                5.6559,\n                9.9406,\n
+        \               10.6309,\n                11.0232,\n                11.0232,\n
+        \               7.8936,\n                11.2029,\n                8.7154,\n
+        \               10.3811,\n                6.3582,\n                4.7382,\n
+        \               4.7382,\n                6.5852,\n                5.7382,\n
+        \               5.5113,\n                3.5852,\n                2.7382,\n
+        \               2.5113,\n                0\n              ],\n              \"style\":
+        {\n                \"annotation\": [\n                  3,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8,\n                  8,\n
+        \                 8,\n                  8,\n                  8\n                ],\n
+        \               \"aid1\": [\n                  22,\n                  30,\n
+        \                 30,\n                  31,\n                  32,\n                  33,\n
+        \                 34,\n                  34,\n                  35,\n                  37,\n
+        \                 38,\n                  39,\n                  40\n                ],\n
+        \               \"aid2\": [\n                  25,\n                  31,\n
+        \                 32,\n                  33,\n                  35,\n                  36,\n
+        \                 37,\n                  38,\n                  36,\n                  39,\n
+        \                 40,\n                  41,\n                  41\n                ]\n
+        \             }\n            }\n          ]\n        }\n      ],\n      \"charge\":
+        0,\n      \"props\": [\n        {\n          \"urn\": {\n            \"label\":
+        \"Compound\",\n            \"name\": \"Canonicalized\",\n            \"datatype\":
+        5,\n            \"release\": \"2019.01.04\"\n          },\n          \"value\":
+        {\n            \"ival\": 1\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"Compound Complexity\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_COMPLEXITY\",\n            \"version\":
+        \"3.4.6.11\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"xemistry.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"fval\": 1050\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Hydrogen Bond Acceptor\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NHACCEPTORS\",\n            \"version\": \"3.4.6.11\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"xemistry.com\",\n            \"release\":
+        \"2019.06.18\"\n          },\n          \"value\": {\n            \"ival\":
+        9\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Count\",\n            \"name\": \"Hydrogen Bond Donor\",\n            \"datatype\":
+        5,\n            \"implementation\": \"E_NHDONORS\",\n            \"version\":
+        \"3.4.6.11\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"xemistry.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"ival\": 2\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Count\",\n            \"name\":
+        \"Rotatable Bond\",\n            \"datatype\": 5,\n            \"implementation\":
+        \"E_NROTBONDS\",\n            \"version\": \"3.4.6.11\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"xemistry.com\",\n            \"release\":
+        \"2019.06.18\"\n          },\n          \"value\": {\n            \"ival\":
+        11\n          }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Fingerprint\",\n            \"name\": \"SubStructure Keys\",\n            \"datatype\":
+        16,\n            \"parameters\": \"extended 2\",\n            \"implementation\":
+        \"E_SCREEN\",\n            \"version\": \"3.4.6.11\",\n            \"software\":
+        \"Cactvs\",\n            \"source\": \"xemistry.com\",\n            \"release\":
+        \"2019.06.18\"\n          },\n          \"value\": {\n            \"binary\":
+        \"00000371F07B38006010000000000000000000000000000000003C78C1020000000000B14000001E04104000000D2CC5D806B2C782C00402800224424070C2081021220008889A0E6C880C2722C4F19B84302865D015C8E80790E0CC0E00800008000220000100001000044000000000000000\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Allowed\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"N-(cyclohexylmethyl)-1-[2-[1-(2,4-dimethoxyphenyl)sulfonyl-3,4-dihydro-2H-quinolin-2-yl]ethylsulfonyl]piperidin-4-amine;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"CAS-like Style\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"N-(cyclohexylmethyl)-1-[2-[1-(2,4-dimethoxyphenyl)sulfonyl-3,4-dihydro-2H-quinolin-2-yl]ethylsulfonyl]-4-piperidinamine;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Markup\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"<I>N</I>-(cyclohexylmethyl)-1-[2-[1-(2,4-dimethoxyphenyl)sulfonyl-3,4-dihydro-2<I>H</I>-quinolin-2-yl]ethylsulfonyl]piperidin-4-amine;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Preferred\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"N-(cyclohexylmethyl)-1-[2-[1-(2,4-dimethoxyphenyl)sulfonyl-3,4-dihydro-2H-quinolin-2-yl]ethylsulfonyl]piperidin-4-amine;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Systematic\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"N-(cyclohexylmethyl)-1-[2-[1-(2,4-dimethoxyphenyl)sulfonyl-3,4-dihydro-2H-quinolin-2-yl]ethylsulfonyl]piperidin-4-amine;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"IUPAC Name\",\n            \"name\": \"Traditional\",\n            \"datatype\":
+        1,\n            \"version\": \"2.6.6\",\n            \"software\": \"LexiChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"cyclohexylmethyl-[1-[2-[1-(2,4-dimethoxyphenyl)sulfonyl-3,4-dihydro-2H-quinolin-2-yl]ethylsulfonyl]-4-piperidyl]amine;hydrobromide\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChI\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.5\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"InChI=1S/C31H45N3O6S2.BrH/c1-39-28-14-15-31(30(22-28)40-2)42(37,38)34-27(13-12-25-10-6-7-11-29(25)34)18-21-41(35,36)33-19-16-26(17-20-33)32-23-24-8-4-3-5-9-24;/h6-7,10-11,14-15,22,24,26-27,32H,3-5,8-9,12-13,16-21,23H2,1-2H3;1H\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"InChIKey\",\n            \"name\": \"Standard\",\n            \"datatype\":
+        1,\n            \"version\": \"1.0.5\",\n            \"software\": \"InChI\",\n
+        \           \"source\": \"iupac.org\",\n            \"release\": \"2019.06.18\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"JTLJPLTVDHZSRP-UHFFFAOYSA-N\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Mass\",\n            \"name\": \"Exact\",\n            \"datatype\": 1,\n
+        \           \"version\": \"2.1\",\n            \"software\": \"PubChem\",\n
+        \           \"source\": \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"699.20114\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Molecular Formula\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"C31H46BrN3O6S2\"\n          }\n
+        \       },\n        {\n          \"urn\": {\n            \"label\": \"Molecular
+        Weight\",\n            \"datatype\": 1,\n            \"version\": \"2.1\",\n
+        \           \"software\": \"PubChem\",\n            \"source\": \"ncbi.nlm.nih.gov\",\n
+        \           \"release\": \"2021.05.07\"\n          },\n          \"value\":
+        {\n            \"sval\": \"700.8\"\n          }\n        },\n        {\n          \"urn\":
+        {\n            \"label\": \"SMILES\",\n            \"name\": \"Absolute\",\n
+        \           \"datatype\": 1,\n            \"version\": \"2.3.0\",\n            \"software\":
+        \"OEChem\",\n            \"source\": \"OpenEye Scientific Software\",\n            \"release\":
+        \"2024.12.12\"\n          },\n          \"value\": {\n            \"sval\":
+        \"COC1=CC(=C(C=C1)S(=O)(=O)N2C(CCC3=CC=CC=C32)CCS(=O)(=O)N4CCC(CC4)NCC5CCCCC5)OC.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"SMILES\",\n            \"name\": \"Connectivity\",\n            \"datatype\":
+        1,\n            \"version\": \"2.1.5\",\n            \"software\": \"OEChem\",\n
+        \           \"source\": \"openeye.com\",\n            \"release\": \"2025.06.30\"\n
+        \         },\n          \"value\": {\n            \"sval\": \"COC1=CC(=C(C=C1)S(=O)(=O)N2C(CCC3=CC=CC=C32)CCS(=O)(=O)N4CCC(CC4)NCC5CCCCC5)OC.Br\"\n
+        \         }\n        },\n        {\n          \"urn\": {\n            \"label\":
+        \"Topological\",\n            \"name\": \"Polar Surface Area\",\n            \"datatype\":
+        7,\n            \"implementation\": \"E_TPSA\",\n            \"version\":
+        \"3.4.6.11\",\n            \"software\": \"Cactvs\",\n            \"source\":
+        \"xemistry.com\",\n            \"release\": \"2019.06.18\"\n          },\n
+        \         \"value\": {\n            \"fval\": 122\n          }\n        },\n
+        \       {\n          \"urn\": {\n            \"label\": \"Weight\",\n            \"name\":
+        \"MonoIsotopic\",\n            \"datatype\": 1,\n            \"version\":
+        \"2.1\",\n            \"software\": \"PubChem\",\n            \"source\":
+        \"ncbi.nlm.nih.gov\",\n            \"release\": \"2021.05.07\"\n          },\n
+        \         \"value\": {\n            \"sval\": \"699.20114\"\n          }\n
+        \       }\n      ],\n      \"count\": {\n        \"heavy_atom\": 43,\n        \"atom_chiral\":
+        1,\n        \"atom_chiral_def\": 0,\n        \"atom_chiral_undef\": 1,\n        \"bond_chiral\":
+        0,\n        \"bond_chiral_def\": 0,\n        \"bond_chiral_undef\": 0,\n        \"isotope_atom\":
+        0,\n        \"covalent_unit\": 2,\n        \"tautomers\": -1\n      }\n    }\n
+        \ ]\n}\n"
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - private
+      Connection:
+      - close
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 01 Jan 2026 23:31:38 GMT
+      Expires:
+      - Fri, 02 Jan 2026 00:31:38 GMT
+      NCBI-PHID:
+      - 90C605A395703DA10000000000000001.m_2
+      NCBI-SID:
+      - 90C605A395703DA1_0000SID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Throttling-Control:
+      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
+        status: Green (7%)'
       X-UA-Compatible:
       - IE=Edge
       X-XSS-Protection:

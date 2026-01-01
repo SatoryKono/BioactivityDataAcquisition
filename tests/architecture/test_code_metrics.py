@@ -239,6 +239,7 @@ class TestFunctionLength:
         "create": 90,
         "fetch": 80,
         "process_batch": 70,
+        "_process_batch": 100,  # BatchExecutor internal processing
         "_transform_impl": 120,  # Transform implementations
         "_clear_exports_legacy": 70,
         "create_logger": 55,  # Logger setup with many handlers
@@ -347,7 +348,7 @@ class TestClassSize:
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
         # PubChem adapter (similar to ChEMBL adapter)
-        "PubChemAdapter": 310,  # 303 lines - sync adapter with ThreadPoolExecutor
+        "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
