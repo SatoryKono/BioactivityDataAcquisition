@@ -1,0 +1,345 @@
+# BioETL Architecture Audit Scores
+# Version: 2.1 | Target: RULES.md v5.8
+# Generated: 2026-01-01
+
+project_assessment:
+  audit_date: "2026-01-01"
+  commit_hash: "9d4504032e6512c76bd85bfc23b3862a53a022e4"
+  auditor: "Claude Architecture Audit Agent"
+
+  baseline_metrics:
+    total_source_files: 327
+    total_source_lines: 56122
+    total_test_files: 270
+    total_test_functions: 4367
+    architecture_test_files: 36
+    vcr_cassettes: 61
+    property_based_tests: 94
+    adrs_total: 22
+    adrs_accepted: 22
+
+  scores:
+    architecture_compliance:
+      score: 9
+      weight: 0.15
+      evidence: |
+        - grep "from bioetl.infrastructure" src/bioetl/domain/ → 0 violations
+        - grep "from bioetl.infrastructure" src/bioetl/application/ → 0 violations
+        - pytest tests/architecture/ → 392 passed, 1 skipped
+        - mypy --strict → "Success: no issues found in 327 source files"
+      justification: |
+        Полное соответствие Hexagonal архитектуре.
+        Матрица импортов соблюдается: domain не импортирует infrastructure/application.
+        392 архитектурных теста проходят. mypy --strict без ошибок.
+        Единственный skip — ожидаемый (no allowed files в composition).
+      violations: []
+
+    domain_model_quality:
+      score: 9
+      weight: 0.12
+      evidence: |
+        - grep "@frozen\|frozen=True" src/bioetl/domain/ → 88 frozen dataclasses
+        - grep "class.*Protocol" src/bioetl/domain/ports/ → 30 Protocol definitions
+        - grep "import httpx\|import requests" src/bioetl/domain/ → 0 I/O imports
+        - grep "@runtime_checkable" src/bioetl/domain/ports/ → 30 decorators
+        - grep "aclose" src/bioetl/domain/ports/ → 7 lifecycle methods
+      justification: |
+        Domain слой чист от I/O зависимостей. 88 frozen dataclasses обеспечивают
+        иммутабельность Value Objects. 30 Protocol определений с @runtime_checkable.
+        Все async порты имеют aclose() для lifecycle management.
+        Ports facade в __init__.py экспортирует все интерфейсы.
+      violations: []
+
+    data_flow_medallion:
+      score: 9
+      weight: 0.12
+      evidence: |
+        - grep "delta\|DeltaTable" src/bioetl/infrastructure/storage/ → 54 refs
+        - grep "content_hash" src/bioetl/ → 84 references
+        - ls configs/pipelines/ → chembl, crossref, pubchem, pubmed, uniprot
+        - Bronze/Silver/Gold writers реализованы в infrastructure/storage/
+      justification: |
+        Medallion архитектура полностью реализована: Bronze (JSONL+zstd),
+        Silver (Delta Lake с merge/upsert), Gold (Delta/Parquet).
+        Content hash используется для идемпотентности (84 ref).
+        5 провайдеров сконфигурированы с YAML.
+      violations: []
+
+    error_handling:
+      score: 8
+      weight: 0.10
+      evidence: |
+        - grep "CircuitBreaker" src/bioetl/ → 109 references
+        - grep "retry\|RetryPolicy" src/bioetl/ → 180 references
+        - grep "soft_fail_threshold\|hard_fail_threshold" → DQConfig с 0.05/0.20
+        - ADR-007 Circuit Breaker: Accepted
+        - ADR-016 Error Handling Strategy: Accepted
+      justification: |
+        Circuit Breaker реализован (ADR-007). Retry с backoff.
+        DQ пороги 5%/20% настроены. Классификация ошибок
+        (Critical/Recoverable/DataQuality) документирована.
+        Минус: нет централизованного error recovery dashboard.
+      violations:
+        - id: "ERR-001"
+          severity: "Low"
+          description: "Отсутствует централизованный error recovery dashboard"
+
+    test_coverage:
+      score: 9
+      weight: 0.12
+      evidence: |
+        - pytest --cov-fail-under=85 → "Total coverage: 88.06%"
+        - Total test functions: 4367
+        - Architecture tests: 392 passed
+        - VCR cassettes: 61
+        - Property-based tests (hypothesis): 94
+        - Integration tests: 14 marked
+      justification: |
+        Coverage 88.06% > 85% threshold. 4367 тестов с хорошим распределением.
+        Property-based тесты с hypothesis (94 ref). VCR для HTTP (61 кассета).
+        Архитектурные тесты (392) проверяют contracts и boundaries.
+      violations: []
+
+    code_quality:
+      score: 9
+      weight: 0.08
+      evidence: |
+        - ruff check → "All checks passed!"
+        - mypy --strict → "Success: no issues found in 327 source files"
+        - grep "print(" → 0 (excluding tests)
+        - Typing complete, no untyped Any without reason
+      justification: |
+        Ruff и mypy --strict проходят без ошибок.
+        Нет print() statements в production коде.
+        Полная типизация (327 файлов проверены mypy --strict).
+      violations: []
+
+    documentation:
+      score: 8
+      weight: 0.08
+      evidence: |
+        - RULES.md: 1110 строк
+        - refactoring-plan.md: 1206 строк
+        - REQUIREMENTS.md: 930 строк
+        - ADRs: 22 (все Accepted)
+        - CLAUDE.md: comprehensive agent instructions
+      justification: |
+        Обширная документация: RULES.md v5.8, 22 ADR все Accepted.
+        CLAUDE.md с Double Verification Protocol.
+        Минус: glossary.md может быть расширен, некоторые inline
+        docstrings минимальны.
+      violations:
+        - id: "DOC-001"
+          severity: "Low"
+          description: "Glossary может быть более полным"
+
+    security:
+      score: 8
+      weight: 0.08
+      evidence: |
+        - grep "api_key\s*=" → только parameter passing, не hardcoded
+        - os.environ/getenv → 4 references для конфигурации
+        - BIOETL_ prefix convention → используется
+        - VCR sanitization → documented in conftest.py
+      justification: |
+        Secrets через environment variables (BIOETL_ prefix).
+        API keys передаются как параметры, не hardcoded.
+        VCR кассеты санитизируются.
+        Минус: нет автоматического secret scanning в CI.
+      violations:
+        - id: "SEC-001"
+          severity: "Low"
+          description: "Отсутствует автоматический secret scanning в CI (gitleaks/trufflehog)"
+
+    observability:
+      score: 8
+      weight: 0.08
+      evidence: |
+        - grep "structlog" application/ → 0 (uses LoggerPort)
+        - grep "run_id" → 363 references
+        - MetricsPort/TracingPort → 224 references
+        - OpenTelemetry → 52 references
+        - Observability modules: logging, metrics, tracing, prometheus_metrics
+      justification: |
+        Structured logging через LoggerPort. run_id propagation (363 ref).
+        OpenTelemetry интеграция (52 ref). Prometheus metrics.
+        NoOp implementations для graceful degradation.
+        Минус: аномальные отклонения метрик не алертируются автоматически.
+      violations:
+        - id: "OBS-001"
+          severity: "Low"
+          description: "Нет автоматического алертинга на аномалии метрик"
+
+    operational_readiness:
+      score: 8
+      weight: 0.07
+      evidence: |
+        - Shutdown handling: 256 references, ShutdownService (286 LOC)
+        - MemoryLock: 9 references (per ADR-010 local-only)
+        - SIGTERM/SIGINT: proper exit codes (130, 143)
+        - ADR-008 Graceful Shutdown: Accepted
+        - ADR-010 Local-Only Deployment: Accepted
+      justification: |
+        Graceful shutdown реализован (ADR-008). MemoryLock достаточен
+        для local-only архитектуры (ADR-010). Exit codes стандартизированы.
+        Checkpoint management для recovery.
+        Минус: нет health check endpoint для orchestrators.
+      violations:
+        - id: "OPS-001"
+          severity: "Low"
+          description: "Нет HTTP health check endpoint для внешних orchestrators"
+
+  calculation:
+    architecture:     "9 × 0.15 = 1.35"
+    domain:           "9 × 0.12 = 1.08"
+    data_flow:        "9 × 0.12 = 1.08"
+    error_handling:   "8 × 0.10 = 0.80"
+    test_coverage:    "9 × 0.12 = 1.08"
+    code_quality:     "9 × 0.08 = 0.72"
+    documentation:    "8 × 0.08 = 0.64"
+    security:         "8 × 0.08 = 0.64"
+    observability:    "8 × 0.08 = 0.64"
+    operations:       "8 × 0.07 = 0.56"
+
+  total_score: 8.59
+  grade: "A"
+
+  summary: |
+    BioETL демонстрирует зрелую архитектуру с оценкой 8.59/10 (Grade A).
+
+    Ключевые сильные стороны:
+    - Чистая Hexagonal архитектура (0 нарушений границ слоёв)
+    - Полная типизация (mypy --strict проходит на 327 файлах)
+    - Высокое покрытие тестами (88.06%, 4367 тестов)
+    - Зрелая документация (22 ADR, RULES.md v5.8)
+    - Medallion архитектура с Delta Lake
+
+    Области для улучшения (все Low severity):
+    - Добавить secret scanning в CI
+    - Расширить glossary
+    - Добавить HTTP health check endpoint
+    - Рассмотреть автоматический алертинг на аномалии
+
+    Проект готов к production использованию с минимальными доработками.
+
+validated_problems:
+  - id: "ERR-001"
+    category: "ERROR_HANDLING"
+    title: "Отсутствует error recovery dashboard"
+    validation:
+      code_verdict: "CONFIRMED"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "70%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected: ["operations", "monitoring"]
+    assessment:
+      complexity: 3
+      effort_days: 2
+      priority: "P3"
+    resolution:
+      approach: "Добавить CLI команду или dashboard для просмотра error statistics"
+      breaking_changes: false
+
+  - id: "DOC-001"
+    category: "DOCUMENTATION"
+    title: "Glossary может быть более полным"
+    validation:
+      code_verdict: "N/A"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "30%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected: ["documentation", "onboarding"]
+    assessment:
+      complexity: 2
+      effort_days: 1
+      priority: "P3"
+    resolution:
+      approach: "Расширить glossary.md терминами из domain layer"
+      breaking_changes: false
+
+  - id: "SEC-001"
+    category: "SECURITY"
+    title: "Нет автоматического secret scanning в CI"
+    validation:
+      code_verdict: "CONFIRMED"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "60%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected: ["security", "ci/cd"]
+    assessment:
+      complexity: 2
+      effort_days: 0.5
+      priority: "P2"
+    resolution:
+      approach: "Добавить gitleaks или trufflehog в GitHub Actions workflow"
+      breaking_changes: false
+
+  - id: "OBS-001"
+    category: "OBSERVABILITY"
+    title: "Нет автоматического алертинга на аномалии метрик"
+    validation:
+      code_verdict: "CONFIRMED"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "60%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected: ["observability", "operations"]
+    assessment:
+      complexity: 5
+      effort_days: 3
+      priority: "P3"
+    resolution:
+      approach: "Интегрировать alerting rules для Prometheus или добавить anomaly detection"
+      breaking_changes: false
+
+  - id: "OPS-001"
+    category: "OPERATIONS"
+    title: "Нет HTTP health check endpoint"
+    validation:
+      code_verdict: "CONFIRMED"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "60%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected: ["operations", "deployment"]
+    assessment:
+      complexity: 3
+      effort_days: 1
+      priority: "P2"
+    resolution:
+      approach: "Добавить /health endpoint в observability server"
+      breaking_changes: false
+
+false_positives_avoided:
+  - assertion: "PipelineRunner — god object"
+    reality: "173 LOC, делегирует через RunnerServices bundle"
+    verification: "wc -l runner.py → 173, grep self._ → 5+ delegates"
+
+  - assertion: "MemoryLock требует Redis"
+    reality: "ADR-010 Local-Only, MemoryLock достаточен"
+    verification: "ADR-010-local-only-deployment.md → Accepted"
+
+  - assertion: "bootstrap_pipeline — монолит"
+    reality: "113 LOC, делегирует через 4 функции"
+    verification: "wc -l bootstrap.py → 113"
+
+  - assertion: "Нет coverage gate в CI"
+    reality: "pyproject.toml:180 fail_under=85, .github/workflows/tests.yml"
+    verification: "pytest --cov-fail-under=85 → 88.06%"
+
+  - assertion: "mypy --strict падает"
+    reality: "Success: no issues found in 327 source files"
+    verification: "mypy src/bioetl --strict → Success"
