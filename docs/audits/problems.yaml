@@ -1,149 +1,140 @@
-# BioETL Audit Problems
-# Generated: 2025-12-31
-# Commit: 1873efdd79da1afbee2d610013972cb85d4ad39c
+# BioETL Validated Problems
+# Audit Date: 2025-12-31
+# Commit: 205f1d736e79d85cc768fe95b2a66e75814652aa
 
 problems:
-  - id: "ISSUE-001"
-    category: "DOC"
-    title: "ADR files missing explicit Status header"
-
+  - id: "TEST-001"
+    category: "TEST"
+    title: "ChEMBL activity integration test failing"
+    
     validation:
-      commit: "1873efdd79da1afbee2d610013972cb85d4ad39c"
-      code_verdict: "N/A"
-      doc_verdict: "CONFIRMED"
-      test_verdict: "N/A"
-      total_confirmed: "60%"
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "CONFIRMED"
+      total_confirmed: "100%"
       final_verdict: "VALID"
-
+    
+    evidence:
+      test_output: |
+        FAILED tests/integration/pipelines/test_chembl_activity.py::TestChemblActivityPipeline::test_chembl_activity_happy_path
+      location: "tests/integration/pipelines/test_chembl_activity.py"
+    
     impact:
       severity: "Medium"
-      affected:
-        - "docs/02-architecture/decisions/"
-
-    assessment:
-      complexity: 2
-      effort_days: 0.5
-      priority: "P2"
-
-    resolution:
-      approach: "Add consistent 'Status: Accepted' header to all ADR files following ADR-015 format"
-      breaking_changes: false
-
-  - id: "ISSUE-002"
-    category: "OPS"
-    title: "DQ metrics emission needs runtime verification"
-
-    validation:
-      commit: "1873efdd79da1afbee2d610013972cb85d4ad39c"
-      code_verdict: "PARTIAL"
-      doc_verdict: "CONFIRMED"
-      test_verdict: "PARTIAL"
-      total_confirmed: "60%"
-      final_verdict: "VALID"
-
-    impact:
-      severity: "Medium"
-      affected:
-        - "src/bioetl/application/services/postrun_service.py"
-
+      affected: ["ChEMBL pipeline integration tests"]
+    
     assessment:
       complexity: 3
-      effort_days: 1
+      effort_days: 0.5
       priority: "P2"
-
+    
     resolution:
-      approach: "Add integration test to verify dq_soft_threshold_exceeded and dq_check_duration_ms metrics are emitted"
+      approach: "Investigate VCR cassette or API response changes. Update cassette if needed."
       breaking_changes: false
 
-  - id: "ISSUE-003"
-    category: "OBS"
-    title: "Verify run_id propagation across all log statements"
-
+  - id: "DOC-001"
+    category: "DOC"
+    title: "isort not installed, architecture test skipped"
+    
     validation:
-      commit: "1873efdd79da1afbee2d610013972cb85d4ad39c"
-      code_verdict: "PARTIAL"
-      doc_verdict: "CONFIRMED"
-      test_verdict: "N/A"
-      total_confirmed: "50%"
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "CONFIRMED"
+      total_confirmed: "100%"
       final_verdict: "VALID"
-
+    
+    evidence:
+      test_output: "SKIPPED [1] tests/architecture/test_code_formatting.py:62: isort not installed"
+      location: "tests/architecture/test_code_formatting.py:62"
+    
     impact:
       severity: "Low"
-      affected:
-        - "All logging statements in src/bioetl/"
+      affected: ["Import sorting verification"]
+    
+    assessment:
+      complexity: 1
+      effort_days: 0.1
+      priority: "P3"
+    
+    resolution:
+      approach: "Add isort to dev dependencies or mark test as optional"
+      breaking_changes: false
 
+  - id: "COV-001"
+    category: "TEST"
+    title: "Some CLI commands have low coverage"
+    
+    validation:
+      commit: "205f1d7"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "PARTIAL"
+      total_confirmed: "75%"
+      final_verdict: "VALID"
+    
+    evidence:
+      coverage_output: |
+        src/bioetl/interfaces/cli/commands/cleanup.py: 45.00%
+        src/bioetl/interfaces/cli/commands/config.py: 38.20%
+        src/bioetl/interfaces/cli/commands/lock.py: 39.58%
+    
+    impact:
+      severity: "Low"
+      affected: ["CLI maintenance commands"]
+    
     assessment:
       complexity: 4
       effort_days: 2
       priority: "P3"
-
+    
     resolution:
-      approach: "Create architecture test to verify all log.* calls include run_id context via LoggerPort.bind()"
+      approach: "Add unit tests for CLI commands (cleanup, config, lock)"
       breaking_changes: false
 
-  - id: "ISSUE-004"
-    category: "OPS"
-    title: "Verify health check 30s cache implementation per RULES.md"
-
-    validation:
-      commit: "1873efdd79da1afbee2d610013972cb85d4ad39c"
-      code_verdict: "PARTIAL"
-      doc_verdict: "CONFIRMED"
-      test_verdict: "N/A"
-      total_confirmed: "50%"
-      final_verdict: "VALID"
-
-    impact:
-      severity: "Low"
-      affected:
-        - "src/bioetl/infrastructure/adapters/"
-
-    assessment:
-      complexity: 3
-      effort_days: 1
-      priority: "P3"
-
-    resolution:
-      approach: "Verify or implement TTL cache decorator for health_check() in adapter implementations per RULES.md §1.1.2"
-      breaking_changes: false
-
-  - id: "ISSUE-005"
+  - id: "STOR-001"
     category: "TEST"
-    title: "Verify 85% coverage gate passes in CI"
-
+    title: "Storage writers have coverage below 85%"
+    
     validation:
-      commit: "1873efdd79da1afbee2d610013972cb85d4ad39c"
+      commit: "205f1d7"
       code_verdict: "CONFIRMED"
-      doc_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
       test_verdict: "PARTIAL"
-      total_confirmed: "70%"
+      total_confirmed: "75%"
       final_verdict: "VALID"
-
+    
+    evidence:
+      coverage_output: |
+        src/bioetl/infrastructure/storage/bronze_writer.py: 78.20%
+        src/bioetl/infrastructure/storage/gold_writer.py: 77.32%
+        src/bioetl/infrastructure/storage/silver_writer.py: 71.07%
+    
     impact:
-      severity: "Low"
-      affected:
-        - ".github/workflows/"
-        - "pyproject.toml"
-
+      severity: "Medium"
+      affected: ["Bronze, Silver, Gold writers"]
+    
     assessment:
-      complexity: 1
-      effort_days: 0.5
-      priority: "P3"
-
+      complexity: 5
+      effort_days: 3
+      priority: "P2"
+    
     resolution:
-      approach: "Run full test suite with --cov-fail-under=85 in CI to verify coverage gate"
+      approach: "Add tests for uncovered branches in storage writers (error paths, edge cases)"
       breaking_changes: false
 
+# Summary
 summary:
-  total_problems: 5
+  total_problems: 4
   by_severity:
     critical: 0
     high: 0
     medium: 2
-    low: 3
+    low: 2
   by_priority:
     p0: 0
     p1: 0
     p2: 2
-    p3: 3
-  total_effort_days: 5
+    p3: 2
+  estimated_total_effort: "5.6 person-days"

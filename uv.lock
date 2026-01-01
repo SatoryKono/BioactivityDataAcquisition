@@ -141,7 +141,7 @@ wheels = [
 
 [[package]]
 name = "bioetl"
-version = "5.0.1"
+version = "5.0.6"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -205,6 +205,7 @@ performance = [
 tests = [
     { name = "black" },
     { name = "hypothesis" },
+    { name = "isort" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-sdk" },
@@ -260,6 +261,7 @@ requires-dist = [
     { name = "hypothesis", marker = "extra == 'tests'", specifier = ">=6.100" },
     { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.13" },
+    { name = "isort", marker = "extra == 'tests'", specifier = ">=5.13" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
     { name = "mkdocs-mermaid2-plugin", marker = "extra == 'docs'", specifier = ">=1.1" },

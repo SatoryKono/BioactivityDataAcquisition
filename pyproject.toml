@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bioetl"
-version = "5.0.1"
+version = "5.0.6"
 description = "BioETL: Bioactivity data acquisition and processing pipeline"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -74,6 +74,7 @@ tests = [
     "pytest-vcr>=1.0",
     # Code formatting (required by architecture tests)
     "black>=24.0",
+    "isort>=5.13",
 ]
 dev = [
     "pytest>=8.0",
