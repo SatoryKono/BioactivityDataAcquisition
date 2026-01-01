@@ -1,6 +1,6 @@
 # План Рефакторинга: Наблюдаемость, CLI-покрытие, VACUUM-автоматизация
 
-*Версия: 1.0 | Дата: 2026-01-01*
+*Версия: 1.1 | Дата: 2026-01-01 | Синхронизировано с main: b529c56*
 
 > **ПРОТОКОЛ ДВОЙНОЙ ВЕРИФИКАЦИИ (REQ-ARCH-040)**
 > Все утверждения в этом документе прошли верификацию согласно `RULES.md` §7.
@@ -29,6 +29,9 @@
 | **CLI vacuum команды** | `vacuum.py:21-120` | `vacuum`, `vacuum-all` с dry-run |
 | **VacuumService** | `vacuum_service.py:85-225` | Application-layer сервис |
 | **CLI тесты (250+)** | `tests/unit/interfaces/`, `tests/integration/interfaces/` | 13 файлов тестов CLI |
+| **run_all coverage 99%** | `test_cli_run_all_vacuum_formatters.py` (1290 LOC) | Коммит `b529c56` |
+| **vacuum coverage 100%** | `test_cli_run_all_vacuum_formatters.py` | Коммит `b529c56` |
+| **formatters coverage 100%** | `test_cli_run_all_vacuum_formatters.py` | Коммит `b529c56` |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (Не Повторять)
 
@@ -178,21 +181,25 @@ def test_no_fstring_in_log_calls():
 
 ## Фаза C: Покрытие CLI-команд тестами
 
-### Верифицированное Покрытие (2026-01-01)
+### Верифицированное Покрытие (2026-01-01, обновлено после b529c56)
 
-| Команда | Unit Tests | Integration Tests | Статус |
-|---------|------------|-------------------|--------|
-| `run` | `test_cli.py` | `test_cli_run_dry_run.py`, `test_cli_run_incremental.py` | ✅ |
-| `run-all` | `test_run_all_command.py` (24), `test_cli_run_all_vacuum_formatters.py` (58) | — | ✅ |
-| `vacuum` | `test_vacuum_commands.py` (25) | `test_cli_maintenance_vacuum.py` | ✅ |
-| `checkpoint list` | `test_cli_commands.py` | `test_cli_checkpoint_list.py` | ✅ |
-| `quarantine inspect` | `test_cli_commands.py` | `test_cli_quarantine_inspect.py` | ✅ |
-| `lock release` | `test_cli_commands.py` (2+) | — | ⚠️ Частично |
-| `config show/validate` | `test_cli_commands.py` (10+) | — | ✅ |
-| `archive` | — | `test_cli_maintenance_archive.py` | ✅ |
-| `cleanup` | `test_cli_commands.py` (5+) | — | ✅ |
+| Команда | Coverage | Unit Tests | Integration Tests | Статус |
+|---------|----------|------------|-------------------|--------|
+| `run` | — | `test_cli.py` | `test_cli_run_dry_run.py`, `test_cli_run_incremental.py` | ✅ |
+| `run-all` | **98.97%** | `test_run_all_command.py`, `test_cli_run_all_vacuum_formatters.py` | — | ✅ |
+| `vacuum` | **100%** | `test_vacuum_commands.py`, `test_cli_run_all_vacuum_formatters.py` | `test_cli_maintenance_vacuum.py` | ✅ |
+| `formatters` | **100%** | `test_cli_run_all_vacuum_formatters.py` | — | ✅ |
+| `checkpoint list` | — | `test_cli_commands.py` | `test_cli_checkpoint_list.py` | ✅ |
+| `quarantine inspect` | — | `test_cli_commands.py` | `test_cli_quarantine_inspect.py` | ✅ |
+| `lock release` | — | `test_cli_commands.py` (2+) | — | ⚠️ Частично |
+| `config show/validate` | — | `test_cli_commands.py` (10+) | — | ✅ |
+| `archive` | — | — | `test_cli_maintenance_archive.py` | ✅ |
+| `cleanup` | — | `test_cli_commands.py` (5+) | — | ✅ |
 
-**Вывод:** Покрытие ~95%. Требуется расширение для `lock` команд.
+**Обновление (b529c56):** Добавлено 1290 строк тестов в `test_cli_run_all_vacuum_formatters.py`.
+Покрытие run_all, vacuum, formatters доведено до ≥99%.
+
+**Вывод:** Покрытие ~97%. Требуется расширение только для `lock` команд.
 
 ---
 
