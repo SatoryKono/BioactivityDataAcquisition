@@ -888,7 +888,14 @@ class TestQuarantineInspectCommand:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["quarantine", "inspect", "--pipeline", "chembl_activity", "--limit", "50"],
+                [
+                    "quarantine",
+                    "inspect",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--limit",
+                    "50",
+                ],
             )
 
         assert result.exit_code == 0
@@ -1062,7 +1069,10 @@ class TestGetExitCodeForException:
 
     def test_direct_mapping_value_error(self):
         """Test direct mapping for ValueError."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+        from bioetl.interfaces.cli.exit_codes import (
+            ExitCode,
+            get_exit_code_for_exception,
+        )
 
         exc = ValueError("Invalid value")
         result = get_exit_code_for_exception(exc)
@@ -1071,7 +1081,10 @@ class TestGetExitCodeForException:
 
     def test_direct_mapping_file_not_found(self):
         """Test direct mapping for FileNotFoundError."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+        from bioetl.interfaces.cli.exit_codes import (
+            ExitCode,
+            get_exit_code_for_exception,
+        )
 
         exc = FileNotFoundError("File not found")
         result = get_exit_code_for_exception(exc)
@@ -1080,7 +1093,10 @@ class TestGetExitCodeForException:
 
     def test_direct_mapping_keyboard_interrupt(self):
         """Test direct mapping for KeyboardInterrupt."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+        from bioetl.interfaces.cli.exit_codes import (
+            ExitCode,
+            get_exit_code_for_exception,
+        )
 
         exc = KeyboardInterrupt()
         result = get_exit_code_for_exception(exc)
@@ -1089,7 +1105,10 @@ class TestGetExitCodeForException:
 
     def test_mro_fallback_for_subclass(self):
         """Test MRO fallback for exception subclass."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+        from bioetl.interfaces.cli.exit_codes import (
+            ExitCode,
+            get_exit_code_for_exception,
+        )
 
         # Create a custom ValueError subclass
         class CustomValueError(ValueError):
@@ -1103,7 +1122,10 @@ class TestGetExitCodeForException:
 
     def test_unknown_exception_returns_fail(self):
         """Test unknown exception returns FAIL."""
-        from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
+        from bioetl.interfaces.cli.exit_codes import (
+            ExitCode,
+            get_exit_code_for_exception,
+        )
 
         # Create an exception not in the mapping
         class UnknownError(Exception):
