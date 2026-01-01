@@ -18,7 +18,7 @@ classDiagram
         -_ttl_task: asyncio.Task | None
         -_running: bool = True
 
-        +acquire(key: str, owner_id: str, ttl: int = 90, wait: bool = False, timeout: int = 300, exclusive: bool = False) bool
+        +acquire(key: str, owner_id: str, ttl: int = 60, wait: bool = False, timeout: int = 300, exclusive: bool = False) bool
         +release(key: str, owner_id: str, exclusive: bool = False) bool
         +heartbeat(key: str, owner_id: str, exclusive: bool = False) bool
         +validate_owner(key: str, owner_id: str) bool
@@ -60,8 +60,8 @@ classDiagram
     class LockManager {
         -_lock: LockPort
         -_logger: LoggerPort
-        -_ttl: int = 90
-        -_heartbeat_interval: int = 30
+        -_ttl: int = 60
+        -_heartbeat_interval: int = 20
         -_wait_for_lock: bool = False
         -_wait_timeout: int = 300
         -_heartbeat_task: asyncio.Task | None
@@ -96,7 +96,7 @@ classDiagram
     LockManager --> LockResult : returns
     BackfillLock --> LockPort : uses
 
-    note for MemoryLock "Local-Only Architecture\n━━━━━━━━━━━━━━━━━━━━━━\nDesigned for single-process execution.\nNO Redis dependency required.\n\nKey Features:\n• TTL-based auto-expiration\n• Heartbeat refresh support\n• Ownership validation (Safety Guard)\n• Async-safe operations\n\nDefault Parameters:\n• TTL: 90 seconds\n• TTL check interval: 1 second\n• Heartbeat: 30 seconds"
+    note for MemoryLock "Local-Only Architecture\n━━━━━━━━━━━━━━━━━━━━━━\nDesigned for single-process execution.\nNO Redis dependency required.\n\nKey Features:\n• TTL-based auto-expiration\n• Heartbeat refresh support\n• Ownership validation (Safety Guard)\n• Async-safe operations\n\nDefault Parameters:\n• TTL: 60 seconds\n• TTL check interval: 1 second\n• Heartbeat: 20 seconds"
 
     note for LockManager "Orchestration Layer\n━━━━━━━━━━━━━━━━━━━━━━\nWraps LockPort with:\n• Automatic heartbeat management\n• Lock key construction\n• Logging integration\n\nKey Format:\nlock:{provider}_{entity}\nlock:{provider}_{entity}:exclusive"
 

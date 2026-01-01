@@ -25,9 +25,9 @@
 | ID | Утверждение | Вердикт | Верификация |
 |----|-------------|---------|-------------|
 | ARCH-001 | "Зафиксировать Bronze JSONL+zstd, запретить parquet/delta" | ❌ **УЖЕ РЕАЛИЗОВАНО** | Bronze уже использует ТОЛЬКО JSONL+zstd (`bronze_writer.py:1,335`). BronzeSinkDict type допускает parquet, но BronzeWriter его не поддерживает. |
-| OPS-001 | "Применить TTL=90s, heartbeat=30s в MemoryLock" | ⚠️ **ЛОЖНОЕ** | MemoryLock НЕ хардкодит значения — принимает TTL как параметр `acquire(ttl=...)`. Уже в списке ложных: `refactoring-plan.md:121` |
+| OPS-001 | "Применить TTL=90s, heartbeat=30s в MemoryLock" | ⚠️ **ЛОЖНОЕ** | MemoryLock НЕ хардкодит значения — принимает TTL как параметр `acquire(ttl=...)`. RuntimeConfig defaults: TTL=60s, heartbeat=20s. Уже в списке ложных: `refactoring-plan.md:121` |
 | TEST-001 | "Добавить юнит-тесты на Bronze валидацию" | ⚠️ **Частично** | Тесты Bronze существуют, но можно расширить покрытие |
-| DOC-001 | "Синхронизировать документацию по ADR-010" | ✅ **ВАЛИДНО** | Несоответствие: ADR-010:109 = 30s, `config.py:254` = 20s |
+| DOC-001 | "Синхронизировать документацию по ADR-010" | ✅ **ИСПРАВЛЕНО** | Синхронизировано 2026-01-01: RULES.md, REQUIREMENTS.md, диаграммы обновлены на 20s/60s |
 
 ### План 2 (2025-12-31, Score 7.61/10)
 
@@ -70,15 +70,16 @@
 
 **Решение:** Синхронизировать валидацию. Согласно `pipeline_config.py:431-432`: "RULES.md §2.1: Silver and Gold MUST use Delta Lake format".
 
-### 2. Несоответствие heartbeat_interval: ADR-010 vs config.py
+### 2. ~~Несоответствие heartbeat_interval: ADR-010 vs config.py~~ ✅ ИСПРАВЛЕНО
 
-**Файлы:**
-- `ADR-010:108-111` — документирует `heartbeat_interval = 30s`
-- `config.py:254` — `heartbeat_interval: int = Field(default=20, ...)`
+**Статус:** ИСПРАВЛЕНО 2026-01-01
 
-**Проблема:** Документация не соответствует реализации.
-
-**Решение:** Обновить ADR-010 на актуальное значение 20s, или изменить default в config.py на 30s.
+**Выполнено:**
+- RULES.md v5.9: обновлено на TTL=60s, Heartbeat=20s
+- REQUIREMENTS.md: REQ-LOCK-002, REQ-LOCK-003 обновлены
+- 00-rules-summary.md: таблица синхронизирована
+- Диаграммы mermaid: 6 файлов обновлены
+- ADR-010, ADR-003 уже имели корректные значения 20s/60s
 
 ### 3. Отсутствие _dq_error в ETLRecordSchema
 

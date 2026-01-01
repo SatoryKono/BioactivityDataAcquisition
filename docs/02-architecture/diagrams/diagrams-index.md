@@ -86,8 +86,8 @@ All diagrams use the following Mermaid theme configuration:
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Lock TTL | 90s | RuntimeConfig |
-| Heartbeat Interval | 30s | LockManager |
+| Lock TTL | 60s | RuntimeConfig |
+| Heartbeat Interval | 20s | LockManager |
 | Circuit Breaker Threshold | 5 failures | CircuitBreaker |
 | Recovery Timeout | 300s (5 min) | CircuitBreaker |
 | DQ Soft Threshold | 5% | DQConfig |
@@ -124,6 +124,6 @@ All diagrams use the following Mermaid theme configuration:
 After rendering, validate diagrams against:
 
 - [ ] Class names match `src/bioetl/` codebase
-- [ ] Lock parameters: TTL=90s, Heartbeat=30s
+- [ ] Lock parameters: TTL=60s, Heartbeat=20s
 - [ ] Circuit Breaker: threshold=5, timeout=300s
 - [ ] Retention: Bronze=90d, Silver=permanent, Quarantine=30d
