@@ -421,7 +421,7 @@ class TestSilverWriterGetTableInfo:
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
         mock_table_instance.version.return_value = 10
-        mock_table_instance.files.return_value = ["file1.parquet", "file2.parquet"]
+        mock_table_instance.file_uris.return_value = ["file1.parquet", "file2.parquet"]
         mock_schema = MagicMock()
         mock_schema.to_arrow.return_value = {"fields": []}
         mock_table_instance.schema.return_value = mock_schema
