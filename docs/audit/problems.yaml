@@ -142,6 +142,8 @@ problems:
 # Summary Statistics
 summary:
   total_problems: 3
+  resolved: 3
+  remaining: 0
   by_severity:
     critical: 0
     high: 0
@@ -159,4 +161,21 @@ summary:
     CONFIG: 0
     OPS: 0
   estimated_total_effort_hours: 4
+  actual_effort_hours: 2
   blocking_issues: 0
+
+# Resolution Log
+resolutions:
+  - id: "TEST-001"
+    resolved_at: "2026-01-01"
+    commit: "ab51f69"
+    fix: "Changed mock from files() to file_uris() to match actual implementation"
+
+  - id: "TEST-002"
+    resolved_at: "2026-01-01"
+    commit: "ab51f69"
+    fix: "Added cache_clear() teardown to prevent LRU cache contamination across tests"
+
+  - id: "DOC-001"
+    resolved_at: "2026-01-01"
+    status: "Verified - all 22 ADRs have Status fields, minor format differences acceptable"
