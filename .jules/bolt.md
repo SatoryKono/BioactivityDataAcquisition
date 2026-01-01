@@ -1,3 +1,6 @@
+## 2026-05-24 - [Pandera Schema Introspection]
+**Learning:** Pandera's `schema.to_schema()` or schema inspection can be expensive if called repeatedly in a hot loop (e.g., per batch). Even simple property access can trigger validation or conversion logic depending on the object type.
+**Action:** Cache schema attributes (like column names needed for filtering) in the `__init__` method of long-lived components like `BatchWriter`, rather than querying the schema object in the processing method.
 # Bolt's Performance Journal
 
 ## 2025-01-27 - [Pydantic Validation in Hot Paths]
