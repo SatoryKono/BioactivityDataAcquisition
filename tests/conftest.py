@@ -213,13 +213,50 @@ def _sanitize_request(request: Request) -> Request:
 
 
 def _sanitize_response(response: dict[str, Any]) -> dict[str, Any]:
-    """Sanitize secrets from recorded responses."""
+    """Sanitize secrets and PII from recorded responses.
+
+    Removes:
+    - Sensitive headers (Set-Cookie, X-Request-Id)
+    - Email addresses from response body (PII protection)
+
+    Requirements:
+    - REQ-TEST-002: Secret sanitization in before_record hook
+    - REQ-SECRET-004: PII sanitization in VCR cassettes
+    """
     # Remove sensitive headers from response
     headers_to_remove = ["Set-Cookie", "X-Request-Id"]
     if "headers" in response:
         for header in headers_to_remove:
             response["headers"].pop(header, None)
             response["headers"].pop(header.lower(), None)
+
+    # Sanitize email addresses from response body (PII protection)
+    # Pattern matches standard email format
+    email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+    email_pattern_bytes = rb"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+
+    if "body" in response:
+        body = response["body"]
+        # Handle string body
+        if isinstance(body, str):
+            response["body"] = re.sub(email_pattern, "redacted@example.com", body)
+        # Handle bytes body
+        elif isinstance(body, bytes):
+            response["body"] = re.sub(
+                email_pattern_bytes, b"redacted@example.com", body
+            )
+        # Handle dict with 'string' key (VCR internal format)
+        elif isinstance(body, dict) and "string" in body:
+            string_body = body["string"]
+            if isinstance(string_body, str):
+                body["string"] = re.sub(
+                    email_pattern, "redacted@example.com", string_body
+                )
+            elif isinstance(string_body, bytes):
+                body["string"] = re.sub(
+                    email_pattern_bytes, b"redacted@example.com", string_body
+                )
+
     return response
 
 
