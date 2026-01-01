@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.8 (TTL/Heartbeat Sync), 2025-12-29* 
+*Версия: 5.9 (TTL/Heartbeat Sync Fix), 2026-01-01* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -343,8 +343,8 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Механизм**: In-memory блокировки (`MemoryLock`)
 - **Scope**: Один процесс Python
 - **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`
-- **Lock TTL**: `heartbeat_interval * 3` = **90 секунд** по умолчанию
-- **Heartbeat**: **30 секунд** (настраивается в `RuntimeConfig`)
+- **Lock TTL**: `heartbeat_interval * 3` = **60 секунд** по умолчанию
+- **Heartbeat**: **20 секунд** (настраивается в `RuntimeConfig`)
 - **Lock Max Duration**: **4 часа**. Принудительное снятие по истечении.
 
 #### Распределённое развёртывание (REJECTED)
@@ -1088,7 +1088,8 @@ fields:
 | [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | 2025-12-16 |
 
 ## История Изменений (Changelog)
-- **5.8** (2025-12-29): TTL/Heartbeat Sync. Добавлены явные значения Lock TTL (90s) и Heartbeat (30s) в §3.3 "Текущая реализация". Синхронизация с CLAUDE.md §5.
+- **5.9** (2026-01-01): TTL/Heartbeat Sync Fix. Исправлены значения Lock TTL (60s) и Heartbeat (20s) в §3.3 для соответствия реализации в `domain/config.py`. Синхронизация RULES.md, REQUIREMENTS.md, 00-rules-summary.md и диаграмм mermaid с кодом.
+- **5.8** (2025-12-29): TTL/Heartbeat Sync. Добавлены явные значения Lock TTL и Heartbeat в §3.3 "Текущая реализация". Синхронизация с CLAUDE.md §5.
 - **5.7** (2025-12-27): Pre-Refactoring Verification Requirement. Добавлено обязательное требование в §7.1: перед предложением рефакторинга MUST сверяться с CLAUDE.md §0 и секцией "УЖЕ РЕАЛИЗОВАНО" в refactoring-plan.md.
 - **5.6** (2025-12-27): Anti-False-Claims Protocol (REQ-ARCH-041). Расширена §7 с детальными правилами анализа делегирования (§7.1.6), причинами ложных утверждений (§7.1.5), контрпримерами (ChemblAdapter, GoldWriter, PreflightService). Добавлены конкретные примеры из кодовой базы в §7.1.4.
 - **5.5** (2025-12-27): Mandatory Architecture Review Verification Protocol. Добавлена §7 "Протокол Архитектурных Обзоров" с требованием двойной верификации (REQ-ARCH-040). Причина: анализ выявил ~50% ложных утверждений в планах рефакторинга.
