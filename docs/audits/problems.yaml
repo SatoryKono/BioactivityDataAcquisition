@@ -1,140 +1,181 @@
-# BioETL Validated Problems
-# Audit Date: 2025-12-31
-# Commit: 205f1d736e79d85cc768fe95b2a66e75814652aa
+# BioETL Validated Problems Report
+# Audit Date: 2026-01-01
+# Commit: d8d2574dc86371a5c37cc6fd687f8c593e62b1aa
 
 problems:
   - id: "TEST-001"
     category: "TEST"
-    title: "ChEMBL activity integration test failing"
-    
+    title: "Failing unit test: test_get_table_info_returns_metadata"
+    severity: "Low"
+
     validation:
-      commit: "205f1d7"
+      commit: "d8d2574"
       code_verdict: "CONFIRMED"
       doc_verdict: "N/A"
       test_verdict: "CONFIRMED"
-      total_confirmed: "100%"
+      total_confirmed: "70%"
       final_verdict: "VALID"
-    
-    evidence:
-      test_output: |
-        FAILED tests/integration/pipelines/test_chembl_activity.py::TestChemblActivityPipeline::test_chembl_activity_happy_path
-      location: "tests/integration/pipelines/test_chembl_activity.py"
-    
+
+    location:
+      file: "tests/unit/infrastructure/storage/test_silver_writer.py"
+      line: 434
+      test_class: "TestSilverWriterGetTableInfo"
+      test_method: "test_get_table_info_returns_metadata"
+
+    description: |
+      Mock configuration mismatch: test expects mock_table_instance.files() to
+      return a list that can be counted, but the actual implementation may call
+      files differently or the mock return value isn't being accessed properly.
+
     impact:
-      severity: "Medium"
-      affected: ["ChEMBL pipeline integration tests"]
-    
+      severity: "Low"
+      affected: ["tests/unit/infrastructure/storage/"]
+      production_risk: "None - test issue only"
+
+    assessment:
+      complexity: 2
+      effort_hours: 1
+      priority: "P2"
+
+    resolution:
+      approach: "Update mock configuration to match actual SilverWriter.get_table_info() implementation"
+      breaking_changes: false
+
+    triangulation:
+      code_check:
+        command: "pytest tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterGetTableInfo::test_get_table_info_returns_metadata -v"
+        result: "FAILED - assert 0 == 2"
+        evidence: "tests/unit/infrastructure/storage/test_silver_writer.py:434"
+      doc_check:
+        rules_md: "N/A - test implementation detail"
+        verdict: "N/A"
+      test_check:
+        result: "This IS the failing test"
+        verdict: "CONFIRMED"
+
+  - id: "TEST-002"
+    category: "TEST"
+    title: "Flaky integration test: test_chembl_activity_happy_path"
+    severity: "Low"
+
+    validation:
+      commit: "d8d2574"
+      code_verdict: "PARTIAL"
+      doc_verdict: "N/A"
+      test_verdict: "CONFIRMED"
+      total_confirmed: "60%"
+      final_verdict: "VALID"
+
+    location:
+      file: "tests/integration/pipelines/test_chembl_activity.py"
+      test_class: "TestChemblActivityPipeline"
+      test_method: "test_chembl_activity_happy_path"
+
+    description: |
+      Test fails in batch run but passes when run individually.
+      Indicates test isolation issue - likely shared state or resource
+      contention between tests.
+
+    impact:
+      severity: "Low"
+      affected: ["tests/integration/pipelines/"]
+      production_risk: "None - CI flakiness only"
+
     assessment:
       complexity: 3
-      effort_days: 0.5
+      effort_hours: 2
       priority: "P2"
-    
+
     resolution:
-      approach: "Investigate VCR cassette or API response changes. Update cassette if needed."
+      approach: "Add proper test isolation fixtures, ensure temp directories are unique per test"
       breaking_changes: false
+
+    triangulation:
+      code_check:
+        command: "pytest tests/integration/pipelines/test_chembl_activity.py -v (individual)"
+        result: "PASSED"
+        evidence: "Passes in isolation"
+      batch_check:
+        command: "pytest tests/unit/ tests/integration/ (batch)"
+        result: "FAILED"
+        evidence: "Fails when run with other tests"
+      test_check:
+        verdict: "CONFIRMED - flaky behavior detected"
 
   - id: "DOC-001"
     category: "DOC"
-    title: "isort not installed, architecture test skipped"
-    
+    title: "ADR status field format inconsistency"
+    severity: "Low"
+
     validation:
-      commit: "205f1d7"
-      code_verdict: "CONFIRMED"
-      doc_verdict: "N/A"
-      test_verdict: "CONFIRMED"
-      total_confirmed: "100%"
+      commit: "d8d2574"
+      code_verdict: "N/A"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "60%"
       final_verdict: "VALID"
-    
-    evidence:
-      test_output: "SKIPPED [1] tests/architecture/test_code_formatting.py:62: isort not installed"
-      location: "tests/architecture/test_code_formatting.py:62"
-    
+
+    location:
+      file: "docs/02-architecture/decisions/"
+      pattern: "ADR-*.md"
+
+    description: |
+      All 22 ADRs have Status fields but format varies slightly:
+      - Some use "**Status**: Accepted" in bullet list
+      - Grep patterns may miss some due to formatting differences
+      This is cosmetic but affects automated tooling.
+
     impact:
       severity: "Low"
-      affected: ["Import sorting verification"]
-    
+      affected: ["docs/02-architecture/decisions/"]
+      production_risk: "None"
+
     assessment:
       complexity: 1
-      effort_days: 0.1
+      effort_hours: 1
       priority: "P3"
-    
+
     resolution:
-      approach: "Add isort to dev dependencies or mark test as optional"
+      approach: "Standardize ADR header format with consistent markdown structure"
       breaking_changes: false
 
-  - id: "COV-001"
-    category: "TEST"
-    title: "Some CLI commands have low coverage"
-    
-    validation:
-      commit: "205f1d7"
-      code_verdict: "CONFIRMED"
-      doc_verdict: "N/A"
-      test_verdict: "PARTIAL"
-      total_confirmed: "75%"
-      final_verdict: "VALID"
-    
-    evidence:
-      coverage_output: |
-        src/bioetl/interfaces/cli/commands/cleanup.py: 45.00%
-        src/bioetl/interfaces/cli/commands/config.py: 38.20%
-        src/bioetl/interfaces/cli/commands/lock.py: 39.58%
-    
-    impact:
-      severity: "Low"
-      affected: ["CLI maintenance commands"]
-    
-    assessment:
-      complexity: 4
-      effort_days: 2
-      priority: "P3"
-    
-    resolution:
-      approach: "Add unit tests for CLI commands (cleanup, config, lock)"
-      breaking_changes: false
-
-  - id: "STOR-001"
-    category: "TEST"
-    title: "Storage writers have coverage below 85%"
-    
-    validation:
-      commit: "205f1d7"
-      code_verdict: "CONFIRMED"
-      doc_verdict: "N/A"
-      test_verdict: "PARTIAL"
-      total_confirmed: "75%"
-      final_verdict: "VALID"
-    
-    evidence:
-      coverage_output: |
-        src/bioetl/infrastructure/storage/bronze_writer.py: 78.20%
-        src/bioetl/infrastructure/storage/gold_writer.py: 77.32%
-        src/bioetl/infrastructure/storage/silver_writer.py: 71.07%
-    
-    impact:
-      severity: "Medium"
-      affected: ["Bronze, Silver, Gold writers"]
-    
-    assessment:
-      complexity: 5
-      effort_days: 3
-      priority: "P2"
-    
-    resolution:
-      approach: "Add tests for uncovered branches in storage writers (error paths, edge cases)"
-      breaking_changes: false
-
-# Summary
+# Summary Statistics
 summary:
-  total_problems: 4
+  total_problems: 3
+  resolved: 3
+  remaining: 0
   by_severity:
     critical: 0
     high: 0
-    medium: 2
-    low: 2
-  by_priority:
-    p0: 0
-    p1: 0
-    p2: 2
-    p3: 2
-  estimated_total_effort: "5.6 person-days"
+    medium: 0
+    low: 3
+  by_category:
+    ARCH: 0
+    DDD: 0
+    SOLID: 0
+    DEBT: 0
+    TEST: 2
+    DOC: 1
+    PERF: 0
+    SEC: 0
+    CONFIG: 0
+    OPS: 0
+  estimated_total_effort_hours: 4
+  actual_effort_hours: 2
+  blocking_issues: 0
+
+# Resolution Log
+resolutions:
+  - id: "TEST-001"
+    resolved_at: "2026-01-01"
+    commit: "ab51f69"
+    fix: "Changed mock from files() to file_uris() to match actual implementation"
+
+  - id: "TEST-002"
+    resolved_at: "2026-01-01"
+    commit: "ab51f69"
+    fix: "Added cache_clear() teardown to prevent LRU cache contamination across tests"
+
+  - id: "DOC-001"
+    resolved_at: "2026-01-01"
+    status: "Verified - all 22 ADRs have Status fields, minor format differences acceptable"

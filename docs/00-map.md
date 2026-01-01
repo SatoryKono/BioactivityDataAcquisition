@@ -1,11 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.8 | Last updated: 2025-12-31*
+*Synced with RULES.md v5.9 | Last updated: 2026-01-01*
 
-> **Documentation Audit Completed:** 2025-12-31
-> - Consolidated 4 audit directories → `audits/`
-> - Moved 8 outdated plans → `archived/`
-> - Merged 25 Mermaid diagrams → `02-architecture/diagrams/`
+> **Documentation Audit Completed:** 2026-01-01
+> - Consolidated duplicate `audit/` and `audits/` directories → `audits/`
+> - Fixed 30+ broken relative links
+> - Updated version references to v5.9
+> - 25 Mermaid diagrams maintained in `02-architecture/diagrams/`
 
 ## Quick Links
 
@@ -40,7 +41,7 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.8)
+├── RULES.md                     # Canonical rules document (v5.9)
 ├── REQUIREMENTS.md              # 127 testable requirements
 ├── CHANGELOG.md                 # Version history
 ├── refactoring-plan.md          # Current refactoring roadmap
@@ -335,19 +336,19 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2025-12-29   | v5.8 (TTL/Heartbeat Sync)    |
+| RULES.md                 | 2026-01-01   | v5.9 (TTL/Heartbeat Sync)    |
 | refactoring-plan.md      | 2025-12-31   | Active refactoring roadmap   |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2025-12-31   | v6.0 Post-audit consolidated |
-| 00-rules-summary.md      | 2025-12-27   | v5.6 Synced                  |
+| 00-map.md                | 2026-01-01   | v6.1 Post-audit consolidated |
+| 00-rules-summary.md      | 2026-01-01   | v5.9 Synced                  |
 | 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
 | ADR-001..022             | 2025-12-31   | All 22 ADRs documented       |
 | 05-operations/runbooks/  | 2025-12-27   | 11 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| audits/                  | 2025-12-31   | Consolidated (18 files)      |
-| 02-architecture/diagrams/| 2025-12-31   | 35 Mermaid diagrams          |
+| audits/                  | 2026-01-01   | Consolidated (22 files)      |
+| 02-architecture/diagrams/| 2025-12-31   | 25 Mermaid diagrams          |
 
 ---
 
-*Last updated: 2025-12-31. Documentation audit completed.*
+*Last updated: 2026-01-01. Documentation audit completed.*

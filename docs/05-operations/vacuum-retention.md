@@ -225,7 +225,8 @@ VACUUM операции логируются с structlog pattern:
 
 ## Связанные ресурсы
 
-- [ADR-002: Delta Lake Storage](../02-architecture/decisions/ADR-002-delta-lake-storage.md)
+- [ADR-001: Delta Lake vs Parquet](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)
+- [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [RULES.md §3.1: Medallion Architecture](../RULES.md)
 - [VacuumService](../../src/bioetl/application/services/vacuum_service.py)
 - [RetentionManager](../../src/bioetl/infrastructure/storage/retention_manager.py)
