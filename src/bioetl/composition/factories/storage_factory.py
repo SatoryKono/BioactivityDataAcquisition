@@ -212,9 +212,13 @@ class StorageFactory:
             logger.info("JSON export enabled for Bronze layer")
         if silver_csv_exporter:
             logger.info(
-                f"CSV export enabled for Silver layer: {silver_csv_exporter.base_path}"
+                "csv_export_enabled",
+                layer="silver",
+                base_path=str(silver_csv_exporter.base_path),
             )
         if gold_csv_exporter:
             logger.info(
-                f"CSV export enabled for Gold layer: {gold_csv_exporter.base_path}"
+                "csv_export_enabled",
+                layer="gold",
+                base_path=str(gold_csv_exporter.base_path),
             )
