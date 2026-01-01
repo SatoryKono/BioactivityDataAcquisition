@@ -4,6 +4,12 @@ import pytest
 import yaml
 
 from bioetl.infrastructure.config import load_pipeline_config
+from bioetl.infrastructure.config_loader import (
+    load_pipeline_config as load_pipeline_config_cached,
+)
+from bioetl.infrastructure.config_loader import (
+    load_source_config,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -12,6 +18,8 @@ def setup_configs(tmp_path, monkeypatch):
     """
     Sets up a temporary configs directory structure and changes the current working directory
     to tmp_path so the relative paths in load_pipeline_config work correctly.
+
+    IMPORTANT: Clears the LRU cache on teardown to prevent cross-test contamination.
     """
     # Create the configs/pipelines directory structure in the temp dir
     pipelines_dir = tmp_path / "configs" / "pipelines"
@@ -50,7 +58,12 @@ def setup_configs(tmp_path, monkeypatch):
     # Change CWD to tmp_path so "configs/pipelines/..." resolves to our temp files
     monkeypatch.chdir(tmp_path)
 
-    return pipelines_dir
+    yield pipelines_dir
+
+    # Teardown: Clear the LRU cache to prevent cross-test contamination
+    # This is critical for test isolation when integration tests run after unit tests
+    load_pipeline_config_cached.cache_clear()
+    load_source_config.cache_clear()
 
 
 def test_load_dynamic_pipeline(setup_configs):

@@ -166,8 +166,12 @@ class CellLine(BaseEntity):
     cell_source_organism: str | None = None
     cell_source_tax_id: int | None = None
 
+    # Cell type classification (API-OPTIONAL)
+    cell_type: str | None = None
+
     # External identifiers (API-OPTIONAL)
     cellosaurus_id: str | None = None
+    clo_id: str | None = None
     cl_lincs_id: str | None = None
     efo_id: str | None = None
 

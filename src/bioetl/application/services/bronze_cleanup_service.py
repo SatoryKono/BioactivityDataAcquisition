@@ -111,9 +111,8 @@ class BronzeCleanupService:
         Args:
             result: The cleanup result to log.
         """
-        action = "Would remove" if result.dry_run else "Removed"
         self.logger.info(
-            f"{action} Bronze files",
+            "bronze_cleanup_completed",
             files_removed=result.files_removed,
             bytes_freed=result.bytes_freed,
             directories_removed=result.directories_removed,

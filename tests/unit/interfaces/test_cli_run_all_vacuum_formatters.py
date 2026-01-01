@@ -873,3 +873,414 @@ class TestVacuumFormatters:
 
         assert "Failed tables" in result.output
         assert "gold/bad_table" in result.output
+
+
+# =============================================================================
+# echo_cleanup_preview Tests
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestEchoCleanupPreview:
+    """Tests for echo_cleanup_preview formatter."""
+
+    def test_echo_cleanup_preview_with_existing_layers(self, cli_runner):
+        """Test echo_cleanup_preview when both layers exist."""
+        from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.interfaces.cli.formatters import echo_cleanup_preview
+
+        preview = CleanupPreview(
+            silver=LayerInfo(path="/data/silver/test", file_count=10, exists=True),
+            gold=LayerInfo(path="/data/gold/test", file_count=5, exists=True),
+            total_files=15,
+        )
+
+        result = cli_runner.invoke(
+            click.command()(lambda: echo_cleanup_preview(preview)), []
+        )
+
+        assert "/data/silver/test" in result.output
+        assert "10 files" in result.output
+        assert "/data/gold/test" in result.output
+        assert "5 files" in result.output
+        assert "15" in result.output
+        assert "dry-run" in result.output.lower()
+
+    def test_echo_cleanup_preview_with_non_existing_silver(self, cli_runner):
+        """Test echo_cleanup_preview when silver doesn't exist."""
+        from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.interfaces.cli.formatters import echo_cleanup_preview
+
+        preview = CleanupPreview(
+            silver=LayerInfo(path="/data/silver/missing", file_count=0, exists=False),
+            gold=None,
+            total_files=0,
+        )
+
+        result = cli_runner.invoke(
+            click.command()(lambda: echo_cleanup_preview(preview)), []
+        )
+
+        assert "/data/silver/missing" in result.output
+        assert "does not exist" in result.output
+
+    def test_echo_cleanup_preview_with_non_existing_gold(self, cli_runner):
+        """Test echo_cleanup_preview when gold doesn't exist."""
+        from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.interfaces.cli.formatters import echo_cleanup_preview
+
+        preview = CleanupPreview(
+            silver=LayerInfo(path="/data/silver/test", file_count=5, exists=True),
+            gold=LayerInfo(path="/data/gold/missing", file_count=0, exists=False),
+            total_files=5,
+        )
+
+        result = cli_runner.invoke(
+            click.command()(lambda: echo_cleanup_preview(preview)), []
+        )
+
+        assert "/data/silver/test" in result.output
+        assert "5 files" in result.output
+        assert "/data/gold/missing" in result.output
+        assert "does not exist" in result.output
+
+    def test_echo_cleanup_preview_without_gold(self, cli_runner):
+        """Test echo_cleanup_preview when gold is None."""
+        from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.interfaces.cli.formatters import echo_cleanup_preview
+
+        preview = CleanupPreview(
+            silver=LayerInfo(path="/data/silver/only", file_count=8, exists=True),
+            gold=None,
+            total_files=8,
+        )
+
+        result = cli_runner.invoke(
+            click.command()(lambda: echo_cleanup_preview(preview)), []
+        )
+
+        assert "/data/silver/only" in result.output
+        assert "8 files" in result.output
+        # Gold should not be mentioned when None
+        assert "Gold:" not in result.output
+
+
+# =============================================================================
+# vacuum command Tests (single table)
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestVacuumCommand:
+    """Tests for vacuum command (single table operation)."""
+
+    def test_vacuum_help(self, cli_runner):
+        """Test that vacuum --help works."""
+        result = cli_runner.invoke(cli, ["maintenance", "vacuum", "--help"])
+
+        assert result.exit_code == 0
+        assert "TABLE" in result.output
+        assert "--retention-days" in result.output
+        assert "--dry-run" in result.output
+
+    def test_vacuum_requires_table(self, cli_runner):
+        """Test that TABLE argument is required."""
+        result = cli_runner.invoke(cli, ["maintenance", "vacuum"])
+
+        assert result.exit_code != 0
+        assert "Missing argument" in result.output or "TABLE" in result.output
+
+    def test_vacuum_success(self, cli_runner):
+        """Test successful vacuum of single table."""
+        mock_lifecycle = MagicMock()
+        mock_lifecycle.vacuum = AsyncMock(return_value=42)
+
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
+            return_value=mock_lifecycle,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum", "chembl.activity"]
+            )
+
+        assert result.exit_code == 0
+        assert "Removed 42 files" in result.output
+
+    def test_vacuum_dry_run(self, cli_runner):
+        """Test vacuum with --dry-run."""
+        mock_lifecycle = MagicMock()
+        mock_lifecycle.vacuum = AsyncMock(return_value=25)
+
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
+            return_value=mock_lifecycle,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum", "chembl.activity", "--dry-run"]
+            )
+
+        assert result.exit_code == 0
+        assert "[DRY-RUN]" in result.output
+        assert "Would remove 25 files" in result.output
+
+    def test_vacuum_with_retention_days(self, cli_runner):
+        """Test vacuum with custom retention days."""
+        mock_lifecycle = MagicMock()
+        mock_lifecycle.vacuum = AsyncMock(return_value=10)
+
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
+            return_value=mock_lifecycle,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum", "chembl.activity", "-r", "30"]
+            )
+
+        assert result.exit_code == 0
+        # Verify retention_days was passed
+        call_kwargs = mock_lifecycle.vacuum.call_args[1]
+        assert call_kwargs["retention_days"] == 30
+
+
+# =============================================================================
+# Additional run_all Tests for Coverage
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestRunAllPipelinesAsync:
+    """Tests for _run_all_pipelines_async function."""
+
+    @pytest.mark.asyncio
+    async def test_run_all_pipelines_handles_success(self):
+        """Test _run_all_pipelines_async with successful run."""
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SUCCESS,
+                pipeline_name="test_pipeline",
+                run_id="test-run-123",
+                run_type="incremental",
+                records_fetched=100,
+            )
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ):
+            options = RunOptions(run_type="incremental", dry_run=False)
+            result = await _run_all_pipelines_async(["test_pipeline"], options)
+
+        assert result.total == 1
+        assert result.succeeded == 1
+        assert result.failed == 0
+
+    @pytest.mark.asyncio
+    async def test_run_all_pipelines_handles_dry_run_status(self):
+        """Test _run_all_pipelines_async with DRY_RUN status."""
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.DRY_RUN,
+                pipeline_name="test_pipeline",
+                run_id="test-run-123",
+                run_type="incremental",
+            )
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ):
+            options = RunOptions(run_type="incremental", dry_run=True)
+            result = await _run_all_pipelines_async(["test_pipeline"], options)
+
+        assert result.total == 1
+        assert result.skipped == 1
+        assert result.succeeded == 0
+
+    @pytest.mark.asyncio
+    async def test_run_all_pipelines_handles_shutdown_status(self):
+        """Test _run_all_pipelines_async stops on SHUTDOWN status."""
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.SHUTDOWN,
+                pipeline_name="pipeline1",
+                run_id="test-run-123",
+                run_type="incremental",
+            )
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ):
+            options = RunOptions(run_type="incremental", dry_run=False)
+            result = await _run_all_pipelines_async(
+                ["pipeline1", "pipeline2", "pipeline3"], options
+            )
+
+        assert result.total == 3
+        assert result.skipped == 1
+        # Should break after shutdown, so only 1 call
+        assert mock_service.run.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_run_all_pipelines_handles_failed_status(self):
+        """Test _run_all_pipelines_async with FAILED status."""
+        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=RunStatus.FAILED,
+                pipeline_name="failing_pipeline",
+                run_id="test-run-123",
+                run_type="incremental",
+                error_message="Something went wrong",
+            )
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ):
+            options = RunOptions(run_type="incremental", dry_run=False)
+            result = await _run_all_pipelines_async(["failing_pipeline"], options)
+
+        assert result.total == 1
+        assert result.failed == 1
+        assert "failing_pipeline" in result.failed_pipelines
+
+    @pytest.mark.asyncio
+    async def test_run_all_pipelines_handles_not_found_error(self):
+        """Test _run_all_pipelines_async with PipelineNotFoundError."""
+        from bioetl.application.services import PipelineNotFoundError, RunOptions
+        from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            side_effect=PipelineNotFoundError("missing_pipeline", available=["other"])
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ):
+            options = RunOptions(run_type="incremental", dry_run=False)
+            result = await _run_all_pipelines_async(["missing_pipeline"], options)
+
+        assert result.total == 1
+        assert result.failed == 1
+        assert "missing_pipeline" in result.failed_pipelines
+
+    @pytest.mark.asyncio
+    async def test_run_all_pipelines_handles_unexpected_exception(self):
+        """Test _run_all_pipelines_async with unexpected exception."""
+        from bioetl.application.services import RunOptions
+        from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(side_effect=RuntimeError("Unexpected error"))
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ):
+            options = RunOptions(run_type="incremental", dry_run=False)
+            result = await _run_all_pipelines_async(["error_pipeline"], options)
+
+        assert result.total == 1
+        assert result.failed == 1
+        assert "error_pipeline" in result.failed_pipelines
+
+
+@pytest.mark.unit
+class TestHandleDestructiveConfirmationCancel:
+    """Tests for _handle_destructive_confirmation with user cancellation."""
+
+    @patch("bioetl.interfaces.cli.commands.run_all.click.confirm", return_value=False)
+    def test_confirmation_cancelled_by_user(self, mock_confirm):
+        """Test that cancellation exits the program."""
+        with pytest.raises(SystemExit) as exc_info:
+            _handle_destructive_confirmation(
+                run_type="rebuild",
+                pipelines=["test_pipeline"],
+                dry_run=False,
+                yes=False,
+            )
+
+        assert exc_info.value.code == ExitCode.OK
+        mock_confirm.assert_called_once()
+
+
+@pytest.mark.unit
+class TestRunAllCommandExceptions:
+    """Tests for run_all command exception handling."""
+
+    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
+    def test_run_all_unexpected_exception(
+        self, mock_asyncio_run, cli_runner, mock_registry
+    ):
+        """Test run-all handles unexpected exceptions during batch execution."""
+        mock_asyncio_run.side_effect = RuntimeError("Unexpected batch error")
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+            return_value=mock_registry,
+        ):
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
+
+        assert result.exit_code == ExitCode.FAIL
+        assert "Unexpected error" in result.output or "error" in result.output.lower()
+
+    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
+    def test_run_all_with_debug_flag(self, mock_asyncio_run, cli_runner, mock_registry):
+        """Test run-all with --debug flag."""
+        mock_asyncio_run.return_value = BatchRunResult(
+            total=2, succeeded=2, failed=0, skipped=0
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+            return_value=mock_registry,
+        ):
+            result = cli_runner.invoke(
+                cli, ["run-all", "--source", "chembl", "--yes", "--debug"]
+            )
+
+        assert result.exit_code == 0
+        # The async function is called, check that it was called
+        mock_asyncio_run.assert_called_once()
+
+
+@pytest.mark.unit
+class TestEchoBatchSummarySkipped:
+    """Tests for _echo_batch_summary with skipped pipelines."""
+
+    def test_summary_with_skipped(self):
+        """Test batch summary shows skipped count."""
+        result = BatchRunResult(
+            total=5,
+            succeeded=3,
+            failed=0,
+            skipped=2,
+        )
+
+        with patch("bioetl.interfaces.cli.commands.run_all.echo_info") as mock_info:
+            _echo_batch_summary(result, dry_run=False)
+
+        calls = [str(call) for call in mock_info.call_args_list]
+        assert any("Skipped" in str(c) for c in calls)
