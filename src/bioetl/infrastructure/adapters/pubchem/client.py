@@ -185,6 +185,33 @@ class PubChemAdapter(BaseSyncAdapter):
                 break
             yield self._compound_to_dict(compound)
 
+    async def _fetch_single_smiles(
+        self, smiles: str
+    ) -> list[dict[str, Any]] | None:
+        """Fetch compounds for a single SMILES string.
+
+        Args:
+            smiles: SMILES string to search.
+
+        Returns:
+            List of compound dicts, or None if fetch failed.
+
+        """
+        try:
+            await self.rate_limiter.acquire()
+            compounds = await self.circuit_breaker.call(
+                self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
+            )
+            return [self._compound_to_dict(c) for c in (compounds or [])]
+        except Exception as e:
+            self.logger.warning(
+                "smiles_fetch_failed",
+                provider=self.provider_name,
+                smiles=smiles[:50],
+                error=str(e),
+            )
+            return None
+
     async def _fetch_by_smiles(
         self,
         smiles_list: list[str],
@@ -211,31 +238,68 @@ class PubChemAdapter(BaseSyncAdapter):
         for smiles in smiles_list:
             if limit and fetched >= limit:
                 break
-
             if not smiles or not smiles.strip():
                 continue
 
-            try:
-                await self.rate_limiter.acquire()
-                compounds = await self.circuit_breaker.call(
-                    self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
-                )
-
-                for compound in compounds or []:
-                    if limit and fetched >= limit:
-                        break
-                    yield self._compound_to_dict(compound)
-                    fetched += 1
-
-            except Exception as e:
-                # Log and skip invalid SMILES (DQ error, not critical)
-                self.logger.warning(
-                    "smiles_fetch_failed",
-                    provider=self.provider_name,
-                    smiles=smiles[:50],  # Truncate for logging
-                    error=str(e),
-                )
+            records = await self._fetch_single_smiles(smiles)
+            if records is None:
                 continue
+
+            for record in records:
+                if limit and fetched >= limit:
+                    break
+                yield record
+                fetched += 1
+
+    def _validate_cids(self, cid_list: list[str]) -> list[int]:
+        """Convert and validate CID strings to integers.
+
+        Args:
+            cid_list: List of CID strings to validate.
+
+        Returns:
+            List of valid integer CIDs.
+
+        """
+        valid_cids: list[int] = []
+        for cid in cid_list:
+            try:
+                valid_cids.append(int(cid))
+            except (ValueError, TypeError):
+                self.logger.warning(
+                    "invalid_cid_skipped",
+                    provider=self.provider_name,
+                    cid=cid,
+                )
+        return valid_cids
+
+    async def _fetch_cid_batch(
+        self, batch: list[int]
+    ) -> list[dict[str, Any]] | None:
+        """Fetch a batch of compounds by CIDs.
+
+        Args:
+            batch: List of integer CIDs to fetch.
+
+        Returns:
+            List of compound dicts, or None if fetch failed.
+
+        """
+        try:
+            await self.rate_limiter.acquire()
+            compounds = await self.circuit_breaker.call(
+                self._run_in_executor, pcp.get_compounds, batch, "cid"
+            )
+            return [self._compound_to_dict(c) for c in (compounds or [])]
+        except Exception as e:
+            self.logger.warning(
+                "cid_batch_fetch_failed",
+                provider=self.provider_name,
+                batch_start=batch[0] if batch else None,
+                batch_size=len(batch),
+                error=str(e),
+            )
+            return None
 
     async def _fetch_by_cids(
         self,
@@ -255,46 +319,22 @@ class PubChemAdapter(BaseSyncAdapter):
 
         """
         fetched = 0
-        # Convert to integers, filter invalid
-        valid_cids: list[int] = []
-        for cid in cid_list:
-            try:
-                valid_cids.append(int(cid))
-            except (ValueError, TypeError):
-                self.logger.warning(
-                    "invalid_cid_skipped",
-                    provider=self.provider_name,
-                    cid=cid,
-                )
+        valid_cids = self._validate_cids(cid_list)
 
-        # Batch CIDs for efficiency
         for i in range(0, len(valid_cids), batch_size):
             if limit and fetched >= limit:
                 break
 
             batch = valid_cids[i : i + batch_size]
-            await self.rate_limiter.acquire()
-
-            try:
-                compounds = await self.circuit_breaker.call(
-                    self._run_in_executor, pcp.get_compounds, batch, "cid"
-                )
-
-                for compound in compounds or []:
-                    if limit and fetched >= limit:
-                        break
-                    yield self._compound_to_dict(compound)
-                    fetched += 1
-
-            except Exception as e:
-                self.logger.warning(
-                    "cid_batch_fetch_failed",
-                    provider=self.provider_name,
-                    batch_start=batch[0] if batch else None,
-                    batch_size=len(batch),
-                    error=str(e),
-                )
+            records = await self._fetch_cid_batch(batch)
+            if records is None:
                 continue
+
+            for record in records:
+                if limit and fetched >= limit:
+                    break
+                yield record
+                fetched += 1
 
     async def fetch_filtered(
         self,
