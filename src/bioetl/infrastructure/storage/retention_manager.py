@@ -154,7 +154,7 @@ class RetentionManager:
             )
             return {
                 "version": dt.version(),
-                "num_files": len(dt.files()),
+                "num_files": len(dt.file_uris()),
                 "schema": dt.schema().to_arrow(),
                 "metadata": dt.metadata(),
             }
