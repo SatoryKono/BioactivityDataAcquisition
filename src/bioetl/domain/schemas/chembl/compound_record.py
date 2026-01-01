@@ -1,11 +1,10 @@
 """Pandera schema for ChEMBL Compound Record entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.0 and ChEMBL 34 API schema.
+Source: ChEMBL REST API /compound_record endpoint.
 """
 
 from __future__ import annotations
-
-from datetime import date
 
 import pandera as pa
 from pandera.typing import Series
@@ -14,64 +13,58 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 
 class CompoundRecordSchema(ETLRecordSchema):
-    """Compound Record validation schema for Silver layer."""
+    """Compound Record validation schema for Silver layer.
+
+    Compound records link molecules to documents. Contains the original
+    compound name as it appears in the publication.
+
+    Relationships:
+    - M:1 → Molecule (molecule_chembl_id)
+    - M:1 → Publication (document_chembl_id)
+    - M:1 → Source (src_id)
+    """
 
     # === Primary Key ===
-    record_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
+    record_id: Series[int] = pa.Field(
+        nullable=False,
+        ge=1,
+        description="ChEMBL record ID (PK).",
+    )
 
     # === Foreign Keys ===
-    molregno: Series[int] | None = pa.Field(
-        nullable=True, description="FK to molecule."
+    molecule_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^CHEMBL\d+$",
+        description="FK → Molecule.",
     )
-    doc_id: Series[int] | None = pa.Field(nullable=True, description="FK to document.")
+    document_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^CHEMBL\d+$",
+        description="FK → Publication.",
+    )
+    src_id: Series[int] = pa.Field(
+        nullable=False,
+        ge=1,
+        description="FK → Source (data source).",
+    )
 
-    # === Identifiers ===
+    # === Source-specific Identifiers ===
     compound_key: Series[str] | None = pa.Field(
-        nullable=True, description="Compound key."
+        nullable=True,
+        description="Original compound key in source document.",
     )
     compound_name: Series[str] | None = pa.Field(
-        nullable=True, description="Compound name."
+        nullable=True,
+        description="Original compound name in source document.",
     )
-    src_id: Series[int] | None = pa.Field(nullable=True, description="Source ID.")
     src_compound_id: Series[str] | None = pa.Field(
-        nullable=True, description="Source compound ID."
-    )
-    src_compound_id_version: Series[int] | None = pa.Field(
-        nullable=True, description="Source compound ID version."
-    )
-
-    # === Metadata ===
-    filename: Series[str] | None = pa.Field(nullable=True, description="Filename.")
-    load_date: Series[date] | None = pa.Field(nullable=True, description="Load date.")
-    ridx: Series[str] | None = pa.Field(nullable=True, description="Record index.")
-    cidx: Series[str] | None = pa.Field(nullable=True, description="Compound index.")
-    molregno_comment: Series[str] | None = pa.Field(
-        nullable=True, description="Molregno comment."
-    )
-    molregno_sv: Series[float] | None = pa.Field(
-        nullable=True, description="Molregno SV."
-    )
-
-    # === Flags ===
-    removed: Series[int] | None = pa.Field(
         nullable=True,
-        isin=[0, 1],
-        description="Removed flag.",
-    )
-    curated: Series[int] | None = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Curated flag.",
-    )
-    molregno_fixed: Series[int] | None = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Molregno fixed flag.",
+        description="Compound ID in original data source.",
     )
 
     class Config:
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
