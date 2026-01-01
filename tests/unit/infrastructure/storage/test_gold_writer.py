@@ -672,3 +672,180 @@ class TestGoldWriterDeterministicBackoff:
         sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
         assert sleep_calls[0] == 0.55
         assert sleep_calls[1] == 1.05
+
+
+@pytest.mark.unit
+class TestGoldWriterAudit:
+    """Tests for GoldWriter audit logging."""
+
+    @pytest.mark.asyncio
+    async def test_log_gold_audit_requires_ingestion_ts(
+        self, gold_writer, valid_records
+    ):
+        """Test _log_gold_audit raises ValueError when ingestion_ts is None."""
+        from bioetl.domain.medallion import GoldWriteMode
+
+        with pytest.raises(ValueError, match="ingestion_ts is required"):
+            await gold_writer._log_gold_audit(
+                table_name="test.table",
+                records=valid_records,
+                mode=GoldWriteMode.OVERWRITE,
+                ingestion_ts=None,
+                run_id=None,
+            )
+
+    @pytest.mark.asyncio
+    async def test_log_gold_audit_generates_run_id_fallback(
+        self, gold_writer, valid_records, fixed_ingestion_ts
+    ):
+        """Test _log_gold_audit generates run_id when not provided."""
+        from unittest.mock import AsyncMock
+
+        from bioetl.domain.medallion import GoldWriteMode
+
+        mock_audit = AsyncMock()
+        gold_writer._audit = mock_audit
+
+        await gold_writer._log_gold_audit(
+            table_name="test.table",
+            records=valid_records,
+            mode=GoldWriteMode.OVERWRITE,
+            ingestion_ts=fixed_ingestion_ts,
+            run_id=None,  # Should trigger fallback
+        )
+
+        mock_audit.log_write.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_log_gold_audit_with_valid_data(
+        self, gold_writer, valid_records, fixed_ingestion_ts
+    ):
+        """Test _log_gold_audit logs correctly with valid data."""
+        from unittest.mock import AsyncMock
+        from uuid import uuid4
+
+        from bioetl.domain.medallion import GoldWriteMode
+        from bioetl.domain.types import RunID
+
+        mock_audit = AsyncMock()
+        gold_writer._audit = mock_audit
+
+        run_id = RunID(uuid4())
+        await gold_writer._log_gold_audit(
+            table_name="test.table",
+            records=valid_records,
+            mode=GoldWriteMode.APPEND,
+            ingestion_ts=fixed_ingestion_ts,
+            run_id=run_id,
+        )
+
+        mock_audit.log_write.assert_called_once()
+        call_args = mock_audit.log_write.call_args
+        audit_entry = call_args[0][0]
+
+        assert audit_entry.run_id == run_id
+        assert audit_entry.records_count == len(valid_records)
+        assert audit_entry.metadata["write_mode"] == "append"
+
+    @pytest.mark.asyncio
+    async def test_log_gold_audit_scd2_mode_maps_to_merge(
+        self, gold_writer, valid_records, fixed_ingestion_ts
+    ):
+        """Test _log_gold_audit maps SCD2 mode to MERGE operation."""
+        from unittest.mock import AsyncMock
+        from uuid import uuid4
+
+        from bioetl.domain.medallion import GoldWriteMode
+        from bioetl.domain.ports.audit import AuditOperation
+        from bioetl.domain.types import RunID
+
+        mock_audit = AsyncMock()
+        gold_writer._audit = mock_audit
+
+        run_id = RunID(uuid4())
+        await gold_writer._log_gold_audit(
+            table_name="test.table",
+            records=valid_records,
+            mode=GoldWriteMode.SCD2,
+            ingestion_ts=fixed_ingestion_ts,
+            run_id=run_id,
+        )
+
+        mock_audit.log_write.assert_called_once()
+        call_args = mock_audit.log_write.call_args
+        audit_entry = call_args[0][0]
+
+        # SCD2 should map to MERGE operation
+        assert audit_entry.operation == AuditOperation.MERGE
+
+
+@pytest.mark.unit
+class TestGoldWriterArrowConversion:
+    """Tests for GoldWriter Arrow table conversion."""
+
+    def test_to_arrow_table_handles_null_type(self, gold_writer):
+        """Test _to_arrow_table converts null types to string."""
+        records = [
+            {"id": "1", "null_field": None},
+            {"id": "2", "null_field": None},
+        ]
+
+        result = gold_writer._to_arrow_table(records)
+
+        # Should have converted successfully
+        assert len(result) == 2
+        assert "null_field" in result.column_names
+
+    def test_to_arrow_table_sorts_columns(self, gold_writer):
+        """Test _to_arrow_table enforces deterministic column order."""
+        records = [
+            {"z_field": 1, "a_field": 2, "m_field": 3},
+        ]
+
+        result = gold_writer._to_arrow_table(records)
+
+        # Columns should be sorted alphabetically
+        assert result.column_names == ["a_field", "m_field", "z_field"]
+
+    def test_sanitize_type_for_delta_null_type(self, gold_writer):
+        """Test _sanitize_type_for_delta converts null to string."""
+        import pyarrow as pa
+
+        result = gold_writer._sanitize_type_for_delta(pa.null())
+        assert result == pa.string()
+
+    def test_sanitize_type_for_delta_list_with_null(self, gold_writer):
+        """Test _sanitize_type_for_delta handles list<null>."""
+        import pyarrow as pa
+
+        result = gold_writer._sanitize_type_for_delta(pa.list_(pa.null()))
+        assert result == pa.list_(pa.string())
+
+    def test_sanitize_type_for_delta_struct_with_null(self, gold_writer):
+        """Test _sanitize_type_for_delta handles struct with null field."""
+        import pyarrow as pa
+
+        struct_type = pa.struct([pa.field("null_field", pa.null())])
+        result = gold_writer._sanitize_type_for_delta(struct_type)
+
+        expected = pa.struct([pa.field("null_field", pa.string())])
+        assert result == expected
+
+    def test_sanitize_type_for_delta_preserves_normal_types(self, gold_writer):
+        """Test _sanitize_type_for_delta preserves non-null types."""
+        import pyarrow as pa
+
+        # Test various normal types
+        for dtype in [pa.int64(), pa.float64(), pa.string(), pa.bool_()]:
+            result = gold_writer._sanitize_type_for_delta(dtype)
+            assert result == dtype
+
+    def test_sanitize_type_for_delta_map_type(self, gold_writer):
+        """Test _sanitize_type_for_delta handles map types."""
+        import pyarrow as pa
+
+        map_type = pa.map_(pa.string(), pa.null())
+        result = gold_writer._sanitize_type_for_delta(map_type)
+
+        expected = pa.map_(pa.string(), pa.string())
+        assert result == expected

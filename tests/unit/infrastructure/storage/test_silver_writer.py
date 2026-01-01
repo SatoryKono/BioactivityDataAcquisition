@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -1262,3 +1263,346 @@ class TestSilverWriterWriteModePolicy:
             1,
             {"layer": "silver", "mode": "overwrite"},
         )
+
+
+@pytest.mark.unit
+class TestSilverWriterClear:
+    """Tests for SilverWriter clear operation."""
+
+    def test_clear_nonexistent_base_path_returns_zero(self, noop_logger, tmp_path):
+        """Test clear returns 0 when base_path doesn't exist."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        nonexistent = tmp_path / "nonexistent"
+        writer = SilverWriter(base_path=str(nonexistent), logger=noop_logger)
+
+        result = writer.clear()
+        assert result == 0
+
+    def test_clear_specific_table(self, noop_logger, tmp_path):
+        """Test clear removes specific table directory."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        # Create table structure with _delta_log
+        table_path = tmp_path / "chembl" / "activity"
+        delta_log = table_path / "_delta_log"
+        delta_log.mkdir(parents=True)
+        (table_path / "part-00000.parquet").touch()
+
+        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        result = writer.clear(table_name="chembl.activity")
+
+        assert result == 1
+        assert not table_path.exists()
+
+    def test_clear_specific_table_dry_run(self, noop_logger, tmp_path):
+        """Test clear dry_run doesn't remove files."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        # Create table structure
+        table_path = tmp_path / "chembl" / "activity"
+        delta_log = table_path / "_delta_log"
+        delta_log.mkdir(parents=True)
+
+        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        result = writer.clear(table_name="chembl.activity", dry_run=True)
+
+        assert result == 1
+        assert table_path.exists()  # Not deleted due to dry_run
+
+    def test_clear_all_tables(self, noop_logger, tmp_path):
+        """Test clear removes all Delta tables."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        # Create multiple table structures
+        for name in ["table1", "table2", "table3"]:
+            table_path = tmp_path / name
+            (table_path / "_delta_log").mkdir(parents=True)
+
+        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        result = writer.clear()
+
+        assert result == 3
+        assert not (tmp_path / "table1").exists()
+        assert not (tmp_path / "table2").exists()
+        assert not (tmp_path / "table3").exists()
+
+    def test_clear_ignores_non_delta_directories(self, noop_logger, tmp_path):
+        """Test clear ignores directories without _delta_log."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        # Create Delta table
+        delta_table = tmp_path / "delta_table"
+        (delta_table / "_delta_log").mkdir(parents=True)
+
+        # Create non-Delta directory
+        non_delta = tmp_path / "non_delta"
+        non_delta.mkdir()
+        (non_delta / "some_file.txt").touch()
+
+        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        result = writer.clear()
+
+        assert result == 1
+        assert not delta_table.exists()
+        assert non_delta.exists()  # Not deleted
+
+    def test_get_table_path(self, noop_logger, tmp_path):
+        """Test get_table_path returns correct path."""
+        from pathlib import Path
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
+        result = writer.get_table_path("chembl.activity")
+
+        assert result == Path(tmp_path) / "chembl" / "activity"
+
+
+@pytest.mark.unit
+class TestSilverWriterAudit:
+    """Tests for SilverWriter audit logging."""
+
+    @pytest.mark.asyncio
+    async def test_log_silver_audit_skips_when_no_audit(self, noop_logger):
+        """Test _log_silver_audit does nothing when audit is None."""
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+
+        # Should not raise, just return early
+        await writer._log_silver_audit(
+            table_name="test.table",
+            records=[{"_run_id": "uuid", "_ingestion_ts": "2025-01-01T00:00:00Z"}],
+            mode=SilverWriteMode.MERGE,
+        )
+
+    @pytest.mark.asyncio
+    async def test_log_silver_audit_skips_invalid_run_id(self, noop_logger):
+        """Test _log_silver_audit skips when run_id is invalid UUID."""
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        mock_audit = MagicMock()
+        writer = SilverWriter(
+            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+        )
+
+        # Invalid UUID should skip audit logging
+        await writer._log_silver_audit(
+            table_name="test.table",
+            records=[{"_run_id": "not-a-uuid", "_ingestion_ts": "2025-01-01T00:00:00Z"}],
+            mode=SilverWriteMode.MERGE,
+        )
+
+        # Audit should NOT be called due to invalid run_id
+        mock_audit.log_write.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_log_silver_audit_with_valid_data(self, noop_logger):
+        """Test _log_silver_audit logs correctly with valid data."""
+        from unittest.mock import AsyncMock
+        from uuid import uuid4
+
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        mock_audit = MagicMock()
+        mock_audit.log_write = AsyncMock()
+
+        writer = SilverWriter(
+            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+        )
+
+        valid_uuid = str(uuid4())
+        await writer._log_silver_audit(
+            table_name="test.table",
+            records=[
+                {
+                    "_run_id": valid_uuid,
+                    "_ingestion_ts": "2025-01-01T12:00:00",
+                    "_run_type": "incremental",
+                    "_source_batch_id": "batch-123",
+                }
+            ],
+            mode=SilverWriteMode.MERGE,
+        )
+
+        mock_audit.log_write.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_log_silver_audit_with_datetime_ingestion_ts(self, noop_logger):
+        """Test _log_silver_audit handles datetime ingestion_ts."""
+        from datetime import UTC, datetime
+        from unittest.mock import AsyncMock
+        from uuid import uuid4
+
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        mock_audit = MagicMock()
+        mock_audit.log_write = AsyncMock()
+
+        writer = SilverWriter(
+            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+        )
+
+        valid_uuid = str(uuid4())
+        ingestion_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        await writer._log_silver_audit(
+            table_name="test.table",
+            records=[
+                {
+                    "_run_id": valid_uuid,
+                    "_ingestion_ts": ingestion_dt,  # datetime object
+                    "_run_type": "backfill",
+                    "_source_batch_id": "batch-456",
+                }
+            ],
+            mode=SilverWriteMode.APPEND,
+        )
+
+        mock_audit.log_write.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_log_silver_audit_fallback_timestamp(self, noop_logger):
+        """Test _log_silver_audit uses fallback when ingestion_ts is invalid type."""
+        from unittest.mock import AsyncMock
+        from uuid import uuid4
+
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        mock_audit = MagicMock()
+        mock_audit.log_write = AsyncMock()
+
+        writer = SilverWriter(
+            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+        )
+
+        valid_uuid = str(uuid4())
+        await writer._log_silver_audit(
+            table_name="test.table",
+            records=[
+                {
+                    "_run_id": valid_uuid,
+                    "_ingestion_ts": 12345,  # Invalid type - will use fallback
+                    "_run_type": "rebuild",
+                    "_source_batch_id": "batch-789",
+                }
+            ],
+            mode=SilverWriteMode.DELETE,
+        )
+
+        mock_audit.log_write.assert_called_once()
+
+
+@pytest.mark.unit
+class TestSilverWriterCsvExport:
+    """Tests for SilverWriter CSV export integration."""
+
+    @pytest.mark.asyncio
+    async def test_write_silver_with_csv_exporter(self, noop_logger, valid_records):
+        """Test write_silver calls CSV exporter when configured."""
+        from unittest.mock import AsyncMock
+
+        import pyarrow as pa
+        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        mock_exporter = MagicMock()
+        mock_exporter.export = AsyncMock()
+
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
+            ),
+        ):
+            writer = SilverWriter(
+                base_path="/tmp/silver",
+                logger=noop_logger,
+                csv_exporter=mock_exporter,
+            )
+
+            await writer.write_silver(
+                table_name="test.table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="append",
+            )
+
+            mock_exporter.export.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_write_silver_csv_exporter_with_merge_passes_primary_keys(
+        self, noop_logger, valid_records
+    ):
+        """Test CSV exporter receives primary_keys when mode is merge."""
+        import pyarrow as pa
+        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        mock_exporter = MagicMock()
+        export_calls = []
+
+        async def capture_export(*args, **kwargs):
+            export_calls.append(kwargs)
+
+        mock_exporter.export = capture_export
+
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
+            ),
+        ):
+            writer = SilverWriter(
+                base_path="/tmp/silver",
+                logger=noop_logger,
+                csv_exporter=mock_exporter,
+            )
+
+            await writer.write_silver(
+                table_name="test.table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="merge",
+            )
+
+            assert len(export_calls) == 1
+            assert export_calls[0]["primary_keys"] == ["entity_id"]

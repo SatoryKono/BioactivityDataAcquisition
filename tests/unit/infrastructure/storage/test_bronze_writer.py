@@ -1825,3 +1825,276 @@ class TestBronzeWriterJsonValidation:
         assert error.record_index is None
         assert error.original_error is None
         assert str(error) == "Simple error"
+
+
+@pytest.mark.unit
+class TestBronzeWriterAudit:
+    """Tests for BronzeWriter audit logging."""
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_with_audit(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze calls audit.log_write when audit port configured."""
+        from unittest.mock import AsyncMock
+
+        mock_audit = AsyncMock()
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+            audit=mock_audit,
+        )
+        date = datetime(2024, 1, 15, tzinfo=UTC)
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        mock_audit.log_write.assert_called_once()
+        call_args = mock_audit.log_write.call_args
+        audit_entry = call_args[0][0]
+
+        # Verify audit entry fields
+        assert audit_entry.run_id == run_id
+        assert audit_entry.records_count == len(sample_records)
+        assert audit_entry.metadata["provider"] == "chembl"
+        assert audit_entry.metadata["entity"] == "activity"
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_without_audit(
+        self,
+        tmp_path,
+        noop_logger,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test write_bronze works without audit port (default)."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+        date = datetime(2024, 1, 15, tzinfo=UTC)
+
+        # Should not raise
+        path = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        assert path is not None
+
+
+@pytest.mark.unit
+class TestBronzeWriterCleanup:
+    """Tests for BronzeWriter cleanup operations."""
+
+    def test_find_old_date_dirs_empty_base(self, tmp_path, noop_logger) -> None:
+        """Test _find_old_date_dirs returns empty list for nonexistent base."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Base path exists but no version directory
+        result = writer._find_old_date_dirs("2024-01-01")
+        assert result == []
+
+    def test_find_old_date_dirs_finds_old_directories(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test _find_old_date_dirs correctly identifies old date directories."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Create directory structure
+        version_path = tmp_path / "v1"
+        provider_path = version_path / "chembl"
+        entity_path = provider_path / "activity"
+
+        # Create date directories
+        old_date = entity_path / "2024-01-01"
+        old_date.mkdir(parents=True)
+        (old_date / "batch.jsonl.zst").touch()
+
+        newer_date = entity_path / "2024-06-01"
+        newer_date.mkdir(parents=True)
+        (newer_date / "batch.jsonl.zst").touch()
+
+        # Find directories older than 2024-03-01
+        result = writer._find_old_date_dirs("2024-03-01")
+
+        assert len(result) == 1
+        assert result[0] == old_date
+
+    def test_find_old_date_dirs_ignores_non_date_directories(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test _find_old_date_dirs ignores directories without date format."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Create directory structure
+        version_path = tmp_path / "v1"
+        provider_path = version_path / "chembl"
+        entity_path = provider_path / "activity"
+
+        # Create non-date directory
+        non_date = entity_path / "not-a-date"
+        non_date.mkdir(parents=True)
+
+        # Create date directory
+        date_dir = entity_path / "2024-01-01"
+        date_dir.mkdir(parents=True)
+
+        result = writer._find_old_date_dirs("2024-12-01")
+
+        # Should only find the date directory
+        assert len(result) == 1
+        assert result[0].name == "2024-01-01"
+
+    @pytest.mark.asyncio
+    async def test_cleanup_old_files_removes_old_data(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test cleanup_old_files removes files older than cutoff."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Create directory structure with old data
+        version_path = tmp_path / "v1"
+        provider_path = version_path / "chembl"
+        entity_path = provider_path / "activity"
+
+        old_date = entity_path / "2024-01-01"
+        old_date.mkdir(parents=True)
+        old_file = old_date / "batch.jsonl.zst"
+        old_file.write_bytes(b"test data")
+
+        cutoff = datetime(2024, 6, 1, tzinfo=UTC)
+        result = await writer.cleanup_old_files(cutoff)
+
+        assert result["files_removed"] == 1
+        assert result["bytes_freed"] > 0
+        assert result["directories_removed"] == 1
+        assert not old_date.exists()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_old_files_dry_run(self, tmp_path, noop_logger) -> None:
+        """Test cleanup_old_files dry_run counts but doesn't delete."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Create directory structure with old data
+        version_path = tmp_path / "v1"
+        provider_path = version_path / "chembl"
+        entity_path = provider_path / "activity"
+
+        old_date = entity_path / "2024-01-01"
+        old_date.mkdir(parents=True)
+        old_file = old_date / "batch.jsonl.zst"
+        old_file.write_bytes(b"test data")
+
+        cutoff = datetime(2024, 6, 1, tzinfo=UTC)
+        result = await writer.cleanup_old_files(cutoff, dry_run=True)
+
+        assert result["files_removed"] == 1
+        assert result["directories_removed"] == 1
+        # Files should still exist
+        assert old_file.exists()
+        assert old_date.exists()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_old_files_preserves_recent_data(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test cleanup_old_files preserves data newer than cutoff."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Create directory structure with recent data
+        version_path = tmp_path / "v1"
+        provider_path = version_path / "chembl"
+        entity_path = provider_path / "activity"
+
+        recent_date = entity_path / "2024-12-01"
+        recent_date.mkdir(parents=True)
+        recent_file = recent_date / "batch.jsonl.zst"
+        recent_file.write_bytes(b"test data")
+
+        cutoff = datetime(2024, 6, 1, tzinfo=UTC)
+        result = await writer.cleanup_old_files(cutoff)
+
+        assert result["files_removed"] == 0
+        assert result["directories_removed"] == 0
+        # Recent files should still exist
+        assert recent_file.exists()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_old_files_multiple_providers(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test cleanup_old_files handles multiple providers/entities."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        version_path = tmp_path / "v1"
+
+        # Create multiple provider/entity combinations
+        for provider in ["chembl", "pubchem"]:
+            for entity in ["activity", "compound"]:
+                entity_path = version_path / provider / entity
+                old_date = entity_path / "2024-01-01"
+                old_date.mkdir(parents=True)
+                (old_date / "batch.jsonl.zst").write_bytes(b"data")
+
+        cutoff = datetime(2024, 6, 1, tzinfo=UTC)
+        result = await writer.cleanup_old_files(cutoff)
+
+        # Should remove from all 4 provider/entity combinations
+        assert result["files_removed"] == 4
+        assert result["directories_removed"] == 4
