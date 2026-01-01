@@ -6,6 +6,8 @@ import yaml
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.infrastructure.config_loader import (
     load_pipeline_config as load_pipeline_config_cached,
+)
+from bioetl.infrastructure.config_loader import (
     load_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
