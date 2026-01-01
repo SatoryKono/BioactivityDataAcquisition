@@ -52,11 +52,22 @@ class CellLineSchema(ETLRecordSchema):
         description="NCBI Taxonomy ID for source organism.",
     )
 
+    # === Cell Type Classification ===
+    cell_type: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Cell type classification (e.g., Cancer cell line).",
+    )
+
     # === External Identifiers ===
     cellosaurus_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^CVCL_[A-Z0-9]+$",
         description="Cellosaurus ID (external reference).",
+    )
+    clo_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^CLO_\d+$",
+        description="Cell Line Ontology ID.",
     )
     cl_lincs_id: Series[str] | None = pa.Field(
         nullable=True,
