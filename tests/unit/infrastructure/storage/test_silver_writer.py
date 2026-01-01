@@ -1392,7 +1392,9 @@ class TestSilverWriterAudit:
         # Invalid UUID should skip audit logging
         await writer._log_silver_audit(
             table_name="test.table",
-            records=[{"_run_id": "not-a-uuid", "_ingestion_ts": "2025-01-01T00:00:00Z"}],
+            records=[
+                {"_run_id": "not-a-uuid", "_ingestion_ts": "2025-01-01T00:00:00Z"}
+            ],
             mode=SilverWriteMode.MERGE,
         )
 
@@ -1532,9 +1534,7 @@ class TestSilverWriterCsvExport:
                 "bioetl.infrastructure.storage.silver_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
-            ),
+            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
                 base_path="/tmp/silver",
@@ -1586,9 +1586,7 @@ class TestSilverWriterCsvExport:
                 "bioetl.infrastructure.storage.silver_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
-            ),
+            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
                 base_path="/tmp/silver",
