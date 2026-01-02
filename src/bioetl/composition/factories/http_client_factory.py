@@ -132,8 +132,8 @@ class HttpClientFactory:
             failure_threshold = source_config.circuit_breaker.failure_threshold
             recovery_timeout = source_config.circuit_breaker.recovery_timeout
             # Client settings (timeout and retries)
-            timeout = source_config.provider_config.client.timeout_sec
-            max_retries = source_config.provider_config.client.max_retries
+            timeout = source_config.timeout_sec
+            max_retries = source_config.max_retries
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
