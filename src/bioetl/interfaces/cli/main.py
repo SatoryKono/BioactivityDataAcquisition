@@ -12,6 +12,7 @@ from bioetl import __version__
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
+from bioetl.interfaces.cli.commands.health import health
 from bioetl.interfaces.cli.commands.lock import lock
 from bioetl.interfaces.cli.commands.maintenance import maintenance
 from bioetl.interfaces.cli.commands.quarantine import quarantine
@@ -32,6 +33,7 @@ cli.add_command(run_all)
 cli.add_command(quarantine)
 cli.add_command(checkpoint)
 cli.add_command(config)
+cli.add_command(health)
 cli.add_command(lock)
 cli.add_command(maintenance)
 
