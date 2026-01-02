@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted (Revised 2025-12-23)
 *   **Date**: 2025-05-20 (Original), 2025-12-23 (Revised)
+*   **Last Updated**: 2026-01-02
 *   **Related**: [ADR-010: Local-Only Deployment](ADR-010-local-only-deployment.md)
 
 ## Context
@@ -150,9 +151,9 @@ await lock.aclose()
 
 ## Related ADRs
 
-- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — определяет Local-Only стратегию
-- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker — комплементарный паттерн устойчивости
-- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — освобождение блокировок при shutdown
+- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — определяет Local-Only стратегию (Updated: 2025-12-23)
+- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker — комплементарный паттерн устойчивости (Updated: 2025-12-22)
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — освобождение блокировок при shutdown (Updated: 2025-12-22)
 
 ## Migration Notes
 

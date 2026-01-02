@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted
 *   **Date**: 2025-12-26
+*   **Last Updated**: 2026-01-02
 *   **Context**: The BioETL pipeline needs a consistent strategy for handling errors across all adapters and processing stages. Without a unified approach, error handling becomes fragmented, leading to inconsistent behavior, difficulty in debugging, and potential data loss.
 
 ## The Decision
@@ -250,6 +251,6 @@ Rejected because:
 
 ## Related ADRs
 
-- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation
-- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy
-- [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes and Retries
+- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation (Updated: 2025-12-22)
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy (Updated: 2025-12-22)
+- [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes and Retries (Updated: 2025-12-24)
