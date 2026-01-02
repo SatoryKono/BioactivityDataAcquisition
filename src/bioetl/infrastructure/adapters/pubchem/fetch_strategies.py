@@ -56,9 +56,7 @@ class PubChemFetchStrategies:
                 break
             yield self._mapper.compound_to_dict(compound)
 
-    async def _fetch_single_smiles(
-        self, smiles: str
-    ) -> list[dict[str, Any]]:
+    async def _fetch_single_smiles(self, smiles: str) -> list[dict[str, Any]]:
         """Fetch compounds for a single SMILES string."""
         await self._rate_limiter.acquire()
         compounds = await self._circuit_breaker.call(
