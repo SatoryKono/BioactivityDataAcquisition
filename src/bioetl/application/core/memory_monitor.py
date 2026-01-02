@@ -102,9 +102,7 @@ class MemoryMonitor:
         if self._psutil_available and self.logger:
             self.logger.debug("psutil available for memory monitoring")
         elif not self._psutil_available and self.logger:
-            self.logger.debug(
-                "psutil not available, using fallback memory monitoring"
-            )
+            self.logger.debug("psutil not available, using fallback memory monitoring")
 
     def get_memory_stats(self) -> MemoryStats:
         """Get current memory statistics.
