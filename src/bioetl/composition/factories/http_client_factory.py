@@ -20,6 +20,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
+from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -123,13 +124,16 @@ class HttpClientFactory:
                 provider,
             )
 
-        # Get rate limit and circuit breaker settings
+        # Get rate limit, circuit breaker, and client settings
         if source_config is not None:
             # Use source YAML config (primary)
             rate = source_config.rate_limit.requests_per_second
             capacity = source_config.rate_limit.burst
             failure_threshold = source_config.circuit_breaker.failure_threshold
             recovery_timeout = source_config.circuit_breaker.recovery_timeout
+            # Client settings (timeout and retries)
+            timeout = source_config.provider_config.client.timeout_sec
+            max_retries = source_config.provider_config.client.max_retries
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
@@ -139,11 +143,15 @@ class HttpClientFactory:
                 capacity = 10
                 failure_threshold = 5
                 recovery_timeout = 300
+                timeout = 30.0
+                max_retries = 3
             else:
                 rate = http_config.rate
                 capacity = http_config.capacity
                 failure_threshold = 5  # Default
                 recovery_timeout = 300  # Default
+                timeout = 30.0  # Default
+                max_retries = 3  # Default
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -162,6 +170,8 @@ class HttpClientFactory:
                 recovery_timeout=recovery_timeout,
                 metrics=metrics,
             ),
+            retry_config=RetryConfig(max_attempts=max_retries),
+            timeout=timeout,
             provider=provider,
             run_id=run_id,
             tracer=tracer,
