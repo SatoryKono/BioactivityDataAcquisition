@@ -1,0 +1,69 @@
+# BioETL Validated Problems
+# Audit Date: 2026-01-02
+# Commit: b870041be2e392687477ea0130cc08d424aadfc2
+
+problems:
+  - id: "TEST-001"
+    category: "TEST_COVERAGE"
+    title: "87:>5 ?>:@KB85 =5:>B>@KE CLI :><0=4"
+    validation:
+      commit: "b870041be2e392687477ea0130cc08d424aadfc2"
+      code_verdict: "CONFIRMED"
+      doc_verdict: "N/A"
+      test_verdict: "CONFIRMED"
+      total_confirmed: "70%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected:
+        - "src/bioetl/interfaces/cli/commands/health.py"
+        - "src/bioetl/interfaces/cli/commands/quarantine.py"
+    assessment:
+      complexity: 4
+      effort_days: 2
+      priority: "P3"
+    resolution:
+      approach: ">1028BL unit B5ABK 4;O CLI commands A low coverage"
+      breaking_changes: false
+    evidence:
+      health_coverage: "14.55%"
+      quarantine_coverage: "34.16%"
+      target_coverage: "e80%"
+
+  - id: "DOC-001"
+    category: "DOCUMENTATION"
+    title: "Glossary <>65B 1KBL 2K=5A5= 2 >B45;L=K9 D09;"
+    validation:
+      commit: "b870041be2e392687477ea0130cc08d424aadfc2"
+      code_verdict: "N/A"
+      doc_verdict: "CONFIRMED"
+      test_verdict: "N/A"
+      total_confirmed: "30%"
+      final_verdict: "VALID"
+    impact:
+      severity: "Low"
+      affected:
+        - "documentation"
+        - "onboarding"
+    assessment:
+      complexity: 2
+      effort_days: 0.5
+      priority: "P3"
+    resolution:
+      approach: "!>740BL docs/glossary.md A B5@<8=0<8 87 domain layer"
+      breaking_changes: false
+    evidence:
+      glossary_location: "RULES.md §;>AA0@89"
+      target: "docs/glossary.md"
+
+summary:
+  total_problems: 2
+  by_severity:
+    critical: 0
+    high: 0
+    medium: 0
+    low: 2
+  by_category:
+    test_coverage: 1
+    documentation: 1
+  total_effort_days: 2.5
