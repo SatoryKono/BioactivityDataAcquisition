@@ -154,13 +154,12 @@ docker-logs: ## Show logs from Docker services
 	docker compose logs -f
 
 seed-local: ## Load sample fixtures into local DB
-	@echo "$(BLUE)Seeding local database...$(NC)"
-	$(RUN) bioetl.interfaces.cli.seed --env local
-	@echo "$(GREEN)Database seeded!$(NC)"
+	@echo "$(YELLOW)Note: BioETL uses external APIs - no local seeding required$(NC)"
+	@echo "$(GREEN)Ready for pipeline run!$(NC)"
 
-run-local: ## Run sample pipeline on local fixtures
-	@echo "$(BLUE)Running sample pipeline...$(NC)"
-	$(RUN) bioetl.interfaces.cli.runner --pipeline sample --env local
+run-local: ## Run sample pipeline (ChEMBL activity with limit)
+	@echo "$(BLUE)Running ChEMBL activity pipeline (limit=10)...$(NC)"
+	$(RUN) bioetl run --pipeline chembl_activity --limit 10
 
 clean: ## Clean up generated files (Python artifacts, caches, build outputs)
 	@echo "$(YELLOW)Cleaning Python artifacts...$(NC)"
