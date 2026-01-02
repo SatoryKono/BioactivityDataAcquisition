@@ -6,6 +6,7 @@ REQ-ARCH-051: Consistent import ordering via isort.
 
 from __future__ import annotations
 
+import platform
 import subprocess
 import sys
 from importlib.util import find_spec
@@ -16,6 +17,18 @@ import pytest
 _black_available = find_spec("black") is not None
 # Check if isort is available
 _isort_available = find_spec("isort") is not None
+
+# Platform-specific hints for line ending issues
+_LINE_ENDING_HINT = (
+    (
+        "\n\nOn Windows, line ending issues may occur. Try:\n"
+        "  git add --renormalize .\n"
+        "  git checkout -- .\n"
+        "Or run `black` to fix formatting."
+    )
+    if platform.system() == "Windows"
+    else ""
+)
 
 
 class TestCodeFormatting:
@@ -37,7 +50,7 @@ class TestCodeFormatting:
         assert result.returncode == 0, (
             "Code formatting issues found in src/:\n"
             f"{result.stdout}\n{result.stderr}\n\n"
-            "Run `black src` to fix formatting issues."
+            f"Run `black src` to fix formatting issues.{_LINE_ENDING_HINT}"
         )
 
     @pytest.mark.slow
@@ -56,7 +69,7 @@ class TestCodeFormatting:
         assert result.returncode == 0, (
             "Code formatting issues found in tests/:\n"
             f"{result.stdout}\n{result.stderr}\n\n"
-            "Run `black tests` to fix formatting issues."
+            f"Run `black tests` to fix formatting issues.{_LINE_ENDING_HINT}"
         )
 
     @pytest.mark.slow
