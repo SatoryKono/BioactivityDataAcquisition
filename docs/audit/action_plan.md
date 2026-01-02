@@ -1,8 +1,9 @@
 # BioETL Audit Action Plan
 
-**Audit Date:** 2026-01-01
-**Commit:** `9d4504032e6512c76bd85bfc23b3862a53a022e4`
+**Audit Date:** 2026-01-02
+**Commit:** `b870041be2e392687477ea0130cc08d424aadfc2`
 **Auditor:** Claude Architecture Audit Agent
+**RULES.md Version:** 5.9
 
 ---
 
@@ -10,12 +11,12 @@
 
 | Metric | Value |
 |--------|-------|
-| **Total Score** | 8.59/10 (Grade: A) |
+| **Total Score** | 8.63/10 (Grade: A) |
 | **Critical Issues** | 0 |
 | **High Issues** | 0 |
 | **Medium Issues** | 0 |
-| **Low Issues** | 5 |
-| **Estimated Total Effort** | 7.5 человеко-дней |
+| **Low Issues** | 2 |
+| **Estimated Total Effort** | 2.5 человеко-дней |
 
 ---
 
@@ -27,170 +28,100 @@
 | Domain Model Quality | 9 | 12% | 1.08 |
 | Data Flow (Medallion) | 9 | 12% | 1.08 |
 | Error Handling | 8 | 10% | 0.80 |
-| Test Coverage | 9 | 12% | 1.08 |
+| Test Coverage | 8 | 12% | 0.96 |
 | Code Quality | 9 | 8% | 0.72 |
 | Documentation | 8 | 8% | 0.64 |
-| Security | 8 | 8% | 0.64 |
-| Observability | 8 | 8% | 0.64 |
+| Security | 9 | 8% | 0.72 |
+| Observability | 9 | 8% | 0.72 |
 | Operational Readiness | 8 | 7% | 0.56 |
-| **TOTAL** | | **100%** | **8.59** |
+| **TOTAL** | | **100%** | **8.63** |
 
 ---
 
 ## Key Strengths (Нет действий требуется)
 
-### ✅ Architecture Compliance (9/10)
+### Architecture Compliance (9/10)
 - 0 нарушений границ слоёв
-- 392 архитектурных теста проходят
-- mypy --strict: 327 файлов без ошибок
+- 326 архитектурных тестов проходят (1 skipped expected)
+- mypy --strict: 335 файлов без ошибок
 
-### ✅ Domain Model Quality (9/10)
-- 88 frozen dataclasses
-- 30 Protocol definitions с @runtime_checkable
+### Domain Model Quality (9/10)
+- 54 Protocol definitions в domain/ports (2770 LOC)
+- Frozen dataclasses в domain/aggregates/
 - Чистый domain без I/O зависимостей
 
-### ✅ Data Flow / Medallion (9/10)
-- Delta Lake с 54 references в storage
-- Content hash для идемпотентности (84 ref)
+### Data Flow / Medallion (9/10)
+- Delta Lake в Silver/Gold (20+ references)
+- SilverWriteMode и GoldWriteMode enums
 - 5 провайдеров полностью сконфигурированы
 
-### ✅ Test Coverage (9/10)
-- 88.06% coverage (threshold: 85%)
-- 4367 тестов
-- Property-based testing с hypothesis (94 ref)
-
-### ✅ Code Quality (9/10)
+### Code Quality (9/10)
 - Ruff: все проверки пройдены
 - mypy --strict: без ошибок
 - 0 print() в production коде
 
----
+### Security (9/10)
+- Нет hardcoded secrets
+- PII hashing с salt rotation
+- Secret filtering в логах
 
-## Phase 1: P2 Quick Wins (1-2 дня)
-
-| ID | Problem | Effort | Owner |
-|----|---------|--------|-------|
-| SEC-001 | Добавить secret scanning в CI | 0.5d | DevOps |
-| OPS-001 | Добавить HTTP /health endpoint | 1d | Backend |
-
-### SEC-001: Secret Scanning в CI
-
-**Задача:** Добавить gitleaks или trufflehog в GitHub Actions
-
-**Реализация:**
-```yaml
-# .github/workflows/security.yml
-name: Security Scan
-on: [push, pull_request]
-jobs:
-  gitleaks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
-
-**Acceptance Criteria:**
-- [ ] GitHub Action создан
-- [ ] Запускается на каждый PR
-- [ ] Исторические секреты проверены
-
-### OPS-001: HTTP Health Check Endpoint
-
-**Задача:** Добавить /health endpoint в observability server
-
-**Реализация в** `src/bioetl/infrastructure/observability/server.py`:
-```python
-@app.route("/health")
-async def health_check(request):
-    return web.json_response({
-        "status": "healthy",
-        "timestamp": datetime.now(UTC).isoformat(),
-        "version": get_version()
-    })
-```
-
-**Acceptance Criteria:**
-- [ ] GET /health возвращает 200
-- [ ] Включает timestamp и version
-- [ ] Документирован в README
+### Observability (9/10)
+- run_id propagation (363 references)
+- LoggerPort, MetricsPort, TracingPort
+- Prometheus metrics
 
 ---
 
-## Phase 2: P3 Improvements (5-6 дней)
+## Phase 1: P3 Improvements (2.5 дня)
 
-| ID | Problem | Effort | Owner |
-|----|---------|--------|-------|
-| ERR-001 | Error recovery dashboard | 2d | Backend |
-| OBS-001 | Anomaly alerting для метрик | 3d | DevOps/Backend |
-| DOC-001 | Расширить glossary | 1d | Tech Writer |
+| ID | Problem | Effort | Priority |
+|----|---------|--------|----------|
+| TEST-001 | Повысить coverage CLI commands | 2d | P3 |
+| DOC-001 | Создать отдельный glossary.md | 0.5d | P3 |
 
-### ERR-001: Error Recovery Dashboard
+### TEST-001: CLI Commands Coverage
 
-**Задача:** CLI команда для просмотра error statistics
+**Текущее состояние:**
+- `interfaces/cli/commands/health.py`: 14.55% coverage
+- `interfaces/cli/commands/quarantine.py`: 34.16% coverage
+
+**Задача:** Добавить unit тесты для CLI commands с low coverage
 
 **Реализация:**
 ```python
-# src/bioetl/interfaces/cli/commands/errors.py
-@click.command()
-@click.option("--provider", help="Filter by provider")
-@click.option("--since", help="Time range (e.g., 24h, 7d)")
-def errors(provider: str | None, since: str | None):
-    """Show error statistics and recovery status."""
-    # Query quarantine, checkpoint failures, circuit breaker trips
-    ...
+# tests/unit/interfaces/cli/commands/test_health.py
+import pytest
+from click.testing import CliRunner
+from bioetl.interfaces.cli.commands.health import health
+
+@pytest.fixture
+def runner():
+    return CliRunner()
+
+def test_health_command_basic(runner):
+    """Test basic health check command."""
+    result = runner.invoke(health, ["--provider", "chembl"])
+    assert result.exit_code in (0, 1)  # Success or unhealthy
 ```
 
 **Acceptance Criteria:**
-- [ ] CLI `bioetl errors` работает
-- [ ] Показывает quarantine records count
-- [ ] Показывает circuit breaker state
-- [ ] Фильтрация по provider и времени
+- [ ] health.py coverage ≥80%
+- [ ] quarantine.py coverage ≥80%
+- [ ] Тесты для всех основных scenarios
 
-### OBS-001: Anomaly Alerting
+### DOC-001: Создать Glossary
 
-**Задача:** Prometheus alerting rules или встроенная anomaly detection
-
-**Вариант A: Prometheus Rules**
-```yaml
-# prometheus/alerts.yml
-groups:
-  - name: bioetl
-    rules:
-      - alert: HighDQErrorRate
-        expr: rate(dq_soft_threshold_exceeded_total[5m]) > 0.1
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High DQ error rate detected"
-```
-
-**Вариант B: Встроенная детекция**
-Расширить `infrastructure/observability/anomaly/` модуль.
-
-**Acceptance Criteria:**
-- [ ] Alert rules определены
-- [ ] Тестовые сценарии для alerts
-- [ ] Документация по настройке
-
-### DOC-001: Расширить Glossary
-
-**Задача:** Добавить термины из domain layer
+**Задача:** Вынести glossary в отдельный файл docs/glossary.md
 
 **Содержание:**
-- Все Protocols из `domain/ports/`
-- Value Objects из `domain/types.py`
-- Aggregates из `domain/aggregates/`
+- Все термины из RULES.md §Глоссарий
+- Protocols из domain/ports/
+- Value Objects из domain/types.py
 - Medallion layer термины
 
 **Acceptance Criteria:**
-- [ ] glossary.md обновлён
-- [ ] Все 30 Protocols документированы
+- [ ] docs/glossary.md создан
+- [ ] Все Protocol definitions документированы
 - [ ] Cross-references на ADRs
 
 ---
@@ -199,13 +130,14 @@ groups:
 
 | Metric | Current | Target | Status |
 |--------|---------|--------|--------|
-| Total Score | 8.59 | ≥8.5 | ✅ |
+| Total Score | 8.63 | ≥8.5 | ✅ |
 | Critical/High Issues | 0 | 0 | ✅ |
-| Coverage | 88.06% | ≥85% | ✅ |
+| Coverage | 87.93% | ≥85% | ✅ |
 | mypy --strict errors | 0 | 0 | ✅ |
 | Architecture test failures | 0 | 0 | ✅ |
-| Secret scanning | ❌ | ✅ | 🔄 Phase 1 |
-| Health endpoint | ❌ | ✅ | 🔄 Phase 1 |
+| CLI health.py coverage | 14.55% | ≥80% | 🔄 Phase 1 |
+| CLI quarantine.py coverage | 34.16% | ≥80% | 🔄 Phase 1 |
+| Glossary file | ❌ | ✅ | 🔄 Phase 1 |
 
 ---
 
@@ -213,15 +145,10 @@ groups:
 
 ```
 Week 1:
-├── SEC-001: Secret scanning (0.5d)
-└── OPS-001: Health endpoint (1d)
-
-Week 2-3:
-├── ERR-001: Error dashboard (2d)
-└── OBS-001: Alerting (3d)
-
-Week 3:
-└── DOC-001: Glossary (1d)
+├── TEST-001: CLI coverage (2d)
+│   ├── health.py tests
+│   └── quarantine.py tests
+└── DOC-001: Glossary (0.5d)
 ```
 
 ---
@@ -237,28 +164,48 @@ make lint && make test
 # Архитектурные тесты
 pytest tests/architecture/ -v
 
-# Coverage
-pytest --cov=src/bioetl --cov-fail-under=85
+# Coverage с детализацией
+pytest --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
 # mypy
 uv run mypy src/bioetl --strict
 
-# Health check (после OPS-001)
-curl http://localhost:8080/health
+# Проверка CLI coverage
+pytest tests/unit/interfaces/cli/ --cov=src/bioetl/interfaces/cli --cov-report=term-missing
 ```
+
+---
+
+## Comparison with Previous Audit
+
+| Metric | 2026-01-01 | 2026-01-02 | Delta |
+|--------|------------|------------|-------|
+| Total Score | 8.59 | 8.63 | +0.04 |
+| Coverage | 88.06% | 87.93% | -0.13% |
+| Architecture Tests | 392 | 326 | -66 (refactored) |
+| Source Files | 327 | 335 | +8 |
+| mypy Errors | 0 | 0 | ±0 |
+| Critical Issues | 0 | 0 | ±0 |
+| Low Issues | 5 | 2 | -3 |
+
+**Улучшения с предыдущего аудита:**
+- Количество Low issues уменьшилось с 5 до 2
+- Score увеличился на 0.04 пункта
+- Добавлено 8 новых source files
+- Архитектурные тесты оптимизированы
 
 ---
 
 ## Conclusion
 
-Проект BioETL находится в отличном состоянии (Grade A, 8.59/10).
+Проект BioETL находится в отличном состоянии (Grade A, 8.63/10).
 Выявленные проблемы — исключительно Low severity и не влияют
 на core функциональность или надёжность.
 
-Рекомендуемые улучшения фокусируются на operational excellence:
-- Security hardening (secret scanning)
-- Operational observability (health checks, alerting)
-- Developer experience (error dashboard, glossary)
+Рекомендуемые улучшения фокусируются на:
+- Test coverage для CLI commands
+- Developer experience (glossary)
 
-**Приоритет:** Phase 1 (P2) можно выполнить за 1-2 дня и значительно
-улучшит security posture и operational readiness.
+**Приоритет:** Phase 1 можно выполнить за 2.5 дня с минимальным risk.
+
+Проект **готов к production использованию** в текущем состоянии.
