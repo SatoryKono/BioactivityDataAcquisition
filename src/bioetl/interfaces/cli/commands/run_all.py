@@ -148,29 +148,29 @@ async def _run_all_pipelines_async(
 
             if result.status == RunStatus.SUCCESS:
                 batch_result.succeeded += 1
-                echo_info(f"✓ {pipeline}: completed successfully")
+                echo_info(f"[OK] {pipeline}: completed successfully")
             elif result.status == RunStatus.DRY_RUN:
                 batch_result.skipped += 1
-                echo_info(f"○ {pipeline}: dry-run (no changes)")
+                echo_info(f"[DRY] {pipeline}: dry-run (no changes)")
             elif result.status == RunStatus.SHUTDOWN:
                 batch_result.skipped += 1
-                echo_warning(f"⊘ {pipeline}: gracefully shut down")
+                echo_warning(f"[STOP] {pipeline}: gracefully shut down")
                 # Stop processing remaining pipelines on shutdown
                 break
             elif result.status == RunStatus.FAILED:
                 batch_result.failed += 1
                 batch_result.failed_pipelines.append(pipeline)
                 echo_error(
-                    f"✗ {pipeline}: failed", result.error_message or "Unknown error"
+                    f"[FAIL] {pipeline}: failed", result.error_message or "Unknown error"
                 )
         except PipelineNotFoundError as e:
             batch_result.failed += 1
             batch_result.failed_pipelines.append(pipeline)
-            echo_error(f"✗ {pipeline}: not found", str(e))
+            echo_error(f"[FAIL] {pipeline}: not found", str(e))
         except Exception as e:
             batch_result.failed += 1
             batch_result.failed_pipelines.append(pipeline)
-            echo_error(f"✗ {pipeline}: unexpected error", str(e))
+            echo_error(f"[FAIL] {pipeline}: unexpected error", str(e))
 
     return batch_result
 
