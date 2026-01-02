@@ -146,7 +146,10 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
                     status = await adapter.health_check()
                     results[prov] = {"status": status.value.lower()}
                 else:
-                    results[prov] = {"status": "unknown", "error": "No health check method"}
+                    results[prov] = {
+                        "status": "unknown",
+                        "error": "No health check method",
+                    }
             except Exception as e:
                 results[prov] = {"status": "unhealthy", "error": str(e)}
 
@@ -164,7 +167,9 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         all_healthy = True
         for prov, result in results.items():
             status = result.get("status", "unknown")
-            status_icon = "✓" if status == "healthy" else "⚠" if status == "degraded" else "✗"
+            status_icon = (
+                "✓" if status == "healthy" else "⚠" if status == "degraded" else "✗"
+            )
 
             if status != "healthy":
                 all_healthy = False

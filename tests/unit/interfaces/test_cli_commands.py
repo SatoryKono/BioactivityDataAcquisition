@@ -876,7 +876,9 @@ class TestQuarantineInspectCommand:
             )
 
         assert result.exit_code == 0
-        mock_quarantine_manager.inspect.assert_called_once_with(limit=100)
+        mock_quarantine_manager.inspect.assert_called_once_with(
+            limit=100, error_code=None
+        )
 
     def test_quarantine_inspect_with_custom_limit(
         self, cli_runner, mock_quarantine_manager
@@ -899,7 +901,9 @@ class TestQuarantineInspectCommand:
             )
 
         assert result.exit_code == 0
-        mock_quarantine_manager.inspect.assert_called_once_with(limit=50)
+        mock_quarantine_manager.inspect.assert_called_once_with(
+            limit=50, error_code=None
+        )
 
     def test_quarantine_inspect_no_records(self, cli_runner):
         """Test quarantine inspection with no records."""

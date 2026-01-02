@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -49,6 +49,12 @@ def mock_logger() -> MagicMock:
     return logger
 
 
+@pytest.fixture
+def now() -> datetime:
+    """Create a fixed timestamp for tests."""
+    return datetime.now(tz=UTC)
+
+
 class TestAlertSeverity:
     """Tests for AlertSeverity enum."""
 
@@ -63,7 +69,7 @@ class TestAlertSeverity:
 class TestAlert:
     """Tests for Alert dataclass."""
 
-    def test_to_dict(self, sample_anomaly: Anomaly) -> None:
+    def test_to_dict(self, sample_anomaly: Anomaly, now: datetime) -> None:
         """Test alert serialization to dict."""
         alert = Alert(
             id="test123",
@@ -72,7 +78,7 @@ class TestAlert:
             title="Test Alert",
             message="Test message",
             pipeline="test_pipeline",
-            timestamp=datetime.now(tz=UTC),
+            timestamp=now,
         )
 
         data = alert.to_dict()
@@ -119,7 +125,7 @@ class TestLoggerAlertChannel:
 
     @pytest.mark.asyncio
     async def test_send_logs_alert(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test that sending alert logs structured message."""
         channel = LoggerAlertChannel(mock_logger)
@@ -130,7 +136,7 @@ class TestLoggerAlertChannel:
             title="Test Alert",
             message="Test message",
             pipeline="test_pipeline",
-            timestamp=datetime.now(tz=UTC),
+            timestamp=now,
         )
 
         result = await channel.send(alert)
@@ -147,7 +153,7 @@ class TestWebhookAlertChannel:
 
     @pytest.mark.asyncio
     async def test_send_webhook_success(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test successful webhook send."""
         # Create mock HTTP client
@@ -169,7 +175,7 @@ class TestWebhookAlertChannel:
             title="Test Alert",
             message="Test message",
             pipeline="test_pipeline",
-            timestamp=datetime.now(tz=UTC),
+            timestamp=now,
         )
 
         result = await channel.send(alert)
@@ -179,7 +185,7 @@ class TestWebhookAlertChannel:
 
     @pytest.mark.asyncio
     async def test_send_webhook_failure(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test webhook failure handling."""
         mock_client = AsyncMock()
@@ -200,7 +206,7 @@ class TestWebhookAlertChannel:
             title="Test Alert",
             message="Test message",
             pipeline="test_pipeline",
-            timestamp=datetime.now(tz=UTC),
+            timestamp=now,
         )
 
         result = await channel.send(alert)
@@ -214,7 +220,7 @@ class TestAlertService:
 
     @pytest.mark.asyncio
     async def test_alert_creates_and_dispatches(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test that alert service creates and dispatches alerts."""
         service = AlertService(
@@ -222,7 +228,7 @@ class TestAlertService:
             config=AlertConfig.default(),
         )
 
-        alert = await service.alert(sample_anomaly, pipeline="test_pipeline")
+        alert = await service.alert(sample_anomaly, pipeline="test_pipeline", now=now)
 
         assert alert is not None
         assert alert.pipeline == "test_pipeline"
@@ -231,7 +237,7 @@ class TestAlertService:
 
     @pytest.mark.asyncio
     async def test_alert_respects_disabled_config(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test that disabled config prevents alerting."""
         config = AlertConfig(enabled=False)
@@ -240,13 +246,13 @@ class TestAlertService:
             config=config,
         )
 
-        alert = await service.alert(sample_anomaly, pipeline="test_pipeline")
+        alert = await service.alert(sample_anomaly, pipeline="test_pipeline", now=now)
 
         assert alert is None
 
     @pytest.mark.asyncio
     async def test_alert_respects_cooldown(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test that cooldown prevents duplicate alerts."""
         config = AlertConfig(
@@ -266,16 +272,23 @@ class TestAlertService:
         )
 
         # First alert should succeed
-        alert1 = await service.alert(sample_anomaly, pipeline="test_pipeline")
+        alert1 = await service.alert(sample_anomaly, pipeline="test_pipeline", now=now)
         assert alert1 is not None
 
-        # Second alert should be skipped (cooldown)
-        alert2 = await service.alert(sample_anomaly, pipeline="test_pipeline")
+        # Second alert should be skipped (cooldown) - same timestamp
+        alert2 = await service.alert(sample_anomaly, pipeline="test_pipeline", now=now)
         assert alert2 is None
+
+        # Third alert after cooldown passes should succeed
+        later = now + timedelta(seconds=301)
+        alert3 = await service.alert(
+            sample_anomaly, pipeline="test_pipeline", now=later
+        )
+        assert alert3 is not None
 
     @pytest.mark.asyncio
     async def test_alert_batch(
-        self, sample_anomaly: Anomaly, mock_logger: MagicMock
+        self, sample_anomaly: Anomaly, mock_logger: MagicMock, now: datetime
     ) -> None:
         """Test batch alerting."""
         service = AlertService(
@@ -292,13 +305,14 @@ class TestAlertService:
             anomaly_type=AnomalyType.SPIKE,
             severity=AnomalySeverity.HIGH,
             z_score=22.5,
-            timestamp=datetime.now(tz=UTC),
+            timestamp=now,
             message="Error rate spiked",
         )
 
         alerts = await service.alert_batch(
             [sample_anomaly, anomaly2],
             pipeline="test_pipeline",
+            now=now,
         )
 
         assert len(alerts) == 2
@@ -311,9 +325,6 @@ class TestAlertService:
         assert "logger" in service.channel_names
 
         # Add custom channel
-        custom_channel = LoggerAlertChannel(mock_logger)
-        custom_channel._name = "custom"  # type: ignore
-
         class CustomChannel(LoggerAlertChannel):
             @property
             def name(self) -> str:

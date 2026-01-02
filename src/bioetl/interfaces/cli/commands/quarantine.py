@@ -117,7 +117,9 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
 @quarantine.command("replay")
 @click.option("--pipeline", required=True, help="Pipeline name")
 @click.option("--error-code", help="Filter by error code")
-@click.option("--max-age-days", type=int, default=7, help="Max age of records to replay")
+@click.option(
+    "--max-age-days", type=int, default=7, help="Max age of records to replay"
+)
 @click.option("--dry-run", is_flag=True, help="Show records without replaying")
 def quarantine_replay(
     pipeline: str,
@@ -157,7 +159,9 @@ def quarantine_replay(
     if dry_run:
         click.echo(f"\nWould replay {len(records)} record(s):\n")
         for i, rec in enumerate(records[:10], 1):
-            click.echo(f"  {i}. Error: {rec.get('error_code')} | Hash: {rec.get('payload_hash', 'N/A')[:16]}...")
+            click.echo(
+                f"  {i}. Error: {rec.get('error_code')} | Hash: {rec.get('payload_hash', 'N/A')[:16]}..."
+            )
         if len(records) > 10:
             click.echo(f"  ... and {len(records) - 10} more")
     else:
@@ -175,7 +179,9 @@ def quarantine_replay(
 
 @quarantine.command("purge")
 @click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--older-than-days", type=int, default=30, help="Delete records older than N days")
+@click.option(
+    "--older-than-days", type=int, default=30, help="Delete records older than N days"
+)
 @click.option("--dry-run", is_flag=True, help="Show count without deleting")
 @click.option("--force", is_flag=True, help="Skip confirmation prompt")
 def quarantine_purge(
@@ -231,7 +237,9 @@ def quarantine_purge(
 @quarantine.command("resolve")
 @click.option("--pipeline", required=True, help="Pipeline name")
 @click.option("--payload-hash", required=True, help="Payload hash of record to resolve")
-@click.option("--status", type=click.Choice(["IGNORED", "REPROCESSED"]), default="IGNORED")
+@click.option(
+    "--status", type=click.Choice(["IGNORED", "REPROCESSED"]), default="IGNORED"
+)
 def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
     """Mark a quarantine record as resolved.
 
