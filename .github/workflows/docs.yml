@@ -39,21 +39,24 @@ jobs:
           cat > /tmp/puppeteer-config.json << 'EOF'
           {
             "executablePath": "/usr/bin/chromium-browser",
-            "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
           }
           EOF
 
       - name: Validate Mermaid diagrams
         run: |
           shopt -s globstar nullglob
+          mkdir -p /tmp/mermaid-validation
           failed=0
           for file in docs/**/*.mermaid; do
             echo "Validating $file..."
-            if ! mmdc -i "$file" -o /dev/null -p /tmp/puppeteer-config.json 2>&1; then
+            outfile="/tmp/mermaid-validation/$(basename "$file" .mermaid).svg"
+            if ! mmdc -i "$file" -o "$outfile" -p /tmp/puppeteer-config.json 2>&1; then
               echo "::error file=$file::Mermaid validation failed for $file"
               failed=1
             fi
           done
+          rm -rf /tmp/mermaid-validation
           if [ $failed -eq 1 ]; then
             echo "::error::One or more Mermaid diagrams failed validation"
             exit 1
@@ -87,7 +90,7 @@ jobs:
           cat > /tmp/puppeteer-config.json << 'EOF'
           {
             "executablePath": "/usr/bin/chromium-browser",
-            "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
           }
           EOF
 
