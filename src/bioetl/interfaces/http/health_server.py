@@ -79,43 +79,67 @@ class HealthServer:
     ) -> None:
         """Handle incoming HTTP connection."""
         try:
-            request_line = await asyncio.wait_for(reader.readline(), timeout=5.0)
-            if not request_line:
-                return
-
-            request = request_line.decode("utf-8").strip()
-            parts = request.split(" ")
-
-            if len(parts) < 2:
-                await self._send_response(writer, 400, "Bad Request")
-                return
-
-            method, path = parts[0], parts[1]
-
-            # Read and discard headers
-            while True:
-                line = await reader.readline()
-                if line == b"\r\n" or line == b"\n" or not line:
-                    break
-
-            if method != "GET":
-                await self._send_response(writer, 405, "Method Not Allowed")
-                return
-
-            await self._route_request(writer, path)
-
+            await self._process_request(reader, writer)
         except TimeoutError:
             await self._send_response(writer, 408, "Request Timeout")
         except Exception as e:
-            if self._logger:
-                self._logger.error("health_server_error", error=str(e))
-            await self._send_response(writer, 500, "Internal Server Error")
+            await self._handle_request_error(writer, e)
         finally:
-            try:
-                writer.close()
-                await writer.wait_closed()
-            except Exception:
-                pass
+            await self._close_writer(writer)
+
+    async def _process_request(
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter,
+    ) -> None:
+        """Process incoming HTTP request."""
+        request_line = await asyncio.wait_for(reader.readline(), timeout=5.0)
+        if not request_line:
+            return
+
+        method, path = self._parse_request_line(request_line)
+        if method is None or path is None:
+            await self._send_response(writer, 400, "Bad Request")
+            return
+
+        await self._consume_headers(reader)
+
+        if method != "GET":
+            await self._send_response(writer, 405, "Method Not Allowed")
+            return
+
+        await self._route_request(writer, path)
+
+    def _parse_request_line(self, request_line: bytes) -> tuple[str | None, str | None]:
+        """Parse HTTP request line into method and path."""
+        request = request_line.decode("utf-8").strip()
+        parts = request.split(" ")
+        if len(parts) < 2:
+            return None, None
+        return parts[0], parts[1]
+
+    async def _consume_headers(self, reader: asyncio.StreamReader) -> None:
+        """Read and discard HTTP headers."""
+        while True:
+            line = await reader.readline()
+            if line in (b"\r\n", b"\n", b""):
+                break
+
+    async def _handle_request_error(
+        self, writer: asyncio.StreamWriter, error: Exception
+    ) -> None:
+        """Handle request processing error."""
+        if self._logger:
+            self._logger.error("health_server_error", error=str(error))
+        await self._send_response(writer, 500, "Internal Server Error")
+
+    async def _close_writer(self, writer: asyncio.StreamWriter) -> None:
+        """Close the stream writer safely."""
+        try:
+            writer.close()
+            await writer.wait_closed()
+        except Exception:
+            pass
 
     async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
         """Route request to appropriate handler."""
