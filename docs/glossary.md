@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 1.0 | Created: 2025-12-29*
+*Version 1.1 | Updated: 2026-01-02 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -8,12 +8,24 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ## Quick Reference
 
+### Core Domain Terms
+
 | Canonical Term | Provider Variation | Description |
 |----------------|-------------------|-------------|
 | **Activity** | ChEMBL: Activity | Bioactivity measurement |
 | **Molecule** | ChEMBL: Molecule, PubChem: Compound | Chemical compound |
 | **Target** | ChEMBL: Target, UniProt: Protein | Biological target |
 | **Publication** | PubMed: Publication, ChEMBL: Document, CrossRef: Publication | Scientific document |
+
+### Operations Terms
+
+| Canonical Term | Description |
+|----------------|-------------|
+| **Health Check** | System component availability verification |
+| **Anomaly** | Detected deviation from baseline |
+| **Alert** | Notification from anomaly detection |
+| **Quarantine** | Isolation of failed records |
+| **Circuit Breaker** | Cascading failure prevention pattern |
 
 ---
 
@@ -195,6 +207,100 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | Term | API Endpoint | Description |
 |------|-------------|-------------|
 | `Publication` | `/works` | Scholarly publication metadata (API uses "works", codebase uses "publication") |
+
+---
+
+## Operations & Monitoring Terminology
+
+### Health Checks
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Health Check** | Periodic verification of system component availability | `ping`, `status check` |
+| **Liveness Probe** | Check that a process is running (Kubernetes-compatible) | `alive check` |
+| **Readiness Probe** | Check that a service is ready to accept traffic | `ready check` |
+| **Health Status** | One of: `HEALTHY`, `DEGRADED`, `UNHEALTHY` | `up/down`, `ok/error` |
+| **Health Server** | HTTP server exposing health endpoints | `status server` |
+
+### Anomaly Detection
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Anomaly** | A detected deviation from baseline behavior | `outlier`, `exception` (in data context) |
+| **Baseline** | Historical reference values for comparison | `history`, `average` |
+| **Z-Score** | Number of standard deviations from mean | `sigma`, `deviation` |
+| **Threshold** | Configurable limit for anomaly detection | `limit`, `bound` |
+| **Anomaly Severity** | One of: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` | Custom severity names |
+| **Anomaly Type** | One of: `SPIKE`, `DROP`, `THRESHOLD_EXCEEDED`, `TREND_CHANGE` | Generic descriptions |
+
+### Alerting
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Alert** | Notification generated from an anomaly | `warning`, `notification` (as class names) |
+| **Alert Channel** | Destination for alert delivery (logger, webhook) | `notifier`, `sender` |
+| **Alert Rule** | Configuration for when/how to send alerts | `trigger`, `condition` |
+| **Alert Severity** | One of: `INFO`, `WARNING`, `ERROR`, `CRITICAL` | Custom severity names |
+| **Cooldown** | Minimum time between repeated alerts | `debounce`, `throttle` |
+| **Webhook** | HTTP endpoint for receiving alert payloads | `callback`, `hook` |
+
+### Metrics & Observability
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Metrics Port** | Interface for recording metrics | `MetricsClient` |
+| **Logger Port** | Interface for structured logging | `LoggerClient` |
+| **Tracing Port** | Interface for distributed tracing | `TracerClient` |
+| **Span** | A unit of work in distributed tracing | `trace`, `segment` |
+| **Counter** | Monotonically increasing metric | `incrementer` |
+| **Histogram** | Distribution of values over time | `timing`, `duration` |
+| **Gauge** | Point-in-time value metric | `level`, `current` |
+
+---
+
+## Resilience & Error Handling Terminology
+
+### Circuit Breaker
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Circuit Breaker** | Pattern to prevent cascading failures | `failsafe`, `breaker` |
+| **Circuit State** | One of: `CLOSED`, `OPEN`, `HALF_OPEN` | Custom state names |
+| **Trip** | Circuit breaker opening due to failures | `break`, `trigger` |
+| **Recovery** | Circuit breaker closing after successful probes | `reset`, `heal` |
+| **Failure Threshold** | Consecutive errors before circuit opens | `trip_count` |
+
+### Error Recovery
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Retry** | Re-attempting a failed operation | `repeat`, `redo` |
+| **Backoff** | Increasing delay between retries | `delay`, `wait` |
+| **Jitter** | Random variation in backoff timing | `randomization` |
+| **Checkpoint** | Saved state for resumable execution | `savepoint`, `marker` |
+| **Recovery Dashboard** | CLI interface for error inspection/recovery | `error console` |
+
+### Locking
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Lock** | Mutual exclusion mechanism for resources | `mutex`, `semaphore` |
+| **Lock Port** | Interface for lock acquisition/release | `LockClient` |
+| **TTL** | Time-to-live for automatic lock expiration | `timeout`, `expiry` |
+| **Heartbeat** | Periodic lock renewal signal | `keepalive`, `refresh` |
+| **Owner ID** | Identifier of lock holder | `holder`, `client_id` |
+
+---
+
+## Security Terminology
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Secret** | Sensitive configuration value (API key, password) | `credential`, `token` (as generic terms) |
+| **Secret Scanning** | Detection of accidentally committed secrets | `credential scanning` |
+| **Allowlist** | Approved patterns/files exempt from checks | `whitelist` (deprecated) |
+| **Baseline** | Known-good secrets for incremental scanning | `snapshot` |
+| **Sanitization** | Removal of secrets from VCR cassettes | `redaction`, `masking` |
 
 ---
 
