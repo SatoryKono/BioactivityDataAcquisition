@@ -165,7 +165,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true  # Don't fail PR on first run
+          GITLEAKS_CONFIG: .gitleaks.toml
 
       - name: Check for hardcoded secrets patterns
         run: |
