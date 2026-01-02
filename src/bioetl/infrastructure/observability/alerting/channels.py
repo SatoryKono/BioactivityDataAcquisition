@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import httpx
@@ -145,7 +145,7 @@ class WebhookAlertChannel(AlertChannel):
             if self._owns_client:
                 await client.aclose()
 
-    def _format_slack_payload(self, alert: Alert) -> dict:
+    def _format_slack_payload(self, alert: Alert) -> dict[str, Any]:
         """Format alert as Slack-compatible payload."""
         severity_emoji = {
             "info": ":information_source:",

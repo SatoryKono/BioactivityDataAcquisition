@@ -4,16 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.interfaces.http.health_server import HealthResponse, HealthServer
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+from bioetl.interfaces.http.health_server import HealthServer
+from bioetl.interfaces.http.types import HealthResponse
 
 
 class TestHealthResponse:

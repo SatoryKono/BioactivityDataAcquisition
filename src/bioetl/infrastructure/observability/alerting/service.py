@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import fnmatch
 import uuid
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
 
 from bioetl.infrastructure.observability.alerting.channels import (
     AlertChannel,
@@ -102,7 +102,9 @@ class AlertService:
         self,
         anomaly: Anomaly,
         pipeline: str,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
+        *,
+        now: datetime,
     ) -> Alert | None:
         """Generate and dispatch an alert for an anomaly.
 
@@ -110,6 +112,7 @@ class AlertService:
             anomaly: Detected anomaly
             pipeline: Pipeline name where anomaly occurred
             metadata: Optional additional context
+            now: Current timestamp from application layer (required per ADR-014)
 
         Returns:
             Generated Alert if sent, None if filtered/skipped
@@ -124,7 +127,9 @@ class AlertService:
             return None
 
         # Check cooldown
-        if not self._check_cooldown(anomaly.metric_name, rule.cooldown_seconds):
+        if not self._check_cooldown(
+            anomaly.metric_name, rule.cooldown_seconds, now=now
+        ):
             self._logger.debug(
                 "alert_skipped_cooldown",
                 metric_name=anomaly.metric_name,
@@ -133,14 +138,14 @@ class AlertService:
             return None
 
         # Create alert
-        alert = self._create_alert(anomaly, pipeline, rule, metadata)
+        alert = self._create_alert(anomaly, pipeline, rule, metadata, now=now)
 
         # Dispatch to channels
         channels = rule.channels or self._config.default_channels
         await self._dispatch(alert, channels)
 
         # Update cooldown tracker
-        self._last_alert_times[anomaly.metric_name] = datetime.now(tz=UTC)
+        self._last_alert_times[anomaly.metric_name] = now
 
         return alert
 
@@ -148,7 +153,9 @@ class AlertService:
         self,
         anomalies: list[Anomaly],
         pipeline: str,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
+        *,
+        now: datetime,
     ) -> list[Alert]:
         """Generate and dispatch alerts for multiple anomalies.
 
@@ -156,6 +163,7 @@ class AlertService:
             anomalies: List of detected anomalies
             pipeline: Pipeline name
             metadata: Optional additional context
+            now: Current timestamp from application layer (required per ADR-014)
 
         Returns:
             List of generated alerts
@@ -163,7 +171,7 @@ class AlertService:
         """
         alerts = []
         for anomaly in anomalies:
-            alert = await self.alert(anomaly, pipeline, metadata)
+            alert = await self.alert(anomaly, pipeline, metadata, now=now)
             if alert:
                 alerts.append(alert)
         return alerts
@@ -187,13 +195,15 @@ class AlertService:
 
         return None
 
-    def _check_cooldown(self, metric_name: str, cooldown_seconds: int) -> bool:
+    def _check_cooldown(
+        self, metric_name: str, cooldown_seconds: int, *, now: datetime
+    ) -> bool:
         """Check if cooldown period has passed for a metric."""
         last_alert = self._last_alert_times.get(metric_name)
         if not last_alert:
             return True
 
-        elapsed = (datetime.now(tz=UTC) - last_alert).total_seconds()
+        elapsed = (now - last_alert).total_seconds()
         return elapsed >= cooldown_seconds
 
     def _create_alert(
@@ -201,7 +211,9 @@ class AlertService:
         anomaly: Anomaly,
         pipeline: str,
         rule: AlertRule,
-        metadata: dict | None,
+        metadata: dict[str, Any] | None,
+        *,
+        now: datetime,
     ) -> Alert:
         """Create an alert from an anomaly."""
         alert_id = str(uuid.uuid4())[:8]
@@ -216,7 +228,7 @@ class AlertService:
             title=title,
             message=message,
             pipeline=pipeline,
-            timestamp=datetime.now(tz=UTC),
+            timestamp=now,
             metadata=metadata or {},
         )
 
