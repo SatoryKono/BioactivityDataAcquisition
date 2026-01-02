@@ -56,6 +56,16 @@ class PubChemFetchStrategies:
                 break
             yield self._mapper.compound_to_dict(compound)
 
+    async def _fetch_single_smiles(
+        self, smiles: str
+    ) -> list[dict[str, Any]]:
+        """Fetch compounds for a single SMILES string."""
+        await self._rate_limiter.acquire()
+        compounds = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
+        )
+        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+
     async def fetch_by_smiles(
         self, smiles_list: list[str], limit: int | None = None
     ) -> AsyncIterator[dict[str, Any]]:
@@ -63,19 +73,16 @@ class PubChemFetchStrategies:
         fetched = 0
         for smiles in smiles_list:
             if limit and fetched >= limit:
-                break
+                return
             if not smiles or not smiles.strip():
                 continue
 
             try:
-                await self._rate_limiter.acquire()
-                compounds = await self._circuit_breaker.call(
-                    self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
-                )
-                for compound in compounds or []:
+                records = await self._fetch_single_smiles(smiles)
+                for record in records:
                     if limit and fetched >= limit:
-                        break
-                    yield self._mapper.compound_to_dict(compound)
+                        return
+                    yield record
                     fetched += 1
             except Exception as e:
                 self._logger.warning(
@@ -84,13 +91,9 @@ class PubChemFetchStrategies:
                     smiles=smiles[:50],
                     error=str(e),
                 )
-                continue
 
-    async def fetch_by_cids(
-        self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds by CID list."""
-        fetched = 0
+    def _parse_valid_cids(self, cid_list: list[str]) -> list[int]:
+        """Parse and validate CID list, returning only valid integers."""
         valid_cids: list[int] = []
         for cid in cid_list:
             try:
@@ -99,21 +102,34 @@ class PubChemFetchStrategies:
                 self._logger.warning(
                     "invalid_cid_skipped", provider=self._provider_name, cid=cid
                 )
+        return valid_cids
+
+    async def _fetch_cid_batch(self, batch: list[int]) -> list[dict[str, Any]]:
+        """Fetch a batch of compounds by CID."""
+        await self._rate_limiter.acquire()
+        compounds = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_compounds, batch, "cid"
+        )
+        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+
+    async def fetch_by_cids(
+        self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by CID list."""
+        fetched = 0
+        valid_cids = self._parse_valid_cids(cid_list)
 
         for i in range(0, len(valid_cids), batch_size):
             if limit and fetched >= limit:
-                break
+                return
             batch = valid_cids[i : i + batch_size]
-            await self._rate_limiter.acquire()
 
             try:
-                compounds = await self._circuit_breaker.call(
-                    self._run_in_executor, pcp.get_compounds, batch, "cid"
-                )
-                for compound in compounds or []:
+                records = await self._fetch_cid_batch(batch)
+                for record in records:
                     if limit and fetched >= limit:
-                        break
-                    yield self._mapper.compound_to_dict(compound)
+                        return
+                    yield record
                     fetched += 1
             except Exception as e:
                 self._logger.warning(
@@ -123,7 +139,6 @@ class PubChemFetchStrategies:
                     batch_size=len(batch),
                     error=str(e),
                 )
-                continue
 
     async def fetch_substances(
         self, query: str | None, limit: int | None
