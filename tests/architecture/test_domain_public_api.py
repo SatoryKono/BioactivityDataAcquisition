@@ -157,10 +157,15 @@ def test_domain_no_infrastructure_types_in_all() -> None:
     ]
 
     # Domain config objects that happen to contain infrastructure-like patterns
-    # but are actually domain-level configuration DTOs
+    # but are actually domain-level configuration DTOs or domain exceptions
     allowed_exceptions = {
         "BaseClientConfig",  # Domain config DTO for client settings
         "BaseProviderConfig",  # Domain config for providers
+        # Delta-related domain exceptions (storage error hierarchy)
+        "DeltaOptimizeError",  # Domain exception for Delta VACUUM/OPTIMIZE failures
+        "DeltaSchemaValidationError",  # Domain exception for schema validation
+        "DeltaTransactionError",  # Domain exception for transaction failures
+        "DeltaWriteConflictError",  # Domain exception for concurrent write conflicts
     }
 
     for symbol in domain.__all__:
