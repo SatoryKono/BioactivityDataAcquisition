@@ -154,7 +154,10 @@ class SourceYamlConfig(BaseModel):
 
     @property
     def provider_config(self) -> ProviderConfigYaml:
-        """Get provider config from nested config."""
+        """Get provider config from nested source config.
+
+        Convenience property for consistent API access.
+        """
         return self.source.provider_config
 
     @property
