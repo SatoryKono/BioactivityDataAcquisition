@@ -552,7 +552,9 @@ class TestTimeoutBoundaryConditions:
     @pytest.mark.unit
     async def test_request_just_before_timeout(self) -> None:
         """Timeout: Request just before recovery timeout should be blocked."""
-        recovery_timeout = 1.0  # Increased for Windows timer reliability
+        # Use larger timeout (1s) for robustness against timer precision variance
+        # (especially on Windows where timer resolution is ~15.6ms)
+        recovery_timeout = 1.0
         cb = CircuitBreaker(
             provider="test",
             failure_threshold=2,
@@ -567,8 +569,8 @@ class TestTimeoutBoundaryConditions:
             with pytest.raises(RuntimeError):
                 await cb.call(fail)
 
-        # Wait slightly less than recovery timeout (30% to ensure we're well within)
-        await asyncio.sleep(recovery_timeout * 0.3)
+        # Wait 25% of recovery timeout (250ms) - far from boundary
+        await asyncio.sleep(recovery_timeout * 0.25)
 
         # Should still be blocked
         async def probe() -> str:
