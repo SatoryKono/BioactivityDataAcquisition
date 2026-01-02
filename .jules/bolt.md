@@ -1,9 +1,3 @@
-# Bolt's Performance Journal
-
-## 2025-01-27 - [Pydantic Validation in Hot Paths]
-**Learning:** Pydantic validation is significantly slower than standard Python class instantiation. In tight loops (processing millions of records), instantiating Pydantic models for every record just to access fields or serialize them is a massive bottleneck.
-**Action:** For high-throughput ETL hot paths, prefer TypedDicts or raw dictionaries for intermediate data moving between layers (Bronze -> Silver), and only use Pydantic for the final strict domain boundary or config loading. If domain entities are needed, use `construct()` if data is already trusted, or optimized `__post_init__` in standard classes (frozen dataclasses) as done in `src/bioetl/domain/entities.py`.
-
-## 2025-02-15 - [JSON Serialization Overhead]
-**Learning:** Standard `json.dumps` is slow. `orjson` is much faster but requires careful handling of options (like `OPT_SORT_KEYS` for determinism).
-**Action:** Use `orjson` in all `BatchWriter` implementations. Pre-calculate invariant metadata strings outside the loop to avoid repeated serialization/concatenation.
+## 2026-05-24 - Schema Column Caching in BatchWriter
+**Learning:** Repetitive schema introspection (e.g., `pandera.DataFrameModel.to_schema()`) in hot loops is a significant bottleneck. Moving this logic to initialization (O(1)) avoids repeated O(N) conversions per batch.
+**Action:** Always hoist schema introspection/conversion out of processing loops into `__init__` or `__post_init__` for long-lived worker objects.
