@@ -1,19 +1,19 @@
 # BioETL Architectural Audit Scores
-# Generated: 2026-01-01
-# RULES.md Target: v5.8
+# Generated: 2026-01-02
+# RULES.md Target: v5.9
 # Protocol: Triple Verification (Code + Documentation + Tests)
 
 project_assessment:
-  audit_date: "2026-01-01"
-  commit_hash: "8d5a1ada40c6fb9431be5eecbd6a6c504c1bdbaa"
+  audit_date: "2026-01-02"
+  commit_hash: "b86dedb9a60bb4f8eefa45e29491e8536bcd8a39"
   auditor: "Claude Code Audit Agent"
-  rules_version: "5.8"
+  rules_version: "5.9"
 
   baseline:
-    source_files: 325
-    test_files: 328
-    architecture_tests: 392
-    coverage_percent: 89.95
+    source_files: 335
+    test_files: 333
+    architecture_tests: 396  # 396 passed, 1 skipped
+    coverage_percent: 89.96
 
   scores:
     architecture_compliance:
@@ -22,24 +22,25 @@ project_assessment:
       evidence: |
         - grep "from bioetl.infrastructure" src/bioetl/domain/ → 0 violations
         - grep "from bioetl.infrastructure" src/bioetl/application/ → 0 violations
-        - pytest tests/architecture/ → 392 passed, 1 skipped
-        - import-linter contracts enforced in CI
+        - pytest tests/architecture/ → 396 passed, 1 skipped
+        - import-linter in pyproject.toml:101 (dev dependencies)
+        - Layer imports verified via test_layer_dependencies.py
       justification: |
         Perfect layer isolation. No forbidden imports between domain/application
         and infrastructure. Hexagonal architecture properly implemented with
-        Ports & Adapters pattern. All architecture tests pass.
+        Ports & Adapters pattern. All 396 architecture tests pass.
       issues: []
 
     domain_model_quality:
       score: 9
       weight: 0.12
       evidence: |
-        - grep "@dataclass.*frozen" src/bioetl/domain/ → 72 frozen dataclasses
-        - grep "Protocol" src/bioetl/domain/ports/ → 55 Protocol definitions
-        - grep "runtime_checkable" src/bioetl/domain/ports/ → 47 decorators
-        - grep "aclose" src/bioetl/domain/ports/ → 7 lifecycle methods
+        - grep "@dataclass.*frozen" src/bioetl/domain/ → 20+ frozen dataclasses
+        - grep "Protocol" src/bioetl/domain/ports/ → Multiple Protocol definitions
+        - grep "runtime_checkable" src/bioetl/domain/ports/ → All ports decorated
+        - grep "aclose" src/bioetl/domain/ports/ → Lifecycle methods present
         - grep "import httpx" src/bioetl/domain/ → 0 I/O imports
-        - 21 port files in domain/ports/
+        - domain/ports/ → 2770 lines of well-structured port definitions
       justification: |
         Clean domain layer with immutable Value Objects (frozen dataclasses).
         Rich Protocol-based port definitions with proper lifecycle (aclose).
@@ -50,12 +51,12 @@ project_assessment:
       score: 9
       weight: 0.12
       evidence: |
-        - grep "delta|DeltaTable" src/bioetl/infrastructure/storage/ → 54 references
-        - BronzeWriter, SilverWriter, GoldWriter properly implemented
-        - SilverWriteMode, GoldWriteMode enums defined
-        - content_hash/sha256 → 84 references
-        - 10 pipeline configs across 5 providers
-        - ADR-001, ADR-002 document Delta Lake choice
+        - grep "DeltaTable|delta|deltalake" src/bioetl/infrastructure/storage/ → 20+ references
+        - from deltalake import DeltaTable, write_deltalake (silver_writer.py:34)
+        - SilverWriteMode enum: delta_writer.py:53-64
+        - GoldWriteMode enum: gold_writer.py:42-54
+        - Bronze→Silver→Gold flow fully implemented
+        - ADR-001 (Delta Lake), ADR-002 (Medallion Architecture)
       justification: |
         Complete Medallion architecture (Bronze→Silver→Gold) with Delta Lake.
         ACID transactions via delta-rs. Proper write modes (MERGE, APPEND, SCD2).
@@ -66,93 +67,94 @@ project_assessment:
       score: 8
       weight: 0.10
       evidence: |
-        - grep "CircuitBreaker" → 107 references
-        - grep "retry|Retry" → 197 references
+        - CircuitBreaker implementation in infrastructure/adapters/http/circuit_breaker.py
+        - RetryPolicy with exponential backoff in domain/resilience.py
         - DQConfig with soft_fail_threshold=0.05, hard_fail_threshold=0.20
-        - grep "graceful|shutdown" → 191 references
-        - ADR-007 (Circuit Breaker), ADR-008 (Graceful Shutdown)
+        - Graceful shutdown implementation (ADR-008)
+        - ADR-007 (Circuit Breaker), ADR-016 (Error Handling Strategy)
       justification: |
         Comprehensive error handling with Circuit Breaker pattern (ADR-007).
         Retry logic with exponential backoff. DQ thresholds configured.
-        Graceful shutdown implemented (ADR-008). Minor: some edge cases
-        in storage layer could have more granular error classification.
+        Graceful shutdown implemented (ADR-008). Error classification via
+        ErrorClassifier in domain and error_handling.py in infrastructure.
       issues:
         - id: "ERR-001"
           severity: "Low"
-          description: "Consider adding more granular error classification in storage adapters"
+          description: "Minor: Some error recovery paths could have more detailed logging"
 
     test_coverage:
       score: 9
       weight: 0.12
       evidence: |
-        - pytest --cov-fail-under=85 → 89.95% coverage (threshold passed)
-        - tests/architecture/ → 392 tests in 36 files
-        - tests/fixtures/vcr/ → 51+ cassettes
-        - pyproject.toml: fail_under = 85
-        - CI enforces coverage gate
+        - pytest --cov-fail-under=85 → 89.96% coverage (threshold passed)
+        - tests/architecture/ → 396 passed, 10299 lines of tests
+        - tests/fixtures/vcr/ → VCR cassettes for HTTP mocking
+        - pyproject.toml:194 → fail_under = 85
+        - Makefile:63 → --cov-fail-under=85
+        - CI enforces coverage gate in 3 workflows
+        - Total: 4662 tests passed, 31 skipped
       justification: |
-        Excellent test coverage at 89.95%, well above 85% threshold.
-        Comprehensive architecture test suite (392 tests). VCR cassettes
-        for HTTP mocking. Coverage gate enforced in CI.
+        Excellent test coverage at 89.96%, well above 85% threshold.
+        Comprehensive architecture test suite (396 tests in 10K+ lines).
+        VCR cassettes for HTTP mocking. Coverage gate enforced in CI.
       issues: []
 
     code_quality:
-      score: 9
+      score: 10
       weight: 0.08
       evidence: |
         - uv run ruff check src/bioetl/ → "All checks passed!"
-        - uv run mypy src/bioetl --strict → "Success: no issues found in 325 source files"
+        - uv run mypy src/bioetl --strict → "Success: no issues found in 335 source files"
         - grep "print(" src/bioetl/ (non-test) → 0 occurrences
+        - No hardcoded values, proper typing throughout
       justification: |
         Perfect linting with ruff and mypy --strict. No print statements
-        in production code. Strong typing throughout codebase.
+        in production code. Strong typing throughout codebase. Zero issues.
       issues: []
 
     documentation:
       score: 8
       weight: 0.08
       evidence: |
-        - RULES.md v5.8 (76KB comprehensive)
-        - 17 ADR documents in docs/02-architecture/decisions/
-        - glossary.md maintained
-        - REQUIREMENTS.md (42KB)
-        - refactoring-plan.md with verified status
+        - RULES.md v5.9 (76KB comprehensive)
+        - 22 ADR documents in docs/02-architecture/decisions/
+        - docs/REQUIREMENTS.md (42KB)
+        - docs/refactoring-plan.md with verified status (100+ false assertions tracked)
+        - CLAUDE.md with comprehensive development guidelines
       justification: |
         Comprehensive documentation including RULES.md, ADRs, glossary.
-        Documentation sync maintained. Minor: some ADRs could benefit
-        from update dates in "Related ADRs" section.
+        Thorough refactoring-plan.md tracks verified vs false assertions.
+        Minor: Some ADRs show only 1 with explicit "Accepted" status marker.
       issues:
         - id: "DOC-001"
           severity: "Low"
-          description: "Consider adding 'Last Updated' dates to ADR cross-references"
+          description: "Normalize ADR Status format across all 22 ADR documents"
 
     security:
       score: 9
       weight: 0.08
       evidence: |
         - grep "api_key\s*=\s*['\"]" → 0 hardcoded secrets
-        - grep "PIIHasher|pii_hash" → 21 references
-        - Environment variables: BIOETL_* pattern used
-        - SecretStr usage: get_secret_value() in registration.py
-        - VCR cassette sanitization implemented
+        - Sha256PiiHasher implementation in infrastructure/security/pii_hasher.py
+        - Environment variables: BIOETL_* pattern (BIOETL_PII_SALT_CURRENT, etc.)
+        - VCR cassette sanitization documented
+        - tests/architecture/test_pii_hashing.py
       justification: |
-        No hardcoded secrets. PII hashing implemented. Environment variables
-        used for configuration. SecretStr for sensitive values. VCR cassettes
-        sanitized.
+        No hardcoded secrets. PII hashing implemented with salt rotation support.
+        Environment variables used for configuration. Proper security testing.
       issues: []
 
     observability:
       score: 9
       weight: 0.08
       evidence: |
-        - grep "structlog" → 44 references
-        - grep "run_id" → 363 references
-        - LoggerPort usage → 281 references
-        - MetricsPort usage → 207 references
-        - TracingPort usage → 120 references
-        - OpenTelemetry → 57 references
-        - Prometheus → 40 references
-        - ADR-006 (Logger/Metrics Ports), ADR-017 (Observability)
+        - LoggerPort usage throughout codebase (281+ references)
+        - run_id correlation in HTTP headers and schemas
+        - MetricsPort, TracingPort protocols in domain/ports/observability.py
+        - NoOpMetrics, NoOpTracing (Null Object Pattern) for optional observability
+        - OpenTelemetry tracing implementation
+        - Prometheus metrics implementation
+        - ADR-006, ADR-017, ADR-019 (Observability)
       justification: |
         Comprehensive observability with structured logging (structlog),
         OpenTelemetry tracing, and Prometheus metrics. run_id correlation
@@ -163,20 +165,20 @@ project_assessment:
       score: 8
       weight: 0.07
       evidence: |
-        - grep "MemoryLock" → 9 references (ADR-010: local-only design)
-        - grep "checkpoint" → 329 references
-        - grep "VACUUM" → 244 references
-        - 14 CI workflows (tests, security, architecture, etc.)
-        - Makefile with comprehensive targets
-        - Graceful shutdown implementation
+        - MemoryLock implementation (256 lines, full TTL/heartbeat/validation)
+        - Checkpoint implementation in infrastructure/checkpoint/
+        - VACUUM automation in postrun_service.py
+        - Graceful shutdown via ShutdownPort (domain/ports/shutdown.py)
+        - CLI exit codes defined (interfaces/cli/exit_codes.py)
+        - dev_setup.sh for environment setup
       justification: |
         Good operational readiness with checkpointing, VACUUM maintenance,
-        and graceful shutdown. Local-only locking per ADR-010. Comprehensive
-        CI/CD. Minor: could benefit from more documented runbooks.
+        and graceful shutdown. Local-only locking per ADR-010 (sufficient
+        for single-process pipelines). Comprehensive CI/CD workflows.
       issues:
         - id: "OPS-001"
           severity: "Low"
-          description: "Consider adding more detailed runbooks for common operational scenarios"
+          description: "Consider adding documented runbooks for common operations"
 
   # CALCULATION (per formula §3.3)
   calculation:
@@ -185,31 +187,35 @@ project_assessment:
     data_flow:        "9 × 0.12 = 1.08"
     error_handling:   "8 × 0.10 = 0.80"
     test_coverage:    "9 × 0.12 = 1.08"
-    code_quality:     "9 × 0.08 = 0.72"
+    code_quality:     "10 × 0.08 = 0.80"
     documentation:    "8 × 0.08 = 0.64"
     security:         "9 × 0.08 = 0.72"
     observability:    "9 × 0.08 = 0.72"
     operations:       "8 × 0.07 = 0.56"
 
-  total_score: 8.75
+  total_score: 8.83
 
   grade: "A"  # A=9-10, B=7-8, C=5-6, D=3-4, F=1-2
-  # Note: 8.75 rounds to A (8.5+ considered A grade)
+  # Note: 8.83 rounds to A (8.5+ considered A grade)
 
   summary: |
-    BioETL demonstrates excellent architectural quality with a total score of 8.75/10 (Grade A).
+    BioETL demonstrates excellent architectural quality with a total score of 8.83/10 (Grade A).
 
     Key Strengths:
     - Perfect layer isolation (Hexagonal Architecture with Ports & Adapters)
-    - Clean domain model with 72 frozen dataclasses and 55 Protocol definitions
-    - Strong test coverage (89.95%) with 392 architecture tests
-    - Zero linting/typing issues (ruff + mypy --strict pass)
+    - Clean domain model with frozen dataclasses and Protocol-based ports
+    - Strong test coverage (89.96%) with 396 architecture tests
+    - Zero linting/typing issues (ruff + mypy --strict pass on 335 source files)
     - Comprehensive observability (OpenTelemetry, Prometheus, structured logging)
+    - 22 ADRs documenting architectural decisions
 
     Areas for Minor Improvement:
-    - Error handling could have more granular classification in storage layer
-    - Documentation could benefit from update dates in ADR cross-references
+    - ADR status format could be normalized across all documents
     - Operational runbooks could be more detailed
+    - Some error recovery paths could have more detailed logging
 
-    The project follows RULES.md v5.8 requirements rigorously with proper
+    The project follows RULES.md v5.9 requirements rigorously with proper
     triple verification (code + documentation + tests) across all components.
+
+    Notable: refactoring-plan.md tracks 100+ verified false assertions from
+    previous audits, demonstrating strong documentation discipline.
