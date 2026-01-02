@@ -310,7 +310,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             # Lightweight search probe: Ubiquitin (P62988)
             params = {"query": "accession:P62988", "size": 1, "format": "json"}
             with self._adapter_metrics.measure_request("/health"):
-                resp = await self.http_client.get(
+                resp = await self.http_client.get_once(
                     f"{self.base_url}/uniprotkb/search", params=params
                 )
             if resp.status_code != 200:

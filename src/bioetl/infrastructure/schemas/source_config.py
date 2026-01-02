@@ -153,6 +153,11 @@ class SourceYamlConfig(BaseModel):
     source: SourceSectionConfig = Field(default_factory=SourceSectionConfig)
 
     @property
+    def provider_config(self) -> ProviderConfigYaml:
+        """Get provider config from nested config."""
+        return self.source.provider_config
+
+    @property
     def provider(self) -> str:
         """Get provider name from nested config."""
         return self.source.provider_config.provider
@@ -181,6 +186,14 @@ class SourceYamlConfig(BaseModel):
         Returns None if not specified, allowing adapters to use their defaults.
         """
         return self.source.provider_config.page_size
+
+    @property
+    def max_url_length(self) -> int | None:
+        """Get max URL length for APIs (e.g., ChEMBL).
+
+        Returns None if not specified, allowing adapters to use their defaults.
+        """
+        return self.source.provider_config.max_url_length
 
     @property
     def timeout_sec(self) -> float:
