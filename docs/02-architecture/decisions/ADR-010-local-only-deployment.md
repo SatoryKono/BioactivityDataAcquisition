@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted
 *   **Date**: 2025-12-23
+*   **Last Updated**: 2026-01-02
 *   **Supersedes**: ADR-003 (Redis for Distributed Locking)
 
 ## Context
@@ -185,12 +186,12 @@ class Settings:
 
 ## Related ADRs
 
-- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — сохраняется, меняется только storage backend
-- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking — детализация стратегии блокировок
-- [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — упрощён, удалены cloud factories
-- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — MemoryLock shutdown behavior
-- [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplification aligned with Local-Only
-- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern consistent with Local-Only (no external infra)
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — сохраняется, меняется только storage backend (Updated: 2025-05-20)
+- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking — детализация стратегии блокировок (Updated: 2025-12-23)
+- [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — упрощён, удалены cloud factories (Updated: 2025-12-18)
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown — MemoryLock shutdown behavior (Updated: 2025-12-22)
+- [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplification aligned with Local-Only (Updated: 2025-12-23)
+- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern consistent with Local-Only (no external infra) (Updated: 2025-12-27)
 
 ## Migration Notes
 
