@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted
 *   **Date**: 2025-05-20 (Implicitly from RULES.md v2.0)
+*   **Last Updated**: 2026-01-02
 *   **Context**: The project needs a structured and scalable approach to manage data pipelines, from raw ingestion to analysis-ready aggregates.
 
 ## The Decision
@@ -39,8 +40,8 @@ The Medallion Architecture provides a clear and logical separation of concerns, 
 
 ## Related ADRs
 
-- [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet — storage format choice for Silver/Gold layers
-- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — simplifies deployment while preserving Medallion architecture
-- [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplifies load strategy within Medallion
-- [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — Medallion invariants for destructive operations
-- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — quality guarantees for Gold layer
+- [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet — storage format choice for Silver/Gold layers (Updated: 2025-05-20)
+- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — simplifies deployment while preserving Medallion architecture (Updated: 2025-12-23)
+- [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplifies load strategy within Medallion (Updated: 2025-12-23)
+- [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — Medallion invariants for destructive operations (Updated: 2025-12-25)
+- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — quality guarantees for Gold layer (Updated: 2025-12-26)

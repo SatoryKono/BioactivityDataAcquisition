@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted
 *   **Date**: 2025-12-22
+*   **Last Updated**: 2026-01-02
 *   **Context**: External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures, slowdowns, or rate limiting. Without protection, the pipeline would repeatedly hammer failing services, wasting resources and potentially causing cascading failures. A circuit breaker pattern was needed to gracefully handle degraded external dependencies.
 
 ## The Decision
@@ -147,7 +148,7 @@ async def fetch_activity(activity_id: int) -> dict:
 
 ## Related ADRs
 
-- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — complementary resilience pattern
-- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — coordinates with circuit breaker during shutdown
-- [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin — wraps fetch calls with circuit breaker
-- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — circuit breaker is part of error handling
+- [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — complementary resilience pattern (Updated: 2025-12-20)
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — coordinates with circuit breaker during shutdown (Updated: 2025-12-22)
+- [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin — wraps fetch calls with circuit breaker (Updated: 2025-12-22)
+- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — circuit breaker is part of error handling (Updated: 2025-12-26)

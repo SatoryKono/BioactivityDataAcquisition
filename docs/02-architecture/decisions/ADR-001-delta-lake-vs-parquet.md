@@ -2,6 +2,7 @@
 
 *   **Status**: Accepted
 *   **Date**: 2025-05-20 (Implicitly from RULES.md v4.2)
+*   **Last Updated**: 2026-01-02
 *   **Context**: The project requires a reliable, high-performance storage format for the Silver (normalized) and Gold (aggregated) layers of the data warehouse. The primary candidates were raw Apache Parquet and Delta Lake.
 
 ## The Decision
@@ -37,6 +38,6 @@ While Parquet is an excellent columnar storage format, it lacks critical feature
 
 ## Related ADRs
 
-- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — uses Delta Lake for Silver and Gold layers
-- [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — defines clear/cleanup operations for Delta tables
-- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — schema validation for Gold layer Delta tables
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — uses Delta Lake for Silver and Gold layers (Updated: 2025-05-20)
+- [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — defines clear/cleanup operations for Delta tables (Updated: 2025-12-25)
+- [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — schema validation for Gold layer Delta tables (Updated: 2025-12-26)
