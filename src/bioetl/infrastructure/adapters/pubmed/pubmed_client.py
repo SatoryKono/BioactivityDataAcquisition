@@ -328,7 +328,7 @@ class PubMedAdapter(BaseHttpAdapter):
 
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
-                response = await self.http_client.get(
+                response = await self.http_client.get_once(
                     f"{ENTREZ_API_BASE}esearch.fcgi", params=params
                 )
             elapsed = time.monotonic() - start_time

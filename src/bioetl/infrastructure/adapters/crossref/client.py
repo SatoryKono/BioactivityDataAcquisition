@@ -423,7 +423,7 @@ class CrossRefAdapter(BaseHttpAdapter):
 
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
-                response = await self.http_client.get(
+                response = await self.http_client.get_once(
                     url, params=params, headers=self._build_headers()
                 )
             elapsed = time.monotonic() - start_time
