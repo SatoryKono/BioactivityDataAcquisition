@@ -10,8 +10,8 @@ title = "BioETL Gitleaks Configuration"
 # Use default gitleaks rules as base
 useDefault = true
 
-# Allowlist paths that are expected to contain non-sensitive patterns
-[allowlist]
+# Global allowlist (v8.25.0+ syntax: [[allowlists]])
+[[allowlists]]
 description = "BioETL-specific allowlist"
 
 paths = [
@@ -34,9 +34,13 @@ paths = [
     # Generated documentation
     '''^docs/_build/.*$''',
     '''^site/.*$''',
+
+    # Audit documentation (contains commit hashes, not secrets)
+    '''^docs/audit/.*$''',
 ]
 
-# Regex patterns to ignore (for common false positives)
+regexTarget = "match"
+
 regexes = [
     # Example/placeholder patterns
     '''example[_-]?(api[_-]?)?key''',
@@ -52,6 +56,18 @@ regexes = [
 
     # NCBI tool email (not PII, technical identifier)
     '''default_email.*@.*\.com''',
+
+    # Environment variable references (not actual secrets)
+    '''os\.environ\[["'][A-Z_]+["']\]''',
+
+    # getenv calls (not actual secrets)
+    '''getenv\(["'][A-Z_]+["']''',
+
+    # Settings object references
+    '''settings\.[a-z_]+''',
+
+    # Git commit hashes (40-char hex strings in docs)
+    '''[a-f0-9]{40}''',
 ]
 
 # Stopwords to ignore
@@ -64,22 +80,3 @@ stopwords = [
     "placeholder",
     "your-api-key-here",
 ]
-
-# Additional rules for BioETL-specific patterns
-[[rules]]
-id = "bioetl-env-var-reference"
-description = "Environment variable references (not actual secrets)"
-regex = '''os\.environ\[["'][A-Z_]+["']\]'''
-allowlist.regexTarget = "match"
-
-[[rules]]
-id = "bioetl-getenv"
-description = "getenv calls (not actual secrets)"
-regex = '''getenv\(["'][A-Z_]+["']'''
-allowlist.regexTarget = "match"
-
-[[rules]]
-id = "bioetl-settings-reference"
-description = "Settings object references"
-regex = '''settings\.[a-z_]+'''
-allowlist.regexTarget = "match"
