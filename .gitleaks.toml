@@ -1,0 +1,85 @@
+# Gitleaks configuration for BioETL
+# See: https://github.com/gitleaks/gitleaks#configuration
+#
+# This file configures secret scanning in CI.
+# Run locally: gitleaks detect --config .gitleaks.toml
+
+title = "BioETL Gitleaks Configuration"
+
+[extend]
+# Use default gitleaks rules as base
+useDefault = true
+
+# Allowlist paths that are expected to contain non-sensitive patterns
+[allowlist]
+description = "BioETL-specific allowlist"
+
+paths = [
+    # Example environment file with placeholder values
+    '''^\.env\.example$''',
+
+    # VCR cassettes contain sanitized API responses
+    '''^tests/fixtures/vcr/.*\.yaml$''',
+
+    # Test fixtures may contain mock data
+    '''^tests/fixtures/.*$''',
+
+    # Secrets baseline for detect-secrets
+    '''^\.secrets\.baseline$''',
+
+    # Lock files
+    '''^uv\.lock$''',
+    '''^poetry\.lock$''',
+
+    # Generated documentation
+    '''^docs/_build/.*$''',
+    '''^site/.*$''',
+]
+
+# Regex patterns to ignore (for common false positives)
+regexes = [
+    # Example/placeholder patterns
+    '''example[_-]?(api[_-]?)?key''',
+    '''your[_-]?api[_-]?key[_-]?here''',
+    '''<your[_-]?.*>''',
+    '''xxx+''',
+    '''placeholder''',
+
+    # Test mock values
+    '''test[_-]?secret''',
+    '''mock[_-]?token''',
+    '''fake[_-]?key''',
+
+    # NCBI tool email (not PII, technical identifier)
+    '''default_email.*@.*\.com''',
+]
+
+# Stopwords to ignore
+stopwords = [
+    "example",
+    "sample",
+    "test",
+    "mock",
+    "fake",
+    "placeholder",
+    "your-api-key-here",
+]
+
+# Additional rules for BioETL-specific patterns
+[[rules]]
+id = "bioetl-env-var-reference"
+description = "Environment variable references (not actual secrets)"
+regex = '''os\.environ\[["'][A-Z_]+["']\]'''
+allowlist.regexTarget = "match"
+
+[[rules]]
+id = "bioetl-getenv"
+description = "getenv calls (not actual secrets)"
+regex = '''getenv\(["'][A-Z_]+["']'''
+allowlist.regexTarget = "match"
+
+[[rules]]
+id = "bioetl-settings-reference"
+description = "Settings object references"
+regex = '''settings\.[a-z_]+'''
+allowlist.regexTarget = "match"
