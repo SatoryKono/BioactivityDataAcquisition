@@ -115,6 +115,15 @@ class PubChemAdapter(BaseSyncAdapter):
             provider_name=self.provider_name,
         )
 
+    async def _fetch_compound(
+        self, query: str | None, limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by query."""
+        if not query:
+            raise ValueError("Query is required for compound fetch")
+        async for record in self._strategies.fetch_by_query(query, limit):
+            yield record
+
     async def fetch(
         self,
         entity_type: str,
@@ -131,19 +140,18 @@ class PubChemAdapter(BaseSyncAdapter):
                 yield record
             return
 
-        if entity_type == "compound":
-            if not query:
-                raise ValueError("Query is required for compound fetch")
-            async for record in self._strategies.fetch_by_query(query, limit):
-                yield record
-        elif entity_type == "substance":
-            async for record in self._strategies.fetch_substances(query, limit):
-                yield record
-        elif entity_type == "assay":
-            async for record in self._strategies.fetch_assays(query, limit):
-                yield record
-        else:
+        fetch_methods = {
+            "compound": lambda: self._fetch_compound(query, limit),
+            "substance": lambda: self._strategies.fetch_substances(query, limit),
+            "assay": lambda: self._strategies.fetch_assays(query, limit),
+        }
+
+        method = fetch_methods.get(entity_type)
+        if method is None:
             raise ValueError(f"Unsupported entity type: {entity_type}")
+
+        async for record in method():
+            yield record
 
     async def fetch_filtered(
         self,
