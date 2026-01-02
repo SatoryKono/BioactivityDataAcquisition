@@ -493,7 +493,7 @@ class TestMemoryMonitorResourceFallback:
         config = MemoryConfig()
 
         with patch(
-            "bioetl.application.core.memory_monitor.MemoryMonitor._check_psutil"
+            "bioetl.application.core.memory_monitor._check_psutil_available"
         ) as mock_check:
             mock_check.return_value = False
             monitor = MemoryMonitor(config=config, logger=mock_logger)
