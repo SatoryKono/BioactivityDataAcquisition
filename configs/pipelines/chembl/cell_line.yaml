@@ -42,7 +42,7 @@ sink:
 # Entity-specific input filter
 input_filter:
   enabled: true
-  source_path: "data/input/cell_line.csv"
+  source_path: "data/input/cell.csv"
   column_name: "cell_chembl_id"
   filter_field: "cell_chembl_id"
   batch_size: 20
