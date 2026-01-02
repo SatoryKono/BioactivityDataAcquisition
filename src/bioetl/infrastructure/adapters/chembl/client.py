@@ -499,7 +499,7 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         try:
             with self._adapter_metrics.measure_request("/status"):
-                response = await self.http_client.get(CHEMBL_STATUS_URL)
+                response = await self.http_client.get_once(CHEMBL_STATUS_URL)
             return self._handle_health_response(response)
         except Exception as e:
             error_type = self._error_handler.get_error_type(e)

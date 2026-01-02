@@ -443,3 +443,36 @@ class UnifiedHTTPClient:
 
         """
         return await self._request_with_retry("HEAD", url, headers=headers)
+
+    async def get_once(
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
+        """Send single GET request without retries.
+
+        Use this for health checks where we want immediate status
+        without retry delays.
+
+        Args:
+            url: Request URL
+            params: Query parameters
+            headers: Additional headers
+
+        Returns:
+            httpx.Response
+
+        Raises:
+            CircuitBreakerOpenError: If circuit is open
+            httpx.HTTPStatusError: For error status codes
+            httpx.TimeoutException: On timeout
+
+        """
+        client = self._get_client()
+        await self.rate_limiter.acquire()
+        response = await self.circuit_breaker.call(
+            client.request, "GET", url, params=params, headers=headers
+        )
+        response.raise_for_status()
+        return response
