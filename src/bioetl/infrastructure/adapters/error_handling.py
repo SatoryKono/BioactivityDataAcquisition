@@ -169,11 +169,29 @@ class ErrorService:
 
         # Default classification based on status code ranges
         if 400 <= status_code < 500:
+            self._logger.debug(
+                "http_error_classified_by_range",
+                status_code=status_code,
+                category=ErrorCategory.DATA_QUALITY.value,
+                reason="4xx client error (not in explicit mapping)",
+            )
             return ErrorCategory.DATA_QUALITY
         if status_code >= 500:
+            self._logger.debug(
+                "http_error_classified_by_range",
+                status_code=status_code,
+                category=ErrorCategory.RECOVERABLE.value,
+                reason="5xx server error (not in explicit mapping)",
+            )
             return ErrorCategory.RECOVERABLE
 
         # Unknown status code - treat as recoverable
+        self._logger.warning(
+            "http_error_unknown_status_code",
+            status_code=status_code,
+            category=ErrorCategory.RECOVERABLE.value,
+            reason="unknown status code, defaulting to recoverable",
+        )
         return ErrorCategory.RECOVERABLE
 
     def classify_exception(self, error: Exception) -> ErrorCategory:
@@ -190,13 +208,38 @@ class ErrorService:
         error_type = self._classifier.classify(error)
 
         if error_type.is_critical():
+            self._logger.debug(
+                "exception_classified",
+                error_type=error_type.value,
+                category=ErrorCategory.CRITICAL.value,
+                error_class=type(error).__name__,
+            )
             return ErrorCategory.CRITICAL
         if error_type.is_recoverable():
+            self._logger.debug(
+                "exception_classified",
+                error_type=error_type.value,
+                category=ErrorCategory.RECOVERABLE.value,
+                error_class=type(error).__name__,
+            )
             return ErrorCategory.RECOVERABLE
         if error_type.is_data_quality():
+            self._logger.debug(
+                "exception_classified",
+                error_type=error_type.value,
+                category=ErrorCategory.DATA_QUALITY.value,
+                error_class=type(error).__name__,
+            )
             return ErrorCategory.DATA_QUALITY
 
         # Default to recoverable for unknown types
+        self._logger.warning(
+            "exception_classification_fallback",
+            error_type=error_type.value,
+            category=ErrorCategory.RECOVERABLE.value,
+            error_class=type(error).__name__,
+            reason="unknown error type, defaulting to recoverable",
+        )
         return ErrorCategory.RECOVERABLE
 
     def get_error_type(self, error: Exception) -> ErrorType:
@@ -294,7 +337,15 @@ class ErrorService:
             True if error is recoverable and should be retried.
         """
         error_type = self._classifier.classify(error)
-        return error_type.is_recoverable()
+        should_retry = error_type.is_recoverable()
+        self._logger.debug(
+            "retry_decision",
+            error_type=error_type.value,
+            error_class=type(error).__name__,
+            should_retry=should_retry,
+            decision_source="exception_type",
+        )
+        return should_retry
 
     def should_retry_status(self, status_code: int) -> bool:
         """Determine if HTTP status code should be retried.
@@ -306,7 +357,15 @@ class ErrorService:
             True if status code indicates recoverable error.
         """
         category = self.classify_http_error(status_code)
-        return category == ErrorCategory.RECOVERABLE
+        should_retry = category == ErrorCategory.RECOVERABLE
+        self._logger.debug(
+            "retry_decision",
+            status_code=status_code,
+            category=category.value,
+            should_retry=should_retry,
+            decision_source="http_status",
+        )
+        return should_retry
 
     def get_retry_after(self, response: Response) -> float | None:
         """Extract Retry-After header value from response.
@@ -373,13 +432,28 @@ class ErrorService:
             ) from error
 
         if error_type == ErrorType.RATE_LIMIT:
+            effective_retry_after = retry_after or 60.0
+            self._logger.info(
+                "error_wrapped_rate_limit",
+                provider=provider,
+                error_type=error_type.value,
+                retry_after=effective_retry_after,
+                original_error=type(error).__name__,
+            )
             return RateLimitExceededError(
                 message=message,
                 service_name=provider,
-                retry_after=retry_after or 60.0,
+                retry_after=effective_retry_after,
             )
 
         if error_type == ErrorType.TIMEOUT:
+            self._logger.info(
+                "error_wrapped_timeout",
+                provider=provider,
+                error_type=error_type.value,
+                retry_after=retry_after,
+                original_error=type(error).__name__,
+            )
             return ServiceUnavailableError(
                 message=message,
                 service_name=provider,
@@ -387,6 +461,14 @@ class ErrorService:
             )
 
         # Default to generic ExternalServiceError
+        self._logger.debug(
+            "error_wrapped_generic",
+            provider=provider,
+            error_type=error_type.value,
+            status_code=status_code,
+            retry_after=retry_after,
+            original_error=type(error).__name__,
+        )
         return ExternalServiceError(
             message=message,
             service_name=provider,
@@ -425,14 +507,29 @@ class ErrorService:
 
         # Rate limit
         if status_code == 429:
+            effective_retry_after = retry_after or 60.0
+            self._logger.info(
+                "http_error_wrapped_rate_limit",
+                provider=provider,
+                status_code=status_code,
+                retry_after=effective_retry_after,
+                recovery_action="retry_after_delay",
+            )
             return RateLimitExceededError(
                 message=message,
                 service_name=provider,
-                retry_after=retry_after or 60.0,
+                retry_after=effective_retry_after,
             )
 
         # Server errors
         if status_code >= 500:
+            self._logger.info(
+                "http_error_wrapped_server_error",
+                provider=provider,
+                status_code=status_code,
+                retry_after=retry_after,
+                recovery_action="retry_with_backoff",
+            )
             return ServiceUnavailableError(
                 message=message,
                 service_name=provider,
@@ -441,6 +538,13 @@ class ErrorService:
             )
 
         # Default to generic error
+        self._logger.debug(
+            "http_error_wrapped_generic",
+            provider=provider,
+            status_code=status_code,
+            retry_after=retry_after,
+            recovery_action="no_retry",
+        )
         return ExternalServiceError(
             message=message,
             service_name=provider,

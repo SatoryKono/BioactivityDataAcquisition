@@ -1,8 +1,8 @@
 # ADR-005: Composition Layer as Separate Module (Not Part of Interfaces)
 
-* **Status**: Accepted
-* **Date**: 2025-12-18
-* **Context**: During architecture review, the question arose whether the `composition/` module (Composition Root, DI wiring, factories) should be merged into `interfaces/` to reduce the number of top-level directories. This decision documents the rationale for keeping them separate.
+*   **Status**: Accepted
+*   **Date**: 2025-12-18
+*   **Context**: During architecture review, the question arose whether the `composition/` module (Composition Root, DI wiring, factories) should be merged into `interfaces/` to reduce the number of top-level directories. This decision documents the rationale for keeping them separate.
 
 ## The Decision
 

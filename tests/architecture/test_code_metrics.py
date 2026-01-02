@@ -355,7 +355,7 @@ class TestClassSize:
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 360,  # 351 lines - HTTP adapter with Entrez API
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
-        "ErrorService": 420,  # ~400 lines - comprehensive error classification and logging
+        "ErrorService": 500,  # ~480 lines - comprehensive error classification with detailed recovery logging
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
         "ActivityAggregator": 320,  # 311 lines - Activity aggregation with multiple strategies
