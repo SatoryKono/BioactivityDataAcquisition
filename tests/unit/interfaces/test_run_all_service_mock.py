@@ -316,7 +316,7 @@ class TestRunAllFormatterOutput:
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
-    def test_success_output_contains_checkmark(
+    def test_success_output_contains_ok_marker(
         self,
         mock_get_service,
         mock_get_registry,
@@ -325,7 +325,7 @@ class TestRunAllFormatterOutput:
         mock_registry,
         mock_pipeline_runner_service,
     ):
-        """Test successful run shows checkmark in output."""
+        """Test successful run shows [OK] marker in output."""
         mock_get_registry.return_value = mock_registry
         mock_get_service.return_value = mock_pipeline_runner_service
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
@@ -336,13 +336,13 @@ class TestRunAllFormatterOutput:
 
         result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
 
-        assert "✓" in result.output
+        assert "[OK]" in result.output
         assert "completed successfully" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
-    def test_failure_output_contains_x_mark(
+    def test_failure_output_contains_fail_marker(
         self,
         mock_get_service,
         mock_get_registry,
@@ -351,7 +351,7 @@ class TestRunAllFormatterOutput:
         mock_registry,
         mock_pipeline_runner_service,
     ):
-        """Test failed run shows X mark in output."""
+        """Test failed run shows [FAIL] marker in output."""
         mock_get_registry.return_value = mock_registry
         mock_get_service.return_value = mock_pipeline_runner_service
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
@@ -364,7 +364,7 @@ class TestRunAllFormatterOutput:
 
         result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
 
-        assert "✗" in result.output
+        assert "[FAIL]" in result.output
         assert "failed" in result.output.lower()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
@@ -501,7 +501,7 @@ class TestRunAllShutdownScenarios:
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
-    def test_shutdown_shows_warning_symbol(
+    def test_shutdown_shows_stop_marker(
         self,
         mock_get_service,
         mock_get_registry,
@@ -510,7 +510,7 @@ class TestRunAllShutdownScenarios:
         mock_registry,
         mock_pipeline_runner_service,
     ):
-        """Test shutdown status shows proper warning symbol."""
+        """Test shutdown status shows [STOP] marker."""
         mock_get_registry.return_value = mock_registry
         mock_get_service.return_value = mock_pipeline_runner_service
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
@@ -521,7 +521,7 @@ class TestRunAllShutdownScenarios:
 
         result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
 
-        assert "⊘" in result.output
+        assert "[STOP]" in result.output
         assert "WARNING:" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")

@@ -71,7 +71,7 @@ async def test_health_check_returns_healthy_on_success(adapter, mock_http_client
     """Test health_check returns HEALTHY on 200 response."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_http_client.get = AsyncMock(return_value=mock_response)
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()
 
@@ -85,7 +85,7 @@ async def test_health_check_returns_unhealthy_on_non_200(
     """Test health_check returns UNHEALTHY on non-200 response."""
     mock_response = MagicMock()
     mock_response.status_code = 503
-    mock_http_client.get = AsyncMock(return_value=mock_response)
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()
 
@@ -104,7 +104,7 @@ async def test_health_check_returns_degraded_on_slow_response(
     """
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_http_client.get = AsyncMock(return_value=mock_response)
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     # Mock time.monotonic to simulate slow response
     # _probe_health does: start_time = time.monotonic() then elapsed = time.monotonic() - start_time
@@ -137,7 +137,7 @@ async def test_health_check_logs_error_on_exception(
     adapter, mock_http_client, mock_logger
 ):
     """Test health_check logs error details on exception."""
-    mock_http_client.get = AsyncMock(side_effect=Exception("Network timeout"))
+    mock_http_client.get_once = AsyncMock(side_effect=Exception("Network timeout"))
 
     await adapter.health_check()
 
@@ -158,7 +158,7 @@ async def test_health_check_logs_error_on_exception(
 @pytest.mark.asyncio
 async def test_health_check_returns_unhealthy_on_exception(adapter, mock_http_client):
     """Test health_check returns UNHEALTHY when exception occurs."""
-    mock_http_client.get = AsyncMock(side_effect=Exception("Connection refused"))
+    mock_http_client.get_once = AsyncMock(side_effect=Exception("Connection refused"))
 
     result = await adapter.health_check()
 

@@ -122,7 +122,7 @@ async def test_health_check_healthy(adapter, mock_http_client):
     """Test health_check returns HEALTHY on success."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_http_client.get.return_value = mock_response
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()
 
@@ -134,7 +134,7 @@ async def test_health_check_unhealthy_on_error(adapter, mock_http_client):
     """Test health_check returns UNHEALTHY on HTTP error."""
     mock_response = MagicMock()
     mock_response.status_code = 503
-    mock_http_client.get.return_value = mock_response
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()
 
@@ -144,7 +144,9 @@ async def test_health_check_unhealthy_on_error(adapter, mock_http_client):
 @pytest.mark.asyncio
 async def test_health_check_unhealthy_on_request_error(adapter, mock_http_client):
     """Test health_check returns UNHEALTHY on request error."""
-    mock_http_client.get.side_effect = RequestError("Connection refused")
+    mock_http_client.get_once = AsyncMock(
+        side_effect=RequestError("Connection refused")
+    )
 
     result = await adapter.health_check()
 
@@ -158,7 +160,7 @@ async def test_health_check_returns_degraded_on_slow_response(
     """Test health_check returns DEGRADED when response takes >5 seconds."""
     mock_response = MagicMock()
     mock_response.status_code = 200
-    mock_http_client.get = AsyncMock(return_value=mock_response)
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     # Simulate slow response by patching time.monotonic in both modules
     # (adapter module and health_check_mixin where HealthCheckContext uses it)

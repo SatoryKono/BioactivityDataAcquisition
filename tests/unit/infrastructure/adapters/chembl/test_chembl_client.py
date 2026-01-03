@@ -206,7 +206,7 @@ async def test_health_check_healthy(adapter, mock_http_client):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"status": "UP"}
-    mock_http_client.get.return_value = mock_response
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     status = await adapter.health_check()
     assert status == HealthStatus.HEALTHY
@@ -218,7 +218,7 @@ async def test_health_check_unhealthy(adapter, mock_http_client):
 
     Health status is now derived from circuit breaker state, not consecutive errors.
     """
-    mock_http_client.get.side_effect = Exception("Down")
+    mock_http_client.get_once = AsyncMock(side_effect=Exception("Down"))
     # Configure circuit breaker to report UNHEALTHY state (failure_count > 2)
     mock_http_client.circuit_breaker.get_failure_count.return_value = 3
 
