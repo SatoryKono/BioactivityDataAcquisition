@@ -161,7 +161,8 @@ async def _run_all_pipelines_async(
                 batch_result.failed += 1
                 batch_result.failed_pipelines.append(pipeline)
                 echo_error(
-                    f"[FAIL] {pipeline}: failed", result.error_message or "Unknown error"
+                    f"[FAIL] {pipeline}: failed",
+                    result.error_message or "Unknown error",
                 )
         except PipelineNotFoundError as e:
             batch_result.failed += 1
