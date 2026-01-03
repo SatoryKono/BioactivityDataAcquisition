@@ -197,7 +197,11 @@ class TestHealthCheckCommand:
         mock_factory.list_providers.return_value = ["chembl"]
 
         results = {
-            "chembl": {"status": "degraded", "latency_ms": "500.00", "endpoint": "/api"},
+            "chembl": {
+                "status": "degraded",
+                "latency_ms": "500.00",
+                "endpoint": "/api",
+            },
         }
 
         with patch("asyncio.run", return_value=results):
@@ -245,7 +249,8 @@ class TestHealthCheckCommand:
 
         with patch("asyncio.run", return_value=results):
             result = cli_runner.invoke(
-                cli, ["health", "check", "--provider", "chembl", "--provider", "pubchem"]
+                cli,
+                ["health", "check", "--provider", "chembl", "--provider", "pubchem"],
             )
 
         assert "Running health checks..." in result.output
