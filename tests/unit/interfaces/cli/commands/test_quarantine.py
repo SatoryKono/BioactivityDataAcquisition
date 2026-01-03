@@ -181,10 +181,19 @@ class TestQuarantineInspect:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["quarantine", "inspect", "--pipeline", "chembl_activity", "--limit", "50"],
+                [
+                    "quarantine",
+                    "inspect",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--limit",
+                    "50",
+                ],
             )
 
-        mock_quarantine_manager.inspect.assert_called_once_with(limit=50, error_code=None)
+        mock_quarantine_manager.inspect.assert_called_once_with(
+            limit=50, error_code=None
+        )
         assert result.exit_code == 0
 
 
@@ -360,12 +369,15 @@ class TestQuarantineReplay:
         """Test quarantine replay with no records."""
         mock_unified_quarantine.replay.return_value = iter([])
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -388,12 +400,15 @@ class TestQuarantineReplay:
         ]
         mock_unified_quarantine.replay.return_value = iter(mock_records)
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -418,12 +433,15 @@ class TestQuarantineReplay:
         ]
         mock_unified_quarantine.replay.return_value = iter(mock_records)
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -448,12 +466,15 @@ class TestQuarantineReplay:
         mock_unified_quarantine.replay.return_value = iter(mock_records)
         mock_unified_quarantine.update_status.return_value = True
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -475,12 +496,15 @@ class TestQuarantineReplay:
         """Test quarantine replay with error code filter."""
         mock_unified_quarantine.replay.return_value = iter([])
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -506,12 +530,15 @@ class TestQuarantineReplay:
         """Test quarantine replay with custom max-age-days."""
         mock_unified_quarantine.replay.return_value = iter([])
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -560,12 +587,15 @@ class TestQuarantinePurge:
         """Test quarantine purge in dry-run mode."""
         mock_unified_quarantine.get_stats = AsyncMock(return_value={"total_count": 50})
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -586,12 +616,15 @@ class TestQuarantinePurge:
         """Test quarantine purge with confirmation prompt."""
         mock_unified_quarantine.purge.return_value = 25
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             # Simulate user confirming with 'y'
             result = cli_runner.invoke(
@@ -610,12 +643,15 @@ class TestQuarantinePurge:
         mock_unified_quarantine: MagicMock,
     ) -> None:
         """Test quarantine purge aborts on negative confirmation."""
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             # Simulate user aborting with 'n'
             result = cli_runner.invoke(
@@ -637,12 +673,15 @@ class TestQuarantinePurge:
         """Test quarantine purge with --force skips confirmation."""
         mock_unified_quarantine.purge.return_value = 30
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -663,12 +702,15 @@ class TestQuarantinePurge:
         """Test quarantine purge with custom --older-than-days."""
         mock_unified_quarantine.purge.return_value = 10
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -713,9 +755,7 @@ class TestQuarantineResolve:
 
     def test_resolve_requires_payload_hash(self, cli_runner: CliRunner) -> None:
         """Test that quarantine resolve requires --payload-hash."""
-        result = cli_runner.invoke(
-            cli, ["quarantine", "resolve", "--pipeline", "test"]
-        )
+        result = cli_runner.invoke(cli, ["quarantine", "resolve", "--pipeline", "test"])
 
         assert result.exit_code != 0
         assert "Missing option" in result.output or "required" in result.output.lower()
@@ -729,12 +769,15 @@ class TestQuarantineResolve:
         """Test quarantine resolve with default IGNORED status."""
         mock_unified_quarantine.update_status.return_value = True
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -763,12 +806,15 @@ class TestQuarantineResolve:
         """Test quarantine resolve with REPROCESSED status."""
         mock_unified_quarantine.update_status.return_value = True
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -799,12 +845,15 @@ class TestQuarantineResolve:
         """Test quarantine resolve when record not found."""
         mock_unified_quarantine.update_status.return_value = False
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -839,7 +888,10 @@ class TestQuarantineResolve:
 
         assert result.exit_code != 0
         # Click should reject invalid choice
-        assert "Invalid value" in result.output or "invalid choice" in result.output.lower()
+        assert (
+            "Invalid value" in result.output
+            or "invalid choice" in result.output.lower()
+        )
 
 
 class TestQuarantineEdgeCases:
@@ -875,12 +927,15 @@ class TestQuarantineEdgeCases:
         mock_unified_quarantine.replay.return_value = iter(mock_records)
         mock_unified_quarantine.update_status.return_value = True
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -901,12 +956,15 @@ class TestQuarantineEdgeCases:
         mock_records = [{"error_code": "DQ_ERROR", "payload_hash": long_hash}]
         mock_unified_quarantine.replay.return_value = iter(mock_records)
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
@@ -925,12 +983,15 @@ class TestQuarantineEdgeCases:
         """Test purge dry-run shows custom older-than-days."""
         mock_unified_quarantine.get_stats = AsyncMock(return_value={"total_count": 100})
 
-        with patch(
-            "bioetl.infrastructure.config.Settings",
-            return_value=mock_settings,
-        ), patch(
-            "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-            return_value=mock_unified_quarantine,
+        with (
+            patch(
+                "bioetl.infrastructure.config.Settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
+                return_value=mock_unified_quarantine,
+            ),
         ):
             result = cli_runner.invoke(
                 cli,
