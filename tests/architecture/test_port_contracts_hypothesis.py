@@ -44,8 +44,9 @@ lock_key_strategy = st.text(
     min_size=1, max_size=100, alphabet=st.characters(whitelist_categories=("L", "N"))
 ).filter(lambda x: x.strip() != "")
 
-# Strategy for valid pipeline names (alphanumeric with underscores)
-pipeline_name_strategy = st.from_regex(r"[a-zA-Z][a-zA-Z0-9_]{0,49}", fullmatch=True)
+# Strategy for valid pipeline names (lowercase alphanumeric with underscores)
+# Uses lowercase only to avoid case-sensitivity issues on Windows file system
+pipeline_name_strategy = st.from_regex(r"[a-z][a-z0-9_]{0,49}", fullmatch=True)
 
 # Strategy for TTL values (positive integers within reasonable range)
 ttl_strategy = st.integers(min_value=1, max_value=3600)
