@@ -168,7 +168,9 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         for prov, result in results.items():
             status = result.get("status", "unknown")
             status_icon = (
-                "[OK]" if status == "healthy" else "[WARN]" if status == "degraded" else "[FAIL]"
+                "[OK]"
+                if status == "healthy"
+                else "[WARN]" if status == "degraded" else "[FAIL]"
             )
 
             if status != "healthy":
