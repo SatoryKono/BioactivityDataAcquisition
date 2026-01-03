@@ -85,6 +85,11 @@ class BatchWriter:
         self._silver_schema = config.silver_schema
         self._table_config = config.table_config
 
+        # Optimize Gold schema extraction
+        # Caching this prevents repeated calls to to_schema() and iterations
+        # in the hot path of write_gold.
+        self._gold_schema_columns = self._get_schema_columns(config.gold_schema)
+
     async def _validate_lock(self, operation: str) -> None:
         """Validate lock ownership before write operation (Safety Guard §4.6).
 
@@ -289,7 +294,8 @@ class BatchWriter:
 
             # Filter records to only include columns defined in Gold schema
             # This ensures strict schema validation passes (REQ-DATA-009)
-            schema_columns = self._get_schema_columns(gold_schema)
+            # OPTIMIZATION: Use cached schema columns
+            schema_columns = self._gold_schema_columns
             if schema_columns:
                 records = [{k: r[k] for k in schema_columns if k in r} for r in records]
 

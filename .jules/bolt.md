@@ -7,3 +7,7 @@
 ## 2025-02-15 - [JSON Serialization Overhead]
 **Learning:** Standard `json.dumps` is slow. `orjson` is much faster but requires careful handling of options (like `OPT_SORT_KEYS` for determinism).
 **Action:** Use `orjson` in all `BatchWriter` implementations. Pre-calculate invariant metadata strings outside the loop to avoid repeated serialization/concatenation.
+
+## 2025-05-27 - [Pandera Schema Conversion Overhead]
+**Learning:** Calling `schema.to_schema()` on a Pandera `DataFrameModel` or iterating over schema columns repeatedly in a hot path (e.g., inside `write_gold` for every batch) is surprisingly expensive. It performs type inspection and object creation each time.
+**Action:** Cache schema columns in `__init__` if the schema is immutable for the lifetime of the component. This avoids redundant computation in the loop.
