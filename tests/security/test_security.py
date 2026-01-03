@@ -461,7 +461,7 @@ class TestPathTraversal:
 
         for py_file in SRC_DIR.rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
-            for pattern, dangerous_pattern in enumerate(dangerous_patterns):
+            for dangerous_pattern in dangerous_patterns:
                 if re.search(dangerous_pattern, content):
                     rel_path = py_file.relative_to(PROJECT_ROOT)
                     violations.append(f"{rel_path}: Potential path traversal")
