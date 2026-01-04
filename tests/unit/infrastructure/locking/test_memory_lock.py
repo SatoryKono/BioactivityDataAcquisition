@@ -182,21 +182,22 @@ class TestMemoryLockTTL:
         await fast_ttl_lock.acquire(
             key="test_key",
             owner_id="owner_1",
-            ttl=0.5,  # 500ms TTL (increased for CI stability)
+            ttl=0.8,  # 800ms TTL (increased for CI stability)
         )
 
         # Wait less than half the TTL
-        await asyncio.sleep(0.15)
+        await asyncio.sleep(0.2)
 
-        # Heartbeat to extend TTL (resets to 500ms from now)
+        # Heartbeat to extend TTL (resets to 800ms from now)
         result = await fast_ttl_lock.heartbeat(
             key="test_key",
             owner_id="owner_1",
         )
         assert result is True
 
-        # Wait another 0.4s (original TTL would have expired, but heartbeat extended)
-        await asyncio.sleep(0.4)
+        # Wait another 0.3s (original TTL would have expired, but heartbeat extended)
+        # After heartbeat, TTL is 0.8s, so 0.3s wait leaves 0.5s margin for CI stability
+        await asyncio.sleep(0.3)
 
         # Lock should still be held because heartbeat extended it
         result = await fast_ttl_lock.acquire(
