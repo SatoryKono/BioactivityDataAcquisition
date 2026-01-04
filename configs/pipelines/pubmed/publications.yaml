@@ -52,8 +52,9 @@ sink:
       path: "data/output/csv/gold"
 
 # Entity-specific input filter
+# NOTE: Disabled - PubMed adapter does not implement FilterableDataSourcePort
 input_filter:
-  enabled: true
+  enabled: false
   source_path: "data/input/pubmed.csv"
   column_name: "pubmed_id"
   filter_field: "pmid"
