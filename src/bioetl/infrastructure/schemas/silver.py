@@ -379,6 +379,30 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Document Term
+# Derived entity extracted from Document records
+# See: https://www.ebi.ac.uk/chembl/api/data/document
+CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Composite key fields
+        pa.field("document_chembl_id", pa.string()),
+        pa.field("term", pa.string()),
+        pa.field("term_type", pa.string()),
+        # MeSH-specific fields
+        pa.field("mesh_id", pa.string()),
+        pa.field("qualifier", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for ChEMBL Molecule
 # See: https://www.ebi.ac.uk/chembl/api/data/molecule
 CHEMBL_MOLECULE_SCHEMA = pa.schema(

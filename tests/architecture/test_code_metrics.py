@@ -43,6 +43,7 @@ class TestFileSizeLimits:
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
+        "chembl_structures.py": 350,  # 324 LOC - ChEMBL structural entities
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
         # Domain value objects (rich domain models with validation)
@@ -65,6 +66,7 @@ class TestFileSizeLimits:
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 520,  # 517 LOC - merged generic_factory + runner_assembly
+        "pipeline_factories.py": 420,  # 406 LOC - pipeline factory configurations
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation

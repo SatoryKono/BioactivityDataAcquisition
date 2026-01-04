@@ -8,6 +8,9 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+from bioetl.application.pipelines.chembl.document_term_transformer import (
+    DocumentTermTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
@@ -802,3 +805,210 @@ class TestTargetComponentTransformer:
         result_empty = await transformer.transform(mock_context, record_empty, index=0)
         assert result_empty is not None
         assert result_empty.get("protein_classification_ids") is None
+
+
+@pytest.mark.unit
+class TestDocumentTermTransformer:
+    """Tests for DocumentTermTransformer."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create DocumentTermTransformer instance."""
+        return DocumentTermTransformer(provider="chembl")
+
+    def test_extract_mesh_terms(self, transformer):
+        """Test extraction of MeSH terms from document record."""
+        record = {
+            "document_chembl_id": "CHEMBL1135642",
+            "mesh_terms": [
+                {
+                    "mesh_id": "D001241",
+                    "mesh_heading": "Aspirin",
+                    "mesh_qualifier": "pharmacology",
+                },
+                {
+                    "mesh_id": "D006801",
+                    "mesh_heading": "Humans",
+                },
+            ],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1135642")
+
+        # Should extract 3 terms: 2 headings + 1 qualifier
+        assert len(terms) == 3
+
+        # Check first MeSH heading
+        aspirin_heading = next(
+            t
+            for t in terms
+            if t["term"] == "Aspirin" and t["term_type"] == "MESH_HEADING"
+        )
+        assert aspirin_heading["document_chembl_id"] == "CHEMBL1135642"
+        assert aspirin_heading["mesh_id"] == "D001241"
+        assert aspirin_heading["qualifier"] == "pharmacology"
+
+        # Check MeSH qualifier extracted as separate term
+        qualifier_term = next(
+            t
+            for t in terms
+            if t["term"] == "pharmacology" and t["term_type"] == "MESH_QUALIFIER"
+        )
+        assert qualifier_term["document_chembl_id"] == "CHEMBL1135642"
+
+        # Check second MeSH heading (no qualifier)
+        humans_heading = next(
+            t
+            for t in terms
+            if t["term"] == "Humans" and t["term_type"] == "MESH_HEADING"
+        )
+        assert humans_heading["mesh_id"] == "D006801"
+        assert humans_heading["qualifier"] is None
+
+    def test_extract_keywords(self, transformer):
+        """Test extraction of keywords from document record."""
+        record = {
+            "document_chembl_id": "CHEMBL1135642",
+            "keywords": ["aspirin", "anti-inflammatory", "COX inhibitor"],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1135642")
+
+        assert len(terms) == 3
+
+        for term in terms:
+            assert term["term_type"] == "KEYWORD"
+            assert term["document_chembl_id"] == "CHEMBL1135642"
+            assert term["mesh_id"] is None
+            assert term["qualifier"] is None
+
+        term_texts = [t["term"] for t in terms]
+        assert "aspirin" in term_texts
+        assert "anti-inflammatory" in term_texts
+        assert "COX inhibitor" in term_texts
+
+    def test_extract_mixed_terms(self, transformer):
+        """Test extraction of both MeSH and keywords from document."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "mesh_terms": [
+                {"mesh_id": "D001241", "mesh_heading": "Aspirin"},
+            ],
+            "keywords": ["kinase inhibitor"],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        assert len(terms) == 2
+
+        mesh_terms = [t for t in terms if t["term_type"] == "MESH_HEADING"]
+        keyword_terms = [t for t in terms if t["term_type"] == "KEYWORD"]
+
+        assert len(mesh_terms) == 1
+        assert len(keyword_terms) == 1
+
+    def test_extract_empty_terms(self, transformer):
+        """Test extraction from document with no terms."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "mesh_terms": [],
+            "keywords": [],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        assert len(terms) == 0
+
+    def test_extract_null_terms(self, transformer):
+        """Test extraction from document with null term arrays."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "mesh_terms": None,
+            "keywords": None,
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        assert len(terms) == 0
+
+    def test_extract_terms_with_whitespace(self, transformer):
+        """Test that keyword terms are stripped of whitespace."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "keywords": ["  aspirin  ", " kinase inhibitor "],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        assert len(terms) == 2
+        assert terms[0]["term"] == "aspirin"
+        assert terms[1]["term"] == "kinase inhibitor"
+
+    def test_compute_term_entity_id_deterministic(self, transformer):
+        """Test that entity ID computation is deterministic."""
+        id1 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "Aspirin")
+        id2 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "Aspirin")
+
+        assert id1 == id2
+        assert len(id1) == 16  # First 16 chars of SHA256
+
+    def test_compute_term_entity_id_case_insensitive(self, transformer):
+        """Test that entity ID is case-insensitive for term text."""
+        id1 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "Aspirin")
+        id2 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "aspirin")
+        id3 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "ASPIRIN")
+
+        assert id1 == id2 == id3
+
+    def test_compute_term_entity_id_different_for_different_types(self, transformer):
+        """Test that different term types produce different IDs."""
+        id_heading = transformer.compute_term_entity_id(
+            "CHEMBL123", "MESH_HEADING", "aspirin"
+        )
+        id_keyword = transformer.compute_term_entity_id(
+            "CHEMBL123", "KEYWORD", "aspirin"
+        )
+
+        assert id_heading != id_keyword
+
+    def test_compute_term_entity_id_different_for_different_documents(
+        self, transformer
+    ):
+        """Test that different documents produce different IDs."""
+        id1 = transformer.compute_term_entity_id("CHEMBL123", "KEYWORD", "aspirin")
+        id2 = transformer.compute_term_entity_id("CHEMBL456", "KEYWORD", "aspirin")
+
+        assert id1 != id2
+
+    def test_skip_empty_keywords(self, transformer):
+        """Test that empty string keywords are skipped."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "keywords": ["aspirin", "", "  ", "kinase"],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        # Only "aspirin" and "kinase" should be extracted
+        assert len(terms) == 2
+        term_texts = [t["term"] for t in terms]
+        assert "aspirin" in term_texts
+        assert "kinase" in term_texts
+
+    def test_skip_non_dict_mesh_terms(self, transformer):
+        """Test that non-dict entries in mesh_terms are skipped."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "mesh_terms": [
+                {"mesh_id": "D001241", "mesh_heading": "Aspirin"},
+                "invalid_string",  # Should be skipped
+                None,  # Should be skipped
+                123,  # Should be skipped
+            ],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        # Only the valid dict should be processed
+        assert len(terms) == 1
+        assert terms[0]["term"] == "Aspirin"
