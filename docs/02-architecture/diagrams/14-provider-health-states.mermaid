@@ -87,27 +87,27 @@ stateDiagram-v2
     %% Provider-specific configurations section
 
     state ProviderSpecificBehavior {
-        state "ChEMBL" as ChEMBL {
-            ChEMBL: Rate Limit = None
-            ChEMBL: Health = /status.json
-            ChEMBL: Batch = 1000 records
+        state ChEMBLProvider {
+            ChEMBLProvider: Rate Limit = None
+            ChEMBLProvider: Health = /status.json
+            ChEMBLProvider: Batch = 1000 records
         }
 
-        state "PubChem" as PubChem {
-            PubChem: Rate Limit = 5 req/sec
-            PubChem: Health = compound probe
-            PubChem: Batch = 100 compounds
+        state PubChemProvider {
+            PubChemProvider: Rate Limit = 5 req/sec
+            PubChemProvider: Health = compound probe
+            PubChemProvider: Batch = 100 compounds
         }
 
-        state "UniProt" as UniProt {
-            UniProt: Rate Limit = 100 req/sec (API key)
-            UniProt: Health = search probe
-            UniProt: Batch = 500 proteins
+        state UniProtProvider {
+            UniProtProvider: Rate Limit = 100 req/sec
+            UniProtProvider: Health = search probe
+            UniProtProvider: Batch = 500 proteins
         }
 
-        state "PubMed" as PubMed {
-            PubMed: Rate Limit = 3 req/sec (10 w/ key)
-            PubMed: Health = efetch probe
-            PubMed: Batch = 200 articles
+        state PubMedProvider {
+            PubMedProvider: Rate Limit = 3 req/sec
+            PubMedProvider: Health = efetch probe
+            PubMedProvider: Batch = 200 articles
         }
     }

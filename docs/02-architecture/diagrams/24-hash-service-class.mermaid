@@ -49,48 +49,12 @@ classDiagram
     %% Implementation flow
     class HashFlow {
         <<flowchart>>
-        1. Input: provider + raw_data
-        2. Filter: remove '_' prefixed keys
-        3. Normalize: apply value rules
-        4. Serialize: canonical JSON
-        5. Hash: SHA256
-        6. Output: ContentHash (64 hex chars)
+        1_Input: provider + raw_data
+        2_Filter: remove underscore prefixed keys
+        3_Normalize: apply value rules
+        4_Serialize: canonical JSON
+        5_Hash: SHA256
+        6_Output: ContentHash 64 hex chars
     }
 
     ContentHashService --> HashFlow : implements
-
-    %% Example
-    class Example {
-        <<example>>
-        Input:
-          provider = "chembl"
-          data = {
-            "activity_id": "CHEMBL123",
-            "standard_value": 3.14159265358979,
-            "_run_id": "abc-123",
-            "measured_at": "2024-01-15"
-          }
-
-        After filter:
-          {
-            "activity_id": "CHEMBL123",
-            "standard_value": 3.14159265358979,
-            "measured_at": "2024-01-15"
-          }
-
-        After normalize:
-          {
-            "activity_id": "CHEMBL123",
-            "standard_value": 3.1415926536,
-            "measured_at": "2024-01-15"
-          }
-
-        Canonical JSON:
-          {"activity_id":"CHEMBL123","measured_at":"2024-01-15","standard_value":3.1415926536}
-
-        Hash Input:
-          "chembl" + canonical_json
-
-        Output:
-          "a1b2c3d4e5f6..." (64 hex chars)
-    }

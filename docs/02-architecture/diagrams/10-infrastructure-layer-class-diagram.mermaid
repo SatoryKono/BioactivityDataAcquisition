@@ -54,8 +54,8 @@ classDiagram
         class RetryPolicy {
             +max_retries: int = 3
             +backoff_factor: float = 2.0
-            +jitter_range: tuple = (0.1, 0.5)
-            +retriable_status_codes: set = {429, 500, 502, 503, 504}
+            +jitter_range: tuple
+            +retriable_status_codes: set
             +calculate_delay(attempt) float
         }
     }
