@@ -84,30 +84,14 @@ stateDiagram-v2
         • Requires successful health_check
     end note
 
-    %% Provider-specific configurations section
+    %% Provider-specific configurations
+    note right of ProviderSpecificBehavior
+        ChEMBL: No rate limit, /status.json, 1000 records
+        PubChem: 5 req/sec, compound probe, 100 compounds
+        UniProt: 100 req/sec, search probe, 500 proteins
+        PubMed: 3 req/sec, efetch probe, 200 articles
+    end note
 
     state ProviderSpecificBehavior {
-        state ChEMBLProvider {
-            ChEMBLProvider: Rate Limit = None
-            ChEMBLProvider: Health = /status.json
-            ChEMBLProvider: Batch = 1000 records
-        }
-
-        state PubChemProvider {
-            PubChemProvider: Rate Limit = 5 req/sec
-            PubChemProvider: Health = compound probe
-            PubChemProvider: Batch = 100 compounds
-        }
-
-        state UniProtProvider {
-            UniProtProvider: Rate Limit = 100 req/sec
-            UniProtProvider: Health = search probe
-            UniProtProvider: Batch = 500 proteins
-        }
-
-        state PubMedProvider {
-            PubMedProvider: Rate Limit = 3 req/sec
-            PubMedProvider: Health = efetch probe
-            PubMedProvider: Batch = 200 articles
-        }
+        [*] --> ConfiguredProviders
     }
