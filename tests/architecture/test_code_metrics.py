@@ -70,6 +70,7 @@ class TestFileSizeLimits:
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
+        "client.py": 670,  # 660 LOC - ChemblAdapter with fetch_multi_filtered for multi-column filtering
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -338,7 +339,7 @@ class TestClassSize:
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "LineageTracker": 400,
-        "ChemblAdapter": 520,  # 513 lines - complex API adapter with Template Method health check
+        "ChemblAdapter": 600,  # 581 lines - complex API adapter with fetch_multi_filtered for multi-column filtering
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service

@@ -66,7 +66,9 @@ class TestInputFilterConfigValidation:
     def test_enabled_without_column_name_raises(self):
         """Test that enabled=True without column_name or columns raises ValueError."""
         with pytest.raises(
-            ValueError, match="Either columns list or column_name/filter_field"
+            ValueError,
+            match="Either columns list or column_name/filter_field is required "
+            "when filter is enabled",
         ):
             InputFilterConfig(
                 enabled=True,
@@ -78,7 +80,9 @@ class TestInputFilterConfigValidation:
     def test_enabled_without_filter_field_raises(self):
         """Test that enabled=True without filter_field or columns raises ValueError."""
         with pytest.raises(
-            ValueError, match="Either columns list or column_name/filter_field"
+            ValueError,
+            match="Either columns list or column_name/filter_field is required "
+            "when filter is enabled",
         ):
             InputFilterConfig(
                 enabled=True,

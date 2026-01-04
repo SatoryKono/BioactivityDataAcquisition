@@ -2,54 +2,88 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
+from bioetl.domain.ports import FilterableDataSourcePort
 from bioetl.domain.types import HealthStatus
+
+
+class MockDataSource:
+    """Mock data source that does NOT implement FilterableDataSourcePort.
+
+    Tracks method calls for test assertions.
+    """
+
+    provider_name = "chembl"
+
+    def __init__(self):
+        self.__aenter__ = AsyncMock(return_value=self)
+        self.__aexit__ = AsyncMock(return_value=None)
+        self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        self.aclose = AsyncMock()
+
+    async def fetch(self, *args, **kwargs):
+        for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
+            yield record
+
+
+class MockFilterableDataSource:
+    """Mock data source that implements FilterableDataSourcePort.
+
+    Tracks method calls for test assertions.
+    """
+
+    provider_name = "chembl"
+
+    def __init__(self):
+        self.__aenter__ = AsyncMock(return_value=self)
+        self.__aexit__ = AsyncMock(return_value=None)
+        self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        self.aclose = AsyncMock()
+
+    async def fetch(self, *args, **kwargs):
+        for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
+            yield record
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ):
+        for record in [{"id": "filtered_1"}, {"id": "filtered_2"}]:
+            yield record
+
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ):
+        for record in [{"id": "multi_1"}, {"id": "multi_2"}]:
+            yield record
+
+
+# Verify the mock properly implements the Protocol
+assert isinstance(MockFilterableDataSource(), FilterableDataSourcePort)
 
 
 @pytest.fixture
 def mock_data_source():
-    """Create a mock data source."""
-    source = AsyncMock()
-    source.provider_name = "chembl"
-
-    async def mock_fetch(*args, **kwargs):
-        for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
-            yield record
-
-    source.fetch = mock_fetch
-    source.__aenter__ = AsyncMock(return_value=source)
-    source.__aexit__ = AsyncMock(return_value=None)
-    source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
-    source.aclose = AsyncMock()
-    return source
+    """Create a mock data source (does NOT implement FilterableDataSourcePort)."""
+    return MockDataSource()
 
 
 @pytest.fixture
 def mock_data_source_with_filtered():
     """Create a mock data source with fetch_filtered support."""
-    source = AsyncMock()
-    source.provider_name = "chembl"
-
-    async def mock_fetch(*args, **kwargs):
-        for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
-            yield record
-
-    async def mock_fetch_filtered(*args, **kwargs):
-        for record in [{"id": "filtered_1"}, {"id": "filtered_2"}]:
-            yield record
-
-    source.fetch = mock_fetch
-    source.fetch_filtered = mock_fetch_filtered
-    source.__aenter__ = AsyncMock(return_value=source)
-    source.__aexit__ = AsyncMock(return_value=None)
-    source.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
-    source.aclose = AsyncMock()
-    return source
+    return MockFilterableDataSource()
 
 
 @pytest.fixture

@@ -61,17 +61,22 @@ class InputFilterConfig:
             raise ValueError("source_path is required when filter is enabled")
         # Either columns list or single column_name/filter_field must be provided
         if self.columns:
-            # Multi-column mode - validation done via columns
-            for col in self.columns:
-                if not col.column_name or not col.filter_field:
-                    raise ValueError(
-                        "Each column must have column_name and filter_field"
-                    )
-        elif not self.column_name or not self.filter_field:
+            self._validate_columns()
+        elif not self._has_single_column_config():
             raise ValueError(
                 "Either columns list or column_name/filter_field is required "
                 "when filter is enabled"
             )
+
+    def _has_single_column_config(self) -> bool:
+        """Check if single-column configuration is complete."""
+        return bool(self.column_name and self.filter_field)
+
+    def _validate_columns(self) -> None:
+        """Validate multi-column configuration."""
+        for col in self.columns:
+            if not col.column_name or not col.filter_field:
+                raise ValueError("Each column must have column_name and filter_field")
 
     def _validate_batch_size(self) -> None:
         """Validate the batch_size is within a reasonable range."""

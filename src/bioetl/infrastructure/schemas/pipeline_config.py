@@ -195,9 +195,9 @@ class InputFilterConfig(BaseModel):
             enabled=self.enabled,
             source_path=self.source_path,
             column_name=self.column_name if self.enabled and not self.columns else None,
-            filter_field=self.filter_field
-            if self.enabled and not self.columns
-            else None,
+            filter_field=(
+                self.filter_field if self.enabled and not self.columns else None
+            ),
             columns=domain_columns,
             batch_size=self.batch_size,
         )
