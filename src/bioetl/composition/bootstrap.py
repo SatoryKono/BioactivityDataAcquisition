@@ -153,11 +153,13 @@ def bootstrap_pipeline(
     )
 
     # Build filter config using the dedicated builder or CLI input_filter
+    # In test mode, YAML-based filters are disabled to allow E2E tests to run
     filter_config = FilterConfigBuilder.build(
         yaml_filter=yaml_config.input_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
         cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
         cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
+        test_mode=settings.test_mode,
     )
 
     if filter_config:
