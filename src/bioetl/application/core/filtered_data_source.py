@@ -108,9 +108,11 @@ class FilteredDataSource:
             columns = self._filter_config.get_columns()
             if len(columns) > 1:
                 # Multi-column mode: load all columns
-                self._filter_result = await self._filter_reader.load_multi_column_filter(
-                    source_path=source_path,
-                    columns=list(columns),
+                self._filter_result = (
+                    await self._filter_reader.load_multi_column_filter(
+                        source_path=source_path,
+                        columns=list(columns),
+                    )
                 )
                 # Convert to mutable dict for API calls
                 self._multi_filter_ids = {
@@ -214,6 +216,51 @@ class FilteredDataSource:
         )
         return record_values in self._valid_combinations
 
+    def _ensure_filterable_adapter(self, mode: str) -> None:
+        """Check that adapter implements FilterableDataSourcePort."""
+        if not isinstance(self._data_source, FilterableDataSourcePort):
+            raise TypeError(
+                f"Adapter {self._data_source.provider_name} does not implement "
+                f"FilterableDataSourcePort. {mode} requires an adapter with "
+                "fetch_filtered() method."
+            )
+
+    async def _fetch_multi_column(
+        self, entity_type: str, limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with multi-column filtering (hybrid approach)."""
+        self._ensure_filterable_adapter("Multi-column filtering")
+        fetched_count = 0
+        async for record in self._data_source.fetch_multi_filtered(
+            entity_type=entity_type,
+            filters=dict(self._multi_filter_ids),  # type: ignore[arg-type]
+            limit=None,  # Don't limit server-side, we filter client-side
+        ):
+            if self._matches_valid_combination(record):
+                yield record
+                fetched_count += 1
+                if limit and fetched_count >= limit:
+                    return
+
+    async def _fetch_single_column(
+        self, entity_type: str, limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with single-column filtering."""
+        self._ensure_filterable_adapter("Filtering")
+        config_filter_field = self._filter_config.filter_field
+        if config_filter_field is None:
+            raise ValueError(
+                "filter_field must be specified in InputFilterConfig "
+                "when filtering is enabled."
+            )
+        async for record in self._data_source.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=self._filter_ids,  # type: ignore[arg-type]
+            filter_field=config_filter_field,
+            limit=limit,
+        ):
+            yield record
+
     async def fetch(
         self,
         entity_type: str,
@@ -227,10 +274,6 @@ class FilteredDataSource:
         If filtering is enabled and filter IDs are loaded, uses the adapter's
         fetch_filtered() method if available. Otherwise, delegates to standard fetch().
 
-        For multi-column filtering, uses Hybrid Filtering approach:
-        - Server-side: API request with multiple __in filters (coarse filter)
-        - Client-side: Filter results to match only exact row-wise combinations
-
         Args:
             entity_type: Type of entity to fetch.
             limit: Maximum number of records.
@@ -241,77 +284,19 @@ class FilteredDataSource:
         Yields:
             Records from the data source, filtered if configured.
 
-        Raises:
-            TypeError: If filtering is enabled but the adapter doesn't support
-                fetch_filtered() method.
-
         """
-        # Note: External filter_ids/filter_field are ignored -
-        # this class manages its own filter state from InputFilterConfig
+        # Note: External filter_ids/filter_field are ignored
         _ = filter_ids, filter_field  # Mark as intentionally unused
 
-        # Multi-column filtering mode
         if self._filter_config.enabled and self._multi_filter_ids:
-            # Check if adapter implements FilterableDataSourcePort
-            if not isinstance(self._data_source, FilterableDataSourcePort):
-                raise TypeError(
-                    f"Adapter {self._data_source.provider_name} does not implement "
-                    "FilterableDataSourcePort. Filtering requires an adapter with "
-                    "fetch_multi_filtered() method."
-                )
-            # Check if adapter supports multi-filtered
-            if not hasattr(self._data_source, "fetch_multi_filtered"):
-                raise TypeError(
-                    f"Adapter {self._data_source.provider_name} does not implement "
-                    "fetch_multi_filtered() method for multi-column filtering."
-                )
-
-            # Server-side coarse filter + client-side precise filter
-            fetched_count = 0
-            async for record in self._data_source.fetch_multi_filtered(
-                entity_type=entity_type,
-                filters=dict(self._multi_filter_ids),
-                limit=None,  # Don't limit server-side, we filter client-side
-            ):
-                # Client-side: check if record matches exact combination
-                if self._matches_valid_combination(record):
-                    yield record
-                    fetched_count += 1
-                    if limit and fetched_count >= limit:
-                        return
-
-        # Single-column filtering mode
+            async for record in self._fetch_multi_column(entity_type, limit):
+                yield record
         elif self._filter_config.enabled and self._filter_ids:
-            # Check if adapter implements FilterableDataSourcePort or has fetch_filtered
-            if not isinstance(
-                self._data_source, FilterableDataSourcePort
-            ) and not hasattr(self._data_source, "fetch_filtered"):
-                raise TypeError(
-                    f"Adapter {self._data_source.provider_name} does not implement "
-                    "FilterableDataSourcePort. Filtering requires an adapter with "
-                    "fetch_filtered() method."
-                )
-            # Validate filter_field is set when filtering is enabled
-            config_filter_field = self._filter_config.filter_field
-            if config_filter_field is None:
-                raise ValueError(
-                    "filter_field must be specified in InputFilterConfig "
-                    "when filtering is enabled."
-                )
-            # Filtered fetch using adapter-specific method
-            async for record in self._data_source.fetch_filtered(
-                entity_type=entity_type,
-                filter_ids=self._filter_ids,
-                filter_field=config_filter_field,
-                limit=limit,
-            ):
+            async for record in self._fetch_single_column(entity_type, limit):
                 yield record
         else:
-            # Standard fetch: no filtering
             async for record in self._data_source.fetch(
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
+                entity_type=entity_type, limit=limit, query=query
             ):
                 yield record
 
