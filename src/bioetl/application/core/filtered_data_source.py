@@ -230,6 +230,7 @@ class FilteredDataSource:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch with multi-column filtering (hybrid approach)."""
         self._ensure_filterable_adapter("Multi-column filtering")
+        assert isinstance(self._data_source, FilterableDataSourcePort)
         fetched_count = 0
         async for record in self._data_source.fetch_multi_filtered(
             entity_type=entity_type,
@@ -247,6 +248,7 @@ class FilteredDataSource:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch with single-column filtering."""
         self._ensure_filterable_adapter("Filtering")
+        assert isinstance(self._data_source, FilterableDataSourcePort)
         config_filter_field = self._filter_config.filter_field
         if config_filter_field is None:
             raise ValueError(
