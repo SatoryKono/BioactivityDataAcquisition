@@ -37,16 +37,11 @@ sequenceDiagram
 
         loop Retry loop (max 3 attempts)
             Adapter->>HTTP: request(method="GET", url="/activities", params)
-            activate HTTP
-
             HTTP->>API: GET /chembl/api/data/activity.json?...
-            activate API
 
             alt 200 OK
                 API-->>HTTP: JSON response
-                deactivate API
                 HTTP-->>Adapter: Response(status=200, data)
-                deactivate HTTP
 
                 Adapter->>CB: record_success()
                 Note right of CB: failure_count = 0
@@ -55,18 +50,14 @@ sequenceDiagram
 
             else 429 Rate Limited
                 API-->>HTTP: 429 + Retry-After header
-                deactivate API
                 HTTP-->>Adapter: Response(status=429)
-                deactivate HTTP
 
                 Note right of Adapter: Extract Retry-After value<br/>Default: 60 seconds
                 Adapter->>Adapter: await asyncio.sleep(retry_after)
 
             else 5xx Server Error (500, 502, 503, 504)
                 API-->>HTTP: 5xx error
-                deactivate API
                 HTTP-->>Adapter: Response(status=5xx)
-                deactivate HTTP
 
                 Adapter->>CB: record_failure()
                 Note right of CB: failure_count += 1
@@ -78,7 +69,6 @@ sequenceDiagram
 
             else Connection Error / Timeout
                 HTTP-->>Adapter: raise ConnectionError
-                deactivate HTTP
 
                 Adapter->>CB: record_failure()
                 Adapter->>Adapter: await asyncio.sleep(delay)
