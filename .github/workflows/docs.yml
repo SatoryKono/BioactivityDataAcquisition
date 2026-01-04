@@ -17,28 +17,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      - name: Install system dependencies for Puppeteer
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
+          node-version: '20'
 
       - name: Install Mermaid CLI
-        run: npm install -g @mermaid-js/mermaid-cli
-        env:
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+        run: npm install -g @mermaid-js/mermaid-cli@10.6.1
 
       - name: Create Puppeteer config
         run: |
           cat > /tmp/puppeteer-config.json << 'EOF'
           {
-            "executablePath": "/usr/bin/chromium-browser",
             "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
           }
           EOF
@@ -68,28 +60,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      - name: Install system dependencies for Puppeteer
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
+          node-version: '20'
 
       - name: Install Mermaid CLI
-        run: npm install -g @mermaid-js/mermaid-cli
-        env:
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+        run: npm install -g @mermaid-js/mermaid-cli@10.6.1
 
       - name: Create Puppeteer config
         run: |
           cat > /tmp/puppeteer-config.json << 'EOF'
           {
-            "executablePath": "/usr/bin/chromium-browser",
             "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
           }
           EOF
@@ -107,7 +91,7 @@ jobs:
           done
 
       - name: Upload rendered diagrams
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rendered-diagrams
           path: rendered-diagrams

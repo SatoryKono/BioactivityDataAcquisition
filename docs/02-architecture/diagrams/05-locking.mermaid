@@ -2,7 +2,7 @@
 sequenceDiagram
     title Pipeline Locking Mechanism (Local-Only)
 
-    Note right of Worker: Local-Only Deployment (ADR-010):<br/>Используется MemoryLock для локального<br/>процесса. Redis-блокировки отложены<br/>для будущего распределённого развёртывания.
+    Note right of Worker: Local-Only Deployment (ADR-010)
 
     participant Worker as Pipeline Worker
     participant LockManager as MemoryLock (In-Process)
@@ -34,4 +34,4 @@ sequenceDiagram
         end
     end
 
-    Note over Worker,Lake: Lock Max Duration: 4 hours<br/>После истечения - принудительное снятие
+    Note over Worker,Lake: Lock Max Duration: 4 hours
