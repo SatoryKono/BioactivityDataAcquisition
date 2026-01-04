@@ -354,7 +354,7 @@ class TestClassSize:
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
         # PubMed adapter (similar to ChEMBL adapter)
-        "PubMedAdapter": 360,  # 351 lines - HTTP adapter with Entrez API
+        "PubMedAdapter": 400,  # 373 lines - HTTP adapter with Entrez API + FilterableDataSourcePort
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
         "ErrorService": 500,  # ~480 lines - comprehensive error classification with detailed recovery logging
         # Domain services
@@ -493,6 +493,7 @@ class TestGodObjectDetection:
         "CrossRefAdapter": "HTTP adapter with internal helpers for batch resolution",
         "CrossRefTransformer": "Transformer with field extraction - single responsibility",
         "PubChemAdapter": "Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter, CircuitBreaker",
+        "PubMedAdapter": "HTTP adapter with FilterableDataSourcePort implementation; delegates to BaseHttpAdapter",
         "UnifiedHTTPClient": "HTTP client with internal retry logic; single responsibility",
         # CLI (inherently has many commands but delegates to entrypoints)
         "CLI": "CLI entry point - commands are cohesive, delegates to entrypoints",

@@ -4671,4 +4671,136 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=5&offset=0&format=json
+  response:
+    body:
+      string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
+        31863, "activity_properties": [], "assay_chembl_id": "CHEMBL663853", "assay_description":
+        "Inhibitory concentration against human DNA topoisomerase II, alpha mediated
+        relaxation of pBR322; no measurable activity", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "c1ccc(-c2nc3c(-c4nc5ccccc5o4)cccc3o2)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1137930", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL113081", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL113081", "pchembl_value": null,
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 206172, "relation": ">", "src_id": 1, "standard_flag": 1, "standard_relation":
+        ">", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "100000.0", "target_chembl_id":
+        "CHEMBL1806", "target_organism": "Homo sapiens", "target_pref_name": "DNA
+        topoisomerase 2-alpha", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "100.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        31864, "activity_properties": [], "assay_chembl_id": "CHEMBL872937", "assay_description":
+        "In vivo inhibitory activity against human Heparanase", "assay_type": "B",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000218", "bao_label": "organism-based format",
+        "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2004, "ligand_efficiency": {"bei": "14.06", "le": "0.26", "lle": "1.30", "sei":
+        "5.56"}, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": "5.60", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        208970, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "2500.0", "target_chembl_id":
+        "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
+        "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
+        "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value": "2.5"},
+        {"action_type": null, "activity_comment": null, "activity_id": 31865, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL693237", "assay_description": "In vivo concentration
+        required against angiogenesis in human endothelial cells", "assay_type": "F",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000218", "bao_label": "organism-based format",
+        "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL324340", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL324340", "pchembl_value": null,
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 208970, "relation": ">", "src_id": 1, "standard_flag": 1, "standard_relation":
+        ">", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "50000.0", "target_chembl_id":
+        "CHEMBL3879801", "target_organism": null, "target_pref_name": "NON-PROTEIN
+        TARGET", "target_tax_id": null, "text_value": null, "toid": null, "type":
+        "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "50.0"}, {"action_type": null, "activity_comment": null, "activity_id": 31866,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL872937", "assay_description":
+        "In vivo inhibitory activity against human Heparanase", "assay_type": "B",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000218", "bao_label": "organism-based format",
+        "canonical_smiles": "COc1ccccc1-c1ccc2oc(-c3ccc(OC)c(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2004, "ligand_efficiency": {"bei": "9.69", "le": "0.18", "lle": "-0.63", "sei":
+        "4.23"}, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": "5.05", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        208987, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "9000.0", "target_chembl_id":
+        "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
+        "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
+        "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value": "9.0"},
+        {"action_type": null, "activity_comment": "Not Determined", "activity_id":
+        31867, "activity_properties": [], "assay_chembl_id": "CHEMBL693238", "assay_description":
+        "In vivo concentration required against angiogenesis in human endothelial
+        cells; NT=Not tested", "assay_type": "F", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000218", "bao_label": "organism-based format", "canonical_smiles": "COc1ccccc1-c1ccc2oc(-c3ccc(OC)c(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1146658", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2004, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL109600", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL109600", "pchembl_value": null,
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 208987, "relation": null, "src_id": 1, "standard_flag": 0, "standard_relation":
+        null, "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": null, "target_chembl_id":
+        "CHEMBL3879801", "target_organism": null, "target_pref_name": "NON-PROTEIN
+        TARGET", "target_tax_id": null, "text_value": null, "toid": null, "type":
+        "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/activity.json?limit=5&offset=5",
+        "offset": 0, "previous": null, "total_count": 24267312}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '7336'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 04 Jan 2026 18:18:08 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.07887554168701172'
+    status:
+      code: 200
+      message: OK
 version: 1

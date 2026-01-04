@@ -202,9 +202,30 @@ class PubMedAdapter(BaseHttpAdapter):
                 msg="Assuming PMIDs",
             )
 
-        pmids = filter_ids[:limit] if limit else filter_ids
         async for record in self._yield_articles_from_pmids(pmids, limit):
             yield record
+
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Multi-field filtering not supported by PubMed API.
+
+        PubMed only supports single-field filtering by PMID.
+        Use fetch_filtered() for PMID-based filtering instead.
+
+        Raises:
+            NotImplementedError: Always, as PubMed doesn't support multi-field filtering.
+        """
+        # AsyncIterator requires yield before raise for proper generator creation
+        if False:  # pragma: no cover
+            yield {}  # Required for AsyncIterator type signature
+        raise NotImplementedError(
+            "PubMed API does not support multi-field filtering. "
+            "Use fetch_filtered() with filter_field='pmid' instead."
+        )
 
     async def fetch(
         self,
@@ -398,22 +419,6 @@ def _create_pubmed_adapter(
     settings: Settings | None,
     **kwargs: Any,
 ) -> PubMedAdapter:
-    """Custom creator для PubMed адаптера.
-
-    Обрабатывает логику получения email и api_key из settings.
-
-    Args:
-        http_client: HTTP клиент
-        logger: Логгер
-        settings: Настройки приложения
-        **kwargs: Дополнительные параметры (email, api_key, metrics)
-
-    Returns:
-        Инициализированный PubMedAdapter
-
-    Raises:
-        ValueError: Если email не указан и не найден в settings
-    """
     # Email: из kwargs или settings
     email = kwargs.get("email")
     if not email and settings:

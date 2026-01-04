@@ -416,6 +416,9 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         and "test" not in str(item.filename).lower()  # Ignore test files
         # Imports at 90% confidence in TYPE_CHECKING blocks are often false positives
         and not (item.typ == "import" and item.confidence < 100)
+        # Unreachable code used for AsyncIterator type signature (NotImplementedError pattern)
+        # Example: `if False: yield {}; raise NotImplementedError(...)`
+        and item.typ != "unreachable_code"
     ]
 
     if unused:
