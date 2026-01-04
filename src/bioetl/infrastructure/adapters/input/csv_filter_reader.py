@@ -141,9 +141,7 @@ class CsvFilterReader:
             filter_fields=list(filter_fields),
             total_rows=total_count,
             valid_combinations=len(valid_combinations),
-            unique_ids_per_field={
-                field: len(ids) for field, ids in column_ids.items()
-            },
+            unique_ids_per_field={field: len(ids) for field, ids in column_ids.items()},
         )
 
     async def load_multi_column_filter(
