@@ -25,27 +25,40 @@ class FilterConfigBuilder:
         cli_csv: str | None = None,
         cli_column: str | None = None,
         cli_field: str | None = None,
+        *,
+        test_mode: bool = False,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
         CLI arguments take precedence over YAML configuration for single-column mode.
         Filter is enabled if either:
         1. A CSV path is provided via CLI
-        2. The YAML config has enabled=True
+        2. The YAML config has enabled=True (ignored in test mode)
 
         Multi-column mode (columns list in YAML) is used as-is, CLI overrides ignored.
+
+        Note:
+            In test mode, YAML-based filters are disabled to allow E2E tests
+            to run without requiring actual filter CSV files. Only explicitly
+            provided CLI filters will be used in test mode.
 
         Args:
             yaml_filter: Filter configuration from pipeline YAML
             cli_csv: Optional CSV path from CLI (single-column mode only)
             cli_column: Optional column name from CLI (single-column mode only)
             cli_field: Optional filter field from CLI (single-column mode only)
+            test_mode: If True, YAML-based filters are disabled (from Settings.test_mode)
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
-        # Enable filter if: CLI provides --input-csv OR config has enabled=true
-        filter_enabled = bool(cli_csv) or yaml_filter.enabled
+        # In test mode, only enable filter if CLI explicitly provides --input-csv
+        # This allows E2E tests to run without actual filter CSV files
+        if test_mode:
+            filter_enabled = bool(cli_csv)
+        else:
+            # Enable filter if: CLI provides --input-csv OR config has enabled=true
+            filter_enabled = bool(cli_csv) or yaml_filter.enabled
 
         if not filter_enabled:
             return None
