@@ -202,7 +202,7 @@ class PubMedAdapter(BaseHttpAdapter):
                 msg="Assuming PMIDs",
             )
 
-        async for record in self._yield_articles_from_pmids(pmids, limit):
+        async for record in self._yield_articles_from_pmids(filter_ids, limit):
             yield record
 
     async def fetch_multi_filtered(

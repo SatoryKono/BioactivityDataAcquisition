@@ -1,25 +1,8 @@
-"""ChEMBL data source adapter.
+"""ChEMBL data source adapter implementing DataSourcePort.
 
-Implements DataSourcePort for ChEMBL database.
-See RULES.md Appendix A for rate limits and retry strategy.
-
-Uses chembl_webresource_client library for API access.
-
-Error Handling (RULES.md §3.1):
-- Critical errors: Fail immediately (401, 403)
-- Recoverable errors: Handled by UnifiedHTTPClient retry
-- Data quality errors: Log and skip record
-
-Health-Aware Fetching:
-- Uses circuit breaker state for health-aware batch sizing
-- HEALTHY: Normal batch_size
-- DEGRADED: batch_size ÷ 2 (per RULES.md §3.5)
-- UNHEALTHY: Fail fast with clear error
-
-DTO Support:
-- fetch_as_models(): Returns typed DTO models (ActivityRecord, AssayRecord, etc.)
-- fetch(): Returns raw dicts (backward compatible)
-- Use model_construct() for trusted data (skip validation)
+Uses chembl_webresource_client library. Error handling per RULES.md §3.1.
+Health-aware fetching: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=fail fast.
+DTO support via fetch_as_models() returning typed Pydantic models.
 """
 
 from __future__ import annotations
@@ -180,6 +163,36 @@ class ChemblAdapter(BaseHttpAdapter):
         """Split IDs into batches for API requests."""
         for i in range(0, len(ids), batch_size):
             yield ids[i : i + batch_size]
+
+    def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
+        """Build __in filter parameters for multi-field filtering."""
+        return {
+            f"{filter_field}__in": ",".join(ids)
+            for filter_field, ids in filters.items()
+            if ids
+        }
+
+    def _is_duplicate_record(
+        self,
+        record: dict[str, Any],
+        pk_field: str,
+        seen_ids: set[str],
+        entity_type: str,
+    ) -> bool:
+        """Check if record is duplicate and add to seen set if not."""
+        record_id = str(record.get(pk_field, ""))
+        if not record_id:
+            return False
+        if record_id in seen_ids:
+            self.logger.debug(
+                "skipping_duplicate_record",
+                entity_type=entity_type,
+                pk_field=pk_field,
+                record_id=record_id,
+            )
+            return True
+        seen_ids.add(record_id)
+        return False
 
     async def _fetch_page(
         self, url: str, params: dict[str, Any], entity_type: str
@@ -451,20 +464,15 @@ class ChemblAdapter(BaseHttpAdapter):
             Dictionary records matching ALL filter criteria
 
         """
+        filter_params = self._build_filter_in_params(filters)
+        if not filter_params:
+            return
+
         url = self._mapper.get_resource_url(entity_type)
+        pk_field = self._mapper.get_primary_key_field(entity_type)
         offset = 0
         total_fetched = 0
         seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-
-        # Build __in params for all filter fields
-        filter_params: dict[str, str] = {}
-        for filter_field, ids in filters.items():
-            if ids:
-                filter_params[f"{filter_field}__in"] = ",".join(ids)
-
-        if not filter_params:
-            return
 
         while True:
             params = self._build_params(offset)
@@ -475,17 +483,8 @@ class ChemblAdapter(BaseHttpAdapter):
                 break
 
             for record in records:
-                record_id = str(record.get(pk_field, ""))
-                if record_id and record_id in seen_ids:
-                    self.logger.debug(
-                        "skipping_duplicate_record",
-                        entity_type=entity_type,
-                        pk_field=pk_field,
-                        record_id=record_id,
-                    )
+                if self._is_duplicate_record(record, pk_field, seen_ids, entity_type):
                     continue
-                if record_id:
-                    seen_ids.add(record_id)
                 yield record
                 total_fetched += 1
                 if limit and total_fetched >= limit:
