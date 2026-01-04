@@ -66,7 +66,7 @@ Storage writers implementing `StoragePort`:
 Observability infrastructure:
 
 - `PrometheusMetrics` - Prometheus metrics exporter
-- `NoOpTracing` - Null Object Pattern tracing (see [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md))
+- `NoOpTracing` - Null Object Pattern tracing (see [ADR-022](../../02-architecture/decisions/ADR-022-tracing-noop.md))
 - `StructlogLogger` - Structured logging
 - `LineageTracker` - Data lineage tracking
 
