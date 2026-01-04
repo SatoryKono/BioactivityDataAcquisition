@@ -255,7 +255,7 @@ class FilteredDataSource:
                 "filter_field must be specified in InputFilterConfig "
                 "when filtering is enabled."
             )
-        async for record in filterable.fetch_filtered(
+        async for record in self._data_source.fetch_filtered(
             entity_type=entity_type,
             filter_ids=self._filter_ids,  # type: ignore[arg-type]
             filter_field=config_filter_field,
