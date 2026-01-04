@@ -45,9 +45,12 @@ sink:
       path: "data/output/csv/gold"
 
 # Entity-specific input filter
+# NOTE: Disabled because ChEMBL API doesn't support filtering by record_id.
+# To filter, use molecule_chembl_id in a CSV file instead.
 input_filter:
-  enabled: true
-  source_path: "data/input/compound_record.csv"
-  column_name: "record_id"
-  filter_field: "record_id"
+  enabled: false
+  source_path: "data/input/molecule.csv"
+  column_name: "molecule_chembl_id"
+  filter_field: "molecule_chembl_id"
   batch_size: 20
+
