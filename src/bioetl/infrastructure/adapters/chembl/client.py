@@ -427,6 +427,74 @@ class ChemblAdapter(BaseHttpAdapter):
         ):
             yield record
 
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from ChEMBL with multiple filter fields (AND logic).
+
+        Implements FilterableDataSourcePort.fetch_multi_filtered().
+
+        Makes requests with multiple __in parameters, e.g.:
+        ?molecule_chembl_id__in=CHEMBL25,CHEMBL26&document_chembl_id__in=CHEMBL1123
+
+        ChEMBL API returns records matching ALL filter conditions (AND logic).
+
+        Args:
+            entity_type: Type of entity to fetch
+            filters: Mapping from filter_field to list of IDs
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records matching ALL filter criteria
+
+        """
+        url = self._mapper.get_resource_url(entity_type)
+        offset = 0
+        total_fetched = 0
+        seen_ids: set[str] = set()
+        pk_field = self._mapper.get_primary_key_field(entity_type)
+
+        # Build __in params for all filter fields
+        filter_params: dict[str, str] = {}
+        for field, ids in filters.items():
+            if ids:
+                filter_params[f"{field}__in"] = ",".join(ids)
+
+        if not filter_params:
+            return
+
+        while True:
+            params = self._build_params(offset)
+            params.update(filter_params)
+
+            records, has_next = await self._fetch_page(url, params, entity_type)
+            if not records:
+                break
+
+            for record in records:
+                record_id = str(record.get(pk_field, ""))
+                if record_id and record_id in seen_ids:
+                    self.logger.debug(
+                        "skipping_duplicate_record",
+                        entity_type=entity_type,
+                        pk_field=pk_field,
+                        record_id=record_id,
+                    )
+                    continue
+                if record_id:
+                    seen_ids.add(record_id)
+                yield record
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
+
+            if not has_next:
+                break
+            offset += len(records)
+
     async def fetch_as_models(
         self,
         entity_type: str,

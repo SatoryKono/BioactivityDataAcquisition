@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.filtering import FilterColumn, InputFilterConfig
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import (
@@ -28,35 +28,58 @@ class FilterConfigBuilder:
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
-        CLI arguments take precedence over YAML configuration.
+        CLI arguments take precedence over YAML configuration for single-column mode.
         Filter is enabled if either:
         1. A CSV path is provided via CLI
         2. The YAML config has enabled=True
 
+        Multi-column mode (columns list in YAML) is used as-is, CLI overrides ignored.
+
         Args:
             yaml_filter: Filter configuration from pipeline YAML
-            cli_csv: Optional CSV path from CLI
-            cli_column: Optional column name from CLI
-            cli_field: Optional filter field from CLI
+            cli_csv: Optional CSV path from CLI (single-column mode only)
+            cli_column: Optional column name from CLI (single-column mode only)
+            cli_field: Optional filter field from CLI (single-column mode only)
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
-        # Determine effective values: CLI > YAML config
-        effective_csv = cli_csv or yaml_filter.source_path
-        effective_column = cli_column or yaml_filter.column_name
-        effective_field = cli_field or yaml_filter.filter_field
-
         # Enable filter if: CLI provides --input-csv OR config has enabled=true
         filter_enabled = bool(cli_csv) or yaml_filter.enabled
 
-        if filter_enabled and effective_csv:
+        if not filter_enabled:
+            return None
+
+        # Determine effective CSV path
+        effective_csv = cli_csv or yaml_filter.source_path
+        if not effective_csv:
+            return None
+
+        # Check for multi-column mode (columns list in YAML)
+        if yaml_filter.columns and not cli_csv:
+            # Multi-column mode: use YAML config as-is
+            domain_columns = tuple(
+                FilterColumn(
+                    column_name=col.column_name,
+                    filter_field=col.filter_field,
+                )
+                for col in yaml_filter.columns
+            )
             return InputFilterConfig(
                 enabled=True,
                 source_path=effective_csv,
-                column_name=effective_column,
-                filter_field=effective_field,
+                columns=domain_columns,
                 batch_size=yaml_filter.batch_size,
             )
 
-        return None
+        # Single-column mode: CLI > YAML config
+        effective_column = cli_column or yaml_filter.column_name
+        effective_field = cli_field or yaml_filter.filter_field
+
+        return InputFilterConfig(
+            enabled=True,
+            source_path=effective_csv,
+            column_name=effective_column,
+            filter_field=effective_field,
+            batch_size=yaml_filter.batch_size,
+        )

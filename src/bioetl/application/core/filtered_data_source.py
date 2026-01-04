@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Self
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Mapping
 
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, InputFilterPort, MetricsPort
@@ -29,6 +29,11 @@ class FilteredDataSource:
     2. Calls fetch_filtered() on adapters that support it (e.g., ChemblAdapter)
     3. Delegates all other operations to the wrapped adapter
     4. Records metrics about loaded IDs and duplicates
+
+    Multi-column filtering (AND logic):
+    When multiple columns are specified, the wrapper uses Hybrid Filtering:
+    - Server-side: API request with multiple __in filters (coarse filter)
+    - Client-side: Filter results to match only exact row-wise combinations
 
     Note:
         Filtering requires the underlying adapter to implement FilterableDataSourcePort.
@@ -74,6 +79,10 @@ class FilteredDataSource:
         self._pipeline_name = pipeline_name
         self._filter_ids: list[str] | None = None
         self._filter_result: FilterLoadResult | None = None
+        # Multi-column filtering state
+        self._multi_filter_ids: Mapping[str, list[str]] | None = None
+        self._valid_combinations: frozenset[tuple[str, ...]] | None = None
+        self._filter_fields: tuple[str, ...] | None = None
 
     @property
     def provider_name(self) -> str:
@@ -90,20 +99,39 @@ class FilteredDataSource:
         await self._data_source.__aenter__()
 
         # Pre-load filter IDs from CSV
-        if (
-            self._filter_config.enabled
-            and self._filter_reader
-            and self._filter_config.source_path
-            and self._filter_config.column_name
-        ):
-            self._filter_result = await self._filter_reader.load_filter_ids(
-                source_path=self._filter_config.source_path,
-                column_name=self._filter_config.column_name,
-            )
-            self._filter_ids = list(self._filter_result.ids)
+        if self._filter_config.enabled and self._filter_reader:
+            source_path = self._filter_config.source_path
+            if not source_path:
+                return self
 
-            # Record metrics
-            self._record_filter_metrics()
+            # Check if multi-column mode
+            columns = self._filter_config.get_columns()
+            if len(columns) > 1:
+                # Multi-column mode: load all columns
+                self._filter_result = await self._filter_reader.load_multi_column_filter(
+                    source_path=source_path,
+                    columns=list(columns),
+                )
+                # Convert to mutable dict for API calls
+                self._multi_filter_ids = {
+                    field: list(ids)
+                    for field, ids in self._filter_result.column_ids.items()
+                }
+                self._valid_combinations = self._filter_result.valid_combinations
+                self._filter_fields = self._filter_result.filter_fields
+
+                # Record metrics
+                self._record_multi_filter_metrics()
+            elif self._filter_config.column_name:
+                # Single-column mode (backward compatibility)
+                self._filter_result = await self._filter_reader.load_filter_ids(
+                    source_path=source_path,
+                    column_name=self._filter_config.column_name,
+                )
+                self._filter_ids = list(self._filter_result.ids)
+
+                # Record metrics
+                self._record_filter_metrics()
 
         return self
 
@@ -129,6 +157,33 @@ class FilteredDataSource:
                 {"pipeline": self._pipeline_name, "source_file": source_file},
             )
 
+    def _record_multi_filter_metrics(self) -> None:
+        """Record multi-column filter loading metrics."""
+        if not self._metrics or not self._filter_result:
+            return
+
+        source_file = self._filter_config.source_path or "unknown"
+
+        # Record total valid combinations
+        if self._valid_combinations:
+            self._metrics.increment_counter(
+                "filter_combinations_loaded_total",
+                len(self._valid_combinations),
+                {"pipeline": self._pipeline_name, "source_file": source_file},
+            )
+
+        # Record unique IDs per field
+        for field, ids in self._filter_result.column_ids.items():
+            self._metrics.increment_counter(
+                "filter_ids_loaded_total",
+                len(ids),
+                {
+                    "pipeline": self._pipeline_name,
+                    "source_file": source_file,
+                    "filter_field": field,
+                },
+            )
+
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
@@ -137,6 +192,27 @@ class FilteredDataSource:
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
+
+    def _matches_valid_combination(self, record: dict[str, Any]) -> bool:
+        """Check if record matches one of the valid combinations.
+
+        Used for client-side filtering in multi-column mode to ensure
+        only exact row-wise combinations from CSV are returned.
+
+        Args:
+            record: The record to check.
+
+        Returns:
+            True if record matches a valid combination, False otherwise.
+        """
+        if not self._valid_combinations or not self._filter_fields:
+            return True
+
+        # Build tuple of values from record in the same order as filter_fields
+        record_values = tuple(
+            str(record.get(field, "")) for field in self._filter_fields
+        )
+        return record_values in self._valid_combinations
 
     async def fetch(
         self,
@@ -150,6 +226,10 @@ class FilteredDataSource:
 
         If filtering is enabled and filter IDs are loaded, uses the adapter's
         fetch_filtered() method if available. Otherwise, delegates to standard fetch().
+
+        For multi-column filtering, uses Hybrid Filtering approach:
+        - Server-side: API request with multiple __in filters (coarse filter)
+        - Client-side: Filter results to match only exact row-wise combinations
 
         Args:
             entity_type: Type of entity to fetch.
@@ -169,9 +249,43 @@ class FilteredDataSource:
         # Note: External filter_ids/filter_field are ignored -
         # this class manages its own filter state from InputFilterConfig
         _ = filter_ids, filter_field  # Mark as intentionally unused
-        if self._filter_config.enabled and self._filter_ids:
+
+        # Multi-column filtering mode
+        if self._filter_config.enabled and self._multi_filter_ids:
             # Check if adapter implements FilterableDataSourcePort
             if not isinstance(self._data_source, FilterableDataSourcePort):
+                raise TypeError(
+                    f"Adapter {self._data_source.provider_name} does not implement "
+                    "FilterableDataSourcePort. Filtering requires an adapter with "
+                    "fetch_multi_filtered() method."
+                )
+            # Check if adapter supports multi-filtered
+            if not hasattr(self._data_source, "fetch_multi_filtered"):
+                raise TypeError(
+                    f"Adapter {self._data_source.provider_name} does not implement "
+                    "fetch_multi_filtered() method for multi-column filtering."
+                )
+
+            # Server-side coarse filter + client-side precise filter
+            fetched_count = 0
+            async for record in self._data_source.fetch_multi_filtered(
+                entity_type=entity_type,
+                filters=dict(self._multi_filter_ids),
+                limit=None,  # Don't limit server-side, we filter client-side
+            ):
+                # Client-side: check if record matches exact combination
+                if self._matches_valid_combination(record):
+                    yield record
+                    fetched_count += 1
+                    if limit and fetched_count >= limit:
+                        return
+
+        # Single-column filtering mode
+        elif self._filter_config.enabled and self._filter_ids:
+            # Check if adapter implements FilterableDataSourcePort or has fetch_filtered
+            if not isinstance(
+                self._data_source, FilterableDataSourcePort
+            ) and not hasattr(self._data_source, "fetch_filtered"):
                 raise TypeError(
                     f"Adapter {self._data_source.provider_name} does not implement "
                     "FilterableDataSourcePort. Filtering requires an adapter with "

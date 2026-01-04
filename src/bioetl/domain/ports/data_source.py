@@ -118,3 +118,26 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
             Dictionary records matching the filter criteria.
         """
         ...
+
+    def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by multiple fields (AND logic).
+
+        This method enables multi-field server-side filtering by passing
+        multiple filter criteria directly to the data source API.
+        The API will return records matching ALL filter conditions.
+
+        Args:
+            entity_type: The type of entity to fetch.
+            filters: Mapping from filter_field to list of IDs.
+                Example: {"molecule_chembl_id": ["CHEMBL25"], "document_chembl_id": ["CHEMBL1123"]}
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching ALL filter criteria.
+        """
+        ...
