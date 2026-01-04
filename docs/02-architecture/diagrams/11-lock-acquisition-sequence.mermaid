@@ -1,8 +1,8 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 sequenceDiagram
     autonumber
-    participant WorkerA as Worker A<br/>(owner=worker_a_uuid)
-    participant WorkerB as Worker B<br/>(owner=worker_b_uuid)
+    participant WorkerA as Worker A (owner_a_uuid)
+    participant WorkerB as Worker B (owner_b_uuid)
     participant Lock as MemoryLock
     participant HeartbeatA as Heartbeat Thread A
     participant Storage as DeltaWriter
