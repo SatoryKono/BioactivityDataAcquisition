@@ -1,6 +1,6 @@
 """ChEMBL structural domain entities.
 
-Contains Document, Target, TargetComponent, CellLine, and Molecule entities.
+Contains Document, DocumentTerm, Target, TargetComponent, CellLine, and Molecule entities.
 """
 
 from __future__ import annotations
@@ -53,6 +53,47 @@ class Document(BaseEntity):
             raise ValueError("Document ChEMBL ID is required")
         if self.year is not None and (self.year < 1800 or self.year > 2100):
             raise ValueError(f"Year must be between 1800-2100, got {self.year}")
+
+
+@dataclass(frozen=True, kw_only=True)
+class DocumentTerm(BaseEntity):
+    """Represents a term associated with a ChEMBL Document.
+
+    Terms include MeSH headings, MeSH qualifiers, keywords, and concepts
+    extracted from Document records. This is a derived entity that flattens
+    the 1:M relationship between documents and their associated terms.
+
+    Source: Nested in ChEMBL API /document response (mesh_terms, keywords fields)
+
+    Composite Key: document_chembl_id + term_type + term (normalized)
+    See: https://www.ebi.ac.uk/chembl/api/data/document
+    """
+
+    # === Composite Key Fields ===
+    document_chembl_id: str  # FK → Document
+    term: str  # Term text (e.g., "Aspirin", "kinase inhibitor")
+    term_type: str  # MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT
+
+    # === MeSH-specific Fields ===
+    mesh_id: str | None = None  # MeSH identifier (e.g., "D001241")
+    qualifier: str | None = None  # MeSH qualifier (e.g., "pharmacology")
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.document_chembl_id:
+            raise ValueError("Document ChEMBL ID is required")
+        if not self.term:
+            raise ValueError("Term text is required")
+        if not self.term_type:
+            raise ValueError("Term type is required")
+        valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}
+        if self.term_type not in valid_term_types:
+            raise ValueError(
+                f"term_type must be one of {valid_term_types}, got {self.term_type}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)

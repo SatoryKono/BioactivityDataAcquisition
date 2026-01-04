@@ -42,6 +42,10 @@ from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_term import ChEMBLDocumentTermPipeline
+from bioetl.application.pipelines.chembl.document_term_transformer import (
+    DocumentTermTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import (
     DocumentTransformer,
 )
@@ -68,10 +72,12 @@ __all__ = [
     "ChEMBLCellLinePipeline",
     "ChEMBLCompoundRecordPipeline",
     "ChEMBLDocumentPipeline",
+    "ChEMBLDocumentTermPipeline",
     "ChEMBLMoleculePipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
     "CompoundRecordTransformer",
+    "DocumentTermTransformer",
     "DocumentTransformer",
     "MoleculeTransformer",
     "TargetComponentTransformer",
