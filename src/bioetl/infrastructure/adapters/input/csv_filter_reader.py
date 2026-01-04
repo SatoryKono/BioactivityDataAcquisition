@@ -71,6 +71,28 @@ class CsvFilterReader:
         duplicate_count = total_count - unique_count
         return unique_ids, unique_count, duplicate_count, duplicates
 
+    def _extract_column_ids_map(
+        self, df: pl.DataFrame, columns: list[FilterColumn]
+    ) -> dict[str, tuple[str, ...]]:
+        """Extract unique IDs per column for server-side filtering."""
+        return {
+            col.filter_field: tuple(
+                sorted(set(self._extract_column_ids(df, col.column_name)))
+            )
+            for col in columns
+        }
+
+    def _build_valid_combinations(
+        self, df: pl.DataFrame, column_names: list[str]
+    ) -> set[tuple[str, ...]]:
+        """Build valid row-wise combinations for client-side filtering."""
+        combinations: set[tuple[str, ...]] = set()
+        for row in df.select(column_names).iter_rows():
+            combo = tuple(str(val).strip() if val is not None else "" for val in row)
+            if all(combo):  # Skip rows with empty values
+                combinations.add(combo)
+        return combinations
+
     async def load_filter_ids(
         self, source_path: str, column_name: str
     ) -> FilterLoadResult:
@@ -100,6 +122,30 @@ class CsvFilterReader:
             duplicates=duplicates,
         )
 
+    def _log_multi_column_filter(
+        self,
+        source_path: str,
+        columns: list[FilterColumn],
+        filter_fields: tuple[str, ...],
+        total_count: int,
+        valid_combinations: set[tuple[str, ...]],
+        column_ids: dict[str, tuple[str, ...]],
+    ) -> None:
+        """Log multi-column filter load statistics."""
+        if not self._logger:
+            return
+        self._logger.info(
+            "multi_column_filter_loaded",
+            source_path=source_path,
+            columns=[col.column_name for col in columns],
+            filter_fields=list(filter_fields),
+            total_rows=total_count,
+            valid_combinations=len(valid_combinations),
+            unique_ids_per_field={
+                field: len(ids) for field, ids in column_ids.items()
+            },
+        )
+
     async def load_multi_column_filter(
         self,
         source_path: str,
@@ -118,40 +164,21 @@ class CsvFilterReader:
             FilterLoadResult with column_ids and valid_combinations.
         """
         df = self._read_csv_dataframe(source_path)
+        column_ids = self._extract_column_ids_map(df, columns)
 
-        # Extract unique IDs per column for server-side filtering
-        column_ids: dict[str, tuple[str, ...]] = {}
-        for col in columns:
-            ids = self._extract_column_ids(df, col.column_name)
-            column_ids[col.filter_field] = tuple(sorted(set(ids)))
-
-        # Extract exact row-wise combinations for client-side filtering
         column_names = [col.column_name for col in columns]
         filter_fields = tuple(col.filter_field for col in columns)
-
-        # Build valid combinations from each row
-        valid_combinations: set[tuple[str, ...]] = set()
-        for row in df.select(column_names).iter_rows():
-            # Convert all values to strings and strip whitespace
-            combo = tuple(str(val).strip() if val is not None else "" for val in row)
-            # Skip rows with empty values
-            if all(combo):
-                valid_combinations.add(combo)
-
+        valid_combinations = self._build_valid_combinations(df, column_names)
         total_count = len(df)
 
-        if self._logger:
-            self._logger.info(
-                "multi_column_filter_loaded",
-                source_path=source_path,
-                columns=[col.column_name for col in columns],
-                filter_fields=list(filter_fields),
-                total_rows=total_count,
-                valid_combinations=len(valid_combinations),
-                unique_ids_per_field={
-                    field: len(ids) for field, ids in column_ids.items()
-                },
-            )
+        self._log_multi_column_filter(
+            source_path,
+            columns,
+            filter_fields,
+            total_count,
+            valid_combinations,
+            column_ids,
+        )
 
         return FilterLoadResult(
             total_count=total_count,
