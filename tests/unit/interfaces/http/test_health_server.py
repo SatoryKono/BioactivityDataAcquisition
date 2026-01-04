@@ -606,7 +606,7 @@ class TestHealthServerErrorHandling:
     @pytest.mark.asyncio
     async def test_handle_connection_timeout(self) -> None:
         """Test that TimeoutError in connection handling returns 408."""
-        from unittest.mock import patch, AsyncMock
+        from unittest.mock import AsyncMock, patch
 
         server = HealthServer(host="127.0.0.1", port=0)
 
@@ -630,7 +630,7 @@ class TestHealthServerErrorHandling:
     @pytest.mark.asyncio
     async def test_handle_connection_generic_exception(self) -> None:
         """Test that generic Exception in connection handling returns 500."""
-        from unittest.mock import patch, AsyncMock
+        from unittest.mock import AsyncMock, patch
 
         mock_logger = MagicMock()
         server = HealthServer(host="127.0.0.1", port=0, logger=mock_logger)
