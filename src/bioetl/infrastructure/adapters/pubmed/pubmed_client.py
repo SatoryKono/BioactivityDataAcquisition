@@ -408,22 +408,6 @@ def _create_pubmed_adapter(
     settings: Settings | None,
     **kwargs: Any,
 ) -> PubMedAdapter:
-    """Custom creator для PubMed адаптера.
-
-    Обрабатывает логику получения email и api_key из settings.
-
-    Args:
-        http_client: HTTP клиент
-        logger: Логгер
-        settings: Настройки приложения
-        **kwargs: Дополнительные параметры (email, api_key, metrics)
-
-    Returns:
-        Инициализированный PubMedAdapter
-
-    Raises:
-        ValueError: Если email не указан и не найден в settings
-    """
     # Email: из kwargs или settings
     email = kwargs.get("email")
     if not email and settings:

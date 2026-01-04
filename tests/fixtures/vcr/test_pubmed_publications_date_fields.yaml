@@ -1016,48 +1016,44 @@ interactions:
     uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=pharmacogenomics%5BTitle%2FAbstract%5D&retmax=5&usehistory=y&retmode=json&email=default%40example.com
   response:
     body:
-      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"8694","retmax":"5","retstart":"0","querykey":"1","webenv":"MCID_695aa123a48eb73e350a77a0","idlist":["41484425","41478610","41475569","41471361","41465160"],"translationset":[],"querytranslation":"\"pharmacogenomics\"[Title/Abstract]"}}
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"8694","retmax":"5","retstart":"0","querykey":"1","webenv":"MCID_695a9e36c8ff833f280eeb2c","idlist":["41484425","41478610","41475569","41471361","41465160"],"translationset":[],"querytranslation":"\"pharmacogenomics\"[Title/Abstract]"}}
 
         '
     headers:
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - X-RateLimit-Limit,X-RateLimit-Remaining
-      Cache-Control:
+      cache-control:
       - private
-      Connection:
-      - Keep-Alive
-      Content-Security-Policy:
-      - upgrade-insecure-requests
-      Content-Type:
-      - application/json; charset=UTF-8
-      Date:
-      - Sun, 04 Jan 2026 17:19:30 GMT
-      Keep-Alive:
-      - timeout=4, max=40
-      NCBI-PHID:
-      - 1D34D6BA30F60A5500005AEE7771349F.1.1.m_1
-      NCBI-SID:
-      - 60A1B215D7643192_56C2SID
-      Referrer-Policy:
-      - origin-when-cross-origin
-      Server:
-      - Finatra
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
-      - chunked
-      X-RateLimit-Limit:
-      - '3'
-      X-RateLimit-Remaining:
-      - '2'
-      X-UA-Compatible:
-      - IE=Edge
-      X-XSS-Protection:
-      - 1; mode=block
       content-length:
       - '307'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sun, 04 Jan 2026 17:07:01 GMT
+      ncbi-phid:
+      - 1D34D6BA30F60A55000042EAF4640698.1.1.m_1
+      ncbi-sid:
+      - 4AF9C0B4EF67944E_9709SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '2'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK
@@ -2483,44 +2479,40 @@ interactions:
         Soc. Ser. C Appl. Stat. 2025;74:373&#x2013;390. doi: 10.1093/jrsssc/qlae058.</Citation><ArticleIdList><ArticleId
         IdType="doi">10.1093/jrsssc/qlae058</ArticleId></ArticleIdList></Reference></ReferenceList></PubmedData></PubmedArticle></PubmedArticleSet>'
     headers:
-      Access-Control-Allow-Origin:
+      access-control-allow-origin:
       - '*'
-      Access-Control-Expose-Headers:
+      access-control-expose-headers:
       - X-RateLimit-Limit,X-RateLimit-Remaining
-      Cache-Control:
+      cache-control:
       - private
-      Connection:
-      - Keep-Alive
-      Content-Security-Policy:
-      - upgrade-insecure-requests
-      Content-Type:
-      - text/xml; charset=UTF-8
-      Date:
-      - Sun, 04 Jan 2026 17:19:32 GMT
-      Keep-Alive:
-      - timeout=4, max=40
-      NCBI-PHID:
-      - 1D34D6BA30F60A5500004AEE7B7E3F07.1.1.m_6
-      NCBI-SID:
-      - 60A1B215D7643192_56C2SID
-      Referrer-Policy:
-      - origin-when-cross-origin
-      Server:
-      - Finatra
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains; preload
-      Transfer-Encoding:
-      - chunked
-      X-RateLimit-Limit:
-      - '3'
-      X-RateLimit-Remaining:
-      - '2'
-      X-UA-Compatible:
-      - IE=Edge
-      X-XSS-Protection:
-      - 1; mode=block
       content-length:
       - '135914'
+      content-security-policy:
+      - upgrade-insecure-requests
+      content-type:
+      - text/xml; charset=UTF-8
+      date:
+      - Sun, 04 Jan 2026 17:07:02 GMT
+      ncbi-phid:
+      - 1D3204E8A11FA285000048D65CD745F7.1.1.m_6
+      ncbi-sid:
+      - 4AF9C0B4EF67944E_9709SID
+      referrer-policy:
+      - origin-when-cross-origin
+      server:
+      - Finatra
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      x-ratelimit-limit:
+      - '3'
+      x-ratelimit-remaining:
+      - '2'
+      x-ua-compatible:
+      - IE=Edge
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK

@@ -186,7 +186,6 @@ class PubChemAdapter(BaseSyncAdapter):
             "PubChemAdapter does not support multi-column filtering."
         )
 
-
     async def fetch_as_models(
         self,
         entity_type: str,
