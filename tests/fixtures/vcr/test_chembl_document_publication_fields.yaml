@@ -2937,4 +2937,122 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=5&offset=0&format=json
+  response:
+    body:
+      string: "{\"documents\": [{\"abstract\": \"\", \"authors\": null, \"chembl_release\":
+        {\"chembl_release\": \"CHEMBL_7\", \"creation_date\": \"2010-09-29\"}, \"contact\":
+        null, \"doc_type\": \"DATASET\", \"document_chembl_id\": \"CHEMBL1158643\",
+        \"doi\": null, \"doi_chembl\": null, \"first_page\": null, \"issue\": null,
+        \"journal\": null, \"journal_full_title\": null, \"last_page\": null, \"patent_id\":
+        null, \"pubmed_id\": null, \"src_id\": 0, \"title\": \"Unpublished dataset\",
+        \"volume\": null, \"year\": null}, {\"abstract\": \"\", \"authors\": \"Clader
+        JW.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\", \"creation_date\":
+        \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\":
+        \"CHEMBL1139451\", \"doi\": \"10.1021/jm030283g\", \"doi_chembl\": null, \"first_page\":
+        \"1\", \"issue\": \"1\", \"journal\": \"J Med Chem\", \"journal_full_title\":
+        \"Journal of medicinal chemistry.\", \"last_page\": \"9\", \"patent_id\":
+        null, \"pubmed_id\": 14695813, \"src_id\": 1, \"title\": \"The discovery of
+        ezetimibe: a view from outside the receptor.\", \"volume\": \"47\", \"year\":
+        2004}, {\"abstract\": \"Okadaic acid (OA) is a toxin responsible for diarrhetic
+        shellfish poisoning and is an extremely useful tool for studying processes
+        that are regulated by phosphorylation, although the exact mechanism of action
+        is still undetermined. We report on a study that proved the existence of OA
+        in an unusual dimeric form when complexed with potassium ion. The proposed
+        structure of this dimer is based on spectroscopic and conformational studies.\",
+        \"authors\": \"Daranas AH, Fern\xE1ndez JJ, Morales EQ, Norte M, Gav\xEDn
+        JA.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\", \"creation_date\":
+        \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\":
+        \"CHEMBL1148466\", \"doi\": \"10.1021/jm034189b\", \"doi_chembl\": null, \"first_page\":
+        \"10\", \"issue\": \"1\", \"journal\": \"J Med Chem\", \"journal_full_title\":
+        \"Journal of medicinal chemistry.\", \"last_page\": \"13\", \"patent_id\":
+        null, \"pubmed_id\": 14695814, \"src_id\": 1, \"title\": \"Self-association
+        of okadaic acid upon complexation with potassium ion.\", \"volume\": \"47\",
+        \"year\": 2004}, {\"abstract\": \"A variety of novel heterocyclic compounds
+        having thienoazepine, pyrroloazepine, furoazepine, and thienodiazepine skeletons
+        were synthesized, most of which exhibited potent antagonism of [(3)H]-AVP
+        specific binding in assays using rat liver (V1), rat kidney (V2), human platelet
+        plasma membranes, and recombinant human CHO cells (V2), as well as antagonizing
+        AVP-induced hypertension in rats (V1, intravenous) and showing a diuretic
+        effect in rats (V2, oral). By detailed studies of the structure-activity relationships
+        of these compounds, the thienoazepine derivative 1 was found to be a very
+        potent combined V1 and V2 antagonist. After further pharmacological and toxicological
+        evaluation as well as physical properties, the hydrochloride 2 (JTV-605) of
+        compound 1 was selected for clinical studies as a potent AVP antagonist with
+        a long duration of action.\", \"authors\": \"Cho H, Murakami K, Nakanishi
+        H, Fujisawa A, Isoshima H, Niwa M, Hayakawa K, Hase Y, Uchida I, Watanabe
+        H, Wakitani K, Aisaka K.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1139452\", \"doi\": \"10.1021/jm030287l\",
+        \"doi_chembl\": null, \"first_page\": \"101\", \"issue\": \"1\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"109\", \"patent_id\": null, \"pubmed_id\": 14695824, \"src_id\":
+        1, \"title\": \"Synthesis and structure-activity relationships of 5,6,7,8-tetrahydro-4H-thieno[3,2-b]azepine
+        derivatives: novel arginine vasopressin antagonists.\", \"volume\": \"47\",
+        \"year\": 2004}, {\"abstract\": \"The hemoglobin-degrading aspartic proteases
+        plasmepsin I (Plm I) and plasmepsin II (Plm II) of the malaria parasite Plasmodium
+        falciparum have lately emerged as putative drug targets. A series of C(2)-symmetric
+        compounds encompassing the 1,2-dihydroxyethylene scaffold and a variety of
+        elongated P1/P1' side chains were synthesized via microwave-assisted palladium-catalyzed
+        coupling reactions. Binding affinity calculations with the linear interaction
+        energy method and molecular dynamics simulations reproduced the experimental
+        binding data obtained in a Plm II assay with very good accuracy. Bioactive
+        conformations of the elongated P1/P1' chains were predicted and agreed essentially
+        with a recent X-ray structure. The compounds exhibited picomolar to nanomolar
+        inhibition constants for the plasmepsins and no measurable affinity to the
+        human enzyme cathepsin D. Some of the compounds also demonstrated significant
+        inhibition of parasite growth in cell culture. To the best of our knowledge,
+        these plasmepsin inhibitors represent the most selective reported to date
+        and constitute promising lead compounds for further optimization.\", \"authors\":
+        \"Ersmark K, Feierberg I, Bjelic S, Hamelink E, Hackett F, Blackman MJ, Hult\xE9n
+        J, Samuelsson B, Aqvist J, Hallberg A.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1139453\", \"doi\": \"10.1021/jm030933g\",
+        \"doi_chembl\": null, \"first_page\": \"110\", \"issue\": \"1\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"122\", \"patent_id\": null, \"pubmed_id\": 14695825, \"src_id\":
+        1, \"title\": \"Potent inhibitors of the Plasmodium falciparum enzymes plasmepsin
+        I and II devoid of cathepsin D inhibitory activity.\", \"volume\": \"47\",
+        \"year\": 2004}], \"page_meta\": {\"limit\": 5, \"next\": \"/chembl/api/data/document.json?limit=5&offset=5\",
+        \"offset\": 0, \"previous\": null, \"total_count\": 99142}}"
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '5642'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 04 Jan 2026 18:18:57 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.01528310775756836'
+    status:
+      code: 200
+      message: OK
 version: 1
