@@ -205,15 +205,26 @@ class PubMedAdapter(BaseHttpAdapter):
         async for record in self._yield_articles_from_pmids(pmids, limit):
             yield record
 
-    def fetch_multi_filtered(
+    async def fetch_multi_filtered(
         self,
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records filtered by multiple fields (AND logic)."""
+        """Multi-field filtering not supported by PubMed API.
+
+        PubMed only supports single-field filtering by PMID.
+        Use fetch_filtered() for PMID-based filtering instead.
+
+        Raises:
+            NotImplementedError: Always, as PubMed doesn't support multi-field filtering.
+        """
+        # AsyncIterator requires yield before raise for proper generator creation
+        if False:  # pragma: no cover
+            yield {}  # Required for AsyncIterator type signature
         raise NotImplementedError(
-            "PubMedAdapter does not support multi-column filtering."
+            "PubMed API does not support multi-field filtering. "
+            "Use fetch_filtered() with filter_field='pmid' instead."
         )
 
     async def fetch(
