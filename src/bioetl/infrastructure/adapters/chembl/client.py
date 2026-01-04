@@ -459,9 +459,9 @@ class ChemblAdapter(BaseHttpAdapter):
 
         # Build __in params for all filter fields
         filter_params: dict[str, str] = {}
-        for field, ids in filters.items():
+        for filter_field, ids in filters.items():
             if ids:
-                filter_params[f"{field}__in"] = ",".join(ids)
+                filter_params[f"{filter_field}__in"] = ",".join(ids)
 
         if not filter_params:
             return
