@@ -36,7 +36,7 @@ sequenceDiagram
     Note over Writer,Storage: Phase 3: Build Path & Write
 
     Writer->>Writer: Build path
-    Note right of Writer: bronze/v1/{provider}/{entity}/{date}/<br/>batch_{batch_id}.jsonl.zst<br/><br/>Example:<br/>bronze/v1/chembl/activity/2024-01-15/<br/>batch_abc123.jsonl.zst
+    Note right of Writer: Path: bronze/v1/{provider}/{entity}/{date}/batch_{batch_id}.jsonl.zst
 
     Writer->>Storage: write_bytes(path, compressed_bytes)
     activate Storage
@@ -52,7 +52,7 @@ sequenceDiagram
 
     Writer->>Lineage: record(entry)
     activate Lineage
-    Note right of Lineage: LineageLogEntry:<br/>• batch_id: UUID<br/>• pipeline: "chembl_activity"<br/>• bronze_paths: [path]<br/>• transform_version: "1.0.0"<br/>• run_params: {...}
+    Note right of Lineage: LineageLogEntry (batch_id, pipeline, bronze_paths, version)
     Lineage-->>Writer: OK
     deactivate Lineage
 
@@ -65,14 +65,14 @@ sequenceDiagram
     Writer-->>Executor: BronzeWriteResult
     deactivate Writer
 
-    Note over Executor: BronzeWriteResult contains:<br/>• path: str<br/>• batch_id: UUID<br/>• record_count: int<br/>• compressed_size: int<br/>• compression_ratio: float
+    Note over Executor: BronzeWriteResult (path, batch_id, record_count, compressed_size, ratio)
 
     rect rgb(255, 240, 245)
         Note over Writer,Storage: Error Handling
-        Note right of Writer: On write failure:<br/>1. Log error with batch_id<br/>2. DO NOT retry (Bronze is append-only)<br/>3. Raise BronzeWriteError<br/>4. Pipeline handles checkpoint
+        Note right of Writer: On failure: log error, raise BronzeWriteError, pipeline handles checkpoint
     end
 
     rect rgb(240, 255, 240)
         Note over Writer: Atomicity Guarantee
-        Note right of Writer: Write to temp file first,<br/>then atomic rename.<br/>Ensures no partial writes.
+        Note right of Writer: Write to temp file first, then atomic rename (no partial writes)
     end
