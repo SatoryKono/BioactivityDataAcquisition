@@ -21,6 +21,7 @@ ENTITY_MAPPING: dict[str, str] = {
     "document": "document",
     "cell_line": "cell_line",
     "tissue": "tissue",
+    "compound_record": "compound_record",
 }
 
 # Plural forms for API response keys (ChEMBL uses irregular plurals)
@@ -33,6 +34,7 @@ ENTITY_PLURAL: dict[str, str] = {
     "document": "documents",
     "cell_line": "cell_lines",
     "tissue": "tissues",
+    "compound_record": "compound_records",
 }
 
 # Primary key field overrides by entity type
@@ -45,6 +47,7 @@ PK_FIELD_OVERRIDES: dict[str, str] = {
     "target_component": "component_id",
     "cell_line": "cell_chembl_id",
     "tissue": "tissue_chembl_id",
+    "compound_record": "record_id",
 }
 
 
