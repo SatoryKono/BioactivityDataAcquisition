@@ -568,6 +568,34 @@ class DocumentRecord(BaseModel):
     src_id: int | None = Field(default=None, description="Data source ID")
 
 
+class DocumentTermRecord(BaseModel):
+    """Document term DTO from ChEMBL.
+
+    Represents a term (MeSH heading, keyword, concept) associated with
+    a ChEMBL document. This is a derived entity extracted from Document
+    records by flattening the 1:M relationship.
+
+    Required fields: document_chembl_id, term, term_type.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    # === Composite Key Fields (REQUIRED) ===
+    document_chembl_id: str = Field(description="FK → Document ChEMBL ID")
+    term: str = Field(min_length=1, description="Term text (e.g., 'Aspirin')")
+    term_type: str = Field(
+        description="Term type: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT"
+    )
+
+    # === MeSH-specific Fields ===
+    mesh_id: str | None = Field(
+        default=None, description="MeSH identifier (e.g., 'D001241')"
+    )
+    qualifier: str | None = Field(
+        default=None, description="MeSH qualifier (e.g., 'pharmacology')"
+    )
+
+
 class CellLineRecord(BaseModel):
     """Cell line DTO from ChEMBL.
 
@@ -644,6 +672,7 @@ __all__ = [
     "AssayRecord",
     "CellLineRecord",
     "DocumentRecord",
+    "DocumentTermRecord",
     "MoleculeRecord",
     "TargetComponentRecord",
     "TargetRecord",

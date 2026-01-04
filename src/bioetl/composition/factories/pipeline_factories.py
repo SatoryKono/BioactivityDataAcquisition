@@ -45,6 +45,9 @@ from bioetl.application.pipelines.chembl.cell_line_transformer import (
 from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
+from bioetl.application.pipelines.chembl.document_term_transformer import (
+    DocumentTermTransformer,
+)
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
@@ -65,6 +68,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLCellLineGoldSchema,
     ChEMBLCompoundRecordGoldSchema,
     ChEMBLDocumentGoldSchema,
+    ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
@@ -80,6 +84,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_CELL_LINE_SCHEMA,
     CHEMBL_COMPOUND_RECORD_SCHEMA,
     CHEMBL_DOCUMENT_SCHEMA,
+    CHEMBL_DOCUMENT_TERM_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
@@ -157,6 +162,13 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=DocumentTransformer,
         silver_schema=CHEMBL_DOCUMENT_SCHEMA,
         gold_schema=ChEMBLDocumentGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_document_term",
+        provider="chembl",
+        transformer_class=DocumentTermTransformer,
+        silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
+        gold_schema=ChEMBLDocumentTermGoldSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_molecule",
@@ -242,6 +254,7 @@ chembl_assay_factory = _factories["chembl_assay"]
 chembl_cell_line_factory = _factories["chembl_cell_line"]
 chembl_compound_record_factory = _factories["chembl_compound_record"]
 chembl_document_factory = _factories["chembl_document"]
+chembl_document_term_factory = _factories["chembl_document_term"]
 chembl_molecule_factory = _factories["chembl_molecule"]
 chembl_target_factory = _factories["chembl_target"]
 chembl_target_component_factory = _factories["chembl_target_component"]
@@ -378,6 +391,7 @@ __all__ = [
     "chembl_cell_line_factory",
     "chembl_compound_record_factory",
     "chembl_document_factory",
+    "chembl_document_term_factory",
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",

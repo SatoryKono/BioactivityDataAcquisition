@@ -1,0 +1,51 @@
+# configs/pipelines/chembl/document_terms.yaml
+# Pipeline configuration for ChEMBL Document Term entity.
+#
+# Derived entity: Extracts and flattens terms from Document records.
+# Inherits defaults from ../_defaults.yaml
+
+pipeline_name: chembl_document_term
+provider: chembl
+entity_type: document_term
+version: "1.0.0"
+description: "Extract document terms (MeSH, keywords) from ChEMBL Document records"
+
+# Composite primary key (document_chembl_id + term_type + term)
+# entity_id is generated as SHA256 hash of composite key
+primary_keys: ["entity_id"]
+silver_table: "chembl_document_term"
+
+source_file: ../../sources/chembl.yaml
+
+# Entity-specific gold filters
+gold_filters:
+  columns:
+    term_type: [MESH_HEADING, KEYWORD]  # Filter to main term types
+  required_fields:
+    - document_chembl_id
+    - term
+    - term_type
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: "data/output/bronze"
+  silver:
+    path: "data/output/silver"
+    primary_key: ["entity_id"]
+    partition_by: ["term_type"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/output/gold"
+    csv_export:
+      path: "data/output/csv/gold"
+
+# Entity-specific input filter (optional)
+input_filter:
+  enabled: false
+  # When enabled, can filter by document_chembl_id
+  # source_path: "data/input/documents.csv"
+  # column_name: "document_chembl_id"
+  # filter_field: "document_chembl_id"
+  # batch_size: 20
