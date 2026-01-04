@@ -202,9 +202,19 @@ class PubMedAdapter(BaseHttpAdapter):
                 msg="Assuming PMIDs",
             )
 
-        pmids = filter_ids[:limit] if limit else filter_ids
         async for record in self._yield_articles_from_pmids(pmids, limit):
             yield record
+
+    def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by multiple fields (AND logic)."""
+        raise NotImplementedError(
+            "PubMedAdapter does not support multi-column filtering."
+        )
 
     async def fetch(
         self,

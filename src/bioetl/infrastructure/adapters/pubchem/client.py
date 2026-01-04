@@ -175,6 +175,18 @@ class PubChemAdapter(BaseSyncAdapter):
         else:
             raise ValueError(f"Unsupported filter_field: {filter_field}")
 
+    def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by multiple fields (AND logic)."""
+        raise NotImplementedError(
+            "PubChemAdapter does not support multi-column filtering."
+        )
+
+
     async def fetch_as_models(
         self,
         entity_type: str,
