@@ -107,8 +107,19 @@ class CsvExportConfig(BaseModel):
     encoding: str = "utf-8"
 
 
+class FilterColumnSchema(BaseModel):
+    """Schema for a single filter column configuration."""
+
+    column_name: str = Field(description="Column name in CSV containing filter IDs")
+    filter_field: str = Field(description="API field name to filter by")
+
+
 class InputFilterConfig(BaseModel):
     """Configuration for input ID filtering from CSV.
+
+    Supports both single-column and multi-column filtering modes:
+    - Single-column: Use column_name and filter_field directly
+    - Multi-column: Use columns list for AND-logic filtering
 
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
     """
@@ -118,13 +129,19 @@ class InputFilterConfig(BaseModel):
         default=None,
         description="Path to CSV file with filter IDs",
     )
-    column_name: str = Field(
-        default="id",
-        description="Column name in CSV containing filter IDs",
+    # Single-column mode (backward compatibility)
+    column_name: str | None = Field(
+        default=None,
+        description="Column name in CSV containing filter IDs (single-column mode)",
     )
-    filter_field: str = Field(
-        default="molecule_chembl_id",
-        description="API field name to filter by",
+    filter_field: str | None = Field(
+        default=None,
+        description="API field name to filter by (single-column mode)",
+    )
+    # Multi-column mode
+    columns: list[FilterColumnSchema] | None = Field(
+        default=None,
+        description="List of column configurations for multi-column filtering",
     )
     batch_size: int = Field(
         default=100,
@@ -133,6 +150,23 @@ class InputFilterConfig(BaseModel):
         description="Number of IDs per API request",
     )
 
+    @model_validator(mode="after")
+    def validate_column_config(self) -> InputFilterConfig:
+        """Validate that either columns or column_name/filter_field is provided."""
+        if not self.enabled:
+            return self
+        if self.columns:
+            # Multi-column mode - columns provided
+            return self
+        if self.column_name and self.filter_field:
+            # Single-column mode - backward compatibility
+            return self
+        # Neither mode configured - raise error
+        raise ValueError(
+            "Either 'columns' list or both 'column_name' and 'filter_field' "
+            "must be provided when filter is enabled"
+        )
+
     def to_domain(self) -> DomainInputFilterConfig:
         """Convert to domain InputFilterConfig dataclass.
 
@@ -140,14 +174,31 @@ class InputFilterConfig(BaseModel):
             DomainInputFilterConfig: Immutable domain configuration.
         """
         from bioetl.domain.filtering.input_config import (
+            FilterColumn as DomainFilterColumn,
+        )
+        from bioetl.domain.filtering.input_config import (
             InputFilterConfig as DomainInputFilterConfigImpl,
         )
+
+        # Convert columns list to domain FilterColumn tuple
+        domain_columns: tuple[DomainFilterColumn, ...] = ()
+        if self.columns:
+            domain_columns = tuple(
+                DomainFilterColumn(
+                    column_name=col.column_name,
+                    filter_field=col.filter_field,
+                )
+                for col in self.columns
+            )
 
         return DomainInputFilterConfigImpl(
             enabled=self.enabled,
             source_path=self.source_path,
-            column_name=self.column_name if self.enabled else None,
-            filter_field=self.filter_field if self.enabled else None,
+            column_name=self.column_name if self.enabled and not self.columns else None,
+            filter_field=self.filter_field
+            if self.enabled and not self.columns
+            else None,
+            columns=domain_columns,
             batch_size=self.batch_size,
         )
 

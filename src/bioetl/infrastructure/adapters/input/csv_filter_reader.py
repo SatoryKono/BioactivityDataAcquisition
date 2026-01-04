@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.domain.filtering import FilterLoadResult
+from bioetl.domain.filtering import FilterColumn, FilterLoadResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -98,4 +98,64 @@ class CsvFilterReader:
             unique_count=unique_count,
             duplicate_count=duplicate_count,
             duplicates=duplicates,
+        )
+
+    async def load_multi_column_filter(
+        self,
+        source_path: str,
+        columns: list[FilterColumn],
+    ) -> FilterLoadResult:
+        """Load filter data from multiple columns.
+
+        Returns unique IDs per column for server-side filtering, plus
+        exact row-wise combinations for client-side filtering.
+
+        Args:
+            source_path: Path to the CSV file.
+            columns: List of FilterColumn objects defining columns to load.
+
+        Returns:
+            FilterLoadResult with column_ids and valid_combinations.
+        """
+        df = self._read_csv_dataframe(source_path)
+
+        # Extract unique IDs per column for server-side filtering
+        column_ids: dict[str, tuple[str, ...]] = {}
+        for col in columns:
+            ids = self._extract_column_ids(df, col.column_name)
+            column_ids[col.filter_field] = tuple(sorted(set(ids)))
+
+        # Extract exact row-wise combinations for client-side filtering
+        column_names = [col.column_name for col in columns]
+        filter_fields = tuple(col.filter_field for col in columns)
+
+        # Build valid combinations from each row
+        valid_combinations: set[tuple[str, ...]] = set()
+        for row in df.select(column_names).iter_rows():
+            # Convert all values to strings and strip whitespace
+            combo = tuple(str(val).strip() if val is not None else "" for val in row)
+            # Skip rows with empty values
+            if all(combo):
+                valid_combinations.add(combo)
+
+        total_count = len(df)
+
+        if self._logger:
+            self._logger.info(
+                "multi_column_filter_loaded",
+                source_path=source_path,
+                columns=[col.column_name for col in columns],
+                filter_fields=list(filter_fields),
+                total_rows=total_count,
+                valid_combinations=len(valid_combinations),
+                unique_ids_per_field={
+                    field: len(ids) for field, ids in column_ids.items()
+                },
+            )
+
+        return FilterLoadResult(
+            total_count=total_count,
+            column_ids=column_ids,
+            valid_combinations=frozenset(valid_combinations),
+            filter_fields=filter_fields,
         )

@@ -6,9 +6,12 @@ various sources (CSV files, databases, etc.) for filtering API requests.
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.filtering import FilterLoadResult
+
+if TYPE_CHECKING:
+    from bioetl.domain.filtering import FilterColumn
 
 
 @runtime_checkable
@@ -39,5 +42,31 @@ class InputFilterPort(Protocol):
         Raises:
             FileNotFoundError: If the source file does not exist.
             ValueError: If the column is not found in the source.
+        """
+        ...
+
+    async def load_multi_column_filter(
+        self,
+        source_path: str,
+        columns: list[FilterColumn],
+    ) -> FilterLoadResult:
+        """Load filter data from multiple columns.
+
+        Returns unique IDs per column for server-side filtering, plus
+        exact row-wise combinations for client-side filtering.
+
+        Args:
+            source_path: Path to the filter source (e.g., CSV file path).
+            columns: List of FilterColumn objects defining columns to load.
+
+        Returns:
+            FilterLoadResult with:
+            - column_ids: Per-field unique IDs for API __in filters
+            - valid_combinations: Exact row-wise value combinations
+            - filter_fields: Ordered field names for combinations
+
+        Raises:
+            FileNotFoundError: If the source file does not exist.
+            ValueError: If any column is not found in the source.
         """
         ...
