@@ -20,6 +20,56 @@ class FilterConfigBuilder:
     """Builder for InputFilterConfig."""
 
     @staticmethod
+    def _is_filter_enabled(
+        yaml_filter: YamlInputFilter, cli_csv: str | None, test_mode: bool
+    ) -> bool:
+        """Determine if filtering should be enabled."""
+        if test_mode:
+            return bool(cli_csv)
+        return bool(cli_csv) or yaml_filter.enabled
+
+    @staticmethod
+    def _build_multi_column_config(
+        yaml_filter: YamlInputFilter, effective_csv: str
+    ) -> InputFilterConfig:
+        """Build config for multi-column filtering mode.
+
+        Caller must ensure yaml_filter.columns is not None.
+        """
+        assert yaml_filter.columns is not None  # Guaranteed by caller check
+        domain_columns = tuple(
+            FilterColumn(
+                column_name=col.column_name,
+                filter_field=col.filter_field,
+            )
+            for col in yaml_filter.columns
+        )
+        return InputFilterConfig(
+            enabled=True,
+            source_path=effective_csv,
+            columns=domain_columns,
+            batch_size=yaml_filter.batch_size,
+        )
+
+    @staticmethod
+    def _build_single_column_config(
+        yaml_filter: YamlInputFilter,
+        effective_csv: str,
+        cli_column: str | None,
+        cli_field: str | None,
+    ) -> InputFilterConfig:
+        """Build config for single-column filtering mode."""
+        effective_column = cli_column or yaml_filter.column_name
+        effective_field = cli_field or yaml_filter.filter_field
+        return InputFilterConfig(
+            enabled=True,
+            source_path=effective_csv,
+            column_name=effective_column,
+            filter_field=effective_field,
+            batch_size=yaml_filter.batch_size,
+        )
+
+    @staticmethod
     def build(
         yaml_filter: YamlInputFilter,
         cli_csv: str | None = None,
@@ -52,47 +102,20 @@ class FilterConfigBuilder:
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
-        # In test mode, only enable filter if CLI explicitly provides --input-csv
-        # This allows E2E tests to run without actual filter CSV files
-        if test_mode:
-            filter_enabled = bool(cli_csv)
-        else:
-            # Enable filter if: CLI provides --input-csv OR config has enabled=true
-            filter_enabled = bool(cli_csv) or yaml_filter.enabled
-
-        if not filter_enabled:
+        if not FilterConfigBuilder._is_filter_enabled(yaml_filter, cli_csv, test_mode):
             return None
 
-        # Determine effective CSV path
         effective_csv = cli_csv or yaml_filter.source_path
         if not effective_csv:
             return None
 
-        # Check for multi-column mode (columns list in YAML)
+        # Multi-column mode: use YAML config as-is
         if yaml_filter.columns and not cli_csv:
-            # Multi-column mode: use YAML config as-is
-            domain_columns = tuple(
-                FilterColumn(
-                    column_name=col.column_name,
-                    filter_field=col.filter_field,
-                )
-                for col in yaml_filter.columns
-            )
-            return InputFilterConfig(
-                enabled=True,
-                source_path=effective_csv,
-                columns=domain_columns,
-                batch_size=yaml_filter.batch_size,
+            return FilterConfigBuilder._build_multi_column_config(
+                yaml_filter, effective_csv
             )
 
         # Single-column mode: CLI > YAML config
-        effective_column = cli_column or yaml_filter.column_name
-        effective_field = cli_field or yaml_filter.filter_field
-
-        return InputFilterConfig(
-            enabled=True,
-            source_path=effective_csv,
-            column_name=effective_column,
-            filter_field=effective_field,
-            batch_size=yaml_filter.batch_size,
+        return FilterConfigBuilder._build_single_column_config(
+            yaml_filter, effective_csv, cli_column, cli_field
         )
