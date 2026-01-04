@@ -6,7 +6,7 @@ Loads filter IDs from external sources (CSV) and passes them to the adapter.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -232,7 +232,7 @@ class FilteredDataSource:
         self._ensure_filterable_adapter("Multi-column filtering")
         assert isinstance(self._data_source, FilterableDataSourcePort)
         fetched_count = 0
-        async for record in filterable.fetch_multi_filtered(
+        async for record in self._data_source.fetch_multi_filtered(
             entity_type=entity_type,
             filters=dict(self._multi_filter_ids),  # type: ignore[arg-type]
             limit=None,  # Don't limit server-side, we filter client-side
@@ -255,7 +255,7 @@ class FilteredDataSource:
                 "filter_field must be specified in InputFilterConfig "
                 "when filtering is enabled."
             )
-        async for record in filterable.fetch_filtered(
+        async for record in self._data_source.fetch_filtered(
             entity_type=entity_type,
             filter_ids=self._filter_ids,  # type: ignore[arg-type]
             filter_field=config_filter_field,
