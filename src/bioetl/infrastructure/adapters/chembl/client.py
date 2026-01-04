@@ -1,25 +1,8 @@
-"""ChEMBL data source adapter.
+"""ChEMBL data source adapter implementing DataSourcePort.
 
-Implements DataSourcePort for ChEMBL database.
-See RULES.md Appendix A for rate limits and retry strategy.
-
-Uses chembl_webresource_client library for API access.
-
-Error Handling (RULES.md §3.1):
-- Critical errors: Fail immediately (401, 403)
-- Recoverable errors: Handled by UnifiedHTTPClient retry
-- Data quality errors: Log and skip record
-
-Health-Aware Fetching:
-- Uses circuit breaker state for health-aware batch sizing
-- HEALTHY: Normal batch_size
-- DEGRADED: batch_size ÷ 2 (per RULES.md §3.5)
-- UNHEALTHY: Fail fast with clear error
-
-DTO Support:
-- fetch_as_models(): Returns typed DTO models (ActivityRecord, AssayRecord, etc.)
-- fetch(): Returns raw dicts (backward compatible)
-- Use model_construct() for trusted data (skip validation)
+Uses chembl_webresource_client library. Error handling per RULES.md §3.1.
+Health-aware fetching: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=fail fast.
+DTO support via fetch_as_models() returning typed Pydantic models.
 """
 
 from __future__ import annotations
@@ -181,9 +164,7 @@ class ChemblAdapter(BaseHttpAdapter):
         for i in range(0, len(ids), batch_size):
             yield ids[i : i + batch_size]
 
-    def _build_filter_in_params(
-        self, filters: dict[str, list[str]]
-    ) -> dict[str, str]:
+    def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
         """Build __in filter parameters for multi-field filtering."""
         return {
             f"{filter_field}__in": ",".join(ids)
