@@ -14,25 +14,11 @@ flowchart TB
         end
 
         subgraph aggregates["aggregates/"]
-            Batch["Batch Aggregate
-            ───────────────
-            • add_record()
-            • quarantine_record()
-            • seal()
-            • mark_committed()"]
+            Batch["Batch Aggregate<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
 
-            PipelineRun["PipelineRun Aggregate
-            ───────────────
-            • start()
-            • record_stage_success()
-            • complete()
-            • fail()"]
+            PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
 
-            QuarantineEntry["QuarantineEntry Aggregate
-            ───────────────
-            • mark_retrying()
-            • mark_recovered()
-            • mark_dead_letter()"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()"]
         end
 
         subgraph events["Domain Events"]
@@ -49,15 +35,12 @@ flowchart TB
             BatchID["BatchID (UUID)"]
             EntityID["EntityID (str)"]
             ContentHash["ContentHash (str)"]
-            Measurement["Measurement
-            (value, unit, relation)"]
+            Measurement["Measurement<br/>(value, unit, relation)"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum
-            (INCREMENTAL, BACKFILL, REBUILD)"]
-            HealthStatus["HealthStatus Enum
-            (HEALTHY, DEGRADED, UNHEALTHY)"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)"]
         end
 
         subgraph exceptions["exceptions/"]
