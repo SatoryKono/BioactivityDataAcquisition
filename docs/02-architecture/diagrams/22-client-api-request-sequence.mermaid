@@ -19,7 +19,7 @@ sequenceDiagram
     alt Circuit OPEN
         CB-->>Adapter: State.OPEN
         Adapter-->>Executor: raise CircuitOpenError
-        Note right of CB: Circuit opened due to<br/>5 consecutive failures.<br/>Recovery timeout: 300s
+        Note right of CB: Circuit opened: 5 consecutive failures, recovery timeout: 300s
     else Circuit CLOSED or HALF_OPEN
         CB-->>Adapter: State.CLOSED (or HALF_OPEN)
         deactivate CB
@@ -28,7 +28,7 @@ sequenceDiagram
 
         Adapter->>RL: acquire()
         activate RL
-        Note right of RL: Token Bucket Algorithm<br/>Rate: provider-specific<br/>ChEMBL: unlimited<br/>PubChem: 5 req/sec
+        Note right of RL: Token Bucket Algorithm (ChEMBL: unlimited, PubChem: 5 req/sec)
         RL->>RL: Wait for token if needed
         RL-->>Adapter: Token acquired
         deactivate RL
@@ -52,7 +52,7 @@ sequenceDiagram
                 API-->>HTTP: 429 + Retry-After header
                 HTTP-->>Adapter: Response(status=429)
 
-                Note right of Adapter: Extract Retry-After value<br/>Default: 60 seconds
+                Note right of Adapter: Extract Retry-After value (default: 60 seconds)
                 Adapter->>Adapter: await asyncio.sleep(retry_after)
 
             else 5xx Server Error (500, 502, 503, 504)
@@ -63,7 +63,7 @@ sequenceDiagram
                 Note right of CB: failure_count += 1
 
                 Note over Adapter: Calculate backoff delay
-                Note right of Adapter: delay = backoff_factor^attempt<br/>       + random.uniform(0.1, 0.5)<br/><br/>Attempt 1: ~2s<br/>Attempt 2: ~4s<br/>Attempt 3: ~8s
+                Note right of Adapter: Exponential backoff with jitter (~2s, ~4s, ~8s)
 
                 Adapter->>Adapter: await asyncio.sleep(delay)
 
@@ -80,7 +80,7 @@ sequenceDiagram
 
             opt failure_count >= 5
                 CB->>CB: transition to OPEN
-                Note right of CB: Circuit tripped!<br/>metric: circuit_breaker_trips_total += 1
+                Note right of CB: Circuit tripped! (circuit_breaker_trips_total += 1)
             end
 
             Adapter-->>Executor: raise RetryExhaustedError
@@ -91,15 +91,15 @@ sequenceDiagram
 
     rect rgb(255, 250, 205)
         Note over CB: Circuit Breaker Parameters
-        Note right of CB: failure_threshold: 5<br/>recovery_timeout: 300s (5 min)<br/>States: CLOSED → OPEN → HALF_OPEN
+        Note right of CB: failure_threshold: 5, recovery_timeout: 300s
     end
 
     rect rgb(240, 255, 240)
         Note over RL: Rate Limiter Parameters
-        Note right of RL: ChEMBL: No limit<br/>PubChem: 5 req/sec<br/>UniProt: 100 req/sec (API key)<br/>PubMed: 3 req/sec (10 w/ key)
+        Note right of RL: ChEMBL: No limit, PubChem: 5/s, UniProt: 100/s, PubMed: 3/s
     end
 
     rect rgb(240, 248, 255)
         Note over HTTP: Retry Policy
-        Note right of HTTP: max_retries: 3<br/>backoff_factor: 2.0<br/>jitter_range: (0.1, 0.5)<br/>retriable_codes: {429, 500, 502, 503, 504}
+        Note right of HTTP: max_retries: 3, backoff_factor: 2.0, jitter: 0.1-0.5
     end
