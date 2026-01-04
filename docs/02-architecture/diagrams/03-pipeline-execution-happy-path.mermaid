@@ -48,7 +48,7 @@ sequenceDiagram
             Bronze-->>Processor: BronzeWriteResult
 
             Processor->>Processor: transform(records)
-            Note right of Processor: normalize_values()<br/>compute_content_hash()<br/>add_metadata()
+            Note right of Processor: normalize, compute hash, add metadata
 
             Processor->>Silver: merge(records, primary_key)
             Silver->>Lock: validate_owner()
@@ -73,7 +73,7 @@ sequenceDiagram
     rect rgb(255, 240, 245)
         Note over Runner,Checkpoint: Phase 4: Postrun & Cleanup
         Runner->>Postrun: run_checks(metrics)
-        Note right of Postrun: DQ threshold validation<br/>dq_soft_threshold_exceeded metric
+        Note right of Postrun: DQ threshold validation
         Postrun-->>Runner: PostrunResult
 
         Runner->>Checkpoint: delete(pipeline_name)
