@@ -118,3 +118,4 @@ coverage_summary.txt
 .coverage
 .coverage.*
 htmlcov/
+tests.zip

@@ -175,6 +175,28 @@ class PubChemAdapter(BaseSyncAdapter):
         else:
             raise ValueError(f"Unsupported filter_field: {filter_field}")
 
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Multi-field filtering not supported by PubChem API.
+
+        PubChem API only supports single-field filtering (by CID, SMILES, or name).
+        Use fetch_filtered() for single-field filtering instead.
+
+        Raises:
+            NotImplementedError: Always, as PubChem doesn't support multi-field filtering.
+        """
+        # AsyncIterator requires yield before raise for proper generator creation
+        if False:  # pragma: no cover
+            yield {}  # Required for AsyncIterator type signature
+        raise NotImplementedError(
+            "PubChem API does not support multi-field filtering. "
+            "Use fetch_filtered() with a single filter_field instead."
+        )
+
     async def fetch_as_models(
         self,
         entity_type: str,

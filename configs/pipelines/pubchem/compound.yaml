@@ -45,8 +45,9 @@ sink:
       path: "data/output/csv/gold"
 
 # Entity-specific input filter - SMILES-based filtering (primary mode)
+# NOTE: Disabled - PubChem adapter does not implement FilterableDataSourcePort
 input_filter:
-  enabled: true
+  enabled: false
   source_path: "data/input/molecule.csv"
   column_name: "canonical_smiles"
   filter_field: "smiles"

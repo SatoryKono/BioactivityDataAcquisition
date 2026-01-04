@@ -1783,4 +1783,107 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay.json?limit=5&offset=0&format=json
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615117", "assay_classifications": [], "assay_group":
+        null, "assay_organism": null, "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Homologous single protein target assigned",
+        "confidence_score": 8, "description": "The compound was tested for the in
+        vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Homologous
+        protein target assigned", "relationship_type": "H", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL615118", "assay_classifications": [], "assay_group": null, "assay_organism":
+        null, "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        null, "assay_tax_id": null, "assay_test_type": null, "assay_tissue": null,
+        "assay_type": "F", "assay_type_description": "Functional", "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format", "cell_chembl_id": null, "confidence_description":
+        "Default value - Target unknown or has yet to be assigned", "confidence_score":
+        0, "description": "Compound was evaluated for its ability to mobilize calcium
+        in 1321NI cells", "document_chembl_id": "CHEMBL1127008", "relationship_description":
+        "Default value - Target has yet to be curated", "relationship_type": "U",
+        "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL612545", "tissue_chembl_id":
+        null, "variant_sequence": null}, {"aidx": "CLD0", "assay_category": null,
+        "assay_cell_type": null, "assay_chembl_id": "CHEMBL615119", "assay_classifications":
+        [], "assay_group": null, "assay_organism": null, "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Default value - Target unknown or has yet
+        to be assigned", "confidence_score": 0, "description": null, "document_chembl_id":
+        "CHEMBL1133101", "relationship_description": "Default value - Target has yet
+        to be curated", "relationship_type": "U", "src_assay_id": null, "src_id":
+        1, "target_chembl_id": "CHEMBL2362975", "tissue_chembl_id": null, "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
+        "CHEMBL615120", "assay_classifications": [], "assay_group": null, "assay_organism":
+        "Bos taurus", "assay_parameters": [], "assay_strain": null, "assay_subcellular_fraction":
+        "Membrane", "assay_tax_id": 9913, "assay_test_type": null, "assay_tissue":
+        "Striatum", "assay_type": "B", "assay_type_description": "Binding", "bao_format":
+        "BAO_0000249", "bao_label": "cell membrane format", "cell_chembl_id": null,
+        "confidence_description": "Multiple homologous protein targets may be assigned",
+        "confidence_score": 4, "description": "Binding affinity against A2 adenosine
+        receptor in bovine striatal membranes using [3H]CGS-21680", "document_chembl_id":
+        "CHEMBL1149169", "relationship_description": "Homologous protein target assigned",
+        "relationship_type": "H", "src_assay_id": null, "src_id": 1, "target_chembl_id":
+        "CHEMBL2094257", "tissue_chembl_id": "CHEMBL3638255", "variant_sequence":
+        null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": "143B",
+        "assay_chembl_id": "CHEMBL615121", "assay_classifications": [], "assay_group":
+        null, "assay_organism": "Homo sapiens", "assay_parameters": [], "assay_strain":
+        null, "assay_subcellular_fraction": null, "assay_tax_id": 9606, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "F", "assay_type_description": "Functional",
+        "bao_format": "BAO_0000219", "bao_label": "cell-based format", "cell_chembl_id":
+        "CHEMBL3307382", "confidence_description": "Target assigned is non-molecular",
+        "confidence_score": 1, "description": "In vitro cell cytotoxicity against
+        143-B cell lines (Human osteosarcoma cell line)", "document_chembl_id": "CHEMBL1136729",
+        "relationship_description": "Non-molecular target assigned", "relationship_type":
+        "N", "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL614508",
+        "tissue_chembl_id": null, "variant_sequence": null}], "page_meta": {"limit":
+        5, "next": "/chembl/api/data/assay.json?limit=5&offset=5", "offset": 0, "previous":
+        null, "total_count": 1890749}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '4794'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 04 Jan 2026 18:18:43 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.20492839813232422'
+    status:
+      code: 200
+      message: OK
 version: 1
