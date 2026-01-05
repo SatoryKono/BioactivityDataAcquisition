@@ -11,7 +11,10 @@ import sys
 
 import click
 
-from bioetl.composition.entrypoints import get_health_server, get_health_service
+from bioetl.composition.entrypoints import (
+    get_health_server_dependencies,
+    get_health_service,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -59,8 +62,18 @@ def health_server_command(host: str, port: int) -> None:
     click.echo("\nPress Ctrl+C to stop.")
 
     async def run() -> None:
-        # Get server with dependencies injected via composition root
-        server = get_health_server(host=host, port=port)
+        # Import HealthServer here (interfaces layer can import from interfaces)
+        from bioetl.interfaces.http.health_server import HealthServer
+
+        # Get dependencies from composition root (proper DI)
+        deps = get_health_server_dependencies()
+
+        # Create server in interfaces layer with injected dependencies
+        server = HealthServer(
+            host=host,
+            port=port,
+            health_monitor=deps.health_monitor,
+        )
 
         await server.start()
 

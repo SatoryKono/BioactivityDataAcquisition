@@ -1,11 +1,12 @@
 """Bootstrap functions for health service.
 
-Contains bootstrap functions for HealthService and HealthServer.
+Contains bootstrap functions for HealthService and health server dependencies.
 Used primarily by CLI health operations.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.data_source_factory import DataSourceFactory
@@ -13,12 +14,32 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.application.services import HealthService
-    from bioetl.interfaces.http.health_server import HealthServer
+    from bioetl.domain.ports import MetricsPort
+    from bioetl.infrastructure.adapters.http.health_monitor import (
+        ProviderHealthMonitor,
+    )
 
 __all__ = [
-    "bootstrap_health_server",
+    "HealthServerDependencies",
+    "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class HealthServerDependencies:
+    """Dependencies for HealthServer, provided by composition layer.
+
+    This dataclass allows composition to provide dependencies without
+    importing from interfaces layer (which would violate layer rules).
+
+    Attributes:
+        health_monitor: ProviderHealthMonitor for health state tracking.
+        metrics: MetricsPort for observability.
+    """
+
+    health_monitor: ProviderHealthMonitor
+    metrics: MetricsPort
 
 
 def bootstrap_health_service() -> HealthService:
@@ -46,31 +67,23 @@ def bootstrap_health_service() -> HealthService:
     )
 
 
-def bootstrap_health_server(
-    host: str = "0.0.0.0",
-    port: int = 8080,
-) -> HealthServer:
-    """Bootstrap HealthServer with all dependencies via DI.
+def bootstrap_health_server_dependencies() -> HealthServerDependencies:
+    """Bootstrap dependencies for HealthServer via DI.
 
-    Creates HealthServer with properly injected:
+    Creates and wires up:
     - PrometheusMetrics for observability
     - ProviderHealthMonitor for health state tracking
 
-    This is the composition root for the health server CLI command,
-    ensuring all dependencies are created in the composition layer.
-
-    Args:
-        host: Host to bind to (default: "0.0.0.0").
-        port: Port to listen on (default: 8080).
+    The actual HealthServer is created in the interfaces layer
+    to maintain proper layer separation (composition cannot import interfaces).
 
     Returns:
-        HealthServer configured with injected dependencies.
+        HealthServerDependencies with metrics and health_monitor.
 
     Example:
-        >>> server = bootstrap_health_server(host="127.0.0.1", port=9090)
-        >>> await server.start()
-        >>> # ... server running ...
-        >>> await server.stop()
+        >>> deps = bootstrap_health_server_dependencies()
+        >>> server = HealthServer(host="127.0.0.1", port=9090,
+        ...                       health_monitor=deps.health_monitor)
     """
     from bioetl.infrastructure.adapters.http.health_monitor import (
         ProviderHealthMonitor,
@@ -78,7 +91,6 @@ def bootstrap_health_server(
     from bioetl.infrastructure.observability.prometheus_metrics import (
         PrometheusMetrics,
     )
-    from bioetl.interfaces.http.health_server import HealthServer
 
     # Create metrics port for health monitor
     metrics = PrometheusMetrics()
@@ -86,9 +98,7 @@ def bootstrap_health_server(
     # Create health monitor with injected metrics
     health_monitor = ProviderHealthMonitor(metrics=metrics)
 
-    # Create and return server with injected dependencies
-    return HealthServer(
-        host=host,
-        port=port,
+    return HealthServerDependencies(
         health_monitor=health_monitor,
+        metrics=metrics,
     )
