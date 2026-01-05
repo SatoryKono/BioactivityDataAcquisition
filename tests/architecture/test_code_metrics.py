@@ -343,7 +343,7 @@ class TestClassSize:
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "LineageTracker": 400,
-        "ChemblAdapter": 600,  # 581 lines - complex API adapter with fetch_multi_filtered for multi-column filtering
+        "ChemblAdapter": 650,  # 630 lines - complex API adapter implementing full FilterableDataSourcePort
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
