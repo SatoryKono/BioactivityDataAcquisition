@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
 
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, InputFilterPort, MetricsPort
+    from bioetl.domain.ports import DataSourcePort, MetricsPort
     from bioetl.domain.types import HealthStatus
 
 
@@ -128,9 +128,9 @@ class FilteredDataSource:
                 self._record_multi_filter_metrics()
             elif self._filter_config.column_name:
                 # Single-column mode (backward compatibility)
-                # Check if fallback column is configured
-                if self._filter_config.fallback_column and hasattr(
-                    self._filter_reader, "load_filter_with_fallback"
+                # Check if fallback column is configured and reader supports it
+                if self._filter_config.fallback_column and isinstance(
+                    self._filter_reader, InputFilterPort
                 ):
                     # Load with fallback mapping
                     self._filter_result, self._fallback_mapping = (
