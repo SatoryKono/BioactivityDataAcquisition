@@ -8,7 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.domain.ports import (
+    FallbackFilterableDataSourcePort,
+    FallbackInputFilterPort,
+    FilterableDataSourcePort,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
@@ -21,37 +25,9 @@ if TYPE_CHECKING:
 class FilteredDataSource:
     """Wraps a DataSourcePort to add CSV-based filtering.
 
-    This is a Decorator pattern implementation that adds filtering
-    capability to any DataSourcePort without modifying the original.
-
-    The wrapper:
-    1. Loads filter IDs from CSV on context entry
-    2. Calls fetch_filtered() on adapters that support it (e.g., ChemblAdapter)
-    3. Delegates all other operations to the wrapped adapter
-    4. Records metrics about loaded IDs and duplicates
-
-    Multi-column filtering (AND logic):
-    When multiple columns are specified, the wrapper uses Hybrid Filtering:
-    - Server-side: API request with multiple __in filters (coarse filter)
-    - Client-side: Filter results to match only exact row-wise combinations
-
-    Note:
-        Filtering requires the underlying adapter to implement FilterableDataSourcePort.
-        This Protocol defines the fetch_filtered() method for adapters that support
-        server-side filtering (e.g., ChemblAdapter, PubMedAdapter).
-
-    Example:
-        >>> config = InputFilterConfig(
-        ...     enabled=True,
-        ...     source_path="data/input/molecules.csv",
-        ...     column_name="molecule_chembl_id",
-        ...     filter_field="molecule_chembl_id",
-        ... )
-        >>> wrapped = FilteredDataSource(adapter, csv_reader, config)
-        >>> async with wrapped:
-        ...     async for record in wrapped.fetch("activity"):
-        ...         process(record)
-
+    Decorator pattern: loads filter IDs from CSV, calls fetch_filtered() on
+    adapters that support it, delegates all other operations to wrapped adapter.
+    Multi-column filtering uses hybrid approach (server + client-side filtering).
     """
 
     def __init__(
@@ -62,16 +38,7 @@ class FilteredDataSource:
         metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
     ) -> None:
-        """Initialize filtered data source wrapper.
-
-        Args:
-            data_source: The underlying data source adapter to wrap.
-            filter_reader: Reader for loading filter IDs (e.g., CsvFilterReader).
-            filter_config: Configuration for filtering behavior.
-            metrics: Optional metrics port for recording filter statistics.
-            pipeline_name: Pipeline name for metrics labels.
-
-        """
+        """Initialize filtered data source wrapper."""
         self._data_source = data_source
         self._filter_reader = filter_reader
         self._filter_config = filter_config
@@ -129,8 +96,8 @@ class FilteredDataSource:
             elif self._filter_config.column_name:
                 # Single-column mode (backward compatibility)
                 # Check if fallback column is configured
-                if self._filter_config.fallback_column and hasattr(
-                    self._filter_reader, "load_filter_with_fallback"
+                if self._filter_config.fallback_column and isinstance(
+                    self._filter_reader, FallbackInputFilterPort
                 ):
                     # Load with fallback mapping
                     self._filter_result, self._fallback_mapping = (
@@ -212,21 +179,9 @@ class FilteredDataSource:
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
     def _matches_valid_combination(self, record: dict[str, Any]) -> bool:
-        """Check if record matches one of the valid combinations.
-
-        Used for client-side filtering in multi-column mode to ensure
-        only exact row-wise combinations from CSV are returned.
-
-        Args:
-            record: The record to check.
-
-        Returns:
-            True if record matches a valid combination, False otherwise.
-        """
+        """Check if record matches one of the valid combinations."""
         if not self._valid_combinations or not self._filter_fields:
             return True
-
-        # Build tuple of values from record in the same order as filter_fields
         record_values = tuple(
             str(record.get(field, "")) for field in self._filter_fields
         )
@@ -273,8 +228,8 @@ class FilteredDataSource:
             )
 
         # Check if adapter supports fallback and we have fallback mapping
-        if self._fallback_mapping and hasattr(
-            self._data_source, "fetch_filtered_with_fallback"
+        if self._fallback_mapping and isinstance(
+            self._data_source, FallbackFilterableDataSourcePort
         ):
             async for record in self._data_source.fetch_filtered_with_fallback(
                 entity_type=entity_type,
@@ -302,24 +257,8 @@ class FilteredDataSource:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records with optional filtering.
-
-        If filtering is enabled and filter IDs are loaded, uses the adapter's
-        fetch_filtered() method if available. Otherwise, delegates to standard fetch().
-
-        Args:
-            entity_type: Type of entity to fetch.
-            limit: Maximum number of records.
-            query: Optional search query for providers that support it.
-            filter_ids: External filter IDs (ignored - uses internal filter from CSV).
-            filter_field: External filter field (ignored - uses internal config).
-
-        Yields:
-            Records from the data source, filtered if configured.
-
-        """
-        # Note: External filter_ids/filter_field are ignored
-        _ = filter_ids, filter_field  # Mark as intentionally unused
+        """Fetch records with optional filtering from internal CSV config."""
+        _ = filter_ids, filter_field  # External params ignored, use internal config
 
         if self._filter_config.enabled and self._multi_filter_ids:
             async for record in self._fetch_multi_column(entity_type, limit):
