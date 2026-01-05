@@ -1,9 +1,13 @@
 # ADR-016: Error Handling Strategy
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-26
-*   **Last Updated**: 2026-01-02
-*   **Context**: The BioETL pipeline needs a consistent strategy for handling errors across all adapters and processing stages. Without a unified approach, error handling becomes fragmented, leading to inconsistent behavior, difficulty in debugging, and potential data loss.
+**Status:** Accepted
+**Date:** 2025-12-26
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+
+## Context
+
+The BioETL pipeline needs a consistent strategy for handling errors across all adapters and processing stages. Without a unified approach, error handling becomes fragmented, leading to inconsistent behavior, difficulty in debugging, and potential data loss.
 
 ## The Decision
 

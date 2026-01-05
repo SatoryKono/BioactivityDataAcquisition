@@ -1,9 +1,10 @@
 # ADR-019: Observability Port Enforcement
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-26
-*   **Supersedes**: None
-*   **Related**: ADR-006 (Logger/Metrics Ports), ADR-017 (Observability Architecture)
+**Status:** Accepted
+**Date:** 2025-12-26
+**Decision makers:** @BioETL-Team
+**Supersedes:** None
+**Related:** ADR-006 (Logger/Metrics Ports), ADR-017 (Observability Architecture)
 
 ## Context
 
