@@ -1,6 +1,7 @@
 """Configuration commands for BioETL CLI.
 
 Implements config inspection and validation commands.
+Uses ConfigService from composition entrypoints for clean layering.
 """
 
 from __future__ import annotations
@@ -10,8 +11,7 @@ from typing import Any
 
 import click
 
-from bioetl.composition.registry import get_default_registry
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.composition.entrypoints import get_config_service
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 
@@ -56,16 +56,16 @@ def show_command(pipeline: str, output_format: str) -> None:
 
         bioetl config show chembl_activity --format json
     """
+    service = get_config_service()
+
     try:
-        yaml_config = load_pipeline_config(pipeline)
+        config_dict = service.get_pipeline_yaml_config(pipeline)
     except ValueError as e:
         echo_error("Configuration error", str(e))
         return
     except FileNotFoundError as e:
         echo_error("Config file not found", str(e))
         return
-
-    config_dict = _config_to_dict(yaml_config)
 
     if output_format == "json":
         echo_info(json.dumps(config_dict, indent=2, default=str))
@@ -86,14 +86,16 @@ def validate_command(pipeline: str) -> None:
 
         bioetl config validate chembl_activity
     """
+    service = get_config_service()
+
     try:
-        yaml_config = load_pipeline_config(pipeline)
+        info = service.validate_pipeline_config(pipeline)
         echo_info(f"Configuration valid for {pipeline}")
-        echo_info(f"  Provider: {yaml_config.provider}")
-        echo_info(f"  Entity type: {yaml_config.entity_type}")
-        echo_info(f"  Silver table: {yaml_config.silver_table}")
-        if yaml_config.gold_table:
-            echo_info(f"  Gold table: {yaml_config.gold_table}")
+        echo_info(f"  Provider: {info.provider}")
+        echo_info(f"  Entity type: {info.entity_type}")
+        echo_info(f"  Silver table: {info.silver_table}")
+        if info.gold_table:
+            echo_info(f"  Gold table: {info.gold_table}")
     except ValueError as e:
         echo_error("Configuration invalid", str(e))
     except FileNotFoundError as e:
@@ -119,12 +121,31 @@ def show_settings_command(output_format: str) -> None:
 
         bioetl config show-settings --format json
     """
-    settings = get_settings()
-    settings_dict = settings.model_dump()
+    service = get_config_service()
+    settings_info = service.get_settings()
 
-    # Mask sensitive values
-    if settings_dict.get("pubmed_api_key"):
-        settings_dict["pubmed_api_key"] = "***MASKED***"
+    # Convert SettingsInfo to dict for output
+    settings_dict: dict[str, Any] = {
+        "env": settings_info.env,
+        "data_dir": settings_info.data_dir,
+        "bronze_path": settings_info.bronze_path,
+        "silver_path": settings_info.silver_path,
+        "gold_path": settings_info.gold_path,
+        "checkpoint_path": settings_info.checkpoint_path,
+        "quarantine_path": settings_info.quarantine_path,
+        "debug": settings_info.debug,
+        "test_mode": settings_info.test_mode,
+        "metrics_enabled": settings_info.metrics_enabled,
+        "metrics_port": settings_info.metrics_port,
+        "batch_size": settings_info.batch_size,
+    }
+
+    # Add additional settings (with sensitive values masked)
+    for key, value in settings_info.additional.items():
+        if "api_key" in key.lower() or "password" in key.lower():
+            settings_dict[key] = "***MASKED***"
+        else:
+            settings_dict[key] = value
 
     if output_format == "json":
         echo_info(json.dumps(settings_dict, indent=2, default=str))
@@ -142,11 +163,8 @@ def list_pipelines_command() -> None:
 
         bioetl config list-pipelines
     """
-    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-
-    register_all_pipelines()
-    registry = get_default_registry()
-    pipelines = registry.list_pipelines()
+    service = get_config_service()
+    pipelines = service.list_pipelines()
 
     if not pipelines:
         echo_info("No pipelines registered.")
