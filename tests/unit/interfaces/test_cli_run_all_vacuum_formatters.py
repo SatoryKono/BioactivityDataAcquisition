@@ -397,9 +397,7 @@ class TestRunAllCommand:
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run_all.asyncio.run",
-                return_value=BatchRunResult(
-                    total=2, succeeded=0, failed=0, skipped=2
-                ),
+                return_value=BatchRunResult(total=2, succeeded=0, failed=0, skipped=2),
             ),
             patch(
                 "bioetl.interfaces.cli.commands.run_all.get_default_registry",
@@ -418,9 +416,7 @@ class TestRunAllCommand:
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run_all.asyncio.run",
-                return_value=BatchRunResult(
-                    total=2, succeeded=2, failed=0, skipped=0
-                ),
+                return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
                 "bioetl.interfaces.cli.commands.run_all.get_default_registry",
@@ -437,9 +433,7 @@ class TestRunAllCommand:
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run_all.asyncio.run",
-                return_value=BatchRunResult(
-                    total=2, succeeded=2, failed=0, skipped=0
-                ),
+                return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
                 "bioetl.interfaces.cli.commands.run_all.get_default_registry",
@@ -1265,9 +1259,7 @@ class TestRunAllCommandExceptions:
         with (
             patch(
                 "bioetl.interfaces.cli.commands.run_all.asyncio.run",
-                return_value=BatchRunResult(
-                    total=2, succeeded=2, failed=0, skipped=0
-                ),
+                return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
                 "bioetl.interfaces.cli.commands.run_all.get_default_registry",
