@@ -1,0 +1,271 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-length:
+      - '211'
+      content-type:
+      - application/json
+      date:
+      - Mon, 05 Jan 2026 23:19:44 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line.json?limit=50&offset=0&format=json
+  response:
+    body:
+      string: '{"cell_lines": [{"cell_chembl_id": "CHEMBL3307241", "cell_description":
+        "DC3F", "cell_id": 1, "cell_name": "DC3F", "cell_source_organism": "Cricetulus
+        griseus", "cell_source_tax_id": 10029, "cell_source_tissue": "Lung", "cellosaurus_id":
+        "CVCL_4704", "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307242", "cell_description": "P3HR-1", "cell_id": 2, "cell_name":
+        "P3HR-1", "cell_source_organism": "Homo sapiens", "cell_source_tax_id": 9606,
+        "cell_source_tissue": "Lyphoma", "cellosaurus_id": "CVCL_2676", "cl_lincs_id":
+        "LCL-2024", "clo_id": "CLO_0008331", "efo_id": "EFO_0002312"}, {"cell_chembl_id":
+        "CHEMBL3307243", "cell_description": "UCLA P-3", "cell_id": 3, "cell_name":
+        "UCLA P-3", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Lung Adenocarcinoma", "cellosaurus_id": "CVCL_N513",
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307244",
+        "cell_description": "UMSCC22B", "cell_id": 4, "cell_name": "UMSCC22B", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Carcinoma",
+        "cellosaurus_id": "CVCL_7732", "cl_lincs_id": null, "clo_id": null, "efo_id":
+        null}, {"cell_chembl_id": "CHEMBL3307245", "cell_description": "UMUC3", "cell_id":
+        5, "cell_name": "UMUC3", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Bladder Carcinoma", "cellosaurus_id": "CVCL_1783",
+        "cl_lincs_id": "LCL-1721", "clo_id": "CLO_0009487", "efo_id": "EFO_0002387"},
+        {"cell_chembl_id": "CHEMBL3307246", "cell_description": "V79-4", "cell_id":
+        6, "cell_name": "V79-4", "cell_source_organism": "Cricetulus griseus", "cell_source_tax_id":
+        10029, "cell_source_tissue": "Lung", "cellosaurus_id": "CVCL_2796", "cl_lincs_id":
+        null, "clo_id": "CLO_0009504", "efo_id": null}, {"cell_chembl_id": "CHEMBL3307247",
+        "cell_description": "VCR100", "cell_id": 7, "cell_name": "VCR100", "cell_source_organism":
+        "Mus musculus", "cell_source_tax_id": 10090, "cell_source_tissue": "Leukaemia",
+        "cellosaurus_id": null, "cl_lincs_id": null, "clo_id": null, "efo_id": null},
+        {"cell_chembl_id": "CHEMBL3307248", "cell_description": "W256", "cell_id":
+        8, "cell_name": "W256", "cell_source_organism": "Rattus norvegicus", "cell_source_tax_id":
+        10116, "cell_source_tissue": "Monocytic Carcinosarcoma", "cellosaurus_id":
+        "CVCL_3537", "cl_lincs_id": null, "clo_id": "CLO_0007335", "efo_id": null},
+        {"cell_chembl_id": "CHEMBL3307249", "cell_description": "WEHI265.1", "cell_id":
+        9, "cell_name": "WEHI265.1", "cell_source_organism": "Mus musculus", "cell_source_tax_id":
+        10090, "cell_source_tissue": "Macrophage", "cellosaurus_id": "CVCL_3620",
+        "cl_lincs_id": null, "clo_id": "CLO_0009576", "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307250", "cell_description": "WiDr-NTR", "cell_id": 10, "cell_name":
+        "WiDr-NTR", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Colon Adenocarcinoma", "cellosaurus_id": null,
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307251",
+        "cell_description": "XC", "cell_id": 11, "cell_name": "XC", "cell_source_organism":
+        "Rattus norvegicus", "cell_source_tax_id": 10116, "cell_source_tissue": "Sarcoma",
+        "cellosaurus_id": "CVCL_1891", "cl_lincs_id": null, "clo_id": "CLO_0009645",
+        "efo_id": null}, {"cell_chembl_id": "CHEMBL3307253", "cell_description": "YAPC",
+        "cell_id": 13, "cell_name": "YAPC", "cell_source_organism": "Homo sapiens",
+        "cell_source_tax_id": 9606, "cell_source_tissue": "Pancreas Carcinoma", "cellosaurus_id":
+        "CVCL_1794", "cl_lincs_id": "LCL-1792", "clo_id": "CLO_0009711", "efo_id":
+        "EFO_0006778"}, {"cell_chembl_id": "CHEMBL3307254", "cell_description": "YT-NU",
+        "cell_id": 14, "cell_name": "YT-NU", "cell_source_organism": "Homo sapiens",
+        "cell_source_tax_id": 9606, "cell_source_tissue": "Neuroblastoma", "cellosaurus_id":
+        "CVCL_H524", "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307255", "cell_description": "T6400", "cell_id": 15, "cell_name":
+        "T6400", "cell_source_organism": "Mus musculus", "cell_source_tax_id": 10090,
+        "cell_source_tissue": "Fibroblasts", "cellosaurus_id": "CVCL_R998", "cl_lincs_id":
+        null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307256",
+        "cell_description": "T78-1", "cell_id": 16, "cell_name": "T78-1", "cell_source_organism":
+        "Cricetulus griseus", "cell_source_tax_id": 10029, "cell_source_tissue": "Lung",
+        "cellosaurus_id": "CVCL_X527", "cl_lincs_id": null, "clo_id": null, "efo_id":
+        null}, {"cell_chembl_id": "CHEMBL3307257", "cell_description": "T78-1/T79-A3",
+        "cell_id": 17, "cell_name": "T78-1/T79-A3", "cell_source_organism": "Cricetulus
+        griseus", "cell_source_tax_id": 10029, "cell_source_tissue": "Lung", "cellosaurus_id":
+        null, "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307258", "cell_description": "TA3", "cell_id": 18, "cell_name": "TA3",
+        "cell_source_organism": "Mus musculus", "cell_source_tax_id": 10090, "cell_source_tissue":
+        "Mammary Carcinoma", "cellosaurus_id": "CVCL_4315", "cl_lincs_id": null, "clo_id":
+        null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307259", "cell_description":
+        "UMR106-06", "cell_id": 19, "cell_name": "UMR106-06", "cell_source_organism":
+        "Rattus norvegicus", "cell_source_tax_id": 10116, "cell_source_tissue": "Osteosarcoma",
+        "cellosaurus_id": "CVCL_S477", "cl_lincs_id": null, "clo_id": null, "efo_id":
+        null}, {"cell_chembl_id": "CHEMBL3308406", "cell_description": "AIK-T8", "cell_id":
+        20, "cell_name": "AIK-T8", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Lymphocyte", "cellosaurus_id": "CVCL_1B43", "cl_lincs_id":
+        null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3308394",
+        "cell_description": "G-401", "cell_id": 21, "cell_name": "G-401", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Kidney
+        Wilm''s tumor", "cellosaurus_id": "CVCL_0270", "cl_lincs_id": "LCL-1511",
+        "clo_id": "CLO_0003434", "efo_id": "EFO_0002179"}, {"cell_chembl_id": "CHEMBL3307260",
+        "cell_description": "Jensen sarcoma", "cell_id": 22, "cell_name": "Jensen
+        sarcoma", "cell_source_organism": "Rattus norvegicus", "cell_source_tax_id":
+        10116, "cell_source_tissue": "fibroblast sarcoma", "cellosaurus_id": "CVCL_3531",
+        "cl_lincs_id": null, "clo_id": "CLO_0007018", "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307261", "cell_description": "MDA-MB-238", "cell_id": 23, "cell_name":
+        "MDA-MB-238", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Breast Adenocarcinoma", "cellosaurus_id": null,
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307263",
+        "cell_description": "MOLT-4F", "cell_id": 25, "cell_name": "MOLT-4F", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Leukaemia",
+        "cellosaurus_id": "CVCL_2792", "cl_lincs_id": "LCL-1031", "clo_id": "CLO_0050994",
+        "efo_id": null}, {"cell_chembl_id": "CHEMBL3307264", "cell_description": "N9",
+        "cell_id": 26, "cell_name": "N9", "cell_source_organism": "Homo sapiens",
+        "cell_source_tax_id": 9606, "cell_source_tissue": "Hepatocyte", "cellosaurus_id":
+        null, "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307265", "cell_description": "NCI-H417", "cell_id": 27, "cell_name":
+        "NCI-H417", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Lung Carcinoma", "cellosaurus_id": "CVCL_1602",
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307266",
+        "cell_description": "NRK", "cell_id": 28, "cell_name": "NRK", "cell_source_organism":
+        "Rattus norvegicus", "cell_source_tax_id": 10116, "cell_source_tissue": "Kidney
+        ", "cellosaurus_id": "CVCL_3758", "cl_lincs_id": null, "clo_id": "CLO_0008195",
+        "efo_id": null}, {"cell_chembl_id": "CHEMBL3307267", "cell_description": "NUGC-4",
+        "cell_id": 29, "cell_name": "NUGC-4", "cell_source_organism": "Homo sapiens",
+        "cell_source_tax_id": 9606, "cell_source_tissue": "gastric lymph node, adenocarcinoma",
+        "cellosaurus_id": "CVCL_3082", "cl_lincs_id": "LCL-2001", "clo_id": "CLO_0050789",
+        "efo_id": "EFO_0006703"}, {"cell_chembl_id": "CHEMBL3307268", "cell_description":
+        "P388/VCR", "cell_id": 30, "cell_name": "P388/VCR", "cell_source_organism":
+        "Mus musculus", "cell_source_tax_id": 10090, "cell_source_tissue": "Leukaemia",
+        "cellosaurus_id": null, "cl_lincs_id": null, "clo_id": null, "efo_id": null},
+        {"cell_chembl_id": "CHEMBL3307269", "cell_description": "PAXF546", "cell_id":
+        31, "cell_name": "PAXF546", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Panreatic Carcinoma", "cellosaurus_id": null,
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307270",
+        "cell_description": "PLC", "cell_id": 32, "cell_name": "PLC", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Hepatoma",
+        "cellosaurus_id": null, "cl_lincs_id": null, "clo_id": null, "efo_id": null},
+        {"cell_chembl_id": "CHEMBL3307271", "cell_description": "SCC-38", "cell_id":
+        34, "cell_name": "SCC-38", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Squamous Carcinoma", "cellosaurus_id": null,
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307272",
+        "cell_description": "SISO", "cell_id": 35, "cell_name": "SISO", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Cervical
+        Adenocarcinoma", "cellosaurus_id": "CVCL_2193", "cl_lincs_id": "LCL-1514",
+        "clo_id": "CLO_0009021", "efo_id": null}, {"cell_chembl_id": "CHEMBL3307273",
+        "cell_description": "SNU-16", "cell_id": 37, "cell_name": "SNU-16", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Gastric
+        Carcinoma", "cellosaurus_id": "CVCL_0076", "cl_lincs_id": "LCL-1889", "clo_id":
+        "CLO_0009095", "efo_id": "EFO_0002344"}, {"cell_chembl_id": "CHEMBL3307274",
+        "cell_description": "SW 962", "cell_id": 38, "cell_name": "SW 962", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Vulva Lymphoid
+        Carcinoma", "cellosaurus_id": "CVCL_1733", "cl_lincs_id": null, "clo_id":
+        "CLO_0009205", "efo_id": "EFO_0002377"}, {"cell_chembl_id": "CHEMBL3307275",
+        "cell_description": "T84", "cell_id": 39, "cell_name": "T84", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Colon carcinoma",
+        "cellosaurus_id": "CVCL_0555", "cl_lincs_id": "LCL-1166", "clo_id": "CLO_0009254",
+        "efo_id": "EFO_0002084"}, {"cell_chembl_id": "CHEMBL3307276", "cell_description":
+        "AIK-T4", "cell_id": 40, "cell_name": "AIK-T4", "cell_source_organism": "Homo
+        sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Lymphocyte",
+        "cellosaurus_id": "CVCL_1B42", "cl_lincs_id": null, "clo_id": null, "efo_id":
+        null}, {"cell_chembl_id": "CHEMBL3307277", "cell_description": "B104", "cell_id":
+        41, "cell_name": "B104", "cell_source_organism": "Rattus norvegicus", "cell_source_tax_id":
+        10116, "cell_source_tissue": "Neuroblastoma", "cellosaurus_id": "CVCL_0154",
+        "cl_lincs_id": null, "clo_id": "CLO_0001783", "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307278", "cell_description": "CCRF S-180", "cell_id": 42, "cell_name":
+        "CCRF S-180", "cell_source_organism": "Mus musculus", "cell_source_tax_id":
+        10090, "cell_source_tissue": "Fibroblast Sarcoma", "cellosaurus_id": "CVCL_2874",
+        "cl_lincs_id": null, "clo_id": "CLO_0002333", "efo_id": null}, {"cell_chembl_id":
+        "CHEMBL3307279", "cell_description": "CEM-TK(+)", "cell_id": 43, "cell_name":
+        "CEM-TK(+)", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Blood", "cellosaurus_id": null, "cl_lincs_id":
+        null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307280",
+        "cell_description": "COLO 480", "cell_id": 44, "cell_name": "COLO 480", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Colon adenocarcinoma",
+        "cellosaurus_id": null, "cl_lincs_id": null, "clo_id": null, "efo_id": null},
+        {"cell_chembl_id": "CHEMBL3307281", "cell_description": "DAN-G", "cell_id":
+        45, "cell_name": "DAN-G", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Pancreas adenocarcinoma", "cellosaurus_id": "CVCL_0243",
+        "cl_lincs_id": "LCL-1734", "clo_id": "CLO_0002698", "efo_id": "EFO_0006562"},
+        {"cell_chembl_id": "CHEMBL3307282", "cell_description": "HOS-TE85", "cell_id":
+        46, "cell_name": "HOS-TE85", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Oesteosarcoma", "cellosaurus_id": "CVCL_0439",
+        "cl_lincs_id": null, "clo_id": "CLO_0007814", "efo_id": "EFO_0002866"}, {"cell_chembl_id":
+        "CHEMBL3308408", "cell_description": "L1210 (DACH)", "cell_id": 47, "cell_name":
+        "L1210 (DACH)", "cell_source_organism": "Mus musculus", "cell_source_tax_id":
+        10090, "cell_source_tissue": "lymphoblast, lymphocytic, leukemia (DACH resistant",
+        "cellosaurus_id": "CVCL_Y419", "cl_lincs_id": null, "clo_id": null, "efo_id":
+        null}, {"cell_chembl_id": "CHEMBL3307283", "cell_description": "MAC13", "cell_id":
+        48, "cell_name": "MAC13", "cell_source_organism": "Mus musculus", "cell_source_tax_id":
+        10090, "cell_source_tissue": "colon adenocarcinoma", "cellosaurus_id": "CVCL_S000",
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307285",
+        "cell_description": "CEM-TK(-)", "cell_id": 50, "cell_name": "CEM-TK(-)",
+        "cell_source_organism": "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue":
+        "Blood", "cellosaurus_id": null, "cl_lincs_id": null, "clo_id": null, "efo_id":
+        null}, {"cell_chembl_id": "CHEMBL3307286", "cell_description": "M96", "cell_id":
+        52, "cell_name": "M96", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Melanoma", "cellosaurus_id": null, "cl_lincs_id":
+        null, "clo_id": null, "efo_id": null}, {"cell_chembl_id": "CHEMBL3307287",
+        "cell_description": "MKN-74", "cell_id": 53, "cell_name": "MKN-74", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Stomach
+        Adenocarcinoma", "cellosaurus_id": "CVCL_2791", "cl_lincs_id": null, "clo_id":
+        "CLO_0050798", "efo_id": "EFO_0002834"}, {"cell_chembl_id": "CHEMBL3307288",
+        "cell_description": "NAMALVA", "cell_id": 54, "cell_name": "NAMALVA", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Leukocyte/lymphoblastoid",
+        "cellosaurus_id": "CVCL_0067", "cl_lincs_id": null, "clo_id": "CLO_0007939",
+        "efo_id": "EFO_0002246"}, {"cell_chembl_id": "CHEMBL3307289", "cell_description":
+        "NCI-H46", "cell_id": 55, "cell_name": "NCI-H46", "cell_source_organism":
+        "Homo sapiens", "cell_source_tax_id": 9606, "cell_source_tissue": "Lung Carcinoma",
+        "cellosaurus_id": null, "cl_lincs_id": null, "clo_id": null, "efo_id": null},
+        {"cell_chembl_id": "CHEMBL3307290", "cell_description": "QG-95", "cell_id":
+        56, "cell_name": "QG-95", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
+        9606, "cell_source_tissue": "Lung Carcinoma", "cellosaurus_id": "CVCL_S847",
+        "cl_lincs_id": null, "clo_id": null, "efo_id": null}], "page_meta": {"limit":
+        50, "next": "/chembl/api/data/cell_line.json?limit=50&offset=50", "offset":
+        0, "previous": null, "total_count": 2215}}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-disposition:
+      - inline
+      content-length:
+      - '15414'
+      content-type:
+      - application/json
+      date:
+      - Mon, 05 Jan 2026 23:21:09 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
+      x-chembl-in-cache:
+      - 'True'
+      x-chembl-retrieval-time:
+      - '0.008199453353881836'
+    status:
+      code: 200
+      message: OK
+version: 1
