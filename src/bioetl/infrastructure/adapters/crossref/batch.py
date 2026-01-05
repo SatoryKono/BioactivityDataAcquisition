@@ -260,7 +260,9 @@ class SearchPaginator:
                 # Check if pagination should continue
                 if not self._should_continue_pagination(items, next_cursor, cursor):
                     break
-                assert next_cursor is not None  # Guaranteed by _should_continue_pagination
+                assert (
+                    next_cursor is not None
+                )  # Guaranteed by _should_continue_pagination
                 cursor = next_cursor
 
         except CrossRefApiError:
