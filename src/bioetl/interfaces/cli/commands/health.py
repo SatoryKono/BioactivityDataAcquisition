@@ -97,7 +97,7 @@ def health_server_command(host: str, port: int) -> None:
         asyncio.run(run())
     except KeyboardInterrupt:
         click.echo("\nShutting down...")
-        sys.exit(ExitCode.OK.value)
+        sys.exit(ExitCode.OK)
 
 
 @health.command("check")
@@ -143,7 +143,7 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         results = asyncio.run(run_checks())
     except Exception as e:
         click.echo(f"Error running health checks: {e}", err=True)
-        sys.exit(ExitCode.FAIL.value)
+        sys.exit(ExitCode.FAIL)
 
     if output_json:
         click.echo(json_module.dumps(results, indent=2))
@@ -170,10 +170,10 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
 
         if all_healthy:
             click.echo("\nAll providers healthy.")
-            sys.exit(ExitCode.OK.value)
+            sys.exit(ExitCode.OK)
         else:
             click.echo("\nSome providers unhealthy.")
-            sys.exit(ExitCode.FAIL.value)
+            sys.exit(ExitCode.FAIL)
 
 
 __all__ = ["health"]
