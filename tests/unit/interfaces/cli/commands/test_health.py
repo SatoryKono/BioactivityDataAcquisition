@@ -48,21 +48,22 @@ class TestHealthServerCommand:
         assert "8080" in result.output  # default port
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
-    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_default_options(
         self,
-        mock_metrics: MagicMock,
-        mock_monitor: MagicMock,
-        mock_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server with default options."""
-        # Setup mocks - intercept before asyncio.run
+        # Setup mocks - mock dependencies and server class
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
         mock_server_instance.stop = AsyncMock()
-        mock_server.return_value = mock_server_instance
+        mock_server_cls.return_value = mock_server_instance
 
         with patch("asyncio.run", side_effect=KeyboardInterrupt()):
             result = cli_runner.invoke(cli, ["health", "server"])
@@ -76,20 +77,21 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
-    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_custom_host_port(
         self,
-        mock_metrics: MagicMock,
-        mock_monitor: MagicMock,
-        mock_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server with custom host and port."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
         mock_server_instance.stop = AsyncMock()
-        mock_server.return_value = mock_server_instance
+        mock_server_cls.return_value = mock_server_instance
 
         with patch("asyncio.run", side_effect=KeyboardInterrupt()):
             result = cli_runner.invoke(
@@ -100,20 +102,21 @@ class TestHealthServerCommand:
         assert result.exit_code == ExitCode.OK.value
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
-    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_keyboard_interrupt(
         self,
-        mock_metrics: MagicMock,
-        mock_monitor: MagicMock,
-        mock_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server graceful shutdown on Ctrl+C."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
         mock_server_instance.stop = AsyncMock()
-        mock_server.return_value = mock_server_instance
+        mock_server_cls.return_value = mock_server_instance
 
         with patch("asyncio.run", side_effect=KeyboardInterrupt()):
             result = cli_runner.invoke(cli, ["health", "server"])
@@ -580,16 +583,17 @@ class TestHealthServerAsyncExecution:
     """Test the actual async execution of health server."""
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
-    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_starts_and_stops(
         self,
-        mock_metrics_cls: MagicMock,
-        mock_monitor_cls: MagicMock,
+        mock_get_deps: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server starts and stops correctly."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
         mock_server.stop = AsyncMock()
@@ -608,16 +612,17 @@ class TestHealthServerAsyncExecution:
         assert "Health server stopped." in result.output
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
-    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_with_custom_options(
         self,
-        mock_metrics_cls: MagicMock,
-        mock_monitor_cls: MagicMock,
+        mock_get_deps: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server passes custom host/port to HealthServer."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
         mock_server.stop = AsyncMock()
@@ -633,27 +638,23 @@ class TestHealthServerAsyncExecution:
             )
 
         # Verify HealthServer was called with correct options
-        mock_server_cls.assert_called_once()
-        call_kwargs = mock_server_cls.call_args.kwargs
-        assert call_kwargs["host"] == "127.0.0.1"
-        assert call_kwargs["port"] == 9000
+        mock_server_cls.assert_called_once_with(
+            host="127.0.0.1",
+            port=9000,
+            health_monitor=mock_deps.health_monitor,
+        )
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
-    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
-    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
-    def test_health_server_creates_components(
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
+    def test_health_server_uses_composition_entrypoint(
         self,
-        mock_metrics_cls: MagicMock,
-        mock_monitor_cls: MagicMock,
+        mock_get_deps: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
-        """Test health server creates metrics and monitor."""
-        mock_metrics = MagicMock()
-        mock_metrics_cls.return_value = mock_metrics
-
-        mock_monitor = MagicMock()
-        mock_monitor_cls.return_value = mock_monitor
+        """Test health server uses composition entrypoint for DI."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
 
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
@@ -666,13 +667,13 @@ class TestHealthServerAsyncExecution:
         with patch("asyncio.sleep", side_effect=cancelling_sleep):
             cli_runner.invoke(cli, ["health", "server"])
 
-        # Verify components were created
-        mock_metrics_cls.assert_called_once()
-        mock_monitor_cls.assert_called_once_with(metrics=mock_metrics)
+        # Verify entrypoint was called to get dependencies
+        mock_get_deps.assert_called_once()
+        # Verify HealthServer was called with default options
         mock_server_cls.assert_called_once_with(
             host="0.0.0.0",
             port=8080,
-            health_monitor=mock_monitor,
+            health_monitor=mock_deps.health_monitor,
         )
 
 
