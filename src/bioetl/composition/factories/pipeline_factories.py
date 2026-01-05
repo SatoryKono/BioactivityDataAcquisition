@@ -56,6 +56,9 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
 from bioetl.application.pipelines.generic import GenericPipeline
+from bioetl.application.pipelines.openalex.transformer import (
+    OpenAlexPublicationTransformer,
+)
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
@@ -74,6 +77,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
     CrossRefPublicationGoldSchema,
+    OpenAlexPublicationGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     UniProtProteinGoldSchema,
@@ -91,6 +95,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     CROSSREF_PUBLICATION_SCHEMA,
+    OPENALEX_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
@@ -226,6 +231,14 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=CROSSREF_PUBLICATION_SCHEMA,
         gold_schema=CrossRefPublicationGoldSchema,
     ),
+    # OpenAlex pipeline
+    PipelineFactoryConfig(
+        pipeline_name="openalex_publication",
+        provider="openalex",
+        transformer_class=OpenAlexPublicationTransformer,
+        silver_schema=OPENALEX_PUBLICATION_SCHEMA,
+        gold_schema=OpenAlexPublicationGoldSchema,
+    ),
 )
 
 
@@ -273,6 +286,7 @@ pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
 pubmed_publications_factory = _factories["pubmed_publications"]
 crossref_publication_enrichment_factory = _factories["crossref_publication_enrichment"]
+openalex_publication_factory = _factories["openalex_publication"]
 
 
 # =============================================================================
@@ -411,6 +425,7 @@ __all__ = [
     "get_factory",
     "is_registered",
     "list_available_pipelines",
+    "openalex_publication_factory",
     "pubchem_compound_factory",
     "pubmed_publications_factory",
     "register_all_pipelines",

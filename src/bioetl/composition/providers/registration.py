@@ -24,13 +24,13 @@ from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefAdapter,
     _create_crossref_adapter,
 )
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.adapters.openalex.client import (
     OpenAlexAdapter,
     _create_openalex_adapter,
 )
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
 from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
     PubMedAdapter,

@@ -9,12 +9,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.openalex.client import (
     OpenAlexAdapter,
     _create_openalex_adapter,
 )
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 @pytest.fixture
@@ -180,8 +180,14 @@ class TestFetchFiltered:
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "results": [
-                {"id": "https://openalex.org/W123", "doi": "https://doi.org/10.1038/test1"},
-                {"id": "https://openalex.org/W456", "doi": "https://doi.org/10.1038/test2"},
+                {
+                    "id": "https://openalex.org/W123",
+                    "doi": "https://doi.org/10.1038/test1",
+                },
+                {
+                    "id": "https://openalex.org/W456",
+                    "doi": "https://doi.org/10.1038/test2",
+                },
             ]
         }
         mock_http_client.get.return_value = mock_response
@@ -202,9 +208,7 @@ class TestFetchFiltered:
         """Should respect limit parameter."""
         mock_response = MagicMock()
         mock_response.json.return_value = {
-            "results": [
-                {"id": f"https://openalex.org/W{i}"} for i in range(10)
-            ]
+            "results": [{"id": f"https://openalex.org/W{i}"} for i in range(10)]
         }
         mock_http_client.get.return_value = mock_response
 
@@ -253,9 +257,7 @@ class TestFetch:
         assert len(results) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_invalid_entity_type(
-        self, adapter: OpenAlexAdapter
-    ) -> None:
+    async def test_fetch_invalid_entity_type(self, adapter: OpenAlexAdapter) -> None:
         """Should raise ValueError for invalid entity type."""
         with pytest.raises(ValueError, match="supports 'work' or 'publication'"):
             async for _ in adapter.fetch("invalid", query="test"):
@@ -330,9 +332,7 @@ class TestCreateOpenAlexAdapter:
                 settings=None,
             )
 
-    def test_create_adapter_requires_http_client(
-        self, logger: NoOpLogger
-    ) -> None:
+    def test_create_adapter_requires_http_client(self, logger: NoOpLogger) -> None:
         """Should raise ValueError when http_client not provided."""
         with pytest.raises(ValueError, match="requires http_client"):
             _create_openalex_adapter(
@@ -342,9 +342,7 @@ class TestCreateOpenAlexAdapter:
                 mailto="test@example.com",
             )
 
-    def test_create_adapter_requires_logger(
-        self, mock_http_client: MagicMock
-    ) -> None:
+    def test_create_adapter_requires_logger(self, mock_http_client: MagicMock) -> None:
         """Should raise ValueError when logger not provided."""
         with pytest.raises(ValueError, match="requires logger"):
             _create_openalex_adapter(

@@ -98,9 +98,7 @@ def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
     return authors
 
 
-def extract_concepts(
-    concepts: list[dict[str, Any]], max_count: int = 10
-) -> list[str]:
+def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> list[str]:
     """Extract top concept names from concepts list.
 
     OpenAlex provides concepts sorted by relevance score.

@@ -5,7 +5,7 @@ Tests the OpenAlexPublicationSchema validation.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pandas as pd
@@ -24,7 +24,7 @@ def valid_record() -> dict:
         "_run_id": uuid4(),
         "_run_type": "incremental",
         "_source_batch_id": None,
-        "_ingestion_ts": datetime.now(timezone.utc),
+        "_ingestion_ts": datetime.now(UTC),
         "_dq_warn": False,
         "_dq_error": False,
         "_index": 0,

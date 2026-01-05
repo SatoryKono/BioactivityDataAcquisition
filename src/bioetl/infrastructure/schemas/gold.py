@@ -575,3 +575,55 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = True
+
+
+class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for OpenAlex Publication in Gold layer.
+
+    Used for batch DOI resolution with title fallback via OpenAlex Works API.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    openalex_id: Series[str] = pa.Field(nullable=False)
+
+    # Core fields
+    doi: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[object] = pa.Field(nullable=True)  # list[str]
+    concepts: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # Journal info
+    journal: Series[str] = pa.Field(nullable=True)
+    issn: Series[str] = pa.Field(nullable=True)
+    publisher: Series[str] = pa.Field(nullable=True)
+
+    # Date fields
+    year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
+    publication_date: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    doc_type: Series[str] = pa.Field(nullable=False)
+    is_oa: Series[bool] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True)
+    cited_by_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    language: Series[str] = pa.Field(nullable=True)
+    source: Series[str] = pa.Field(nullable=False)
+
+    # Lookup metadata
+    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method")
+    original_doi: Series[str] = pa.Field(nullable=True, alias="_original_doi")
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True

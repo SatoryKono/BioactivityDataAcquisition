@@ -176,6 +176,8 @@ filterwarnings = [
     "ignore::pytest.PytestUnraisableExceptionWarning",
     # pytest-benchmark warning when xdist is active (expected in parallel mode)
     "ignore:Benchmarks are automatically disabled",
+    # Pandera import deprecation warning (will migrate to pandera.pandas in future)
+    "ignore:Importing pandas-specific classes.*:FutureWarning",
 ]
 
 # ============ COVERAGE ============

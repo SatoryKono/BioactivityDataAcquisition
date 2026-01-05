@@ -5,7 +5,7 @@ Tests the OpenAlexPublicationTransformer class.
 
 from __future__ import annotations
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -15,8 +15,8 @@ from bioetl.application.pipelines.openalex.transformer import (
     OpenAlexPublicationTransformer,
 )
 from bioetl.domain.context import PipelineContext
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 @pytest.fixture

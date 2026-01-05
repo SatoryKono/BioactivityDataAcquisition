@@ -329,9 +329,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
     # Internal methods
     # =========================================================================
 
-    async def _fetch_by_dois(
-        self, dois: list[str]
-    ) -> AsyncIterator[dict[str, Any]]:
+    async def _fetch_by_dois(self, dois: list[str]) -> AsyncIterator[dict[str, Any]]:
         """Fetch works by batch of DOIs.
 
         Uses `filter=doi:doi1|doi2|doi3` syntax for efficient batch lookup.

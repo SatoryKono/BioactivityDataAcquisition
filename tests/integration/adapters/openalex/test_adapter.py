@@ -13,15 +13,17 @@ import pytest
 import pytest_asyncio
 
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.openalex.client import OpenAlexAdapter
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 # VCR cassette directory
-CASSETTE_DIR = Path(__file__).parent.parent.parent.parent / "fixtures" / "vcr" / "openalex"
+CASSETTE_DIR = (
+    Path(__file__).parent.parent.parent.parent / "fixtures" / "vcr" / "openalex"
+)
 
 
 @pytest.fixture(scope="module")
@@ -80,9 +82,7 @@ class TestOpenAlexAdapterIntegration:
         dois = ["10.1038/s41586-020-2012-7"]  # COVID-19 paper
 
         results = []
-        async for work in adapter.fetch_filtered(
-            "publication", dois, "doi", limit=1
-        ):
+        async for work in adapter.fetch_filtered("publication", dois, "doi", limit=1):
             results.append(work)
 
         assert len(results) == 1
@@ -101,9 +101,7 @@ class TestOpenAlexAdapterIntegration:
         ]
 
         results = []
-        async for work in adapter.fetch_filtered(
-            "publication", dois, "doi"
-        ):
+        async for work in adapter.fetch_filtered("publication", dois, "doi"):
             results.append(work)
 
         assert len(results) >= 1  # At least one should be found
@@ -129,9 +127,7 @@ class TestOpenAlexAdapterIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_fetch_filtered_with_fallback(
-        self, adapter: OpenAlexAdapter
-    ) -> None:
+    async def test_fetch_filtered_with_fallback(self, adapter: OpenAlexAdapter) -> None:
         """Should fallback to title search when DOI not found."""
         # Valid DOI and title for fallback
         dois = ["10.1038/s41586-020-2012-7"]
@@ -176,17 +172,13 @@ class TestOpenAlexAdapterRateLimiting:
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_rate_limiting_not_exceeded(
-        self, adapter: OpenAlexAdapter
-    ) -> None:
+    async def test_rate_limiting_not_exceeded(self, adapter: OpenAlexAdapter) -> None:
         """Should not exceed rate limit (10 req/sec)."""
         # Fetch a small batch - should not trigger rate limit
         dois = [f"10.1038/test{i}" for i in range(5)]
 
         results = []
-        async for work in adapter.fetch_filtered(
-            "publication", dois, "doi", limit=5
-        ):
+        async for work in adapter.fetch_filtered("publication", dois, "doi", limit=5):
             results.append(work)
 
         # Just verify no rate limit error was raised
