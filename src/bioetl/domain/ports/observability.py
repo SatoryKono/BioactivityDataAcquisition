@@ -143,16 +143,54 @@ class DQMonitorPort(Protocol):
     """Port for data quality monitoring and anomaly detection.
 
     Monitors pipeline metrics for statistical anomalies using
-    Z-score analysis and configurable thresholds.
+    Z-score analysis and configurable thresholds. Detects spikes,
+    drops, and threshold breaches in pipeline metrics.
 
     Example:
-        >>> monitor = DataQualityMonitor(z_score_threshold=2.5)
-        >>> anomalies = monitor.check_quality({
-        ...     "record_count": 1000,
-        ...     "error_rate": 0.15,
-        ... })
-        >>> [(a.severity, a.message) for a in anomalies]  # Severity and message pairs
-        [('warning', 'Error rate above threshold')]
+        Basic monitoring workflow in a pipeline::
+
+            # DataQualityMonitor is injected via composition layer
+            # (see: infrastructure.observability.anomaly.DataQualityMonitor)
+            monitor: DQMonitorPort = injected_monitor
+
+            # Register metrics with historical baseline
+            monitor.add_metric(
+                "record_count",
+                baseline=[1000, 1050, 980, 1020, 990, 1010, 1005],
+            )
+            monitor.add_metric(
+                "error_rate",
+                baseline=[0.01, 0.02, 0.015, 0.01, 0.02],
+                max_threshold=0.10,  # Hard limit: fail if > 10%
+            )
+
+            # After pipeline run, check for anomalies
+            anomalies = monitor.check_quality({
+                "record_count": 500,   # Suspicious drop!
+                "error_rate": 0.15,    # Exceeds threshold!
+            })
+
+            for anomaly in anomalies:
+                logger.warning(
+                    "data_quality_anomaly_detected",
+                    metric=anomaly.metric_name,
+                    severity=anomaly.severity.value,
+                    current=anomaly.current_value,
+                    baseline_mean=anomaly.baseline_mean,
+                    z_score=anomaly.z_score,
+                    message=anomaly.message,
+                )
+
+            # Update baseline only if no critical issues
+            monitor.update_baseline_from_metrics({
+                "record_count": 1000,
+                "error_rate": 0.02,
+            })
+
+    See Also:
+        - ``DataQualityMonitor`` - Implementation in infrastructure layer
+        - ``Anomaly`` - Detected anomaly data structure
+        - ``AnomalySeverity`` - LOW, MEDIUM, HIGH, CRITICAL levels
     """
 
     def add_metric(
@@ -169,6 +207,29 @@ class DQMonitorPort(Protocol):
             baseline: Historical values for baseline calculation
             min_threshold: Absolute minimum threshold (optional)
             max_threshold: Absolute maximum threshold (optional)
+
+        Example:
+            Register common pipeline metrics::
+
+                # Record count with historical data (7-day baseline)
+                monitor.add_metric(
+                    "record_count",
+                    baseline=[1000, 1050, 980, 1020, 990, 1010, 1005],
+                )
+
+                # Error rate with hard threshold (fail if > 10%)
+                monitor.add_metric(
+                    "error_rate",
+                    baseline=[0.01, 0.02, 0.015],
+                    max_threshold=0.10,
+                )
+
+                # Quality score with minimum threshold
+                monitor.add_metric(
+                    "quality_score",
+                    baseline=[0.95, 0.97, 0.96],
+                    min_threshold=0.80,  # Alert if below 80%
+                )
         """
         ...
 
@@ -183,6 +244,24 @@ class DQMonitorPort(Protocol):
 
         Returns:
             List of detected anomalies (empty if none detected)
+
+        Example:
+            Check metrics after pipeline run::
+
+                anomalies = monitor.check_quality({
+                    "record_count": 500,    # May trigger DROP anomaly
+                    "error_rate": 0.15,     # May trigger THRESHOLD_EXCEEDED
+                    "processing_time_ms": 5000,
+                })
+
+                if anomalies:
+                    critical = [a for a in anomalies if a.severity.value == "critical"]
+                    if critical:
+                        raise DataQualityError(f"Critical anomalies: {critical}")
+
+                    for anomaly in anomalies:
+                        # Log non-critical anomalies as warnings
+                        logger.warning(str(anomaly))
         """
         ...
 
@@ -197,6 +276,19 @@ class DQMonitorPort(Protocol):
 
         Args:
             metrics: Current metric values to add to baseline
+
+        Example:
+            Update baseline after successful run::
+
+                # Only update baseline if run was successful
+                if run_result.success:
+                    monitor.update_baseline_from_metrics({
+                        "record_count": run_result.record_count,
+                        "error_rate": run_result.error_rate,
+                        "processing_time_ms": run_result.duration_ms,
+                    })
+                    # Note: If metrics contain critical anomalies,
+                    # baseline will NOT be updated (protects from bad data)
         """
         ...
 
@@ -208,5 +300,25 @@ class DQMonitorPort(Protocol):
 
         Returns:
             Tuple of (mean, stddev, sample_count) or None if no baseline
+
+        Example:
+            Inspect baseline for debugging::
+
+                stats = monitor.get_baseline_stats("record_count")
+                if stats:
+                    mean, stddev, count = stats
+                    logger.info(
+                        "baseline_stats",
+                        metric="record_count",
+                        mean=mean,
+                        stddev=stddev,
+                        sample_count=count,
+                    )
+                    # Calculate expected range (mean ± 2.5 * stddev)
+                    lower = mean - 2.5 * stddev
+                    upper = mean + 2.5 * stddev
+                    logger.info(f"Expected range: [{lower:.0f}, {upper:.0f}]")
+                else:
+                    logger.warning("No baseline data for record_count")
         """
         ...
