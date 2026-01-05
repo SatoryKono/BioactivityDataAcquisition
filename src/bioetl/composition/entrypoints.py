@@ -1,19 +1,11 @@
 """Entrypoints for BioETL pipeline operations.
 
 Provides high-level functions for running pipelines and managing resources.
-These entrypoints are designed to be used by CLI, REST APIs, or any
-other orchestration layer without direct dependency on bootstrap functions.
+These entrypoints are designed to be used by CLI, REST APIs, or any other
+orchestration layer without direct dependency on bootstrap functions.
 
-The CLI should only import from this module, not from bootstrap.
-
-This module provides the unified pipeline execution interface (REQ-ARCH-041):
-- RunOptions: User-facing configuration options
-- RunResult: Execution result with metrics and status
-- run_pipeline(): Async convenience function for pipeline execution
-- create_pipeline_runner(): Factory for PipelineRunner instances
-
-Any orchestration layer (CLI, REST API, schedulers) should use these
-entrypoints instead of directly accessing bootstrap or runner internals.
+This module provides the unified pipeline execution interface (REQ-ARCH-041).
+Any orchestration layer should use these entrypoints instead of bootstrap.
 """
 
 from __future__ import annotations
@@ -48,7 +40,7 @@ __all__ = [
     # Resource management (services - new)
     "get_checkpoint_service",
     "get_config_service",
-    "get_health_server",
+    "get_health_server_dependencies",
     "get_health_service",
     "get_lock_service",
     "get_metrics_service",
@@ -68,10 +60,11 @@ __all__ = [
 ]
 
 from bioetl.composition._bootstrap import (
+    HealthServerDependencies,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
-    bootstrap_health_server,
+    bootstrap_health_server_dependencies,
     bootstrap_health_service,
     bootstrap_lock_service,
     bootstrap_metrics_service,
@@ -114,7 +107,6 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import QuarantinePort
-    from bioetl.interfaces.http.health_server import HealthServer
 
 
 @dataclass(frozen=True)
@@ -670,34 +662,14 @@ def get_health_service() -> HealthService:
     return bootstrap_health_service()
 
 
-def get_health_server(
-    host: str = "0.0.0.0",
-    port: int = 8080,
-) -> HealthServer:
-    """Get a health server with all dependencies injected via composition root.
+def get_health_server_dependencies() -> HealthServerDependencies:
+    """Get dependencies for HealthServer via composition root.
 
-    Creates a HealthServer configured with:
-    - PrometheusMetrics for observability
-    - ProviderHealthMonitor for health state tracking
-
-    This is the recommended way to create a health server from CLI.
-    All dependencies are properly injected via the composition layer.
-
-    Args:
-        host: Host to bind to (default: "0.0.0.0").
-        port: Port to listen on (default: 8080).
-
-    Returns:
-        HealthServer instance ready to start.
-
-    Example:
-        >>> server = get_health_server(host="127.0.0.1", port=9090)
-        >>> await server.start()
-        >>> # ... server running ...
-        >>> await server.stop()
+    Returns HealthServerDependencies with PrometheusMetrics and
+    ProviderHealthMonitor. HealthServer is created in interfaces layer.
     """
     _ensure_registrations()
-    return bootstrap_health_server(host=host, port=port)
+    return bootstrap_health_server_dependencies()
 
 
 def get_metrics_service() -> MetricsService:

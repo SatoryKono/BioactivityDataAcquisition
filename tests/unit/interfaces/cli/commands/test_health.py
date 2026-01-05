@@ -47,18 +47,23 @@ class TestHealthServerCommand:
         assert "0.0.0.0" in result.output  # default host
         assert "8080" in result.output  # default port
 
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_default_options(
         self,
-        mock_get_health_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server with default options."""
-        # Setup mocks - mock the entrypoint to return a mock server
+        # Setup mocks - mock dependencies and server class
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
         mock_server_instance.stop = AsyncMock()
-        mock_get_health_server.return_value = mock_server_instance
+        mock_server_cls.return_value = mock_server_instance
 
         with patch("asyncio.run", side_effect=KeyboardInterrupt()):
             result = cli_runner.invoke(cli, ["health", "server"])
@@ -71,17 +76,22 @@ class TestHealthServerCommand:
         assert "/health/providers" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_custom_host_port(
         self,
-        mock_get_health_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server with custom host and port."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
         mock_server_instance.stop = AsyncMock()
-        mock_get_health_server.return_value = mock_server_instance
+        mock_server_cls.return_value = mock_server_instance
 
         with patch("asyncio.run", side_effect=KeyboardInterrupt()):
             result = cli_runner.invoke(
@@ -91,17 +101,22 @@ class TestHealthServerCommand:
         assert "Starting health server on http://127.0.0.1:9090" in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_keyboard_interrupt(
         self,
-        mock_get_health_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server graceful shutdown on Ctrl+C."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server_instance = MagicMock()
         mock_server_instance.start = AsyncMock()
         mock_server_instance.stop = AsyncMock()
-        mock_get_health_server.return_value = mock_server_instance
+        mock_server_cls.return_value = mock_server_instance
 
         with patch("asyncio.run", side_effect=KeyboardInterrupt()):
             result = cli_runner.invoke(cli, ["health", "server"])
@@ -567,17 +582,22 @@ class TestHealthCheckAsyncExecution:
 class TestHealthServerAsyncExecution:
     """Test the actual async execution of health server."""
 
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_starts_and_stops(
         self,
-        mock_get_health_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server starts and stops correctly."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
         mock_server.stop = AsyncMock()
-        mock_get_health_server.return_value = mock_server
+        mock_server_cls.return_value = mock_server
 
         # Simulate CancelledError after first sleep to trigger shutdown
         async def cancelling_sleep(seconds: float) -> None:
@@ -591,17 +611,22 @@ class TestHealthServerAsyncExecution:
         mock_server.stop.assert_called_once()
         assert "Health server stopped." in result.output
 
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_with_custom_options(
         self,
-        mock_get_health_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
-        """Test health server passes custom host/port via entrypoint."""
+        """Test health server passes custom host/port to HealthServer."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
         mock_server.stop = AsyncMock()
-        mock_get_health_server.return_value = mock_server
+        mock_server_cls.return_value = mock_server
 
         async def cancelling_sleep(seconds: float) -> None:
             raise asyncio.CancelledError()
@@ -612,20 +637,29 @@ class TestHealthServerAsyncExecution:
                 ["health", "server", "--host", "127.0.0.1", "--port", "9000"],
             )
 
-        # Verify get_health_server was called with correct options
-        mock_get_health_server.assert_called_once_with(host="127.0.0.1", port=9000)
+        # Verify HealthServer was called with correct options
+        mock_server_cls.assert_called_once_with(
+            host="127.0.0.1",
+            port=9000,
+            health_monitor=mock_deps.health_monitor,
+        )
 
-    @patch("bioetl.interfaces.cli.commands.health.get_health_server")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.interfaces.cli.commands.health.get_health_server_dependencies")
     def test_health_server_uses_composition_entrypoint(
         self,
-        mock_get_health_server: MagicMock,
+        mock_get_deps: MagicMock,
+        mock_server_cls: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health server uses composition entrypoint for DI."""
+        mock_deps = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
         mock_server = MagicMock()
         mock_server.start = AsyncMock()
         mock_server.stop = AsyncMock()
-        mock_get_health_server.return_value = mock_server
+        mock_server_cls.return_value = mock_server
 
         async def cancelling_sleep(seconds: float) -> None:
             raise asyncio.CancelledError()
@@ -633,8 +667,14 @@ class TestHealthServerAsyncExecution:
         with patch("asyncio.sleep", side_effect=cancelling_sleep):
             cli_runner.invoke(cli, ["health", "server"])
 
-        # Verify entrypoint was called with default options
-        mock_get_health_server.assert_called_once_with(host="0.0.0.0", port=8080)
+        # Verify entrypoint was called to get dependencies
+        mock_get_deps.assert_called_once()
+        # Verify HealthServer was called with default options
+        mock_server_cls.assert_called_once_with(
+            host="0.0.0.0",
+            port=8080,
+            health_monitor=mock_deps.health_monitor,
+        )
 
 
 class TestHealthCheckEdgeCases:

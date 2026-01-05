@@ -112,9 +112,7 @@ class TestInterfacesNoDIrectInfrastructure:
             # quarantine.py uses infrastructure config and quarantine directly
             # TODO: Route through QuarantineService
             "quarantine.py",
-            # health.py uses health_monitor and prometheus_metrics directly
-            # TODO: Route through HealthService
-            "health.py",
+            # Note: health.py was refactored to use composition entrypoints
         }
 
         violations = []
@@ -156,11 +154,9 @@ class TestInterfacesNoDIrectInfrastructure:
 
         # Expected legacy violations - keep in sync with test above
         # Note: quarantine.py was fixed in IF-002 refactoring to use QuarantineService
-        expected_violations = {
-            "health.py": [
-                "bioetl.infrastructure.adapters.http.health_monitor",
-                "bioetl.infrastructure.observability.prometheus_metrics",
-            ],
+        # Note: health.py was fixed to use composition entrypoints for DI
+        expected_violations: dict[str, list[str]] = {
+            # All CLI commands now properly use composition entrypoints
         }
 
         actual_violations = {}
