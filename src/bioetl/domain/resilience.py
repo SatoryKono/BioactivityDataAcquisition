@@ -10,7 +10,8 @@ import hashlib
 from dataclasses import dataclass, field
 
 # Default retryable HTTP status codes per RULES.md §3.1.3
-DEFAULT_RETRYABLE_STATUSES: frozenset[int] = frozenset({429, 502, 503, 504})
+# 429: Rate Limit, 500: Internal Server Error, 502-504: Gateway errors
+DEFAULT_RETRYABLE_STATUSES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,7 +29,7 @@ class RetryConfig:
         max_attempts: Maximum number of attempts (default: 3)
         multiplier: Delay multiplier per attempt (default: 2.0, results in 1s, 2s, 4s)
         jitter_range: Min/max jitter factor as tuple (default: (0.1, 0.5))
-        retryable_statuses: HTTP status codes to retry (default: 429, 502, 503, 504)
+        retryable_statuses: HTTP status codes to retry (default: 429, 500, 502, 503, 504)
         retryable_exceptions: Exception types to retry (default: ConnectionError, TimeoutError)
         base_delay: Base delay in seconds (default: 1.0)
         max_delay: Maximum delay in seconds (default: 60.0)
