@@ -212,6 +212,25 @@ class SearchPaginator:
 
         return items, next_cursor
 
+    def _should_continue_pagination(
+        self, items: list[dict[str, Any]], next_cursor: str | None, current_cursor: str
+    ) -> bool:
+        """Check if pagination should continue.
+
+        Args:
+            items: Items from the current page.
+            next_cursor: Next cursor from API response.
+            current_cursor: Current cursor used for the request.
+
+        Returns:
+            True if pagination should continue, False otherwise.
+        """
+        if not items:
+            return False
+        if not next_cursor:
+            return False
+        return next_cursor != current_cursor
+
     async def search(
         self, query: str, limit: int | None = None, cursor: str = "*"
     ) -> AsyncIterator[dict[str, Any]]:
@@ -239,8 +258,11 @@ class SearchPaginator:
                         return
 
                 # Check if pagination should continue
-                if not items or not next_cursor or next_cursor == cursor:
+                if not self._should_continue_pagination(items, next_cursor, cursor):
                     break
+                assert (
+                    next_cursor is not None
+                )  # Guaranteed by _should_continue_pagination
                 cursor = next_cursor
 
         except CrossRefApiError:

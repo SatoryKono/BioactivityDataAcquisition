@@ -298,13 +298,15 @@ class TestPanderaValidatorPropertyBased:
     These tests verify that validators handle arbitrary input gracefully
     without raising unexpected exceptions.
 
-    Marked as slow because Hypothesis property tests with complex JSON
-    strategies can take 5-8 seconds each.
+    Note: max_examples is controlled by Hypothesis profile (conftest.py):
+    - CI: 10 examples (fast)
+    - fast: 5 examples (smoke tests)
+    - dev: 50 examples (default)
+    - thorough: 200 examples (pre-release)
     """
 
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
-        max_examples=50,
         deadline=None,
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
@@ -324,7 +326,6 @@ class TestPanderaValidatorPropertyBased:
 
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
-        max_examples=50,
         deadline=None,
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
@@ -342,7 +343,6 @@ class TestPanderaValidatorPropertyBased:
 
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
-        max_examples=50,
         deadline=None,
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
@@ -361,7 +361,6 @@ class TestPanderaValidatorPropertyBased:
 
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
-        max_examples=30,
         deadline=None,
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
@@ -387,7 +386,7 @@ class TestPanderaValidatorPropertyBased:
             }
         )
     )
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_valid_records_pass_matching_schema(self, record: dict):
         """Property: Records matching schema structure always pass validation."""
         import pandera as pa

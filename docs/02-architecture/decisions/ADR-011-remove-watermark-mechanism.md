@@ -1,8 +1,8 @@
 # ADR-011: Отказ от механизма Watermark
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-23
-*   **Context**: Упрощение архитектуры пайплайнов
+**Status:** Accepted
+**Date:** 2025-12-23
+**Decision makers:** @BioETL-Team
 
 ## Context
 

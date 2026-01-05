@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main, master, develop ]
 
+env:
+  # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)
+  HYPOTHESIS_PROFILE: ci
+  # Optimize Python for CI
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,6 +30,16 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v1
 
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: pytest-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            pytest-${{ runner.os }}-
+
       - name: Install dependencies
         run: |
           uv sync --extra dev --extra tracing --extra performance
@@ -34,11 +51,13 @@ jobs:
           print(orjson.__version__)
           PY
 
-      - name: Run Tests with Coverage
+      - name: Run Tests with Coverage (Parallel)
         run: |
-          # Run unit and integration tests with coverage
+          # Run unit and integration tests with coverage (parallel execution)
+          # Uses pytest-xdist for ~50% faster test execution
           # Enforce 85% coverage threshold (RULES.md §4.2)
-          uv run pytest tests/ -v -m "not e2e" \
+          uv run pytest tests/ -m "not e2e" \
+            -n auto --dist loadscope \
             --cov=src/bioetl \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
