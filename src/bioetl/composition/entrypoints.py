@@ -48,6 +48,7 @@ __all__ = [
     # Resource management (services - new)
     "get_checkpoint_service",
     "get_config_service",
+    "get_health_server",
     "get_health_service",
     "get_lock_service",
     "get_metrics_service",
@@ -70,6 +71,7 @@ from bioetl.composition._bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
+    bootstrap_health_server,
     bootstrap_health_service,
     bootstrap_lock_service,
     bootstrap_metrics_service,
@@ -112,6 +114,7 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import QuarantinePort
+    from bioetl.interfaces.http.health_server import HealthServer
 
 
 @dataclass(frozen=True)
@@ -665,6 +668,36 @@ def get_health_service() -> HealthService:
     """
     _ensure_registrations()
     return bootstrap_health_service()
+
+
+def get_health_server(
+    host: str = "0.0.0.0",
+    port: int = 8080,
+) -> HealthServer:
+    """Get a health server with all dependencies injected via composition root.
+
+    Creates a HealthServer configured with:
+    - PrometheusMetrics for observability
+    - ProviderHealthMonitor for health state tracking
+
+    This is the recommended way to create a health server from CLI.
+    All dependencies are properly injected via the composition layer.
+
+    Args:
+        host: Host to bind to (default: "0.0.0.0").
+        port: Port to listen on (default: 8080).
+
+    Returns:
+        HealthServer instance ready to start.
+
+    Example:
+        >>> server = get_health_server(host="127.0.0.1", port=9090)
+        >>> await server.start()
+        >>> # ... server running ...
+        >>> await server.stop()
+    """
+    _ensure_registrations()
+    return bootstrap_health_server(host=host, port=port)
 
 
 def get_metrics_service() -> MetricsService:
