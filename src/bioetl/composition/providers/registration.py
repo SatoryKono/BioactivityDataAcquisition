@@ -9,6 +9,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.document_term_data_source import DocumentTermDataSource
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
@@ -162,6 +163,9 @@ def _create_chembl_data_source(
 
     Configuration is loaded from configs/sources/chembl.yaml via AdapterConfig.
     This ensures YAML is the single source of truth (RULES.md §12.1.2).
+
+    For document_term entity type, wraps the adapter with DocumentTermDataSource
+    to extract terms from document records (derived entity pattern).
     """
     DataSourceFactory, HttpClientFactory = _get_factories()
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
@@ -176,6 +180,12 @@ def _create_chembl_data_source(
         adapter_config=adapter_config,
         metrics=metrics,
     )
+
+    # Wrap with DocumentTermDataSource for derived entity extraction
+    # document_term is extracted from document records (1:M relationship)
+    if pipeline_config.entity_type == "document_term":
+        base_adapter = DocumentTermDataSource(base_adapter)
+
     return _wrap_with_filter(
         base_adapter, filter_config, logger, metrics, pipeline_name
     )
