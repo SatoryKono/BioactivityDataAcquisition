@@ -67,6 +67,7 @@ class FilterConfigBuilder:
             column_name=effective_column,
             filter_field=effective_field,
             batch_size=yaml_filter.batch_size,
+            fallback_column=yaml_filter.fallback_column,
         )
 
     @staticmethod

@@ -39,6 +39,7 @@ class InputFilterConfig:
         filter_field: API field to filter by (single-column mode).
         columns: Tuple of FilterColumn for multi-column filtering.
         batch_size: Number of IDs per API request (ChEMBL limit ~100).
+        fallback_column: Optional column for fallback search (e.g., 'title' for DOI→title).
     """
 
     enabled: bool = False
@@ -47,6 +48,7 @@ class InputFilterConfig:
     filter_field: str | None = None
     columns: tuple[FilterColumn, ...] = ()
     batch_size: int = 100
+    fallback_column: str | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""

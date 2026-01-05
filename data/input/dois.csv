@@ -1,6 +1,6 @@
-doi
-10.1038/nature12373
-10.1126/science.1259855
-10.1016/j.cell.2015.06.034
-10.1021/acs.jmedchem.5b01460
-10.1038/s41586-020-2649-2
+doi,title
+10.1038/nature12373,Crystal structure of a human GABAA receptor
+10.1126/science.1259855,Structural basis of the allosteric behaviour of phosphofructokinase
+10.1016/j.cell.2015.06.034,FOXG1-Dependent Dysregulation of GABA/Glutamate Neuron Differentiation in Autism Spectrum Disorders
+10.1021/acs.jmedchem.5b01460,Discovery of Potent and Selective Inhibitors of Human Reticulocyte
+10.1038/s41586-020-2649-2,Highly accurate protein structure prediction with AlphaFold

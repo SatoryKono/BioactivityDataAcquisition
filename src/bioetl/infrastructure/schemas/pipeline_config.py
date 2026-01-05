@@ -149,6 +149,11 @@ class InputFilterConfig(BaseModel):
         le=1000,
         description="Number of IDs per API request",
     )
+    # Fallback support (e.g., DOI → title search)
+    fallback_column: str | None = Field(
+        default=None,
+        description="Column name for fallback search when primary lookup fails",
+    )
 
     @model_validator(mode="after")
     def validate_column_config(self) -> InputFilterConfig:
@@ -200,6 +205,7 @@ class InputFilterConfig(BaseModel):
             ),
             columns=domain_columns,
             batch_size=self.batch_size,
+            fallback_column=self.fallback_column,
         )
 
 

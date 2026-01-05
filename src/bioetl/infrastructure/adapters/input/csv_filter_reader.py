@@ -122,6 +122,69 @@ class CsvFilterReader:
             duplicates=duplicates,
         )
 
+    async def load_filter_with_fallback(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str]]:
+        """Load filter IDs and fallback mapping from CSV.
+
+        Loads primary filter IDs and builds a mapping from primary to fallback
+        values for use when primary lookup fails (e.g., DOI → title fallback).
+
+        Args:
+            source_path: Path to the CSV file.
+            primary_column: Name of the primary filter column (e.g., 'doi').
+            fallback_column: Name of the fallback column (e.g., 'title').
+
+        Returns:
+            Tuple of (FilterLoadResult, fallback_mapping).
+            fallback_mapping maps primary values to fallback values.
+        """
+        df = self._read_csv_dataframe(source_path)
+
+        # Standard loading of primary IDs
+        all_ids = self._extract_column_ids(df, primary_column)
+        unique_ids, unique_count, duplicate_count, duplicates = (
+            self._compute_duplicate_stats(all_ids)
+        )
+
+        # Build fallback mapping
+        fallback_mapping: dict[str, str] = {}
+        if fallback_column in df.columns:
+            for row in df.iter_rows(named=True):
+                primary_val = row.get(primary_column)
+                fallback_val = row.get(fallback_column)
+                if primary_val and fallback_val:
+                    fallback_mapping[str(primary_val).strip()] = str(fallback_val).strip()
+
+            if self._logger:
+                self._logger.info(
+                    "fallback_mapping_loaded",
+                    source_path=source_path,
+                    primary_column=primary_column,
+                    fallback_column=fallback_column,
+                    mapping_count=len(fallback_mapping),
+                )
+        elif self._logger:
+            self._logger.warning(
+                "fallback_column_not_found",
+                source_path=source_path,
+                fallback_column=fallback_column,
+                available_columns=df.columns,
+            )
+
+        result = FilterLoadResult(
+            ids=unique_ids,
+            total_count=len(all_ids),
+            unique_count=unique_count,
+            duplicate_count=duplicate_count,
+            duplicates=duplicates,
+        )
+
+        return result, fallback_mapping
+
     def _log_multi_column_filter(
         self,
         source_path: str,
