@@ -1,9 +1,13 @@
 # ADR-008: Graceful Shutdown Strategy
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-22
-*   **Last Updated**: 2026-01-02
-*   **Context**: ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding distributed locks. An abrupt shutdown (kill -9, OOM, etc.) can leave the system in an inconsistent state: orphaned locks, missing checkpoints, partially written batches. A coordinated shutdown mechanism was needed to ensure data integrity.
+**Status:** Accepted
+**Date:** 2025-12-22
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+
+## Context
+
+ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding distributed locks. An abrupt shutdown (kill -9, OOM, etc.) can leave the system in an inconsistent state: orphaned locks, missing checkpoints, partially written batches. A coordinated shutdown mechanism was needed to ensure data integrity.
 
 ## The Decision
 

@@ -1,7 +1,8 @@
 # ADR-014: Deterministic Writes and Retries
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-24
+**Status:** Accepted
+**Date:** 2025-12-24
+**Decision makers:** @BioETL-Team
 
 ## Context
 

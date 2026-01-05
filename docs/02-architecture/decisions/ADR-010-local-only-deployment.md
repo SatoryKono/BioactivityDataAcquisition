@@ -1,9 +1,10 @@
 # ADR-010: Local-Only Deployment Strategy
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-23
-*   **Last Updated**: 2026-01-02
-*   **Supersedes**: ADR-003 (Redis for Distributed Locking)
+**Status:** Accepted
+**Date:** 2025-12-23
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+**Supersedes:** ADR-003 (Redis for Distributed Locking)
 
 ## Context
 

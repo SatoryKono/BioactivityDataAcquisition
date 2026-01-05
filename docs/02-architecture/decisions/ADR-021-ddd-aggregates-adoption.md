@@ -1,7 +1,8 @@
 # ADR-021: Внедрение DDD Aggregates в Domain Layer
 
-*   **Status**: Accepted (Implemented 2025-12-29)
-*   **Date**: 2025-12-29
+**Status:** Accepted (Implemented 2025-12-29)
+**Date:** 2025-12-29
+**Decision makers:** @BioETL-Team
 
 ## Контекст
 

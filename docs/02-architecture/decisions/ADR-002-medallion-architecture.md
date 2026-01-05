@@ -1,9 +1,13 @@
 # ADR-002: Why Medallion Architecture?
 
-*   **Status**: Accepted
-*   **Date**: 2025-05-20 (Implicitly from RULES.md v2.0)
-*   **Last Updated**: 2026-01-02
-*   **Context**: The project needs a structured and scalable approach to manage data pipelines, from raw ingestion to analysis-ready aggregates.
+**Status:** Accepted
+**Date:** 2025-05-20
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+
+## Context
+
+The project needs a structured and scalable approach to manage data pipelines, from raw ingestion to analysis-ready aggregates.
 
 ## The Decision
 

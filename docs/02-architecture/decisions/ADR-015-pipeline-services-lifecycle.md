@@ -1,8 +1,8 @@
 # ADR-015: Pipeline Services Lifecycle Management
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-24
-*   **Deciders**: BioETL Team
+**Status:** Accepted
+**Date:** 2025-12-24
+**Decision makers:** @BioETL-Team
 
 ## Context
 
