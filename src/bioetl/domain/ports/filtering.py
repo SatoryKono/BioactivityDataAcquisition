@@ -80,7 +80,7 @@ class InputFilterPort(Protocol):
         """Load filter IDs and fallback mapping from source.
 
         Loads primary filter IDs and builds a mapping from primary to fallback
-        values for use when primary lookup fails (e.g., DOI → title fallback).
+        values for use when primary lookup fails (e.g., DOI -> title fallback).
 
         Args:
             source_path: Path to the filter source (e.g., CSV file path).
