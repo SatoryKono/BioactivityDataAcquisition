@@ -1,23 +1,34 @@
 # BioETL Architecture Diagrams
 
-This directory contains 25 Mermaid diagram source files documenting the BioETL architecture.
+*Updated: 2026-01-05*
+
+This directory contains 34 Mermaid diagram source files documenting the BioETL architecture.
 
 ## Diagram Overview
 
 | # | File | Description |
 |---|------|-------------|
-| 01 | `01-full-system-component.mermaid` | Full system component diagram (C4-style) |
-| 02 | `02-full-medallion-data-flow.mermaid` | Medallion architecture data flow |
-| 03 | `03-pipeline-execution-happy-path.mermaid` | Pipeline execution sequence (happy path) |
-| 04 | `04-domain-layer-class-diagram.mermaid` | Domain layer ports, entities, config |
-| 05 | `05-pipeline-lifecycle-states.mermaid` | Pipeline state machine |
-| 06 | `06-application-layer-class-diagram.mermaid` | Application layer classes |
-| 07 | `07-circuit-breaker-states.mermaid` | Circuit breaker state machine |
-| 08 | `08-complete-etl-workflow.mermaid` | Complete ETL workflow |
+| 01a | `01-full-system-component.mermaid` | Full system component diagram (C4-style) |
+| 01b | `01-high-level.mermaid` | High-level system overview |
+| 02a | `02-full-medallion-data-flow.mermaid` | Medallion architecture data flow (detailed) |
+| 02b | `02-medallion.mermaid` | Medallion architecture (simplified) |
+| 03a | `03-pipeline-execution-happy-path.mermaid` | Pipeline execution sequence (happy path) |
+| 03b | `03-pipeline-sequence.mermaid` | Pipeline sequence diagram |
+| 04a | `04-domain-layer-class-diagram.mermaid` | Domain layer ports, entities, config |
+| 04b | `04-error-flow.mermaid` | Error handling flow |
+| 05a | `05-layers-interaction.mermaid` | Layer interaction diagram |
+| 05b | `05-locking.mermaid` | Locking mechanism |
+| 05c | `05-pipeline-lifecycle-states.mermaid` | Pipeline state machine |
+| 06a | `06-application-layer-class-diagram.mermaid` | Application layer classes |
+| 06b | `06-pipeline-execution.mermaid` | Pipeline execution flow |
+| 07a | `07-circuit-breaker-states.mermaid` | Circuit breaker state machine |
+| 07b | `07-medallion-flow.mermaid` | Medallion data flow |
+| 08a | `08-complete-etl-workflow.mermaid` | Complete ETL workflow |
+| 08b | `08-domain-ddd.mermaid` | Domain-driven design diagram |
 | 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
 | 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
 | 11 | `11-lock-acquisition-sequence.mermaid` | Lock acquisition sequence |
-| 12 | `12-full-aws-deployment.mermaid` | AWS deployment architecture |
+| 12 | `12-full-aws-deployment.mermaid` | AWS deployment architecture (reference) |
 | 13 | `13-domain-models-relationship.mermaid` | Domain model relationships |
 | 14 | `14-provider-health-states.mermaid` | Provider health states |
 | 15 | `15-dq-check-workflow.mermaid` | Data quality check workflow |
