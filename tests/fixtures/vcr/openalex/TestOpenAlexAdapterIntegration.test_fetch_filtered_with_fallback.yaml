@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&filter=doi%3A10.1038%2Fs41586-020-2012-7&per-page=1
+  response:
+    body:
+      string: |
+        {
+          "meta": {"count": 1, "db_response_time_ms": 15, "page": null, "per_page": 1},
+          "results": [
+            {
+              "id": "https://openalex.org/W3006090887",
+              "doi": "https://doi.org/10.1038/s41586-020-2012-7",
+              "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
+              "publication_year": 2020,
+              "publication_date": "2020-02-03",
+              "type": "article",
+              "open_access": {"is_oa": true, "oa_status": "gold"},
+              "cited_by_count": 15000,
+              "language": "en"
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

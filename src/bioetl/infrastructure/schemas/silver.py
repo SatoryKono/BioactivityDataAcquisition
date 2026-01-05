@@ -545,3 +545,43 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("source", pa.string()),
     ]
 )
+
+# Schema for OpenAlex Publication
+# See: https://docs.openalex.org/api-entities/works
+OPENALEX_PUBLICATION_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # Primary key
+        pa.field("openalex_id", pa.string()),
+        # Core fields
+        pa.field("doi", pa.string()),
+        pa.field("title", pa.string()),
+        pa.field("abstract", pa.string()),
+        pa.field("authors", pa.list_(pa.string())),
+        pa.field("concepts", pa.list_(pa.string())),
+        # Journal info
+        pa.field("journal", pa.string()),
+        pa.field("issn", pa.string()),
+        pa.field("publisher", pa.string()),
+        # Date fields
+        pa.field("year", pa.int64()),
+        pa.field("publication_date", pa.string()),
+        # Metadata
+        pa.field("doc_type", pa.string()),
+        pa.field("is_oa", pa.bool_()),
+        pa.field("oa_status", pa.string()),
+        pa.field("cited_by_count", pa.int64()),
+        pa.field("language", pa.string()),
+        pa.field("source", pa.string()),
+        # Lookup metadata
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_doi", pa.string()),
+    ]
+)

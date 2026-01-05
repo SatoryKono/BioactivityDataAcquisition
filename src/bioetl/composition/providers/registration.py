@@ -27,6 +27,10 @@ from bioetl.infrastructure.adapters.crossref.client import (
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
+from bioetl.infrastructure.adapters.openalex.client import (
+    OpenAlexAdapter,
+    _create_openalex_adapter,
+)
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
 from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
     PubMedAdapter,
@@ -341,6 +345,52 @@ def _create_crossref_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_openalex_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create OpenAlex data source with optional CSV filtering.
+
+    OpenAlex requires mailto for polite pool access (10 req/sec).
+    Email is obtained from pipeline config or settings.default_email.
+
+    Args:
+        settings: Application settings.
+        pipeline_config: Pipeline configuration from YAML.
+        logger: LoggerPort for structured logging.
+        filter_config: Optional filter configuration for CSV-based DOI filtering.
+        metrics: Optional MetricsPort for recording adapter metrics.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured DataSourcePort with optional filtering wrapper.
+
+    Raises:
+        ValueError: If mailto is not configured in settings or pipeline config.
+
+    """
+    _, HttpClientFactory = _get_factories()
+    http_client = HttpClientFactory.create_for_provider("openalex", settings)
+
+    # Get mailto from pipeline config or settings
+    mailto = pipeline_config.source.email or settings.default_email
+    batch_size = _get_batch_size_from_config("openalex", default=50)
+
+    data_source = _create_openalex_adapter(
+        http_client=http_client,
+        logger=logger,
+        settings=settings,
+        mailto=mailto,
+        batch_size=batch_size,
+        metrics=metrics,
+    )
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
+
+
 # =============================================================================
 # Provider registration
 # =============================================================================
@@ -362,6 +412,7 @@ def register_all_providers() -> None:
     - UniProt: configs/sources/uniprot.yaml
     - PubMed: configs/sources/pubmed.yaml
     - CrossRef: configs/sources/crossref.yaml
+    - OpenAlex: configs/sources/openalex.yaml
 
     Each provider includes a data_source_creator for unified registry access.
     """
@@ -457,5 +508,25 @@ def register_all_providers() -> None:
                 requires_logger=True,
                 custom_creator=_create_crossref_adapter,
                 data_source_creator=_create_crossref_data_source,
+            ),
+        )
+
+    # OpenAlex - async HTTP adapter for open scholarly metadata
+    # Requires mailto for polite pool access (10 req/sec)
+    # Supports batch DOI resolution with title fallback
+    openalex_rate, openalex_capacity = _get_rate_limit_from_config("openalex")
+    if not ProviderRegistry.is_registered("openalex"):
+        ProviderRegistry.register(
+            "openalex",
+            ProviderConfig(
+                adapter_class=OpenAlexAdapter,
+                http_config=HttpConfig(
+                    rate=openalex_rate,
+                    capacity=openalex_capacity,
+                ),
+                requires_http_client=True,
+                requires_logger=True,
+                custom_creator=_create_openalex_adapter,
+                data_source_creator=_create_openalex_data_source,
             ),
         )

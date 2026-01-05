@@ -1,0 +1,71 @@
+# configs/pipelines/openalex/publication.yaml
+# Pipeline for batch DOI resolution via OpenAlex with title fallback.
+#
+# Reads DOIs from CSV input file, resolves metadata from OpenAlex Works API.
+# Falls back to title search when DOI resolution fails.
+#
+# Inherits defaults from ../_defaults.yaml
+
+pipeline_name: openalex_publication
+provider: openalex
+entity_type: publication
+version: "1.0.0"
+description: "Batch DOI resolution via OpenAlex with title fallback"
+
+primary_keys: ["openalex_id"]
+silver_table: "openalex_publication"
+gold_table: "openalex_publication"
+
+source_file: ../../sources/openalex.yaml
+
+# Pipeline-specific source configuration
+source:
+  email: "${BIOETL_OPENALEX_EMAIL}"  # Required for polite pool
+  batch_size: 50
+
+# Entity-specific gold filters
+gold_filters:
+  required_fields:
+    - openalex_id
+    - title
+  ranges:
+    year:
+      min: 1900
+      max: 2100
+
+# Entity-specific transform steps
+transform:
+  version: "1.0.0"
+  steps:
+    - extract_openalex_id
+    - extract_doi
+    - reconstruct_abstract
+    - extract_authors
+    - extract_concepts
+    - normalize_dates
+    - add_metadata
+    - calculate_content_hash
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: "data/bronze/openalex/publication"
+  silver:
+    path: "data/silver/openalex/publication"
+    primary_key: ["openalex_id"]
+    partition_by: ["year"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/gold/openalex/publication"
+    csv_export:
+      path: "data/output/csv/gold"
+
+# Input filter for batch DOI resolution with title fallback
+input_filter:
+  enabled: true
+  source_path: "data/input/dois.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 50
+  fallback_column: "title"  # Search by title if DOI not found or empty

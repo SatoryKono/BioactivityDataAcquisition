@@ -1,0 +1,28 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&filter=doi%3A10.1038%2Ftest0%7C10.1038%2Ftest1%7C10.1038%2Ftest2%7C10.1038%2Ftest3%7C10.1038%2Ftest4&per-page=5
+  response:
+    body:
+      string: |
+        {
+          "meta": {"count": 0, "db_response_time_ms": 10, "page": null, "per_page": 5},
+          "results": []
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
