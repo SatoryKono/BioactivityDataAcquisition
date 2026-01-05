@@ -1,5 +1,5 @@
 # Activity Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.8*
+*Version: 1.0.0 | Aligned with RULES.md v5.9*
 
 ## Overview
 
