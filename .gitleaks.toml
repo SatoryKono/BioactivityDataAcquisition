@@ -56,6 +56,8 @@ regexes = [
     '''test[_-]?secret''',
     '''mock[_-]?token''',
     '''fake[_-]?key''',
+    '''secret[_-]?api[_-]?key[_-]?\d+''',
+    '''test[_-]?value[_-]?for[_-]?masking''',
 
     # NCBI tool email (not PII, technical identifier)
     '''default_email.*@.*\.com''',
