@@ -558,3 +558,194 @@ class TestPublicationEntity:
         )
         with pytest.raises(AttributeError):
             publication.doi = "10.9999/changed"
+
+    def test_publication_default_source_is_crossref(self, base_entity_kwargs):
+        """Test that source defaults to 'crossref'."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+        )
+        assert publication.source == "crossref"
+
+    def test_publication_custom_source(self, base_entity_kwargs):
+        """Test PublicationEntity with custom source."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            source="pubmed",
+        )
+        assert publication.source == "pubmed"
+
+    def test_publication_with_citation_metrics(self, base_entity_kwargs):
+        """Test PublicationEntity with citation metrics."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            citation_count=150,
+            reference_count=45,
+        )
+        assert publication.citation_count == 150
+        assert publication.reference_count == 45
+
+    def test_publication_citation_count_can_be_zero(self, base_entity_kwargs):
+        """Test that citation_count can be zero."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            citation_count=0,
+        )
+        assert publication.citation_count == 0
+
+    def test_publication_with_date_fields(self, base_entity_kwargs):
+        """Test PublicationEntity date fields."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            year=2023,
+            published_print="2023-06-15",
+            published_online="2023-05-01",
+        )
+        assert publication.year == 2023
+        assert publication.published_print == "2023-06-15"
+        assert publication.published_online == "2023-05-01"
+
+    def test_publication_year_can_be_none(self, base_entity_kwargs):
+        """Test that year can be None for publications with unknown date."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            year=None,
+        )
+        assert publication.year is None
+
+    def test_publication_with_license_url(self, base_entity_kwargs):
+        """Test PublicationEntity with license URL."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            license_url="https://creativecommons.org/licenses/by/4.0/",
+        )
+        assert publication.license_url == "https://creativecommons.org/licenses/by/4.0/"
+
+    def test_publication_with_language(self, base_entity_kwargs):
+        """Test PublicationEntity with language code."""
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+            language="en",
+        )
+        assert publication.language == "en"
+
+
+@pytest.mark.unit
+class TestPublicationRecord:
+    """Tests for CrossRef PublicationRecord DTO."""
+
+    def test_publication_record_creation(self):
+        """Test PublicationRecord DTO creation."""
+        from bioetl.domain.entities.crossref import PublicationRecord
+
+        record = PublicationRecord(
+            doi="10.1234/test",
+            title="Test Publication",
+        )
+        assert record.doi == "10.1234/test"
+        assert record.title == "Test Publication"
+
+    def test_publication_record_is_frozen(self):
+        """Test PublicationRecord is immutable."""
+        from bioetl.domain.entities.crossref import PublicationRecord
+
+        record = PublicationRecord(doi="10.1234/test")
+        with pytest.raises(Exception):  # Pydantic raises ValidationError on mutation
+            record.doi = "changed"
+
+    def test_publication_record_forbids_extra_fields(self):
+        """Test PublicationRecord rejects extra fields."""
+        from pydantic import ValidationError
+
+        from bioetl.domain.entities.crossref import PublicationRecord
+
+        with pytest.raises(ValidationError):
+            PublicationRecord(
+                doi="10.1234/test",
+                unknown_field="value",
+            )
+
+    def test_publication_record_default_values(self):
+        """Test PublicationRecord default values."""
+        from bioetl.domain.entities.crossref import PublicationRecord
+
+        record = PublicationRecord(doi="10.1234/test")
+        assert record.title is None
+        assert record.abstract is None
+        assert record.authors == []
+        assert record.issn == []
+        assert record.subjects == []
+        assert record.source == "crossref"
+        assert record.doc_type == "PUBLICATION"
+
+    def test_publication_record_with_all_fields(self):
+        """Test PublicationRecord with all fields."""
+        from bioetl.domain.entities.crossref import PublicationRecord
+
+        record = PublicationRecord(
+            doi="10.1038/nature12373",
+            title="Test Title",
+            abstract="Test abstract",
+            authors=["John Doe", "Jane Smith"],
+            journal="Nature",
+            issn=["0028-0836"],
+            publisher="Springer",
+            volume="523",
+            issue="7562",
+            first_page="561",
+            last_page="567",
+            year=2015,
+            published_print="2015-07-30",
+            published_online="2015-07-25",
+            doc_type="PUBLICATION",
+            citation_count=892,
+            reference_count=50,
+            language="en",
+            license_url="https://license.com",
+            subjects=["Science"],
+            source="crossref",
+        )
+        assert record.citation_count == 892
+        assert len(record.authors) == 2
+
+
+@pytest.mark.unit
+class TestWorkDeprecation:
+    """Tests for deprecated Work alias."""
+
+    def test_work_emits_deprecation_warning(self, base_entity_kwargs):
+        """Test that Work usage emits deprecation warning."""
+        import warnings
+
+        from bioetl.domain.entities.crossref import Work
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            Work(
+                **base_entity_kwargs,
+                doi="10.1234/test",
+            )
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "Work is deprecated" in str(w[0].message)
+
+    def test_work_isinstance_check(self, base_entity_kwargs):
+        """Test that Work isinstance check works with PublicationEntity."""
+
+        from bioetl.domain.entities.crossref import PublicationEntity, Work
+
+        # Create a PublicationEntity
+        publication = PublicationEntity(
+            **base_entity_kwargs,
+            doi="10.1234/test",
+        )
+
+        # Should be recognized as Work via metaclass
+        assert isinstance(publication, Work)
