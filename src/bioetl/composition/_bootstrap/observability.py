@@ -27,6 +27,7 @@ from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 if TYPE_CHECKING:
+    from bioetl.application.services.metrics_service import MetricsService
     from bioetl.domain.ports import DQMonitorPort
     from bioetl.infrastructure.config import Settings
 
@@ -34,6 +35,7 @@ __all__ = [
     "bootstrap_dq_monitor",
     "bootstrap_logger",
     "bootstrap_metrics",
+    "bootstrap_metrics_service",
     "bootstrap_observability",
     "bootstrap_tracer",
     "validate_observability_preflight",
@@ -302,3 +304,32 @@ def bootstrap_observability(
     )
 
     return bundle
+
+
+def bootstrap_metrics_service() -> MetricsService:
+    """Bootstrap metrics service for administrative operations.
+
+    Creates a MetricsService with infrastructure dependencies injected.
+    Used by CLI and other interfaces for metrics server management.
+
+    Returns:
+        MetricsService instance ready for use.
+
+    Example:
+        >>> service = bootstrap_metrics_service()
+        >>> result = service.start(port=8000)
+        >>> # result.success is True if server started
+    """
+    from bioetl.application.services.metrics_service import MetricsService
+    from bioetl.infrastructure.observability.metrics_server_adapter import (
+        MetricsServerAdapter,
+    )
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    logger = NoOpLogger()
+    server = MetricsServerAdapter(logger=logger)
+
+    return MetricsService(
+        logger=logger,
+        _server=server,
+    )

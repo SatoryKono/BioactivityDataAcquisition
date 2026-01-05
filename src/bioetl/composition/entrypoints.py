@@ -50,6 +50,7 @@ __all__ = [
     "get_config_service",
     "get_health_service",
     "get_lock_service",
+    "get_metrics_service",
     "get_pipeline_runner_service",
     "get_quarantine_service",
     "get_quarantine_store",
@@ -71,6 +72,7 @@ from bioetl.composition._bootstrap import (
     bootstrap_config_service,
     bootstrap_health_service,
     bootstrap_lock_service,
+    bootstrap_metrics_service,
     bootstrap_pipeline_runner_service,
     bootstrap_quarantine,
     bootstrap_quarantine_service,
@@ -100,6 +102,7 @@ if TYPE_CHECKING:
         CleanupResult,
         ConfigService,
         HealthService,
+        MetricsService,
         PipelineRunnerService,
         QuarantineService,
         VacuumService,
@@ -662,6 +665,27 @@ def get_health_service() -> HealthService:
     """
     _ensure_registrations()
     return bootstrap_health_service()
+
+
+def get_metrics_service() -> MetricsService:
+    """Get a metrics service for managing the Prometheus metrics server.
+
+    Provides a clean interface for metrics server management from CLI or
+    other interfaces. Abstracts infrastructure metrics server operations.
+
+    Returns:
+        MetricsService instance for metrics server operations.
+
+    Example:
+        >>> service = get_metrics_service()
+        >>> result = service.start(port=8000)
+        >>> if result.success:
+        ...     logger.info("Metrics server started", port=result.port)
+        >>> status = service.get_status()
+        >>> logger.info("Server status", running=status.running)
+    """
+    _ensure_registrations()
+    return bootstrap_metrics_service()
 
 
 def get_quarantine_store(pipeline: str) -> QuarantinePort:
