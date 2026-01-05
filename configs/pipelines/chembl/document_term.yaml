@@ -43,7 +43,7 @@ sink:
 
 # Entity-specific input filter (optional)
 input_filter:
-  enabled: false
+  enabled: true
   # When enabled, can filter by document_chembl_id
   # source_path: "data/input/documents.csv"
   # column_name: "document_chembl_id"
