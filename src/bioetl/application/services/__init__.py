@@ -9,6 +9,8 @@ Administrative services for CLI operations:
 - LockService: Lock management
 - BronzeCleanupService: Bronze retention cleanup
 - PipelineRunnerService: Universal pipeline execution
+- ConfigService: Configuration access and validation
+- HealthService: Provider health checking
 """
 
 from __future__ import annotations
@@ -21,7 +23,17 @@ from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
+from bioetl.application.services.config_service import (
+    ConfigService,
+    PipelineInfo,
+    SettingsInfo,
+)
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.health_service import (
+    HealthCheckSummary,
+    HealthResult,
+    HealthService,
+)
 from bioetl.application.services.lock_service import (
     LockInfo,
     LockService,
@@ -61,10 +73,15 @@ __all__ = [
     "CheckpointService",
     "CleanupResult",
     "ClearResult",
+    "ConfigService",
     "DataQualityService",
+    "HealthCheckSummary",
+    "HealthResult",
+    "HealthService",
     "LockInfo",
     "LockService",
     "MedallionLifecycleService",
+    "PipelineInfo",
     "PipelineNotFoundError",
     "PipelineRunnerService",
     "PipelineShutdownError",
@@ -75,6 +92,7 @@ __all__ = [
     "RunOptions",
     "RunResult",
     "RunStatus",
+    "SettingsInfo",
     "ShutdownReason",
     "ShutdownService",
     "TableCollectorPort",

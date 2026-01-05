@@ -157,6 +157,57 @@ class MockPipelineConfig:
         }
 
 
+@dataclass
+class MockPipelineInfo:
+    """Mock PipelineInfo for testing validate command."""
+
+    name: str = "chembl_activity"
+    provider: str = "chembl"
+    entity_type: str = "activity"
+    silver_table: str = "chembl_activity"
+    gold_table: str | None = "chembl_activity_gold"
+
+
+@dataclass
+class MockSettingsInfo:
+    """Mock SettingsInfo for testing show-settings command."""
+
+    env: str = "dev"
+    data_dir: str = "/data"
+    bronze_path: str = "/data/bronze"
+    silver_path: str = "/data/silver"
+    gold_path: str = "/data/gold"
+    checkpoint_path: str = "/data/checkpoints"
+    quarantine_path: str = "/data/quarantine"
+    debug: bool = False
+    test_mode: bool = False
+    metrics_enabled: bool = True
+    metrics_port: int = 8000
+    batch_size: int = 100
+    additional: dict = None
+
+    def __post_init__(self):
+        if self.additional is None:
+            self.additional = {}
+
+
+@pytest.fixture
+def mock_config_service():
+    """Create a mock ConfigService."""
+    service = MagicMock()
+    # Default implementations
+    service.get_pipeline_yaml_config.return_value = {
+        "provider": "chembl",
+        "entity_type": "activity",
+        "silver_table": "chembl_activity",
+        "gold_table": "chembl_activity_gold",
+    }
+    service.validate_pipeline_config.return_value = MockPipelineInfo()
+    service.get_settings.return_value = MockSettingsInfo()
+    service.list_pipelines.return_value = ["chembl_activity", "chembl_molecule"]
+    return service
+
+
 @pytest.mark.unit
 class TestConfigShowCommand:
     """Tests for config show command."""
@@ -169,11 +220,11 @@ class TestConfigShowCommand:
         assert "PIPELINE" in result.output
         assert "--format" in result.output
 
-    def test_config_show_yaml_format(self, cli_runner):
+    def test_config_show_yaml_format(self, cli_runner, mock_config_service):
         """Test config show with YAML format (default)."""
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            return_value=MockPipelineConfig(),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "show", "chembl_activity"])
 
@@ -181,11 +232,11 @@ class TestConfigShowCommand:
         assert "provider: chembl" in result.output
         assert "entity_type: activity" in result.output
 
-    def test_config_show_json_format(self, cli_runner):
+    def test_config_show_json_format(self, cli_runner, mock_config_service):
         """Test config show with JSON format."""
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            return_value=MockPipelineConfig(),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(
                 cli, ["config", "show", "chembl_activity", "--format", "json"]
@@ -195,21 +246,27 @@ class TestConfigShowCommand:
         assert '"provider": "chembl"' in result.output
         assert '"entity_type": "activity"' in result.output
 
-    def test_config_show_file_not_found(self, cli_runner):
+    def test_config_show_file_not_found(self, cli_runner, mock_config_service):
         """Test config show handles missing config file."""
+        mock_config_service.get_pipeline_yaml_config.side_effect = FileNotFoundError(
+            "Config not found"
+        )
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            side_effect=FileNotFoundError("Config not found"),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "show", "nonexistent"])
 
         assert "Config file not found" in result.output or "not found" in result.output
 
-    def test_config_show_validation_error(self, cli_runner):
+    def test_config_show_validation_error(self, cli_runner, mock_config_service):
         """Test config show handles validation errors."""
+        mock_config_service.get_pipeline_yaml_config.side_effect = ValueError(
+            "Invalid configuration"
+        )
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            side_effect=ValueError("Invalid configuration"),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "show", "invalid"])
 
@@ -232,11 +289,11 @@ class TestConfigValidateCommand:
         assert result.exit_code == 0
         assert "PIPELINE" in result.output
 
-    def test_config_validate_success(self, cli_runner):
+    def test_config_validate_success(self, cli_runner, mock_config_service):
         """Test successful config validation."""
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            return_value=MockPipelineConfig(),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "validate", "chembl_activity"])
 
@@ -247,12 +304,14 @@ class TestConfigValidateCommand:
         assert "Silver table: chembl_activity" in result.output
         assert "Gold table: chembl_activity_gold" in result.output
 
-    def test_config_validate_without_gold(self, cli_runner):
+    def test_config_validate_without_gold(self, cli_runner, mock_config_service):
         """Test config validation without gold table."""
-        config = MockPipelineConfig(gold_table=None)
+        mock_config_service.validate_pipeline_config.return_value = MockPipelineInfo(
+            gold_table=None
+        )
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            return_value=config,
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "validate", "chembl_activity"])
 
@@ -261,21 +320,27 @@ class TestConfigValidateCommand:
         # Gold table line should not appear if None
         assert "Gold table:" not in result.output
 
-    def test_config_validate_file_not_found(self, cli_runner):
+    def test_config_validate_file_not_found(self, cli_runner, mock_config_service):
         """Test config validate handles missing config file."""
+        mock_config_service.validate_pipeline_config.side_effect = FileNotFoundError(
+            "Config not found"
+        )
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            side_effect=FileNotFoundError("Config not found"),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "validate", "nonexistent"])
 
         assert "Config file not found" in result.output or "not found" in result.output
 
-    def test_config_validate_invalid_config(self, cli_runner):
+    def test_config_validate_invalid_config(self, cli_runner, mock_config_service):
         """Test config validate handles invalid configuration."""
+        mock_config_service.validate_pipeline_config.side_effect = ValueError(
+            "Missing required field"
+        )
         with patch(
-            "bioetl.interfaces.cli.commands.config.load_pipeline_config",
-            side_effect=ValueError("Missing required field"),
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "validate", "invalid"])
 
@@ -298,37 +363,23 @@ class TestConfigShowSettingsCommand:
         assert result.exit_code == 0
         assert "--format" in result.output
 
-    def test_show_settings_yaml_format(self, cli_runner):
+    def test_show_settings_yaml_format(self, cli_runner, mock_config_service):
         """Test show-settings with YAML format (default)."""
-        mock_settings = MagicMock()
-        mock_settings.model_dump.return_value = {
-            "data_dir": "/data",
-            "log_level": "INFO",
-            "pubmed_api_key": None,
-        }
-
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_settings",
-            return_value=mock_settings,
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "show-settings"])
 
         assert result.exit_code == 0
         assert "data_dir" in result.output
-        assert "log_level" in result.output
+        assert "env" in result.output
 
-    def test_show_settings_json_format(self, cli_runner):
+    def test_show_settings_json_format(self, cli_runner, mock_config_service):
         """Test show-settings with JSON format."""
-        mock_settings = MagicMock()
-        mock_settings.model_dump.return_value = {
-            "data_dir": "/data",
-            "log_level": "INFO",
-            "pubmed_api_key": None,
-        }
-
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_settings",
-            return_value=mock_settings,
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(
                 cli, ["config", "show-settings", "--format", "json"]
@@ -336,20 +387,17 @@ class TestConfigShowSettingsCommand:
 
         assert result.exit_code == 0
         assert '"data_dir"' in result.output
-        assert '"log_level"' in result.output
+        assert '"env"' in result.output
 
-    def test_show_settings_masks_api_key(self, cli_runner):
+    def test_show_settings_masks_api_key(self, cli_runner, mock_config_service):
         """Test show-settings masks sensitive API keys."""
-        mock_settings = MagicMock()
-        mock_settings.model_dump.return_value = {
-            "data_dir": "/data",
-            "log_level": "INFO",
-            "pubmed_api_key": "secret_api_key_12345",
-        }
+        mock_config_service.get_settings.return_value = MockSettingsInfo(
+            additional={"pubmed_api_key": "secret_api_key_12345"}
+        )
 
         with patch(
-            "bioetl.interfaces.cli.commands.config.get_settings",
-            return_value=mock_settings,
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "show-settings"])
 
@@ -374,23 +422,17 @@ class TestConfigListPipelinesCommand:
         assert result.exit_code == 0
         assert "List all registered pipelines" in result.output
 
-    def test_list_pipelines_success(self, cli_runner):
+    def test_list_pipelines_success(self, cli_runner, mock_config_service):
         """Test successful pipeline listing."""
-        mock_registry = MagicMock()
-        mock_registry.list_pipelines.return_value = [
+        mock_config_service.list_pipelines.return_value = [
             "chembl_activity",
             "chembl_molecule",
             "pubchem_compound",
         ]
 
-        with (
-            patch(
-                "bioetl.composition.factories.pipeline_factories.register_all_pipelines",
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.config.get_default_registry",
-                return_value=mock_registry,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 
@@ -400,43 +442,31 @@ class TestConfigListPipelinesCommand:
         assert "chembl_molecule" in result.output
         assert "pubchem_compound" in result.output
 
-    def test_list_pipelines_empty(self, cli_runner):
+    def test_list_pipelines_empty(self, cli_runner, mock_config_service):
         """Test list-pipelines with no registered pipelines."""
-        mock_registry = MagicMock()
-        mock_registry.list_pipelines.return_value = []
+        mock_config_service.list_pipelines.return_value = []
 
-        with (
-            patch(
-                "bioetl.composition.factories.pipeline_factories.register_all_pipelines",
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.config.get_default_registry",
-                return_value=mock_registry,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 
         assert result.exit_code == 0
         assert "No pipelines registered" in result.output
 
-    def test_list_pipelines_sorted(self, cli_runner):
+    def test_list_pipelines_sorted(self, cli_runner, mock_config_service):
         """Test list-pipelines returns sorted list."""
-        mock_registry = MagicMock()
-        # Return unsorted list
-        mock_registry.list_pipelines.return_value = [
+        # Return unsorted list - the command should sort it
+        mock_config_service.list_pipelines.return_value = [
             "z_pipeline",
             "a_pipeline",
             "m_pipeline",
         ]
 
-        with (
-            patch(
-                "bioetl.composition.factories.pipeline_factories.register_all_pipelines",
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.config.get_default_registry",
-                return_value=mock_registry,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.config.get_config_service",
+            return_value=mock_config_service,
         ):
             result = cli_runner.invoke(cli, ["config", "list-pipelines"])
 
