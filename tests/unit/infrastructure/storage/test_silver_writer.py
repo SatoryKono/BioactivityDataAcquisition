@@ -565,9 +565,16 @@ class TestSilverWriterErrorHandling:
             ]
         )
 
-        with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-            delta_table_mock,
+        # Patch both modules: base_delta_writer for _get_table_schema, silver_writer for _write_merge
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                delta_table_mock,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                delta_table_mock,
+            ),
         ):
             writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
@@ -618,9 +625,16 @@ class TestSilverWriterErrorHandling:
             ]
         )
 
-        with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-            delta_table_mock,
+        # Patch both modules: base_delta_writer for _get_table_schema, silver_writer for _write_merge
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                delta_table_mock,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                delta_table_mock,
+            ),
         ):
             writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
 
@@ -645,7 +659,7 @@ class TestSilverWriterSchemaDrift:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -668,8 +682,9 @@ class TestSilverWriterSchemaDrift:
         mock_table = MagicMock()
         mock_table.schema.return_value = mock_delta_schema
 
+        # Patch in base_delta_writer where _get_table_schema is defined
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -695,7 +710,7 @@ class TestSilverWriterSchemaDrift:
         mock_table.schema.return_value = mock_delta_schema
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -742,7 +757,7 @@ class TestSilverWriterSchemaDrift:
         ]
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -770,7 +785,7 @@ class TestSilverWriterSchemaDrift:
         mock_table.schema.return_value = mock_delta_schema
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -795,7 +810,7 @@ class TestSilverWriterSchemaDrift:
         mock_table.schema.return_value = mock_delta_schema
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -830,7 +845,7 @@ class TestSilverWriterSchemaDrift:
         mock_table.schema.return_value = mock_delta_schema
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -846,7 +861,7 @@ class TestSilverWriterSchemaDrift:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -869,7 +884,7 @@ class TestSilverWriterSchemaDrift:
         mock_table.schema.return_value = mock_delta_schema
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -919,7 +934,7 @@ class TestSilverWriterSchemaDrift:
         mock_table.schema.return_value = mock_delta_schema
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
             writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -1155,7 +1170,7 @@ class TestSilverWriterWriteModePolicy:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
@@ -1199,7 +1214,7 @@ class TestSilverWriterWriteModePolicy:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
@@ -1530,7 +1545,7 @@ class TestSilverWriterCsvExport:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
@@ -1582,7 +1597,7 @@ class TestSilverWriterCsvExport:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
