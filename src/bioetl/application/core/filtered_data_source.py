@@ -83,6 +83,8 @@ class FilteredDataSource:
         self._multi_filter_ids: Mapping[str, list[str]] | None = None
         self._valid_combinations: frozenset[tuple[str, ...]] | None = None
         self._filter_fields: tuple[str, ...] | None = None
+        # Fallback mapping state (e.g., DOI → title)
+        self._fallback_mapping: dict[str, str] | None = None
 
     @property
     def provider_name(self) -> str:
@@ -126,10 +128,24 @@ class FilteredDataSource:
                 self._record_multi_filter_metrics()
             elif self._filter_config.column_name:
                 # Single-column mode (backward compatibility)
-                self._filter_result = await self._filter_reader.load_filter_ids(
-                    source_path=source_path,
-                    column_name=self._filter_config.column_name,
-                )
+                # Check if fallback column is configured
+                if self._filter_config.fallback_column and hasattr(
+                    self._filter_reader, "load_filter_with_fallback"
+                ):
+                    # Load with fallback mapping
+                    self._filter_result, self._fallback_mapping = (
+                        await self._filter_reader.load_filter_with_fallback(
+                            source_path=source_path,
+                            primary_column=self._filter_config.column_name,
+                            fallback_column=self._filter_config.fallback_column,
+                        )
+                    )
+                else:
+                    # Standard loading without fallback
+                    self._filter_result = await self._filter_reader.load_filter_ids(
+                        source_path=source_path,
+                        column_name=self._filter_config.column_name,
+                    )
                 self._filter_ids = list(self._filter_result.ids)
 
                 # Record metrics
@@ -255,13 +271,28 @@ class FilteredDataSource:
                 "filter_field must be specified in InputFilterConfig "
                 "when filtering is enabled."
             )
-        async for record in self._data_source.fetch_filtered(
-            entity_type=entity_type,
-            filter_ids=self._filter_ids,  # type: ignore[arg-type]
-            filter_field=config_filter_field,
-            limit=limit,
+
+        # Check if adapter supports fallback and we have fallback mapping
+        if self._fallback_mapping and hasattr(
+            self._data_source, "fetch_filtered_with_fallback"
         ):
-            yield record
+            async for record in self._data_source.fetch_filtered_with_fallback(
+                entity_type=entity_type,
+                filter_ids=self._filter_ids,  # type: ignore[arg-type]
+                filter_field=config_filter_field,
+                fallback_mapping=self._fallback_mapping,
+                limit=limit,
+            ):
+                yield record
+        else:
+            # Standard path without fallback
+            async for record in self._data_source.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=self._filter_ids,  # type: ignore[arg-type]
+                filter_field=config_filter_field,
+                limit=limit,
+            ):
+                yield record
 
     async def fetch(
         self,

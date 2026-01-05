@@ -386,6 +386,145 @@ class CrossRefAdapter(BaseHttpAdapter):
             "Use fetch_filtered() with filter_field='doi' instead."
         )
 
+    def _titles_match(
+        self, query_title: str, found_title: str, threshold: float = 0.8
+    ) -> bool:
+        """Check if titles match (case-insensitive, normalized).
+
+        Args:
+            query_title: The title we're searching for.
+            found_title: The title found in CrossRef.
+            threshold: Unused, reserved for future fuzzy matching.
+
+        Returns:
+            True if titles match, False otherwise.
+        """
+        q = query_title.lower().strip()
+        f = found_title.lower().strip()
+
+        # Exact match
+        if q == f:
+            return True
+
+        # Substring match (title may be truncated)
+        if q in f or f in q:
+            return True
+
+        return False
+
+    async def _search_by_title(
+        self,
+        title: str,
+        limit: int = 3,
+    ) -> dict[str, Any] | None:
+        """Search for a publication by title.
+
+        Args:
+            title: Publication title to search for.
+            limit: Maximum results to check for relevance.
+
+        Returns:
+            First relevant publication or None.
+        """
+        # Clean title for search (CrossRef limit)
+        clean_title = title.strip()[:200]
+
+        try:
+            async for publication in self._search_publications(
+                query=f'title:"{clean_title}"',
+                limit=limit,
+            ):
+                # Check relevance (title must match)
+                pub_titles = publication.get("title", [])
+                found_title = pub_titles[0] if pub_titles else ""
+                if self._titles_match(clean_title, found_title):
+                    return publication
+        except Exception as e:
+            self.logger.debug(
+                "crossref_title_search_failed",
+                title=clean_title[:50],
+                error=str(e),
+            )
+
+        return None
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with fallback search by title when DOI returns 404.
+
+        Args:
+            entity_type: Must be 'work' or 'publication'.
+            filter_ids: List of DOIs to resolve.
+            filter_field: Field name for filtering ('doi').
+            fallback_mapping: Mapping {doi: title} for fallback search.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Publication records.
+        """
+        if entity_type not in ("work", "publication"):
+            raise ValueError(
+                f"CrossRefAdapter supports 'work'/'publication', got: {entity_type}"
+            )
+
+        dois = filter_ids[:limit] if limit else filter_ids
+        fetched = 0
+        found_dois: set[str] = set()
+
+        # Batch fetch (primary path)
+        for i in range(0, len(dois), self.batch_size):
+            batch = dois[i : i + self.batch_size]
+
+            async for publication in self._fetch_batch_publications(batch):
+                doi = publication.get("DOI", "").lower()
+                found_dois.add(doi)
+                yield publication
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+        # Fallback for not-found DOIs
+        for doi in dois:
+            normalized_doi = (normalize_doi(doi) or "").lower()
+            if normalized_doi in found_dois:
+                continue
+
+            title = fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
+            if not title:
+                self.logger.debug("crossref_no_fallback_title", doi=doi)
+                continue
+
+            self.logger.info(
+                "crossref_title_fallback_attempt",
+                doi=doi,
+                title=title[:50] + "..." if len(title) > 50 else title,
+            )
+
+            publication = await self._search_by_title(title)
+            if publication:
+                self.logger.info(
+                    "crossref_title_fallback_success",
+                    original_doi=doi,
+                    found_doi=publication.get("DOI"),
+                    title=title[:50],
+                )
+                yield publication
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+            else:
+                self.logger.warning(
+                    "crossref_title_fallback_not_found",
+                    doi=doi,
+                    title=title[:50],
+                )
+
     async def fetch(
         self,
         entity_type: str,
