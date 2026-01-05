@@ -272,10 +272,8 @@ class FilteredDataSource:
                 "when filtering is enabled."
             )
 
-        # Check if adapter supports fallback and we have fallback mapping
-        if self._fallback_mapping and hasattr(
-            self._data_source, "fetch_filtered_with_fallback"
-        ):
+        # Check if we have fallback mapping (adapter implements FilterableDataSourcePort)
+        if self._fallback_mapping:
             async for record in self._data_source.fetch_filtered_with_fallback(
                 entity_type=entity_type,
                 filter_ids=self._filter_ids,  # type: ignore[arg-type]
