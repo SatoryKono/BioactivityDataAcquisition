@@ -1,9 +1,13 @@
 # ADR-001: Why Delta Lake over Raw Parquet?
 
-*   **Status**: Accepted
-*   **Date**: 2025-05-20 (Implicitly from RULES.md v4.2)
-*   **Last Updated**: 2026-01-02
-*   **Context**: The project requires a reliable, high-performance storage format for the Silver (normalized) and Gold (aggregated) layers of the data warehouse. The primary candidates were raw Apache Parquet and Delta Lake.
+**Status:** Accepted
+**Date:** 2025-05-20
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+
+## Context
+
+The project requires a reliable, high-performance storage format for the Silver (normalized) and Gold (aggregated) layers of the data warehouse. The primary candidates were raw Apache Parquet and Delta Lake.
 
 ## The Decision
 

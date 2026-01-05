@@ -1,8 +1,12 @@
 # ADR-004: Why Pydantic over Standard Dataclasses?
 
-*   **Status**: Accepted
-*   **Date**: 2025-05-20 (Implicitly from `pyproject.toml` and `RULES.md`)
-*   **Context**: The project requires a robust way to define and validate data schemas, especially for data contracts between layers (e.g., API responses, records in Delta tables). The primary candidates were standard Python `dataclasses` and Pydantic.
+**Status:** Accepted
+**Date:** 2025-05-20
+**Decision makers:** @BioETL-Team
+
+## Context
+
+The project requires a robust way to define and validate data schemas, especially for data contracts between layers (e.g., API responses, records in Delta tables). The primary candidates were standard Python `dataclasses` and Pydantic.
 
 ## The Decision
 

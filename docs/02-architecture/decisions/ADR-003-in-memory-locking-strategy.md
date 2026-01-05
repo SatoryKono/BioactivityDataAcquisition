@@ -1,9 +1,10 @@
 # ADR-003: In-Memory Locking Strategy (MemoryLock)
 
-*   **Status**: Accepted (Revised 2025-12-23)
-*   **Date**: 2025-05-20 (Original), 2025-12-23 (Revised)
-*   **Last Updated**: 2026-01-02
-*   **Related**: [ADR-010: Local-Only Deployment](ADR-010-local-only-deployment.md)
+**Status:** Accepted (Revised 2025-12-23)
+**Date:** 2025-05-20
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+**Related:** [ADR-010: Local-Only Deployment](ADR-010-local-only-deployment.md)
 
 ## Context
 

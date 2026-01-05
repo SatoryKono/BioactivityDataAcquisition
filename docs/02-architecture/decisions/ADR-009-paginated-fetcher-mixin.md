@@ -1,8 +1,12 @@
 # ADR-009: PaginatedFetcherMixin Design
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-22
-*   **Context**: All data source adapters (ChEMBL, PubChem, UniProt) implement pagination, but each API uses different mechanisms (offset-based, cursor-based, page tokens). The pagination loop logic was duplicated across adapters, leading to inconsistent error handling and limit enforcement. A unified abstraction was needed.
+**Status:** Accepted
+**Date:** 2025-12-22
+**Decision makers:** @BioETL-Team
+
+## Context
+
+All data source adapters (ChEMBL, PubChem, UniProt) implement pagination, but each API uses different mechanisms (offset-based, cursor-based, page tokens). The pagination loop logic was duplicated across adapters, leading to inconsistent error handling and limit enforcement. A unified abstraction was needed.
 
 ## The Decision
 
