@@ -30,7 +30,7 @@ class TestPipelineSettings:
         assert settings.batch_size == 100
         assert settings.checkpoint_interval == 1000
         assert settings.max_concurrent_batches == 4
-        assert settings.heartbeat_interval == 20
+        assert settings.heartbeat_interval == 30
 
     def test_custom_values(self) -> None:
         """Test custom pipeline settings."""
