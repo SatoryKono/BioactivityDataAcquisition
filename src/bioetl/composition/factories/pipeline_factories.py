@@ -56,6 +56,7 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
+from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
@@ -72,6 +73,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    CrossRefPublicationGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     UniProtProteinGoldSchema,
@@ -88,6 +90,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
+    CROSSREF_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
@@ -215,6 +218,14 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=PUBMED_PUBLICATION_SCHEMA,
         gold_schema=PubMedPublicationGoldSchema,
     ),
+    # CrossRef pipeline
+    PipelineFactoryConfig(
+        pipeline_name="crossref_publication_enrichment",
+        provider="crossref",
+        transformer_class=CrossRefTransformer,
+        silver_schema=CROSSREF_PUBLICATION_SCHEMA,
+        gold_schema=CrossRefPublicationGoldSchema,
+    ),
 )
 
 
@@ -261,6 +272,7 @@ chembl_target_component_factory = _factories["chembl_target_component"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
 pubmed_publications_factory = _factories["pubmed_publications"]
+crossref_publication_enrichment_factory = _factories["crossref_publication_enrichment"]
 
 
 # =============================================================================
@@ -395,6 +407,7 @@ __all__ = [
     "chembl_molecule_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
+    "crossref_publication_enrichment_factory",
     "get_factory",
     "is_registered",
     "list_available_pipelines",

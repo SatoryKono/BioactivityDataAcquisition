@@ -505,3 +505,43 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
     ]
 )
+
+# Schema for CrossRef Publication
+# See: https://api.crossref.org/swagger-ui/index.html
+CROSSREF_PUBLICATION_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # Primary key
+        pa.field("doi", pa.string()),
+        # Core fields
+        pa.field("title", pa.string()),
+        pa.field("abstract", pa.string()),
+        pa.field("authors", pa.list_(pa.string())),
+        pa.field("journal", pa.string()),
+        pa.field("issn", pa.list_(pa.string())),
+        pa.field("publisher", pa.string()),
+        pa.field("volume", pa.string()),
+        pa.field("issue", pa.string()),
+        pa.field("first_page", pa.string()),
+        pa.field("last_page", pa.string()),
+        # Date fields
+        pa.field("year", pa.int64()),
+        pa.field("published_print", pa.string()),
+        pa.field("published_online", pa.string()),
+        # Metadata
+        pa.field("doc_type", pa.string()),
+        pa.field("citation_count", pa.int64()),
+        pa.field("reference_count", pa.int64()),
+        pa.field("language", pa.string()),
+        pa.field("license_url", pa.string()),
+        pa.field("subjects", pa.list_(pa.string())),
+        pa.field("source", pa.string()),
+    ]
+)

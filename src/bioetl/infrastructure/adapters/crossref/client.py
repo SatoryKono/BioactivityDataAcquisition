@@ -364,6 +364,28 @@ class CrossRefAdapter(BaseHttpAdapter):
                 if limit and fetched >= limit:
                     return
 
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Multi-field filtering not supported by CrossRef API.
+
+        CrossRef only supports single-field filtering by DOI.
+        Use fetch_filtered() for DOI-based filtering instead.
+
+        Raises:
+            NotImplementedError: Always, as CrossRef doesn't support multi-field filtering.
+        """
+        # AsyncIterator requires yield before raise for proper generator creation
+        if False:  # pragma: no cover
+            yield {}  # Required for AsyncIterator type signature
+        raise NotImplementedError(
+            "CrossRef API does not support multi-field filtering. "
+            "Use fetch_filtered() with filter_field='doi' instead."
+        )
+
     async def fetch(
         self,
         entity_type: str,
