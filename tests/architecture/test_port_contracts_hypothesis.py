@@ -5,8 +5,13 @@ maintain their contracts across a wide range of inputs and edge cases.
 
 Implements the refactoring plan: "Расширение контрактных тестов портов".
 
-Marked as slow tests because Hypothesis property tests generate many examples
-and can take 1-2 seconds each.
+Note: max_examples is controlled by Hypothesis profile (conftest.py):
+- CI: 10 examples (fast)
+- fast: 5 examples (smoke tests)
+- dev: 50 examples (default)
+- thorough: 200 examples (pre-release)
+
+Tests do NOT override max_examples to respect profile settings.
 """
 
 from __future__ import annotations
@@ -84,7 +89,7 @@ class TestLockPortProperties:
     """Property-based tests for LockPort contract invariants."""
 
     @given(key=lock_key_strategy)
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_acquire_release_cycle_is_consistent(self, key: str) -> None:
         """Property: acquire() followed by release() MUST succeed for same owner."""
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -112,7 +117,7 @@ class TestLockPortProperties:
         asyncio.run(test_cycle())
 
     @given(key=lock_key_strategy, ttl=ttl_strategy)
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_heartbeat_extends_ttl(self, key: str, ttl: int) -> None:
         """Property: heartbeat() on valid lock MUST return True."""
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -139,7 +144,7 @@ class TestLockPortProperties:
         asyncio.run(test_heartbeat())
 
     @given(keys=st.lists(lock_key_strategy, min_size=1, max_size=10, unique=True))
-    @settings(max_examples=20, deadline=None)
+    @settings(deadline=None)
     def test_multiple_locks_are_independent(self, keys: list[str]) -> None:
         """Property: Locks on different keys MUST be independent."""
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -178,7 +183,7 @@ class TestCheckpointPortProperties:
     """Property-based tests for CheckpointPort contract invariants."""
 
     @given(pipeline=pipeline_name_strategy, metadata=checkpoint_metadata_strategy)
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_save_load_roundtrip_preserves_data(
         self, pipeline: str, metadata: dict[str, Any]
     ) -> None:
@@ -211,7 +216,7 @@ class TestCheckpointPortProperties:
     @given(
         pipelines=st.lists(pipeline_name_strategy, min_size=1, max_size=10, unique=True)
     )
-    @settings(max_examples=20, deadline=None)
+    @settings(deadline=None)
     def test_list_all_returns_all_saved_pipelines(self, pipelines: list[str]) -> None:
         """Property: list_all() MUST return all saved pipeline names."""
         import tempfile
@@ -238,7 +243,7 @@ class TestCheckpointPortProperties:
         asyncio.run(test_list())
 
     @given(pipeline=pipeline_name_strategy)
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_delete_makes_load_return_none(self, pipeline: str) -> None:
         """Property: delete() followed by load() MUST return None."""
         import tempfile
@@ -274,7 +279,7 @@ class TestRateLimiterPortProperties:
     """Property-based tests for RateLimiterPort contract invariants."""
 
     @given(rate=rate_strategy, capacity=capacity_strategy)
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_initial_tokens_equal_capacity(self, rate: float, capacity: int) -> None:
         """Property: Initial available_tokens() MUST equal capacity."""
         from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -292,7 +297,7 @@ class TestRateLimiterPortProperties:
         rate=st.floats(min_value=0.001, max_value=1.0),
         capacity=capacity_strategy,
     )
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_try_acquire_respects_capacity(self, rate: float, capacity: int) -> None:
         """Property: try_acquire() MUST fail after capacity tokens acquired.
 
@@ -318,7 +323,7 @@ class TestRateLimiterPortProperties:
         capacity=st.integers(min_value=2, max_value=100),
         tokens=st.integers(min_value=1, max_value=10),
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_acquire_multiple_tokens_works(
         self, rate: float, capacity: int, tokens: int
     ) -> None:
@@ -340,7 +345,7 @@ class TestRateLimiterPortProperties:
         asyncio.run(test_acquire())
 
     @given(rate=rate_strategy, capacity=capacity_strategy)
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_tokens_never_exceed_capacity(self, rate: float, capacity: int) -> None:
         """Property: available_tokens() MUST never exceed capacity."""
         import time
@@ -371,7 +376,7 @@ class TestCircuitBreakerPortProperties:
         failure_threshold=failure_threshold_strategy,
         recovery_timeout=recovery_timeout_strategy,
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_initial_state_is_closed(
         self, failure_threshold: int, recovery_timeout: int
     ) -> None:
@@ -393,7 +398,7 @@ class TestCircuitBreakerPortProperties:
         failure_threshold=failure_threshold_strategy,
         recovery_timeout=recovery_timeout_strategy,
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_reset_returns_to_closed(
         self, failure_threshold: int, recovery_timeout: int
     ) -> None:
@@ -417,7 +422,7 @@ class TestCircuitBreakerPortProperties:
         assert breaker.get_failure_count() == 0
 
     @given(failure_threshold=st.integers(min_value=1, max_value=10))
-    @settings(max_examples=20, deadline=None)
+    @settings(deadline=None)
     def test_opens_after_threshold_failures(self, failure_threshold: int) -> None:
         """Property: Circuit MUST open after failure_threshold consecutive failures."""
         from bioetl.domain.types import CircuitBreakerState
@@ -458,7 +463,7 @@ class TestMetricsPortProperties:
         metric_name=st.text(min_size=1, max_size=50).filter(lambda x: x.strip() != ""),
         value=st.floats(min_value=-1e10, max_value=1e10, allow_nan=False),
     )
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_noop_metrics_accepts_any_valid_input(
         self, metric_name: str, value: float
     ) -> None:
@@ -479,7 +484,7 @@ class TestMetricsPortProperties:
             max_size=5,
         )
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_noop_metrics_accepts_various_labels(self, labels: dict[str, str]) -> None:
         """Property: NoOpMetrics MUST accept various label combinations."""
         from bioetl.domain.ports.noop import NoOpMetrics
@@ -513,7 +518,7 @@ class TestLoggerPortProperties:
             max_size=5,
         ),
     )
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_noop_logger_accepts_any_message(
         self, message: str, context: dict[str, Any]
     ) -> None:
@@ -538,7 +543,7 @@ class TestLoggerPortProperties:
             max_size=5,
         )
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_logger_bind_returns_logger_port(self, bindings: dict[str, Any]) -> None:
         """Property: LoggerPort.bind() MUST return LoggerPort instance."""
         from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -588,7 +593,7 @@ class TestJsonEncoderPortProperties:
         reason="Hypothesis st.recursive has lambda reflection issues on Python 3.14",
     )
     @given(data=json_safe_value)
-    @settings(max_examples=100, deadline=None)
+    @settings(deadline=None)
     def test_dumps_loads_roundtrip(self, data: Any) -> None:
         """Property: dumps() followed by loads() MUST preserve data."""
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
@@ -618,7 +623,7 @@ class TestJsonEncoderPortProperties:
             max_size=10,
         )
     )
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_dumps_canonical_is_deterministic(self, data: dict[str, Any]) -> None:
         """Property: dumps_canonical() MUST produce identical output for same input."""
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
@@ -644,7 +649,7 @@ class TestJsonEncoderPortProperties:
             max_size=5,
         )
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_dumps_canonical_sorts_keys(self, data: dict[str, Any]) -> None:
         """Property: dumps_canonical() MUST produce sorted keys."""
         from bioetl.infrastructure.serialization.encoders import StdLibJsonEncoder
@@ -672,7 +677,7 @@ class TestMemoryMonitorPortProperties:
     """Property-based tests for MemoryMonitorPort contract invariants."""
 
     @given(batch_size=st.integers(min_value=1, max_value=10000))
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_recommended_batch_size_is_positive(self, batch_size: int) -> None:
         """Property: get_recommended_batch_size() MUST return positive integer."""
         from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
@@ -685,7 +690,7 @@ class TestMemoryMonitorPortProperties:
         ), f"Recommended batch size must be positive, got {recommended}"
 
     @given(batch_size=st.integers(min_value=1, max_value=10000))
-    @settings(max_examples=50, deadline=None)
+    @settings(deadline=None)
     def test_noop_monitor_returns_same_batch_size(self, batch_size: int) -> None:
         """Property: NoOpMemoryMonitor MUST return input batch size unchanged."""
         from bioetl.domain.ports.noop import NoOpMemoryMonitor
@@ -701,7 +706,7 @@ class TestMemoryMonitorPortProperties:
         records_count=st.integers(min_value=0, max_value=100000),
         avg_record_size=st.integers(min_value=1, max_value=10000),
     )
-    @settings(max_examples=30, deadline=None)
+    @settings(deadline=None)
     def test_estimate_batch_memory_is_non_negative(
         self, records_count: int, avg_record_size: int
     ) -> None:
