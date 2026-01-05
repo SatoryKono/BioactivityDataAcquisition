@@ -141,3 +141,28 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
             Dictionary records matching ALL filter criteria.
         """
         ...
+
+    def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback search when primary lookup fails.
+
+        When a primary ID lookup fails (e.g., DOI returns 404), attempts
+        to find the record using the fallback value (e.g., search by title).
+
+        Args:
+            entity_type: The type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering (e.g., 'doi').
+            fallback_mapping: Mapping from primary ID to fallback value.
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records found via primary lookup or fallback search.
+        """
+        ...

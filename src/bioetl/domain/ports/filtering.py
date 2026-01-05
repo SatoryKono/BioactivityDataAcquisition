@@ -70,3 +70,29 @@ class InputFilterPort(Protocol):
             ValueError: If any column is not found in the source.
         """
         ...
+
+    async def load_filter_with_fallback(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str]]:
+        """Load filter IDs and fallback mapping from source.
+
+        Loads primary filter IDs and builds a mapping from primary to fallback
+        values for use when primary lookup fails (e.g., DOI → title fallback).
+
+        Args:
+            source_path: Path to the filter source (e.g., CSV file path).
+            primary_column: Name of the primary filter column (e.g., 'doi').
+            fallback_column: Name of the fallback column (e.g., 'title').
+
+        Returns:
+            Tuple of (FilterLoadResult, fallback_mapping).
+            fallback_mapping maps primary values to fallback values.
+
+        Raises:
+            FileNotFoundError: If the source file does not exist.
+            ValueError: If columns are not found in the source.
+        """
+        ...
