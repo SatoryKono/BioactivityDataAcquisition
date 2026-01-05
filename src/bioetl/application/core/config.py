@@ -44,10 +44,10 @@ class LockConfig:
 
     lock_key: str
     exclusive: bool = False
-    lock_ttl: int = 60
+    lock_ttl: int = 90
     wait_for_lock: bool = True
     wait_timeout: int = 300
-    heartbeat_interval: int = 20
+    heartbeat_interval: int = 30
 
     @classmethod
     def for_pipeline(
@@ -55,10 +55,10 @@ class LockConfig:
         provider: str,
         entity_type: str,
         run_type: RunType,
-        lock_ttl: int = 60,
+        lock_ttl: int = 90,
         wait_for_lock: bool = True,
         wait_timeout: int = 300,
-        heartbeat_interval: int = 20,
+        heartbeat_interval: int = 30,
     ) -> LockConfig:
         """Create LockConfig for a pipeline.
 

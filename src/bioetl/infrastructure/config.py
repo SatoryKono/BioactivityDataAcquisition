@@ -251,8 +251,8 @@ class PipelineSettings(BaseSettings):
     max_concurrent_batches: int = Field(default=4, ge=1, le=16)
     """Maximum concurrent batch writes."""
 
-    heartbeat_interval: int = Field(default=20, ge=5, le=60)
-    """Lock heartbeat interval in seconds (default: 20s, range: 5-60s)."""
+    heartbeat_interval: int = Field(default=30, ge=5, le=60)
+    """Lock heartbeat interval in seconds (default: 30s, range: 5-60s)."""
 
 
 class Settings(BaseSettings):

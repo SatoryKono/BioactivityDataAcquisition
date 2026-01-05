@@ -166,10 +166,10 @@ class TestLockConfig:
         config = LockConfig(lock_key="test:key")
         assert config.lock_key == "test:key"
         assert config.exclusive is False
-        assert config.lock_ttl == 60
+        assert config.lock_ttl == 90
         assert config.wait_for_lock is True
         assert config.wait_timeout == 300
-        assert config.heartbeat_interval == 20
+        assert config.heartbeat_interval == 30
 
     def test_lock_config_for_pipeline_incremental(self) -> None:
         """Test LockConfig factory for incremental run."""

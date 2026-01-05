@@ -372,8 +372,8 @@ sha256(provider + canonical_json(record))
 |----------|----------|
 | Механизм | In-memory (MemoryLock) |
 | Область | Локальный процесс |
-| TTL по умолчанию | 60s (настраивается в `RuntimeConfig`) |
-| Heartbeat | 20s (настраивается в `RuntimeConfig`) |
+| TTL по умолчанию | 90s (настраивается в `RuntimeConfig`) |
+| Heartbeat | 30s (настраивается в `RuntimeConfig`) |
 
 ### 5.1. ⚠️ MemoryLock Достаточен для Локального Запуска
 
