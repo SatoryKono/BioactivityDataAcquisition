@@ -1,0 +1,36 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0 (mailto:test@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?filter=doi:10.1038/nature12373,10.1016/j.cell.2019.03.025&rows=2&mailto=test@example.com
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"items-per-page":2,"total-results":2,"items":[{"DOI":"10.1038/nature12373","title":["Crystal structure of rhodopsin bound to arrestin"],"author":[{"given":"Yanyong","family":"Kang"}],"container-title":["Nature"],"publisher":"Springer Science and Business Media LLC","published-print":{"date-parts":[[2015,7,30]]},"is-referenced-by-count":892,"type":"journal-article"},{"DOI":"10.1016/j.cell.2019.03.025","title":["Structure of the human histamine H1 receptor"],"author":[{"given":"Tatsuro","family":"Shimamura"}],"container-title":["Cell"],"publisher":"Elsevier BV","published-print":{"date-parts":[[2019,5,2]]},"is-referenced-by-count":245,"type":"journal-article"}]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 05 Jan 2026 12:00:00 GMT
+      X-Rate-Limit-Interval:
+      - 1s
+      X-Rate-Limit-Limit:
+      - '50'
+    status:
+      code: 200
+      message: OK
+version: 1
