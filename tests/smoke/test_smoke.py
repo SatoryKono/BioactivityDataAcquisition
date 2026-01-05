@@ -90,8 +90,8 @@ class TestDomainConfig:
         from bioetl.domain.types import RunType
 
         config = RuntimeConfig(run_type=RunType.INCREMENTAL)
-        assert config.heartbeat_interval == 20
-        assert config.lock_ttl == 60
+        assert config.heartbeat_interval == 30
+        assert config.lock_ttl == 90
         assert config.dry_run is False
 
 
