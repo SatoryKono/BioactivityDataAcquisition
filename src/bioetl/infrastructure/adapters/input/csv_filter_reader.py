@@ -157,7 +157,9 @@ class CsvFilterReader:
                 primary_val = row.get(primary_column)
                 fallback_val = row.get(fallback_column)
                 if primary_val and fallback_val:
-                    fallback_mapping[str(primary_val).strip()] = str(fallback_val).strip()
+                    fallback_mapping[str(primary_val).strip()] = str(
+                        fallback_val
+                    ).strip()
 
             if self._logger:
                 self._logger.info(

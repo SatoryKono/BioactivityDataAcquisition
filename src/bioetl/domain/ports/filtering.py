@@ -70,3 +70,40 @@ class InputFilterPort(Protocol):
             ValueError: If any column is not found in the source.
         """
         ...
+
+
+@runtime_checkable
+class FallbackInputFilterPort(InputFilterPort, Protocol):
+    """Extended InputFilterPort with fallback column support.
+
+    This Protocol extends InputFilterPort for filter readers that support
+    loading a primary column with a fallback column mapping (e.g., DOI with
+    title fallback for CrossRef).
+
+    Use isinstance() check to detect if a reader supports fallback:
+        if isinstance(reader, FallbackInputFilterPort):
+            result, mapping = await reader.load_filter_with_fallback(...)
+    """
+
+    async def load_filter_with_fallback(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str]]:
+        """Load filter IDs with fallback column mapping.
+
+        Args:
+            source_path: Path to the filter source.
+            primary_column: Name of the primary filter column.
+            fallback_column: Name of the fallback column for mapping.
+
+        Returns:
+            Tuple of (FilterLoadResult, fallback_mapping dict).
+            The fallback_mapping maps primary IDs to fallback values.
+
+        Raises:
+            FileNotFoundError: If the source file does not exist.
+            ValueError: If any column is not found in the source.
+        """
+        ...
