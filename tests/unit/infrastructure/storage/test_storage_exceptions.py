@@ -42,20 +42,20 @@ class TestSilverWriterExceptions:
     """Tests for exception handling in SilverWriter."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
     async def test_write_silver_raises_schema_violation_error_on_merge(
-        self, mock_delta_table, valid_record, noop_logger
+        self, valid_record, noop_logger
     ):
         """Test that SchemaViolationError is raised on merge."""
+        import pyarrow as pa
+
         # First call (schema check) raises TableNotFoundError, second call raises
         # SchemaMismatchError
-        mock_delta_table.side_effect = [
-            TableNotFoundError("Not found"),  # Schema check
-            SchemaMismatchError("Invalid schema"),  # Write attempt
-        ]
-        writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
-
-        import pyarrow as pa
+        mock_delta_table = MagicMock(
+            side_effect=[
+                TableNotFoundError("Not found"),  # Schema check (base_delta_writer)
+                SchemaMismatchError("Invalid schema"),  # Write attempt (silver_writer)
+            ]
+        )
 
         schema = pa.schema(
             [
@@ -66,17 +66,31 @@ class TestSilverWriterExceptions:
                 pa.field("_ingestion_ts", pa.string()),
             ]
         )
-        with pytest.raises(SchemaViolationError):
-            await writer.write_silver(
-                "test.table", [valid_record], ["id"], schema=schema
-            )
+
+        # Use same mock for both modules so side_effect list is shared
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                mock_delta_table,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                mock_delta_table,
+            ),
+        ):
+            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            with pytest.raises(SchemaViolationError):
+                await writer.write_silver(
+                    "test.table", [valid_record], ["id"], schema=schema
+                )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.silver_writer.DeltaTable")
     async def test_write_silver_raises_merge_conflict_error(
-        self, mock_delta_table, valid_record, noop_logger
+        self, valid_record, noop_logger
     ):
         """Test that MergeConflictError is raised."""
+        import pyarrow as pa
+
         mock_table_instance = MagicMock()
         mock_merge = MagicMock()
         mock_table_instance.merge.return_value = mock_merge
@@ -85,14 +99,12 @@ class TestSilverWriterExceptions:
         mock_merge.execute.side_effect = DeltaError("Merge-conflict")
 
         # First call (schema check) raises TableNotFoundError, second call returns mock
-        mock_delta_table.side_effect = [
-            TableNotFoundError("Not found"),  # Schema check
-            mock_table_instance,  # Write attempt
-        ]
-
-        writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
-
-        import pyarrow as pa
+        mock_delta_table = MagicMock(
+            side_effect=[
+                TableNotFoundError("Not found"),  # Schema check
+                mock_table_instance,  # Write attempt
+            ]
+        )
 
         schema = pa.schema(
             [
@@ -103,24 +115,29 @@ class TestSilverWriterExceptions:
                 pa.field("_ingestion_ts", pa.string()),
             ]
         )
-        with pytest.raises(MergeConflictError):
-            await writer.write_silver(
-                "test.table", [valid_record], ["id"], schema=schema
-            )
+
+        # Use same mock for both modules so side_effect list is shared
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                mock_delta_table,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                mock_delta_table,
+            ),
+        ):
+            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            with pytest.raises(MergeConflictError):
+                await writer.write_silver(
+                    "test.table", [valid_record], ["id"], schema=schema
+                )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.silver_writer.write_deltalake")
-    @patch(
-        "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-        side_effect=TableNotFoundError,
-    )
     async def test_write_silver_raises_schema_error_on_create(
-        self, _mock_delta_table, mock_write_deltalake, valid_record, noop_logger
+        self, valid_record, noop_logger
     ):
         """Test SchemaViolationError on table creation."""
-        mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
-        writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
-
         import pyarrow as pa
 
         schema = pa.schema(
@@ -132,10 +149,27 @@ class TestSilverWriterExceptions:
                 pa.field("_ingestion_ts", pa.string()),
             ]
         )
-        with pytest.raises(SchemaViolationError):
-            await writer.write_silver(
-                "test.table", [valid_record], ["id"], schema=schema
-            )
+
+        # Both DeltaTable patches raise TableNotFoundError so it falls back to write_deltalake
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                side_effect=TableNotFoundError,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=TableNotFoundError,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.write_deltalake",
+                side_effect=ArrowTypeError("Arrow type error"),
+            ),
+        ):
+            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            with pytest.raises(SchemaViolationError):
+                await writer.write_silver(
+                    "test.table", [valid_record], ["id"], schema=schema
+                )
 
     @pytest.mark.asyncio
     async def test_vacuum_raises_table_not_found(self, noop_logger):
