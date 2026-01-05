@@ -1,7 +1,7 @@
 """Health check command for BioETL CLI.
 
 Provides commands for running health checks and starting the health server.
-Uses HealthService from composition entrypoints for clean layering.
+Uses composition entrypoints for clean layering and proper DI.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ import sys
 
 import click
 
-from bioetl.composition.entrypoints import get_health_service
+from bioetl.composition.entrypoints import get_health_server, get_health_service
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -59,27 +59,8 @@ def health_server_command(host: str, port: int) -> None:
     click.echo("\nPress Ctrl+C to stop.")
 
     async def run() -> None:
-        # Import server components at runtime (interfaces layer can import from infrastructure)
-        from bioetl.infrastructure.adapters.http.health_monitor import (
-            ProviderHealthMonitor,
-        )
-        from bioetl.infrastructure.observability.prometheus_metrics import (
-            PrometheusMetrics,
-        )
-        from bioetl.interfaces.http.health_server import HealthServer
-
-        # Create metrics port for health monitor
-        metrics = PrometheusMetrics()
-
-        # Create health monitor
-        health_monitor = ProviderHealthMonitor(metrics=metrics)
-
-        # Create and start server
-        server = HealthServer(
-            host=host,
-            port=port,
-            health_monitor=health_monitor,
-        )
+        # Get server with dependencies injected via composition root
+        server = get_health_server(host=host, port=port)
 
         await server.start()
 

@@ -22,7 +22,10 @@ from bioetl.composition._bootstrap.checkpoint import (
     bootstrap_quarantine_service,
 )
 from bioetl.composition._bootstrap.config import bootstrap_config_service
-from bioetl.composition._bootstrap.health import bootstrap_health_service
+from bioetl.composition._bootstrap.health import (
+    bootstrap_health_server,
+    bootstrap_health_service,
+)
 from bioetl.composition._bootstrap.lock import bootstrap_lock_service
 from bioetl.composition._bootstrap.observability import (
     MetricsServerError,
@@ -53,6 +56,7 @@ __all__ = [
     "bootstrap_cleanup",
     "bootstrap_config_service",
     "bootstrap_dq_monitor",
+    "bootstrap_health_server",
     "bootstrap_health_service",
     "bootstrap_lifecycle_service",
     "bootstrap_lock_service",
