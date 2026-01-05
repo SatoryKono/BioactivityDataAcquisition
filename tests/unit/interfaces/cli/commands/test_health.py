@@ -5,6 +5,7 @@ Tests health check and health server CLI commands.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -323,6 +324,249 @@ class TestHealthCheckCommand:
 
         assert "[FAIL]" in result.output
         assert "unknown" in result.output
+
+
+class TestHealthCheckAsyncExecution:
+    """Test the actual async execution of health check."""
+
+    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    def test_health_check_with_check_health_method(
+        self,
+        mock_factory: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health check when adapter has check_health method."""
+        # Setup mock adapter with check_health method
+        mock_result = MagicMock()
+        mock_result.status.value = "healthy"
+        mock_result.latency_ms = 25.5
+        mock_result.endpoint = "/api/status"
+        mock_result.last_error = None
+
+        mock_adapter = MagicMock()
+        mock_adapter.check_health = AsyncMock(return_value=mock_result)
+
+        mock_factory.list_providers.return_value = ["test_provider"]
+        mock_factory.create.return_value = mock_adapter
+
+        result = cli_runner.invoke(cli, ["health", "check"])
+
+        assert result.exit_code == ExitCode.OK.value
+        assert "[OK]" in result.output
+        assert "test_provider" in result.output
+        assert "25.50ms" in result.output
+
+    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    def test_health_check_with_check_health_has_error(
+        self,
+        mock_factory: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health check when check_health result has last_error."""
+        mock_result = MagicMock()
+        mock_result.status.value = "unhealthy"
+        mock_result.latency_ms = 100.0
+        mock_result.endpoint = "/api/status"
+        mock_result.last_error = "Connection timeout"
+
+        mock_adapter = MagicMock()
+        mock_adapter.check_health = AsyncMock(return_value=mock_result)
+
+        mock_factory.list_providers.return_value = ["test_provider"]
+        mock_factory.create.return_value = mock_adapter
+
+        result = cli_runner.invoke(cli, ["health", "check"])
+
+        assert result.exit_code == ExitCode.FAIL.value
+        assert "Connection timeout" in result.output
+
+    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    def test_health_check_with_health_check_method(
+        self,
+        mock_factory: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health check when adapter has health_check (not check_health) method."""
+        mock_status = MagicMock()
+        mock_status.value = "healthy"
+
+        # Adapter with health_check but NOT check_health
+        mock_adapter = MagicMock(spec=["health_check"])
+        mock_adapter.health_check = AsyncMock(return_value=mock_status)
+
+        mock_factory.list_providers.return_value = ["legacy_provider"]
+        mock_factory.create.return_value = mock_adapter
+
+        result = cli_runner.invoke(cli, ["health", "check"])
+
+        assert result.exit_code == ExitCode.OK.value
+        assert "[OK]" in result.output
+        assert "legacy_provider" in result.output
+
+    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    def test_health_check_adapter_no_health_method(
+        self,
+        mock_factory: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health check when adapter has no health check methods."""
+        # Adapter with neither check_health nor health_check
+        mock_adapter = MagicMock(spec=[])  # Empty spec = no methods
+
+        mock_factory.list_providers.return_value = ["no_health_provider"]
+        mock_factory.create.return_value = mock_adapter
+
+        result = cli_runner.invoke(cli, ["health", "check"])
+
+        assert result.exit_code == ExitCode.FAIL.value
+        assert "unknown" in result.output
+        assert "No health check method" in result.output
+
+    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    def test_health_check_adapter_raises_exception(
+        self,
+        mock_factory: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health check when adapter raises exception during check."""
+        mock_adapter = MagicMock()
+        mock_adapter.check_health = AsyncMock(
+            side_effect=RuntimeError("Network unreachable")
+        )
+
+        mock_factory.list_providers.return_value = ["failing_provider"]
+        mock_factory.create.return_value = mock_adapter
+
+        result = cli_runner.invoke(cli, ["health", "check"])
+
+        assert result.exit_code == ExitCode.FAIL.value
+        assert "unhealthy" in result.output
+        assert "Network unreachable" in result.output
+
+    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    def test_health_check_specific_provider_filter(
+        self,
+        mock_factory: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health check filters to specific providers."""
+        mock_result = MagicMock()
+        mock_result.status.value = "healthy"
+        mock_result.latency_ms = 10.0
+        mock_result.endpoint = "/api"
+        mock_result.last_error = None
+
+        mock_adapter = MagicMock()
+        mock_adapter.check_health = AsyncMock(return_value=mock_result)
+
+        mock_factory.list_providers.return_value = ["chembl", "pubchem", "uniprot"]
+        mock_factory.create.return_value = mock_adapter
+
+        result = cli_runner.invoke(cli, ["health", "check", "--provider", "chembl"])
+
+        assert result.exit_code == ExitCode.OK.value
+        # Factory.create should only be called for requested provider
+        mock_factory.create.assert_called_once_with("chembl")
+
+
+class TestHealthServerAsyncExecution:
+    """Test the actual async execution of health server."""
+
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
+    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    def test_health_server_starts_and_stops(
+        self,
+        mock_metrics_cls: MagicMock,
+        mock_monitor_cls: MagicMock,
+        mock_server_cls: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health server starts and stops correctly."""
+        mock_server = MagicMock()
+        mock_server.start = AsyncMock()
+        mock_server.stop = AsyncMock()
+        mock_server_cls.return_value = mock_server
+
+        # Simulate CancelledError after first sleep to trigger shutdown
+        async def cancelling_sleep(seconds: float) -> None:
+            raise asyncio.CancelledError()
+
+        with patch("asyncio.sleep", side_effect=cancelling_sleep):
+            result = cli_runner.invoke(cli, ["health", "server"])
+
+        # Verify server was started and stopped
+        mock_server.start.assert_called_once()
+        mock_server.stop.assert_called_once()
+        assert "Health server stopped." in result.output
+
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
+    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    def test_health_server_with_custom_options(
+        self,
+        mock_metrics_cls: MagicMock,
+        mock_monitor_cls: MagicMock,
+        mock_server_cls: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health server passes custom host/port to HealthServer."""
+        mock_server = MagicMock()
+        mock_server.start = AsyncMock()
+        mock_server.stop = AsyncMock()
+        mock_server_cls.return_value = mock_server
+
+        async def cancelling_sleep(seconds: float) -> None:
+            raise asyncio.CancelledError()
+
+        with patch("asyncio.sleep", side_effect=cancelling_sleep):
+            cli_runner.invoke(
+                cli,
+                ["health", "server", "--host", "127.0.0.1", "--port", "9000"],
+            )
+
+        # Verify HealthServer was called with correct options
+        mock_server_cls.assert_called_once()
+        call_kwargs = mock_server_cls.call_args.kwargs
+        assert call_kwargs["host"] == "127.0.0.1"
+        assert call_kwargs["port"] == 9000
+
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("bioetl.infrastructure.adapters.http.health_monitor.ProviderHealthMonitor")
+    @patch("bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics")
+    def test_health_server_creates_components(
+        self,
+        mock_metrics_cls: MagicMock,
+        mock_monitor_cls: MagicMock,
+        mock_server_cls: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Test health server creates metrics and monitor."""
+        mock_metrics = MagicMock()
+        mock_metrics_cls.return_value = mock_metrics
+
+        mock_monitor = MagicMock()
+        mock_monitor_cls.return_value = mock_monitor
+
+        mock_server = MagicMock()
+        mock_server.start = AsyncMock()
+        mock_server.stop = AsyncMock()
+        mock_server_cls.return_value = mock_server
+
+        async def cancelling_sleep(seconds: float) -> None:
+            raise asyncio.CancelledError()
+
+        with patch("asyncio.sleep", side_effect=cancelling_sleep):
+            cli_runner.invoke(cli, ["health", "server"])
+
+        # Verify components were created
+        mock_metrics_cls.assert_called_once()
+        mock_monitor_cls.assert_called_once_with(metrics=mock_metrics)
+        mock_server_cls.assert_called_once_with(
+            host="0.0.0.0",
+            port=8080,
+            health_monitor=mock_monitor,
+        )
 
 
 class TestHealthCheckEdgeCases:
