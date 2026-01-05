@@ -72,7 +72,7 @@ class TestFileSizeLimits:
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
-        "client.py": 700,  # 691 LOC - CrossRefAdapter with fetch_filtered_with_fallback for DOI→title fallback
+        "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
