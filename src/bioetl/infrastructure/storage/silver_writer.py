@@ -43,7 +43,7 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
 )
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
-from bioetl.infrastructure.storage.retention_manager import RetentionManager
+from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -65,8 +65,11 @@ from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
 
-class SilverWriter:
+class SilverWriter(BaseDeltaWriter):
     """Writer for Silver layer (normalized data in Delta Lake).
+
+    Inherits from BaseDeltaWriter for common Delta Lake operations
+    (get_table_path, clear, _get_table_schema).
 
     Implements merge/upsert strategy to handle updates and deduplication.
     CSV export is delegated to an optional CsvExporter (composition pattern).
@@ -105,15 +108,16 @@ class SilverWriter:
             Lock validation is now performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
+        # Initialize base class (sets base_path, logger, _retention_manager)
+        super().__init__(base_path, logger)
+
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
             from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
             tracing = NoOpTracing()
 
-        self.base_path = str(base_path).rstrip("/")
         self.csv_exporter = csv_exporter
-        self.logger = logger
         self._write_policy = write_policy or WriteModePolicy()
         self._metrics = metrics
         self._audit = audit
@@ -127,9 +131,6 @@ class SilverWriter:
 
             silver_validator = NoOpSilverValidator()
         self._silver_validator: SilverValidatorPort = silver_validator
-
-        # Delegate retention operations to RetentionManager
-        self._retention_manager = RetentionManager(base_path)
 
     def _prepare_arrow_data(
         self,
@@ -370,25 +371,7 @@ class SilverWriter:
                 table_path, arrow_data, primary_keys, partition_cols
             )
 
-    async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
-        """Get existing table schema if table exists.
-
-        Args:
-            table_name: Target table name
-
-        Returns:
-            PyArrow schema if table exists, None otherwise
-        """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return dt.schema().to_arrow()
-        except DeltaTableNotFoundError:
-            return None
+    # NOTE: _get_table_schema() is inherited from BaseDeltaWriter
 
     async def _check_schema_drift(
         self,
@@ -636,56 +619,7 @@ class SilverWriter:
             ),
         )
 
-    def get_table_path(self, table_name: str) -> Path:
-        """Get the filesystem path for a table.
-
-        Args:
-            table_name: Table name (e.g., 'chembl.activity')
-
-        Returns:
-            Path to the table directory.
-
-        """
-        from pathlib import Path
-
-        return Path(self.base_path) / table_name.replace(".", "/")
-
-    def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
-        """Clear Delta table(s) at the start of a pipeline run.
-
-        Args:
-            table_name: If provided, only clear this table.
-                       If None, clear all tables in base_path.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Number of tables cleared (or would be cleared).
-
-        """
-        import shutil
-        from pathlib import Path
-
-        base = Path(self.base_path)
-        if not base.exists():
-            return 0
-
-        cleared = 0
-        if table_name:
-            # Clear specific table
-            table_path = self.get_table_path(table_name)
-            if table_path.exists():
-                if not dry_run:
-                    shutil.rmtree(table_path)
-                cleared = 1
-        else:
-            # Clear all Delta tables (directories with _delta_log)
-            for item in base.iterdir():
-                if item.is_dir() and (item / "_delta_log").exists():
-                    if not dry_run:
-                        shutil.rmtree(item)
-                    cleared += 1
-
-        return cleared
+    # NOTE: get_table_path() and clear() are inherited from BaseDeltaWriter
 
     async def vacuum(
         self,
