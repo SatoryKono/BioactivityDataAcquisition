@@ -5,15 +5,13 @@ Tests the pure functions in extractors.py module.
 
 from __future__ import annotations
 
-import pytest
-
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
     extract_concepts,
     extract_doi,
     extract_journal_info,
-    extract_openalex_id,
     extract_open_access_info,
+    extract_openalex_id,
     reconstruct_abstract,
 )
 
@@ -131,8 +129,7 @@ class TestExtractConcepts:
     def test_extract_concepts_with_limit(self) -> None:
         """Should respect max_count limit."""
         concepts = [
-            {"display_name": f"Concept{i}", "score": 0.9 - i * 0.1}
-            for i in range(20)
+            {"display_name": f"Concept{i}", "score": 0.9 - i * 0.1} for i in range(20)
         ]
         result = extract_concepts(concepts, max_count=5)
         assert len(result) == 5

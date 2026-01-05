@@ -12,6 +12,7 @@
     - chembl_target
     - chembl_target_component
     - crossref_publication_enrichment
+    - openalex_publication
     - pubchem_compound
     - pubmed_publications
     - uniprot_protein

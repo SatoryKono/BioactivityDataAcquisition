@@ -79,9 +79,7 @@ class OpenAlexPublicationRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED, OpenAlex Work ID)
-    openalex_id: str = PydanticField(
-        description="OpenAlex Work ID (e.g., W2148763428)"
-    )
+    openalex_id: str = PydanticField(description="OpenAlex Work ID (e.g., W2148763428)")
 
     # DOI (may be None for some works)
     doi: str | None = PydanticField(
@@ -91,7 +89,8 @@ class OpenAlexPublicationRecord(BaseModel):
     # Core metadata
     title: str | None = PydanticField(default=None, description="Publication title")
     abstract: str | None = PydanticField(
-        default=None, description="Publication abstract (reconstructed from inverted index)"
+        default=None,
+        description="Publication abstract (reconstructed from inverted index)",
     )
 
     # Authors (list of display names, hashed for PII)
@@ -115,9 +114,7 @@ class OpenAlexPublicationRecord(BaseModel):
     )
 
     # Document type (mapped from OpenAlex type)
-    doc_type: str = PydanticField(
-        default="PUBLICATION", description="Document type"
-    )
+    doc_type: str = PydanticField(default="PUBLICATION", description="Document type")
 
     # Open Access status
     is_oa: bool | None = PydanticField(default=None, description="Is Open Access")

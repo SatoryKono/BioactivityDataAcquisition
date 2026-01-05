@@ -37,9 +37,7 @@ def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> TitleFallbackH
 class TestGetFallbackTitle:
     """Tests for _get_fallback_title method."""
 
-    def test_get_title_with_original_doi(
-        self, handler: TitleFallbackHandler
-    ) -> None:
+    def test_get_title_with_original_doi(self, handler: TitleFallbackHandler) -> None:
         """Should return title from original DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(
@@ -47,9 +45,7 @@ class TestGetFallbackTitle:
         )
         assert result == "Test Title"
 
-    def test_get_title_with_normalized_doi(
-        self, handler: TitleFallbackHandler
-    ) -> None:
+    def test_get_title_with_normalized_doi(self, handler: TitleFallbackHandler) -> None:
         """Should fall back to normalized DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(
@@ -65,37 +61,31 @@ class TestGetFallbackTitle:
         result = handler._get_fallback_title("10.1038/test", None, fallback_mapping)
         assert result == "Test Title"
 
-    def test_get_title_not_found(
-        self, handler: TitleFallbackHandler
-    ) -> None:
+    def test_get_title_not_found(self, handler: TitleFallbackHandler) -> None:
         """Should return None when title not in mapping."""
         fallback_mapping = {"other_doi": "Other Title"}
-        result = handler._get_fallback_title("10.1038/test", "10.1038/test", fallback_mapping)
+        result = handler._get_fallback_title(
+            "10.1038/test", "10.1038/test", fallback_mapping
+        )
         assert result is None
 
 
 class TestTruncateTitle:
     """Tests for _truncate_title method."""
 
-    def test_truncate_short_title(
-        self, handler: TitleFallbackHandler
-    ) -> None:
+    def test_truncate_short_title(self, handler: TitleFallbackHandler) -> None:
         """Should not truncate short titles."""
         result = handler._truncate_title("Short title", max_len=50)
         assert result == "Short title"
 
-    def test_truncate_long_title(
-        self, handler: TitleFallbackHandler
-    ) -> None:
+    def test_truncate_long_title(self, handler: TitleFallbackHandler) -> None:
         """Should truncate long titles with ellipsis."""
         long_title = "A" * 100
         result = handler._truncate_title(long_title, max_len=50)
         assert result == "A" * 50 + "..."
         assert len(result) == 53
 
-    def test_truncate_exact_length(
-        self, handler: TitleFallbackHandler
-    ) -> None:
+    def test_truncate_exact_length(self, handler: TitleFallbackHandler) -> None:
         """Should not truncate titles at exact max length."""
         title = "A" * 50
         result = handler._truncate_title(title, max_len=50)
@@ -131,7 +121,10 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_missing_doi_with_fallback_success(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock, mock_logger: MagicMock
+        self,
+        handler: TitleFallbackHandler,
+        mock_search_fn: AsyncMock,
+        mock_logger: MagicMock,
     ) -> None:
         """Should search by title and return work when DOI not found."""
         dois = ["10.1038/missing"]
@@ -160,7 +153,10 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_missing_doi_with_fallback_not_found(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock, mock_logger: MagicMock
+        self,
+        handler: TitleFallbackHandler,
+        mock_search_fn: AsyncMock,
+        mock_logger: MagicMock,
     ) -> None:
         """Should log warning when title fallback doesn't find work."""
         dois = ["10.1038/notfound"]
@@ -184,7 +180,10 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_missing_doi_without_title(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock, mock_logger: MagicMock
+        self,
+        handler: TitleFallbackHandler,
+        mock_search_fn: AsyncMock,
+        mock_logger: MagicMock,
     ) -> None:
         """Should skip DOI when no title in fallback mapping."""
         dois = ["10.1038/notitle"]
