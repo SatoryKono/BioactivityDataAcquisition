@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import UUID
@@ -124,7 +124,9 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["tldr"] == "This paper presents a novel approach to gene editing..."
+        assert (
+            result["tldr"] == "This paper presents a novel approach to gene editing..."
+        )
 
     @pytest.mark.asyncio
     async def test_transform_authors_serialized(
@@ -324,9 +326,7 @@ class TestTransformerWithPiiHasher:
         mock_pii_hasher = MagicMock()
         mock_pii_hasher.hash_list = MagicMock(return_value=["hash1", "hash2"])
 
-        transformer = SemanticScholarPublicationTransformer(
-            pii_hasher=mock_pii_hasher
-        )
+        transformer = SemanticScholarPublicationTransformer(pii_hasher=mock_pii_hasher)
 
         result = await transformer.transform(mock_context, sample_record, 0)
 

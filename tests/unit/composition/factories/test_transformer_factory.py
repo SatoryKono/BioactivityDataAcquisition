@@ -211,7 +211,13 @@ class TestRegisterAllTransformers:
         register_all_transformers()
 
         providers = {key[0] for key in _TRANSFORMER_REGISTRY.keys()}
-        expected_providers = {"chembl", "pubchem", "uniprot", "pubmed"}
+        expected_providers = {
+            "chembl",
+            "pubchem",
+            "uniprot",
+            "pubmed",
+            "semanticscholar",
+        }
 
         assert providers == expected_providers
 

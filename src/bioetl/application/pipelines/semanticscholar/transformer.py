@@ -206,9 +206,7 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
 
         # Compute entity_id and content_hash
         # Exclude lookup metadata from content hash (they're operational, not content)
-        business_data = {
-            k: v for k, v in fields.items() if not k.startswith("_lookup")
-        }
+        business_data = {k: v for k, v in fields.items() if not k.startswith("_lookup")}
         content_hash = self.compute_content_hash(business_data)
         entity_id = self.compute_entity_id(fields["paper_id"], fields)
 

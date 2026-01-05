@@ -151,7 +151,9 @@ def register_all_transformers() -> None:
     register_transformer("pubmed", "publications", PubMedPublicationTransformer)
 
     # Semantic Scholar transformers
-    register_transformer("semanticscholar", "publication", SemanticScholarPublicationTransformer)
+    register_transformer(
+        "semanticscholar", "publication", SemanticScholarPublicationTransformer
+    )
 
 
 __all__ = [

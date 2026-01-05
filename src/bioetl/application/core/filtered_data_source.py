@@ -96,12 +96,13 @@ class FilteredDataSource:
                     self._filter_reader, InputFilterPort
                 ):
                     # Load with fallback mapping
-                    self._filter_result, self._fallback_mapping = (
-                        await self._filter_reader.load_filter_with_fallback(
-                            source_path=source_path,
-                            primary_column=self._filter_config.column_name,
-                            fallback_column=self._filter_config.fallback_column,
-                        )
+                    (
+                        self._filter_result,
+                        self._fallback_mapping,
+                    ) = await self._filter_reader.load_filter_with_fallback(
+                        source_path=source_path,
+                        primary_column=self._filter_config.column_name,
+                        fallback_column=self._filter_config.fallback_column,
                     )
                 else:
                     # Standard loading without fallback
