@@ -1,0 +1,47 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&filter=doi%3A10.1038%2Fs41586-020-2012-7%7C10.1016%2Fj.cell.2020.02.052&per-page=2
+  response:
+    body:
+      string: |
+        {
+          "meta": {"count": 2, "db_response_time_ms": 20, "page": null, "per_page": 2},
+          "results": [
+            {
+              "id": "https://openalex.org/W3006090887",
+              "doi": "https://doi.org/10.1038/s41586-020-2012-7",
+              "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
+              "publication_year": 2020,
+              "publication_date": "2020-02-03",
+              "type": "article",
+              "language": "en"
+            },
+            {
+              "id": "https://openalex.org/W3006008821",
+              "doi": "https://doi.org/10.1016/j.cell.2020.02.052",
+              "title": "Functional assessment of cell entry and receptor usage for SARS-CoV-2",
+              "publication_year": 2020,
+              "publication_date": "2020-03-16",
+              "type": "article",
+              "language": "en"
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
