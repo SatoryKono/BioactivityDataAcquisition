@@ -118,6 +118,14 @@ test-failed: ## Run only the tests that failed in the last run
 	@echo "$(BLUE)Running failed tests...$(NC)"
 	$(RUN) pytest tests/ -v --lf
 
+test-quick: ## Run quickest possible tests (fast profile, parallel, no slow tests)
+	@echo "$(BLUE)Running quick tests (HYPOTHESIS_PROFILE=fast)...$(NC)"
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -m "not slow" -n auto --dist loadscope -q --tb=line
+
+test-changed: ## Run tests for changed files (compared to main branch)
+	@echo "$(BLUE)Running tests for changed files...$(NC)"
+	./scripts/test_changed.sh
+
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
 	$(RUN) pytest tests/test_architecture_enforcement.py -v --tb=short
