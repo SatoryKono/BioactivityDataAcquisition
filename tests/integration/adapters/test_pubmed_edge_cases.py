@@ -92,7 +92,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -134,7 +136,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -174,7 +178,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -219,7 +225,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -253,7 +261,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -294,7 +304,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -343,7 +355,9 @@ class TestPubMedEdgeCases:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -363,7 +377,9 @@ class TestPubMedEdgeCases:
         """Test health check when API returns error."""
         with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
             # Health check uses esearch.fcgi endpoint with term="health"
-            respx_mock.get("esearch.fcgi").mock(return_value=Response(500, text="Error"))
+            respx_mock.get("esearch.fcgi").mock(
+                return_value=Response(500, text="Error")
+            )
 
             async with pubmed_adapter.http_client:
                 status = await pubmed_adapter.health_check()
@@ -395,7 +411,9 @@ class TestPubMedRateLimiting:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -437,7 +455,9 @@ class TestPubMedXMLParsing:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
@@ -481,7 +501,9 @@ class TestPubMedXMLParsing:
             respx_mock.get("esearch.fcgi").mock(
                 return_value=Response(200, json=mock_search_json)
             )
-            respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
 
             async with pubmed_adapter.http_client:
                 records = []
