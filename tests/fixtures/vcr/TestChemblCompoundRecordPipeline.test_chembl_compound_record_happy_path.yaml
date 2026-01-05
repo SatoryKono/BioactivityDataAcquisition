@@ -1,0 +1,103 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-length:
+      - '211'
+      content-type:
+      - application/json
+      date:
+      - Mon, 05 Jan 2026 23:21:09 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/compound_record.json?limit=10&offset=0&format=json
+  response:
+    body:
+      string: '{"compound_records": [{"compound_key": "X", "compound_name": "Bis(3-[14-Benzyl-11-(1H-indol-3-ylmethyl)-2-isobutyl-13-methyl-5-(2-methylsulfanyl-ethyl)-3,6,9,12,15,20-hexaoxo-1,4,7,10,13,16-hexaaza-bicyclo[15.2.1]icos-18-en-8-yl]-propionamide)",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349687",
+        "record_id": 1, "src_id": 1}, {"compound_key": "V", "compound_name": "3-[11,14-Dibenzyl-2-isobutyl-5-(2-methylsulfanyl-ethyl)-3,6,9,12,15,20-hexaoxo-1,4,7,10,13,16-hexaaza-bicyclo[15.2.1]icos-18-en-8-yl]-propionamide",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349799",
+        "record_id": 2, "src_id": 1}, {"compound_key": "IX", "compound_name": "3-[14-Benzyl-11-(1H-indol-3-ylmethyl)-2-isobutyl-13-methyl-5-(2-methylsulfanyl-ethyl)-3,6,9,12,15,20-hexaoxo-1,4,7,10,13,16-hexaaza-bicyclo[15.2.1]icos-18-en-8-yl]-propionamide",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349688",
+        "record_id": 3, "src_id": 1}, {"compound_key": "IV", "compound_name": "11,14-Dibenzyl-2-isobutyl-8-methyl-5-(2-methylsulfanyl-ethyl)-1,4,7,10,13,16-hexaaza-bicyclo[15.2.1]icos-18-ene-3,6,9,12,15,20-hexaone",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349660",
+        "record_id": 4, "src_id": 1}, {"compound_key": "XVI", "compound_name": "3-[17-Benzyl-14-(1H-indol-3-ylmethyl)-2-isobutyl-5-(2-methylsulfanyl-ethyl)-3,6,9,12,15,18,23-heptaoxo-1,4,7,10,13,16,19-heptaaza-bicyclo[18.2.1]tricos-21-en-11-yl]-propionamide",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3350012",
+        "record_id": 5, "src_id": 1}, {"compound_key": "XIX", "compound_name": "3-[5-Benzyl-8-(1H-indol-3-ylmethyl)-17-isobutyl-14-(2-methylsulfanyl-ethyl)-4,7,10,13,16,19-hexaoxo-octadecahydro-3a,6,9,12,15,18-hexaaza-cyclopentacyclooctadecen-11-yl]-propionamide",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349619",
+        "record_id": 6, "src_id": 1}, {"compound_key": "III", "compound_name": "11,14-Dibenzyl-2-isobutyl-5-(2-methylsulfanyl-ethyl)-1,4,7,10,13,16-hexaaza-bicyclo[15.2.1]icos-18-ene-3,6,9,12,15,20-hexaone",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3350013",
+        "record_id": 7, "src_id": 1}, {"compound_key": "VII", "compound_name": "14-Benzyl-2-isobutyl-11-methyl-5-(2-methylsulfanyl-ethyl)-11-naphthalen-1-yl-1,4,7,10,13,16-hexaaza-bicyclo[15.2.1]icos-18-ene-3,6,9,12,15,20-hexaone",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3350016",
+        "record_id": 8, "src_id": 1}, {"compound_key": "XII", "compound_name": "3-[17,20-Dibenzyl-2-isobutyl-5-(2-methylsulfanyl-ethyl)-3,6,12,15,18,21,26-heptaoxo-1,4,7,13,16,19,22-heptaaza-tricyclo[21.2.1.0*7,11*]hexacos-24-en-14-yl]-propionamide",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349462",
+        "record_id": 9, "src_id": 1}, {"compound_key": "XIV", "compound_name": "3-[17-Benzyl-14-(4-hydroxy-benzyl)-2-isobutyl-5-(2-methylsulfanyl-ethyl)-3,6,9,12,15,18,23-heptaoxo-1,4,7,10,13,16,19-heptaaza-bicyclo[18.2.1]tricos-21-en-11-yl]-propionamide",
+        "document_chembl_id": "CHEMBL1126670", "molecule_chembl_id": "CHEMBL3349511",
+        "record_id": 10, "src_id": 1}], "page_meta": {"limit": 10, "next": "/chembl/api/data/compound_record.json?limit=10&offset=10",
+        "offset": 0, "previous": null, "total_count": 3774137}}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-disposition:
+      - inline
+      content-length:
+      - '3310'
+      content-type:
+      - application/json
+      date:
+      - Mon, 05 Jan 2026 23:21:35 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
+      x-chembl-in-cache:
+      - 'True'
+      x-chembl-retrieval-time:
+      - '0.03172707557678223'
+    status:
+      code: 200
+      message: OK
+version: 1
