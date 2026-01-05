@@ -1,0 +1,115 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&filter=doi%3A10.1038%2Fs41586-020-2012-7&per-page=1
+  response:
+    body:
+      string: |
+        {
+          "meta": {
+            "count": 1,
+            "db_response_time_ms": 15,
+            "page": null,
+            "per_page": 1,
+            "groups_count": null
+          },
+          "results": [
+            {
+              "id": "https://openalex.org/W3006090887",
+              "doi": "https://doi.org/10.1038/s41586-020-2012-7",
+              "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
+              "display_name": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
+              "publication_year": 2020,
+              "publication_date": "2020-02-03",
+              "type": "article",
+              "type_crossref": "journal-article",
+              "open_access": {
+                "is_oa": true,
+                "oa_status": "gold",
+                "oa_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf",
+                "any_repository_has_fulltext": true
+              },
+              "authorships": [
+                {
+                  "author_position": "first",
+                  "author": {
+                    "id": "https://openalex.org/A5023888391",
+                    "display_name": "Peng Zhou",
+                    "orcid": null
+                  },
+                  "institutions": [],
+                  "countries": ["CN"],
+                  "is_corresponding": false,
+                  "raw_author_name": "Peng Zhou",
+                  "raw_affiliation_strings": []
+                }
+              ],
+              "primary_location": {
+                "source": {
+                  "id": "https://openalex.org/S137773608",
+                  "display_name": "Nature",
+                  "issn_l": "0028-0836",
+                  "issn": ["0028-0836", "1476-4687"],
+                  "is_oa": false,
+                  "is_in_doaj": false,
+                  "host_organization": "https://openalex.org/P4310319965",
+                  "host_organization_name": "Springer Nature",
+                  "type": "journal"
+                },
+                "license": "cc-by",
+                "version": "publishedVersion",
+                "pdf_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf"
+              },
+              "cited_by_count": 15000,
+              "abstract_inverted_index": {
+                "Here": [0],
+                "we": [1, 12],
+                "describe": [2],
+                "a": [3, 8],
+                "new": [4],
+                "coronavirus": [5],
+                "associated": [6],
+                "with": [7],
+                "human": [9],
+                "respiratory": [10],
+                "disease": [11],
+                "call": [13],
+                "2019-nCoV": [14]
+              },
+              "concepts": [
+                {
+                  "id": "https://openalex.org/C71924100",
+                  "wikidata": "https://www.wikidata.org/wiki/Q84263196",
+                  "display_name": "COVID-19",
+                  "level": 2,
+                  "score": 0.95
+                },
+                {
+                  "id": "https://openalex.org/C185592680",
+                  "wikidata": "https://www.wikidata.org/wiki/Q7867",
+                  "display_name": "Chemistry",
+                  "level": 0,
+                  "score": 0.88
+                }
+              ],
+              "language": "en"
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

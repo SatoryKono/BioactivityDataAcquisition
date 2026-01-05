@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&filter=title.search%3ACOVID-19%2Bvaccine%2Bdevelopment&per-page=1
+  response:
+    body:
+      string: |
+        {
+          "meta": {"count": 1, "db_response_time_ms": 20, "page": null, "per_page": 1},
+          "results": [
+            {
+              "id": "https://openalex.org/W3100000001",
+              "doi": "https://doi.org/10.1000/vaccine-001",
+              "title": "COVID-19 vaccine development and deployment",
+              "publication_year": 2021,
+              "publication_date": "2021-01-15",
+              "type": "article",
+              "language": "en"
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

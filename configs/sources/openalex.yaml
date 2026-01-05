@@ -1,0 +1,38 @@
+# configs/sources/openalex.yaml
+# Configuration for OpenAlex API data source.
+# Provides open scholarly metadata via Works API.
+#
+# OpenAlex is an open catalog of scholarly works, authors, venues, and concepts.
+# See: https://docs.openalex.org
+
+source:
+    type: api
+    load_strategy: full
+    batch_size: 50  # Max DOIs per batch request (recommended)
+    provider_config:
+        provider: openalex
+        base_url: https://api.openalex.org
+        mailto: ${BIOETL_OPENALEX_EMAIL}  # Required for polite pool access
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        batch_size: 50  # DOIs per batch
+        cursor_pagination: true  # Uses cursor-based pagination
+
+    # Circuit breaker settings (per ADR-007)
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    # Rate limits for polite pool (10 req/sec with mailto)
+    # See: https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication
+    rate_limit:
+        requests_per_second: 10
+        burst: 20
+
+    # Health check configuration
+    health_check:
+        endpoint: /works
+        params:
+            per-page: 1
+        timeout: 5
