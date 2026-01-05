@@ -16,10 +16,127 @@ interactions:
     uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=1000&offset=0&format=json
   response:
     body:
-      string: '{"documents": [{"document_chembl_id": "CHEMBL1200001", "title": "Aspirin and cardiovascular disease prevention", "abstract": "A comprehensive review of aspirin in cardiovascular disease prevention.", "authors": "Smith J, Johnson M.", "doc_type": "PUBLICATION", "year": 2020, "journal": "J Cardiol", "volume": "45", "issue": "3", "first_page": "123", "last_page": "135", "pubmed_id": 12345678, "doi": "10.1234/jcardiol.2020.001", "mesh_terms": [{"mesh_id": "D001241", "mesh_heading": "Aspirin", "mesh_qualifier": "therapeutic use"}, {"mesh_id": "D002318", "mesh_heading": "Cardiovascular Diseases", "mesh_qualifier": "prevention and control"}], "keywords": ["aspirin", "cardiovascular prevention", "antiplatelet therapy"]}, {"document_chembl_id": "CHEMBL1200002", "title": "Novel kinase inhibitors for cancer therapy", "abstract": "Discovery of new kinase inhibitors with anticancer activity.", "authors": "Williams R, Brown T.", "doc_type": "PUBLICATION", "year": 2021, "journal": "Cancer Res", "volume": "81", "issue": "12", "first_page": "3456", "last_page": "3470", "pubmed_id": 23456789, "doi": "10.1158/cancerres.2021.002", "mesh_terms": [{"mesh_id": "D047428", "mesh_heading": "Protein Kinase Inhibitors", "mesh_qualifier": "pharmacology"}, {"mesh_id": "D009369", "mesh_heading": "Neoplasms", "mesh_qualifier": "drug therapy"}], "keywords": ["kinase inhibitor", "cancer", "targeted therapy"]}, {"document_chembl_id": "CHEMBL1200003", "title": "GPCR modulators in neurological disorders", "abstract": "Review of G protein-coupled receptor modulators for treating neurological conditions.", "authors": "Davis L.", "doc_type": "PUBLICATION", "year": 2022, "journal": "Neuropharmacology", "volume": "200", "issue": "1", "first_page": "108899", "last_page": "108915", "pubmed_id": 34567890, "doi": "10.1016/j.neuropharm.2022.003", "mesh_terms": [{"mesh_id": "D043562", "mesh_heading": "Receptors, G-Protein-Coupled", "mesh_qualifier": null}], "keywords": ["GPCR", "neurological disorders", "drug discovery"]}, {"document_chembl_id": "CHEMBL1200004", "title": "Antibiotic resistance mechanisms", "abstract": "Molecular mechanisms of antibiotic resistance in bacteria.", "authors": "Miller K, Garcia P.", "doc_type": "PUBLICATION", "year": 2019, "journal": "Microbiol Rev", "volume": "83", "issue": "2", "first_page": "e00023-19", "last_page": null, "pubmed_id": 45678901, "doi": "10.1128/MMBR.00023-19", "mesh_terms": [{"mesh_id": "D024901", "mesh_heading": "Drug Resistance, Multiple, Bacterial", "mesh_qualifier": "genetics"}, {"mesh_id": "D000900", "mesh_heading": "Anti-Bacterial Agents", "mesh_qualifier": "pharmacology"}], "keywords": ["antibiotic resistance", "bacteria", "molecular mechanisms"]}, {"document_chembl_id": "CHEMBL1200005", "title": "Immunotherapy advances in oncology", "abstract": "Recent advances in cancer immunotherapy approaches.", "authors": "Anderson C, Thompson E.", "doc_type": "PUBLICATION", "year": 2023, "journal": "Nat Rev Cancer", "volume": "23", "issue": "5", "first_page": "301", "last_page": "320", "pubmed_id": 56789012, "doi": "10.1038/s41568-023-004", "mesh_terms": [{"mesh_id": "D007167", "mesh_heading": "Immunotherapy", "mesh_qualifier": "methods"}], "keywords": ["immunotherapy", "cancer", "checkpoint inhibitors", "CAR-T"]}, {"document_chembl_id": "CHEMBL1200006", "title": "Drug metabolism and pharmacokinetics", "abstract": "Comprehensive overview of drug metabolism pathways.", "authors": "Lee S.", "doc_type": "PUBLICATION", "year": 2021, "journal": "Drug Metab Rev", "volume": "53", "issue": "1", "first_page": "1", "last_page": "25", "pubmed_id": 67890123, "doi": "10.1080/03602532.2021.005", "mesh_terms": [{"mesh_id": "D004354", "mesh_heading": "Drug Evaluation, Preclinical", "mesh_qualifier": null}, {"mesh_id": "D010599", "mesh_heading": "Pharmacokinetics", "mesh_qualifier": null}], "keywords": ["pharmacokinetics", "drug metabolism", "ADME"]}, {"document_chembl_id": "CHEMBL1200007", "title": "Natural products in drug discovery", "abstract": "The role of natural products as sources for new drugs.", "authors": "White P, Black R.", "doc_type": "PUBLICATION", "year": 2020, "journal": "Nat Prod Rep", "volume": "37", "issue": "6", "first_page": "771", "last_page": "800", "pubmed_id": 78901234, "doi": "10.1039/c9np00060g", "mesh_terms": [{"mesh_id": "D001688", "mesh_heading": "Biological Products", "mesh_qualifier": "chemistry"}], "keywords": ["natural products", "drug discovery", "marine compounds"]}, {"document_chembl_id": "CHEMBL1200008", "title": "Proteomics in pharmaceutical research", "abstract": "Applications of proteomics technologies in drug development.", "authors": "Taylor H.", "doc_type": "PUBLICATION", "year": 2022, "journal": "J Proteome Res", "volume": "21", "issue": "4", "first_page": "890", "last_page": "905", "pubmed_id": 89012345, "doi": "10.1021/acs.jproteome.2c00006", "mesh_terms": [{"mesh_id": "D040901", "mesh_heading": "Proteomics", "mesh_qualifier": "methods"}], "keywords": ["proteomics", "biomarkers", "drug targets"]}, {"document_chembl_id": "CHEMBL1200009", "title": "Machine learning in drug design", "abstract": "AI and machine learning approaches for drug discovery.", "authors": "Martinez A, Lopez B.", "doc_type": "PUBLICATION", "year": 2023, "journal": "J Chem Inf Model", "volume": "63", "issue": "2", "first_page": "456", "last_page": "478", "pubmed_id": 90123456, "doi": "10.1021/acs.jcim.2c00007", "mesh_terms": [{"mesh_id": "D000069550", "mesh_heading": "Machine Learning", "mesh_qualifier": null}, {"mesh_id": "D055808", "mesh_heading": "Drug Discovery", "mesh_qualifier": "methods"}], "keywords": ["machine learning", "AI", "drug design", "QSAR"]}, {"document_chembl_id": "CHEMBL1200010", "title": "Clinical pharmacology updates", "abstract": "Recent updates in clinical pharmacology practice.", "authors": "Clark D.", "doc_type": "PUBLICATION", "year": 2019, "journal": "Clin Pharmacol Ther", "volume": "106", "issue": "3", "first_page": "567", "last_page": "580", "pubmed_id": 11234567, "doi": "10.1002/cpt.2019.008", "mesh_terms": [{"mesh_id": "D018954", "mesh_heading": "Drugs, Investigational", "mesh_qualifier": "therapeutic use"}, {"mesh_id": "D010601", "mesh_heading": "Pharmacology, Clinical", "mesh_qualifier": "trends"}], "keywords": ["clinical pharmacology", "drug safety", "personalized medicine"]}], "page_meta": {"limit": 1000, "offset": 0, "total_count": 10}}'
+      string: '{"documents": [{"document_chembl_id": "CHEMBL1200001", "title": "Aspirin
+        and cardiovascular disease prevention", "abstract": "A comprehensive review
+        of aspirin in cardiovascular disease prevention.", "authors": "Smith J, Johnson
+        M.", "doc_type": "PUBLICATION", "year": 2020, "journal": "J Cardiol", "volume":
+        "45", "issue": "3", "first_page": "123", "last_page": "135", "pubmed_id":
+        12345678, "doi": "10.1234/jcardiol.2020.001", "mesh_terms": [{"mesh_id": "D001241",
+        "mesh_heading": "Aspirin", "mesh_qualifier": "therapeutic use"}, {"mesh_id":
+        "D002318", "mesh_heading": "Cardiovascular Diseases", "mesh_qualifier": "prevention
+        and control"}], "keywords": ["aspirin", "cardiovascular prevention", "antiplatelet
+        therapy"]}, {"document_chembl_id": "CHEMBL1200002", "title": "Novel kinase
+        inhibitors for cancer therapy", "abstract": "Discovery of new kinase inhibitors
+        with anticancer activity.", "authors": "Williams R, Brown T.", "doc_type":
+        "PUBLICATION", "year": 2021, "journal": "Cancer Res", "volume": "81", "issue":
+        "12", "first_page": "3456", "last_page": "3470", "pubmed_id": 23456789, "doi":
+        "10.1158/cancerres.2021.002", "mesh_terms": [{"mesh_id": "D047428", "mesh_heading":
+        "Protein Kinase Inhibitors", "mesh_qualifier": "pharmacology"}, {"mesh_id":
+        "D009369", "mesh_heading": "Neoplasms", "mesh_qualifier": "drug therapy"}],
+        "keywords": ["kinase inhibitor", "cancer", "targeted therapy"]}, {"document_chembl_id":
+        "CHEMBL1200003", "title": "GPCR modulators in neurological disorders", "abstract":
+        "Review of G protein-coupled receptor modulators for treating neurological
+        conditions.", "authors": "Davis L.", "doc_type": "PUBLICATION", "year": 2022,
+        "journal": "Neuropharmacology", "volume": "200", "issue": "1", "first_page":
+        "108899", "last_page": "108915", "pubmed_id": 34567890, "doi": "10.1016/j.neuropharm.2022.003",
+        "mesh_terms": [{"mesh_id": "D043562", "mesh_heading": "Receptors, G-Protein-Coupled",
+        "mesh_qualifier": null}], "keywords": ["GPCR", "neurological disorders", "drug
+        discovery"]}, {"document_chembl_id": "CHEMBL1200004", "title": "Antibiotic
+        resistance mechanisms", "abstract": "Molecular mechanisms of antibiotic resistance
+        in bacteria.", "authors": "Miller K, Garcia P.", "doc_type": "PUBLICATION",
+        "year": 2019, "journal": "Microbiol Rev", "volume": "83", "issue": "2", "first_page":
+        "e00023-19", "last_page": null, "pubmed_id": 45678901, "doi": "10.1128/MMBR.00023-19",
+        "mesh_terms": [{"mesh_id": "D024901", "mesh_heading": "Drug Resistance, Multiple,
+        Bacterial", "mesh_qualifier": "genetics"}, {"mesh_id": "D000900", "mesh_heading":
+        "Anti-Bacterial Agents", "mesh_qualifier": "pharmacology"}], "keywords": ["antibiotic
+        resistance", "bacteria", "molecular mechanisms"]}, {"document_chembl_id":
+        "CHEMBL1200005", "title": "Immunotherapy advances in oncology", "abstract":
+        "Recent advances in cancer immunotherapy approaches.", "authors": "Anderson
+        C, Thompson E.", "doc_type": "PUBLICATION", "year": 2023, "journal": "Nat
+        Rev Cancer", "volume": "23", "issue": "5", "first_page": "301", "last_page":
+        "320", "pubmed_id": 56789012, "doi": "10.1038/s41568-023-004", "mesh_terms":
+        [{"mesh_id": "D007167", "mesh_heading": "Immunotherapy", "mesh_qualifier":
+        "methods"}], "keywords": ["immunotherapy", "cancer", "checkpoint inhibitors",
+        "CAR-T"]}, {"document_chembl_id": "CHEMBL1200006", "title": "Drug metabolism
+        and pharmacokinetics", "abstract": "Comprehensive overview of drug metabolism
+        pathways.", "authors": "Lee S.", "doc_type": "PUBLICATION", "year": 2021,
+        "journal": "Drug Metab Rev", "volume": "53", "issue": "1", "first_page": "1",
+        "last_page": "25", "pubmed_id": 67890123, "doi": "10.1080/03602532.2021.005",
+        "mesh_terms": [{"mesh_id": "D004354", "mesh_heading": "Drug Evaluation, Preclinical",
+        "mesh_qualifier": null}, {"mesh_id": "D010599", "mesh_heading": "Pharmacokinetics",
+        "mesh_qualifier": null}], "keywords": ["pharmacokinetics", "drug metabolism",
+        "ADME"]}, {"document_chembl_id": "CHEMBL1200007", "title": "Natural products
+        in drug discovery", "abstract": "The role of natural products as sources for
+        new drugs.", "authors": "White P, Black R.", "doc_type": "PUBLICATION", "year":
+        2020, "journal": "Nat Prod Rep", "volume": "37", "issue": "6", "first_page":
+        "771", "last_page": "800", "pubmed_id": 78901234, "doi": "10.1039/c9np00060g",
+        "mesh_terms": [{"mesh_id": "D001688", "mesh_heading": "Biological Products",
+        "mesh_qualifier": "chemistry"}], "keywords": ["natural products", "drug discovery",
+        "marine compounds"]}, {"document_chembl_id": "CHEMBL1200008", "title": "Proteomics
+        in pharmaceutical research", "abstract": "Applications of proteomics technologies
+        in drug development.", "authors": "Taylor H.", "doc_type": "PUBLICATION",
+        "year": 2022, "journal": "J Proteome Res", "volume": "21", "issue": "4", "first_page":
+        "890", "last_page": "905", "pubmed_id": 89012345, "doi": "10.1021/acs.jproteome.2c00006",
+        "mesh_terms": [{"mesh_id": "D040901", "mesh_heading": "Proteomics", "mesh_qualifier":
+        "methods"}], "keywords": ["proteomics", "biomarkers", "drug targets"]}, {"document_chembl_id":
+        "CHEMBL1200009", "title": "Machine learning in drug design", "abstract": "AI
+        and machine learning approaches for drug discovery.", "authors": "Martinez
+        A, Lopez B.", "doc_type": "PUBLICATION", "year": 2023, "journal": "J Chem
+        Inf Model", "volume": "63", "issue": "2", "first_page": "456", "last_page":
+        "478", "pubmed_id": 90123456, "doi": "10.1021/acs.jcim.2c00007", "mesh_terms":
+        [{"mesh_id": "D000069550", "mesh_heading": "Machine Learning", "mesh_qualifier":
+        null}, {"mesh_id": "D055808", "mesh_heading": "Drug Discovery", "mesh_qualifier":
+        "methods"}], "keywords": ["machine learning", "AI", "drug design", "QSAR"]},
+        {"document_chembl_id": "CHEMBL1200010", "title": "Clinical pharmacology updates",
+        "abstract": "Recent updates in clinical pharmacology practice.", "authors":
+        "Clark D.", "doc_type": "PUBLICATION", "year": 2019, "journal": "Clin Pharmacol
+        Ther", "volume": "106", "issue": "3", "first_page": "567", "last_page": "580",
+        "pubmed_id": 11234567, "doi": "10.1002/cpt.2019.008", "mesh_terms": [{"mesh_id":
+        "D018954", "mesh_heading": "Drugs, Investigational", "mesh_qualifier": "therapeutic
+        use"}, {"mesh_id": "D010601", "mesh_heading": "Pharmacology, Clinical", "mesh_qualifier":
+        "trends"}], "keywords": ["clinical pharmacology", "drug safety", "personalized
+        medicine"]}], "page_meta": {"limit": 1000, "offset": 0, "total_count": 10}}'
     headers:
       Content-Type:
       - application/json
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-length:
+      - '211'
+      content-type:
+      - application/json
+      date:
+      - Mon, 05 Jan 2026 23:39:32 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
     status:
       code: 200
       message: OK

@@ -92,7 +92,9 @@ async def test_chembl_document_term_types(e2e_data_dir: Path):
         term_type = record.get("term_type")
         assert term_type in valid_term_types, f"Invalid term_type: {term_type}"
         assert record.get("term"), "Term text should not be empty"
-        assert record.get("document_chembl_id"), "document_chembl_id should not be empty"
+        assert record.get(
+            "document_chembl_id"
+        ), "document_chembl_id should not be empty"
 
 
 @pytest.mark.e2e
@@ -115,7 +117,9 @@ async def test_chembl_document_term_mesh_fields(e2e_data_dir: Path):
     # Assert - Check MeSH fields presence
     records = get_silver_records(e2e_data_dir, "chembl_document_term")
 
-    mesh_records = [r for r in records if r.get("term_type") in ("MESH_HEADING", "MESH_QUALIFIER")]
+    mesh_records = [
+        r for r in records if r.get("term_type") in ("MESH_HEADING", "MESH_QUALIFIER")
+    ]
 
     # If there are MeSH records, verify structure
     for record in mesh_records:
