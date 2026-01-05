@@ -22,7 +22,10 @@ from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.server import start_metrics_server
+from bioetl.infrastructure.observability.server import (
+    MetricsServerError,
+    start_metrics_server,
+)
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
@@ -32,12 +35,14 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
+    "MetricsServerError",
     "bootstrap_dq_monitor",
     "bootstrap_logger",
     "bootstrap_metrics",
     "bootstrap_metrics_service",
     "bootstrap_observability",
     "bootstrap_tracer",
+    "start_metrics_server",
     "validate_observability_preflight",
 ]
 

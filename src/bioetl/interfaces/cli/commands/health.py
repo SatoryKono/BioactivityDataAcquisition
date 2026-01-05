@@ -1,7 +1,7 @@
 """Health check command for BioETL CLI.
 
 Provides commands for running health checks and starting the health server.
-Uses HealthService from composition entrypoints for clean layering.
+Uses composition entrypoints for clean layering and proper DI.
 """
 
 from __future__ import annotations
@@ -11,7 +11,10 @@ import sys
 
 import click
 
-from bioetl.composition.entrypoints import get_health_service
+from bioetl.composition.entrypoints import (
+    get_health_server_dependencies,
+    get_health_service,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -59,26 +62,17 @@ def health_server_command(host: str, port: int) -> None:
     click.echo("\nPress Ctrl+C to stop.")
 
     async def run() -> None:
-        # Import server components at runtime (interfaces layer can import from infrastructure)
-        from bioetl.infrastructure.adapters.http.health_monitor import (
-            ProviderHealthMonitor,
-        )
-        from bioetl.infrastructure.observability.prometheus_metrics import (
-            PrometheusMetrics,
-        )
+        # Import HealthServer here (interfaces layer can import from interfaces)
         from bioetl.interfaces.http.health_server import HealthServer
 
-        # Create metrics port for health monitor
-        metrics = PrometheusMetrics()
+        # Get dependencies from composition root (proper DI)
+        deps = get_health_server_dependencies()
 
-        # Create health monitor
-        health_monitor = ProviderHealthMonitor(metrics=metrics)
-
-        # Create and start server
+        # Create server in interfaces layer with injected dependencies
         server = HealthServer(
             host=host,
             port=port,
-            health_monitor=health_monitor,
+            health_monitor=deps.health_monitor,
         )
 
         await server.start()
@@ -97,7 +91,7 @@ def health_server_command(host: str, port: int) -> None:
         asyncio.run(run())
     except KeyboardInterrupt:
         click.echo("\nShutting down...")
-        sys.exit(ExitCode.OK.value)
+        sys.exit(ExitCode.OK)
 
 
 @health.command("check")
@@ -143,7 +137,7 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         results = asyncio.run(run_checks())
     except Exception as e:
         click.echo(f"Error running health checks: {e}", err=True)
-        sys.exit(ExitCode.FAIL.value)
+        sys.exit(ExitCode.FAIL)
 
     if output_json:
         click.echo(json_module.dumps(results, indent=2))
@@ -170,10 +164,10 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
 
         if all_healthy:
             click.echo("\nAll providers healthy.")
-            sys.exit(ExitCode.OK.value)
+            sys.exit(ExitCode.OK)
         else:
             click.echo("\nSome providers unhealthy.")
-            sys.exit(ExitCode.FAIL.value)
+            sys.exit(ExitCode.FAIL)
 
 
 __all__ = ["health"]

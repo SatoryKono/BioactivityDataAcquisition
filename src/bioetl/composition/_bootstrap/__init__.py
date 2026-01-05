@@ -22,15 +22,21 @@ from bioetl.composition._bootstrap.checkpoint import (
     bootstrap_quarantine_service,
 )
 from bioetl.composition._bootstrap.config import bootstrap_config_service
-from bioetl.composition._bootstrap.health import bootstrap_health_service
+from bioetl.composition._bootstrap.health import (
+    HealthServerDependencies,
+    bootstrap_health_server_dependencies,
+    bootstrap_health_service,
+)
 from bioetl.composition._bootstrap.lock import bootstrap_lock_service
 from bioetl.composition._bootstrap.observability import (
+    MetricsServerError,
     bootstrap_dq_monitor,
     bootstrap_logger,
     bootstrap_metrics,
     bootstrap_metrics_service,
     bootstrap_observability,
     bootstrap_tracer,
+    start_metrics_server,
     validate_observability_preflight,
 )
 from bioetl.composition._bootstrap.runner import bootstrap_pipeline_runner_service
@@ -43,6 +49,8 @@ from bioetl.composition._bootstrap.storage import (
 )
 
 __all__ = [
+    "HealthServerDependencies",
+    "MetricsServerError",
     "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
@@ -50,6 +58,7 @@ __all__ = [
     "bootstrap_cleanup",
     "bootstrap_config_service",
     "bootstrap_dq_monitor",
+    "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
     "bootstrap_lifecycle_service",
     "bootstrap_lock_service",
@@ -64,5 +73,6 @@ __all__ = [
     "bootstrap_storage",
     "bootstrap_tracer",
     "bootstrap_vacuum_service",
+    "start_metrics_server",
     "validate_observability_preflight",
 ]

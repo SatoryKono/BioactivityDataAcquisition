@@ -1,19 +1,11 @@
 """Entrypoints for BioETL pipeline operations.
 
 Provides high-level functions for running pipelines and managing resources.
-These entrypoints are designed to be used by CLI, REST APIs, or any
-other orchestration layer without direct dependency on bootstrap functions.
+These entrypoints are designed to be used by CLI, REST APIs, or any other
+orchestration layer without direct dependency on bootstrap functions.
 
-The CLI should only import from this module, not from bootstrap.
-
-This module provides the unified pipeline execution interface (REQ-ARCH-041):
-- RunOptions: User-facing configuration options
-- RunResult: Execution result with metrics and status
-- run_pipeline(): Async convenience function for pipeline execution
-- create_pipeline_runner(): Factory for PipelineRunner instances
-
-Any orchestration layer (CLI, REST API, schedulers) should use these
-entrypoints instead of directly accessing bootstrap or runner internals.
+This module provides the unified pipeline execution interface (REQ-ARCH-041).
+Any orchestration layer should use these entrypoints instead of bootstrap.
 """
 
 from __future__ import annotations
@@ -48,6 +40,7 @@ __all__ = [
     # Resource management (services - new)
     "get_checkpoint_service",
     "get_config_service",
+    "get_health_server_dependencies",
     "get_health_service",
     "get_lock_service",
     "get_metrics_service",
@@ -67,9 +60,11 @@ __all__ = [
 ]
 
 from bioetl.composition._bootstrap import (
+    HealthServerDependencies,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
+    bootstrap_health_server_dependencies,
     bootstrap_health_service,
     bootstrap_lock_service,
     bootstrap_metrics_service,
@@ -665,6 +660,16 @@ def get_health_service() -> HealthService:
     """
     _ensure_registrations()
     return bootstrap_health_service()
+
+
+def get_health_server_dependencies() -> HealthServerDependencies:
+    """Get dependencies for HealthServer via composition root.
+
+    Returns HealthServerDependencies with PrometheusMetrics and
+    ProviderHealthMonitor. HealthServer is created in interfaces layer.
+    """
+    _ensure_registrations()
+    return bootstrap_health_server_dependencies()
 
 
 def get_metrics_service() -> MetricsService:
