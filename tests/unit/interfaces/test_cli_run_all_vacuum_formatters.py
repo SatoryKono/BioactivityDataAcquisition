@@ -392,16 +392,17 @@ class TestRunAllCommand:
         assert "chembl_molecule" in result.output
         assert "2 pipeline(s)" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_dry_run(self, mock_asyncio_run, cli_runner, mock_registry):
+    def test_run_all_dry_run(self, cli_runner, mock_registry):
         """Test --dry-run mode shows preview."""
-        mock_asyncio_run.return_value = BatchRunResult(
-            total=2, succeeded=0, failed=0, skipped=2
-        )
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                return_value=BatchRunResult(total=2, succeeded=0, failed=0, skipped=2),
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(
                 cli, ["run-all", "--source", "chembl", "--dry-run"]
@@ -410,32 +411,34 @@ class TestRunAllCommand:
         assert result.exit_code == 0
         assert "[DRY-RUN]" in result.output or "Would run" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_success(self, mock_asyncio_run, cli_runner, mock_registry):
+    def test_run_all_success(self, cli_runner, mock_registry):
         """Test successful run-all execution."""
-        mock_asyncio_run.return_value = BatchRunResult(
-            total=2, succeeded=2, failed=0, skipped=0
-        )
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
+            ) as mock_asyncio_run,
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
         assert result.exit_code == 0
         mock_asyncio_run.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_with_limit(self, mock_asyncio_run, cli_runner, mock_registry):
+    def test_run_all_with_limit(self, cli_runner, mock_registry):
         """Test run-all with --limit option."""
-        mock_asyncio_run.return_value = BatchRunResult(
-            total=2, succeeded=2, failed=0, skipped=0
-        )
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
+            ) as mock_asyncio_run,
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(
                 cli, ["run-all", "--source", "chembl", "--limit", "100", "--yes"]
@@ -444,36 +447,40 @@ class TestRunAllCommand:
         assert result.exit_code == 0
         mock_asyncio_run.assert_called_once()
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_with_failures(self, mock_asyncio_run, cli_runner, mock_registry):
+    def test_run_all_with_failures(self, cli_runner, mock_registry):
         """Test run-all with some failures."""
-        mock_asyncio_run.return_value = BatchRunResult(
-            total=2,
-            succeeded=1,
-            failed=1,
-            skipped=0,
-            failed_pipelines=["chembl_activity"],
-        )
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                return_value=BatchRunResult(
+                    total=2,
+                    succeeded=1,
+                    failed=1,
+                    skipped=0,
+                    failed_pipelines=["chembl_activity"],
+                ),
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
         # Should exit with pipeline error code
         assert result.exit_code == ExitCode.PIPELINE_ERROR
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_keyboard_interrupt(
-        self, mock_asyncio_run, cli_runner, mock_registry
-    ):
+    def test_run_all_keyboard_interrupt(self, cli_runner, mock_registry):
         """Test run-all handles KeyboardInterrupt."""
-        mock_asyncio_run.side_effect = KeyboardInterrupt()
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                side_effect=KeyboardInterrupt(),
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
@@ -1230,32 +1237,34 @@ class TestHandleDestructiveConfirmationCancel:
 class TestRunAllCommandExceptions:
     """Tests for run_all command exception handling."""
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_unexpected_exception(
-        self, mock_asyncio_run, cli_runner, mock_registry
-    ):
+    def test_run_all_unexpected_exception(self, cli_runner, mock_registry):
         """Test run-all handles unexpected exceptions during batch execution."""
-        mock_asyncio_run.side_effect = RuntimeError("Unexpected batch error")
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                side_effect=RuntimeError("Unexpected batch error"),
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
 
         assert result.exit_code == ExitCode.FAIL
         assert "Unexpected error" in result.output or "error" in result.output.lower()
 
-    @patch("bioetl.interfaces.cli.commands.run_all.asyncio.run")
-    def test_run_all_with_debug_flag(self, mock_asyncio_run, cli_runner, mock_registry):
+    def test_run_all_with_debug_flag(self, cli_runner, mock_registry):
         """Test run-all with --debug flag."""
-        mock_asyncio_run.return_value = BatchRunResult(
-            total=2, succeeded=2, failed=0, skipped=0
-        )
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.asyncio.run",
+                return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
+            ) as mock_asyncio_run,
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=mock_registry,
+            ),
         ):
             result = cli_runner.invoke(
                 cli, ["run-all", "--source", "chembl", "--yes", "--debug"]
