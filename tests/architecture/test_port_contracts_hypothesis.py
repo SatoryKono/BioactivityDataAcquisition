@@ -503,7 +503,10 @@ class TestLoggerPortProperties:
     @given(
         message=st.text(max_size=200),
         context=st.dictionaries(
-            keys=st.text(min_size=1, max_size=20).filter(lambda x: x.strip() != ""),
+            # Filter out Python reserved keywords that conflict with method parameters
+            keys=st.text(min_size=1, max_size=20).filter(
+                lambda x: x.strip() != "" and x not in ("self", "cls", "msg", "message")
+            ),
             values=st.one_of(
                 st.text(max_size=50), st.integers(), st.floats(allow_nan=False)
             ),
@@ -527,7 +530,10 @@ class TestLoggerPortProperties:
 
     @given(
         bindings=st.dictionaries(
-            keys=st.text(min_size=1, max_size=20).filter(lambda x: x.strip() != ""),
+            # Filter out Python reserved keywords that conflict with method parameters
+            keys=st.text(min_size=1, max_size=20).filter(
+                lambda x: x.strip() != "" and x not in ("self", "cls")
+            ),
             values=st.one_of(st.text(max_size=50), st.integers()),
             max_size=5,
         )
