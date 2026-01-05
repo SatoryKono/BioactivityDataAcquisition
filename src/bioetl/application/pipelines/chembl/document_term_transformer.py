@@ -58,21 +58,32 @@ class DocumentTermTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         primary_id: Any,
     ) -> dict[str, Any]:
-        """Extract term data from the first available term in the document.
+        """Extract term data from the record.
 
-        This method is called by the base class template but for a 1:M
-        transformer, we use transform_document() to handle multiple terms.
-        For single-term extraction (fallback), extracts the first term.
+        Handles two cases:
+        1. Pre-extracted term records (from DocumentTermDataSource) - pass through
+        2. Raw document records - extract terms from mesh_terms/keywords arrays
 
         Args:
-            record: Raw Bronze record from ChEMBL API.
+            record: Bronze record (either term record or document record).
             primary_id: Validated document_chembl_id value.
 
         Returns:
-            Dictionary of first term's business fields.
+            Dictionary of term business fields.
 
         """
-        # Get the first term from the document (for compatibility)
+        # Case 1: Record is already a term record (from DocumentTermDataSource)
+        # These records have 'term' and 'term_type' fields directly
+        if "term" in record and "term_type" in record:
+            return {
+                "document_chembl_id": str(record.get("document_chembl_id", primary_id)),
+                "term": record.get("term", ""),
+                "term_type": record.get("term_type", ""),
+                "mesh_id": record.get("mesh_id"),
+                "qualifier": record.get("qualifier"),
+            }
+
+        # Case 2: Raw document record - extract terms from nested arrays
         terms = list(self.extract_terms_from_document(record, str(primary_id)))
         if not terms:
             # Return empty data that will fail validation
