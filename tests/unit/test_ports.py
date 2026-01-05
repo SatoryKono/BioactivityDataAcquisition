@@ -344,6 +344,10 @@ class TestQuarantinePortProtocol:
 
     def test_valid_quarantine_implementation(self) -> None:
         """QuarantinePort should accept valid implementations."""
+        from collections.abc import Iterator
+        from datetime import datetime
+
+        from bioetl.domain.types import QuarantineRecordStatus
 
         class ValidQuarantine:
             async def write(
@@ -354,6 +358,8 @@ class TestQuarantinePortProtocol:
                 bronze_batch_id: BatchID,
                 run_id: RunID | None = None,
                 metadata: dict[str, Any] | None = None,
+                *,
+                ingestion_ts: datetime,
             ) -> None:
                 pass
 
@@ -368,6 +374,32 @@ class TestQuarantinePortProtocol:
             async def get_stats(self, pipeline: str) -> dict[str, Any]:
                 return {}
 
+            def replay(
+                self,
+                pipeline: str,
+                error_code: str | None = None,
+                max_age_days: int = 7,
+                *,
+                now: datetime,
+            ) -> Iterator[dict[str, Any]]:
+                return iter([])
+
+            def purge(
+                self,
+                pipeline: str,
+                older_than_days: int = 30,
+                *,
+                now: datetime,
+            ) -> int:
+                return 0
+
+            def update_status(
+                self,
+                payload_hash: str,
+                new_status: QuarantineRecordStatus,
+            ) -> bool:
+                return True
+
             async def aclose(self) -> None:
                 pass
 
@@ -375,6 +407,10 @@ class TestQuarantinePortProtocol:
 
     def test_missing_write_fails(self) -> None:
         """QuarantinePort should reject implementations missing write."""
+        from collections.abc import Iterator
+        from datetime import datetime
+
+        from bioetl.domain.types import QuarantineRecordStatus
 
         class InvalidQuarantine:
             # Missing write method
@@ -388,6 +424,32 @@ class TestQuarantinePortProtocol:
 
             async def get_stats(self, pipeline: str) -> dict[str, Any]:
                 return {}
+
+            def replay(
+                self,
+                pipeline: str,
+                error_code: str | None = None,
+                max_age_days: int = 7,
+                *,
+                now: datetime,
+            ) -> Iterator[dict[str, Any]]:
+                return iter([])
+
+            def purge(
+                self,
+                pipeline: str,
+                older_than_days: int = 30,
+                *,
+                now: datetime,
+            ) -> int:
+                return 0
+
+            def update_status(
+                self,
+                payload_hash: str,
+                new_status: QuarantineRecordStatus,
+            ) -> bool:
+                return True
 
             async def aclose(self) -> None:
                 pass
