@@ -402,15 +402,8 @@ class CrossRefAdapter(BaseHttpAdapter):
         q = query_title.lower().strip()
         f = found_title.lower().strip()
 
-        # Exact match
-        if q == f:
-            return True
-
-        # Substring match (title may be truncated)
-        if q in f or f in q:
-            return True
-
-        return False
+        # Exact or substring match (title may be truncated)
+        return q in f or f in q
 
     async def _search_by_title(
         self,
@@ -448,6 +441,103 @@ class CrossRefAdapter(BaseHttpAdapter):
 
         return None
 
+    async def _try_title_fallback(
+        self,
+        doi: str,
+        fallback_mapping: dict[str, str],
+    ) -> dict[str, Any] | None:
+        """Try to find publication by title when DOI lookup fails.
+
+        Args:
+            doi: Original DOI that wasn't found.
+            fallback_mapping: Mapping {doi: title} for fallback search.
+
+        Returns:
+            Publication dict if found, None otherwise.
+        """
+        normalized_doi = (normalize_doi(doi) or "").lower()
+        title = fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
+
+        if not title:
+            self.logger.debug("crossref_no_fallback_title", doi=doi)
+            return None
+
+        display_title = title[:50] + "..." if len(title) > 50 else title
+        self.logger.info(
+            "crossref_title_fallback_attempt",
+            doi=doi,
+            title=display_title,
+        )
+
+        fallback_pub = await self._search_by_title(title)
+        if fallback_pub:
+            self.logger.info(
+                "crossref_title_fallback_success",
+                original_doi=doi,
+                found_doi=fallback_pub.get("DOI"),
+                title=title[:50],
+            )
+        else:
+            self.logger.warning(
+                "crossref_title_fallback_not_found",
+                doi=doi,
+                title=title[:50],
+            )
+
+        return fallback_pub
+
+    async def _batch_fetch_dois(
+        self,
+        dois: list[str],
+        limit: int | None,
+    ) -> AsyncIterator[tuple[dict[str, Any], set[str]]]:
+        """Fetch publications in batches, tracking found DOIs.
+
+        Args:
+            dois: List of DOIs to fetch.
+            limit: Maximum records to return.
+
+        Yields:
+            Tuple of (publication, updated found_dois set).
+        """
+        fetched = 0
+        found_dois: set[str] = set()
+
+        for i in range(0, len(dois), self.batch_size):
+            batch = dois[i : i + self.batch_size]
+            async for publication in self._fetch_batch_publications(batch):
+                doi = publication.get("DOI", "").lower()
+                found_dois.add(doi)
+                yield publication, found_dois
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+    def _is_doi_found(self, doi: str, found_dois: set[str]) -> bool:
+        """Check if DOI was already found."""
+        normalized = (normalize_doi(doi) or "").lower()
+        return normalized in found_dois
+
+    async def _fallback_missing_dois(
+        self,
+        dois: list[str],
+        found_dois: set[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        already_fetched: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Try title-based fallback for DOIs not found in batch fetch."""
+        fetched = already_fetched
+        for doi in dois:
+            if self._is_doi_found(doi, found_dois):
+                continue
+            fallback_pub = await self._try_title_fallback(doi, fallback_mapping)
+            if fallback_pub:
+                yield fallback_pub
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -478,52 +568,17 @@ class CrossRefAdapter(BaseHttpAdapter):
         found_dois: set[str] = set()
 
         # Batch fetch (primary path)
-        for i in range(0, len(dois), self.batch_size):
-            batch = dois[i : i + self.batch_size]
+        async for publication, updated_found in self._batch_fetch_dois(dois, limit):
+            found_dois = updated_found
+            yield publication
+            fetched += 1
 
-            async for publication in self._fetch_batch_publications(batch):
-                doi = publication.get("DOI", "").lower()
-                found_dois.add(doi)
-                yield publication
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
-
-        # Fallback for not-found DOIs
-        for doi in dois:
-            normalized_doi = (normalize_doi(doi) or "").lower()
-            if normalized_doi in found_dois:
-                continue
-
-            title = fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
-            if not title:
-                self.logger.debug("crossref_no_fallback_title", doi=doi)
-                continue
-
-            self.logger.info(
-                "crossref_title_fallback_attempt",
-                doi=doi,
-                title=title[:50] + "..." if len(title) > 50 else title,
-            )
-
-            publication = await self._search_by_title(title)
-            if publication:
-                self.logger.info(
-                    "crossref_title_fallback_success",
-                    original_doi=doi,
-                    found_doi=publication.get("DOI"),
-                    title=title[:50],
-                )
-                yield publication
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
-            else:
-                self.logger.warning(
-                    "crossref_title_fallback_not_found",
-                    doi=doi,
-                    title=title[:50],
-                )
+        # Fallback for not-found DOIs (if we haven't hit limit)
+        if not limit or fetched < limit:
+            async for pub in self._fallback_missing_dois(
+                dois, found_dois, fallback_mapping, limit, fetched
+            ):
+                yield pub
 
     async def fetch(
         self,

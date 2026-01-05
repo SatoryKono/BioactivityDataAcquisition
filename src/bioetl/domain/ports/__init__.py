@@ -29,8 +29,9 @@ from bioetl.domain.ports.checkpoint import CheckpointPort
 from bioetl.domain.ports.data_source import (
     DataSourcePort,
     FilterableDataSourcePort,
+    FilterableWithFallbackPort,
 )
-from bioetl.domain.ports.filtering import InputFilterPort
+from bioetl.domain.ports.filtering import InputFilterPort, InputFilterWithFallbackPort
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
     HealthCheckResult,
@@ -83,12 +84,14 @@ __all__ = [
     "DQMonitorPort",
     "DataSourcePort",
     "FilterableDataSourcePort",
+    "FilterableWithFallbackPort",
     "GoldValidatorPort",
     "HealthCheckPort",
     "HealthCheckResult",
     "HealthMonitorPort",
     "HealthStatusLiteral",
     "InputFilterPort",
+    "InputFilterWithFallbackPort",
     "JsonEncoderPort",
     "LockPort",
     "LoggerPort",

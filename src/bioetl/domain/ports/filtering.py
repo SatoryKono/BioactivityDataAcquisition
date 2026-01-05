@@ -15,6 +15,35 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
+class InputFilterWithFallbackPort(Protocol):
+    """Extended port for loading filter IDs with fallback mapping support.
+
+    This interface extends InputFilterPort to support loading
+    a fallback column (e.g., title) for cases where primary ID
+    (e.g., DOI) lookup fails.
+    """
+
+    async def load_filter_with_fallback(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str]]:
+        """Load filter IDs with fallback mapping.
+
+        Args:
+            source_path: Path to the filter source (e.g., CSV file path).
+            primary_column: Name of the primary ID column.
+            fallback_column: Name of the fallback column (e.g., title).
+
+        Returns:
+            Tuple of (FilterLoadResult, fallback_mapping) where
+            fallback_mapping is {primary_id: fallback_value}.
+        """
+        ...
+
+
+@runtime_checkable
 class InputFilterPort(Protocol):
     """Port for loading filter IDs from external sources.
 

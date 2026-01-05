@@ -141,3 +141,36 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
             Dictionary records matching ALL filter criteria.
         """
         ...
+
+
+@runtime_checkable
+class FilterableWithFallbackPort(FilterableDataSourcePort, Protocol):
+    """Extended FilterableDataSourcePort with fallback title search.
+
+    This Protocol extends FilterableDataSourcePort for adapters that support
+    fallback search by alternative field (e.g., title) when primary ID
+    (e.g., DOI) lookup fails.
+    """
+
+    def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with fallback search when primary ID lookup fails.
+
+        Args:
+            entity_type: The type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering.
+            fallback_mapping: Mapping {primary_id: fallback_value} for
+                alternative search when primary ID not found.
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+        """
+        ...

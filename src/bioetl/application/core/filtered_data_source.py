@@ -8,7 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.domain.ports import (
+    FilterableDataSourcePort,
+    FilterableWithFallbackPort,
+    InputFilterWithFallbackPort,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
@@ -129,8 +133,8 @@ class FilteredDataSource:
             elif self._filter_config.column_name:
                 # Single-column mode (backward compatibility)
                 # Check if fallback column is configured
-                if self._filter_config.fallback_column and hasattr(
-                    self._filter_reader, "load_filter_with_fallback"
+                if self._filter_config.fallback_column and isinstance(
+                    self._filter_reader, InputFilterWithFallbackPort
                 ):
                     # Load with fallback mapping
                     self._filter_result, self._fallback_mapping = (
@@ -273,8 +277,8 @@ class FilteredDataSource:
             )
 
         # Check if adapter supports fallback and we have fallback mapping
-        if self._fallback_mapping and hasattr(
-            self._data_source, "fetch_filtered_with_fallback"
+        if self._fallback_mapping and isinstance(
+            self._data_source, FilterableWithFallbackPort
         ):
             async for record in self._data_source.fetch_filtered_with_fallback(
                 entity_type=entity_type,
