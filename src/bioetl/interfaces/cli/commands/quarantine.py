@@ -31,7 +31,6 @@ def quarantine() -> None:
     Error recovery dashboard commands for inspecting, analyzing,
     and recovering from pipeline failures.
     """
-    pass
 
 
 @quarantine.command("inspect")
