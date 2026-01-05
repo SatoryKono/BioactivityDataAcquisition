@@ -1,6 +1,7 @@
 """Health check command for BioETL CLI.
 
 Provides commands for running health checks and starting the health server.
+Uses HealthService from composition entrypoints for clean layering.
 """
 
 from __future__ import annotations
@@ -10,6 +11,7 @@ import sys
 
 import click
 
+from bioetl.composition.entrypoints import get_health_service
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -34,7 +36,7 @@ def health() -> None:
     help="Port to listen on.",
     show_default=True,
 )
-def health_server(host: str, port: int) -> None:
+def health_server_command(host: str, port: int) -> None:
     """Start the HTTP health server.
 
     Runs an HTTP server that exposes health check endpoints:
@@ -48,10 +50,6 @@ def health_server(host: str, port: int) -> None:
     Example:
         bioetl health server --port 8080
     """
-    from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
-    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-    from bioetl.interfaces.http.health_server import HealthServer
-
     click.echo(f"Starting health server on http://{host}:{port}")
     click.echo("Endpoints:")
     click.echo(f"  - http://{host}:{port}/health")
@@ -61,6 +59,15 @@ def health_server(host: str, port: int) -> None:
     click.echo("\nPress Ctrl+C to stop.")
 
     async def run() -> None:
+        # Import server components at runtime (interfaces layer can import from infrastructure)
+        from bioetl.infrastructure.adapters.http.health_monitor import (
+            ProviderHealthMonitor,
+        )
+        from bioetl.infrastructure.observability.prometheus_metrics import (
+            PrometheusMetrics,
+        )
+        from bioetl.interfaces.http.health_server import HealthServer
+
         # Create metrics port for health monitor
         metrics = PrometheusMetrics()
 
@@ -119,41 +126,18 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
     """
     import json as json_module
 
-    from bioetl.composition.factories.data_source_factory import DataSourceFactory
-
     click.echo("Running health checks...")
 
     async def run_checks() -> dict[str, dict[str, str]]:
-        # Get available providers from the factory
-        available_providers = DataSourceFactory.list_providers()
-        providers_to_check = list(provider) if provider else available_providers
+        service = get_health_service()
 
-        results: dict[str, dict[str, str]] = {}
+        # Convert tuple to list or None for all providers
+        providers_list = list(provider) if provider else None
 
-        for prov in providers_to_check:
-            try:
-                adapter = DataSourceFactory.create(prov)
-                if hasattr(adapter, "check_health"):
-                    result = await adapter.check_health()
-                    results[prov] = {
-                        "status": result.status.value.lower(),
-                        "latency_ms": f"{result.latency_ms:.2f}",
-                        "endpoint": result.endpoint,
-                    }
-                    if result.last_error:
-                        results[prov]["error"] = result.last_error
-                elif hasattr(adapter, "health_check"):
-                    status = await adapter.health_check()
-                    results[prov] = {"status": status.value.lower()}
-                else:
-                    results[prov] = {
-                        "status": "unknown",
-                        "error": "No health check method",
-                    }
-            except Exception as e:
-                results[prov] = {"status": "unhealthy", "error": str(e)}
+        summary = await service.check_providers(providers=providers_list)
 
-        return results
+        # Convert to dict format for backward compatibility
+        return summary.to_dict()
 
     try:
         results = asyncio.run(run_checks())
