@@ -5,9 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
+
+if TYPE_CHECKING:
+    from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.types import RunID, RunType
 
 
@@ -219,7 +222,7 @@ class PipelineRun:
         self._stages: list[StageResult] = []
         self._started_at: datetime | None = None
         self._ended_at: datetime | None = None
-        self._events: list[Any] = []
+        self._events: list[DomainEvent] = []
         self._metadata = metadata or {}
 
     @property
@@ -532,7 +535,7 @@ class PipelineRun:
             )
         )
 
-    def collect_events(self) -> list[Any]:
+    def collect_events(self) -> list[DomainEvent]:
         """Collect and clear accumulated domain events.
 
         Returns:
