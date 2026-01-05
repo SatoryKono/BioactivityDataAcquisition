@@ -215,15 +215,15 @@ class TestRuntimeConfig:
         assert runtime.strict_gold_validation is True
 
     def test_lock_defaults(self):
-        """Test that lock parameters have correct defaults (20s/60s).
+        """Test that lock parameters have correct defaults (30s/90s).
 
-        REQ-LOCK-001: heartbeat_interval=20s, lock_ttl=60s to reduce
-        split-brain window compared to previous 30s/90s defaults.
+        REQ-LOCK-001: heartbeat_interval=30s, lock_ttl=90s per ADR-010
+        Local-Only Deployment architecture.
         """
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
-        assert runtime.heartbeat_interval == 20
-        assert runtime.lock_ttl == 60
+        assert runtime.heartbeat_interval == 30
+        assert runtime.lock_ttl == 90
 
     def test_effective_lock_ttl_with_explicit_value(self):
         """Test effective_lock_ttl returns explicit lock_ttl when set."""
@@ -246,11 +246,11 @@ class TestRuntimeConfig:
         assert runtime.effective_lock_ttl == 45
 
     def test_effective_lock_ttl_default(self):
-        """Test effective_lock_ttl with default values returns 60s."""
+        """Test effective_lock_ttl with default values returns 90s."""
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
-        # With default lock_ttl=60, effective_lock_ttl should be 60
-        assert runtime.effective_lock_ttl == 60
+        # With default lock_ttl=90, effective_lock_ttl should be 90
+        assert runtime.effective_lock_ttl == 90
 
     def test_lock_ttl_ratio(self):
         """Test that default TTL is 3x heartbeat interval.

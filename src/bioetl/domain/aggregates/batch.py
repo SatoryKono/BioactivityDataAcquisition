@@ -19,9 +19,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
+
+if TYPE_CHECKING:
+    from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 
 
@@ -158,7 +161,7 @@ class Batch:
         self._start_index = start_index
         self._created_at = created_at or datetime.now(UTC)
         self._sealed_at: datetime | None = None
-        self._events: list[Any] = []
+        self._events: list[DomainEvent] = []
         self._metadata = metadata or {}
 
     @classmethod
@@ -496,7 +499,7 @@ class Batch:
     # Domain events
     # ──────────────────────────────────────────────────────────────────────────
 
-    def collect_events(self) -> list[Any]:
+    def collect_events(self) -> list[DomainEvent]:
         """Collect and clear accumulated domain events.
 
         Returns:
