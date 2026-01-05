@@ -47,9 +47,13 @@ __all__ = [
     "get_lifecycle_service",
     # Resource management (services - new)
     "get_checkpoint_service",
+    "get_config_service",
+    "get_health_service",
     "get_lock_service",
+    "get_metrics_service",
     "get_pipeline_runner_service",
     "get_quarantine_service",
+    "get_quarantine_store",
     "get_bronze_cleanup_service",
     "get_vacuum_service",
     # Maintenance operations
@@ -65,8 +69,12 @@ __all__ = [
 from bioetl.composition._bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
+    bootstrap_config_service,
+    bootstrap_health_service,
     bootstrap_lock_service,
+    bootstrap_metrics_service,
     bootstrap_pipeline_runner_service,
+    bootstrap_quarantine,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
 )
@@ -92,6 +100,9 @@ if TYPE_CHECKING:
         BronzeCleanupService,
         CheckpointService,
         CleanupResult,
+        ConfigService,
+        HealthService,
+        MetricsService,
         PipelineRunnerService,
         QuarantineService,
         VacuumService,
@@ -100,6 +111,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
+    from bioetl.domain.ports import QuarantinePort
 
 
 @dataclass(frozen=True)
@@ -605,3 +617,93 @@ def get_pipeline_runner_service() -> PipelineRunnerService:
     """
     _ensure_registrations()
     return bootstrap_pipeline_runner_service()
+
+
+# =============================================================================
+# Configuration and Health Services
+# =============================================================================
+
+
+def get_config_service() -> ConfigService:
+    """Get a configuration service for accessing application configuration.
+
+    Provides a clean interface for configuration access from CLI or other
+    interfaces. Abstracts infrastructure configuration loading.
+
+    Returns:
+        ConfigService instance for configuration operations.
+
+    Example:
+        >>> service = get_config_service()
+        >>> settings = service.get_settings()
+        >>> logger.info("environment", env=settings.env)
+        >>> config = service.load_pipeline_config("chembl_activity")
+        >>> logger.info("pipeline", provider=config.provider)
+    """
+    _ensure_registrations()
+    return bootstrap_config_service()
+
+
+def get_health_service() -> HealthService:
+    """Get a health service for checking provider health.
+
+    Provides a clean interface for health checking from CLI or other
+    interfaces. Abstracts data source factory and adapter creation.
+
+    Returns:
+        HealthService instance for health check operations.
+
+    Example:
+        >>> service = get_health_service()
+        >>> summary = await service.check_providers()
+        >>> if summary.all_healthy:
+        ...     logger.info("All providers healthy")
+        >>> else:
+        ...     for name, result in summary.results.items():
+        ...         if result.is_unhealthy:
+        ...             logger.error("Provider unhealthy", provider=name, error=result.error)
+    """
+    _ensure_registrations()
+    return bootstrap_health_service()
+
+
+def get_metrics_service() -> MetricsService:
+    """Get a metrics service for managing the Prometheus metrics server.
+
+    Provides a clean interface for metrics server management from CLI or
+    other interfaces. Abstracts infrastructure metrics server operations.
+
+    Returns:
+        MetricsService instance for metrics server operations.
+
+    Example:
+        >>> service = get_metrics_service()
+        >>> result = service.start(port=8000)
+        >>> if result.success:
+        ...     logger.info("Metrics server started", port=result.port)
+        >>> status = service.get_status()
+        >>> logger.info("Server status", running=status.running)
+    """
+    _ensure_registrations()
+    return bootstrap_metrics_service()
+
+
+def get_quarantine_store(pipeline: str) -> QuarantinePort:
+    """Get a quarantine store (port) for direct quarantine operations.
+
+    This provides direct access to the QuarantinePort for low-level
+    quarantine operations. For most use cases, prefer get_quarantine_service()
+    which provides a higher-level interface.
+
+    Args:
+        pipeline: Pipeline name (used for context, actual store is shared).
+
+    Returns:
+        QuarantinePort instance for quarantine operations.
+
+    Example:
+        >>> store = get_quarantine_store("chembl_activity")
+        >>> records = await store.inspect("chembl_activity", limit=10)
+    """
+    _ensure_registrations()
+    return bootstrap_quarantine()
