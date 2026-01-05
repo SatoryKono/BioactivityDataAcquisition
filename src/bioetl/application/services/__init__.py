@@ -9,6 +9,8 @@ Administrative services for CLI operations:
 - LockService: Lock management
 - BronzeCleanupService: Bronze retention cleanup
 - PipelineRunnerService: Universal pipeline execution
+- ConfigService: Configuration access and validation
+- HealthService: Provider health checking
 """
 
 from __future__ import annotations
@@ -21,7 +23,17 @@ from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
+from bioetl.application.services.config_service import (
+    ConfigService,
+    PipelineInfo,
+    SettingsInfo,
+)
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.health_service import (
+    HealthCheckSummary,
+    HealthResult,
+    HealthService,
+)
 from bioetl.application.services.lock_service import (
     LockInfo,
     LockService,
@@ -29,6 +41,13 @@ from bioetl.application.services.lock_service import (
 from bioetl.application.services.medallion_lifecycle import (
     ClearResult,
     MedallionLifecycleService,
+)
+from bioetl.application.services.metrics_service import (
+    MetricsServerError,
+    MetricsServerPort,
+    MetricsServerStatus,
+    MetricsService,
+    StartResult,
 )
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
@@ -38,10 +57,8 @@ from bioetl.application.services.pipeline_runner_service import (
     RunStatus,
 )
 from bioetl.application.services.quarantine_service import (
-    PurgeResult,
     QuarantineRecord,
     QuarantineService,
-    ReplayResult,
 )
 from bioetl.application.services.shutdown_service import (
     PipelineShutdownError,
@@ -61,22 +78,31 @@ __all__ = [
     "CheckpointService",
     "CleanupResult",
     "ClearResult",
+    "ConfigService",
     "DataQualityService",
+    "HealthCheckSummary",
+    "HealthResult",
+    "HealthService",
     "LockInfo",
     "LockService",
     "MedallionLifecycleService",
+    "MetricsServerError",
+    "MetricsServerPort",
+    "MetricsServerStatus",
+    "MetricsService",
+    "PipelineInfo",
     "PipelineNotFoundError",
     "PipelineRunnerService",
     "PipelineShutdownError",
-    "PurgeResult",
     "QuarantineRecord",
     "QuarantineService",
-    "ReplayResult",
     "RunOptions",
     "RunResult",
     "RunStatus",
+    "SettingsInfo",
     "ShutdownReason",
     "ShutdownService",
+    "StartResult",
     "TableCollectorPort",
     "TableVacuumResult",
     "VacuumAllResult",

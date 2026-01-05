@@ -6,10 +6,11 @@ for later analysis, preventing them from stopping the entire pipeline.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 
-from bioetl.domain.types import BatchID, RunID
+from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
 
 
 @runtime_checkable
@@ -71,6 +72,73 @@ class QuarantinePort(Protocol):
 
         Returns:
             A dictionary of statistics (e.g., count by error code).
+        """
+        ...
+
+    def replay(
+        self,
+        pipeline: str,
+        error_code: str | None = None,
+        max_age_days: int = 7,
+        *,
+        now: datetime,
+    ) -> Iterator[dict[str, Any]]:
+        """Replay quarantine records for reprocessing.
+
+        Retrieves quarantined records that match the filter criteria
+        for reprocessing by the pipeline.
+
+        Args:
+            pipeline: Pipeline name to filter by.
+            error_code: Optional error code to filter by.
+            max_age_days: Maximum age of records to replay (default 7).
+            now: Current timestamp from application layer
+                 (single source of time per ADR-014). Required.
+
+        Returns:
+            Iterator of quarantine records suitable for replay.
+        """
+        ...
+
+    def purge(
+        self,
+        pipeline: str,
+        older_than_days: int = 30,
+        *,
+        now: datetime,
+    ) -> int:
+        """Purge old quarantine records.
+
+        Deletes quarantined records older than the specified age.
+        Implements RULES.md §2.6 - 30-day retention policy.
+
+        Args:
+            pipeline: Pipeline name to filter by.
+            older_than_days: Delete records older than this (default 30).
+            now: Current timestamp from application layer
+                 (single source of time per ADR-014). Required.
+
+        Returns:
+            Count of deleted records.
+        """
+        ...
+
+    def update_status(
+        self,
+        payload_hash: str,
+        new_status: QuarantineRecordStatus,
+    ) -> bool:
+        """Update DQ status for a quarantined record.
+
+        Used to mark records as IGNORED, REVIEWED, or REPROCESSED
+        after manual inspection.
+
+        Args:
+            payload_hash: Hash of the payload to identify the record.
+            new_status: New status to set.
+
+        Returns:
+            True if record was found and updated, False otherwise.
         """
         ...
 
