@@ -392,7 +392,7 @@ class TestConfigShowSettingsCommand:
     def test_show_settings_masks_api_key(self, cli_runner, mock_config_service):
         """Test show-settings masks sensitive API keys."""
         mock_config_service.get_settings.return_value = MockSettingsInfo(
-            additional={"pubmed_api_key": "secret_api_key_12345"}
+            additional={"pubmed_api_key": "test_value_for_masking"}
         )
 
         with patch(
@@ -402,7 +402,7 @@ class TestConfigShowSettingsCommand:
             result = cli_runner.invoke(cli, ["config", "show-settings"])
 
         assert result.exit_code == 0
-        assert "secret_api_key_12345" not in result.output
+        assert "test_value_for_masking" not in result.output
         assert "MASKED" in result.output
 
 
