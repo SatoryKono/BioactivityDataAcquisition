@@ -24,6 +24,9 @@ paths = [
     # Test fixtures may contain mock data
     '''^tests/fixtures/.*$''',
 
+    # CLI command tests contain mock API key values for testing masking
+    '''^tests/unit/interfaces/test_cli_commands\.py$''',
+
     # Secrets baseline for detect-secrets
     '''^\.secrets\.baseline$''',
 
