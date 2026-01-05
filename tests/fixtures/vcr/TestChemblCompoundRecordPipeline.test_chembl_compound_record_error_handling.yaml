@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      cache-control:
+      - max-age=30000000, s-maxage=30000000
+      content-length:
+      - '211'
+      content-type:
+      - application/json
+      date:
+      - Mon, 05 Jan 2026 23:22:25 GMT
+      server:
+      - gunicorn/20.0.4
+      strict-transport-security:
+      - max-age=0
+      vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+version: 1
