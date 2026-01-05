@@ -329,8 +329,7 @@ class TestHealthCheckCommand:
 @pytest.fixture
 def mock_health_service():
     """Create a mock HealthService for testing."""
-    from dataclasses import dataclass, field
-    from datetime import UTC, datetime
+    from dataclasses import dataclass
 
     @dataclass
     class MockHealthResult:
