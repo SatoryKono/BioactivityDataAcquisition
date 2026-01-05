@@ -42,6 +42,13 @@ from bioetl.application.services.medallion_lifecycle import (
     ClearResult,
     MedallionLifecycleService,
 )
+from bioetl.application.services.metrics_service import (
+    MetricsServerError,
+    MetricsServerPort,
+    MetricsServerStatus,
+    MetricsService,
+    StartResult,
+)
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
     PipelineRunnerService,
@@ -81,6 +88,10 @@ __all__ = [
     "LockInfo",
     "LockService",
     "MedallionLifecycleService",
+    "MetricsServerError",
+    "MetricsServerPort",
+    "MetricsServerStatus",
+    "MetricsService",
     "PipelineInfo",
     "PipelineNotFoundError",
     "PipelineRunnerService",
@@ -95,6 +106,7 @@ __all__ = [
     "SettingsInfo",
     "ShutdownReason",
     "ShutdownService",
+    "StartResult",
     "TableCollectorPort",
     "TableVacuumResult",
     "VacuumAllResult",

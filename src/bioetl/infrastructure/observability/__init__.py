@@ -15,6 +15,9 @@ with mandatory fields: ts, level, run_id, pipeline, stage.
 from __future__ import annotations
 
 from bioetl.infrastructure.observability.logging import StructlogLogger
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
@@ -26,6 +29,7 @@ from bioetl.infrastructure.observability.unified_logger import (
 )
 
 __all__ = [
+    "MetricsServerAdapter",
     "NoOpLogger",
     "NoOpMetrics",
     "NoOpTracing",
