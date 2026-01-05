@@ -54,9 +54,9 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
