@@ -115,9 +115,6 @@ class TestInterfacesNoDIrectInfrastructure:
             # health.py uses health_monitor and prometheus_metrics directly
             # TODO: Route through HealthService
             "health.py",
-            # config.py uses infrastructure config directly
-            # TODO: Route through ConfigService or Composition
-            "config.py",
         }
 
         violations = []
@@ -167,7 +164,6 @@ class TestInterfacesNoDIrectInfrastructure:
                 "bioetl.infrastructure.adapters.http.health_monitor",
                 "bioetl.infrastructure.observability.prometheus_metrics",
             ],
-            "config.py": ["bioetl.infrastructure.config"],
         }
 
         actual_violations = {}
