@@ -71,10 +71,13 @@ def pytest_configure() -> None:
 
     # Configure Hypothesis profiles for CI vs local development
     # CI profile uses fewer examples for faster execution
+    # IMPORTANT: Tests should NOT override max_examples in @settings() decorator
+    # to allow profile settings to control test speed. See OPTIMIZATION.md.
     try:
         from hypothesis import Phase, Verbosity, settings
 
         # CI profile: faster execution with fewer examples
+        # Used automatically in GitHub Actions (CI=true)
         settings.register_profile(
             "ci",
             max_examples=10,
@@ -84,6 +87,7 @@ def pytest_configure() -> None:
             phases=[Phase.explicit, Phase.reuse, Phase.generate],
         )
         # Fast profile: minimal examples for quick smoke tests
+        # Use with: HYPOTHESIS_PROFILE=fast pytest ...
         settings.register_profile(
             "fast",
             max_examples=5,
@@ -92,9 +96,18 @@ def pytest_configure() -> None:
             phases=[Phase.explicit, Phase.reuse, Phase.generate],
         )
         # Dev profile: standard development settings
+        # Default for local development
         settings.register_profile(
             "dev",
             max_examples=50,
+            deadline=None,
+            verbosity=Verbosity.normal,
+        )
+        # Thorough profile: comprehensive testing before releases
+        # Use with: HYPOTHESIS_PROFILE=thorough pytest ...
+        settings.register_profile(
+            "thorough",
+            max_examples=200,
             deadline=None,
             verbosity=Verbosity.normal,
         )
