@@ -440,6 +440,38 @@ class ChemblAdapter(BaseHttpAdapter):
         ):
             yield record
 
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback search when primary lookup fails.
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        Note: ChEMBL doesn't support title-based fallback search like CrossRef.
+        This implementation delegates to fetch_filtered() and ignores fallback_mapping.
+
+        Args:
+            entity_type: The type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering.
+            fallback_mapping: Unused for ChEMBL (fallback not supported).
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records found via primary lookup.
+
+        """
+        # ChEMBL doesn't support fallback search, delegate to regular filtering
+        async for record in self._fetch_filtered(
+            entity_type, limit, filter_ids, filter_field
+        ):
+            yield record
+
     async def fetch_multi_filtered(
         self,
         entity_type: str,
