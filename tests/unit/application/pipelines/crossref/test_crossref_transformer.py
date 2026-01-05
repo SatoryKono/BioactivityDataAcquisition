@@ -199,3 +199,272 @@ def test_provider_is_crossref(transformer):
 def test_entity_type_is_publication(transformer):
     """Test entity type is set to publication (Ubiquitous Language, not CrossRef 'work')."""
     assert transformer.entity_type == "publication"
+
+
+# =============================================================================
+# Edge case tests
+# =============================================================================
+
+
+def test_extract_authors_with_only_given_name(transformer):
+    """Test author extraction with only given name (no family)."""
+    publication = {"author": [{"given": "Madonna"}]}
+    authors = transformer._extract_authors(publication)
+    assert authors == ["Madonna"]
+
+
+def test_extract_authors_empty_list(transformer):
+    """Test author extraction with empty author list."""
+    publication = {"author": []}
+    authors = transformer._extract_authors(publication)
+    assert authors == []
+
+
+def test_extract_authors_missing_key(transformer):
+    """Test author extraction when 'author' key is missing."""
+    publication = {}
+    authors = transformer._extract_authors(publication)
+    assert authors == []
+
+
+def test_extract_authors_with_whitespace(transformer):
+    """Test author extraction strips whitespace from names."""
+    publication = {"author": [{"given": "  John  ", "family": "  Doe  "}]}
+    authors = transformer._extract_authors(publication)
+    assert authors == ["John Doe"]
+
+
+def test_extract_year_from_published_online(transformer):
+    """Test year extraction falls back to published-online."""
+    publication = {"published-online": {"date-parts": [[2022, 3, 15]]}}
+    assert transformer._extract_year(publication) == 2022
+
+
+def test_extract_year_from_issued(transformer):
+    """Test year extraction falls back to issued field."""
+    publication = {"issued": {"date-parts": [[2021, 1, 1]]}}
+    assert transformer._extract_year(publication) == 2021
+
+
+def test_extract_year_priority_order(transformer):
+    """Test year extraction prefers published-print over others."""
+    publication = {
+        "published-print": {"date-parts": [[2023, 6, 1]]},
+        "published-online": {"date-parts": [[2023, 5, 1]]},
+        "issued": {"date-parts": [[2023, 4, 1]]},
+    }
+    assert transformer._extract_year(publication) == 2023
+
+
+def test_extract_year_invalid_year_format(transformer):
+    """Test year extraction with invalid year format."""
+    publication = {"published-print": {"date-parts": [[]]}}
+    assert transformer._extract_year(publication) is None
+
+
+def test_extract_year_non_integer_year(transformer):
+    """Test year extraction with non-integer year."""
+    publication = {"published-print": {"date-parts": [["2023"]]}}
+    assert transformer._extract_year(publication) is None
+
+
+def test_extract_year_out_of_range(transformer):
+    """Test year extraction with year out of valid range."""
+    # Year 1799 is below min_year=1800 in validate_year_range
+    publication = {"published-print": {"date-parts": [[1799]]}}
+    assert transformer._extract_year(publication) is None
+
+    # Year 2101 is above max_year=2100
+    publication2 = {"published-print": {"date-parts": [[2101]]}}
+    assert transformer._extract_year(publication2) is None
+
+
+def test_extract_license_url_multiple_licenses(transformer):
+    """Test license URL extraction returns first license."""
+    publication = {
+        "license": [
+            {"URL": "https://license1.com"},
+            {"URL": "https://license2.com"},
+        ]
+    }
+    assert transformer._extract_license_url(publication) == "https://license1.com"
+
+
+def test_extract_license_url_missing_url(transformer):
+    """Test license URL extraction when URL is missing."""
+    publication = {"license": [{"other": "data"}]}
+    assert transformer._extract_license_url(publication) is None
+
+
+def test_extract_license_url_empty_list(transformer):
+    """Test license URL extraction with empty license list."""
+    publication = {"license": []}
+    assert transformer._extract_license_url(publication) is None
+
+
+def test_extract_business_data_page_range(transformer):
+    """Test page range extraction."""
+    publication = {"DOI": "10.1234/test", "page": "123-145"}
+    data = transformer._extract_business_data(publication)
+    assert data["first_page"] == "123"
+    assert data["last_page"] == "145"
+
+
+def test_extract_business_data_single_page(transformer):
+    """Test single page extraction."""
+    publication = {"DOI": "10.1234/test", "page": "42"}
+    data = transformer._extract_business_data(publication)
+    assert data["first_page"] == "42"
+    assert data["last_page"] is None
+
+
+def test_extract_business_data_html_abstract_stripping(transformer):
+    """Test that HTML tags are stripped from abstract."""
+    publication = {
+        "DOI": "10.1234/test",
+        "abstract": "<jats:p>Abstract with <jats:bold>XML</jats:bold> tags.</jats:p>",
+    }
+    data = transformer._extract_business_data(publication)
+    assert "<" not in data["abstract"]
+    assert ">" not in data["abstract"]
+    assert "Abstract with XML tags." in data["abstract"]
+
+
+def test_extract_business_data_empty_abstract(transformer):
+    """Test empty abstract handling."""
+    publication = {"DOI": "10.1234/test", "abstract": ""}
+    data = transformer._extract_business_data(publication)
+    assert data["abstract"] is None
+
+
+def test_extract_business_data_issn_list(transformer):
+    """Test ISSN list extraction."""
+    publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678", "8765-4321"]}
+    data = transformer._extract_business_data(publication)
+    assert data["issn"] == ["1234-5678", "8765-4321"]
+
+
+def test_extract_business_data_subject_list(transformer):
+    """Test subjects extraction."""
+    publication = {"DOI": "10.1234/test", "subject": ["Biology", "Chemistry"]}
+    data = transformer._extract_business_data(publication)
+    assert data["subjects"] == ["Biology", "Chemistry"]
+
+
+@pytest.mark.asyncio
+async def test_transform_generates_content_hash(transformer, pipeline_context):
+    """Test that transformation generates a content hash."""
+    publication = {"DOI": "10.1234/test", "title": ["Test"]}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert "content_hash" in result
+    # Content hash is a hex string (SHA256)
+    assert len(result["content_hash"]) == 64  # SHA256 produces 64 hex chars
+
+
+@pytest.mark.asyncio
+async def test_transform_same_content_same_hash(transformer, pipeline_context):
+    """Test that same content produces same hash."""
+    publication = {"DOI": "10.1234/test", "title": ["Test"]}
+
+    result1 = await transformer.transform(pipeline_context, publication, index=0)
+    result2 = await transformer.transform(pipeline_context, publication, index=1)
+
+    assert result1["content_hash"] == result2["content_hash"]
+
+
+@pytest.mark.asyncio
+async def test_transform_different_content_different_hash(
+    transformer, pipeline_context
+):
+    """Test that different content produces different hash."""
+    pub1 = {"DOI": "10.1234/test1", "title": ["Test 1"]}
+    pub2 = {"DOI": "10.1234/test2", "title": ["Test 2"]}
+
+    result1 = await transformer.transform(pipeline_context, pub1, index=0)
+    result2 = await transformer.transform(pipeline_context, pub2, index=1)
+
+    assert result1["content_hash"] != result2["content_hash"]
+
+
+@pytest.mark.asyncio
+async def test_transform_entity_id_format(transformer, pipeline_context):
+    """Test that entity_id follows expected format."""
+    publication = {"DOI": "10.1234/test", "title": ["Test"]}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["entity_id"] == "crossref:10.1234/test"
+
+
+@pytest.mark.asyncio
+async def test_transform_normalized_doi_in_entity_id(transformer, pipeline_context):
+    """Test that entity_id uses normalized DOI."""
+    publication = {"DOI": "10.1234/TEST.UPPER", "title": ["Test"]}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    # DOI should be lowercase in entity_id
+    assert "test.upper" in result["entity_id"].lower()
+
+
+def test_doc_type_mapping_all_types():
+    """Test all documented document type mappings."""
+    assert CROSSREF_TYPE_MAP["journal-article"] == "PUBLICATION"
+    assert CROSSREF_TYPE_MAP["posted-content"] == "PREPRINT"
+    assert CROSSREF_TYPE_MAP["proceedings-article"] == "PUBLICATION"
+    assert CROSSREF_TYPE_MAP["book-chapter"] == "PUBLICATION"
+    assert CROSSREF_TYPE_MAP["dissertation"] == "PUBLICATION"
+
+
+def test_doc_type_mapping_unknown_defaults_to_publication(transformer):
+    """Test that unknown type defaults to PUBLICATION."""
+    publication = {"DOI": "10.1234/test", "type": "unknown-type"}
+    data = transformer._extract_business_data(publication)
+    assert data["doc_type"] == "PUBLICATION"
+
+
+@pytest.mark.asyncio
+async def test_transform_with_preprint_type(transformer, pipeline_context):
+    """Test transformation of preprint (posted-content)."""
+    publication = {"DOI": "10.1101/2023.01.01.123456", "type": "posted-content"}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["doc_type"] == "PREPRINT"
+
+
+@pytest.mark.asyncio
+async def test_transform_includes_run_metadata(transformer, pipeline_context):
+    """Test that transformation includes run metadata."""
+    publication = {"DOI": "10.1234/test"}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["_run_id"] == str(pipeline_context.run_id)
+    assert result["_run_type"] == pipeline_context.run_type.value
+    assert "_ingestion_ts" in result
+
+
+def test_extract_business_data_date_formatting(transformer):
+    """Test date formatting from date-parts."""
+    publication = {
+        "DOI": "10.1234/test",
+        "published-print": {"date-parts": [[2023, 6, 15]]},
+        "published-online": {"date-parts": [[2023, 5]]},  # Month only
+    }
+    data = transformer._extract_business_data(publication)
+
+    assert data["published_print"] == "2023-06-15"
+    assert data["published_online"] == "2023-05"
+
+
+def test_extract_business_data_date_year_only(transformer):
+    """Test date formatting with year only."""
+    publication = {
+        "DOI": "10.1234/test",
+        "published-print": {"date-parts": [[2023]]},
+    }
+    data = transformer._extract_business_data(publication)
+    assert data["published_print"] == "2023"
