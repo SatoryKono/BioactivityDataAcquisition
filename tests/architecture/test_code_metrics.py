@@ -72,7 +72,7 @@ class TestFileSizeLimits:
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
-        "client.py": 670,  # 660 LOC - ChemblAdapter with fetch_multi_filtered for multi-column filtering
+        "client.py": 700,  # 691 LOC - CrossRefAdapter with fetch_filtered_with_fallback for DOI→title fallback
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -169,6 +169,8 @@ class TestFunctionComplexity:
         "validate_concentration": 7,  # Concentration validation with unit checks
         "validate_pchembl": 7,  # pChEMBL validation with range checks
         "validate_activity_value": 10,  # Activity value validation
+        # CrossRef adapter fallback logic
+        "fetch_filtered_with_fallback": 17,  # DOI→title fallback with batch processing
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -348,8 +350,10 @@ class TestClassSize:
         "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
         "BatchExecutor": 600,  # 581 lines - unified executor for batch processing
         "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
+        # Application core classes
+        "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
-        "CrossRefAdapter": 460,  # 446 lines - HTTP adapter with batch DOI resolution + helper methods
+        "CrossRefAdapter": 610,  # 603 lines - HTTP adapter with batch DOI resolution + title fallback
         # PubChem adapter (similar to ChEMBL adapter)
         "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
