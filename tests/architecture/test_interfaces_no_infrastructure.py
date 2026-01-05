@@ -155,11 +155,8 @@ class TestInterfacesNoDIrectInfrastructure:
             pytest.skip("CLI commands directory not found")
 
         # Expected legacy violations - keep in sync with test above
+        # Note: quarantine.py was fixed in IF-002 refactoring to use QuarantineService
         expected_violations = {
-            "quarantine.py": [
-                "bioetl.infrastructure.config",
-                "bioetl.infrastructure.quarantine.unified",
-            ],
             "health.py": [
                 "bioetl.infrastructure.adapters.http.health_monitor",
                 "bioetl.infrastructure.observability.prometheus_metrics",

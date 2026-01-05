@@ -32,22 +32,15 @@ def mock_quarantine_manager() -> MagicMock:
 
 
 @pytest.fixture
-def mock_settings() -> MagicMock:
-    """Create mock settings."""
-    settings = MagicMock()
-    settings.quarantine_path = "/tmp/quarantine"
-    return settings
-
-
-@pytest.fixture
-def mock_unified_quarantine() -> MagicMock:
-    """Create mock unified quarantine."""
-    quarantine = MagicMock()
-    quarantine.replay.return_value = iter([])
-    quarantine.purge.return_value = 0
-    quarantine.get_stats = AsyncMock(return_value={"total_count": 0})
-    quarantine.update_status.return_value = True
-    return quarantine
+def mock_quarantine_service() -> MagicMock:
+    """Create a mock quarantine service."""
+    service = MagicMock()
+    service.replay = MagicMock(return_value=[])
+    service.purge = MagicMock(return_value=0)
+    service.get_stats = AsyncMock(return_value={"total_count": 0})
+    service.update_status = MagicMock(return_value=True)
+    service.mark_as_reprocessed = MagicMock(return_value=0)
+    return service
 
 
 class TestQuarantineGroup:
@@ -362,21 +355,14 @@ class TestQuarantineReplay:
     def test_replay_no_records(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine replay with no records."""
-        mock_unified_quarantine.replay.return_value = iter([])
+        mock_quarantine_service.replay.return_value = []
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -389,25 +375,18 @@ class TestQuarantineReplay:
     def test_replay_dry_run(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine replay in dry-run mode."""
         mock_records = [
             {"error_code": "DQ_ERROR", "payload_hash": "abc123def456"},
             {"error_code": "DQ_ERROR", "payload_hash": "xyz789uvw012"},
         ]
-        mock_unified_quarantine.replay.return_value = iter(mock_records)
+        mock_quarantine_service.replay.return_value = mock_records
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -421,8 +400,7 @@ class TestQuarantineReplay:
     def test_replay_dry_run_many_records(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine replay dry-run with many records shows truncation."""
         # Create 15 records to test truncation (shows first 10 + "... and N more")
@@ -430,17 +408,11 @@ class TestQuarantineReplay:
             {"error_code": f"DQ_ERROR_{i}", "payload_hash": f"hash{i:03d}"}
             for i in range(15)
         ]
-        mock_unified_quarantine.replay.return_value = iter(mock_records)
+        mock_quarantine_service.replay.return_value = mock_records
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -454,26 +426,19 @@ class TestQuarantineReplay:
     def test_replay_actual_replay(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine replay actually marks records as reprocessed."""
         mock_records = [
             {"error_code": "DQ_ERROR", "payload_hash": "abc123"},
             {"error_code": "DQ_ERROR", "payload_hash": "def456"},
         ]
-        mock_unified_quarantine.replay.return_value = iter(mock_records)
-        mock_unified_quarantine.update_status.return_value = True
+        mock_quarantine_service.replay.return_value = mock_records
+        mock_quarantine_service.mark_as_reprocessed.return_value = 2
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -483,27 +448,21 @@ class TestQuarantineReplay:
         assert result.exit_code == 0
         assert "Replaying 2 record(s)" in result.output
         assert "Marked 2 record(s) as REPROCESSED" in result.output
-        # Verify update_status was called for each record
-        assert mock_unified_quarantine.update_status.call_count == 2
+        mock_quarantine_service.mark_as_reprocessed.assert_called_once_with(
+            mock_records
+        )
 
     def test_replay_with_error_code_filter(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine replay with error code filter."""
-        mock_unified_quarantine.replay.return_value = iter([])
+        mock_quarantine_service.replay.return_value = []
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -519,25 +478,23 @@ class TestQuarantineReplay:
 
         # Command should execute without error
         assert result.exit_code == 0
+        mock_quarantine_service.replay.assert_called_once_with(
+            pipeline="chembl_activity",
+            error_code="DQ_NETWORK_ERROR",
+            max_age_days=7,
+        )
 
     def test_replay_with_max_age_days(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine replay with custom max-age-days."""
-        mock_unified_quarantine.replay.return_value = iter([])
+        mock_quarantine_service.replay.return_value = []
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -553,8 +510,11 @@ class TestQuarantineReplay:
 
         # Command should execute without error
         assert result.exit_code == 0
-        # Verify replay was called
-        mock_unified_quarantine.replay.assert_called_once()
+        mock_quarantine_service.replay.assert_called_once_with(
+            pipeline="chembl_activity",
+            error_code=None,
+            max_age_days=14,
+        )
 
 
 class TestQuarantinePurge:
@@ -580,21 +540,14 @@ class TestQuarantinePurge:
     def test_purge_dry_run(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine purge in dry-run mode."""
-        mock_unified_quarantine.get_stats = AsyncMock(return_value={"total_count": 50})
+        mock_quarantine_service.get_stats = AsyncMock(return_value={"total_count": 50})
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -609,21 +562,14 @@ class TestQuarantinePurge:
     def test_purge_with_confirmation(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine purge with confirmation prompt."""
-        mock_unified_quarantine.purge.return_value = 25
+        mock_quarantine_service.purge.return_value = 25
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             # Simulate user confirming with 'y'
             result = cli_runner.invoke(
@@ -638,19 +584,12 @@ class TestQuarantinePurge:
     def test_purge_confirmation_abort(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine purge aborts on negative confirmation."""
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             # Simulate user aborting with 'n'
             result = cli_runner.invoke(
@@ -666,21 +605,14 @@ class TestQuarantinePurge:
     def test_purge_with_force(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine purge with --force skips confirmation."""
-        mock_unified_quarantine.purge.return_value = 30
+        mock_quarantine_service.purge.return_value = 30
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -689,27 +621,22 @@ class TestQuarantinePurge:
 
         assert result.exit_code == 0
         assert "Purged 30 record(s)" in result.output
-        # Verify purge was called
-        mock_unified_quarantine.purge.assert_called_once()
+        mock_quarantine_service.purge.assert_called_once_with(
+            pipeline="chembl_activity",
+            older_than_days=30,
+        )
 
     def test_purge_custom_older_than_days(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine purge with custom --older-than-days."""
-        mock_unified_quarantine.purge.return_value = 10
+        mock_quarantine_service.purge.return_value = 10
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -725,10 +652,10 @@ class TestQuarantinePurge:
             )
 
         assert result.exit_code == 0
-        # Verify purge was called with older_than_days=60
-        mock_unified_quarantine.purge.assert_called_once()
-        call_kwargs = mock_unified_quarantine.purge.call_args.kwargs
-        assert call_kwargs.get("older_than_days") == 60
+        mock_quarantine_service.purge.assert_called_once_with(
+            pipeline="chembl_activity",
+            older_than_days=60,
+        )
 
 
 class TestQuarantineResolve:
@@ -762,21 +689,14 @@ class TestQuarantineResolve:
     def test_resolve_success_default_status(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine resolve with default IGNORED status."""
-        mock_unified_quarantine.update_status.return_value = True
+        mock_quarantine_service.update_status.return_value = True
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -792,28 +712,21 @@ class TestQuarantineResolve:
 
         assert result.exit_code == 0
         assert "Record abc123def456 marked as IGNORED" in result.output
-        mock_unified_quarantine.update_status.assert_called_once_with(
+        mock_quarantine_service.update_status.assert_called_once_with(
             "abc123def456", QuarantineRecordStatus.IGNORED
         )
 
     def test_resolve_with_reprocessed_status(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine resolve with REPROCESSED status."""
-        mock_unified_quarantine.update_status.return_value = True
+        mock_quarantine_service.update_status.return_value = True
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -831,28 +744,21 @@ class TestQuarantineResolve:
 
         assert result.exit_code == 0
         assert "Record xyz789 marked as REPROCESSED" in result.output
-        mock_unified_quarantine.update_status.assert_called_once_with(
+        mock_quarantine_service.update_status.assert_called_once_with(
             "xyz789", QuarantineRecordStatus.REPROCESSED
         )
 
     def test_resolve_record_not_found(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test quarantine resolve when record not found."""
-        mock_unified_quarantine.update_status.return_value = False
+        mock_quarantine_service.update_status.return_value = False
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -917,53 +823,39 @@ class TestQuarantineEdgeCases:
     def test_replay_record_without_payload_hash(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test replay handles records without payload_hash."""
         # Record without payload_hash
         mock_records = [{"error_code": "DQ_ERROR"}]
-        mock_unified_quarantine.replay.return_value = iter(mock_records)
-        mock_unified_quarantine.update_status.return_value = True
+        mock_quarantine_service.replay.return_value = mock_records
+        mock_quarantine_service.mark_as_reprocessed.return_value = 0
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
                 ["quarantine", "replay", "--pipeline", "chembl_activity"],
             )
 
-        # Should not crash, but update_status won't be called for records without hash
+        # Should not crash
         assert result.exit_code == 0
 
     def test_replay_dry_run_shows_hash_truncated(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test replay dry-run truncates long payload hashes."""
         long_hash = "a" * 64  # SHA256 hash length
         mock_records = [{"error_code": "DQ_ERROR", "payload_hash": long_hash}]
-        mock_unified_quarantine.replay.return_value = iter(mock_records)
+        mock_quarantine_service.replay.return_value = mock_records
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -976,21 +868,14 @@ class TestQuarantineEdgeCases:
     def test_purge_dry_run_custom_days(
         self,
         cli_runner: CliRunner,
-        mock_settings: MagicMock,
-        mock_unified_quarantine: MagicMock,
+        mock_quarantine_service: MagicMock,
     ) -> None:
         """Test purge dry-run shows custom older-than-days."""
-        mock_unified_quarantine.get_stats = AsyncMock(return_value={"total_count": 100})
+        mock_quarantine_service.get_stats = AsyncMock(return_value={"total_count": 100})
 
-        with (
-            patch(
-                "bioetl.infrastructure.config.Settings",
-                return_value=mock_settings,
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.UnifiedQuarantine",
-                return_value=mock_unified_quarantine,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_service",
+            return_value=mock_quarantine_service,
         ):
             result = cli_runner.invoke(
                 cli,

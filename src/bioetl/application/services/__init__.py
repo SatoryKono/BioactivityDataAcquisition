@@ -57,10 +57,8 @@ from bioetl.application.services.pipeline_runner_service import (
     RunStatus,
 )
 from bioetl.application.services.quarantine_service import (
-    PurgeResult,
     QuarantineRecord,
     QuarantineService,
-    ReplayResult,
 )
 from bioetl.application.services.shutdown_service import (
     PipelineShutdownError,
@@ -96,10 +94,8 @@ __all__ = [
     "PipelineNotFoundError",
     "PipelineRunnerService",
     "PipelineShutdownError",
-    "PurgeResult",
     "QuarantineRecord",
     "QuarantineService",
-    "ReplayResult",
     "RunOptions",
     "RunResult",
     "RunStatus",
