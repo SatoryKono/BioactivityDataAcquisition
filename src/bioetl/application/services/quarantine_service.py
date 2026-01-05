@@ -9,9 +9,10 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
-from uuid import UUID
+
+from bioetl.domain.types import QuarantineRecordStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, QuarantinePort
@@ -36,36 +37,6 @@ class QuarantineRecord:
     pipeline: str
     ingestion_ts: datetime | None
     metadata: dict[str, Any]
-
-
-@dataclass(frozen=True, slots=True)
-class ReplayResult:
-    """Result of replaying quarantined records.
-
-    Attributes:
-        batch_id: Batch ID that was replayed.
-        records_replayed: Number of records attempted to replay.
-        records_succeeded: Number of successful replays.
-        records_failed: Number of failed replays.
-    """
-
-    batch_id: str
-    records_replayed: int
-    records_succeeded: int
-    records_failed: int
-
-
-@dataclass(frozen=True, slots=True)
-class PurgeResult:
-    """Result of purging old quarantine records.
-
-    Attributes:
-        records_purged: Number of records removed.
-        pipelines_affected: Pipelines that had records removed.
-    """
-
-    records_purged: int
-    pipelines_affected: list[str]
 
 
 @dataclass
@@ -160,113 +131,154 @@ class QuarantineService:
 
         return stats
 
-    async def replay(
+    def replay(
         self,
         pipeline: str,
-        batch_id: UUID,
-    ) -> ReplayResult:
-        """Replay quarantined records from a specific batch.
+        error_code: str | None = None,
+        max_age_days: int = 7,
+    ) -> list[dict[str, Any]]:
+        """Replay quarantine records for reprocessing.
 
-        This operation attempts to reprocess records that were
-        previously quarantined. The exact replay mechanism depends
-        on the pipeline configuration and error type.
-
-        Note: This is a placeholder for future implementation.
-        Full replay requires pipeline context and transformation logic.
+        Retrieves quarantined records that match the filter criteria
+        for reprocessing by the pipeline.
 
         Args:
-            pipeline: Pipeline name.
-            batch_id: Batch ID to replay.
+            pipeline: Pipeline name to filter by.
+            error_code: Optional error code to filter by.
+            max_age_days: Maximum age of records to replay (default 7).
 
         Returns:
-            ReplayResult with replay statistics.
+            List of quarantine records suitable for replay.
         """
+        now = datetime.now(tz=UTC)
         self.logger.info(
-            "Replaying quarantine batch",
+            "Replaying quarantine records",
             pipeline=pipeline,
-            batch_id=str(batch_id),
+            error_code=error_code,
+            max_age_days=max_age_days,
         )
 
-        # Get records for this batch
-        records = await self.quarantine_port.inspect(
+        records = list(
+            self.quarantine_port.replay(
+                pipeline=pipeline,
+                error_code=error_code,
+                max_age_days=max_age_days,
+                now=now,
+            )
+        )
+
+        self.logger.info(
+            "Replay records retrieved",
             pipeline=pipeline,
-            limit=10000,  # Large limit to get all batch records
+            record_count=len(records),
         )
 
-        # Filter to specific batch
-        batch_records = [
-            rec for rec in records if rec.get("bronze_batch_id") == str(batch_id)
-        ]
+        return records
 
-        # Placeholder: actual replay would require pipeline context
-        # For now, just return stats about what would be replayed
-        self.logger.warning(
-            "Replay not yet implemented - returning stats only",
-            pipeline=pipeline,
-            batch_id=str(batch_id),
-            records_found=len(batch_records),
+    def mark_as_reprocessed(
+        self,
+        records: list[dict[str, Any]],
+    ) -> int:
+        """Mark replay records as reprocessed.
+
+        Updates the status of records to REPROCESSED after successful replay.
+
+        Args:
+            records: List of records from replay() to mark as reprocessed.
+
+        Returns:
+            Number of records successfully marked.
+        """
+        count = 0
+        for rec in records:
+            payload_hash = rec.get("payload_hash")
+            if payload_hash and self.quarantine_port.update_status(
+                payload_hash, QuarantineRecordStatus.REPROCESSED
+            ):
+                count += 1
+
+        self.logger.info(
+            "Marked records as reprocessed",
+            record_count=count,
         )
+        return count
 
-        return ReplayResult(
-            batch_id=str(batch_id),
-            records_replayed=len(batch_records),
-            records_succeeded=0,
-            records_failed=len(batch_records),
-        )
-
-    async def purge(
+    def purge(
         self,
         pipeline: str,
         older_than_days: int = 30,
-    ) -> PurgeResult:
+    ) -> int:
         """Purge old quarantine records.
 
         Removes quarantine records older than the specified age.
-        This is a cleanup operation for maintaining quarantine storage.
-
-        Note: This operation requires QuarantinePort to support
-        time-based deletion, which may need to be implemented.
+        Implements RULES.md §2.6 - 30-day retention policy.
 
         Args:
-            pipeline: Pipeline name (or "*" for all pipelines).
-            older_than_days: Records older than this will be purged.
+            pipeline: Pipeline name.
+            older_than_days: Records older than this will be purged (default 30).
 
         Returns:
-            PurgeResult with purge statistics.
+            Number of records deleted.
         """
+        now = datetime.now(tz=UTC)
         self.logger.info(
             "Purging old quarantine records",
             pipeline=pipeline,
             older_than_days=older_than_days,
         )
 
-        cutoff_date = datetime.now(UTC) - timedelta(days=older_than_days)
-
-        # Placeholder: actual purge requires QuarantinePort extension
-        # For now, inspect and count what would be purged
-        records = await self.quarantine_port.inspect(
-            pipeline=pipeline,
-            limit=10000,
-        )
-
-        # Filter by date (if ingestion_ts is available)
-        records_to_purge = [
-            rec
-            for rec in records
-            if rec.get("ingestion_ts") and rec["ingestion_ts"] < cutoff_date
-        ]
-
-        self.logger.warning(
-            "Purge not yet implemented - returning stats only",
+        count = self.quarantine_port.purge(
             pipeline=pipeline,
             older_than_days=older_than_days,
-            records_found=len(records_to_purge),
+            now=now,
         )
 
-        return PurgeResult(
-            records_purged=0,  # Not implemented yet
-            pipelines_affected=[pipeline] if records_to_purge else [],
+        self.logger.info(
+            "Purged quarantine records",
+            pipeline=pipeline,
+            records_purged=count,
         )
+
+        return count
+
+    def update_status(
+        self,
+        payload_hash: str,
+        new_status: QuarantineRecordStatus,
+    ) -> bool:
+        """Update DQ status for a quarantined record.
+
+        Used to mark records as IGNORED, REVIEWED, or REPROCESSED
+        after manual inspection.
+
+        Args:
+            payload_hash: Hash of the payload to identify the record.
+            new_status: New status to set.
+
+        Returns:
+            True if record was found and updated, False otherwise.
+        """
+        self.logger.debug(
+            "Updating quarantine status",
+            payload_hash=payload_hash,
+            new_status=new_status.value,
+        )
+
+        success = self.quarantine_port.update_status(payload_hash, new_status)
+
+        if success:
+            self.logger.info(
+                "Updated quarantine status",
+                payload_hash=payload_hash,
+                new_status=new_status.value,
+            )
+        else:
+            self.logger.warning(
+                "Failed to update quarantine status - record not found",
+                payload_hash=payload_hash,
+            )
+
+        return success
 
     async def aclose(self) -> None:
         """Close the service and release resources."""

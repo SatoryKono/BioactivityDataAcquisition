@@ -9,12 +9,14 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
-from datetime import UTC, datetime
 from typing import Any
 
 import click
 
-from bioetl.composition.entrypoints import get_quarantine_manager
+from bioetl.composition.entrypoints import (
+    get_quarantine_manager,
+    get_quarantine_service,
+)
 from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
@@ -136,20 +138,12 @@ def quarantine_replay(
         bioetl quarantine replay --pipeline chembl_activity --dry-run
         bioetl quarantine replay --pipeline chembl_activity --error-code DQ_NETWORK_ERROR
     """
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+    quarantine_service = get_quarantine_service()
 
-    settings = Settings()
-    quarantine_store = UnifiedQuarantine(base_path=str(settings.quarantine_path))
-
-    now = datetime.now(tz=UTC)
-    records = list(
-        quarantine_store.replay(
-            pipeline=pipeline,
-            error_code=error_code,
-            max_age_days=max_age_days,
-            now=now,
-        )
+    records = quarantine_service.replay(
+        pipeline=pipeline,
+        error_code=error_code,
+        max_age_days=max_age_days,
     )
 
     if not records:
@@ -167,13 +161,8 @@ def quarantine_replay(
     else:
         click.echo(f"\nReplaying {len(records)} record(s)...")
         # Mark records as reprocessed
-        for rec in records:
-            payload_hash = rec.get("payload_hash")
-            if payload_hash:
-                quarantine_store.update_status(
-                    payload_hash, QuarantineRecordStatus.REPROCESSED
-                )
-        click.echo(f"Marked {len(records)} record(s) as REPROCESSED.")
+        marked_count = quarantine_service.mark_as_reprocessed(records)
+        click.echo(f"Marked {marked_count} record(s) as REPROCESSED.")
         echo_info("Records are ready for reprocessing by the pipeline.")
 
 
@@ -199,18 +188,12 @@ def quarantine_purge(
         bioetl quarantine purge --pipeline chembl_activity --dry-run
         bioetl quarantine purge --pipeline chembl_activity --older-than-days 60
     """
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-
-    settings = Settings()
-    quarantine_store = UnifiedQuarantine(base_path=str(settings.quarantine_path))
-
-    now = datetime.now(tz=UTC)
+    quarantine_service = get_quarantine_service()
 
     if dry_run:
         # Get count of records that would be purged
         async def _get_stats() -> dict[str, Any]:
-            return await quarantine_store.get_stats(pipeline)
+            return await quarantine_service.get_stats(pipeline)
 
         stats = asyncio.run(_get_stats())
         total = stats.get("total_count", 0)
@@ -225,10 +208,9 @@ def quarantine_purge(
             abort=True,
         )
 
-    count = quarantine_store.purge(
+    count = quarantine_service.purge(
         pipeline=pipeline,
         older_than_days=older_than_days,
-        now=now,
     )
 
     click.echo(f"Purged {count} record(s) from quarantine.")
@@ -254,14 +236,10 @@ def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
         bioetl quarantine resolve --pipeline chembl_activity --payload-hash abc123
         bioetl quarantine resolve --pipeline chembl_activity --payload-hash abc123 --status REPROCESSED
     """
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
-
-    settings = Settings()
-    quarantine_store = UnifiedQuarantine(base_path=str(settings.quarantine_path))
+    quarantine_service = get_quarantine_service()
 
     new_status = QuarantineRecordStatus[status]
-    success = quarantine_store.update_status(payload_hash, new_status)
+    success = quarantine_service.update_status(payload_hash, new_status)
 
     if success:
         click.echo(f"Record {payload_hash} marked as {status}.")
