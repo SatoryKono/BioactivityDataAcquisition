@@ -47,6 +47,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "normalization",  # REFACTOR-004: functions are re-exported, not module
         "ports",
         "resilience",
+        "schemas",  # Pandera schemas (provider-specific, accessed directly)
         "serialization",
         "schemas",  # Pandera schema submodule (provider-specific schemas)
         "services",  # Submodule for domain services (IdentityService)

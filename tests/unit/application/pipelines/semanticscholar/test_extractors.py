@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_authors,
     extract_external_ids,

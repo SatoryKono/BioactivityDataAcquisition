@@ -35,7 +35,9 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def adapter(mock_http_client: MagicMock, mock_logger: MagicMock) -> SemanticScholarAdapter:
+def adapter(
+    mock_http_client: MagicMock, mock_logger: MagicMock
+) -> SemanticScholarAdapter:
     """Create an adapter instance."""
     return SemanticScholarAdapter(
         http_client=mock_http_client,
@@ -90,19 +92,23 @@ class TestSemanticScholarAdapter:
         result = adapter._normalize_doi("http://doi.org/10.1038/s41586-024-07487-w")
         assert result == "10.1038/s41586-024-07487-w"
 
-    def test_normalize_doi_lowercase_prefix(self, adapter: SemanticScholarAdapter) -> None:
+    def test_normalize_doi_lowercase_prefix(
+        self, adapter: SemanticScholarAdapter
+    ) -> None:
         """Test DOI normalization with lowercase doi: prefix."""
         result = adapter._normalize_doi("doi:10.1038/s41586-024-07487-w")
         assert result == "10.1038/s41586-024-07487-w"
 
-    def test_normalize_doi_uppercase_prefix(self, adapter: SemanticScholarAdapter) -> None:
+    def test_normalize_doi_uppercase_prefix(
+        self, adapter: SemanticScholarAdapter
+    ) -> None:
         """Test DOI normalization with uppercase DOI: prefix."""
         result = adapter._normalize_doi("DOI:10.1038/s41586-024-07487-w")
         assert result == "10.1038/s41586-024-07487-w"
 
     def test_escape_title_for_search(self, adapter: SemanticScholarAdapter) -> None:
         """Test title escaping for search."""
-        title = 'A "complex" title with \'quotes\' and   spaces'
+        title = "A \"complex\" title with 'quotes' and   spaces"
         result = adapter._escape_title_for_search(title)
 
         assert '"' not in result

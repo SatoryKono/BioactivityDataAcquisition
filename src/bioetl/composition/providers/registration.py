@@ -422,6 +422,7 @@ def _create_semanticscholar_data_source(
     _, HttpClientFactory = _get_factories()
     http_client = HttpClientFactory.create_for_provider("semanticscholar", settings)
 
+    # Get API key from settings (configured via BIOETL_SEMANTICSCHOLAR_API_KEY env var)
     api_key = (
         settings.semanticscholar_api_key.get_secret_value()
         if settings.semanticscholar_api_key
