@@ -91,6 +91,112 @@ class TestInterfacesNoDIrectInfrastructure:
             f"Use composition.entrypoints instead."
         )
 
+    def test_all_cli_commands_no_infrastructure_imports(self):
+        """Test that ALL CLI command files don't import infrastructure.
+
+        Per RULES.md §1.1 layer matrix, interfaces should not directly
+        access infrastructure adapters. CLI commands should use
+        Application services or Composition entrypoints instead.
+
+        Note: While the architecture matrix technically allows interfaces → infrastructure,
+        we prefer routing through Application services for consistency and testability.
+        """
+        commands_dir = SRC_PATH / "interfaces" / "cli" / "commands"
+
+        if not commands_dir.exists():
+            pytest.skip("CLI commands directory not found")
+
+        # Known legacy violations - these should be addressed in future refactoring
+        # but are allowed for now to prevent regression in new code
+        allowed_legacy_files = {
+            # quarantine.py uses infrastructure config and quarantine directly
+            # TODO: Route through QuarantineService
+            "quarantine.py",
+            # health.py uses health_monitor and prometheus_metrics directly
+            # TODO: Route through HealthService
+            "health.py",
+            # config.py uses infrastructure config directly
+            # TODO: Route through ConfigService or Composition
+            "config.py",
+        }
+
+        violations = []
+
+        for py_file in commands_dir.glob("*.py"):
+            # Skip __init__.py as it typically just re-exports
+            if py_file.name == "__init__.py":
+                continue
+
+            # Skip known legacy files (documented above)
+            if py_file.name in allowed_legacy_files:
+                continue
+
+            imports = get_imports_from_file(py_file)
+            infrastructure_imports = [
+                imp for imp in imports if "bioetl.infrastructure" in imp
+            ]
+
+            if infrastructure_imports:
+                violations.append(
+                    f"{py_file.name}: {infrastructure_imports}"
+                )
+
+        assert violations == [], (
+            "CLI commands should not import from infrastructure directly. "
+            "Found violations:\n  - " + "\n  - ".join(violations) + "\n"
+            "Use Application services or Composition entrypoints instead."
+        )
+
+    def test_legacy_cli_infrastructure_imports_documented(self):
+        """Document and track legacy infrastructure imports in CLI commands.
+
+        This test tracks known violations that are allowed temporarily.
+        As violations are fixed, remove them from the allowlist.
+        If all are fixed, this test can be removed.
+        """
+        commands_dir = SRC_PATH / "interfaces" / "cli" / "commands"
+
+        if not commands_dir.exists():
+            pytest.skip("CLI commands directory not found")
+
+        # Expected legacy violations - keep in sync with test above
+        expected_violations = {
+            "quarantine.py": ["bioetl.infrastructure.config", "bioetl.infrastructure.quarantine.unified"],
+            "health.py": ["bioetl.infrastructure.adapters.http.health_monitor", "bioetl.infrastructure.observability.prometheus_metrics"],
+            "config.py": ["bioetl.infrastructure.config"],
+        }
+
+        actual_violations = {}
+
+        for py_file in commands_dir.glob("*.py"):
+            if py_file.name == "__init__.py":
+                continue
+
+            imports = get_imports_from_file(py_file)
+            infrastructure_imports = sorted(
+                {imp for imp in imports if "bioetl.infrastructure" in imp}
+            )
+
+            if infrastructure_imports:
+                actual_violations[py_file.name] = infrastructure_imports
+
+        # Check that we're tracking all known violations
+        for filename, expected_imports in expected_violations.items():
+            actual = actual_violations.get(filename, [])
+            for expected_import in expected_imports:
+                assert expected_import in actual, (
+                    f"Expected violation in {filename}: {expected_import} "
+                    f"was fixed! Remove from allowed_legacy_files."
+                )
+
+        # Check for new violations not in our allowlist
+        for filename, imports in actual_violations.items():
+            if filename not in expected_violations:
+                pytest.fail(
+                    f"New infrastructure import in {filename}: {imports}. "
+                    f"Either fix it or add to expected_violations with justification."
+                )
+
     def test_interfaces_module_no_infrastructure_imports(self):
         """Test that interfaces __init__ doesn't import infrastructure."""
         init_path = SRC_PATH / "interfaces" / "__init__.py"
