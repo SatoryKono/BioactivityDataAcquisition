@@ -1,13 +1,14 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.9 | Last updated: 2026-01-04*
+*Synced with RULES.md v5.9 | Last updated: 2026-01-05*
 
-> **Documentation Audit Completed:** 2026-01-04
+> **Documentation Audit Completed:** 2026-01-05
 > - Consolidated duplicate `audit/` and `audits/` directories → `audits/`
 > - Consolidated duplicate `operations/` and `05-operations/` directories → `05-operations/`
 > - Fixed 30+ broken relative links
 > - Updated version references to v5.9
 > - 34 Mermaid diagrams maintained in `02-architecture/diagrams/`
+> - Added `02-architecture/00-overview.md` navigation document
 
 ## Quick Links
 
@@ -18,7 +19,7 @@
 | Create a new pipeline   | [00-project_rules/04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)      |
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
-| Understand architecture | [02-architecture/system-context.md](02-architecture/system-context.md)                  |
+| Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
 | Check data contracts    | [contracts/gold/activity.json](contracts/gold/activity.json)                                  |
 
 ---
@@ -57,6 +58,7 @@ docs/
 │   └── 07-consistency-check.md  # Consistency verification guide
 │
 ├── 02-architecture/             # System architecture
+│   ├── 00-overview.md           # Architecture overview & navigation
 │   ├── 01-domain-layer.md       # Domain layer architecture
 │   ├── 02-application-layer.md  # Application layer architecture
 │   ├── 03-infrastructure-layer.md # Infrastructure layer architecture

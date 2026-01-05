@@ -1,7 +1,8 @@
 # ADR-012: Storage Clear Contract and Run ID Consistency
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-23
+**Status:** Accepted
+**Date:** 2025-12-23
+**Decision makers:** @BioETL-Team
 
 ## Context
 

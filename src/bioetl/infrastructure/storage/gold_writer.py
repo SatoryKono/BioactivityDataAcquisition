@@ -30,6 +30,7 @@ from deltalake.exceptions import TableNotFoundError
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
 
 T = TypeVar("T")
 
@@ -47,8 +48,11 @@ if TYPE_CHECKING:
 __all__ = ["GoldWriteMode", "GoldWriter"]
 
 
-class GoldWriter:
+class GoldWriter(BaseDeltaWriter):
     """Writer for Gold layer (validated business data).
+
+    Inherits from BaseDeltaWriter for common Delta Lake operations
+    (get_table_path, clear).
 
     Enforces strict validation before writing. All records must pass
     schema validation or the entire batch fails.
@@ -80,6 +84,9 @@ class GoldWriter:
             Lock validation is now performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
+        # Initialize base class (sets base_path, logger, _retention_manager)
+        super().__init__(base_path, logger)
+
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         # Import from domain.ports.noop to maintain proper layer separation
         if tracing is None:
@@ -87,8 +94,6 @@ class GoldWriter:
 
             tracing = NoOpTracing()
 
-        self.base_path = str(base_path).rstrip("/")
-        self.logger = logger
         self.csv_exporter = csv_exporter
         self._audit = audit
         self._tracing: TracingPort = tracing
@@ -571,56 +576,7 @@ class GoldWriter:
             )
         )
 
-    def get_table_path(self, table_name: str) -> Path:
-        """Get the filesystem path for a table.
-
-        Args:
-            table_name: Table name (e.g., 'chembl.activity')
-
-        Returns:
-            Path to the table directory.
-
-        """
-        from pathlib import Path
-
-        return Path(self.base_path) / table_name.replace(".", "/")
-
-    def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
-        """Clear Gold Delta table(s) at the start of a pipeline run.
-
-        Args:
-            table_name: If provided, only clear this table.
-                       If None, clear all tables in base_path.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Number of tables cleared.
-
-        """
-        import shutil
-        from pathlib import Path
-
-        base = Path(self.base_path)
-        if not base.exists():
-            return 0
-
-        cleared = 0
-        if table_name:
-            # Clear specific table
-            table_path = self.get_table_path(table_name)
-            if table_path.exists():
-                if not dry_run:
-                    shutil.rmtree(table_path)
-                cleared = 1
-        else:
-            # Clear all Delta tables (directories with _delta_log)
-            for item in base.iterdir():
-                if item.is_dir() and (item / "_delta_log").exists():
-                    if not dry_run:
-                        shutil.rmtree(item)
-                    cleared += 1
-
-        return cleared
+    # NOTE: get_table_path() and clear() are inherited from BaseDeltaWriter
 
     async def read_gold(
         self,

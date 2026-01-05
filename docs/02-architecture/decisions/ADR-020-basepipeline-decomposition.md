@@ -1,7 +1,8 @@
 # ADR-020: Декомпозиция BasePipeline
 
-*   **Status**: Accepted (Implemented 2025-12-16)
-*   **Date**: 2025-12-16
+**Status:** Accepted (Implemented 2025-12-16)
+**Date:** 2025-12-16
+**Decision makers:** @BioETL-Team
 
 ## Контекст
 

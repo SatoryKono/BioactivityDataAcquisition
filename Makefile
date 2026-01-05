@@ -105,9 +105,26 @@ test-e2e-local: ## Run E2E tests (assumes Docker services already running)
 test-watch: ## Run tests in watch mode
 	$(RUN) pytest tests/ --looponfail
 
+test-profile: ## Profile test execution times (show top 50 slowest tests)
+	@echo "$(BLUE)Profiling test execution times...$(NC)"
+	$(RUN) pytest tests/ -q --durations=50 --durations-min=0.1 --ignore=tests/e2e/ --ignore=tests/benchmarks/
+	@echo "$(GREEN)Profile complete!$(NC)"
+
+test-ci-local: ## Run tests as they would run in CI (with HYPOTHESIS_PROFILE=ci)
+	@echo "$(BLUE)Running CI-like tests locally...$(NC)"
+	HYPOTHESIS_PROFILE=ci $(RUN) pytest tests/ -m "not e2e" -n auto --dist loadscope --cov=src/bioetl --cov-fail-under=85
+
 test-failed: ## Run only the tests that failed in the last run
 	@echo "$(BLUE)Running failed tests...$(NC)"
 	$(RUN) pytest tests/ -v --lf
+
+test-quick: ## Run quickest possible tests (fast profile, parallel, no slow tests)
+	@echo "$(BLUE)Running quick tests (HYPOTHESIS_PROFILE=fast)...$(NC)"
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -m "not slow" -n auto --dist loadscope -q --tb=line
+
+test-changed: ## Run tests for changed files (compared to main branch)
+	@echo "$(BLUE)Running tests for changed files...$(NC)"
+	./scripts/test_changed.sh
 
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
