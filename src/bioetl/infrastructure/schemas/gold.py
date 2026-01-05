@@ -525,3 +525,53 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = True
+
+
+class CrossRefPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for CrossRef Publication in Gold layer.
+
+    Used for enriching publication records with CrossRef metadata via DOI resolution.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    doi: Series[str] = pa.Field(nullable=False)
+
+    # Core fields
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[object] = pa.Field(nullable=True)  # list[str]
+    journal: Series[str] = pa.Field(nullable=True)
+    issn: Series[object] = pa.Field(nullable=True)  # list[str]
+    publisher: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
+    first_page: Series[str] = pa.Field(nullable=True)
+    last_page: Series[str] = pa.Field(nullable=True)
+
+    # Date fields
+    year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
+    published_print: Series[str] = pa.Field(nullable=True)
+    published_online: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    doc_type: Series[str] = pa.Field(nullable=True)
+    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    language: Series[str] = pa.Field(nullable=True)
+    license_url: Series[str] = pa.Field(nullable=True)
+    subjects: Series[object] = pa.Field(nullable=True)  # list[str]
+    source: Series[str] = pa.Field(nullable=True)
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
