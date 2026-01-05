@@ -137,9 +137,7 @@ class TestInterfacesNoDIrectInfrastructure:
             ]
 
             if infrastructure_imports:
-                violations.append(
-                    f"{py_file.name}: {infrastructure_imports}"
-                )
+                violations.append(f"{py_file.name}: {infrastructure_imports}")
 
         assert violations == [], (
             "CLI commands should not import from infrastructure directly. "
@@ -161,8 +159,14 @@ class TestInterfacesNoDIrectInfrastructure:
 
         # Expected legacy violations - keep in sync with test above
         expected_violations = {
-            "quarantine.py": ["bioetl.infrastructure.config", "bioetl.infrastructure.quarantine.unified"],
-            "health.py": ["bioetl.infrastructure.adapters.http.health_monitor", "bioetl.infrastructure.observability.prometheus_metrics"],
+            "quarantine.py": [
+                "bioetl.infrastructure.config",
+                "bioetl.infrastructure.quarantine.unified",
+            ],
+            "health.py": [
+                "bioetl.infrastructure.adapters.http.health_monitor",
+                "bioetl.infrastructure.observability.prometheus_metrics",
+            ],
             "config.py": ["bioetl.infrastructure.config"],
         }
 
