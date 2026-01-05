@@ -26,7 +26,11 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
+from bioetl.infrastructure.adapters.crossref.batch import (
+    DoiBatchProcessor,
+    SearchPaginator,
+)
+from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -69,9 +73,31 @@ class CrossRefAdapter(BaseHttpAdapter):
     """Provider identifier (required by DataSourcePort)."""
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics after dataclass init."""
+        """Initialize adapter metrics and helper components."""
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Initialize helper components for batch fetching and search
+        self._batch_fetcher = DoiBatchProcessor(
+            http=self.http_client,
+            logger=self.logger,
+            metrics=self._adapter_metrics,
+            mailto=self.mailto,
+            api_base=CROSSREF_API_BASE,
+            headers_fn=self._build_headers,
+        )
+        self._search_paginator = SearchPaginator(
+            http=self.http_client,
+            logger=self.logger,
+            metrics=self._adapter_metrics,
+            mailto=self.mailto,
+            api_base=CROSSREF_API_BASE,
+            headers_fn=self._build_headers,
+        )
+        self._fallback_handler = TitleFallbackHandler(
+            logger=self.logger,
+            search_fn=self._search_paginator.search,
+        )
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers with polite pool identification."""
@@ -79,242 +105,6 @@ class CrossRefAdapter(BaseHttpAdapter):
             "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
             "Accept": "application/json",
         }
-
-    async def _fetch_single_publication(self, doi: str) -> dict[str, Any] | None:
-        """Fetch a single publication by DOI.
-
-        Args:
-            doi: The DOI to fetch (will be normalized).
-
-        Returns:
-            Publication record or None if not found.
-
-        Raises:
-            CrossRefApiError: On API errors (non-404).
-
-        """
-        normalized_doi = normalize_doi(doi) or ""
-        url = f"{CROSSREF_API_BASE}/works/{normalized_doi}"
-
-        try:
-            with self._adapter_metrics.measure_request("/works/{doi}"):
-                response = await self.http_client.get(
-                    url, headers=self._build_headers()
-                )
-
-            if response.status_code == 404:
-                self.logger.debug(
-                    "crossref_doi_not_found",
-                    doi=normalized_doi,
-                )
-                return None
-
-            if response.status_code != 200:
-                raise CrossRefApiError(
-                    f"CrossRef API error for DOI {normalized_doi}",
-                    status_code=response.status_code,
-                )
-
-            data = response.json()
-            publication: dict[str, Any] = data.get("message", {})
-            return publication
-
-        except CrossRefApiError:
-            raise
-        except Exception as e:
-            self.logger.error(
-                "crossref_fetch_failed",
-                doi=normalized_doi,
-                error=str(e),
-            )
-            raise CrossRefApiError(f"Failed to fetch DOI {normalized_doi}: {e}") from e
-
-    async def _fallback_individual_fetch(
-        self, dois: list[str]
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fall back to individual DOI fetches.
-
-        Used when batch endpoint fails.
-
-        Args:
-            dois: List of DOIs to fetch individually.
-
-        Yields:
-            Publication records for successfully fetched DOIs.
-
-        """
-        for doi in dois:
-            try:
-                publication = await self._fetch_single_publication(doi)
-                if publication:
-                    yield publication
-            except Exception as e:
-                self.logger.debug(
-                    "crossref_individual_fetch_failed",
-                    doi=doi,
-                    error=str(e),
-                )
-
-    async def _fetch_batch_publications(
-        self, dois: list[str]
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch multiple publications by DOI batch.
-
-        Uses CrossRef filter endpoint for batch resolution.
-
-        Args:
-            dois: List of DOIs to fetch (max 100).
-
-        Yields:
-            Publication records for found DOIs.
-
-        """
-        if not dois:
-            return
-
-        # CrossRef allows filtering by multiple DOIs
-        normalized_dois = [normalize_doi(d) or "" for d in dois]
-        filter_value = ",".join(normalized_dois)
-        url = f"{CROSSREF_API_BASE}/works"
-        params = {
-            "filter": f"doi:{filter_value}",
-            "rows": str(len(normalized_dois)),
-            "mailto": self.mailto,
-        }
-
-        try:
-            with self._adapter_metrics.measure_request("/works?filter=doi"):
-                response = await self.http_client.get(
-                    url, params=params, headers=self._build_headers()
-                )
-
-            if response.status_code != 200:
-                self.logger.warning(
-                    "crossref_batch_fetch_failed",
-                    status_code=response.status_code,
-                    doi_count=len(dois),
-                )
-                async for publication in self._fallback_individual_fetch(dois):
-                    yield publication
-                return
-
-            data = response.json()
-            items = data.get("message", {}).get("items", [])
-            for item in items:
-                yield item
-
-        except Exception as e:
-            self.logger.warning(
-                "crossref_batch_fetch_error",
-                error=str(e),
-                doi_count=len(dois),
-            )
-            async for publication in self._fallback_individual_fetch(dois):
-                yield publication
-
-    async def _fetch_search_page(
-        self,
-        query: str,
-        rows: int,
-        cursor: str,
-    ) -> tuple[list[dict[str, Any]], str | None]:
-        """Fetch a single page of search results.
-
-        Args:
-            query: Search query string.
-            rows: Number of results per page.
-            cursor: Pagination cursor.
-
-        Returns:
-            Tuple of (items list, next_cursor or None).
-
-        Raises:
-            CrossRefApiError: On API errors.
-
-        """
-        url = f"{CROSSREF_API_BASE}/works"
-        params = {
-            "query": query,
-            "rows": str(rows),
-            "cursor": cursor,
-            "mailto": self.mailto,
-        }
-
-        with self._adapter_metrics.measure_request("/works?query"):
-            response = await self.http_client.get(
-                url, params=params, headers=self._build_headers()
-            )
-
-        if response.status_code != 200:
-            raise CrossRefApiError(
-                f"CrossRef search failed: {response.status_code}",
-                status_code=response.status_code,
-            )
-
-        data = response.json()
-        message = data.get("message", {})
-        items = message.get("items", [])
-        next_cursor = message.get("next-cursor")
-
-        return items, next_cursor
-
-    def _should_continue_pagination(
-        self, items: list[dict[str, Any]], next_cursor: str | None, current_cursor: str
-    ) -> bool:
-        """Check if pagination should continue.
-
-        Args:
-            items: Items from current page.
-            next_cursor: Next cursor from response.
-            current_cursor: Current cursor value.
-
-        Returns:
-            True if pagination should continue, False otherwise.
-
-        """
-        if not items:
-            return False
-        return bool(next_cursor and next_cursor != current_cursor)
-
-    async def _search_publications(
-        self,
-        query: str,
-        limit: int | None = None,
-        cursor: str = "*",
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Search for publications using cursor-based pagination.
-
-        Args:
-            query: Search query string.
-            limit: Maximum number of results.
-            cursor: Pagination cursor (* for first page).
-
-        Yields:
-            Publication records matching the query.
-
-        """
-        rows = min(limit, 100) if limit else 100
-        fetched = 0
-
-        try:
-            while True:
-                items, next_cursor = await self._fetch_search_page(query, rows, cursor)
-
-                for item in items:
-                    yield item
-                    fetched += 1
-                    if limit and fetched >= limit:
-                        return
-
-                if not self._should_continue_pagination(items, next_cursor, cursor):
-                    break
-                cursor = next_cursor  # type: ignore[assignment]
-
-        except CrossRefApiError:
-            raise
-        except Exception as e:
-            self.logger.error("crossref_search_failed", query=query, error=str(e))
-            raise CrossRefApiError(f"CrossRef search failed: {e}") from e
 
     async def fetch_filtered(
         self,
@@ -358,7 +148,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         # Process DOIs in batches (max 100 per request)
         for i in range(0, len(dois), self.batch_size):
             batch = dois[i : i + self.batch_size]
-            async for publication in self._fetch_batch_publications(batch):
+            async for publication in self._batch_fetcher.fetch_batch(batch):
                 yield publication
                 fetched += 1
                 if limit and fetched >= limit:
@@ -385,68 +175,6 @@ class CrossRefAdapter(BaseHttpAdapter):
             "CrossRef API does not support multi-field filtering. "
             "Use fetch_filtered() with filter_field='doi' instead."
         )
-
-    def _titles_match(
-        self, query_title: str, found_title: str, threshold: float = 0.8
-    ) -> bool:
-        """Check if titles match (case-insensitive, normalized).
-
-        Args:
-            query_title: The title we're searching for.
-            found_title: The title found in CrossRef.
-            threshold: Unused, reserved for future fuzzy matching.
-
-        Returns:
-            True if titles match, False otherwise.
-        """
-        q = query_title.lower().strip()
-        f = found_title.lower().strip()
-
-        # Exact match
-        if q == f:
-            return True
-
-        # Substring match (title may be truncated)
-        if q in f or f in q:
-            return True
-
-        return False
-
-    async def _search_by_title(
-        self,
-        title: str,
-        limit: int = 3,
-    ) -> dict[str, Any] | None:
-        """Search for a publication by title.
-
-        Args:
-            title: Publication title to search for.
-            limit: Maximum results to check for relevance.
-
-        Returns:
-            First relevant publication or None.
-        """
-        # Clean title for search (CrossRef limit)
-        clean_title = title.strip()[:200]
-
-        try:
-            async for publication in self._search_publications(
-                query=f'title:"{clean_title}"',
-                limit=limit,
-            ):
-                # Check relevance (title must match)
-                pub_titles = publication.get("title", [])
-                found_title = pub_titles[0] if pub_titles else ""
-                if self._titles_match(clean_title, found_title):
-                    return publication
-        except Exception as e:
-            self.logger.debug(
-                "crossref_title_search_failed",
-                title=clean_title[:50],
-                error=str(e),
-            )
-
-        return None
 
     async def fetch_filtered_with_fallback(
         self,
@@ -480,8 +208,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         # Batch fetch (primary path)
         for i in range(0, len(dois), self.batch_size):
             batch = dois[i : i + self.batch_size]
-
-            async for publication in self._fetch_batch_publications(batch):
+            async for publication in self._batch_fetcher.fetch_batch(batch):
                 doi = publication.get("DOI", "").lower()
                 found_dois.add(doi)
                 yield publication
@@ -489,41 +216,16 @@ class CrossRefAdapter(BaseHttpAdapter):
                 if limit and fetched >= limit:
                     return
 
-        # Fallback for not-found DOIs
-        for doi in dois:
-            normalized_doi = (normalize_doi(doi) or "").lower()
-            if normalized_doi in found_dois:
-                continue
-
-            title = fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
-            if not title:
-                self.logger.debug("crossref_no_fallback_title", doi=doi)
-                continue
-
-            self.logger.info(
-                "crossref_title_fallback_attempt",
-                doi=doi,
-                title=title[:50] + "..." if len(title) > 50 else title,
-            )
-
-            publication = await self._search_by_title(title)
-            if publication:
-                self.logger.info(
-                    "crossref_title_fallback_success",
-                    original_doi=doi,
-                    found_doi=publication.get("DOI"),
-                    title=title[:50],
-                )
-                yield publication
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
-            else:
-                self.logger.warning(
-                    "crossref_title_fallback_not_found",
-                    doi=doi,
-                    title=title[:50],
-                )
+        # Fallback for not-found DOIs using handler
+        async for pub in self._fallback_handler.process_missing_dois(
+            dois=dois,
+            found_dois=found_dois,
+            fallback_mapping=fallback_mapping,
+            normalize_fn=normalize_doi,
+            limit=limit,
+            fetched=fetched,
+        ):
+            yield pub
 
     async def fetch(
         self,
@@ -570,7 +272,7 @@ class CrossRefAdapter(BaseHttpAdapter):
                 "CrossRef requires either filter_ids (DOIs) or query parameter"
             )
 
-        async for publication in self._search_publications(query, limit):
+        async for publication in self._search_paginator.search(query, limit):
             yield publication
 
     async def _probe_health(self) -> HealthStatus:
