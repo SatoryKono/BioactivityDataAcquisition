@@ -526,6 +526,39 @@ class ChemblAdapter(BaseHttpAdapter):
                 break
             offset += len(records)
 
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback (not applicable for ChEMBL).
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        ChEMBL uses ChEMBL IDs for filtering which are always resolvable,
+        so fallback is not needed. This method simply delegates to fetch_filtered()
+        and ignores the fallback_mapping parameter.
+
+        Args:
+            entity_type: Type of entity to fetch
+            filter_ids: Sorted list of IDs to filter by
+            filter_field: Field name to filter on
+            fallback_mapping: Ignored - ChEMBL doesn't need fallback search
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records matching the filter criteria
+
+        """
+        _ = fallback_mapping  # Unused - ChEMBL IDs are always resolvable
+        async for record in self._fetch_filtered(
+            entity_type, limit, filter_ids, filter_field
+        ):
+            yield record
+
     async def fetch_as_models(
         self,
         entity_type: str,
