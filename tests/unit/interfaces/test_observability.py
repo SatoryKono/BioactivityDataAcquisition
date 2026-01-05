@@ -4,12 +4,13 @@ from unittest import mock
 
 import pytest
 
+from bioetl.composition._bootstrap import observability as composition_observability
 from bioetl.infrastructure.observability import server as obs_server
 from bioetl.interfaces import observability
 
 # This module tests the observability interface.
-# The observability module starts a metrics server internally by setting `_SERVER_STARTED` to `True`.
-# Below are the test functions to ensure server initialization behaviour.
+# The observability module re-exports metrics server components from composition layer,
+# which in turn imports from infrastructure.
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
@@ -22,7 +23,7 @@ def reset_server_started():
 
 
 def test_start_metrics_server_success():
-    """Verify metrics_server starts successfully"""
+    """Verify metrics_server starts successfully via interface."""
     with mock.patch(
         "bioetl.infrastructure.observability.server.start_http_server"
     ) as mock_start:
@@ -45,27 +46,23 @@ def test_start_metrics_server_failure():
         assert result is False
 
 
-def test_interface_passes_config_params():
-    """Verify interface layer passes all config params to server."""
-    # Patch at the module level where it's imported as _start_server
-    with mock.patch("bioetl.interfaces.observability._start_server") as mock_server:
-        mock_server.return_value = True
-        result = observability.start_metrics_server(
-            port=9090,
-            fail_fast=True,
-            retry_count=5,
-            retry_delay=2.0,
-        )
+def test_interface_re_exports_from_composition():
+    """Verify interface re-exports start_metrics_server from composition layer.
 
-        mock_server.assert_called_once_with(
-            port=9090,
-            fail_fast=True,
-            retry_count=5,
-            retry_delay=2.0,
-        )
-        assert result is True
+    After architectural refactoring, interfaces/observability.py re-exports
+    from composition/_bootstrap for architectural purity.
+    """
+    # The function should be the same object since it's a re-export
+    assert (
+        observability.start_metrics_server
+        is composition_observability.start_metrics_server
+    )
 
 
 def test_interface_exposes_metrics_server_error():
-    """Verify MetricsServerError is exported from interface."""
+    """Verify MetricsServerError is exported from interface via composition."""
+    # Interface re-exports from composition, which imports from infrastructure
     assert observability.MetricsServerError is obs_server.MetricsServerError
+    assert (
+        observability.MetricsServerError is composition_observability.MetricsServerError
+    )
