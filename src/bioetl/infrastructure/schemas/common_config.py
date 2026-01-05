@@ -25,6 +25,17 @@ class DQConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> DQConfig:
+        """Validate that soft threshold is less than hard threshold.
+
+        Delegates to domain DQConfig for threshold validation per §4.1.
+        Raises ValueError if soft_fail_threshold >= hard_fail_threshold.
+
+        Returns:
+            Self after validation.
+
+        Raises:
+            ValueError: If threshold invariant is violated.
+        """
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -32,6 +43,11 @@ class DQConfig(BaseModel):
         return self
 
     def to_domain(self) -> DomainDQConfig:
+        """Convert Pydantic schema to domain DQConfig object.
+
+        Returns:
+            Domain-layer DQConfig with validated thresholds.
+        """
         return DomainDQConfig(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -46,6 +62,14 @@ class CircuitBreakerConfig(BaseModel):
     recovery_timeout: int = Field(default=300, ge=60)
 
     def to_domain(self) -> DomainCircuitBreakerConfig:
+        """Convert Pydantic schema to domain CircuitBreakerConfig.
+
+        Creates domain configuration for circuit breaker per §3.1.4.
+
+        Returns:
+            Domain-layer CircuitBreakerConfig with failure threshold
+            and recovery timeout settings.
+        """
         return DomainCircuitBreakerConfig(
             failure_threshold=self.failure_threshold,
             recovery_timeout=self.recovery_timeout,
@@ -72,6 +96,14 @@ class InputFilterConfig(BaseModel):
     batch_size: int = Field(default=100, ge=1, le=1000)
 
     def to_domain(self) -> DomainInputFilterConfig:
+        """Convert Pydantic schema to domain InputFilterConfig.
+
+        Creates domain configuration for CSV-based input filtering.
+        When disabled, column_name and filter_field are set to None.
+
+        Returns:
+            Domain-layer InputFilterConfig for selective record processing.
+        """
         from bioetl.domain.filtering.input_config import (
             InputFilterConfig as DomainInputFilterConfigImpl,
         )
@@ -100,6 +132,15 @@ class ApiConfig(BaseModel):
     timeout: int | None = None
 
     def to_domain(self) -> BaseClientConfig:
+        """Convert Pydantic schema to domain BaseClientConfig.
+
+        Creates domain configuration for API client with defaults:
+        - timeout: 30 seconds if not specified
+        - rate_limit: 5.0 requests/second if not specified
+
+        Returns:
+            Domain-layer BaseClientConfig for HTTP client initialization.
+        """
         return BaseClientConfig(
             base_url=self.base_url,
             timeout=self.timeout or 30,
