@@ -87,7 +87,7 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
         stats = asyncio.run(_stats())
     except Exception as e:
         echo_error(f"Failed to get stats: {e}")
-        sys.exit(ExitCode.FAIL.value)
+        sys.exit(ExitCode.FAIL)
 
     if output_json:
         click.echo(json.dumps(stats, indent=2))
@@ -245,7 +245,7 @@ def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
         click.echo(f"Record {payload_hash} marked as {status}.")
     else:
         echo_error(f"Record not found: {payload_hash}")
-        sys.exit(ExitCode.FAIL.value)
+        sys.exit(ExitCode.FAIL)
 
 
 __all__ = ["quarantine"]
