@@ -25,7 +25,7 @@ class TestRetryConfig:
         assert config.max_delay == 60.0
         assert config.multiplier == 2.0
         assert config.jitter_range == (0.1, 0.5)
-        assert config.retryable_statuses == frozenset({429, 502, 503, 504})
+        assert config.retryable_statuses == frozenset({429, 500, 502, 503, 504})
         assert ConnectionError in config.retryable_exceptions
         assert TimeoutError in config.retryable_exceptions
 
@@ -59,13 +59,13 @@ class TestRetryConfig:
         """Test is_retryable_status method."""
         config = RetryConfig()
         assert config.is_retryable_status(429)
+        assert config.is_retryable_status(500)  # Internal Server Error is retryable
         assert config.is_retryable_status(502)
         assert config.is_retryable_status(503)
         assert config.is_retryable_status(504)
         assert not config.is_retryable_status(200)
         assert not config.is_retryable_status(400)
         assert not config.is_retryable_status(401)
-        assert not config.is_retryable_status(500)  # Not in default list
 
     def test_is_retryable_exception(self):
         """Test is_retryable_exception method."""
