@@ -39,15 +39,15 @@ transform:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/bronze/pubmed/publication"
+    path: "data/output/bronze/pubmed/publication"
   silver:
-    path: "data/silver/pubmed/publication"
+    path: "data/output/silver/pubmed/publication"
     primary_key: ["pmid"]
     partition_by: ["pub_year"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: "data/gold/pubmed/publication"
+    path: "data/output/gold/pubmed/publication"
     csv_export:
       path: "data/output/csv/gold"
 

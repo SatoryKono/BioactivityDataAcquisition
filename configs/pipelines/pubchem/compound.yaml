@@ -32,15 +32,15 @@ transform:
 # Entity-specific sink overrides (custom paths)
 sink:
   bronze:
-    path: "data/bronze/pubchem/compound"
+    path: "data/output/bronze/pubchem/compound"
   silver:
-    path: "data/silver/pubchem/compound"
+    path: "data/output/silver/pubchem/compound"
     primary_key: ["cid"]
     partition_by: ["batch_date"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: "data/gold/pubchem/compound"
+    path: "data/output/gold/pubchem/compound"
     csv_export:
       path: "data/output/csv/gold"
 
