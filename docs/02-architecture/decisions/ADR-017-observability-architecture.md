@@ -1,8 +1,12 @@
 # ADR-017: Observability Architecture
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-26
-*   **Context**: BioETL pipelines require comprehensive observability for debugging, performance monitoring, and operational alerting. The observability stack must follow the Ports & Adapters architecture to maintain testability and avoid infrastructure dependencies in domain/application layers.
+**Status:** Accepted
+**Date:** 2025-12-26
+**Decision makers:** @BioETL-Team
+
+## Context
+
+BioETL pipelines require comprehensive observability for debugging, performance monitoring, and operational alerting. The observability stack must follow the Ports & Adapters architecture to maintain testability and avoid infrastructure dependencies in domain/application layers.
 
 ## The Decision
 

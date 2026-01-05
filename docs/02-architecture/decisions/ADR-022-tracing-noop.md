@@ -1,8 +1,9 @@
 # ADR-022: NoOp Tracing for Local-Only Deployment
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-30
-*   **Extends**: ADR-010 (Local-Only Deployment), ADR-017 (Observability Architecture)
+**Status:** Accepted
+**Date:** 2025-12-30
+**Decision makers:** @BioETL-Team
+**Extends:** ADR-010 (Local-Only Deployment), ADR-017 (Observability Architecture)
 
 ## Context
 

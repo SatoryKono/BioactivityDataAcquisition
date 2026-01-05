@@ -1,9 +1,13 @@
 # ADR-007: Circuit Breaker Implementation
 
-*   **Status**: Accepted
-*   **Date**: 2025-12-22
-*   **Last Updated**: 2026-01-02
-*   **Context**: External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures, slowdowns, or rate limiting. Without protection, the pipeline would repeatedly hammer failing services, wasting resources and potentially causing cascading failures. A circuit breaker pattern was needed to gracefully handle degraded external dependencies.
+**Status:** Accepted
+**Date:** 2025-12-22
+**Last Updated:** 2026-01-02
+**Decision makers:** @BioETL-Team
+
+## Context
+
+External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures, slowdowns, or rate limiting. Without protection, the pipeline would repeatedly hammer failing services, wasting resources and potentially causing cascading failures. A circuit breaker pattern was needed to gracefully handle degraded external dependencies.
 
 ## The Decision
 
