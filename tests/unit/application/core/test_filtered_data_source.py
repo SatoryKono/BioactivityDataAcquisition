@@ -68,6 +68,17 @@ class MockFilterableDataSource:
         for record in [{"id": "multi_1"}, {"id": "multi_2"}]:
             yield record
 
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ):
+        for record in [{"id": "fallback_1"}, {"id": "fallback_2"}]:
+            yield record
+
 
 # Verify the mock properly implements the Protocol
 assert isinstance(MockFilterableDataSource(), FilterableDataSourcePort)
