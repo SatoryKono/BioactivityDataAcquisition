@@ -28,6 +28,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-020](ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | Architecture | 2025-12-16 |
 | [ADR-021](ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates Adoption | Accepted | Domain Model | 2025-12-29 |
 | [ADR-022](ADR-022-tracing-noop.md) | NoOp Tracing for Local-Only | Accepted | Observability | 2025-12-30 |
+| [ADR-023](ADR-023-entity-type-patterns.md) | Entity Type Patterns | Accepted | Observability | 2026-01-06 |
 
 ## ADRs by Category
 
@@ -50,6 +51,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-017](ADR-017-observability-architecture.md): Observability Architecture
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
+- [ADR-023](ADR-023-entity-type-patterns.md): Entity Type Patterns (transformer entity_type)
 
 ### Lifecycle Management
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy
@@ -122,22 +124,25 @@ This directory contains Architecture Decision Records documenting significant ar
    │Port Enforc│                 │Error Handl│
    └───────────┘                 └───────────┘
          │
-         ▼
-   ┌───────────┐
-   │  ADR-022  │
-   │ NoOp Trac │◄───────────────────────┐
-   └───────────┘                        │
-                                        │
-                                 ┌───────────┐
-                                 │  ADR-010  │
-                                 │Local-Only │──────► ADR-003 (Superseded)
-                                 └───────────┘
-                                        │
-                                        ▼
-                                 ┌───────────┐
-                                 │  ADR-011  │
-                                 │Rm Watermark│
-                                 └───────────┘
+         ├─────────────────────┐
+         ▼                     ▼
+   ┌───────────┐         ┌───────────┐
+   │  ADR-022  │         │  ADR-023  │
+   │ NoOp Trac │◄────────┤Entity Type│
+   └───────────┘         └───────────┘
+         │
+         │◄────────────────────────────┐
+                                       │
+                                ┌───────────┐
+                                │  ADR-010  │
+                                │Local-Only │──────► ADR-003 (Superseded)
+                                └───────────┘
+                                       │
+                                       ▼
+                                ┌───────────┐
+                                │  ADR-011  │
+                                │Rm Watermark│
+                                └───────────┘
 ```
 
 ## Writing New ADRs
@@ -174,7 +179,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 ## Related ADRs
 
-- [ADR-NNN](ADR-NNN-title.md): Description — how it relates
+- [ADR-001](ADR-001-delta-lake-vs-parquet.md): Description — how it relates
 ```
 
 ### Naming Convention
