@@ -130,11 +130,23 @@ Gold layer applies filters for high-quality drug-like molecules:
 
 ### Flattened Structure Fields
 
+> **Note**: As of v5.10.0, structure fields use unified naming without the `structure_` prefix
+> for consistency with PubChem. See migration guide below.
+
 | Field | Type | Nullable | Description | Source |
 |-------|------|----------|-------------|--------|
-| `structure_canonical_smiles` | `str` | Yes | Canonical SMILES | `molecule_structures.canonical_smiles` |
-| `structure_standard_inchi` | `str` | Yes | Standard InChI | `molecule_structures.standard_inchi` |
-| `structure_standard_inchi_key` | `str` | Yes | Standard InChI Key | `molecule_structures.standard_inchi_key` |
+| `canonical_smiles` | `str` | Yes | Canonical SMILES representation | `molecule_structures.canonical_smiles` |
+| `standard_inchi` | `str` | Yes | Standard InChI representation | `molecule_structures.standard_inchi` |
+| `inchi_key` | `str` | Yes | Standard InChI Key | `molecule_structures.standard_inchi_key` |
+
+#### Migration from v5.9.x
+
+The following field names have been renamed:
+- `structure_canonical_smiles` → `canonical_smiles`
+- `structure_standard_inchi` → `standard_inchi`
+- `structure_standard_inchi_key` → `inchi_key`
+
+Use the migration script: `scripts/migrations/rename_structure_fields.py`
 
 ---
 
@@ -167,7 +179,9 @@ Gold layer applies filters for high-quality drug-like molecules:
 | `molecule_properties` | `molecule_properties` | `json.dumps()` |
 | `molecule_properties.*` | `property_*` | Flatten & convert |
 | `molecule_structures` | `molecule_structures` | `json.dumps()` |
-| `molecule_structures.*` | `structure_*` | Flatten |
+| `molecule_structures.canonical_smiles` | `canonical_smiles` | Flatten (no prefix) |
+| `molecule_structures.standard_inchi` | `standard_inchi` | Flatten (no prefix) |
+| `molecule_structures.standard_inchi_key` | `inchi_key` | Flatten + rename |
 
 ---
 
@@ -292,8 +306,9 @@ def _validate_invariants(self) -> None:
   "property_ro5_violations": 0,
   "property_qed_weighted": 0.56,
 
-  "structure_canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
-  "structure_standard_inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+  "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
+  "standard_inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
+  "inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
 }
 ```
 
@@ -313,6 +328,7 @@ def _validate_invariants(self) -> None:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1.0 | 2026-01-06 | **BREAKING**: Renamed structure fields for PubChem consistency |
 | 1.0.0 | 2024-12-28 | Initial schema documentation |
 
 ---

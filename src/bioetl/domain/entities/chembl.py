@@ -426,16 +426,14 @@ class MoleculeRecord(BaseModel):
         default=None, description="Rule of 3 pass (Y/N)"
     )
 
-    # Flattened structures
-    structure_canonical_smiles: str | None = Field(
-        default=None, description="Canonical SMILES"
+    # Flattened structures (unified naming without structure_ prefix)
+    canonical_smiles: str | None = Field(
+        default=None, description="Canonical SMILES representation"
     )
-    structure_standard_inchi: str | None = Field(
-        default=None, description="Standard InChI"
+    standard_inchi: str | None = Field(
+        default=None, description="Standard InChI representation"
     )
-    structure_standard_inchi_key: str | None = Field(
-        default=None, description="Standard InChI Key"
-    )
+    inchi_key: str | None = Field(default=None, description="Standard InChI Key")
 
     # Complex fields (JSON serialized)
     molecule_hierarchy_json: str | None = Field(

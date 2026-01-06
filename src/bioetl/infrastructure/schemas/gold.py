@@ -478,9 +478,10 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
     property_full_molformula: Series[str] = pa.Field(nullable=True)
     property_ro3_pass: Series[str] = pa.Field(nullable=True)
-    structure_canonical_smiles: Series[str] = pa.Field(nullable=True)
-    structure_standard_inchi: Series[str] = pa.Field(nullable=True)
-    structure_standard_inchi_key: Series[str] = pa.Field(nullable=True)
+    # Flattened Structures (unified naming without structure_ prefix)
+    canonical_smiles: Series[str] = pa.Field(nullable=True)
+    standard_inchi: Series[str] = pa.Field(nullable=True)
+    inchi_key: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
