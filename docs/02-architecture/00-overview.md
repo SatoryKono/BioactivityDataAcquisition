@@ -1,6 +1,6 @@
 # Architecture Overview
 
-*Synced with RULES.md v5.10 (2026-01-05)*
+*Synced with RULES.md v5.10 (2026-01-06)*
 
 ## Quick Navigation
 
@@ -34,7 +34,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 ### Architecture Decision Records (ADRs)
 
-22 ADRs documenting key architectural decisions:
+24 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -60,6 +60,8 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 | [ADR-020](decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | - |
 | [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates | - |
 | [ADR-022](decisions/ADR-022-tracing-noop.md) | Tracing NoOp | - |
+| [ADR-023](decisions/ADR-023-entity-type-patterns.md) | Entity Type Patterns | - |
+| [ADR-024](decisions/ADR-024-entity-naming-unification.md) | Entity Naming Unification | - |
 
 ---
 
