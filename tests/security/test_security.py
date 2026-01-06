@@ -59,6 +59,7 @@ ALLOWED_PATTERNS = [
 ]
 
 
+@pytest.mark.timeout(120)  # File scanning needs more time
 class TestVCRCassetteSanitization:
     """Tests that VCR cassettes don't contain secrets."""
 
