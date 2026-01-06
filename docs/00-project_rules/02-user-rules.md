@@ -1,6 +1,6 @@
 # User Rules
 
-*Синхронизировано с RULES.md v5.9 (2026-01-01)*
+*Синхронизировано с RULES.md v5.10 (2026-01-06)*
 
 Репозиторий: SatoryKono/BioactivityDataAcquisition
 
