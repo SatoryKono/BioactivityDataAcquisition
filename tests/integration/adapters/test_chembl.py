@@ -6,26 +6,10 @@ To record new cassettes: pytest --vcr-record=new_episodes
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-
-# VCR cassette directory for ChEMBL tests
-CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
-
-
-@pytest.fixture(scope="module")
-def vcr_config():
-    """Configure VCR for ChEMBL tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
 
 
 @pytest.mark.integration

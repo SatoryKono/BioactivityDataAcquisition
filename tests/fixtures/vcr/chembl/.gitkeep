@@ -1,2 +1,0 @@
-# VCR.py cassettes for ChEMBL API tests
-# Record new cassettes with: pytest --vcr-record=new_episodes
