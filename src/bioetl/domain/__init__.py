@@ -47,18 +47,20 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     BioactivityState,
     CellLine,
     CellLineRecord,
-    Compound,
+    ChemblPublication,  # Canonical (v2.0)
+    Compound,  # Deprecated → PubchemMolecule
     CompoundRecord,
-    Document,
+    Document,  # Deprecated → ChemblPublication
     DocumentRecord,
     DocumentSimilarity,
     DocumentTerm,
     DocumentTermRecord,
     Molecule,
     MoleculeRecord,
-    Protein,
+    Protein,  # Deprecated → UniprotTarget
     ProteinClassification,
     PubChemCompoundRecord,
+    PubchemMolecule,  # Canonical (v2.0)
     Publication,
     PublicationEntity,
     PublicationRecord,
@@ -67,6 +69,7 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     TargetComponent,
     TargetComponentRecord,
     TargetRecord,
+    UniprotTarget,  # Canonical (v2.0)
 )
 
 # Error classifier
@@ -294,19 +297,22 @@ __all__ = [
     "Bioactivity",
     "BioactivityState",
     "CellLine",
-    "Compound",
+    "ChemblPublication",  # Canonical (v2.0)
+    "Compound",  # Deprecated → PubchemMolecule
     "CompoundRecord",
-    "Document",
+    "Document",  # Deprecated → ChemblPublication
     "DocumentSimilarity",
     "DocumentTerm",
     "Molecule",
-    "Protein",
+    "Protein",  # Deprecated → UniprotTarget
     "ProteinClassification",
+    "PubchemMolecule",  # Canonical (v2.0)
     "Publication",
     "PublicationEntity",
     "SemanticScholarPublicationEntity",
     "Target",
     "TargetComponent",
+    "UniprotTarget",  # Canonical (v2.0)
     # Error classifier
     "ErrorClassifier",
     # Events

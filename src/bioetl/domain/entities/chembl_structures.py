@@ -1,7 +1,12 @@
 """ChEMBL structural domain entities.
 
-Contains Document, DocumentTerm, DocumentSimilarity, Target, TargetComponent,
-CellLine, Molecule, and ProteinClassification entities.
+Contains ChemblPublication (canonical name for Document), DocumentTerm,
+DocumentSimilarity, Target, TargetComponent, CellLine, Molecule,
+and ProteinClassification entities.
+
+.. versionchanged:: 2.0.0
+    Document renamed to ChemblPublication for Ubiquitous Language alignment.
+    The deprecated Document alias remains for backward compatibility.
 """
 
 from __future__ import annotations
@@ -12,11 +17,17 @@ from bioetl.domain.entities.base import BaseEntity
 
 
 @dataclass(frozen=True, kw_only=True)
-class Document(BaseEntity):
+class ChemblPublication(BaseEntity):
     """Represents a scientific document/publication (ChEMBL Document).
+
+    Canonical name for ChEMBL's Document entity, aligned with Ubiquitous Language.
+    Maps to ChEMBL API endpoint: /document
 
     Contains all fields from ChEMBL document API endpoint.
     See: https://www.ebi.ac.uk/chembl/api/data/document
+
+    .. versionadded:: 2.0.0
+        Replaces :class:`Document` as the canonical entity name.
     """
 
     # Primary identifier
@@ -51,7 +62,7 @@ class Document(BaseEntity):
 
     def _validate_invariants(self) -> None:
         if not self.document_chembl_id:
-            raise ValueError("Document ChEMBL ID is required")
+            raise ValueError("ChemblPublication document_chembl_id is required")
         if self.year is not None and (self.year < 1800 or self.year > 2100):
             raise ValueError(f"Year must be between 1800-2100, got {self.year}")
 
@@ -439,3 +450,20 @@ class ProteinClassification(BaseEntity):
     def is_deprecated(self) -> bool:
         """Check if this classification is deprecated."""
         return self.replaced_by is not None or self.downgraded == 1
+
+
+# === Deprecated Aliases (backward compatibility) ===
+
+# Document is a deprecated alias for ChemblPublication.
+# Use ChemblPublication in new code for Ubiquitous Language alignment.
+#
+# .. deprecated:: 2.0.0
+#     Use :class:`ChemblPublication` instead.
+#
+# Migration:
+#     # Before
+#     from bioetl.domain.entities import Document
+#
+#     # After
+#     from bioetl.domain.entities import ChemblPublication
+Document = ChemblPublication
