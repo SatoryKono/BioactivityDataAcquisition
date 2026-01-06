@@ -100,6 +100,48 @@ def extract_first_string(items: list[str] | None) -> str | None:
     return next((s for item in items if (s := _is_valid_string(item))), None)
 
 
+def _filter_valid_strings(items: list[Any]) -> list[str]:
+    """Filter list to valid non-empty strings."""
+    return [str(a).strip() for a in items if a is not None and str(a).strip()]
+
+
+def _parse_authors_from_list(authors: list[Any]) -> list[str]:
+    """Parse author list, filtering non-strings and empty values."""
+    return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
+
+
+def _try_parse_json_array(text: str) -> list[Any] | None:
+    """Try to parse text as JSON array. Returns None if invalid."""
+    try:
+        parsed = json.loads(text)
+        return parsed if isinstance(parsed, list) else None
+    except json.JSONDecodeError:
+        return None
+
+
+def _parse_authors_from_json(text: str) -> list[str] | None:
+    """Try to parse JSON array of authors. Returns None if not valid JSON."""
+    if not text.startswith("["):
+        return None
+    parsed = _try_parse_json_array(text)
+    return _filter_valid_strings(parsed) if parsed is not None else None
+
+
+def _parse_authors_from_delimited(text: str) -> list[str]:
+    """Parse delimited string (semicolon or comma separated)."""
+    delimiter = ";" if ";" in text else ","
+    parts = text.split(delimiter) if delimiter in text else [text]
+    return [a.strip() for a in parts if a.strip()]
+
+
+def _parse_authors_string(text: str) -> list[str]:
+    """Parse string as JSON or delimited format."""
+    json_result = _parse_authors_from_json(text)
+    return (
+        json_result if json_result is not None else _parse_authors_from_delimited(text)
+    )
+
+
 def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
     """Parse various author input formats into a list of author names.
 
@@ -130,38 +172,8 @@ def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
     """
     if authors is None:
         return []
-
     if isinstance(authors, list):
-        # Direct list - strip whitespace from each item
-        return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
-
-    # String input - try JSON first, then delimited string
-    if isinstance(authors, str):
-        stripped = authors.strip()
-        if not stripped:
-            return []
-
-        # Try JSON parsing first (starts with '[')
-        if stripped.startswith("["):
-            try:
-                parsed = json.loads(stripped)
-                if isinstance(parsed, list):
-                    return [
-                        str(a).strip()
-                        for a in parsed
-                        if a is not None and str(a).strip()
-                    ]
-            except json.JSONDecodeError:
-                pass  # Fall through to delimiter parsing
-
-        # Parse as delimited string
-        # Prefer semicolon as delimiter (common in ChEMBL), fall back to comma
-        if ";" in stripped:
-            return [a.strip() for a in stripped.split(";") if a.strip()]
-        elif "," in stripped:
-            return [a.strip() for a in stripped.split(",") if a.strip()]
-        else:
-            # Single author
-            return [stripped]
-
+        return _parse_authors_from_list(authors)
+    if isinstance(authors, str) and authors.strip():
+        return _parse_authors_string(authors.strip())
     return []
