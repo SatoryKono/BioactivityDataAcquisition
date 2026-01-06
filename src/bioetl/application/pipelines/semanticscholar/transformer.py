@@ -89,7 +89,7 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
             pii_hasher=pii_hasher,
         )
 
-    def _extract_business_fields(self, record: BronzeRecord) -> dict[str, Any]:
+    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
 
         Args:
@@ -184,8 +184,8 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
             SilverRecord if transformation successful, None if record should be skipped.
 
         """
-        # 1. Extract business fields
-        business_data = self._extract_business_fields(record)
+        # 1. Extract business data
+        business_data = self._extract_business_data(record)
 
         # 2. Validate required field
         paper_id = business_data.get("paper_id")
