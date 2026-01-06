@@ -24,7 +24,7 @@ dependencies = [
     "deltalake>=0.18",
     "pyarrow>=15.0",
     "zstandard>=0.22",
-    "pandas>=2.0",
+    "pandas>=2.0,<2.3.3",  # Pin to avoid pandas 2.3.3 + Python 3.14 + Pandera compatibility bug (pandas-dev/pandas#62711)
     # Validation
     "pandera>=0.20",
     # Providers (RULES.md Appendix A)

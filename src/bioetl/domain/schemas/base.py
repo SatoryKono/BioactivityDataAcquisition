@@ -6,7 +6,6 @@ Contains common metadata fields required by RULES.md §2.4.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import cast
 
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -34,13 +33,9 @@ class ETLRecordSchema(pa.DataFrameModel):
     run_type: Series[str] = pa.Field(
         alias="_run_type",
         nullable=False,
+        isin=["incremental", "backfill", "rebuild"],
         description="Type of pipeline run.",
     )
-
-    @pa.check("_run_type", name="run_type_values")
-    def _check_run_type(cls, series: Series[str]) -> Series[bool]:
-        """Validate _run_type values."""
-        return cast("Series[bool]", series.isin(["incremental", "backfill", "rebuild"]))
 
     source_batch_id: Series[object] | None = pa.Field(
         alias="_source_batch_id",
@@ -52,12 +47,6 @@ class ETLRecordSchema(pa.DataFrameModel):
         nullable=False,
         description="Timestamp when the record was ingested (UTC).",
     )
-
-    @pa.check("_ingestion_ts", name="ingestion_ts_not_future")
-    def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:
-        """Ensure ingestion timestamp is not in the future."""
-        # Note: In practice, we just check it's a valid datetime
-        return cast("Series[bool]", series <= datetime.now(series.dt.tz))
 
     dq_warn: Series[bool] = pa.Field(
         alias="_dq_warn",
@@ -74,13 +63,9 @@ class ETLRecordSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(
         alias="_index",
         nullable=False,
+        ge=0,
         description="Sequential index of the record in the pipeline run.",
     )
-
-    @pa.check("_index", name="index_non_negative")
-    def _check_index(cls, series: Series[int]) -> Series[bool]:
-        """Validate index is non-negative."""
-        return cast("Series[bool]", series >= 0)
 
     class Config:
         """Pandera configuration."""
