@@ -1,0 +1,332 @@
+"""Unit tests for UniProt ID Mapping client."""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
+    IDMappingJobError,
+    IDMappingTimeoutError,
+    UniProtIDMappingClient,
+)
+
+
+@pytest.fixture
+def mock_http_client():
+    """Create a mock HTTP client."""
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_logger():
+    """Create a mock logger."""
+    logger = MagicMock()
+    logger.info = MagicMock()
+    logger.debug = MagicMock()
+    logger.warning = MagicMock()
+    logger.error = MagicMock()
+    return logger
+
+
+@pytest.fixture
+def idmapping_client(mock_http_client, mock_logger):
+    """Create UniProt ID Mapping client with mocks."""
+    return UniProtIDMappingClient(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        base_url="https://rest.uniprot.org",
+    )
+
+
+@pytest.mark.unit
+class TestUniProtIDMappingClient:
+    """Tests for UniProtIDMappingClient."""
+
+    @pytest.mark.asyncio
+    async def test_map_ids_empty_list(self, idmapping_client):
+        """Test map_ids returns empty dict for empty input."""
+        result = await idmapping_client.map_ids("ChEMBL", "UniProtKB", [])
+        assert result == {}
+
+    @pytest.mark.asyncio
+    async def test_map_ids_single_id_found(self, idmapping_client, mock_http_client):
+        """Test mapping a single ID that is found."""
+        # Mock job submission
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {"jobId": "test-job-123"}
+
+        # Mock status polling
+        status_response = MagicMock()
+        status_response.status_code = 200
+        status_response.json.return_value = {"jobStatus": "FINISHED"}
+
+        # Mock results
+        results_response = MagicMock()
+        results_response.status_code = 200
+        results_response.json.return_value = {
+            "results": [{"from": "CHEMBL204", "to": {"primaryAccession": "P00742"}}]
+        }
+        results_response.headers = {}
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+        mock_http_client.get = AsyncMock(
+            side_effect=[status_response, results_response]
+        )
+
+        result = await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert result == {"CHEMBL204": "P00742"}
+
+    @pytest.mark.asyncio
+    async def test_map_ids_single_id_not_found(
+        self, idmapping_client, mock_http_client
+    ):
+        """Test mapping a single ID that is not found."""
+        # Mock job submission
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {"jobId": "test-job-456"}
+
+        # Mock status polling
+        status_response = MagicMock()
+        status_response.status_code = 200
+        status_response.json.return_value = {"jobStatus": "FINISHED"}
+
+        # Mock empty results
+        results_response = MagicMock()
+        results_response.status_code = 200
+        results_response.json.return_value = {"results": []}
+        results_response.headers = {}
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+        mock_http_client.get = AsyncMock(
+            side_effect=[status_response, results_response]
+        )
+
+        result = await idmapping_client.map_ids(
+            "ChEMBL", "UniProtKB", ["CHEMBL9999999999"]
+        )
+
+        assert result == {"CHEMBL9999999999": None}
+
+    @pytest.mark.asyncio
+    async def test_map_ids_multiple_ids_mixed_results(
+        self, idmapping_client, mock_http_client
+    ):
+        """Test mapping multiple IDs with mixed results."""
+        # Mock job submission
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {"jobId": "test-job-789"}
+
+        # Mock status polling
+        status_response = MagicMock()
+        status_response.status_code = 200
+        status_response.json.return_value = {"jobStatus": "FINISHED"}
+
+        # Mock results with some found, some not
+        results_response = MagicMock()
+        results_response.status_code = 200
+        results_response.json.return_value = {
+            "results": [
+                {"from": "CHEMBL204", "to": {"primaryAccession": "P00742"}},
+                {"from": "CHEMBL205", "to": {"primaryAccession": "P00915"}},
+                # CHEMBL206 not in results = not found
+            ]
+        }
+        results_response.headers = {}
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+        mock_http_client.get = AsyncMock(
+            side_effect=[status_response, results_response]
+        )
+
+        result = await idmapping_client.map_ids(
+            "ChEMBL", "UniProtKB", ["CHEMBL204", "CHEMBL205", "CHEMBL206"]
+        )
+
+        assert result == {
+            "CHEMBL204": "P00742",
+            "CHEMBL205": "P00915",
+            "CHEMBL206": None,
+        }
+
+    @pytest.mark.asyncio
+    async def test_map_ids_job_error(self, idmapping_client, mock_http_client):
+        """Test handling of job error from API."""
+        # Mock job submission
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {"jobId": "test-job-error"}
+
+        # Mock error status
+        status_response = MagicMock()
+        status_response.status_code = 200
+        status_response.json.return_value = {
+            "jobStatus": "ERROR",
+            "errorMessage": "Invalid database",
+        }
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+        mock_http_client.get = AsyncMock(return_value=status_response)
+
+        with pytest.raises(IDMappingJobError) as exc_info:
+            await idmapping_client.map_ids("InvalidDB", "UniProtKB", ["CHEMBL204"])
+
+        assert "Invalid database" in str(exc_info.value)
+        assert exc_info.value.job_id == "test-job-error"
+
+    @pytest.mark.asyncio
+    async def test_map_ids_submission_failure(self, idmapping_client, mock_http_client):
+        """Test handling of job submission failure."""
+        # Mock failed submission
+        submit_response = MagicMock()
+        submit_response.status_code = 500
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+
+        with pytest.raises(IDMappingJobError) as exc_info:
+            await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert "Job submission failed" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    async def test_map_ids_no_job_id_in_response(
+        self, idmapping_client, mock_http_client
+    ):
+        """Test handling of missing jobId in response."""
+        # Mock submission without jobId
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {}  # No jobId
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+
+        with pytest.raises(IDMappingJobError) as exc_info:
+            await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert "No jobId" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    async def test_map_ids_direct_string_mapping(
+        self, idmapping_client, mock_http_client
+    ):
+        """Test handling of direct string mapping (not entry object)."""
+        # Mock job submission
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {"jobId": "test-job-str"}
+
+        # Mock status polling
+        status_response = MagicMock()
+        status_response.status_code = 200
+        status_response.json.return_value = {"jobStatus": "FINISHED"}
+
+        # Mock results with direct string mapping
+        results_response = MagicMock()
+        results_response.status_code = 200
+        results_response.json.return_value = {
+            "results": [{"from": "CHEMBL204", "to": "P00742"}]  # Direct string
+        }
+        results_response.headers = {}
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+        mock_http_client.get = AsyncMock(
+            side_effect=[status_response, results_response]
+        )
+
+        result = await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert result == {"CHEMBL204": "P00742"}
+
+    @pytest.mark.asyncio
+    async def test_health_check_healthy(self, idmapping_client, mock_http_client):
+        """Test health check returns HEALTHY."""
+        # Mock successful health check
+        health_response = MagicMock()
+        health_response.status_code = 200
+
+        mock_http_client.get_once = AsyncMock(return_value=health_response)
+
+        status = await idmapping_client.health_check()
+
+        assert status == HealthStatus.HEALTHY
+
+    @pytest.mark.asyncio
+    async def test_health_check_degraded(self, idmapping_client, mock_http_client):
+        """Test health check returns DEGRADED on non-200."""
+        # Mock degraded health check
+        health_response = MagicMock()
+        health_response.status_code = 503
+
+        mock_http_client.get_once = AsyncMock(return_value=health_response)
+
+        status = await idmapping_client.health_check()
+
+        assert status == HealthStatus.DEGRADED
+
+    def test_get_next_page_url_with_link_header(self, idmapping_client):
+        """Test extraction of next page URL from Link header."""
+        headers = {"Link": '<https://rest.uniprot.org/next>; rel="next"'}
+
+        url = idmapping_client._get_next_page_url(headers)
+
+        assert url == "https://rest.uniprot.org/next"
+
+    def test_get_next_page_url_no_link_header(self, idmapping_client):
+        """Test handling of missing Link header."""
+        headers = {}
+
+        url = idmapping_client._get_next_page_url(headers)
+
+        assert url is None
+
+    def test_get_next_page_url_no_next_rel(self, idmapping_client):
+        """Test handling of Link header without next rel."""
+        headers = {"Link": '<https://rest.uniprot.org/prev>; rel="prev"'}
+
+        url = idmapping_client._get_next_page_url(headers)
+
+        assert url is None
+
+    def test_repr(self, idmapping_client):
+        """Test string representation."""
+        repr_str = repr(idmapping_client)
+
+        assert "UniProtIDMappingClient" in repr_str
+        assert "rest.uniprot.org" in repr_str
+
+    def test_provider_name(self, idmapping_client):
+        """Test provider name attribute."""
+        assert idmapping_client.provider_name == "uniprot_idmapping"
+
+
+@pytest.mark.unit
+class TestIDMappingJobError:
+    """Tests for IDMappingJobError exception."""
+
+    def test_error_message(self):
+        """Test error message format."""
+        error = IDMappingJobError("test-job-123", "Test error message")
+
+        assert "test-job-123" in str(error)
+        assert "Test error message" in str(error)
+        assert error.job_id == "test-job-123"
+
+
+@pytest.mark.unit
+class TestIDMappingTimeoutError:
+    """Tests for IDMappingTimeoutError exception."""
+
+    def test_timeout_message(self):
+        """Test timeout error message format."""
+        error = IDMappingTimeoutError("test-job-456", 100)
+
+        assert "test-job-456" in str(error)
+        assert "100" in str(error)
+        assert error.job_id == "test-job-456"
+        assert error.attempts == 100

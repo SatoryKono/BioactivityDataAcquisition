@@ -73,6 +73,9 @@ from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTra
 from bioetl.application.pipelines.semanticscholar.transformer import (
     SemanticScholarPublicationTransformer,
 )
+from bioetl.application.pipelines.uniprot.idmapping_transformer import (
+    IDMappingTransformer,
+)
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
@@ -96,6 +99,7 @@ from bioetl.infrastructure.schemas.gold import (
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     SemanticScholarPublicationGoldSchema,
+    UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
 
@@ -118,6 +122,7 @@ from bioetl.infrastructure.schemas.silver import (
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
     SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+    UNIPROT_ID_MAPPING_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
 
@@ -248,13 +253,20 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=PUBCHEM_COMPOUND_SCHEMA,
         gold_schema=PubChemCompoundGoldSchema,
     ),
-    # UniProt pipeline
+    # UniProt pipelines
     PipelineFactoryConfig(
         pipeline_name="uniprot_protein",
         provider="uniprot",
         transformer_class=UniProtProteinTransformer,
         silver_schema=UNIPROT_PROTEIN_SCHEMA,
         gold_schema=UniProtProteinGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="uniprot_idmapping",
+        provider="uniprot",
+        transformer_class=IDMappingTransformer,
+        silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
+        gold_schema=UniProtIDMappingGoldSchema,
     ),
     # PubMed pipeline
     PipelineFactoryConfig(
@@ -336,6 +348,7 @@ chembl_target_component_factory = _factories["chembl_target_component"]
 chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
+uniprot_idmapping_factory = _factories["uniprot_idmapping"]
 pubmed_publications_factory = _factories["pubmed_publications"]
 crossref_publication_enrichment_factory = _factories["crossref_publication_enrichment"]
 openalex_publication_factory = _factories["openalex_publication"]
@@ -487,5 +500,6 @@ __all__ = [
     "register_all_pipelines",
     "reset_registration",
     "semanticscholar_publication_factory",
+    "uniprot_idmapping_factory",
     "uniprot_protein_factory",
 ]
