@@ -267,7 +267,9 @@ class PubMedId(ValueObject[str]):
         if not str_value:
             raise ValueError("PubMed ID cannot be empty")
         if not self._PATTERN.match(str_value):
-            raise ValueError(f"Invalid PubMed ID format: {value!r}. Must contain only digits.")
+            raise ValueError(
+                f"Invalid PubMed ID format: {value!r}. Must contain only digits."
+            )
 
         int_value = int(str_value)
         if int_value <= 0:

@@ -376,7 +376,9 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
         # Primary identifier
         pa.field("document_chembl_id", pa.string()),
         # Publication identifiers
-        pa.field("pubmed_id", pa.string()),  # Numeric string for cross-provider consistency
+        pa.field(
+            "pubmed_id", pa.string()
+        ),  # Numeric string for cross-provider consistency
         pa.field("doi", pa.string()),
         pa.field("patent_id", pa.string()),
         # Core metadata
