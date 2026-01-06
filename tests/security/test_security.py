@@ -133,6 +133,7 @@ class TestVCRCassetteSanitization:
         )
 
 
+@pytest.mark.timeout(180)  # File scanning needs more time
 class TestNoHardcodedSecrets:
     """Tests that source code doesn't contain hardcoded secrets."""
 
