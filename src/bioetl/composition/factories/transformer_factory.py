@@ -15,7 +15,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.filtering import GoldFilterConfig
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
@@ -42,6 +44,9 @@ def create_transformer(
     entity_type: str,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
+    gold_filters: GoldFilterConfig | None = None,
+    identity_service: IdentityService | None = None,
+    pii_hasher: PiiHasherPort | None = None,
 ) -> BaseTransformer:
     """Create a transformer instance for the given provider and entity type.
 
@@ -53,6 +58,11 @@ def create_transformer(
         entity_type: Entity type (e.g., 'activity', 'compound').
         tracer: Optional tracing port for distributed tracing (O1 observability).
         metrics: Optional metrics port for duration/error tracking (O1 observability).
+        gold_filters: Optional filter configuration for Gold layer.
+        identity_service: Service for computing entity IDs and content hashes.
+            Defaults to a new IdentityService instance in BaseTransformer.
+        pii_hasher: Optional PII hasher for hashing author names and other PII.
+            Defaults to NoOpPiiHasher (no hashing) in BaseTransformer.
 
     Returns:
         Configured transformer instance with observability.
@@ -75,7 +85,15 @@ def create_transformer(
         )
 
     transformer_class = _TRANSFORMER_REGISTRY[key]
-    return transformer_class(provider=provider, tracer=tracer, metrics=metrics)
+    return transformer_class(
+        provider=provider,
+        entity_type=entity_type,
+        tracer=tracer,
+        metrics=metrics,
+        gold_filters=gold_filters,
+        identity_service=identity_service,
+        pii_hasher=pii_hasher,
+    )
 
 
 def get_transformer_class(

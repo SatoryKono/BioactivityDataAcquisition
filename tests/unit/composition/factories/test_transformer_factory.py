@@ -33,12 +33,20 @@ class MockTransformer:
     def __init__(
         self,
         provider: str,
+        entity_type: str | None = None,
         tracer: Any = None,
         metrics: Any = None,
+        gold_filters: Any = None,
+        identity_service: Any = None,
+        pii_hasher: Any = None,
     ):
         self.provider = provider
+        self.entity_type = entity_type
         self.tracer = tracer
         self.metrics = metrics
+        self.gold_filters = gold_filters
+        self.identity_service = identity_service
+        self.pii_hasher = pii_hasher
 
 
 class TestRegisterTransformer:
@@ -135,6 +143,74 @@ class TestCreateTransformer:
 
         assert transformer.tracer is mock_tracer
         assert transformer.metrics is mock_metrics
+
+    def test_create_transformer_passes_entity_type(self) -> None:
+        """create_transformer passes entity_type to transformer."""
+        register_transformer("chembl", "activity", MockTransformer)
+
+        transformer = create_transformer("chembl", "activity")
+
+        assert transformer.entity_type == "activity"
+
+    def test_create_transformer_with_gold_filters(self) -> None:
+        """create_transformer passes gold_filters."""
+        mock_gold_filters = MagicMock()
+        register_transformer("chembl", "activity", MockTransformer)
+
+        transformer = create_transformer(
+            "chembl", "activity", gold_filters=mock_gold_filters
+        )
+
+        assert transformer.gold_filters is mock_gold_filters
+
+    def test_create_transformer_with_identity_service(self) -> None:
+        """create_transformer passes identity_service."""
+        mock_identity_service = MagicMock()
+        register_transformer("chembl", "activity", MockTransformer)
+
+        transformer = create_transformer(
+            "chembl", "activity", identity_service=mock_identity_service
+        )
+
+        assert transformer.identity_service is mock_identity_service
+
+    def test_create_transformer_with_pii_hasher(self) -> None:
+        """create_transformer passes pii_hasher."""
+        mock_pii_hasher = MagicMock()
+        register_transformer("chembl", "activity", MockTransformer)
+
+        transformer = create_transformer(
+            "chembl", "activity", pii_hasher=mock_pii_hasher
+        )
+
+        assert transformer.pii_hasher is mock_pii_hasher
+
+    def test_create_transformer_with_all_parameters(self) -> None:
+        """create_transformer passes all parameters correctly."""
+        mock_tracer = MagicMock()
+        mock_metrics = MagicMock()
+        mock_gold_filters = MagicMock()
+        mock_identity_service = MagicMock()
+        mock_pii_hasher = MagicMock()
+        register_transformer("pubchem", "compound", MockTransformer)
+
+        transformer = create_transformer(
+            "pubchem",
+            "compound",
+            tracer=mock_tracer,
+            metrics=mock_metrics,
+            gold_filters=mock_gold_filters,
+            identity_service=mock_identity_service,
+            pii_hasher=mock_pii_hasher,
+        )
+
+        assert transformer.provider == "pubchem"
+        assert transformer.entity_type == "compound"
+        assert transformer.tracer is mock_tracer
+        assert transformer.metrics is mock_metrics
+        assert transformer.gold_filters is mock_gold_filters
+        assert transformer.identity_service is mock_identity_service
+        assert transformer.pii_hasher is mock_pii_hasher
 
     def test_create_transformer_unregistered_raises(self) -> None:
         """create_transformer raises KeyError for unregistered."""
