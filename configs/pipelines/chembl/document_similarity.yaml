@@ -11,6 +11,7 @@ description: "Extract document similarity data (Tanimoto coefficients) from ChEM
 
 primary_keys: ["sim_id"]
 silver_table: "chembl_document_similarity"
+gold_table: "chembl_document_similarity"
 
 source_file: ../../sources/chembl.yaml
 

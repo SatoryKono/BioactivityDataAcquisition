@@ -12,6 +12,7 @@ description: "Extract biological activity records from ChEMBL API"
 
 primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
+gold_table: "chembl_activity"
 
 # Reference to source configuration file
 source_file: ../../sources/chembl.yaml
@@ -41,6 +42,7 @@ sink:
   silver:
     path: "data/output/silver"
     primary_key: ["activity_id"]
+    partition_by: []
     csv_export:
       path: "data/output/csv/silver"
   gold:

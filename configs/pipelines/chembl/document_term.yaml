@@ -14,6 +14,7 @@ description: "Extract document terms (MeSH, keywords) from ChEMBL Document recor
 # entity_id is generated as SHA256 hash of composite key
 primary_keys: ["entity_id"]
 silver_table: "chembl_document_term"
+gold_table: "chembl_document_term"
 
 source_file: ../../sources/chembl.yaml
 

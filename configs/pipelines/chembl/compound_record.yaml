@@ -14,6 +14,7 @@ description: "Extract compound records from ChEMBL API"
 
 primary_keys: ["record_id"]
 silver_table: "chembl_compound_record"
+gold_table: "chembl_compound_record"
 
 source_file: ../../sources/chembl.yaml
 

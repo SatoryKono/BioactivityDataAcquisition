@@ -12,6 +12,7 @@ description: "Extract experimental assay parameters from ChEMBL API"
 
 primary_keys: ["assay_param_id"]
 silver_table: "chembl_assay_parameters"
+gold_table: "chembl_assay_parameters"
 
 source_file: ../../sources/chembl.yaml
 
