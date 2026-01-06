@@ -89,7 +89,7 @@ def __init__(
 | Трансформер | entity_type param | Передаёт в super() | entity_class ClassVar | Итоговый entity_type |
 |-------------|-------------------|--------------------|-----------------------|----------------------|
 | SemanticScholarPublicationTransformer | ✅ `"publication"` | ✅ | ❌ | `"publication"` |
-| CrossRefTransformer | ❌ | ✅ (hardcoded) | ❌ | `"publication"` |
+| CrossRefPublicationTransformer | ❌ | ✅ (hardcoded) | ❌ | `"publication"` |
 | OpenAlexPublicationTransformer | ❌ | ✅ (hardcoded) | ❌ | `"publication"` |
 | PubChemCompoundTransformer | ✅ `"compound"` | ✅ | ❌ | `"compound"` |
 | UniProtProteinTransformer | ✅ `"protein"` | ✅ | ❌ | `"protein"` |

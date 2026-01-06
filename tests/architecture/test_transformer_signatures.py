@@ -53,7 +53,7 @@ def get_all_transformers() -> list[type[BaseTransformer]]:
 
     # Other provider transformers
     from bioetl.application.pipelines.crossref.transformer import (
-        CrossRefTransformer,
+        CrossRefPublicationTransformer,
     )
     from bioetl.application.pipelines.openalex.transformer import (
         OpenAlexPublicationTransformer,
@@ -86,7 +86,7 @@ def get_all_transformers() -> list[type[BaseTransformer]]:
         TargetComponentTransformer,
         TargetTransformer,
         # Other providers
-        CrossRefTransformer,
+        CrossRefPublicationTransformer,
         OpenAlexPublicationTransformer,
         PubChemCompoundTransformer,
         PubMedPublicationTransformer,
