@@ -139,9 +139,7 @@ class ArticleSchema(ETLRecordSchema):
         """Validate publication month range."""
         return series.isna() | ((series >= 1) & (series <= 12))
 
-    pub_day: Series[int] | None = pa.Field(
-        nullable=True, description="Publication day"
-    )
+    pub_day: Series[int] | None = pa.Field(nullable=True, description="Publication day")
 
     @pa.check("pub_day", name="pub_day_range")
     def _check_pub_day(cls, series: Series[int]) -> Series[bool]:

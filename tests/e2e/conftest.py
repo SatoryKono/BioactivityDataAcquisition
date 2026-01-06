@@ -19,6 +19,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from deltalake import DeltaTable
 
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType

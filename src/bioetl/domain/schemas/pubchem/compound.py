@@ -19,9 +19,7 @@ class CompoundSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[int] = pa.Field(
-        nullable=False, description="PubChem Compound ID (PK)"
-    )
+    cid: Series[int] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
 
     @pa.check("cid", name="cid_positive")
     def _check_cid(cls, series: Series[int]) -> Series[bool]:
@@ -124,9 +122,7 @@ class CompoundSchema(ETLRecordSchema):
         """Validate complexity is non-negative."""
         return series.isna() | (series >= 0)
 
-    charge: Series[int] | None = pa.Field(
-        nullable=True, description="Formal charge"
-    )
+    charge: Series[int] | None = pa.Field(nullable=True, description="Formal charge")
 
     @pa.check("charge", name="charge_range")
     def _check_charge(cls, series: Series[int]) -> Series[bool]:
@@ -184,7 +180,9 @@ class CompoundSchema(ETLRecordSchema):
         nullable=True, description="Defined stereocenters"
     )
 
-    @pa.check("defined_atom_stereo_count", name="defined_atom_stereo_count_non_negative")
+    @pa.check(
+        "defined_atom_stereo_count", name="defined_atom_stereo_count_non_negative"
+    )
     def _check_defined_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
         """Validate defined atom stereo count is non-negative."""
         return series.isna() | (series >= 0)
@@ -193,7 +191,9 @@ class CompoundSchema(ETLRecordSchema):
         nullable=True, description="Undefined stereocenters"
     )
 
-    @pa.check("undefined_atom_stereo_count", name="undefined_atom_stereo_count_non_negative")
+    @pa.check(
+        "undefined_atom_stereo_count", name="undefined_atom_stereo_count_non_negative"
+    )
     def _check_undefined_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
         """Validate undefined atom stereo count is non-negative."""
         return series.isna() | (series >= 0)
@@ -211,7 +211,9 @@ class CompoundSchema(ETLRecordSchema):
         nullable=True, description="Defined E/Z bonds"
     )
 
-    @pa.check("defined_bond_stereo_count", name="defined_bond_stereo_count_non_negative")
+    @pa.check(
+        "defined_bond_stereo_count", name="defined_bond_stereo_count_non_negative"
+    )
     def _check_defined_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
         """Validate defined bond stereo count is non-negative."""
         return series.isna() | (series >= 0)
@@ -220,7 +222,9 @@ class CompoundSchema(ETLRecordSchema):
         nullable=True, description="Undefined E/Z bonds"
     )
 
-    @pa.check("undefined_bond_stereo_count", name="undefined_bond_stereo_count_non_negative")
+    @pa.check(
+        "undefined_bond_stereo_count", name="undefined_bond_stereo_count_non_negative"
+    )
     def _check_undefined_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
         """Validate undefined bond stereo count is non-negative."""
         return series.isna() | (series >= 0)
@@ -266,7 +270,9 @@ class CompoundSchema(ETLRecordSchema):
         nullable=True, description="3D H-bond acceptor features"
     )
 
-    @pa.check("feature_acceptor_count_3d", name="feature_acceptor_count_3d_non_negative")
+    @pa.check(
+        "feature_acceptor_count_3d", name="feature_acceptor_count_3d_non_negative"
+    )
     def _check_feature_acceptor_count_3d(cls, series: Series[int]) -> Series[bool]:
         """Validate 3D H-bond acceptor count is non-negative."""
         return series.isna() | (series >= 0)
@@ -311,7 +317,9 @@ class CompoundSchema(ETLRecordSchema):
         nullable=True, description="3D hydrophobic features"
     )
 
-    @pa.check("feature_hydrophobe_count_3d", name="feature_hydrophobe_count_3d_non_negative")
+    @pa.check(
+        "feature_hydrophobe_count_3d", name="feature_hydrophobe_count_3d_non_negative"
+    )
     def _check_feature_hydrophobe_count_3d(cls, series: Series[int]) -> Series[bool]:
         """Validate 3D hydrophobic count is non-negative."""
         return series.isna() | (series >= 0)
