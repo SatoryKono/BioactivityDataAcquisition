@@ -58,7 +58,7 @@ class BaseChemblTransformer(BaseTransformer):
 ### Паттерн B: Явная передача
 
 ```python
-class CrossRefTransformer(BaseTransformer):
+class CrossRefPublicationTransformer(BaseTransformer):
     def __init__(self, provider: str = "crossref", ...):
         super().__init__(
             provider,

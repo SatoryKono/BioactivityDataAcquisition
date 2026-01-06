@@ -362,7 +362,7 @@ class TestClassSize:
         "CrossRefAdapter": 610,  # 603 lines - HTTP adapter with batch DOI resolution + title fallback
         # PubChem adapter (similar to ChEMBL adapter)
         "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
-        "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
+        "CrossRefPublicationTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
         # UniProt ID Mapping client (job-based async API)
@@ -509,7 +509,7 @@ class TestGodObjectDetection:
         # Adapters (HTTP adapters need internal helpers for retry/error handling)
         "ChemblAdapter": "HTTP adapter with internal helpers; delegates to ErrorClassifier, EntityMapper",
         "CrossRefAdapter": "HTTP adapter with internal helpers for batch resolution",
-        "CrossRefTransformer": "Transformer with field extraction - single responsibility",
+        "CrossRefPublicationTransformer": "Transformer with field extraction - single responsibility",
         "PubChemAdapter": "Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter, CircuitBreaker",
         "PubMedAdapter": "HTTP adapter with FilterableDataSourcePort implementation; delegates to BaseHttpAdapter",
         "OpenAlexAdapter": "HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title fallback",
