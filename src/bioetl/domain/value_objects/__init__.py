@@ -55,6 +55,11 @@ from bioetl.domain.value_objects.activity_values import (
     PChemblValue,
 )
 from bioetl.domain.value_objects.base import ValueObject
+from bioetl.domain.value_objects.chemical import (
+    SMILES,
+    InChIKey,
+    PublicationYear,
+)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -63,14 +68,13 @@ from bioetl.domain.value_objects.compound_ids import (
 )
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 from bioetl.domain.value_objects.identifiers import (
-    DOI,
-    SMILES,
     ChemblId,
-    InChIKey,
     PubChemCid,
-    PublicationYear,
-    PubMedId,
     UniProtId,
+)
+from bioetl.domain.value_objects.publications import (
+    DOI,
+    PubMedId,
 )
 
 __all__ = [
