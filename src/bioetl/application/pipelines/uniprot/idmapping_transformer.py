@@ -97,8 +97,11 @@ class IDMappingTransformer(BaseTransformer):
             "mapping_status": mapping_status,
         }
 
-        # Step 4: Generate entity_id: chembl:uniprot:{target_chembl_id}
-        entity_id = f"chembl:uniprot:{target_chembl_id}"
+        # Step 4: Generate entity_id using IdentityService (RULES.md §2.8)
+        entity_id = self.compute_entity_id(
+            source_id=target_chembl_id,
+            record={"target_chembl_id": target_chembl_id},
+        )
 
         # Step 5: Compute content_hash (RULES.md §2.8.1)
         content_hash = self.compute_content_hash(business_data, exclude_none=True)

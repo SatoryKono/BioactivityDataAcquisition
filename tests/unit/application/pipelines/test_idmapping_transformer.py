@@ -79,7 +79,7 @@ class TestIDMappingTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["entity_id"] == "chembl:uniprot:CHEMBL204"
+        assert result["entity_id"] == "uniprot:CHEMBL204"
 
     @pytest.mark.asyncio
     async def test_transform_entity_id_for_not_found(self, transformer, mock_context):
@@ -92,7 +92,7 @@ class TestIDMappingTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["entity_id"] == "chembl:uniprot:CHEMBL12345_INVALID"
+        assert result["entity_id"] == "uniprot:CHEMBL12345_INVALID"
 
     @pytest.mark.asyncio
     async def test_transform_missing_chembl_id(self, transformer, mock_context):
@@ -294,8 +294,8 @@ class TestIDMappingTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        # Entity ID format doesn't change based on provider
-        assert result["entity_id"] == "chembl:uniprot:CHEMBL204"
+        # Entity ID uses provider from transformer (RULES.md §2.8)
+        assert result["entity_id"] == "custom_provider:CHEMBL204"
 
     @pytest.mark.asyncio
     async def test_transform_none_accession_vs_missing_key(
