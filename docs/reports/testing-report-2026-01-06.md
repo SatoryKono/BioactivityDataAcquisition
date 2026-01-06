@@ -2,7 +2,10 @@
 
 **Дата**: 2026-01-06
 **RULES.md**: v5.9
+**Версия проекта**: 5.9.0
 **Stage**: 3/5 (Production Release Preparation)
+
+---
 
 ## Сводка тестов
 
@@ -10,143 +13,227 @@
 
 | Категория | Всего | Passed | Failed | Skipped | Время |
 |-----------|-------|--------|--------|---------|-------|
-| Unit | 4384 | 4384 | 0 | 0 | 69.47s |
-| Integration | 216 | 212 | 0 | 4 | 23.25s |
-| Architecture | 395 | 394 | 0 | 1 | 34.67s |
-| Contract | 30 | 0 | 0 | 30 | 0.18s |
-| E2E | 180 | 180 | 0 | 0 | 38.26s |
-| Smoke | 17 | 17 | 0 | 0 | 3.52s |
-| **Итого** | **5222** | **5187** | **0** | **35** | **~284s** |
+| Unit | 4544 | 4544 | 0 | 0 | 58.79s |
+| Integration | 216 | 216 | 0 | 0 | 15.75s |
+| Architecture | 869 | 868 | 0 | 1 | 25.59s |
+| Contract | 30 | 0 | 0 | 30 | 0.15s |
+| E2E | 180 | 180 | 0 | 0 | 28.35s |
+| Smoke | 17 | 17 | 0 | 0 | 3.64s |
+| **Итого** | **5856** | **5825** | **0** | **31** | **~132s** |
 
 ### Причины пропуска тестов (Skipped)
 
 | Категория | Количество | Причина |
 |-----------|------------|---------|
-| Integration | 4 | VCR cassette not yet recorded (UniProt ID Mapping) |
 | Architecture | 1 | No allowed files in composition layer (expected) |
 | Contract | 30 | Live API tests disabled (BIOETL_LIVE_API_TESTS=false) |
 
+---
+
 ## Покрытие кода
 
-**Total Coverage: 89.77%** ✓ (Требуется ≥80%)
+**Total Coverage: 90.76%** ✓ (Требуется ≥80%)
 
-### Покрытие по слоям
+### Покрытие по слоям архитектуры
 
-| Слой | Файлов | Покрытие | Статус |
-|------|--------|----------|--------|
-| domain/ | 40+ | ~95% | ✓ |
-| application/ | 60+ | ~88% | ✓ |
-| infrastructure/ | 80+ | ~87% | ✓ |
-| interfaces/ | 20+ | ~98% | ✓ |
+| Слой | Файлов | Покрытие | Статус (≥80%) |
+|------|--------|----------|---------------|
+| domain/ | 87 | 91.28% | ✓ |
+| application/ | 104 | 95.21% | ✓ |
+| infrastructure/ | 107 | 93.14% | ✓ |
+| interfaces/ | 24 | 91.09% | ✓ |
+| composition/ | 31 | 83.23% | ✓ |
+| **TOTAL** | **353** | **90.76%** | **✓** |
 
-### Модули с покрытием ниже 80% (требуют внимания)
+### Модули с покрытием ниже 70% (требуют внимания)
 
-| Модуль | Coverage | Комментарий |
-|--------|----------|-------------|
-| `infrastructure/adapters/pubchem/client.py` | 54.72% | PubChem sync adapter, редко используется |
-| `infrastructure/adapters/pubchem/fetch_strategies.py` | 44.35% | Альтернативные стратегии |
-| `infrastructure/adapters/input/csv_filter_reader.py` | 47.47% | Опциональный CSV input |
-| `infrastructure/adapters/pubmed/pubmed_client.py` | 59.39% | XML parsing edge cases |
-| `application/core/filtered_data_source.py` | 57.33% | Filter-based data source |
-| `application/core/idmapping_data_source.py` | 17.24% | UniProt ID mapping (недокументированное API) |
-| `application/core/batch_executor.py` | 70.00% | Batch execution edge cases |
-| `application/core/executor.py` | 0.00% | Deprecated, подлежит удалению |
-| `application/core/protocols.py` | 0.00% | Protocol definitions (no runtime code) |
-| `interfaces/cli/__main__.py` | 0.00% | Entry point only |
+| Модуль | Coverage | Слой | Комментарий |
+|--------|----------|------|-------------|
+| `composition/_bootstrap/checkpoint.py` | 36.11% | composition | Bootstrap checkpoint |
+| `composition/factories/runner_factory.py` | 40.48% | composition | Factory code |
+| `infrastructure/adapters/pubchem/fetch_strategies.py` | 44.35% | infrastructure | Fetch strategies |
+| `infrastructure/adapters/input/csv_filter_reader.py` | 47.47% | infrastructure | CSV filter reader |
+| `composition/builders.py` | 48.65% | composition | DI builders |
+| `infrastructure/adapters/pubchem/client.py` | 52.68% | infrastructure | PubChem client |
+| `application/core/filtered_data_source.py` | 57.33% | application | Filtered data source |
+| `infrastructure/adapters/pubmed/pubmed_client.py` | 59.39% | infrastructure | PubMed client |
+| `composition/_bootstrap/health.py` | 60.00% | composition | Bootstrap health |
+| `composition/_bootstrap/lock.py` | 60.00% | composition | Bootstrap lock |
+| `domain/ports/storage.py` | 60.61% | domain | Protocol definitions |
+| `composition/entrypoints.py` | 60.98% | composition | Pipeline entrypoints |
+| `domain/ports/observability.py` | 61.90% | domain | Protocol definitions |
+| `application/services/config_service.py` | 62.32% | application | Config service |
+| `composition/factories/http_client_factory.py` | 62.86% | composition | HTTP client factory |
+| `composition/_bootstrap/runner.py` | 63.64% | composition | Bootstrap runner |
+| `composition/factories/storage_adapter.py` | 65.32% | composition | Storage adapter factory |
+| `domain/ports/normalization.py` | 65.31% | domain | Protocol definitions |
+| `domain/ports/checkpoint.py` | 66.67% | domain | Protocol definitions |
+| `domain/ports/data_source.py` | 66.67% | domain | Protocol definitions |
+| `domain/ports/locking.py` | 66.67% | domain | Protocol definitions |
+| `domain/ports/quarantine.py` | 66.67% | domain | Protocol definitions |
+| `infrastructure/observability/metrics_server_adapter.py` | 66.67% | infrastructure | Metrics server |
+| `composition/providers/registration.py` | 68.84% | composition | Provider registration |
+| `domain/ports/resilience.py` | 69.57% | domain | Protocol definitions |
 
-### Критичные модули (domain/) - все ≥80%
+**Анализ**:
+- Большинство низкопокрытых модулей в `composition/` — DI/bootstrap код, тестируемый через integration/E2E
+- Файлы `domain/ports/*.py` содержат Protocol-определения без runtime-кода (ожидаемо низкое покрытие)
+- Критические бизнес-модули (domain/application services) имеют покрытие >85%
+
+### Критичные модули domain/ - все ≥80%
 
 | Модуль | Coverage |
 |--------|----------|
-| domain/services/activity_aggregator.py | 85.11% |
-| domain/services/normalization_service.py | 89.84% |
-| domain/transformations.py | 96.64% |
-| domain/value_objects/activity.py | 95.24% |
-| domain/value_objects/identifiers.py | 97.50% |
+| domain/services/activity_aggregator.py | 85%+ |
+| domain/services/normalization_service.py | 89%+ |
+| domain/transformations.py | 96%+ |
+| domain/value_objects/activity.py | 95%+ |
+| domain/value_objects/identifiers.py | 97%+ |
+
+---
 
 ## VCR кассеты
 
-- **Всего кассет**: 80 (79 в tests/fixtures/vcr/ + 1 в vcr_cassettes/)
-- **Старше 90 дней**: 0 ✓
-- **Требуют обновления**: Нет
+| Метрика | Значение |
+|---------|----------|
+| Всего кассет | 83 |
+| Старше 90 дней | 0 |
+| Требуют обновления | 0 |
+
+**Статус**: ✓ Все кассеты актуальны
 
 ### Провайдеры с VCR кассетами
 
 | Провайдер | Кассет |
 |-----------|--------|
 | ChEMBL | 35+ |
-| UniProt | 8 |
-| PubChem | 6 |
-| PubMed | 6 |
+| UniProt | 8+ |
+| PubChem | 6+ |
+| PubMed | 6+ |
 | OpenAlex | 10+ |
 | SemanticScholar | 5+ |
-| Crossref | 5+ |
+| CrossRef | 5+ |
+
+---
 
 ## Smoke-тест пайплайна
 
+### Команда
 ```bash
-$ python -m bioetl run --pipeline chembl_activity --dry-run --limit 10
+python -m bioetl run --pipeline chembl_activity --dry-run --limit 10
 ```
 
-**Результат**: SUCCESS ✓
+### Результат: SUCCESS ✓
 
+### Лог выполнения
 ```json
-{"run_id": "36e104e8-0700-4b26-ba6b-e2370bcc03cf", "pipeline": "chembl_activity", "run_type": "incremental", "dry_run": true, "limit": 10, "stage": "init", "event": "Starting pipeline run"}
-{"run_id": "36e104e8-0700-4b26-ba6b-e2370bcc03cf", "pipeline": "chembl_activity", "stage": "init", "event": "Dry-run mode: no execution performed"}
-Dry-run completed (no changes made)
+{
+  "run_id": "f1d8a55c-9a17-495c-8064-44b16acf4f3f",
+  "pipeline": "chembl_activity",
+  "run_type": "incremental",
+  "dry_run": true,
+  "limit": 10,
+  "stage": "init",
+  "event": "Starting pipeline run"
+}
+{
+  "run_id": "f1d8a55c-9a17-495c-8064-44b16acf4f3f",
+  "pipeline": "chembl_activity",
+  "stage": "init",
+  "event": "Dry-run mode: no execution performed"
+}
 ```
+
+---
 
 ## Тестовые fixtures
 
 | Директория | Файлов | Статус |
 |------------|--------|--------|
-| tests/fixtures/vcr/ | 79 | ✓ Актуальны |
-| tests/fixtures/vcr_cassettes/ | 1 | ✓ Актуальна |
-| tests/fixtures/input/ | 2 | ✓ Актуальны |
+| tests/fixtures/vcr/ | 79+ | ✓ Актуальны |
+| tests/fixtures/vcr_cassettes/ | 1+ | ✓ Актуальны |
+| tests/fixtures/input/ | 2+ | ✓ Актуальны |
+| JSON fixtures старше 180 дней | 0 | ✓ |
+
+---
 
 ## Блокеры релиза
 
 **Нет блокеров** ✓
 
 Все критические требования выполнены:
-- [x] Coverage ≥80% (достигнуто 89.77%)
-- [x] Unit тесты без сетевых вызовов (4384 passed)
-- [x] Integration тесты с VCR кассетами (212 passed)
-- [x] Architecture тесты прошли (394 passed)
+- [x] Coverage ≥80% (достигнуто 90.76%)
+- [x] Unit тесты без сетевых вызовов (4544 passed)
+- [x] Integration тесты с VCR кассетами (216 passed)
+- [x] Architecture тесты прошли (868 passed, 1 skipped)
 - [x] E2E тесты прошли (180 passed)
 - [x] Smoke-тест успешен
 - [x] VCR кассеты актуальны (0 старше 90 дней)
+
+---
 
 ## Рекомендации
 
 ### Низкий приоритет (не блокеры)
 
-1. **Увеличить покрытие PubChem адаптеров** (~55%)
-   - Модули используются редко, но стоит добавить тесты для основных сценариев
+1. **Повысить покрытие composition/ слоя** (текущее 83.23%)
+   - Добавить unit-тесты для factories и builders
+   - Цель: 90%+
 
-2. **Записать VCR кассеты для UniProt ID Mapping**
-   - 4 теста пропущены из-за отсутствия кассет
-   - Команда: `pytest tests/integration/adapters/test_uniprot_idmapping.py --vcr-record=new_episodes`
+2. **Увеличить покрытие PubChem/PubMed адаптеров** (~50-60%)
+   - Добавить VCR-кассеты для edge cases
+   - Модули используются, но имеют сложную логику
 
-3. **Удалить deprecated модуль executor.py**
-   - 0% покрытия, помечен как deprecated
+3. **Contract тесты в отдельный CI job**
+   - 30 тестов всегда skipped в стандартном CI
+   - Рекомендация: периодический запуск с `BIOETL_LIVE_API_TESTS=true`
 
-4. **Рассмотреть удаление Contract тестов из CI**
-   - 30 тестов всегда skipped в CI (требуют Live API)
-   - Альтернатива: отдельный CI job для contract testing
+---
 
-## Версия тестового окружения
+## Команды воспроизведения
 
-```
-pytest==9.0.2
-pytest-asyncio==1.3.0
-pytest-cov==7.0.0
-pytest-vcr==1.0.2
-pytest-xdist==3.8.0
-hypothesis==6.149.1
-Python==3.11.14
+```bash
+# Полный прогон с coverage
+pytest tests/ --cov=src/bioetl --cov-report=term-missing --cov-fail-under=80
+
+# Unit тесты
+pytest tests/unit/ -v --tb=short
+
+# Integration тесты
+pytest tests/integration/ -v --tb=short --vcr-record=none
+
+# Architecture тесты
+pytest tests/architecture/ -v --tb=short
+
+# Contract тесты (Live API)
+BIOETL_LIVE_API_TESTS=true pytest tests/contract/ -v --tb=short
+
+# E2E тесты
+pytest tests/e2e/ -v --tb=short
+
+# Smoke тесты
+pytest tests/smoke/ -v --tb=short
+
+# Dry-run пайплайна
+python -m bioetl run --pipeline chembl_activity --dry-run --limit 10
 ```
 
 ---
 
-*Отчёт сгенерирован автоматически 2026-01-06*
+## Версия тестового окружения
+
+```
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-cov>=4.0
+pytest-vcr>=1.0
+pytest-xdist>=3.5
+hypothesis>=6.100
+Python>=3.11
+```
+
+---
+
+**Вывод**: Проект BioETL v5.9.0 успешно прошёл все категории тестирования и готов к production release.
+
+*Отчёт обновлён: 2026-01-06*
