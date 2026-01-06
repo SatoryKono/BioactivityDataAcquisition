@@ -159,7 +159,7 @@ async def transform(
 | PubChem | `PubChemCompoundTransformer` | `BaseTransformer` |
 | UniProt | `UniProtProteinTransformer` | `BaseTransformer` |
 | PubMed | `PubMedPublicationTransformer` | `BaseTransformer` |
-| CrossRef | `CrossRefTransformer` | `BaseTransformer` |
+| CrossRef | `CrossRefPublicationTransformer` | `BaseTransformer` |
 
 **Все трансформеры наследуют от BaseTransformer (напрямую или через BaseChemblTransformer).**
 

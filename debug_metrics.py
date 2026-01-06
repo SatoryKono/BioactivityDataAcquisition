@@ -24,7 +24,7 @@ class TestClassSize:
         "BatchWriter": 350,
         "CrossRefAdapter": 460,
         "PubChemAdapter": 310,
-        "CrossRefTransformer": 360,
+        "CrossRefPublicationTransformer": 360,
         "UniProtAdapter": 320,
         "PubMedAdapter": 360,
         "ErrorService": 420,
