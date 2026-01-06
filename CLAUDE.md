@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.10 (2026-01-06)*
+*Синхронизировано с RULES.md v5.10 (2026-01-06) | Верификация метрик: 2026-01-06 | Версия проекта: 5.9.0*
 
 ---
 
@@ -116,13 +116,24 @@ ls tests/architecture/test_*.py
 
 ## 1. Описание Проекта
 
-**BioETL** — фреймворк для сбора, нормализации и обработки биоактивных данных из публичных репозиториев (ChEMBL, PubChem, UniProt) в унифицированное Delta Lake хранилище.
+**BioETL** — фреймворк для сбора, нормализации и обработки биоактивных данных из публичных репозиториев (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, SemanticScholar) в унифицированное Delta Lake хранилище.
 
 | Аспект | Описание |
 |--------|----------|
 | **Архитектура** | Ports & Adapters (Hexagonal) + Medallion |
 | **Язык** | Python 3.11+ |
 | **Стиль документации** | Русский, RFC 2119 keywords |
+
+### 1.1. Метрики Кодовой Базы (2026-01-06)
+
+| Метрика | Значение |
+|---------|----------|
+| **Python-файлов** | ~380 |
+| **Строк кода** | ~68,400 |
+| **Тестов** | ~5,277 |
+| **ADR** | 23 |
+| **Провайдеров** | 7 |
+| **Pipeline-конфигураций** | 20 |
 
 ---
 
@@ -163,21 +174,21 @@ src/bioetl/
 | Компонент | ❌ Ложное утверждение | ✅ Реальность |
 |-----------|----------------------|---------------|
 | **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42` |
-| **PipelineRunner** | "God object, слишком много ответственностей" | **173 строки**, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
+| **PipelineRunner** | "God object, слишком много ответственностей" | **186 строк**, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
 | **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
-| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **Делегирует** через `EntityMapper` (112 LOC), `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py:30,76-84,90`) |
-| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **Делегирует** CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py:70-71,87-88`) |
+| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **694 строки**, делегирует через `EntityMapper` (112 LOC), `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py:30,76-84,90`) |
+| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **650 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py:70-71,87-88`) |
 | **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
 | **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
 | **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
 | **BronzeWriter** | "Нет observability" | Имеет структурированное логирование (`bronze_writer.py:197-205`) |
 | **DQ/Medallion политики** | "Нет автоматизации" | Реализовано: `MedallionPolicy`, `DQConfig`, `SilverWriteMode`, `GoldWriteMode` enums |
-| **bootstrap_pipeline** | "140+ строк, усложняет тестирование" | **113 строк** (`bootstrap.py:68-180`), делегирует через 4 функции |
+| **bootstrap_pipeline** | "140+ строк, усложняет тестирование" | **185 строк** (`bootstrap.py`), делегирует через фабрики и helper-функции |
 | **RecordProcessor** | "Совмещает метрики/карантин/запись" | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`) |
 | **PipelineRunner** | "Не выпускает метрики по стадиям" | Использует `PipelineObserver` через `RunnerServices.observer` (`runner.py:89,117`) |
 | **Write mode validation** | "Нет валидации через Enum" | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`) |
-| **Архитектурные тесты** | "Не связаны с метриками" | 187 тестов в `tests/architecture/`, `make arch-test` в CI |
+| **Архитектурные тесты** | "Не связаны с метриками" | 360 тестов в `tests/architecture/`, `make arch-test` в CI |
 | **MemoryLock** | "Требуется Redis для распределённых блокировок" | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки. |
 | **MemoryMonitor** | "Возвращает захардкоженные нули, баг" | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180` |
 | **DQ метрики** | "Не экспортируются в Prometheus" | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq_soft_threshold_exceeded` (counter), `dq_check_duration_ms` (histogram). `DQConfig` имеет `soft_fail_threshold=0.05`, `hard_fail_threshold=0.20` |
@@ -290,6 +301,21 @@ cat docs/refactoring-plan.md | head -60
 1. Обновить `docs/refactoring-plan.md` → секция "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
 2. Обновить `CLAUDE.md` → секция 2.3 "Архитектурные Пояснения"
 
+### 2.5. DDD Aggregates (ADR-021)
+
+Проект использует DDD-агрегаты для управления бизнес-инвариантами:
+
+| Агрегат | Файл | Назначение |
+|---------|------|------------|
+| `PipelineRun` | `domain/aggregates/pipeline_run.py` | Запуск пайплайна, события жизненного цикла |
+| `Batch` | `domain/aggregates/batch.py` | Батч записей, состояние обработки |
+| `QuarantineEntry` | `domain/aggregates/quarantine_entry.py` | Карантинные записи |
+
+**Паттерны:**
+- Event Sourcing для аудита изменений
+- Immutable Value Objects для состояний
+- Factory Methods для создания агрегатов
+
 ---
 
 ## 3. Medallion Architecture
@@ -364,6 +390,38 @@ sha256(provider + canonical_json(record))
 3. Сохранить чекпоинт локально
 4. Выйти с кодом 0
 
+### 4.5. Архитектурные Решения (ADR)
+
+**23 ADR** определяют ключевые архитектурные решения проекта:
+
+| ADR | Название | Описание |
+|-----|----------|----------|
+| 001 | Delta Lake vs Parquet | Выбор Delta Lake для ACID |
+| 002 | Medallion Architecture | Bronze/Silver/Gold уровни |
+| 003 | In-Memory Locking | MemoryLock для локального запуска |
+| 004 | Pydantic vs Dataclasses | Dataclasses для domain |
+| 005 | Composition Layer | Отделение DI от бизнес-логики |
+| 006 | Logger/Metrics Ports | Абстракция observability |
+| 007 | Circuit Breaker | Защита от каскадных сбоев |
+| 008 | Graceful Shutdown | Корректное завершение |
+| 009 | Paginated Fetcher Mixin | Унификация пагинации |
+| 010 | Local-Only Deployment | Локальная архитектура |
+| 011 | Remove Watermark | Удаление watermark-механизма |
+| 012 | Storage Clear Contract | Контракт очистки storage |
+| 013 | Async Storage Cleanup | Асинхронная очистка |
+| 014 | Deterministic Writes | Запрет random в writers |
+| 015 | Pipeline Services Lifecycle | Жизненный цикл сервисов |
+| 016 | Error Handling Strategy | Стратегия обработки ошибок |
+| 017 | Observability Architecture | Архитектура observability |
+| 018 | Gold Strict Validation | Строгая валидация Gold |
+| 019 | Observability Port Enforcement | Обязательные порты |
+| 020 | BasePipeline Decomposition | Декомпозиция BasePipeline |
+| 021 | DDD Aggregates Adoption | DDD агрегаты |
+| 022 | Tracing NoOp | NoOp для трассировки |
+| 023 | Entity Type Patterns | Паттерны типов сущностей |
+
+Документы: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+
 ---
 
 ## 5. Блокировки (Locking)
@@ -414,12 +472,12 @@ async def aclose() -> None                             # Graceful shutdown
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~1294 | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
-| **Integration** | `tests/integration/` | ~80 | VCR.py для HTTP. Очистка секретов из кассет. |
+| **Unit** | `tests/unit/` | ~4335 | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
+| **Integration** | `tests/integration/` | ~216 | VCR.py для HTTP. Очистка секретов из кассет. |
 | **E2E** | `tests/e2e/` | - | `@pytest.mark.e2e`, Local-Only архитектура |
-| **Architecture** | `tests/architecture/` | 97 | Проверка слоёв, imports, контракты портов |
+| **Architecture** | `tests/architecture/` | ~360 | Проверка слоёв, imports, контракты портов |
 
-**Всего тестов:** ~1471+
+**Всего тестов:** ~5277 (верифицировано 2026-01-06)
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
 **Цель покрытия:** ≥85% line coverage (проверяется в CI через `--cov-fail-under=85`)
@@ -447,7 +505,7 @@ pip install -e ".[tests]"
 
 ### Контрактные тесты портов
 
-Файл `tests/architecture/test_port_contracts.py` (51 тест) проверяет:
+Файл `tests/architecture/test_port_contracts.py` проверяет:
 
 | Категория | Проверка |
 |-----------|----------|
@@ -590,6 +648,10 @@ make security  # Запускает osv-scanner + pip-audit
 | ChEMBL | chembl_webresource_client | None | `/chembl/api/data/status.json` |
 | PubChem | pubchempy | 5 req/sec | Lightweight compound query |
 | UniProt | unipressed | 100 req/sec (API key) | Search Probe |
+| CrossRef | httpx | Polite pool | Works endpoint |
+| OpenAlex | httpx | 10 req/sec | N/A |
+| PubMed | httpx (NCBI E-utilities) | 3 req/sec | EInfo endpoint |
+| SemanticScholar | httpx | 100 req/5min | Paper probe |
 
 ---
 
@@ -738,10 +800,10 @@ git commit -m "..."
 
 | Документ | Описание |
 |----------|----------|
-| `docs/RULES.md` | Конституция проекта v5.2 |
+| `docs/RULES.md` | Конституция проекта v5.10 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-010) |
+| `docs/02-architecture/decisions/` | ADR (001-023) — 23 архитектурных решения |
 | `AGENT.md` | Детальные инструкции для агента v2.2 |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
 
