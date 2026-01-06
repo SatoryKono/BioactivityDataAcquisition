@@ -163,6 +163,40 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
         strict = True
 
 
+class UniProtIDMappingGoldSchema(pa.DataFrameModel):
+    """Schema for UniProt ID Mapping in Gold layer.
+
+    Maps ChEMBL target IDs to UniProt accessions.
+    Records with mapping_status='not_found' have null uniprot_accession.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key (source identifier)
+    target_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Mapped identifier (nullable - None if not found)
+    uniprot_accession: Series[str] = pa.Field(nullable=True)
+
+    # Mapping status: 'found', 'not_found', 'error'
+    mapping_status: Series[str] = pa.Field(nullable=False)
+
+    # DQ warning flag (True for not_found)
+    dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
+
+
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
     """Schema for PubMed Publication in Gold layer."""
 

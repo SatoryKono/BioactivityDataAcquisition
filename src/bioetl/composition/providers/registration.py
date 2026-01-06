@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.document_term_data_source import DocumentTermDataSource
 from bioetl.application.core.filtered_data_source import FilteredDataSource
+from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
@@ -40,6 +41,9 @@ from bioetl.infrastructure.adapters.semanticscholar.adapter import (
     SemanticScholarAdapter,
 )
 from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
+    UniProtIDMappingClient,
+)
 from bioetl.infrastructure.config import load_source_config
 
 if TYPE_CHECKING:
@@ -447,6 +451,79 @@ def _create_semanticscholar_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_uniprot_idmapping_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create UniProt ID Mapping data source.
+
+    Creates an IDMappingDataSource that:
+    1. Reads ChEMBL target IDs from input CSV file
+    2. Calls UniProt ID Mapping API to map to UniProt accessions
+    3. Yields records with mapping results
+
+    Args:
+        settings: Application settings.
+        pipeline_config: Pipeline configuration from YAML.
+        logger: LoggerPort for structured logging.
+        filter_config: Unused (filtering happens via input_path CSV).
+        metrics: Optional MetricsPort for recording adapter metrics.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured IDMappingDataSource instance.
+    """
+    from pathlib import Path
+
+    # Ignore filter_config - the input file IS the data source
+    _ = filter_config
+
+    _, HttpClientFactory = _get_factories()
+
+    # Create HTTP client for ID Mapping API
+    http_client = HttpClientFactory.create_for_provider("uniprot", settings)
+
+    # Create ID Mapping client
+    base_url = (
+        pipeline_config.source.api.base_url
+        if pipeline_config.source.api
+        else "https://rest.uniprot.org"
+    )
+    idmapping_client = UniProtIDMappingClient(
+        http_client=http_client,
+        logger=logger,
+        metrics=metrics,
+        base_url=base_url,
+    )
+
+    # Get input path from pipeline config
+    input_path_str = (
+        pipeline_config.source.input_path
+        if hasattr(pipeline_config.source, "input_path")
+        else "data/input/target.csv"
+    )
+    input_path = Path(input_path_str)
+
+    # Get database names from API config
+    from_db = "ChEMBL"
+    to_db = "UniProtKB"
+    if pipeline_config.source.api:
+        from_db = getattr(pipeline_config.source.api, "from_db", from_db)
+        to_db = getattr(pipeline_config.source.api, "to_db", to_db)
+
+    return IDMappingDataSource(
+        idmapping_client=idmapping_client,
+        input_path=input_path,
+        logger=logger,
+        from_db=from_db,
+        to_db=to_db,
+    )
+
+
 # =============================================================================
 # Provider registration
 # =============================================================================
@@ -603,5 +680,26 @@ def register_all_providers() -> None:
                 requires_http_client=True,
                 requires_logger=True,
                 data_source_creator=_create_semanticscholar_data_source,
+            ),
+        )
+
+    # UniProt ID Mapping - maps ChEMBL target IDs to UniProt accessions
+    # Uses UniProt ID Mapping REST API (job-based async)
+    # Input comes from CSV file, not external API filtering
+    uniprot_idmapping_rate, uniprot_idmapping_capacity = _get_rate_limit_from_config(
+        "uniprot"
+    )
+    if not ProviderRegistry.is_registered("uniprot_idmapping"):
+        ProviderRegistry.register(
+            "uniprot_idmapping",
+            ProviderConfig(
+                adapter_class=UniProtIDMappingClient,
+                http_config=HttpConfig(
+                    rate=uniprot_idmapping_rate,
+                    capacity=uniprot_idmapping_capacity,
+                ),
+                requires_http_client=True,
+                requires_logger=True,
+                data_source_creator=_create_uniprot_idmapping_data_source,
             ),
         )

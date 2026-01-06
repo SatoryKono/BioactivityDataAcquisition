@@ -129,6 +129,30 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for UniProt ID Mapping
+# Maps ChEMBL target IDs to UniProt accessions
+UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary key (source identifier)
+        pa.field("target_chembl_id", pa.string()),
+        # Mapped identifier (nullable - None if not found)
+        pa.field("uniprot_accession", pa.string()),
+        # Mapping status: 'found', 'not_found', 'error'
+        pa.field("mapping_status", pa.string()),
+        # DQ warning flag (True for not_found)
+        pa.field("_dq_warn", pa.bool_()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for PubMed Publication
 # Matches Publication entity from domain/entities.py
 # See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
