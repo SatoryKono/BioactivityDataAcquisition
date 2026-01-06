@@ -19,6 +19,7 @@
     - pubchem_compound
     - pubmed_publications
     - semanticscholar_publication
+    - uniprot_idmapping
     - uniprot_protein
   
   '''

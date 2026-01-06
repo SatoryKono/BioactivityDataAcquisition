@@ -263,7 +263,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     ),
     PipelineFactoryConfig(
         pipeline_name="uniprot_idmapping",
-        provider="uniprot_idmapping",
+        provider="uniprot",
         transformer_class=IDMappingTransformer,
         silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
         gold_schema=UniProtIDMappingGoldSchema,
