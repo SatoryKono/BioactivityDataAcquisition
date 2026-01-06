@@ -99,7 +99,7 @@ class TestTransformersWithPii:
 
     # Transformers known to handle PII (author names)
     PII_TRANSFORMERS = [
-        "bioetl.application.pipelines.crossref.transformer.CrossRefTransformer",
+        "bioetl.application.pipelines.crossref.transformer.CrossRefPublicationTransformer",
         "bioetl.application.pipelines.pubmed.transformer.PubMedPublicationTransformer",
         "bioetl.application.pipelines.chembl.base_chembl_transformer.BaseChemblTransformer",
     ]
@@ -151,7 +151,7 @@ class TestPiiFieldsInTransformers:
     """Tests that PII fields are actually hashed in transformer code."""
 
     def test_crossref_transformer_hashes_authors(self) -> None:
-        """CrossRefTransformer MUST hash authors field."""
+        """CrossRefPublicationTransformer MUST hash authors field."""
         transformer_path = Path(
             "src/bioetl/application/pipelines/crossref/transformer.py"
         )
@@ -159,7 +159,7 @@ class TestPiiFieldsInTransformers:
 
         # Check that hash_pii_list is called for authors
         assert "hash_pii_list" in content, (
-            "CrossRefTransformer MUST use hash_pii_list() for authors field"
+            "CrossRefPublicationTransformer MUST use hash_pii_list() for authors field"
         )
 
     def test_pubmed_transformer_hashes_authors(self) -> None:

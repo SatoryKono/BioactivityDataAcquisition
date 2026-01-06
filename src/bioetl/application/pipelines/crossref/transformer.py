@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class CrossRefTransformer(BaseTransformer):
+class CrossRefPublicationTransformer(BaseTransformer):
     """Transforms CrossRef bronze records to silver.
 
     Implements field extraction, normalization, and type coercion
