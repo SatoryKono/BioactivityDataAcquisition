@@ -179,8 +179,8 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("authors", pa.list_(pa.string())),
         # Dates (ISO format strings)
         pa.field("pub_date", pa.string()),
-        pa.field("pub_year", pa.int64()),
-        pa.field("publication_year", pa.int64()),  # Legacy alias
+        pa.field("year", pa.int64()),
+        pa.field("publication_year", pa.int64()),  # Legacy alias for year
         pa.field("accepted_date", pa.string()),
         pa.field("received_date", pa.string()),
         pa.field("revised_date", pa.string()),

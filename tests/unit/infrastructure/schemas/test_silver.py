@@ -402,9 +402,9 @@ class TestPubmedPublicationSchema:
             )
             assert field.type.value_type == pa.string()
 
-    def test_pub_year_is_int64(self):
-        """Verify pub_year is int64."""
-        field = PUBMED_PUBLICATION_SCHEMA.field("pub_year")
+    def test_year_is_int64(self):
+        """Verify year is int64."""
+        field = PUBMED_PUBLICATION_SCHEMA.field("year")
         assert field.type == pa.int64()
 
     def test_has_journal_info(self):

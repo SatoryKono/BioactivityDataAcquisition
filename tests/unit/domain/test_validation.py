@@ -8,10 +8,13 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.validation import (
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
     validate_doi,
     validate_non_empty_string,
     validate_non_negative,
     validate_positive_int,
+    validate_publication_year,
     validate_smiles,
     validate_year_range,
 )
@@ -128,6 +131,90 @@ class TestValidateYearRange:
         assert validate_year_range(2025, min_year=2000, max_year=2050) is True
         assert validate_year_range(2050, min_year=2000, max_year=2050) is True
         assert validate_year_range(2051, min_year=2000, max_year=2050) is False
+
+
+class TestPublicationYearConstants:
+    """Tests for publication year constants."""
+
+    def test_min_publication_year_value(self) -> None:
+        """Test MIN_PUBLICATION_YEAR is set to 1800."""
+        assert MIN_PUBLICATION_YEAR == 1800
+
+    def test_max_publication_year_value(self) -> None:
+        """Test MAX_PUBLICATION_YEAR is set to 2100."""
+        assert MAX_PUBLICATION_YEAR == 2100
+
+    def test_constants_are_valid_range(self) -> None:
+        """Test that min < max for valid range."""
+        assert MIN_PUBLICATION_YEAR < MAX_PUBLICATION_YEAR
+
+
+class TestValidatePublicationYear:
+    """Tests for validate_publication_year function.
+
+    The function returns (year, is_warning) tuple where:
+    - year: Original value (preserved even if out of range)
+    - is_warning: True if year is outside valid range (requires DQ warning)
+    """
+
+    @pytest.mark.parametrize(
+        "year,expected_warn",
+        [
+            (2020, False),
+            (1800, False),
+            (2100, False),
+            (1799, True),
+            (2101, True),
+            (1500, True),
+            (None, False),
+        ],
+    )
+    def test_validate_publication_year(
+        self, year: int | None, expected_warn: bool
+    ) -> None:
+        """Test validate_publication_year returns correct warning flag."""
+        result_year, is_warn = validate_publication_year(year)
+        assert result_year == year
+        assert is_warn == expected_warn
+
+    def test_boundary_values(self) -> None:
+        """Test boundary values for publication year validation."""
+        # At boundaries (valid)
+        assert validate_publication_year(MIN_PUBLICATION_YEAR) == (
+            MIN_PUBLICATION_YEAR,
+            False,
+        )
+        assert validate_publication_year(MAX_PUBLICATION_YEAR) == (
+            MAX_PUBLICATION_YEAR,
+            False,
+        )
+
+        # Just outside boundaries (warning)
+        assert validate_publication_year(MIN_PUBLICATION_YEAR - 1) == (
+            MIN_PUBLICATION_YEAR - 1,
+            True,
+        )
+        assert validate_publication_year(MAX_PUBLICATION_YEAR + 1) == (
+            MAX_PUBLICATION_YEAR + 1,
+            True,
+        )
+
+    def test_preserves_original_value(self) -> None:
+        """Test that original value is preserved even when out of range."""
+        # Test with clearly invalid years
+        year, is_warn = validate_publication_year(1000)
+        assert year == 1000
+        assert is_warn is True
+
+        year, is_warn = validate_publication_year(3000)
+        assert year == 3000
+        assert is_warn is True
+
+    def test_none_returns_no_warning(self) -> None:
+        """Test that None value returns no warning."""
+        year, is_warn = validate_publication_year(None)
+        assert year is None
+        assert is_warn is False
 
 
 class TestValidateNonNegative:
