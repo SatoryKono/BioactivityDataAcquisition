@@ -99,36 +99,87 @@ def extract_journal_info(
     }
 
 
+# Valid OA status values (normalized to lowercase for consistency with OpenAlex)
+VALID_OA_STATUS_VALUES = {"gold", "green", "hybrid", "bronze", "closed"}
+
+
+def normalize_oa_status(status: str | None) -> str | None:
+    """Normalize OA status to lowercase.
+
+    Converts OA status values to lowercase for consistency with OpenAlex.
+    Returns None for invalid or unknown status values.
+
+    Args:
+        status: Raw OA status string (may be uppercase, mixed case, or None).
+
+    Returns:
+        Normalized lowercase status if valid, None otherwise.
+
+    Example:
+        >>> normalize_oa_status("GOLD")
+        'gold'
+        >>> normalize_oa_status("Green")
+        'green'
+        >>> normalize_oa_status("unknown")
+        None
+        >>> normalize_oa_status(None)
+        None
+
+    """
+    if status is None:
+        return None
+    normalized = status.lower().strip()
+    return normalized if normalized in VALID_OA_STATUS_VALUES else None
+
+
 def extract_open_access_info(
     is_open_access: bool | None,
     open_access_pdf: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    """Extract open access information.
+    """Extract open access information with normalized status.
+
+    Extracts OA information from S2 API response and normalizes the status
+    to lowercase for consistency with OpenAlex data.
 
     Args:
         is_open_access: Boolean flag from S2.
         open_access_pdf: PDF info object from S2.
 
     Returns:
-        Dict with is_open_access, url, status.
+        Dict with is_oa (bool), url (str|None), oa_status (str|None).
+        If is_open_access is False or None and no OA PDF, oa_status is "closed".
 
     Example:
         >>> oa_pdf = {"url": "https://example.com/paper.pdf", "status": "GREEN"}
         >>> extract_open_access_info(True, oa_pdf)
-        {'is_open_access': True, 'url': 'https://...', 'status': 'GREEN'}
+        {'is_oa': True, 'url': 'https://...', 'oa_status': 'green'}
+        >>> extract_open_access_info(False, None)
+        {'is_oa': False, 'url': None, 'oa_status': 'closed'}
 
     """
-    result: dict[str, Any] = {
-        "is_open_access": is_open_access or False,
-        "url": None,
-        "status": None,
-    }
+    # Determine if open access
+    is_oa = is_open_access or False
+
+    # Extract URL and status from PDF info
+    url: str | None = None
+    raw_status: str | None = None
 
     if open_access_pdf:
-        result["url"] = open_access_pdf.get("url")
-        result["status"] = open_access_pdf.get("status")
+        url = open_access_pdf.get("url")
+        raw_status = open_access_pdf.get("status")
 
-    return result
+    # Normalize status to lowercase
+    oa_status = normalize_oa_status(raw_status)
+
+    # If not open access and no status, set to "closed"
+    if not is_oa and oa_status is None:
+        oa_status = "closed"
+
+    return {
+        "is_oa": is_oa,
+        "url": url,
+        "oa_status": oa_status,
+    }
 
 
 def extract_tldr(tldr: dict[str, Any] | None) -> str | None:

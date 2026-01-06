@@ -10,6 +10,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_journal_info,
     extract_open_access_info,
     extract_tldr,
+    normalize_oa_status,
     validate_year,
 )
 
@@ -164,7 +165,7 @@ class TestExtractOpenAccessInfo:
     """Tests for extract_open_access_info function."""
 
     def test_extract_open_access(self) -> None:
-        """Test extracting open access information."""
+        """Test extracting open access information with normalized status."""
         oa_pdf = {
             "url": "https://example.com/paper.pdf",
             "status": "GREEN",
@@ -172,30 +173,50 @@ class TestExtractOpenAccessInfo:
 
         result = extract_open_access_info(True, oa_pdf)
 
-        assert result["is_open_access"] is True
+        assert result["is_oa"] is True
         assert result["url"] == "https://example.com/paper.pdf"
-        assert result["status"] == "GREEN"
+        assert result["oa_status"] == "green"  # Normalized to lowercase
 
     def test_closed_access(self) -> None:
-        """Test closed access publication."""
+        """Test closed access publication gets 'closed' status."""
         result = extract_open_access_info(False, None)
 
-        assert result["is_open_access"] is False
+        assert result["is_oa"] is False
         assert result["url"] is None
-        assert result["status"] is None
+        assert result["oa_status"] == "closed"  # Now returns "closed" instead of None
 
     def test_none_is_open_access(self) -> None:
-        """Test when is_open_access is None."""
+        """Test when is_open_access is None, defaults to closed."""
         result = extract_open_access_info(None, None)
 
-        assert result["is_open_access"] is False
+        assert result["is_oa"] is False
+        assert result["oa_status"] == "closed"
 
     def test_open_access_without_pdf(self) -> None:
         """Test open access without PDF info."""
         result = extract_open_access_info(True, None)
 
-        assert result["is_open_access"] is True
+        assert result["is_oa"] is True
         assert result["url"] is None
+        assert result["oa_status"] is None  # No status available
+
+    def test_uppercase_gold_normalized(self) -> None:
+        """Test that GOLD status is normalized to lowercase."""
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": "GOLD"}
+        result = extract_open_access_info(True, oa_pdf)
+        assert result["oa_status"] == "gold"
+
+    def test_mixed_case_hybrid_normalized(self) -> None:
+        """Test that mixed case status is normalized."""
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": "Hybrid"}
+        result = extract_open_access_info(True, oa_pdf)
+        assert result["oa_status"] == "hybrid"
+
+    def test_unknown_status_returns_none(self) -> None:
+        """Test that unknown OA status returns None."""
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": "UNKNOWN"}
+        result = extract_open_access_info(True, oa_pdf)
+        assert result["oa_status"] is None
 
 
 class TestExtractTldr:
@@ -273,3 +294,56 @@ class TestValidateYear:
     def test_none_year(self) -> None:
         """Test None year."""
         assert validate_year(None) is None
+
+
+class TestNormalizeOaStatus:
+    """Tests for normalize_oa_status function."""
+
+    def test_uppercase_gold(self) -> None:
+        """Test GOLD is normalized to gold."""
+        assert normalize_oa_status("GOLD") == "gold"
+
+    def test_lowercase_gold(self) -> None:
+        """Test gold stays lowercase."""
+        assert normalize_oa_status("gold") == "gold"
+
+    def test_mixed_case_green(self) -> None:
+        """Test Green is normalized to green."""
+        assert normalize_oa_status("Green") == "green"
+
+    def test_uppercase_hybrid(self) -> None:
+        """Test HYBRID is normalized to hybrid."""
+        assert normalize_oa_status("HYBRID") == "hybrid"
+
+    def test_uppercase_bronze(self) -> None:
+        """Test BRONZE is normalized to bronze."""
+        assert normalize_oa_status("BRONZE") == "bronze"
+
+    def test_closed_status(self) -> None:
+        """Test closed status is valid."""
+        assert normalize_oa_status("closed") == "closed"
+
+    def test_uppercase_closed(self) -> None:
+        """Test CLOSED is normalized to closed."""
+        assert normalize_oa_status("CLOSED") == "closed"
+
+    def test_unknown_returns_none(self) -> None:
+        """Test unknown status returns None."""
+        assert normalize_oa_status("unknown") is None
+
+    def test_invalid_status_returns_none(self) -> None:
+        """Test invalid status returns None."""
+        assert normalize_oa_status("invalid") is None
+
+    def test_empty_string_returns_none(self) -> None:
+        """Test empty string returns None."""
+        assert normalize_oa_status("") is None
+
+    def test_none_returns_none(self) -> None:
+        """Test None returns None."""
+        assert normalize_oa_status(None) is None
+
+    def test_whitespace_trimmed(self) -> None:
+        """Test whitespace is trimmed before normalization."""
+        assert normalize_oa_status("  GOLD  ") == "gold"
+        assert normalize_oa_status("\tgreen\n") == "green"

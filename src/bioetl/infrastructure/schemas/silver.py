@@ -599,9 +599,9 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("citation_count", pa.int64()),
         pa.field("reference_count", pa.int64()),
         # Open Access
-        pa.field("is_open_access", pa.bool_()),
+        pa.field("is_oa", pa.bool_()),
         pa.field("open_access_url", pa.string()),
-        pa.field("open_access_status", pa.string()),
+        pa.field("oa_status", pa.string()),
         # Classification (JSON strings)
         pa.field("fields_of_study", pa.string()),
         pa.field("publication_types", pa.string()),

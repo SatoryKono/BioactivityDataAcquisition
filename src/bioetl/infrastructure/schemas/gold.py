@@ -639,9 +639,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
 
     # Open Access
-    is_open_access: Series[bool] = pa.Field(nullable=True)
+    is_oa: Series[bool] = pa.Field(nullable=True)
     open_access_url: Series[str] = pa.Field(nullable=True)
-    open_access_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True)
 
     # Classification (JSON strings)
     fields_of_study: Series[str] = pa.Field(nullable=True)
