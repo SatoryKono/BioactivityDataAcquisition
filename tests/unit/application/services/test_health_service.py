@@ -212,7 +212,9 @@ class TestHealthService:
     ) -> None:
         """Test check_providers when all providers are healthy."""
         # Setup mock adapter with HealthCheckPort
+        # Must have provider_name property for isinstance(adapter, HealthCheckPort) to pass
         mock_adapter = MagicMock()
+        mock_adapter.provider_name = "test"
         mock_adapter.check_health = AsyncMock(
             return_value=HealthCheckResult(
                 status=HealthStatus.HEALTHY,
@@ -236,6 +238,7 @@ class TestHealthService:
     ) -> None:
         """Test check_providers with specific provider list."""
         mock_adapter = MagicMock()
+        mock_adapter.provider_name = "chembl"
         mock_adapter.check_health = AsyncMock(
             return_value=HealthCheckResult(
                 status=HealthStatus.HEALTHY,
@@ -257,6 +260,7 @@ class TestHealthService:
     ) -> None:
         """Test check_providers when some providers are unhealthy."""
         mock_adapter = MagicMock()
+        mock_adapter.provider_name = "uniprot"
         mock_adapter.check_health = AsyncMock(
             return_value=HealthCheckResult(
                 status=HealthStatus.UNHEALTHY,
@@ -336,6 +340,7 @@ class TestHealthServiceEdgeCases:
         mock_factory.list_providers.return_value = ["test"]
 
         mock_adapter = MagicMock()
+        mock_adapter.provider_name = "test"
         mock_adapter.check_health = AsyncMock(
             return_value=HealthCheckResult(
                 status=HealthStatus.HEALTHY,
@@ -362,6 +367,7 @@ class TestHealthServiceEdgeCases:
         mock_factory.list_providers.return_value = ["test"]
 
         mock_adapter = MagicMock()
+        mock_adapter.provider_name = "test"
         mock_adapter.check_health = AsyncMock(
             return_value=HealthCheckResult(
                 status=HealthStatus.DEGRADED,
