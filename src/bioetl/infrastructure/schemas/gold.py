@@ -527,6 +527,46 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
         strict = True
 
 
+class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Document Similarity in Gold layer.
+
+    Represents similarity between two ChEMBL documents based on Tanimoto coefficients.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    sim_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+
+    # Foreign keys
+    doc_1: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+    doc_2: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+
+    # PubMed identifiers
+    pubmed_id1: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
+    pubmed_id2: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
+
+    # Tanimoto coefficients
+    tid_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+    mol_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+
+    # Derived metrics
+    avg_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+    max_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
+
+
 class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     """Schema for Semantic Scholar Publication in Gold layer.
 
