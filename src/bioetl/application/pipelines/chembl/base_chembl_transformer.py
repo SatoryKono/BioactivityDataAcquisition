@@ -73,8 +73,13 @@ class BaseChemblTransformer(BaseTransformer):
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
 
         """
+        # Auto-derive entity_type from entity_class ClassVar (AUDIT-2026-01-06)
+        # This ensures meaningful entity_type for metrics and tracing labels
+        entity_type = self.entity_class.__name__.lower()
+
         super().__init__(
             provider,
+            entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,

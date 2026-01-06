@@ -52,6 +52,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         """
         super().__init__(
             provider,
+            entity_type="publication",  # AUDIT-2026-01-06: explicit entity_type
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
