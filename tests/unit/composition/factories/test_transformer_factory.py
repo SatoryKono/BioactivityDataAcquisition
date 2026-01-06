@@ -289,10 +289,12 @@ class TestRegisterAllTransformers:
         providers = {key[0] for key in _TRANSFORMER_REGISTRY.keys()}
         expected_providers = {
             "chembl",
+            "crossref",
+            "openalex",
             "pubchem",
-            "uniprot",
             "pubmed",
             "semanticscholar",
+            "uniprot",
         }
 
         assert providers == expected_providers
