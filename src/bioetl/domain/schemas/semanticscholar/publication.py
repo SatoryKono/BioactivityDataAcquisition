@@ -217,7 +217,7 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    @pa.check("lookup_method", name="lookup_method_values")
+    @pa.check("_lookup_method", name="lookup_method_values")
     def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:
         """Validate lookup method values."""
         return series.isin(LOOKUP_METHODS)
