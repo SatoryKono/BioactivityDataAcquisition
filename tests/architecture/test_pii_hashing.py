@@ -43,9 +43,9 @@ class TestPiiHasherPortContract:
         required_methods = ["hash_value", "hash_list", "get_salt_id"]
 
         for method in required_methods:
-            assert hasattr(port, method), (
-                f"PiiHasherPort MUST define {method}() method " f"per RULES.md §5.4"
-            )
+            assert hasattr(
+                port, method
+            ), f"PiiHasherPort MUST define {method}() method per RULES.md §5.4"
 
     def test_pii_hasher_port_exported_in_all(self) -> None:
         """PiiHasherPort MUST be in domain.ports.__all__."""
@@ -55,9 +55,9 @@ class TestPiiHasherPortContract:
 
     def test_noop_pii_hasher_exists(self) -> None:
         """NoOpPiiHasher MUST exist for testing and backward compatibility."""
-        assert hasattr(ports, "NoOpPiiHasher"), (
-            "NoOpPiiHasher MUST be defined for testing " "and backward compatibility"
-        )
+        assert hasattr(
+            ports, "NoOpPiiHasher"
+        ), "NoOpPiiHasher MUST be defined for testing and backward compatibility"
 
     def test_noop_pii_hasher_implements_port(self) -> None:
         """NoOpPiiHasher MUST implement PiiHasherPort."""

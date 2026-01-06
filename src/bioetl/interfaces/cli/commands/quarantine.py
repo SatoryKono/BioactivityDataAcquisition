@@ -92,9 +92,9 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
     if output_json:
         click.echo(json.dumps(stats, indent=2))
     else:
-        click.echo(f"\n{'='*50}")
+        click.echo(f"\n{'=' * 50}")
         click.echo(f"  Quarantine Dashboard: {pipeline}")
-        click.echo(f"{'='*50}")
+        click.echo(f"{'=' * 50}")
 
         total = stats.get("total_count", 0)
         click.echo(f"\n  Total Records: {total}")
@@ -113,7 +113,7 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
                 pct = (count / total * 100) if total > 0 else 0
                 click.echo(f"    - {status}: {count} ({pct:.1f}%)")
 
-        click.echo(f"\n{'='*50}\n")
+        click.echo(f"\n{'=' * 50}\n")
 
 
 @quarantine.command("replay")

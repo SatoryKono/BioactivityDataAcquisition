@@ -38,6 +38,9 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 # Transformers (all DI-injected)
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
+from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
+    AssayParametersTransformer,
+)
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.cell_line_transformer import (
     CellLineTransformer,
@@ -64,6 +67,9 @@ from bioetl.application.pipelines.openalex.transformer import (
 )
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
+from bioetl.application.pipelines.semanticscholar.transformer import (
+    SemanticScholarPublicationTransformer,
+)
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
@@ -72,6 +78,7 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
+    ChEMBLAssayParametersGoldSchema,
     ChEMBLCellLineGoldSchema,
     ChEMBLCompoundRecordGoldSchema,
     ChEMBLDocumentGoldSchema,
@@ -84,12 +91,14 @@ from bioetl.infrastructure.schemas.gold import (
     OpenAlexPublicationGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
+    SemanticScholarPublicationGoldSchema,
     UniProtProteinGoldSchema,
 )
 
 # Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
+    CHEMBL_ASSAY_PARAMETERS_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_CELL_LINE_SCHEMA,
     CHEMBL_COMPOUND_RECORD_SCHEMA,
@@ -103,6 +112,7 @@ from bioetl.infrastructure.schemas.silver import (
     OPENALEX_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
+    SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
 
@@ -154,6 +164,13 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=AssayTransformer,
         silver_schema=CHEMBL_ASSAY_SCHEMA,
         gold_schema=ChEMBLAssayGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_assay_parameters",
+        provider="chembl",
+        transformer_class=AssayParametersTransformer,
+        silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA,
+        gold_schema=ChEMBLAssayParametersGoldSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_cell_line",
@@ -251,6 +268,14 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=OPENALEX_PUBLICATION_SCHEMA,
         gold_schema=OpenAlexPublicationGoldSchema,
     ),
+    # Semantic Scholar pipeline
+    PipelineFactoryConfig(
+        pipeline_name="semanticscholar_publication",
+        provider="semanticscholar",
+        transformer_class=SemanticScholarPublicationTransformer,
+        silver_schema=SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+        gold_schema=SemanticScholarPublicationGoldSchema,
+    ),
 )
 
 
@@ -287,6 +312,7 @@ _factories: dict[str, GenericPipelineFactory[GenericPipeline]] = {
 # Export individual factories for backward compatibility
 chembl_activity_factory = _factories["chembl_activity"]
 chembl_assay_factory = _factories["chembl_assay"]
+chembl_assay_parameters_factory = _factories["chembl_assay_parameters"]
 chembl_cell_line_factory = _factories["chembl_cell_line"]
 chembl_compound_record_factory = _factories["chembl_compound_record"]
 chembl_document_factory = _factories["chembl_document"]
@@ -300,6 +326,7 @@ uniprot_protein_factory = _factories["uniprot_protein"]
 pubmed_publications_factory = _factories["pubmed_publications"]
 crossref_publication_enrichment_factory = _factories["crossref_publication_enrichment"]
 openalex_publication_factory = _factories["openalex_publication"]
+semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 
 
 # =============================================================================
@@ -427,6 +454,7 @@ __all__ = [
     "PipelineFactoryConfig",
     "chembl_activity_factory",
     "chembl_assay_factory",
+    "chembl_assay_parameters_factory",
     "chembl_cell_line_factory",
     "chembl_compound_record_factory",
     "chembl_document_factory",
@@ -444,5 +472,6 @@ __all__ = [
     "pubmed_publications_factory",
     "register_all_pipelines",
     "reset_registration",
+    "semanticscholar_publication_factory",
     "uniprot_protein_factory",
 ]

@@ -1,0 +1,66 @@
+# configs/pipelines/semanticscholar/publication.yaml
+# Pipeline for batch DOI resolution via Semantic Scholar with title fallback.
+#
+# Resolves DOIs from input CSV to enrich with publication metadata.
+# Falls back to title search when DOI is not found or empty.
+#
+# Inherits defaults from ../_defaults.yaml
+
+pipeline_name: semanticscholar_publication
+provider: semanticscholar
+entity_type: publication
+version: "1.0.0"
+description: "Batch DOI resolution via Semantic Scholar with title fallback"
+
+primary_keys: ["paper_id"]
+silver_table: "semanticscholar_publication"
+gold_table: "semanticscholar_publication"
+
+source_file: ../../sources/semanticscholar.yaml
+
+# Entity-specific gold filters
+gold_filters:
+  required_fields:
+    - paper_id
+    - title
+  ranges:
+    year:
+      min: 1900
+      max: 2100
+
+# Entity-specific transform steps
+transform:
+  version: "1.0.0"
+  steps:
+    - extract_external_ids
+    - extract_authors
+    - extract_journal_info
+    - extract_open_access_info
+    - extract_tldr
+    - normalize_dates
+    - add_metadata
+    - calculate_content_hash
+
+# Entity-specific sink configuration
+sink:
+  bronze:
+    path: "data/bronze/semanticscholar/publication"
+  silver:
+    path: "data/silver/semanticscholar/publication"
+    primary_key: ["paper_id"]
+    partition_by: ["year"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/gold/semanticscholar/publication"
+    csv_export:
+      path: "data/output/csv/gold"
+
+# Input filter for batch DOI resolution with title fallback
+input_filter:
+  enabled: true
+  source_path: "data/input/dois.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 100
+  fallback_column: "title"  # Search by title if DOI not found or empty
