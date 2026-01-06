@@ -1,0 +1,95 @@
+# configs/pipelines/uniprot/idmapping.yaml
+# Pipeline configuration for UniProt ID Mapping (ChEMBL → UniProt).
+#
+# Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
+# Input: CSV file with target_chembl_id column
+# Output: Silver/Gold records with mapping results (null for not_found)
+#
+# Inherits defaults from ../_defaults.yaml
+
+pipeline_name: uniprot_idmapping
+provider: uniprot
+entity_type: idmapping
+version: "1.0.0"
+description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
+
+primary_keys: ["target_chembl_id"]
+silver_table: "uniprot_idmapping"
+gold_table: "uniprot_idmapping"
+
+# Source configuration for ID Mapping
+source:
+  type: file
+  load_strategy: full
+  # Input CSV file containing ChEMBL target IDs
+  input_path: data/input/target.csv
+
+  # ID Mapping API configuration
+  api:
+    base_url: https://rest.uniprot.org
+    # Database names as recognized by UniProt ID Mapping API
+    from_db: ChEMBL
+    to_db: UniProtKB
+
+# Transform configuration
+transform:
+  version: "1.0.0"
+  steps:
+    - map_ids
+    - validate_schema
+    - generate_content_hash
+
+# DQ rules - elevated thresholds for ID mapping
+# Many ChEMBL targets may not have UniProt mappings (expected behavior)
+dq_rules:
+  soft_fail_threshold: 0.30  # 30% not_found is acceptable
+  hard_fail_threshold: 0.80  # 80% not_found triggers hard failure
+
+# Circuit breaker for UniProt API
+circuit_breaker:
+  failure_threshold: 5
+  recovery_timeout: 300
+
+# Rate limit for UniProt API
+rate_limit:
+  requests_per_second: 10.0
+  burst: 20
+
+# Sink configuration
+sink:
+  bronze:
+    # ID Mapping doesn't write Bronze (data comes from API, not raw files)
+    enabled: false
+  silver:
+    path: "data/output/silver/uniprot/idmapping"
+    format: delta
+    mode: merge
+    primary_key: ["target_chembl_id"]
+    partition_by: []  # No partitioning - small dataset
+    classification: public
+    csv_export:
+      enabled: true
+      path: "data/output/csv/silver"
+      delimiter: ","
+      header: true
+      encoding: "utf-8"
+  gold:
+    enabled: true
+    path: "data/output/gold/uniprot/idmapping"
+    format: delta
+    mode: overwrite
+    csv_export:
+      enabled: true
+      path: "data/output/csv/gold"
+
+# Gold filters - pass all records (including not_found)
+# Users may want to filter in downstream analysis
+gold_filters:
+  required_fields:
+    - target_chembl_id
+    - mapping_status
+
+# Input filter - the CSV file IS the input (not a filter)
+# Disabled because we read directly from source.input_path
+input_filter:
+  enabled: false
