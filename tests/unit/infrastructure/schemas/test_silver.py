@@ -335,22 +335,27 @@ class TestPubchemCompoundSchema:
         for field_name in expected:
             assert field_name in PUBCHEM_COMPOUND_SCHEMA.names
 
-    def test_all_fields_are_strings(self):
-        """Verify all non-system fields are strings."""
-        non_system_fields = [
+    def test_all_fields_are_strings_or_typed(self):
+        """Verify non-system fields have correct types."""
+        string_fields = [
             "cid",
             "molecular_formula",
-            "molecular_weight",
             "canonical_smiles",
             "inchi",
             "inchikey",
             "iupac_name",
         ]
-        for field_name in non_system_fields:
+        for field_name in string_fields:
             field = PUBCHEM_COMPOUND_SCHEMA.field(field_name)
             assert field.type == pa.string(), (
                 f"{field_name} should be string, got {field.type}"
             )
+
+        # molecular_weight is float64 (transformed by PubChemCompoundTransformer)
+        mw_field = PUBCHEM_COMPOUND_SCHEMA.field("molecular_weight")
+        assert mw_field.type == pa.float64(), (
+            f"molecular_weight should be float64, got {mw_field.type}"
+        )
 
 
 class TestUniprotProteinSchema:
@@ -533,19 +538,20 @@ class TestSilverSchemaValidation:
         """PUBCHEM_COMPOUND_SCHEMA должна валидировать корректные данные."""
         valid_record = {
             "entity_id": "CID_2244",
+            "content_hash": "xyz789",
             "cid": "2244",
             "molecular_formula": "C9H8O4",
-            "molecular_weight": "180.16",
+            "molecular_weight": 180.16,  # float64, not string
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
             "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
             "iupac_name": "2-acetoxybenzoic acid",
-            "content_hash": "xyz789",
             "_run_id": "run_002",
             "_run_type": "incremental",
             "_source_batch_id": "batch_002",
             "_ingestion_ts": "2024-01-15T11:00:00Z",
+            "_index": 0,
         }
 
         table = pa.Table.from_pylist([valid_record], schema=PUBCHEM_COMPOUND_SCHEMA)
