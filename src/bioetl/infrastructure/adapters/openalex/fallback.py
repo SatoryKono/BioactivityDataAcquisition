@@ -5,15 +5,17 @@ Provides title-based search fallback when DOI resolution fails.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Callable
+    from collections.abc import Callable
 
     from bioetl.domain.ports import LoggerPort
 
 
-class TitleFallbackHandler:
+class TitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when DOI lookup fails.
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
@@ -30,77 +32,57 @@ class TitleFallbackHandler:
             logger: Logger port for structured logging.
             search_fn: Async function to search works by title.
         """
-        self._logger = logger
+        super().__init__(logger)
         self._search_fn = search_fn
 
-    def _get_fallback_title(
-        self, doi: str, normalized_doi: str | None, fallback_mapping: dict[str, str]
-    ) -> str | None:
-        """Get fallback title for a DOI from mapping."""
-        if normalized_doi:
-            return fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
-        return fallback_mapping.get(doi)
+    @property
+    def _event_no_fallback_title(self) -> str:
+        """Return log event name for missing fallback title."""
+        return "openalex_no_fallback_title"
 
-    def _truncate_title(self, title: str, max_len: int = 50) -> str:
-        """Truncate title for logging."""
-        return title[:max_len] + "..." if len(title) > max_len else title
+    @property
+    def _event_fallback_attempt(self) -> str:
+        """Return log event name for fallback attempt."""
+        return "openalex_title_fallback_attempt"
 
-    async def process_missing_dois(
-        self,
-        dois: list[str],
-        found_dois: set[str],
-        fallback_mapping: dict[str, str],
-        normalize_fn: Callable[[str], str | None],
-        limit: int | None,
-        fetched: int,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Process DOIs not found via batch fetch using title fallback.
+    @property
+    def _event_fallback_success(self) -> str:
+        """Return log event name for successful fallback."""
+        return "openalex_title_fallback_success"
+
+    @property
+    def _event_fallback_not_found(self) -> str:
+        """Return log event name for failed fallback."""
+        return "openalex_title_fallback_not_found"
+
+    async def _search_by_title(self, title: str) -> dict[str, Any] | None:
+        """Search for work by title using OpenAlex API.
 
         Args:
-            dois: List of DOIs that were requested.
-            found_dois: Set of DOIs that were successfully resolved (lowercase).
-            fallback_mapping: Mapping {doi: title} for fallback search.
-            normalize_fn: Function to normalize DOI strings.
-            limit: Maximum total records to return.
-            fetched: Number of records already fetched.
+            title: Publication title to search for.
 
-        Yields:
-            Work records found via title search with _lookup_method set.
+        Returns:
+            Work record if found, None otherwise.
         """
-        for doi in dois:
-            if limit and fetched >= limit:
-                return
+        result = await self._search_fn(title, 3)
+        return cast(dict[str, Any] | None, result)
 
-            normalized_doi = (normalize_fn(doi) or "").lower()
-            if normalized_doi in found_dois:
-                continue
+    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+        """Return OpenAlex work ID for logging."""
+        return ("found_id", str(result.get("id", "unknown")))
 
-            title = self._get_fallback_title(doi, normalized_doi, fallback_mapping)
-            if not title:
-                self._logger.debug("openalex_no_fallback_title", doi=doi)
-                continue
+    def _process_found_result(
+        self, result: dict[str, Any], original_doi: str
+    ) -> dict[str, Any]:
+        """Add lookup method metadata to found work.
 
-            self._logger.info(
-                "openalex_title_fallback_attempt",
-                doi=doi,
-                title=self._truncate_title(title),
-            )
+        Args:
+            result: The found work record.
+            original_doi: The DOI that was originally searched.
 
-            work = await self._search_fn(title, 3)
-            if work:
-                self._logger.info(
-                    "openalex_title_fallback_success",
-                    original_doi=doi,
-                    found_id=work.get("id"),
-                    title=title[:50],
-                )
-                work["_lookup_method"] = "title_fallback"
-                work["_original_doi"] = doi
-                yield work
-                fetched += 1
-            else:
-                self._logger.warning(
-                    "openalex_title_fallback_not_found",
-                    doi=doi,
-                    title=title[:50],
-                )
+        Returns:
+            Work with _lookup_method and _original_doi added.
+        """
+        result["_lookup_method"] = "title_fallback"
+        result["_original_doi"] = original_doi
+        return result
