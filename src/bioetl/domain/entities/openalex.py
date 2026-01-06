@@ -123,8 +123,10 @@ class OpenAlexPublicationRecord(BaseModel):
     )
 
     # Citation metrics
-    cited_by_count: int | None = PydanticField(
-        default=None, description="Number of citations"
+    # OpenAlex source field: cited_by_count
+    # Unified BioETL field: citation_count (standardized across all providers)
+    citation_count: int | None = PydanticField(
+        default=None, description="Number of citations (from OpenAlex cited_by_count)"
     )
 
     # Concepts (top-level only)
@@ -178,7 +180,7 @@ class OpenAlexPublicationEntity(BaseEntity):
         doc_type: Document type (PUBLICATION, PREPRINT, etc.).
         is_oa: Whether the work is Open Access.
         oa_status: OA status (gold, green, hybrid, bronze, closed).
-        cited_by_count: Number of citations.
+        citation_count: Number of citations (from OpenAlex cited_by_count).
         concepts: Top concept names from OpenAlex.
         language: Publication language code.
         _lookup_method: How record was resolved (doi, title_fallback, title_only).
@@ -218,7 +220,9 @@ class OpenAlexPublicationEntity(BaseEntity):
     oa_status: str | None = None
 
     # Citation metrics
-    cited_by_count: int | None = None
+    # OpenAlex source field: cited_by_count
+    # Unified BioETL field: citation_count (standardized across all providers)
+    citation_count: int | None = None
 
     # Concepts (top-level only)
     concepts: list[str] = field(default_factory=list)

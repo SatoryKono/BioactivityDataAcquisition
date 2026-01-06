@@ -162,7 +162,9 @@ class OpenAlexPublicationTransformer(BaseTransformer):
             "doc_type": doc_type,
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
-            "cited_by_count": rec.get("cited_by_count"),
+            # OpenAlex source field: cited_by_count
+            # Unified BioETL field: citation_count (standardized across all providers)
+            "citation_count": rec.get("cited_by_count"),
             "concepts": concepts,
             "language": rec.get("language"),
             "_lookup_method": lookup_method,

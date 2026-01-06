@@ -749,7 +749,9 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     doc_type: Series[str] = pa.Field(nullable=False)
     is_oa: Series[bool] = pa.Field(nullable=True)
     oa_status: Series[str] = pa.Field(nullable=True)
-    cited_by_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    # OpenAlex source field: cited_by_count
+    # Unified BioETL field: citation_count (standardized across all providers)
+    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
     source: Series[str] = pa.Field(nullable=False)
 
