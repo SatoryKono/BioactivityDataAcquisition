@@ -1,0 +1,547 @@
+"""Unit tests for BasePublicationTransformer.
+
+Tests the Template Method pattern and common transformation flow.
+Uses a concrete test implementation to verify base class behavior.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock
+from uuid import uuid4
+
+import pytest
+
+from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.types import RunID, RunType
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import BronzeRecord
+
+
+# =============================================================================
+# Helper Entity for BasePublicationTransformer tests
+# =============================================================================
+
+
+@dataclass(frozen=True, kw_only=True)
+class StubPublicationEntity(BaseEntity):
+    """Stub entity for BasePublicationTransformer tests."""
+
+    # Required field
+    test_id: str
+
+    # Optional fields
+    title: str | None = None
+    abstract: str | None = None
+    year: int | None = None
+    source: str | None = None
+    _lookup_method: str | None = None
+    _original_doi: str | None = None
+
+
+# =============================================================================
+# Concrete Stub Implementation
+# =============================================================================
+
+
+class StubPublicationTransformer(BasePublicationTransformer):
+    """Concrete stub implementation for testing BasePublicationTransformer."""
+
+    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+        """Extract test fields from record."""
+        return {
+            "test_id": record.get("id"),
+            "title": record.get("title"),
+            "abstract": record.get("abstract"),
+            "year": record.get("year"),
+            "source": "test_provider",
+            "_lookup_method": record.get("_lookup_method"),
+            "_original_doi": record.get("_original_doi"),
+        }
+
+    def _get_primary_id_field(self) -> str:
+        """Return primary ID field name."""
+        return "test_id"
+
+    def _get_entity_class(self) -> type[BaseEntity]:
+        """Return test entity class."""
+        return StubPublicationEntity
+
+
+class StubWithPreValidation(StubPublicationTransformer):
+    """Stub transformer with pre-extraction validation for testing."""
+
+    def _pre_extract_validation(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> None:
+        """Validate required raw fields."""
+        if not record.get("id"):
+            raise ValueError("ID is required for test publication")
+
+
+class StubWithoutFallbackLogging(StubPublicationTransformer):
+    """Stub transformer that disables fallback logging."""
+
+    def _should_log_fallback_lookup(self) -> bool:
+        """Disable fallback logging."""
+        return False
+
+
+# =============================================================================
+# Fixtures
+# =============================================================================
+
+
+@pytest.fixture
+def transformer() -> StubPublicationTransformer:
+    """Create a stub transformer instance."""
+    return StubPublicationTransformer(
+        provider="test_provider",
+        entity_type="publication",
+    )
+
+
+@pytest.fixture
+def mock_context() -> PipelineContext:
+    """Create a mock pipeline context."""
+    mock_logger = MagicMock()
+    mock_logger.info = MagicMock()
+    mock_logger.warning = MagicMock()
+    mock_logger.debug = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+
+    return PipelineContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime.now(UTC),
+        logger=mock_logger,
+    )
+
+
+@pytest.fixture
+def sample_record() -> dict[str, Any]:
+    """Create a sample test record."""
+    return {
+        "id": "test-12345",
+        "title": "Test Publication Title",
+        "abstract": "This is a test abstract.",
+        "year": 2024,
+        "_lookup_method": "doi",
+    }
+
+
+# =============================================================================
+# Base Class Behavior Tests
+# =============================================================================
+
+
+class TestBasePublicationTransformerBasics:
+    """Tests for basic transformation flow."""
+
+    @pytest.mark.asyncio
+    async def test_transform_basic_record(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Should transform a basic record successfully."""
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert result["test_id"] == "test-12345"
+        assert result["title"] == "Test Publication Title"
+        assert result["abstract"] == "This is a test abstract."
+        assert result["year"] == 2024
+        assert result["source"] == "test_provider"
+
+    @pytest.mark.asyncio
+    async def test_transform_generates_entity_id(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Should generate entity ID from primary ID."""
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert "entity_id" in result
+        assert "test_provider" in result["entity_id"]
+        assert "test-12345" in result["entity_id"]
+
+    @pytest.mark.asyncio
+    async def test_transform_generates_content_hash(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Should generate content hash for versioning."""
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert "content_hash" in result
+        assert len(result["content_hash"]) == 64  # SHA256 hex
+
+    @pytest.mark.asyncio
+    async def test_transform_adds_lineage_fields(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Should add lineage fields from context."""
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert "_run_id" in result
+        assert "_run_type" in result
+        assert "_ingestion_ts" in result
+        assert "_index" in result
+        assert result["_run_type"] == "incremental"
+        assert result["_index"] == 0
+
+    @pytest.mark.asyncio
+    async def test_transform_content_hash_excludes_metadata(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Content hash should exclude fields starting with underscore."""
+        record1 = {
+            "id": "test-1",
+            "title": "Same Title",
+            "_lookup_method": "doi",
+        }
+        record2 = {
+            "id": "test-1",
+            "title": "Same Title",
+            "_lookup_method": "title_fallback",  # Different metadata
+            "_original_doi": "10.1234/failed",
+        }
+
+        result1 = await transformer.transform(mock_context, record1, 0)
+        result2 = await transformer.transform(mock_context, record2, 0)
+
+        assert result1 is not None
+        assert result2 is not None
+        # Content hash should be the same (metadata excluded)
+        assert result1["content_hash"] == result2["content_hash"]
+
+
+# =============================================================================
+# Missing Primary ID Tests
+# =============================================================================
+
+
+class TestMissingPrimaryId:
+    """Tests for handling missing primary ID."""
+
+    @pytest.mark.asyncio
+    async def test_missing_id_returns_none(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should return None when primary ID is missing."""
+        record = {
+            "id": None,
+            "title": "No ID Record",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_missing_id_logs_warning(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should log warning when primary ID is missing."""
+        record = {
+            "id": None,
+            "title": "No ID Record",
+            "_lookup_method": "title_fallback",
+        }
+
+        await transformer.transform(mock_context, record, 0)
+
+        mock_context.logger.warning.assert_called_once()
+        call_args = mock_context.logger.warning.call_args
+        assert call_args[0][0] == "record_skipped_no_id"
+
+    @pytest.mark.asyncio
+    async def test_empty_string_id_returns_none(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should return None when primary ID is empty string."""
+        record = {
+            "id": "",
+            "title": "Empty ID Record",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is None
+
+
+# =============================================================================
+# Fallback Lookup Logging Tests
+# =============================================================================
+
+
+class TestFallbackLookupLogging:
+    """Tests for fallback lookup logging behavior."""
+
+    @pytest.mark.asyncio
+    async def test_logs_title_fallback(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should log info when title_fallback is used."""
+        record = {
+            "id": "test-123",
+            "title": "Fallback Record",
+            "_lookup_method": "title_fallback",
+            "_original_doi": "10.1234/failed",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        mock_context.logger.info.assert_called()
+        call_args = mock_context.logger.info.call_args
+        assert call_args[0][0] == "fallback_lookup_used"
+
+    @pytest.mark.asyncio
+    async def test_logs_title_only(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should log info when title_only is used."""
+        record = {
+            "id": "test-123",
+            "title": "Title Only Record",
+            "_lookup_method": "title_only",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        mock_context.logger.info.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_no_log_for_doi_lookup(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Should not log fallback info for regular DOI lookup."""
+        sample_record["_lookup_method"] = "doi"
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        # info should not be called for fallback_lookup_used
+        for call in mock_context.logger.info.call_args_list:
+            assert call[0][0] != "fallback_lookup_used"
+
+    @pytest.mark.asyncio
+    async def test_disabled_fallback_logging(
+        self,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should not log fallback when disabled."""
+        transformer = StubWithoutFallbackLogging(
+            provider="test_provider",
+            entity_type="publication",
+        )
+        record = {
+            "id": "test-123",
+            "title": "Title",
+            "_lookup_method": "title_fallback",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        # info should not be called for fallback_lookup_used
+        for call in mock_context.logger.info.call_args_list:
+            assert call[0][0] != "fallback_lookup_used"
+
+
+# =============================================================================
+# Pre-Extraction Validation Tests
+# =============================================================================
+
+
+class TestPreExtractValidation:
+    """Tests for pre-extraction validation hook."""
+
+    @pytest.mark.asyncio
+    async def test_pre_validation_raises_value_error(
+        self,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should return None when pre-validation raises ValueError."""
+        transformer = StubWithPreValidation(
+            provider="test_provider",
+            entity_type="publication",
+        )
+        record = {
+            "id": None,  # Will fail pre-validation
+            "title": "Test",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        # ValueError is caught by BaseTransformer.transform and returns None
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_pre_validation_passes(
+        self,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Should proceed with transformation when pre-validation passes."""
+        transformer = StubWithPreValidation(
+            provider="test_provider",
+            entity_type="publication",
+        )
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert result["test_id"] == "test-12345"
+
+
+# =============================================================================
+# Lookup Metadata Preservation Tests
+# =============================================================================
+
+
+class TestLookupMetadataPreservation:
+    """Tests for preserving lookup metadata in output."""
+
+    @pytest.mark.asyncio
+    async def test_preserves_lookup_method(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should preserve _lookup_method in Silver record."""
+        record = {
+            "id": "test-123",
+            "title": "Test",
+            "_lookup_method": "title_fallback",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["_lookup_method"] == "title_fallback"
+
+    @pytest.mark.asyncio
+    async def test_preserves_original_doi(
+        self,
+        transformer: StubPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Should preserve _original_doi in Silver record."""
+        record = {
+            "id": "test-123",
+            "title": "Test",
+            "_lookup_method": "title_fallback",
+            "_original_doi": "10.1234/original",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["_original_doi"] == "10.1234/original"
+
+
+# =============================================================================
+# Provider Configuration Tests
+# =============================================================================
+
+
+class TestProviderConfiguration:
+    """Tests for provider and entity type configuration."""
+
+    def test_provider_attribute(self) -> None:
+        """Should set provider attribute correctly."""
+        transformer = StubPublicationTransformer(
+            provider="custom_provider",
+            entity_type="publication",
+        )
+        assert transformer.provider == "custom_provider"
+
+    def test_entity_type_attribute(self) -> None:
+        """Should set entity_type attribute correctly."""
+        transformer = StubPublicationTransformer(
+            provider="test",
+            entity_type="custom_type",
+        )
+        assert transformer.entity_type == "custom_type"
+
+    def test_default_entity_type(self) -> None:
+        """Should use 'unknown' as default entity_type."""
+        transformer = StubPublicationTransformer(provider="test")
+        assert transformer.entity_type == "unknown"
+
+
+# =============================================================================
+# Abstract Method Contract Tests
+# =============================================================================
+
+
+class TestAbstractMethodContracts:
+    """Tests verifying abstract method contracts."""
+
+    def test_get_primary_id_field_returns_string(
+        self,
+        transformer: StubPublicationTransformer,
+    ) -> None:
+        """_get_primary_id_field should return a string."""
+        result = transformer._get_primary_id_field()
+        assert isinstance(result, str)
+        assert result == "test_id"
+
+    def test_get_entity_class_returns_type(
+        self,
+        transformer: StubPublicationTransformer,
+    ) -> None:
+        """_get_entity_class should return a type."""
+        result = transformer._get_entity_class()
+        assert isinstance(result, type)
+        assert issubclass(result, BaseEntity)
+
+    def test_should_log_fallback_default_true(
+        self,
+        transformer: StubPublicationTransformer,
+    ) -> None:
+        """_should_log_fallback_lookup should default to True."""
+        assert transformer._should_log_fallback_lookup() is True
+
+    def test_should_log_fallback_can_be_overridden(self) -> None:
+        """_should_log_fallback_lookup can be overridden to False."""
+        transformer = StubWithoutFallbackLogging(provider="test")
+        assert transformer._should_log_fallback_lookup() is False

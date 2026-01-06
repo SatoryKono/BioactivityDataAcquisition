@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, PublicationEntity
 from bioetl.domain.normalization import (
     extract_first_string,
@@ -36,19 +36,22 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
-class CrossRefPublicationTransformer(BaseTransformer):
+class CrossRefPublicationTransformer(BasePublicationTransformer):
     """Transforms CrossRef bronze records to silver.
 
     Implements field extraction, normalization, and type coercion
     according to the CrossRef → Publication entity mapping specification.
 
-    Subclasses BaseTransformer to provide:
-    - Unified error handling via Template Method
+    Subclasses BasePublicationTransformer to provide:
+    - Unified transformation flow via Template Method
+    - Pre-extraction DOI validation (raises ValueError if missing)
     - Content hash computation
     - Tracing and metrics observability (O1)
+
+    Note: Disables fallback logging since CrossRef uses DOI-only lookup.
     """
 
     def __init__(
@@ -224,49 +227,55 @@ class CrossRefPublicationTransformer(BaseTransformer):
             "source": "crossref",
         }
 
-    async def _transform_impl(
+    def _get_primary_id_field(self) -> str:
+        """Return the primary ID field name for CrossRef publications.
+
+        Returns:
+            'doi' - the CrossRef-specific identifier field.
+
+        """
+        return "doi"
+
+    def _get_entity_class(self) -> type[PublicationEntity]:
+        """Return the domain entity class for CrossRef publications.
+
+        Returns:
+            PublicationEntity class.
+
+        """
+        return PublicationEntity
+
+    def _pre_extract_validation(
         self,
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
-    ) -> SilverRecord | None:
-        """Transform CrossRef bronze record to silver format.
+    ) -> None:
+        """Validate DOI exists before extraction.
+
+        CrossRef publications require DOI as mandatory identifier.
+        Raises ValueError (caught by BaseTransformer.transform).
 
         Args:
-            context: Pipeline context with run_id, run_type, logger.
+            context: Pipeline context (unused).
             record: Raw Bronze record from CrossRef API.
-            index: Sequential index of the record in the pipeline run.
+            index: Sequential index (unused).
 
-        Returns:
-            SilverRecord if transformation successful, None if skipped.
+        Raises:
+            ValueError: If DOI field is missing or empty.
 
         """
-        # 1. Validate required field
         doi = record.get("DOI")
         if not doi:
             raise ValueError("DOI is required for CrossRef Publication")
 
-        # 2. Extract business data
-        business_data = self._extract_business_data(record)
+    def _should_log_fallback_lookup(self) -> bool:
+        """Disable fallback lookup logging for CrossRef.
 
-        # 3. Generate entity ID using IdentityService (normalized DOI)
-        entity_id = self.compute_entity_id(
-            source_id=business_data["doi"],
-            record={"doi": business_data["doi"]},
-        )
+        CrossRef uses DOI-only lookup without title fallback mechanism.
 
-        # 4. Compute content hash
-        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+        Returns:
+            False - no fallback logging needed.
 
-        # 5. Create domain entity
-        entity = self._create_entity(
-            PublicationEntity,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
-        )
-
-        # 6. Convert to SilverRecord
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
+        """
+        return False
