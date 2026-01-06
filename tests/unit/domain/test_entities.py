@@ -11,6 +11,7 @@ from bioetl.domain.entities import (
     Bioactivity,
     BioactivityState,
     Compound,
+    DocumentSimilarity,
     Protein,
     PublicationEntity,
 )
@@ -749,6 +750,168 @@ class TestWorkDeprecation:
 
         # Should be recognized as Work via metaclass
         assert isinstance(publication, Work)
+
+
+@pytest.mark.unit
+class TestDocumentSimilarity:
+    """Tests for DocumentSimilarity entity."""
+
+    def test_valid_entity(self, base_entity_kwargs):
+        """Test creation of valid entity."""
+        entity = DocumentSimilarity(
+            **base_entity_kwargs,
+            sim_id=1,
+            doc_1=100,
+            doc_2=200,
+            tid_tani=0.8,
+            mol_tani=0.6,
+            avg_tani=0.7,
+            max_tani=0.8,
+        )
+
+        assert entity.sim_id == 1
+        assert entity.doc_1 == 100
+        assert entity.doc_2 == 200
+        assert entity.tid_tani == 0.8
+        assert entity.mol_tani == 0.6
+        assert entity.avg_tani == 0.7
+        assert entity.max_tani == 0.8
+
+    def test_minimal_entity(self, base_entity_kwargs):
+        """Test creation with only required fields."""
+        entity = DocumentSimilarity(
+            **base_entity_kwargs,
+            sim_id=1,
+            doc_1=100,
+            doc_2=200,
+        )
+
+        assert entity.sim_id == 1
+        assert entity.tid_tani is None
+        assert entity.mol_tani is None
+        assert entity.avg_tani is None
+        assert entity.max_tani is None
+        assert entity.pubmed_id1 is None
+        assert entity.pubmed_id2 is None
+
+    def test_with_pubmed_ids(self, base_entity_kwargs):
+        """Test creation with PubMed identifiers."""
+        entity = DocumentSimilarity(
+            **base_entity_kwargs,
+            sim_id=1,
+            doc_1=100,
+            doc_2=200,
+            pubmed_id1=12345678,
+            pubmed_id2=87654321,
+        )
+
+        assert entity.pubmed_id1 == 12345678
+        assert entity.pubmed_id2 == 87654321
+
+    def test_invalid_sim_id_zero(self, base_entity_kwargs):
+        """Test that sim_id=0 raises error."""
+        with pytest.raises(ValueError, match="sim_id must be positive"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=0,
+                doc_1=100,
+                doc_2=200,
+            )
+
+    def test_invalid_sim_id_negative(self, base_entity_kwargs):
+        """Test that negative sim_id raises error."""
+        with pytest.raises(ValueError, match="sim_id must be positive"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=-1,
+                doc_1=100,
+                doc_2=200,
+            )
+
+    def test_invalid_doc_1_zero(self, base_entity_kwargs):
+        """Test that doc_1=0 raises error."""
+        with pytest.raises(ValueError, match="doc_1 and doc_2 must be positive"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=1,
+                doc_1=0,
+                doc_2=200,
+            )
+
+    def test_invalid_doc_2_zero(self, base_entity_kwargs):
+        """Test that doc_2=0 raises error."""
+        with pytest.raises(ValueError, match="doc_1 and doc_2 must be positive"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=1,
+                doc_1=100,
+                doc_2=0,
+            )
+
+    def test_invalid_same_document(self, base_entity_kwargs):
+        """Test that doc_1==doc_2 raises error."""
+        with pytest.raises(ValueError, match="cannot be similar to itself"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=1,
+                doc_1=100,
+                doc_2=100,
+            )
+
+    def test_invalid_tanimoto_above_one(self, base_entity_kwargs):
+        """Test that Tanimoto > 1.0 raises error."""
+        with pytest.raises(ValueError, match="tid_tani must be in"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=1,
+                doc_1=100,
+                doc_2=200,
+                tid_tani=1.5,
+            )
+
+    def test_invalid_tanimoto_negative(self, base_entity_kwargs):
+        """Test that negative Tanimoto raises error."""
+        with pytest.raises(ValueError, match="mol_tani must be in"):
+            DocumentSimilarity(
+                **base_entity_kwargs,
+                sim_id=1,
+                doc_1=100,
+                doc_2=200,
+                mol_tani=-0.1,
+            )
+
+    def test_valid_tanimoto_boundary_zero(self, base_entity_kwargs):
+        """Test that Tanimoto=0.0 is valid."""
+        entity = DocumentSimilarity(
+            **base_entity_kwargs,
+            sim_id=1,
+            doc_1=100,
+            doc_2=200,
+            tid_tani=0.0,
+        )
+        assert entity.tid_tani == 0.0
+
+    def test_valid_tanimoto_boundary_one(self, base_entity_kwargs):
+        """Test that Tanimoto=1.0 is valid."""
+        entity = DocumentSimilarity(
+            **base_entity_kwargs,
+            sim_id=1,
+            doc_1=100,
+            doc_2=200,
+            mol_tani=1.0,
+        )
+        assert entity.mol_tani == 1.0
+
+    def test_entity_is_frozen(self, base_entity_kwargs):
+        """Test that DocumentSimilarity is immutable."""
+        entity = DocumentSimilarity(
+            **base_entity_kwargs,
+            sim_id=1,
+            doc_1=100,
+            doc_2=200,
+        )
+        with pytest.raises(AttributeError):
+            entity.sim_id = 2
 
 
 @pytest.mark.unit

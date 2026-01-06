@@ -43,7 +43,7 @@ class TestFileSizeLimits:
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
-        "chembl_structures.py": 400,  # 387 LOC - ChEMBL structural entities + ProteinClassification
+        "chembl_structures.py": 450,  # ~420 LOC - ChEMBL structural entities (DocumentSimilarity + ProteinClassification)
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
         # Domain value objects (rich domain models with validation)
@@ -72,8 +72,8 @@ class TestFileSizeLimits:
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
-        "gold.py": 800,  # 780 LOC - Gold layer Pandera schemas for all entities (OpenAlex + SemanticScholar + AssayParameters + ProteinClass)
-        "silver.py": 720,  # 703 LOC - Silver PyArrow schemas for all providers (AssayParameters + ProteinClass added)
+        "gold.py": 850,  # ~830 LOC - Gold layer Pandera schemas (OpenAlex + SemanticScholar + AssayParameters + ProteinClass + DocumentSimilarity)
+        "silver.py": 750,  # ~730 LOC - Silver PyArrow schemas (AssayParameters + ProteinClass + DocumentSimilarity added)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 550,  # 496 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         # Interfaces layer exemptions

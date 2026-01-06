@@ -506,6 +506,36 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for ChEMBL Document Similarity
+# See: https://www.ebi.ac.uk/chembl/api/data/document_similarity
+CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary key
+        pa.field("sim_id", pa.int64()),
+        # Foreign keys
+        pa.field("doc_1", pa.int64()),
+        pa.field("doc_2", pa.int64()),
+        # PubMed identifiers
+        pa.field("pubmed_id1", pa.int64()),
+        pa.field("pubmed_id2", pa.int64()),
+        # Tanimoto coefficients
+        pa.field("tid_tani", pa.float64()),
+        pa.field("mol_tani", pa.float64()),
+        # Derived metrics
+        pa.field("avg_tani", pa.float64()),
+        pa.field("max_tani", pa.float64()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
+
 # Schema for Semantic Scholar Publication
 # See: https://api.semanticscholar.org/api-docs/graph
 SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(

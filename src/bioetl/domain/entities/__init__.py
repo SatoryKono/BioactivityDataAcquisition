@@ -41,6 +41,7 @@ from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
     Document,
+    DocumentSimilarity,
     DocumentTerm,
     Molecule,
     ProteinClassification,
@@ -75,6 +76,7 @@ __all__ = [
     "CompoundRecord",
     "Document",
     "DocumentRecord",
+    "DocumentSimilarity",
     "DocumentTerm",
     "DocumentTermRecord",
     "Molecule",
