@@ -197,8 +197,13 @@ def validate_non_empty_string(value: str | None) -> str | None:
 # DOI Validation
 # =============================================================================
 
-# DOI regex pattern: 10.XXXX/... where XXXX is registrant code
-_DOI_PATTERN = re.compile(r"^10\.\d{4,}/.*$")
+# DOI regex pattern per DOI Handbook (https://www.doi.org/doi_handbook/2_Numbering.html)
+# Format: 10.XXXX/suffix where:
+#   - 10. is the fixed prefix
+#   - XXXX is registrant code (minimum 4 digits)
+#   - suffix is the identifier (minimum 1 character)
+DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/.+$"
+_DOI_PATTERN = re.compile(DOI_REGEX_PATTERN)
 
 
 def validate_doi(doi: str | None) -> bool:

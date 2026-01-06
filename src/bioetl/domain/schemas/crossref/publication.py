@@ -10,6 +10,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # === Fixed Value Constants ===
 DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
@@ -24,7 +25,7 @@ class PublicationEnrichedSchema(ETLRecordSchema):
     # === Primary Key (DOI) ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.+$",
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier (normalized: lowercase, stripped)",
     )
 
