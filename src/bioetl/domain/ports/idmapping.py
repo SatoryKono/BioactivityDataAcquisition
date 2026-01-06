@@ -1,6 +1,6 @@
 """Port for ID Mapping services.
 
-Defines IDMappingClientPort for mapping identifiers between databases.
+Defines IDMappingPort for mapping identifiers between databases.
 Used for ChEMBL → UniProt and similar cross-database mappings.
 """
 
@@ -13,7 +13,7 @@ from bioetl.domain.types import HealthStatus
 
 
 @runtime_checkable
-class IDMappingClientPort(Protocol):
+class IDMappingPort(Protocol):
     """Port for ID mapping between databases.
 
     This interface abstracts ID mapping services that convert identifiers

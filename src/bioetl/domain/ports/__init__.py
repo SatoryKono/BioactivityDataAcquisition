@@ -37,7 +37,7 @@ from bioetl.domain.ports.health_check import (
     HealthMonitorPort,
     HealthStatusLiteral,
 )
-from bioetl.domain.ports.idmapping import IDMappingClientPort
+from bioetl.domain.ports.idmapping import IDMappingPort
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
 from bioetl.domain.ports.noop import (
@@ -89,7 +89,7 @@ __all__ = [
     "HealthCheckResult",
     "HealthMonitorPort",
     "HealthStatusLiteral",
-    "IDMappingClientPort",
+    "IDMappingPort",
     "InputFilterPort",
     "JsonEncoderPort",
     "LockPort",
