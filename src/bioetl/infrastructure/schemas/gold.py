@@ -116,12 +116,18 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
 
 class PubChemCompoundGoldSchema(pa.DataFrameModel):
-    """Schema for PubChem Compound in Gold layer."""
+    """Schema for PubChem Compound in Gold layer.
+
+    Aligned with domain/entities/pubchem.py (PubchemMolecule domain entity)
+    and application/pipelines/pubchem/transformer.py (PubChemCompoundTransformer).
+    """
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    cid: Series[str] = pa.Field(nullable=False)
+    cid: Series[str] = pa.Field(nullable=False)  # Domain entity uses str for cid
     molecular_formula: Series[str] = pa.Field(nullable=True)
-    molecular_weight: Series[str] = pa.Field(nullable=True)
+    molecular_weight: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Transformed to float by transformer
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     isomeric_smiles: Series[str] = pa.Field(nullable=True)
     inchi: Series[str] = pa.Field(nullable=True)

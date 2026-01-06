@@ -90,18 +90,22 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
 )
 
 # Schema for PubChem Compound
+# Aligned with domain/entities/pubchem.py (PubchemMolecule domain entity)
+# and application/pipelines/pubchem/transformer.py (PubChemCompoundTransformer)
 PUBCHEM_COMPOUND_SCHEMA = pa.schema(
     [
         pa.field("entity_id", pa.string()),
-        pa.field("cid", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("cid", pa.string()),  # Domain entity uses str for cid
         pa.field("molecular_formula", pa.string()),
-        pa.field("molecular_weight", pa.string()),  # Stored as string from source
+        pa.field(
+            "molecular_weight", pa.float64()
+        ),  # Transformed to float by transformer
         pa.field("canonical_smiles", pa.string()),
         pa.field("isomeric_smiles", pa.string()),
         pa.field("inchi", pa.string()),
-        pa.field("inchikey", pa.string()),
+        pa.field("inchikey", pa.string()),  # Matches domain entity field name
         pa.field("iupac_name", pa.string()),
-        pa.field("content_hash", pa.string()),
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
