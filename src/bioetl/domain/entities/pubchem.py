@@ -1,18 +1,13 @@
 """PubChem domain entities.
 
 Contains:
-- PubchemMolecule: Domain entity (canonical name, dataclass) with lineage fields
-- Compound: Deprecated alias for PubchemMolecule (backward compatibility)
+- PubchemMolecule: Domain entity (dataclass) with lineage fields
 - PubChemCompoundRecord: DTO (Pydantic) for type-safe data transfer at boundaries
 
 DTO Design:
 - Uses extra='forbid' to detect API changes early
 - frozen=True ensures immutability
 - Adapters return DTOs, transformers convert to Domain Entities
-
-.. versionchanged:: 2.0.0
-    Compound renamed to PubchemMolecule for Ubiquitous Language alignment.
-    The deprecated Compound alias remains for backward compatibility.
 """
 
 from __future__ import annotations
@@ -96,12 +91,8 @@ class PubChemCompoundRecord(BaseModel):
 class PubchemMolecule(BaseEntity):
     """Represents a chemical compound/molecule (PubChem Compound).
 
-    Canonical name for PubChem's Compound entity, aligned with Ubiquitous Language.
     Domain entity with lineage fields (run_id, content_hash, etc.).
     For DTO without lineage, use PubChemCompoundRecord.
-
-    .. versionadded:: 2.0.0
-        Replaces :class:`Compound` as the canonical entity name.
     """
 
     cid: str
@@ -128,21 +119,4 @@ class PubchemMolecule(BaseEntity):
             )
 
 
-# === Deprecated Aliases (backward compatibility) ===
-
-# Compound is a deprecated alias for PubchemMolecule.
-# Use PubchemMolecule in new code for Ubiquitous Language alignment.
-#
-# .. deprecated:: 2.0.0
-#     Use :class:`PubchemMolecule` instead.
-#
-# Migration:
-#     # Before
-#     from bioetl.domain.entities import Compound
-#
-#     # After
-#     from bioetl.domain.entities import PubchemMolecule
-Compound = PubchemMolecule
-
-
-__all__ = ["Compound", "PubChemCompoundRecord", "PubchemMolecule"]
+__all__ = ["PubChemCompoundRecord", "PubchemMolecule"]

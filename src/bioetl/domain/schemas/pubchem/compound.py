@@ -1,13 +1,7 @@
 """Pandera schema for PubChem Molecule entity.
 
-Canonical name: PubchemMoleculeSchema
-Deprecated alias: CompoundSchema (backward compatibility)
-
 Aligned with RULES.md v5.0 and PubChem PUG REST API.
 Source: https://pubchem.ncbi.nlm.nih.gov/rest/pug/
-
-.. versionchanged:: 2.0.0
-    CompoundSchema renamed to PubchemMoleculeSchema for Ubiquitous Language alignment.
 """
 
 from __future__ import annotations
@@ -24,11 +18,7 @@ from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 class PubchemMoleculeSchema(ETLRecordSchema):
     """PubChem Molecule validation schema for Silver layer.
 
-    Canonical name for CompoundSchema, aligned with Ubiquitous Language.
     Represents a unique chemical structure identified by CID.
-
-    .. versionadded:: 2.0.0
-        Replaces :class:`CompoundSchema` as the canonical schema name.
     """
 
     # === Primary Key ===
@@ -364,13 +354,3 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         coerce = True
         name = "PubchemMoleculeSchema"
         description = "PubChem Molecule Silver layer validation"
-
-
-# === Deprecated Alias (backward compatibility) ===
-
-# CompoundSchema is a deprecated alias for PubchemMoleculeSchema.
-# Use PubchemMoleculeSchema in new code for Ubiquitous Language alignment.
-#
-# .. deprecated:: 2.0.0
-#     Use :class:`PubchemMoleculeSchema` instead.
-CompoundSchema = PubchemMoleculeSchema

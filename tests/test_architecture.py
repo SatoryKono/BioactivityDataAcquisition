@@ -265,7 +265,7 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
 
     # Import schemas and entities
     try:
-        from bioetl.domain.entities import Bioactivity, Compound, Protein
+        from bioetl.domain.entities import Bioactivity, PubchemMolecule, UniprotTarget
         from bioetl.infrastructure.schemas.silver import (
             CHEMBL_ACTIVITY_SCHEMA,
             PUBCHEM_COMPOUND_SCHEMA,
@@ -277,8 +277,8 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
     # Map Schema -> Entity
     pairs = [
         (CHEMBL_ACTIVITY_SCHEMA, Bioactivity),
-        (PUBCHEM_COMPOUND_SCHEMA, Compound),
-        (UNIPROT_PROTEIN_SCHEMA, Protein),
+        (PUBCHEM_COMPOUND_SCHEMA, PubchemMolecule),
+        (UNIPROT_PROTEIN_SCHEMA, UniprotTarget),
     ]
 
     # BaseEntity fields: entity_id, content_hash, run_id, run_type, source_batch_id, ingestion_ts
