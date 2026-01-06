@@ -32,6 +32,11 @@ _HIERARCHY_FIELDS: dict[str, Any] = {
     "molecule_chembl_id": None,
 }
 
+# Rename mapping for hierarchy fields (molecule_chembl_id -> child_chembl_id)
+_HIERARCHY_RENAMES: dict[str, str] = {
+    "hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id",
+}
+
 _PROPERTIES_FIELDS: dict[str, Any] = {
     "alogp": safe_float,
     "mw_freebase": safe_float,
@@ -46,6 +51,11 @@ _PROPERTIES_FIELDS: dict[str, Any] = {
     "qed_weighted": safe_float,
     "full_molformula": None,
     "ro3_pass": None,
+}
+
+# Rename mapping for properties fields (num_ro5_violations -> ro5_violations)
+_PROPERTIES_RENAMES: dict[str, str] = {
+    "property_num_ro5_violations": "property_ro5_violations",
 }
 
 _STRUCTURES_FIELDS: dict[str, Any] = {
@@ -63,25 +73,6 @@ _JSON_FIELDS: tuple[str, ...] = (
     "cross_references",
     "atc_classifications",
 )
-
-
-def _extract_hierarchy(data: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract and rename hierarchy fields using flatten_nested_dict."""
-    result = flatten_nested_dict(data, "hierarchy_", _HIERARCHY_FIELDS)
-    result["hierarchy_child_chembl_id"] = result.pop("hierarchy_molecule_chembl_id")
-    return result
-
-
-def _extract_properties(data: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract and rename properties fields using flatten_nested_dict."""
-    result = flatten_nested_dict(data, "property_", _PROPERTIES_FIELDS)
-    result["property_ro5_violations"] = result.pop("property_num_ro5_violations")
-    return result
-
-
-def _extract_structures(data: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract structures fields using flatten_nested_dict."""
-    return flatten_nested_dict(data, "structure_", _STRUCTURES_FIELDS)
 
 
 # ============================================================================
@@ -168,14 +159,22 @@ class MoleculeTransformer(BaseChemblTransformer):
             **map_field_groups(record, _MOLECULE_GROUPS),
             # JSON serialization using helper method
             **self.serialize_json_fields(rec, _JSON_FIELDS),
-            # Nested dict extraction
-            **_extract_hierarchy(
-                cast("dict[str, Any] | None", rec.get("molecule_hierarchy"))
+            # Nested dict extraction with renames
+            **flatten_nested_dict(
+                cast("dict[str, Any] | None", rec.get("molecule_hierarchy")),
+                "hierarchy_",
+                _HIERARCHY_FIELDS,
+                renames=_HIERARCHY_RENAMES,
             ),
-            **_extract_properties(
-                cast("dict[str, Any] | None", rec.get("molecule_properties"))
+            **flatten_nested_dict(
+                cast("dict[str, Any] | None", rec.get("molecule_properties")),
+                "property_",
+                _PROPERTIES_FIELDS,
+                renames=_PROPERTIES_RENAMES,
             ),
-            **_extract_structures(
-                cast("dict[str, Any] | None", rec.get("molecule_structures"))
+            **flatten_nested_dict(
+                cast("dict[str, Any] | None", rec.get("molecule_structures")),
+                "structure_",
+                _STRUCTURES_FIELDS,
             ),
         }
