@@ -18,6 +18,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Document
+from bioetl.domain.normalization import parse_authors_to_list
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -94,8 +95,14 @@ class DocumentTransformer(BaseChemblTransformer):
         }
 
         # Hash PII field (RULES.md §5.4)
-        # ChEMBL authors is a single string, not a list
-        if data.get("authors"):
-            data["authors"] = self.hash_pii_value(data["authors"])
+        # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
+        # Authors stored as JSON-serialized list for unified format across providers
+        raw_authors = data.get("authors")
+        if raw_authors:
+            author_list = parse_authors_to_list(raw_authors)
+            hashed_authors = self.hash_pii_list(author_list) or []
+            data["authors"] = self.serialize_json_list(hashed_authors)
+        else:
+            data["authors"] = None
 
         return data

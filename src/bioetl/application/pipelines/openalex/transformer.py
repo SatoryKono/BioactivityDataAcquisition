@@ -123,6 +123,7 @@ class OpenAlexPublicationTransformer(BaseTransformer):
         abstract = reconstruct_abstract(abstract_index)
 
         # Extract and hash authors (PII)
+        # Authors stored as JSON-serialized list for unified format across providers
         raw_authors = extract_authors(rec.get("authorships", []))
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
@@ -153,7 +154,7 @@ class OpenAlexPublicationTransformer(BaseTransformer):
             "doi": doi,
             "title": rec.get("title"),
             "abstract": abstract,
-            "authors": hashed_authors,
+            "authors": self.serialize_json_list(hashed_authors),
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),

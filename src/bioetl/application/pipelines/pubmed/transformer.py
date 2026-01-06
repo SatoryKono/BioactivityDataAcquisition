@@ -111,6 +111,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         date_data = self._extract_date_data(article, pubmed_data)
 
         # Extract and hash PII fields (RULES.md §5.4)
+        # Authors stored as JSON-serialized list for unified format across providers
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
@@ -119,7 +120,7 @@ class PubMedPublicationTransformer(BaseTransformer):
             "doi": IdentifierExtractor.extract_doi(root),
             "title": get_text(article.find(".//ArticleTitle")),
             "abstract": AbstractExtractor.extract_abstract(article),
-            "authors": hashed_authors,
+            "authors": self.serialize_json_list(hashed_authors),
             **journal_data,
             **date_data,
             "publication_types": ClassificationExtractor.parse_publication_types(
