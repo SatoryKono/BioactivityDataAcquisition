@@ -37,6 +37,7 @@ from .conftest import (
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Pipeline + Delta table operations need more time
 async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
     """E2E: VACUUM is triggered after successful pipeline run when enabled.
 
@@ -75,6 +76,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Multiple pipeline runs need more time
 async def test_vacuum_respects_retention_days(e2e_data_dir: Path):
     """E2E: VACUUM retention period is respected.
 
@@ -199,6 +201,7 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(180)  # Two sequential pipelines (ChEMBL + UniProt) need more time
 async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     """E2E: ChEMBL and UniProt pipelines can run sequentially.
 
@@ -238,6 +241,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(180)  # Three sequential pipelines need more time
 async def test_multiple_chembl_entities_parallel_safe(e2e_data_dir: Path):
     """E2E: Multiple ChEMBL entity pipelines can run without conflicts.
 
@@ -303,6 +307,7 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Two pipeline runs need more time
 async def test_failed_run_preserves_partial_data(e2e_data_dir: Path):
     """E2E: Partial data is preserved when pipeline fails mid-run.
 
@@ -337,6 +342,7 @@ async def test_failed_run_preserves_partial_data(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Two pipeline runs need more time
 async def test_rebuild_clears_existing_data(e2e_data_dir: Path):
     """E2E: REBUILD run type clears existing Silver/Gold data.
 
@@ -372,6 +378,7 @@ async def test_rebuild_clears_existing_data(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Two pipeline runs need more time
 async def test_backfill_clears_silver_only(e2e_data_dir: Path):
     """E2E: BACKFILL run type clears Silver but keeps Gold unchanged.
 
