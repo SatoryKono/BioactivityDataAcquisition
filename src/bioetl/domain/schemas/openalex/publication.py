@@ -6,6 +6,8 @@ Includes lookup metadata fields for DOI/title resolution tracking.
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -37,7 +39,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("openalex_id", name="openalex_id_format")
     def _check_openalex_id(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate OpenAlex ID format."""
-        return series.str.match(r"^W\d+$")
+        return cast("Series[bool]", series.str.match(r"^W\d+$"))
 
     # === Core Fields ===
     doi: Series[str] = pa.Field(
@@ -48,7 +50,9 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("doi", name="doi_format")
     def _check_doi(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate DOI format."""
-        return series.isna() | series.str.match(r"^10\.\d{4,}/.*$")
+        return cast(
+            "Series[bool]", series.isna() | series.str.match(r"^10\.\d{4,}/.*$")
+        )
 
     title: Series[str] = pa.Field(
         nullable=True,
@@ -68,7 +72,9 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("year", name="year_range")
     def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:  # noqa: N805
         """Validate year range."""
-        return series.isna() | ((series >= 1500) & (series <= 2100))
+        return cast(
+            "Series[bool]", series.isna() | ((series >= 1500) & (series <= 2100))
+        )
 
     publication_date: Series[str] = pa.Field(
         nullable=True,
@@ -78,7 +84,9 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("publication_date", name="publication_date_format")
     def _check_publication_date(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate publication date format."""
-        return series.isna() | series.str.match(r"^\d{4}-\d{2}-\d{2}$")
+        return cast(
+            "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{2}-\d{2}$")
+        )
 
     doc_type: Series[str] = pa.Field(
         nullable=False,
@@ -115,7 +123,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("oa_status", name="oa_status_values")
     def _check_oa_status(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate OA status values."""
-        return series.isna() | series.isin(OA_STATUS_VALUES)
+        return cast("Series[bool]", series.isna() | series.isin(OA_STATUS_VALUES))
 
     # === Metrics ===
     cited_by_count: Series[pd.Int64Dtype] = pa.Field(
@@ -126,7 +134,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("cited_by_count", name="cited_by_count_non_negative")
     def _check_cited_by_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:  # noqa: N805
         """Validate citation count is non-negative."""
-        return series.isna() | (series >= 0)
+        return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === Metadata ===
     language: Series[str] = pa.Field(
@@ -151,7 +159,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     @pa.check("_lookup_method", name="lookup_method_values")
     def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate lookup method values."""
-        return series.isin(LOOKUP_METHODS)
+        return cast("Series[bool]", series.isin(LOOKUP_METHODS))
 
     original_doi: Series[str] = pa.Field(
         alias="_original_doi",

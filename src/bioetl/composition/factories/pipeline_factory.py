@@ -43,14 +43,16 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
         DQMonitorPort,
         LoggerPort,
         MetricsPort,
+        PiiHasherPort,
         TracingPort,
     )
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -65,6 +67,20 @@ __all__ = [
     "create_pipeline_factory",
     "create_pipeline_with_services",
 ]
+
+
+def _extract_entity_type(pipeline_name: str) -> str | None:
+    """Extract entity_type from pipeline_name.
+
+    Example: "chembl_activity" → "activity"
+
+    Args:
+        pipeline_name: Full pipeline name with provider prefix.
+
+    Returns:
+        Entity type suffix, or None if no underscore in name.
+    """
+    return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
 # =============================================================================
@@ -118,14 +134,33 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
     ) -> BaseTransformer | None:
-        """Create transformer instance if transformer_class is configured."""
+        """Create transformer instance if transformer_class is configured.
+
+        Args:
+            tracer: Optional tracing port for distributed tracing.
+            metrics: Optional metrics port for duration/error tracking.
+            gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
+            pii_hasher: Optional PII hasher for hashing author names.
+
+        Returns:
+            Configured transformer instance, or None if no transformer_class.
+        """
         if self.transformer_class is None:
             return None
+
         return self.transformer_class(
             provider=self.provider,
+            entity_type=_extract_entity_type(self.pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            gold_filters=gold_filters,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
         )
 
     def create_data_source(
@@ -377,9 +412,11 @@ def create_pipeline_with_services(
     if transformer_class is not None:
         transformer = transformer_class(
             provider=provider,
+            entity_type=_extract_entity_type(pipeline_name),
             tracer=tracer,
             metrics=metrics,
             gold_filters=domain_config.gold_filters,
+            # identity_service and pii_hasher use defaults in transformer
         )
 
     return pipeline_class.create(

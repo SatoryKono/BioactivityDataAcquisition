@@ -6,6 +6,7 @@ Contains common metadata fields required by RULES.md §2.4.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import cast
 
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -39,7 +40,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     @pa.check("_run_type", name="run_type_values")
     def _check_run_type(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate _run_type values."""
-        return series.isin(["incremental", "backfill", "rebuild"])
+        return cast("Series[bool]", series.isin(["incremental", "backfill", "rebuild"]))
 
     source_batch_id: Series[object] | None = pa.Field(
         alias="_source_batch_id",
@@ -56,7 +57,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:  # noqa: N805
         """Ensure ingestion timestamp is not in the future."""
         # Note: In practice, we just check it's a valid datetime
-        return series <= datetime.now(series.dt.tz)
+        return cast("Series[bool]", series <= datetime.now(series.dt.tz))
 
     dq_warn: Series[bool] = pa.Field(
         alias="_dq_warn",
@@ -79,7 +80,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     @pa.check("_index", name="index_non_negative")
     def _check_index(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
         """Validate index is non-negative."""
-        return series >= 0
+        return cast("Series[bool]", series >= 0)
 
     class Config:
         """Pandera configuration."""

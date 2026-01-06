@@ -56,6 +56,7 @@ class BaseChemblTransformer(BaseTransformer):
     def __init__(
         self,
         provider: str = "chembl",
+        entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
@@ -66,6 +67,8 @@ class BaseChemblTransformer(BaseTransformer):
 
         Args:
             provider: Data provider identifier. Defaults to 'chembl'.
+            entity_type: Entity type for metrics labels. If None, derived from
+                entity_class name (e.g., Activity → "activity").
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
@@ -73,13 +76,14 @@ class BaseChemblTransformer(BaseTransformer):
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
 
         """
-        # Auto-derive entity_type from entity_class ClassVar (AUDIT-2026-01-06)
-        # This ensures meaningful entity_type for metrics and tracing labels
-        entity_type = self.entity_class.__name__.lower()
+        # Derive entity_type from entity_class if not provided
+        resolved_entity_type = entity_type
+        if resolved_entity_type is None and hasattr(self, "entity_class"):
+            resolved_entity_type = self.entity_class.__name__.lower()
 
         super().__init__(
             provider,
-            entity_type=entity_type,
+            entity_type=resolved_entity_type,
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
