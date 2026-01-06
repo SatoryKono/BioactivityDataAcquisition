@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.validation import validate_year_range
+
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
     """Extract all external identifiers from S2 response.
@@ -174,7 +176,10 @@ def extract_fields_of_study(
 
 
 def validate_year(year: int | None) -> int | None:
-    """Validate publication year is in reasonable range.
+    """Validate publication year using domain validation.
+
+    Delegates to domain.validation.validate_year_range() with
+    Semantic Scholar-specific minimum year of 1500.
 
     Args:
         year: Year from S2 response.
@@ -185,6 +190,6 @@ def validate_year(year: int | None) -> int | None:
     """
     if year is None:
         return None
-    if 1500 <= year <= 2100:
+    if validate_year_range(year, min_year=1500):
         return year
     return None
