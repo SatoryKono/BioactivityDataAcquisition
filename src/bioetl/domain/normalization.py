@@ -5,6 +5,7 @@ REFACTOR-004: Domain logic separation from use-case layer.
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import date
 from html import unescape
@@ -122,3 +123,82 @@ def extract_first_string(items: list[str] | None) -> str | None:
     if not items or not isinstance(items, list):
         return None
     return next((s for item in items if (s := _is_valid_string(item))), None)
+
+
+def _filter_valid_strings(items: list[Any]) -> list[str]:
+    """Filter list to valid non-empty strings."""
+    return [str(a).strip() for a in items if a is not None and str(a).strip()]
+
+
+def _parse_authors_from_list(authors: list[Any]) -> list[str]:
+    """Parse author list, filtering non-strings and empty values."""
+    return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
+
+
+def _try_parse_json_array(text: str) -> list[Any] | None:
+    """Try to parse text as JSON array. Returns None if invalid."""
+    try:
+        parsed = json.loads(text)
+        return parsed if isinstance(parsed, list) else None
+    except json.JSONDecodeError:
+        return None
+
+
+def _parse_authors_from_json(text: str) -> list[str] | None:
+    """Try to parse JSON array of authors. Returns None if not valid JSON."""
+    if not text.startswith("["):
+        return None
+    parsed = _try_parse_json_array(text)
+    return _filter_valid_strings(parsed) if parsed is not None else None
+
+
+def _parse_authors_from_delimited(text: str) -> list[str]:
+    """Parse delimited string (semicolon or comma separated)."""
+    delimiter = ";" if ";" in text else ","
+    parts = text.split(delimiter) if delimiter in text else [text]
+    return [a.strip() for a in parts if a.strip()]
+
+
+def _parse_authors_string(text: str) -> list[str]:
+    """Parse string as JSON or delimited format."""
+    json_result = _parse_authors_from_json(text)
+    return (
+        json_result if json_result is not None else _parse_authors_from_delimited(text)
+    )
+
+
+def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
+    """Parse various author input formats into a list of author names.
+
+    Supports:
+    - list[str]: Direct list of authors (returned as-is with stripping)
+    - str (JSON): JSON-serialized list (e.g., '["John Doe", "Jane Smith"]')
+    - str (concatenated): Semicolon or comma-separated string
+      (e.g., "John Doe; Jane Smith" or "John Doe, Jane Smith")
+
+    Args:
+        authors: Raw author data in various formats.
+
+    Returns:
+        List of individual author names (empty list if None or empty).
+        Each name is stripped of whitespace.
+
+    Example:
+        >>> parse_authors_to_list(["John Doe", "Jane Smith"])
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list('["John Doe", "Jane Smith"]')
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list("John Doe; Jane Smith")
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list("John Doe, Jane Smith")
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list(None)
+        []
+    """
+    if authors is None:
+        return []
+    if isinstance(authors, list):
+        return _parse_authors_from_list(authors)
+    if isinstance(authors, str) and authors.strip():
+        return _parse_authors_string(authors.strip())
+    return []

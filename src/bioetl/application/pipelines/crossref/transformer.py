@@ -181,6 +181,7 @@ class CrossRefPublicationTransformer(BaseTransformer):
         abstract = strip_html_tags(abstract_raw) if abstract_raw else None
 
         # Extract and hash PII fields (RULES.md §5.4)
+        # Authors stored as JSON-serialized list for unified format across providers
         raw_authors = self._extract_authors(rec)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
@@ -188,7 +189,7 @@ class CrossRefPublicationTransformer(BaseTransformer):
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
             "abstract": abstract,
-            "authors": hashed_authors,
+            "authors": self.serialize_json_list(hashed_authors),
             "journal": extract_first_string(rec.get("container-title", [])),
             "issn": rec.get("ISSN", []),
             "publisher": rec.get("publisher"),

@@ -64,8 +64,10 @@ class ArticleRecord(BaseModel):
     issue: str | None = PydanticField(default=None, description="Issue number")
     pages: str | None = PydanticField(default=None, description="Page numbers")
 
-    # Authors (list of formatted names)
-    authors: list[str] = PydanticField(default_factory=list, description="Author names")
+    # Authors (JSON-serialized list of hashed names for PII compliance)
+    authors: str | None = PydanticField(
+        default=None, description="Author names (JSON array, hashed for PII)"
+    )
 
     # Dates (ISO format: YYYY-MM-DD or partial)
     pub_date: str | None = PydanticField(
@@ -134,8 +136,8 @@ class Publication(BaseEntity):
     issue: str | None = None
     pages: str | None = None
 
-    # Authors
-    authors: list[str] = field(default_factory=list)
+    # Authors (JSON-serialized list of hashed names for PII compliance)
+    authors: str | None = None
 
     # Dates (stored as ISO strings YYYY-MM-DD or partial YYYY-MM, YYYY)
     pub_date: str | None = None  # Publication date

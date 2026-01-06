@@ -224,9 +224,12 @@ class TestPubMedPublicationTransformer:
         assert "Journal Article" in result["publication_types"]
         assert "unit testing" in result["keywords"]
         assert "Software Testing" in result["mesh_terms"]
-        # Authors (may be hashed)
+        # Authors (JSON-serialized list, may be hashed)
         assert result["authors"] is not None
-        assert len(result["authors"]) == 2
+        import json
+
+        authors_list = json.loads(result["authors"])
+        assert len(authors_list) == 2
 
     @pytest.mark.asyncio
     async def test_transform_structured_abstract(

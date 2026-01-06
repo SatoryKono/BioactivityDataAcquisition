@@ -417,6 +417,34 @@ class BaseTransformer(ABC):
             return list_bytes.decode("utf-8")
         return str(value)
 
+    @staticmethod
+    def serialize_json_list(value: list[Any] | None) -> str | None:
+        """Serialize list to JSON string without unwrapping single elements.
+
+        Unlike serialize_json(), this method always preserves the array format,
+        even for single-element lists. Used for fields like 'authors' where
+        the JSON array structure must be maintained.
+
+        Args:
+            value: List to serialize, or None.
+
+        Returns:
+            JSON array string, or None if input is None or empty list.
+
+        Example:
+            >>> serialize_json_list(["John Doe"])
+            '["John Doe"]'
+            >>> serialize_json_list(["John Doe", "Jane Smith"])
+            '["John Doe","Jane Smith"]'
+            >>> serialize_json_list([])
+            None
+
+        """
+        if value is None or len(value) == 0:
+            return None
+        json_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
+        return json_bytes.decode("utf-8")
+
     @classmethod
     def serialize_json_fields(
         cls,

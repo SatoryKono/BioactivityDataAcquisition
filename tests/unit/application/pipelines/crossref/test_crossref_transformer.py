@@ -122,12 +122,15 @@ def test_map_doc_type():
 
 def test_extract_business_data_full(transformer, sample_publication):
     """Test extracting business data from full work record."""
+    import json
+
     data = transformer._extract_business_data(sample_publication)
 
     assert data["doi"] == "10.1234/test.article"
     assert data["title"] == "Test Article Title"
     assert data["abstract"] == "This is the abstract text."
-    assert data["authors"] == ["John Doe", "Jane Smith", "Anonymous"]
+    # Authors are now JSON-serialized list
+    assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
     assert data["journal"] == "Journal of Testing"
     assert data["year"] == 2023
     assert data["doc_type"] == "PUBLICATION"
