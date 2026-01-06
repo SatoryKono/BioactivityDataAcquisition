@@ -5,6 +5,8 @@ and business rules. They provide type safety and self-validation.
 
 Categories:
 - Identifiers: ChemblId, UniProtId, DOI, PubMedId, PubChemCid, CompoundId, AssayId
+- Chemical: InChIKey, SMILES
+- Metadata: PublicationYear
 - Activity Values: Concentration, ActivityType, PChemblValue, ActivityValue
 - Activity: ConfidenceScore, RelationOperator
 
@@ -25,6 +27,17 @@ Usage:
     >>> score.is_high_confidence
     True
 
+    >>> from bioetl.domain.value_objects import InChIKey, SMILES, PublicationYear
+    >>> key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+    >>> key.connectivity_layer
+    'BSYNRYMUTXBXSQ'
+    >>> smiles = SMILES.canonical("CC(=O)OC1=CC=CC=C1C(=O)O")
+    >>> smiles.is_canonical
+    True
+    >>> year = PublicationYear(2020)
+    >>> year.decade
+    2020
+
 See also:
 - DDD patterns: https://martinfowler.com/bliki/ValueObject.html
 - RULES.md §2.8: Entity ID - stable identifiers
@@ -42,6 +55,11 @@ from bioetl.domain.value_objects.activity_values import (
     PChemblValue,
 )
 from bioetl.domain.value_objects.base import ValueObject
+from bioetl.domain.value_objects.chemical import (
+    SMILES,
+    InChIKey,
+    PublicationYear,
+)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -50,15 +68,18 @@ from bioetl.domain.value_objects.compound_ids import (
 )
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 from bioetl.domain.value_objects.identifiers import (
-    DOI,
     ChemblId,
     PubChemCid,
-    PubMedId,
     UniProtId,
+)
+from bioetl.domain.value_objects.publications import (
+    DOI,
+    PubMedId,
 )
 
 __all__ = [
     "DOI",
+    "SMILES",
     "ActivityType",
     "ActivityValue",
     "AssayId",
@@ -71,9 +92,11 @@ __all__ = [
     "ConfidenceScore",
     "DQEvaluationStatus",
     "DQResult",
+    "InChIKey",
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
+    "PublicationYear",
     "RelationOperator",
     "UniProtId",
     "ValueObject",
