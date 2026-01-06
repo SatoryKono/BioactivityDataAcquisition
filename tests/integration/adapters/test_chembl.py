@@ -14,9 +14,7 @@ from unittest.mock import MagicMock
 import pytest
 
 # VCR cassette directory for ChEMBL tests
-CASSETTE_DIR = (
-    Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
-)
+CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
 
 
 @pytest.fixture(scope="module")
