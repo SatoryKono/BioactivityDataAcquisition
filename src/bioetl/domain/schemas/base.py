@@ -24,7 +24,6 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="SHA256 hash of canonical record representation for versioning.",
     )
 
-    @classmethod
     @pa.check("content_hash", name="content_hash_format")
     def _check_content_hash(cls, series: Series[str]) -> Series[bool]:
         """Validate content_hash is a 64-character hex string."""
