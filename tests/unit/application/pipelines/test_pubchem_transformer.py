@@ -362,7 +362,9 @@ class TestPubChemCompoundTransformer:
         assert result["molecular_weight"] == 0.0
 
     @pytest.mark.asyncio
-    async def test_transform_molecular_weight_precision(self, transformer, mock_context):
+    async def test_transform_molecular_weight_precision(
+        self, transformer, mock_context
+    ):
         """Test that molecular_weight precision is preserved up to 10 decimal places."""
         record = {
             "cid": 2244,
